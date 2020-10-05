@@ -4,9 +4,22 @@ namespace Utili
 {
     class Program
     {
-        static void Main(string[] args)
+        
+        // ReSharper disable InconsistentNaming
+
+        public static Logger _logger;
+
+        // ReSharper enable InconsistentNaming
+
+        private static void Main()
         {
-            Console.WriteLine("Hello World!");
+            _logger = new Logger
+            {
+                LogSeverity = LogSeverity.Dbug
+            };
+            _logger.Initialise();
+
+            _logger.Log("Main", "Hello world!");
         }
     }
 }
