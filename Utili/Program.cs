@@ -20,6 +20,8 @@ namespace Utili
             _logger.Initialise();
 
             _logger.Log("Main", "Hello world!");
+
+            
         }
     }
 }
