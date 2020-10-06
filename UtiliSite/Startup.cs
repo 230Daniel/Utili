@@ -8,6 +8,11 @@ using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ApplicationParts;
+using System.ComponentModel;
 
 namespace UtiliSite
 {
@@ -23,7 +28,28 @@ namespace UtiliSite
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddRazorPages();
+            Main.Initialise();
+
+            services.AddRazorPages(options =>
+            {
+                //options.Conventions.AuthorizeFolder("/Dashboard", "discord");
+            });
+
+            services.AddAuthentication().AddCookie();
+
+            services.AddAuthentication(options =>
+                {
+                    options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                })
+                .AddDiscord(options =>
+                {
+                    options.ClientId = Main._config.DiscordClientId;
+                    options.ClientSecret = Main._config.DiscordClientSecret;
+                    options.Scope.Add("email");
+                    options.Scope.Add("guilds");
+                });
+
+            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Latest);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -45,6 +71,7 @@ namespace UtiliSite
 
             app.UseRouting();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
@@ -52,7 +79,6 @@ namespace UtiliSite
                 endpoints.MapRazorPages();
             });
 
-            Main.Initialise();
             Database.Main.Initialise();
         }
     }

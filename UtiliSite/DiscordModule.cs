@@ -4,6 +4,12 @@ using System.Linq;
 using System.Threading.Tasks;
 using Discord.Rest;
 using Discord;
+using Microsoft.AspNetCore.Http;
+using AspNet.Security.OAuth.Discord;
+using static UtiliSite.Main;
+using Microsoft.Extensions.Logging;
+using System.Text.Encodings.Web;
+
 
 namespace UtiliSite
 {
@@ -15,10 +21,9 @@ namespace UtiliSite
         {
             _client = new DiscordRestClient(new DiscordRestConfig
             {
-                LogLevel = LogSeverity.Info,
-                
+                LogLevel = LogSeverity.Info
             });
-            _client.LoginAsync(TokenType.Bearer, "");
+            _client.LoginAsync(TokenType.Bot, _config.DiscordToken);
         }
     }
 }

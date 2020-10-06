@@ -1,10 +1,16 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Mvc;
+using Org.BouncyCastle.Asn1.Cmp;
+using System.Text.Json;
 
 namespace UtiliSite.Pages.Dashboard
 {
@@ -14,17 +20,18 @@ namespace UtiliSite.Pages.Dashboard
 
         public void OnGet()
         {
-            if (true)
+            if (!HttpContext.User.Identity.IsAuthenticated)
             {
-                Code = Request.Query["code"].ToString();
-            }
-            
-            if (string.IsNullOrEmpty(Code))
-            {
-                Response.Redirect("https://discord.com/api/oauth2/authorize?client_id=655155797260501039&redirect_uri=https%3A%2F%2Flocalhost%3A44347%2FDashboard&response_type=code&scope=identify%20email%20guilds");
+                HttpContext.ChallengeAsync("Discord", new AuthenticationProperties {RedirectUri = "/Dashboard"});
+                return;
             }
 
-            ViewData["code"] = Code;
+            Claim userIdClaim = HttpContext.User.FindFirst(x => x.Type.Contains("nameidentifier"));
+            ulong userId = ulong.Parse(userIdClaim.Value);
+
+            var user = DiscordModule._client.GetUserAsync(userId).GetAwaiter().GetResult();
+
+            ViewData["text"] = JsonSerializer.Serialize(user, new JsonSerializerOptions{WriteIndented = true});
         }
     }
 }

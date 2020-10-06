@@ -14,6 +14,8 @@ namespace UtiliSite
         {
             _config = new Config();
             _config.Load();
+
+            DiscordModule.Initialise();
         }
     }
 }

@@ -1,0 +1,6 @@
+{
+  "DiscordAuthUrl": "https://discord.com/api/oauth2/authorize?client_id=552232599439933474&redirect_uri=https%3A%2F%2Flocalhost%3A44347%2FDashboard&response_type=code&scope=identify",
+  "DiscordClientId": "552232599439933474",
+  "DiscordClientSecret": "XiY6i3sDX9xIUgYF7iJ_G3_DfqTytEnA",
+  "DiscordToken": "NTUyMjMyNTk5NDM5OTMzNDc0.XH2Qrw.8TfQbjgQjT7xGuRgnQAm_3QZ7cE"
+}
