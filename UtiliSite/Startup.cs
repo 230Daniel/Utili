@@ -51,6 +51,8 @@ namespace UtiliSite
             {
                 endpoints.MapRazorPages();
             });
+
+            Database.Main.Initialise();
         }
     }
 }

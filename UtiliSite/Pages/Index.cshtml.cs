@@ -19,7 +19,7 @@ namespace UtiliSite.Pages
 
         public void OnGet()
         {
-
+            ViewData["Subheading"] = $"There are {Database.Types.Autopurge.GetRowsWhere().Count} autopurge channels.";
         }
     }
 }

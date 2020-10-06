@@ -19,10 +19,10 @@ namespace Database
 
         public static AutopurgeTable Autopurge { get; set; } = new AutopurgeTable();
 
-        public static void Initialise()
-        // Start the automatic cache download timer and call the download tables method
+        public static void Initialise() 
+        // Start the automatic cache downloads
         {
-            _ = DownloadTables();
+            DownloadTables();
 
             Timer = new Timer(30000); // The cache will be updated every 30 seconds.
             Timer.Elapsed += Timer_Elapsed;
@@ -32,12 +32,12 @@ namespace Database
         private static void Timer_Elapsed(object sender, ElapsedEventArgs e)
         // At regular intervals, call the download tables method.
         {
-            _ = DownloadTables();
+            DownloadTables();
         }
 
-        private static async Task DownloadTables()
+        private static void DownloadTables()
         {
-            await Autopurge.LoadAsync();
+            Autopurge.LoadAsync();
         }
     }
 }
