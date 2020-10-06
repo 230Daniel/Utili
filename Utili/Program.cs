@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Database.Types;
+using System;
+using System.Linq;
 
 namespace Utili
 {
@@ -25,8 +27,14 @@ namespace Utili
 
             _logger.Log("Main", "Connected to the database");
 
-            var channels = Database.Types.Autopurge.GetRowsWhere();
+            var channels = Autopurge.GetRowsWhere();
             _logger.Log("Main", $"There are {channels.Count} autopurge channels.");
+
+            AutopurgeRow row = Autopurge.GetRowsWhere(0).First();
+
+            row.Messages = 10;
+
+            Autopurge.SaveRow(row);
         }
     }
 }

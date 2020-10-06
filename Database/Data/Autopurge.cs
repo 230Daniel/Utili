@@ -26,6 +26,33 @@ namespace Database.Types
         {
             return Cache.Autopurge.Rows.Where(x => guilds.Contains(x.GuildId)).ToList();
         }
+
+        public static void SaveRow(AutopurgeRow row)
+        {
+            MySqlCommand command;
+
+            if (row.Id == 0) 
+            // The row is a new entry so should be inserted into the database
+            {
+                command = Sql.GetCommand("INSERT INTO Autopurge (GuildID, ChannelId, Timespan, Mode, Messages) VALUES (@GuildId, @ChannelId, @Timespan, @Mode, @Messages);",
+                    new [] {("GuildId", row.GuildId.ToString()), 
+                        ("ChannelId", row.ChannelId.ToString()),
+                        ("Timespan", row.Timespan.ToString()),
+                        ("Mode", row.Mode.ToString()),
+                        ("Messages", row.Messages.ToString())});
+            }
+            else
+            // The row already exists and should be updated
+            {
+                command = Sql.GetCommand("UPDATE Autopurge WHERE Id = @Id SET (GuildID, ChannelId, Timespan, Mode, Messages) VALUES (@GuildId, @ChannelId, @Timespan, @Mode, @Messages);",
+                    new [] {("Id", row.Id.ToString()),
+                        ("GuildId", row.GuildId.ToString()), 
+                        ("ChannelId", row.ChannelId.ToString()),
+                        ("Timespan", row.Timespan.ToString()),
+                        ("Mode", row.Mode.ToString()),
+                        ("Messages", row.Messages.ToString())});
+            }
+        }
     }
 
     public class AutopurgeTable
@@ -60,7 +87,7 @@ namespace Database.Types
 
     public class AutopurgeRow
     {
-        private int Id { get; set; }
+        public int Id { get; }
         public ulong GuildId { get; set; }
         public ulong ChannelId { get; set; }
         public TimeSpan Timespan { get; set; }

@@ -52,6 +52,7 @@ namespace UtiliSite
                 endpoints.MapRazorPages();
             });
 
+            Main.Initialise();
             Database.Main.Initialise();
         }
     }

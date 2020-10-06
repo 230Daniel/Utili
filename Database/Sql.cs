@@ -16,20 +16,6 @@ namespace Database
             ConnectionString = $"Server={server};Database={database};Uid={username};Pwd={password};";
         }
 
-        public static int RunNonQuery(string commandText, (string, string)[] values = null)
-        {
-            try
-            {
-                MySqlCommand command = GetCommand(commandText, values);
-
-                return command.ExecuteNonQuery();
-            }
-            catch
-            {
-                return 0;
-            }
-        }
-
         public static MySqlCommand GetCommand(string commandText, (string, string)[] values = null)
         {
             MySqlConnection connection = new MySqlConnection(ConnectionString);
