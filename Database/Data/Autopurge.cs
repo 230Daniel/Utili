@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -9,15 +10,47 @@ namespace Database.Types
 {
     public class Autopurge
     {
-        public static List<AutopurgeRow> GetRowsWhere(ulong? guildId = null, ulong? channelId = null, TimeSpan? timeSpan = null, int? mode = null, int? messages = null)
+        public static List<AutopurgeRow> GetRowsWhere(ulong? guildId = null, ulong? channelId = null)
         {
-            List<AutopurgeRow> matchedRows = Cache.Autopurge.Rows;
+            List<AutopurgeRow> matchedRows = new List<AutopurgeRow>();
 
-            if (guildId.HasValue) matchedRows.RemoveAll(x => x.GuildId != guildId.Value);
-            if (channelId.HasValue) matchedRows.RemoveAll(x => x.ChannelId != channelId.Value);
-            if (timeSpan.HasValue) matchedRows.RemoveAll(x => x.Timespan != timeSpan.Value);
-            if (mode.HasValue) matchedRows.RemoveAll(x => x.Mode != mode.Value);
-            if (messages.HasValue) matchedRows.RemoveAll(x => x.Messages != messages.Value);
+            if (Cache.Initialised)
+            {
+                matchedRows = Cache.Autopurge.Rows;
+
+                if (guildId.HasValue) matchedRows.RemoveAll(x => x.GuildId != guildId.Value);
+                if (channelId.HasValue) matchedRows.RemoveAll(x => x.ChannelId != channelId.Value);
+            }
+            else
+            {
+                string command = "SELECT * FROM Autopurge WHERE TRUE";
+                List<(string, string)> values = new List<(string, string)>();
+
+                if (guildId.HasValue)
+                {
+                    command += " AND GuildId = @GuildId";
+                    values.Add(("GuildId", guildId.Value.ToString()));
+                }
+
+                if (channelId.HasValue)
+                {
+                    command += " AND ChannelId = @ChannelId";
+                    values.Add(("ChannelId", channelId.Value.ToString()));
+                }
+
+                MySqlDataReader reader = Sql.GetCommand(command, values.ToArray()).ExecuteReader();
+
+                while (reader.Read())
+                {
+                    matchedRows.Add(new AutopurgeRow(
+                        reader.GetInt32(0),
+                        reader.GetString(1),
+                        reader.GetString(2),
+                        reader.GetString(3),
+                        reader.GetInt32(4),
+                        reader.GetInt32(5)));
+                }
+            }
 
             return matchedRows;
         }

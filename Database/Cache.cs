@@ -1,6 +1,7 @@
 ﻿using Database.Types;
 using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using System.Timers;
@@ -15,6 +16,7 @@ namespace Database
 
     internal static class Cache
     {
+        public static bool Initialised = false;
         private static Timer Timer { get; set; }
 
         public static AutopurgeTable Autopurge { get; set; } = new AutopurgeTable();
@@ -27,6 +29,8 @@ namespace Database
             Timer = new Timer(30000); // The cache will be updated every 30 seconds.
             Timer.Elapsed += Timer_Elapsed;
             Timer.Start();
+
+            Initialised = true;
         }
 
         private static void Timer_Elapsed(object sender, ElapsedEventArgs e)

@@ -83,7 +83,8 @@ namespace UtiliSite
                 endpoints.MapRazorPages();
             });
 
-            Database.Main.Initialise();
+            // Initialise the database without using cache.
+            Database.Database.Initialise(false);
         }
     }
 }

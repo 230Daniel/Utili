@@ -23,7 +23,8 @@ namespace Utili
 
             _logger.Log("Main", "Connecting to the database...");
 
-            Database.Main.Initialise();
+            // Initialise the database and use cache
+            Database.Database.Initialise(true);
 
             _logger.Log("Main", "Connected to the database");
 
