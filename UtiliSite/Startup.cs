@@ -53,6 +53,8 @@ namespace UtiliSite
                     options.AccessDeniedPath = "/";
                     options.Scope.Add("email");
                     options.Scope.Add("guilds");
+                    options.SaveTokens = true;
+                    options.ClaimActions.MapAll();
                 });
         }
 

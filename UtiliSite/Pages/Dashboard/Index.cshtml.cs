@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Org.BouncyCastle.Asn1.Cmp;
 using System.Text.Json;
+using Discord.Rest;
 
 namespace UtiliSite.Pages.Dashboard
 {
@@ -17,18 +18,25 @@ namespace UtiliSite.Pages.Dashboard
     {
         public void OnGet()
         {
+            ViewData["guilds"] = new List<RestUserGuild>();
+
             AuthDetails auth = Auth.GetAuthDetails(HttpContext, HttpContext.Request.Path);
             if(!auth.Authenticated) return;
 
             if (auth.Guild == null)
             // We're displaying the guild select screen.
             {
+                ViewData["avatarUrl"] = auth.Client.CurrentUser.GetAvatarUrl();
+                ViewData["guilds"] = DiscordModule.GetManageableGuilds(auth.Client);
+
                 
             }
             else
             // We're displaying the main page of the dashboard
             {
+                ViewData["guildName"] = auth.Guild.Name;
 
+                
             }
         }
     }
