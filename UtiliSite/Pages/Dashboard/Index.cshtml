@@ -1,7 +1,12 @@
 ﻿@page "{guild?}"
 @model UtiliSite.Pages.Dashboard.IndexModel
 @{
-    
+    ViewData["Title"] = "Dashboard";
 }
 
-<p>Selected guild: @ViewData["guild"]</p>
+<div @ViewData["ServerSelectHiddenProperty"]>
+    <div class="text-center">
+        <h1 class="display-4">Dashboard</h1>
+        <p>Select one of your servers to configure it</p>
+    </div>
+</div>

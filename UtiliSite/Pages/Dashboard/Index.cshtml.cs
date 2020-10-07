@@ -22,7 +22,7 @@ namespace UtiliSite.Pages.Dashboard
 
             if (auth.Guild != null)
             {
-                ViewData["guild"] = auth.Guild.Name;
+                ViewData["ServerSelectHiddenProperty"] = "hidden";
             }
         }
     }

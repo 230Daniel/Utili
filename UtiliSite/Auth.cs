@@ -37,14 +37,17 @@ namespace UtiliSite
                 {
                     bool hasGuildPermission = false;
 
-                    RestGuild guild = _client.GetGuildAsync(guildId).GetAwaiter().GetResult();
-                    RestGuildUser user = guild?.GetUserAsync(auth.Id).GetAwaiter().GetResult();
-                    if (user != null)
+                    if (guildId > 0)
                     {
-                        if (user.GuildPermissions.ManageGuild)
+                        RestGuild guild = _client.GetGuildAsync(guildId).GetAwaiter().GetResult();
+                        RestGuildUser user = guild?.GetUserAsync(auth.Id).GetAwaiter().GetResult();
+                        if (user != null)
                         {
-                            hasGuildPermission = true;
-                            auth.Guild = guild;
+                            if (user.GuildPermissions.ManageGuild)
+                            {
+                                hasGuildPermission = true;
+                                auth.Guild = guild;
+                            }
                         }
                     }
 
@@ -54,6 +57,7 @@ namespace UtiliSite
                         httpContext.Response.Redirect(unauthorisedGuildUrl);
                         return auth;
                     }
+                    
                 }
                 else
                 {
