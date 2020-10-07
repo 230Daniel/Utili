@@ -338,3 +338,7 @@ ASALocalRun/
 
 # BeatPulse healthcheck temp database
 healthchecksdb
+
+# Files with passwords and that
+Config.json
+DatabaseCredentials.json
