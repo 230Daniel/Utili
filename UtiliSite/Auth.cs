@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Authentication;
 using static UtiliSite.DiscordModule;
 using Discord.Rest;
 using Microsoft.AspNetCore.Identity;
+using UtiliSite.Pages;
 
 namespace UtiliSite
 {
@@ -52,9 +53,14 @@ namespace UtiliSite
 
                         if (guild == null)
                         {
-                            string inviteUrl =
-                                $"https://discord.com/api/oauth2/authorize?client_id={Main._config.DiscordClientId}&guild_id={guildId}&redirect_uri=https%3A%2F%2Flocalhost%3A44347%2Fdashboard&permissions=8&scope=bot";
-                            httpContext.Response.WriteAsync($@"<script type='text/javascript' language='javascript'>history.go(-1);window.open('{inviteUrl}','_blank').focus();</script>").GetAwaiter().GetResult();
+                            string inviteUrl = "https://discord.com/api/oauth2/authorize?permissions=8&scope=bot" +
+                                               $"&client_id={Main._config.DiscordClientId}" +
+                                               $"&guild_id={guildId}" +
+                                               $"&redirect_uri=https%3A%2F%2F{httpContext.Request.Host.Value}%2Fdashboard";
+
+                            string dashboardUrl = $"https://{httpContext.Request.Host.Value}/dashboard";
+
+                            httpContext.Response.WriteAsync(Helper.GetScript($"window.location.replace(\"{dashboardUrl}\"); window.open(\"{inviteUrl}\");")).GetAwaiter().GetResult();
                             auth.Authenticated = false;
                             return auth;
                         }
