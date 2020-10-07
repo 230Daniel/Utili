@@ -12,7 +12,7 @@ namespace UtiliSite
 {
     public class Auth
     {
-        public static AuthDetails GetAuthDetails(HttpContext httpContext, string redirectUrl, bool sendToAuthenticate = true)
+        public static AuthDetails GetAuthDetails(HttpContext httpContext, string redirectUrl, string unauthorisedGuildUrl = "/dashboard", bool sendToAuthenticate = true)
         {
             if (!httpContext.User.Identity.IsAuthenticated)
             {
@@ -24,7 +24,7 @@ namespace UtiliSite
                 return new AuthDetails(false);
             }
 
-            AuthDetails authDetails = new AuthDetails(
+            AuthDetails auth = new AuthDetails(
                 true,
                 httpContext.User.FindFirst(x => x.Type.Contains("identity/claims/nameidentifier")).Value,
                 httpContext.User.Identity.Name,
@@ -37,35 +37,33 @@ namespace UtiliSite
                 {
                     bool hasGuildPermission = false;
 
-                    try
+                    RestGuild guild = _client.GetGuildAsync(guildId).GetAwaiter().GetResult();
+                    RestGuildUser user = guild?.GetUserAsync(auth.Id).GetAwaiter().GetResult();
+                    if (user != null)
                     {
-                        RestGuild guild = _client.GetGuildAsync(guildId).GetAwaiter().GetResult();
-                        RestGuildUser user = guild.GetUserAsync(authDetails.Id).GetAwaiter().GetResult();
                         if (user.GuildPermissions.ManageGuild)
                         {
                             hasGuildPermission = true;
-                            authDetails.Guild = guild;
+                            auth.Guild = guild;
                         }
                     }
-                    catch {}
 
                     if (!hasGuildPermission)
                     {
-                        authDetails.Authenticated = false;
+                        auth.Authenticated = false;
+                        httpContext.Response.Redirect(unauthorisedGuildUrl);
+                        return auth;
                     }
                 }
                 else
                 {
-                    authDetails.Authenticated = false;
+                    auth.Authenticated = false;
+                    httpContext.Response.Redirect(unauthorisedGuildUrl);
+                    return auth;
                 }
             }
 
-            if (!authDetails.Authenticated)
-            {
-                httpContext.Response.Redirect(redirectUrl);
-            }
-
-            return authDetails;
+            return auth;
         }
     }
 
