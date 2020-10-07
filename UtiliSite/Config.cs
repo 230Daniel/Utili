@@ -7,7 +7,6 @@ namespace Database
 {
     internal class Config
     {
-        public string DiscordAuthUrl { get; set; }
         public string DiscordClientId { get; set; }
         public string DiscordClientSecret { get; set; }
         public string DiscordToken { get; set; }
@@ -21,7 +20,6 @@ namespace Database
 
                 Config config = JsonSerializer.Deserialize<Config>(json);
 
-                DiscordAuthUrl = config.DiscordAuthUrl;
                 DiscordClientId = config.DiscordClientId;
                 DiscordClientSecret = config.DiscordClientSecret;
                 DiscordToken = config.DiscordToken;

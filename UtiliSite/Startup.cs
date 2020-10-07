@@ -30,10 +30,7 @@ namespace UtiliSite
         {
             Main.Initialise();
 
-            services.AddRazorPages(options =>
-            {
-                //options.Conventions.AuthorizeFolder("/Dashboard", "discord");
-            });
+            services.AddRazorPages();
 
             services.AddAuthentication().AddCookie();
 
@@ -45,11 +42,10 @@ namespace UtiliSite
                 {
                     options.ClientId = Main._config.DiscordClientId;
                     options.ClientSecret = Main._config.DiscordClientSecret;
+                    options.AccessDeniedPath = "/";
                     options.Scope.Add("email");
                     options.Scope.Add("guilds");
                 });
-
-            //services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Latest);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

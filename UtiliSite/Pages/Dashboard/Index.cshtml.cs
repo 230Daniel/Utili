@@ -19,18 +19,10 @@ namespace UtiliSite.Pages.Dashboard
 
         public void OnGet()
         {
-            if (!HttpContext.User.Identity.IsAuthenticated)
-            {
-                HttpContext.ChallengeAsync("Discord", new AuthenticationProperties {RedirectUri = "/Dashboard"});
-                return;
-            }
+            AuthUserDetails authUser = Auth.GetAuthUser(HttpContext);
+            if(!authUser.Authenticated) return;
 
-            Claim userIdClaim = HttpContext.User.FindFirst(x => x.Type.Contains("nameidentifier"));
-            ulong userId = ulong.Parse(userIdClaim.Value);
-
-            var user = DiscordModule._client.GetUserAsync(userId).GetAwaiter().GetResult();
-
-            ViewData["text"] = JsonSerializer.Serialize(user, new JsonSerializerOptions{WriteIndented = true});
+            ViewData["text"] = JsonSerializer.Serialize(authUser, new JsonSerializerOptions{WriteIndented = true});
         }
     }
 }
