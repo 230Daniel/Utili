@@ -10,11 +10,15 @@ namespace UtiliSite
 {
     public class Auth
     {
-        public static AuthUserDetails GetAuthUser(HttpContext httpContext)
+        public static AuthUserDetails GetAuthUser(HttpContext httpContext, string redirectUrl = "/dashboard", bool sendToAuthenticate = true)
         {
             if (!httpContext.User.Identity.IsAuthenticated)
             {
-                httpContext.ChallengeAsync("Discord", new AuthenticationProperties {RedirectUri = "/Dashboard"});
+                if (sendToAuthenticate)
+                {
+                    httpContext.ChallengeAsync("Discord", new AuthenticationProperties {RedirectUri = redirectUrl});
+                }
+
                 return new AuthUserDetails(false);
             }
 

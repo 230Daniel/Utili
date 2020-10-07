@@ -30,6 +30,8 @@ namespace UtiliSite
         {
             Main.Initialise();
 
+            services.AddRouting(options => options.LowercaseUrls = true);
+
             services.AddRazorPages();
 
             services.AddAuthentication().AddCookie();
