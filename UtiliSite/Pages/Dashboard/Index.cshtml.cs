@@ -17,7 +17,7 @@ namespace UtiliSite.Pages.Dashboard
     {
         public void OnGet()
         {
-            AuthDetails auth = Auth.GetAuthDetails(HttpContext);
+            AuthDetails auth = Auth.GetAuthDetails(HttpContext, HttpContext.Request.Path);
             if(!auth.Authenticated) return;
 
             if (auth.Guild != null)

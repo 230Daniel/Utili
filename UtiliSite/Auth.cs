@@ -12,7 +12,7 @@ namespace UtiliSite
 {
     public class Auth
     {
-        public static AuthDetails GetAuthDetails(HttpContext httpContext, string redirectUrl = "/dashboard", bool sendToAuthenticate = true)
+        public static AuthDetails GetAuthDetails(HttpContext httpContext, string redirectUrl, bool sendToAuthenticate = true)
         {
             if (!httpContext.User.Identity.IsAuthenticated)
             {
@@ -24,7 +24,7 @@ namespace UtiliSite
                 return new AuthDetails(false);
             }
 
-            AuthDetails details = new AuthDetails(
+            AuthDetails authDetails = new AuthDetails(
                 true,
                 httpContext.User.FindFirst(x => x.Type.Contains("identity/claims/nameidentifier")).Value,
                 httpContext.User.Identity.Name,
@@ -40,32 +40,32 @@ namespace UtiliSite
                     try
                     {
                         RestGuild guild = _client.GetGuildAsync(guildId).GetAwaiter().GetResult();
-                        RestGuildUser user = guild.GetUserAsync(details.Id).GetAwaiter().GetResult();
+                        RestGuildUser user = guild.GetUserAsync(authDetails.Id).GetAwaiter().GetResult();
                         if (user.GuildPermissions.ManageGuild)
                         {
                             hasGuildPermission = true;
-                            details.Guild = guild;
+                            authDetails.Guild = guild;
                         }
                     }
                     catch {}
 
                     if (!hasGuildPermission)
                     {
-                        details.Authenticated = false;
+                        authDetails.Authenticated = false;
                     }
                 }
                 else
                 {
-                    details.Authenticated = false;
+                    authDetails.Authenticated = false;
                 }
             }
 
-            if (!details.Authenticated)
+            if (!authDetails.Authenticated)
             {
                 httpContext.Response.Redirect(redirectUrl);
             }
 
-            return details;
+            return authDetails;
         }
     }
 
