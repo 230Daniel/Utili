@@ -30,9 +30,15 @@ namespace UtiliSite
         {
             Main.Initialise();
 
-            services.AddRouting(options => options.LowercaseUrls = true);
+            services.AddRouting(options =>
+            {
+                options.LowercaseUrls = true;
+            });
 
-            services.AddRazorPages();
+            services.AddRazorPages(options =>
+            {
+                options.Conventions.AddPageRoute("/Dashboard", "Dashboard/{guild?}");
+            });
 
             services.AddAuthentication().AddCookie();
 

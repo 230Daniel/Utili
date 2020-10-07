@@ -15,14 +15,15 @@ namespace UtiliSite.Pages.Dashboard
 {
     public class IndexModel : PageModel
     {
-        public string Code { get; set; }
-
         public void OnGet()
         {
-            AuthUserDetails authUser = Auth.GetAuthUser(HttpContext);
-            if(!authUser.Authenticated) return;
+            AuthDetails auth = Auth.GetAuthDetails(HttpContext);
+            if(!auth.Authenticated) return;
 
-            ViewData["text"] = JsonSerializer.Serialize(authUser, new JsonSerializerOptions{WriteIndented = true});
+            if (auth.Guild != null)
+            {
+                ViewData["guild"] = auth.Guild.Name;
+            }
         }
     }
 }
