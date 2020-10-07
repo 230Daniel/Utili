@@ -6,7 +6,7 @@ using System.Security;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Database.Types
+namespace Database.Data
 {
     public class Autopurge
     {

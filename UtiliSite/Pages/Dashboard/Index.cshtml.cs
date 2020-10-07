@@ -20,9 +20,15 @@ namespace UtiliSite.Pages.Dashboard
             AuthDetails auth = Auth.GetAuthDetails(HttpContext, HttpContext.Request.Path);
             if(!auth.Authenticated) return;
 
-            if (auth.Guild != null)
+            if (auth.Guild == null)
+            // We're displaying the guild select screen.
             {
-                ViewData["ServerSelectHiddenProperty"] = "hidden";
+                
+            }
+            else
+            // We're displaying the main page of the dashboard
+            {
+
             }
         }
     }
