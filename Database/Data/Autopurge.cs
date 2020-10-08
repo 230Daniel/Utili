@@ -73,6 +73,8 @@ namespace Database.Data
                         ("Timespan", row.Timespan.ToString()),
                         ("Mode", row.Mode.ToString()),
                         ("Messages", row.Messages.ToString())});
+
+                Cache.Autopurge.Rows.Add(row);
             }
             else
             // The row already exists and should be updated
@@ -84,7 +86,21 @@ namespace Database.Data
                         ("Timespan", row.Timespan.ToString()),
                         ("Mode", row.Mode.ToString()),
                         ("Messages", row.Messages.ToString())});
+
+                Cache.Autopurge.Rows[Cache.Autopurge.Rows.FindIndex(x => x.Id == row.Id)] = row;
             }
+
+            command.ExecuteNonQuery();
+        }
+
+        public static void DeleteRow(AutopurgeRow row)
+        {
+            if(row == null) return;
+
+            Cache.Autopurge.Rows.RemoveAll(x => x.Id == row.Id);
+
+            string command = "DELETE FROM Autopurge WHERE Id = @Id";
+            Sql.GetCommand(command, new[] {("Id", row.Id.ToString())}).ExecuteNonQuery();
         }
     }
 

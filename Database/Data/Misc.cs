@@ -51,6 +51,13 @@ namespace Database.Data
             return matchedRows;
         }
 
+        public static MiscRow GetRow(ulong? guildId = null, string type = null)
+        {
+            List<MiscRow> rows = GetRowsWhere(guildId, type);
+            if (rows.Count == 0) return null; 
+            return rows.First();
+        }
+
         public static void SaveRow(MiscRow row)
         {
             MySqlCommand command;
@@ -64,6 +71,8 @@ namespace Database.Data
                         ("GuildId", row.GuildId.ToString()),
                         ("Type", row.Type),
                         ("Value", row.Value)});
+
+                Cache.Misc.Rows.Add(row);
             }
             else
             // The row already exists and should be updated
@@ -75,7 +84,49 @@ namespace Database.Data
                         ("GuildId", row.GuildId.ToString()),
                         ("Type", row.Type),
                         ("Value", row.Value)});
+
+                Cache.Misc.Rows[Cache.Misc.Rows.FindIndex(x => x.Id == row.Id)] = row;
             }
+
+            command.ExecuteNonQuery();
+        }
+
+        public static void DeleteRow(MiscRow row)
+        {
+            if(row == null) return;
+
+            Cache.Misc.Rows.RemoveAll(x => x.Id == row.Id);
+
+            string command = "DELETE FROM Misc WHERE Id = @Id";
+            Sql.GetCommand(command, new[] {("Id", row.Id.ToString())}).ExecuteNonQuery();
+        }
+
+        public static string GetPrefix(ulong guildId)
+        {
+            string prefix = ".";
+
+            var rows = GetRowsWhere(guildId, "Prefix");
+            if (rows.Count > 0) prefix = rows.First().Value;
+
+            return prefix;
+        }
+
+        public static void SetPrefix(ulong guildId, string prefix)
+        {
+            MiscRow row = GetRow(guildId, prefix);
+
+            if (prefix == ".")
+            {
+                DeleteRow(GetRow(guildId, "Prefix"));
+                return;
+            }
+
+            if (row == null)
+            {
+                row = new MiscRow(0, guildId.ToString(), "Prefix", prefix);
+            }
+
+            SaveRow(row);
         }
     }
 
