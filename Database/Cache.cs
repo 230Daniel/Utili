@@ -20,6 +20,7 @@ namespace Database
         private static Timer Timer { get; set; }
 
         public static AutopurgeTable Autopurge { get; set; } = new AutopurgeTable();
+        public static MiscTable Misc { get; set; } = new MiscTable();
 
         public static void Initialise() 
         // Start the automatic cache downloads

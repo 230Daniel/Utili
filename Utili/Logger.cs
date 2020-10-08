@@ -40,10 +40,16 @@ namespace Utili
         // Outputs relavent log messages to the console and adds them to the buffer
         {
             string time = $"{DateTime.Now.Hour:00}:{DateTime.Now.Minute:00}:{DateTime.Now.Second:00}";
-            string output = $"{time} | {severity,-4} | {module,-4} | {message}\n";
+            string output = $"{time}  {severity,-4}  {module,-10}  {message}\n";
 
             Console.Write(output);
             Buffer.Append(output);
+        }
+
+        public void LogEmpty(bool fileOnly = false)
+        {
+            if(!fileOnly) Console.Write("\n");
+            Buffer.Append("\n");
         }
 
         public void ReportError(string module, Exception exception)
