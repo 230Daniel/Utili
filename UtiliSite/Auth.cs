@@ -9,6 +9,7 @@ using static UtiliSite.DiscordModule;
 using Discord.Rest;
 using Microsoft.AspNetCore.Identity;
 using UtiliSite.Pages;
+using UtiliSite.Pages.Dashboard;
 
 namespace UtiliSite
 {
@@ -28,11 +29,12 @@ namespace UtiliSite
                 return new AuthDetails(false);
             }
 
+            ulong userId = ulong.Parse(httpContext.User.Claims.First(x => x.Type == "id").Value);
             string token = httpContext.GetTokenAsync("Discord", "access_token").GetAwaiter().GetResult();
 
-            DiscordRestClient client = Login(token);
+            DiscordRestClient client = GetClient(userId, token);
 
-            AuthDetails auth = new AuthDetails(true, client, token);
+            AuthDetails auth = new AuthDetails(true, client, client.CurrentUser, token);
 
             if (httpContext.Request.RouteValues.TryGetValue("guild", out object guildValue))
             {
@@ -53,14 +55,15 @@ namespace UtiliSite
 
                         if (guild == null)
                         {
-                            string inviteUrl = "https://discord.com/api/oauth2/authorize?permissions=8&scope=bot" +
+                            string inviteUrl = "https://discord.com/api/oauth2/authorize?permissions=8&scope=bot&response_type=code" +
                                                $"&client_id={Main._config.DiscordClientId}" +
                                                $"&guild_id={guildId}" +
-                                               $"&redirect_uri=https%3A%2F%2F{httpContext.Request.Host.Value}%2Fdashboard";
+                                               $"&redirect_uri=https%3A%2F%2F{httpContext.Request.Host.Value}%2Fdashboard%2Freturn";
 
-                            string dashboardUrl = $"https://{httpContext.Request.Host.Value}/dashboard";
+                            ReturnModel.SaveRedirect(userId,
+                                $"https://{httpContext.Request.Host.Value}/dashboard/{guildId}");
 
-                            httpContext.Response.WriteAsync(Helper.GetScript($"window.location.replace(\"{dashboardUrl}\"); window.open(\"{inviteUrl}\");")).GetAwaiter().GetResult();
+                            httpContext.Response.Redirect(inviteUrl);
                             auth.Authenticated = false;
                             return auth;
                         }
@@ -103,13 +106,15 @@ namespace UtiliSite
     {
         public bool Authenticated { get; set; }
         public DiscordRestClient Client { get; set; }
+        public RestSelfUser User { get; set; }
         public string Token { get; }
         public RestGuild Guild { get; set; }
 
-        public AuthDetails(bool authenticated, DiscordRestClient client, string token)
+        public AuthDetails(bool authenticated, DiscordRestClient client, RestSelfUser user, string token)
         {
             Authenticated = authenticated;
             Client = client;
+            User = user;
             Token = token;
         }
 

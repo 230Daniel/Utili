@@ -8,7 +8,7 @@
 
 @{
     if (!HttpContext.Request.RouteValues.TryGetValue("guild", out _))
-// This section of HTML is only included if no guild is specified
+    // This section of HTML is only included if no guild is specified
     {
         <div class="text-center">
             <h1 class="display-4">Server Select</h1>
@@ -35,6 +35,8 @@
     }
     else
     {
+        ViewData["Title"] = $"{ViewData["guildName"]} - ";
+
         <p>Selected guild: @ViewData["guildName"]</p>
     }
 }

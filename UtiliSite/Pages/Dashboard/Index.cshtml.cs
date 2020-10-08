@@ -28,8 +28,6 @@ namespace UtiliSite.Pages.Dashboard
             {
                 ViewData["avatarUrl"] = auth.Client.CurrentUser.GetAvatarUrl();
                 ViewData["guilds"] = DiscordModule.GetManageableGuilds(auth.Client);
-
-                
             }
             else
             // We're displaying the main page of the dashboard
