@@ -34,7 +34,7 @@ namespace UtiliSite
 
             DiscordRestClient client = GetClient(userId, token);
 
-            AuthDetails auth = new AuthDetails(true, client, client.CurrentUser, token);
+            AuthDetails auth = new AuthDetails(true, client, client.CurrentUser);
 
             if (httpContext.Request.RouteValues.TryGetValue("guild", out object guildValue))
             {
@@ -107,15 +107,13 @@ namespace UtiliSite
         public bool Authenticated { get; set; }
         public DiscordRestClient Client { get; set; }
         public RestSelfUser User { get; set; }
-        public string Token { get; }
         public RestGuild Guild { get; set; }
 
-        public AuthDetails(bool authenticated, DiscordRestClient client, RestSelfUser user, string token)
+        public AuthDetails(bool authenticated, DiscordRestClient client, RestSelfUser user)
         {
             Authenticated = authenticated;
             Client = client;
             User = user;
-            Token = token;
         }
 
         public AuthDetails(bool authenticated)

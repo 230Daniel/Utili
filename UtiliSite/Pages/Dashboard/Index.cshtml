@@ -8,35 +8,62 @@
 
 @{
     if (!HttpContext.Request.RouteValues.TryGetValue("guild", out _))
-    // This section of HTML is only included if no guild is specified
+        // This section of HTML is only included if no guild is specified
     {
         <div class="text-center">
             <h1 class="display-4">Server Select</h1>
             <p>Select one of your servers to configure it</p>
 
             <div class="row">
-                @{
-                    foreach (RestUserGuild guild in ViewData["guilds"] as IEnumerable)
-                    {
-                        <div class="col-sm">
-                            <a href="@HttpContext.Request.Path/@guild.Id">
-                                <div class="card" style="width: 9rem;">
-                                    <img src="@DiscordModule.SanitiseIconUrl(guild.IconUrl)" class="card-img-top" alt="...">
-                                    <div class="card-body">
-                                        <p class="card-text">@guild.Name</p>
-                                    </div>
+
+                @foreach (RestUserGuild guild in ViewData["guilds"] as IEnumerable)
+                {
+                    <div class="col-sm">
+                        <a href="@HttpContext.Request.Path/@guild.Id">
+                            <div class="card" style="width: 9rem;">
+                                <img src="@DiscordModule.SanitiseIconUrl(guild.IconUrl)" class="card-img-top" alt="...">
+                                <div class="card-body">
+                                    <p class="card-text">@guild.Name</p>
                                 </div>
-                            </a>
-                        </div>
-                    }
+                            </div>
+                        </a>
+                    </div>
                 }
             </div>
         </div>
-    }
-    else
-    {
-        ViewData["Title"] = $"{ViewData["guildName"]} - ";
 
-        <p>Selected guild: @ViewData["guildName"]</p>
+        return;
     }
+
+    ViewData["Title"] = $"{ViewData["guildName"]} - ";
 }
+
+<form id="coreSettings" method="post" onsubmit="return false;">
+
+    <div class="row">
+        <div class="col-3">
+            <label for="Nickname">Nickname</label>
+        </div>
+        <div class="col-3">
+            <input type="text" name="nickname" id="Nickname" value="@ViewData["nickname"]"/>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-3">
+            <label for="Prefix">Command Prefix</label>
+        </div>
+        <div class="col-3">
+            <input type="text" name="prefix" id="Prefix" value="@ViewData["prefix"]" />
+        </div>
+    </div>
+
+    <button type="submit" class="btn btn-success">Save</button>
+
+    <div class="toast" role="alert" data-delay="5000" aria-live="assertive" aria-atomic="true" id="coreSettingsSuccess">
+        <div class="toast-body">
+            <strong>Changes saved</strong> <br/>
+            Your changes may take up to 30 seconds to take effect.
+        </div>
+    </div>
+</form>

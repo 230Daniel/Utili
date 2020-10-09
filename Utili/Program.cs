@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Discord;
 using System.Diagnostics;
+using Discord.Commands;
 
 namespace Utili
 {
@@ -74,7 +75,13 @@ namespace Utili
 
         private async Task Client_MessageReceived(SocketMessage partialMessage)
         {
-            
+            SocketUserMessage message = partialMessage as SocketUserMessage;
+            SocketTextChannel channel = message.Channel as SocketTextChannel;
+            SocketGuild guild = channel.Guild;
+
+            SocketCommandContext context = new SocketCommandContext(_client.GetShardFor(guild), message);
+
+
         }
 
         private async Task Client_Log(LogMessage logMessage)

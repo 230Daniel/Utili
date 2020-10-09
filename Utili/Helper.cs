@@ -6,7 +6,7 @@ namespace Utili
 {
     class Helper
     {
-        public static Utili.LogSeverity ConvertToLocalLogSeverity(Discord.LogSeverity severity)
+        public static LogSeverity ConvertToLocalLogSeverity(Discord.LogSeverity severity)
         {
             switch (severity)
             {
