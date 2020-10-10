@@ -23,53 +23,22 @@ namespace UtiliSite.Pages.Dashboard
         {
             ViewData["guilds"] = new List<RestUserGuild>();
 
-            AuthDetails auth = Auth.GetAuthDetails(HttpContext, HttpContext.Request.Path);
-            if(!auth.Authenticated) return;
-
-            if (auth.Guild == null)
-                // We're displaying the guild select screen.
+            if (HttpContext.Request.RouteValues.TryGetValue("guild", out _))
             {
-                ViewData["avatarUrl"] = auth.Client.CurrentUser.GetAvatarUrl();
-                ViewData["guilds"] = DiscordModule.GetManageableGuilds(auth.Client);
-            }
-            else
-                // We're displaying the main page of the dashboard
-            {
-                ViewData["guildName"] = auth.Guild.Name;
-
-                ViewData["prefix"] = Database.Data.Misc.GetPrefix(auth.Guild.Id);
-                ViewData["nickname"] = DiscordModule.GetNickname(auth.Guild);
-            }
-        }
-
-        public void OnPost()
-        {
-            AuthDetails auth = Auth.GetAuthDetails(HttpContext, HttpContext.Request.Path);
-            if (!auth.Authenticated)
-            {
-                HttpContext.Response.StatusCode = 403;
+                Response.Redirect(RedirectHelper.AddToUrl(HttpContext.Request.Path, "core"));
                 return;
             }
 
-            string prefix = HttpContext.Request.Form["prefix"];
-            string nickname = HttpContext.Request.Form["nickname"];
+            AuthDetails auth = Auth.GetAuthDetails(HttpContext, HttpContext.Request.Path);
+            if(!auth.Authenticated) return;
 
-            if (prefix != (string) ViewData["prefix"])
+            if (auth.Guild != null)
             {
-                Database.Data.Misc.SetPrefix(auth.Guild.Id, prefix);
+                
             }
 
-            if (nickname != (string) ViewData["nickname"])
-            {
-                DiscordModule.SetNickname(auth.Guild, nickname);
-            }
-
-            HttpContext.Response.StatusCode = 200;
+            ViewData["avatarUrl"] = auth.Client.CurrentUser.GetAvatarUrl();
+            ViewData["guilds"] = DiscordModule.GetManageableGuilds(auth.Client);
         }
-    }
-
-    public class IndexSettings
-    {
-        public string Prefix { get; set; }
     }
 }

@@ -3,13 +3,24 @@
 
 // Write your Javascript code.
 
-$('#coreSettings').submit(function(e) {
+$('#settings0').submit(function(e) {
     var formData = $(this).serialize();
     $.ajax({
         type: 'POST',
         data: formData,
         success: function(result) {
-            $('#coreSettingsSuccess').toast('show');
+            $('#success0').toast('show');
+        }
+    });
+});
+
+$('#settings1').submit(function(e) {
+    var formData = $(this).serialize();
+    $.ajax({
+        type: 'POST',
+        data: formData,
+        success: function(result) {
+            $('#success1').toast('show');
         }
     });
 });
