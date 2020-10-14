@@ -15,6 +15,7 @@ namespace UtiliSite.Pages.Dashboard
             if(!auth.Authenticated) return;
 
             ViewData["guildName"] = auth.Guild.Name;
+            ViewData["Title"] = $"{auth.Guild.Name} - ";
 
             ViewData["prefix"] = Database.Data.Misc.GetPrefix(auth.Guild.Id);
             ViewData["nickname"] = DiscordModule.GetNickname(auth.Guild);
