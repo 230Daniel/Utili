@@ -51,6 +51,13 @@ namespace Database.Data
             return matchedRows;
         }
 
+        public static MiscRow GetRow(ulong? guildId = null, string type = null)
+        {
+            List<MiscRow> rows = GetRowsWhere(guildId, type);
+            if (rows.Count == 0) return null; 
+            return rows.First();
+        }
+
         public static void SaveRow(MiscRow row)
         {
             MySqlCommand command;
@@ -58,24 +65,70 @@ namespace Database.Data
             if (row.Id == 0) 
             // The row is a new entry so should be inserted into the database
             {
-                command = Sql.GetCommand("INSERT INTO Misc (GuildID, Type, Value) VALUES (@GuildId, @Type, @Value);",
+                command = Sql.GetCommand("INSERT INTO Misc (GuildId, Type, Value) VALUES (@GuildId, @Type, @Value);",
                     new[]
                     {
                         ("GuildId", row.GuildId.ToString()),
                         ("Type", row.Type),
                         ("Value", row.Value)});
+
+                if(Cache.Initialised) Cache.Misc.Rows.Add(row);
             }
             else
             // The row already exists and should be updated
             {
-                command = Sql.GetCommand("UPDATE Misc WHERE Id = @Id SET (GuildID, Type, Value) VALUES (@GuildId, @Type, @Value);",
+                command = Sql.GetCommand("UPDATE Misc SET GuildId = @GuildId, Type = @Type, Value = @Value WHERE Id = @Id;",
                     new[]
                     {
                         ("Id", row.Id.ToString()),
                         ("GuildId", row.GuildId.ToString()),
                         ("Type", row.Type),
                         ("Value", row.Value)});
+
+                if(Cache.Initialised) Cache.Misc.Rows[Cache.Misc.Rows.FindIndex(x => x.Id == row.Id)] = row;
             }
+
+            command.ExecuteNonQuery();
+        }
+
+        public static void DeleteRow(MiscRow row)
+        {
+            if(row == null) return;
+
+            if(Cache.Initialised) Cache.Misc.Rows.RemoveAll(x => x.Id == row.Id);
+
+            string command = "DELETE FROM Misc WHERE Id = @Id";
+            Sql.GetCommand(command, new[] {("Id", row.Id.ToString())}).ExecuteNonQuery();
+        }
+
+        public static string GetPrefix(ulong guildId)
+        {
+            string prefix = ".";
+
+            var rows = GetRowsWhere(guildId, "Prefix");
+            if (rows.Count > 0) prefix = rows.First().Value;
+
+            return prefix;
+        }
+
+        public static void SetPrefix(ulong guildId, string prefix)
+        {
+            MiscRow row = GetRow(guildId, "Prefix");
+
+            if (prefix == ".")
+            {
+                DeleteRow(row);
+                return;
+            }
+
+            if (row == null)
+            {
+                row = new MiscRow(guildId, "Prefix", prefix);
+            }
+
+            row.Value = prefix;
+
+            SaveRow(row);
         }
     }
 
@@ -113,6 +166,14 @@ namespace Database.Data
         public ulong GuildId { get; set; }
         public string Type { get; set; }
         public string Value { get; set; }
+
+        public MiscRow(ulong guildId, string type, string value)
+        {
+            Id = 0;
+            GuildId = guildId;
+            Type = type;
+            Value = value;
+        }
 
         public MiscRow(int id, string guildId, string type, string value)
         {

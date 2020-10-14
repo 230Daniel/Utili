@@ -74,6 +74,24 @@ namespace UtiliSite
             return client.GetGuildSummariesAsync().FlattenAsync().GetAwaiter().GetResult().Where(x => x.Permissions.ManageGuild).ToList();
         }
 
+        public static string GetNickname(RestGuild guild)
+        {
+            string nickname = guild.GetUserAsync(_client.CurrentUser.Id).GetAwaiter().GetResult().Nickname;
+
+            if (string.IsNullOrEmpty(nickname))
+            {
+                nickname = _client.CurrentUser.Username;
+            }
+
+            return nickname;
+        }
+
+        public static void SetNickname(RestGuild guild, string nickname)
+        {
+            _ = guild.GetUserAsync(DiscordModule._client.CurrentUser.Id).GetAwaiter().GetResult()
+                .ModifyAsync(x => x.Nickname = nickname);
+        }
+
         public static string SanitiseIconUrl(string url)
         {
             if (url == null)

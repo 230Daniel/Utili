@@ -43,6 +43,7 @@ namespace Database
         private static void DownloadTables()
         {
             Autopurge.LoadAsync();
+            Misc.LoadAsync();
         }
     }
 }

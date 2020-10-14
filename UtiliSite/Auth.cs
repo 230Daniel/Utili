@@ -34,7 +34,7 @@ namespace UtiliSite
 
             DiscordRestClient client = GetClient(userId, token);
 
-            AuthDetails auth = new AuthDetails(true, client, client.CurrentUser, token);
+            AuthDetails auth = new AuthDetails(true, client, client.CurrentUser);
 
             if (httpContext.Request.RouteValues.TryGetValue("guild", out object guildValue))
             {
@@ -55,29 +55,32 @@ namespace UtiliSite
 
                         if (guild == null)
                         {
-                            string inviteUrl = "https://discord.com/api/oauth2/authorize?permissions=8&scope=bot&response_type=code" +
-                                               $"&client_id={Main._config.DiscordClientId}" +
-                                               $"&guild_id={guildId}" +
-                                               $"&redirect_uri=https%3A%2F%2F{httpContext.Request.Host.Value}%2Fdashboard%2Freturn";
+                            if (GetManageableGuilds(client).Select(x => x.Id).Contains(guildId))
+                            {
+                                string inviteUrl = "https://discord.com/api/oauth2/authorize?permissions=8&scope=bot&response_type=code" +
+                                                   $"&client_id={Main._config.DiscordClientId}" +
+                                                   $"&guild_id={guildId}" +
+                                                   $"&redirect_uri=https%3A%2F%2F{httpContext.Request.Host.Value}%2Freturn";
 
-                            ReturnModel.SaveRedirect(userId,
-                                $"https://{httpContext.Request.Host.Value}/dashboard/{guildId}");
+                                ReturnModel.SaveRedirect(userId,
+                                    $"https://{httpContext.Request.Host.Value}/dashboard/{guildId}");
 
-                            httpContext.Response.Redirect(inviteUrl);
+                                httpContext.Response.Redirect(inviteUrl);
+                                auth.Authenticated = false;
+                                return auth;
+                            }
+                            
                             auth.Authenticated = false;
+                            httpContext.Response.Redirect(unauthorisedGuildUrl);
                             return auth;
                         }
-                        else
+                        RestGuildUser guildUser = guild.GetUserAsync(auth.Client.CurrentUser.Id).GetAwaiter().GetResult();
+                        if (guildUser != null)
                         {
-                            RestGuildUser guildUser =
-                                guild.GetUserAsync(auth.Client.CurrentUser.Id).GetAwaiter().GetResult();
-                            if (guildUser != null)
+                            if (guildUser.GuildPermissions.ManageGuild)
                             {
-                                if (guildUser.GuildPermissions.ManageGuild)
-                                {
-                                    hasGuildPermission = true;
-                                    auth.Guild = guild;
-                                }
+                                hasGuildPermission = true;
+                                auth.Guild = guild;
                             }
                         }
 
@@ -96,6 +99,12 @@ namespace UtiliSite
                         return auth;
                     }
                 }
+                else
+                {
+                    auth.Authenticated = false;
+                    httpContext.Response.Redirect(unauthorisedGuildUrl);
+                    return auth;
+                }
             }
 
             return auth;
@@ -107,15 +116,13 @@ namespace UtiliSite
         public bool Authenticated { get; set; }
         public DiscordRestClient Client { get; set; }
         public RestSelfUser User { get; set; }
-        public string Token { get; }
         public RestGuild Guild { get; set; }
 
-        public AuthDetails(bool authenticated, DiscordRestClient client, RestSelfUser user, string token)
+        public AuthDetails(bool authenticated, DiscordRestClient client, RestSelfUser user)
         {
             Authenticated = authenticated;
             Client = client;
             User = user;
-            Token = token;
         }
 
         public AuthDetails(bool authenticated)

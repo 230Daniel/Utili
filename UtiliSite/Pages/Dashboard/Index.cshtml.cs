@@ -11,6 +11,9 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Org.BouncyCastle.Asn1.Cmp;
 using System.Text.Json;
 using Discord.Rest;
+using System.Data.Common;
+using Org.BouncyCastle.Bcpg.OpenPgp;
+using Microsoft.AspNetCore.Http;
 
 namespace UtiliSite.Pages.Dashboard
 {
@@ -20,22 +23,22 @@ namespace UtiliSite.Pages.Dashboard
         {
             ViewData["guilds"] = new List<RestUserGuild>();
 
+            if (HttpContext.Request.RouteValues.TryGetValue("guild", out _))
+            {
+                Response.Redirect(RedirectHelper.AddToUrl(HttpContext.Request.Path, "core"));
+                return;
+            }
+
             AuthDetails auth = Auth.GetAuthDetails(HttpContext, HttpContext.Request.Path);
             if(!auth.Authenticated) return;
 
-            if (auth.Guild == null)
-            // We're displaying the guild select screen.
+            if (auth.Guild != null)
             {
-                ViewData["avatarUrl"] = auth.Client.CurrentUser.GetAvatarUrl();
-                ViewData["guilds"] = DiscordModule.GetManageableGuilds(auth.Client);
-            }
-            else
-            // We're displaying the main page of the dashboard
-            {
-                ViewData["guildName"] = auth.Guild.Name;
-
                 
             }
+
+            ViewData["avatarUrl"] = auth.Client.CurrentUser.GetAvatarUrl();
+            ViewData["guilds"] = DiscordModule.GetManageableGuilds(auth.Client);
         }
     }
 }

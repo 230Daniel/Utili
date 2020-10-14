@@ -1,0 +1,35 @@
+﻿@page "{guild?}/core";
+@model UtiliSite.Pages.Dashboard.CoreModel
+@{
+    Layout = "Shared/_Layout.cshtml";
+}
+
+<form id="settings0" method="post" onsubmit="return false;">
+
+    <div class="row">
+        <div class="col-3">
+            <label for="Nickname">Nickname</label>
+        </div>
+        <div class="col-3">
+            <input type="text" name="nickname" id="Nickname" value="@ViewData["nickname"]" />
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-3">
+            <label for="Prefix">Command Prefix</label>
+        </div>
+        <div class="col-3">
+            <input type="text" name="prefix" id="Prefix" value="@ViewData["prefix"]" />
+        </div>
+    </div>
+
+    <button type="submit" class="btn btn-success">Save</button>
+
+    <div class="toast" role="alert" data-delay="5000" aria-live="assertive" aria-atomic="true" id="success0">
+        <div class="toast-body">
+            <strong>Changes saved</strong> <br />
+            Your changes may take up to 30 seconds to take effect.
+        </div>
+    </div>
+</form>

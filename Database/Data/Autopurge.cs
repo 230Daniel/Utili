@@ -73,18 +73,34 @@ namespace Database.Data
                         ("Timespan", row.Timespan.ToString()),
                         ("Mode", row.Mode.ToString()),
                         ("Messages", row.Messages.ToString())});
+
+                if(Cache.Initialised) Cache.Autopurge.Rows.Add(row);
             }
             else
             // The row already exists and should be updated
             {
-                command = Sql.GetCommand("UPDATE Autopurge WHERE Id = @Id SET (GuildID, ChannelId, Timespan, Mode, Messages) VALUES (@GuildId, @ChannelId, @Timespan, @Mode, @Messages);",
+                command = Sql.GetCommand("UPDATE Autopurge SET GuildId = @GuildId, ChannelId = @ChannelId, Timespan = @Timespan, Mode = @Mode, Messages = @Messages WHERE Id = @Id;",
                     new [] {("Id", row.Id.ToString()),
                         ("GuildId", row.GuildId.ToString()), 
                         ("ChannelId", row.ChannelId.ToString()),
                         ("Timespan", row.Timespan.ToString()),
                         ("Mode", row.Mode.ToString()),
                         ("Messages", row.Messages.ToString())});
+
+                if(Cache.Initialised) Cache.Autopurge.Rows[Cache.Autopurge.Rows.FindIndex(x => x.Id == row.Id)] = row;
             }
+
+            command.ExecuteNonQuery();
+        }
+
+        public static void DeleteRow(AutopurgeRow row)
+        {
+            if(row == null) return;
+
+            if(Cache.Initialised) Cache.Autopurge.Rows.RemoveAll(x => x.Id == row.Id);
+
+            string command = "DELETE FROM Autopurge WHERE Id = @Id";
+            Sql.GetCommand(command, new[] {("Id", row.Id.ToString())}).ExecuteNonQuery();
         }
     }
 

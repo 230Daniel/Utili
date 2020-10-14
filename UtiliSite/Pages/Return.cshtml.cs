@@ -6,12 +6,18 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace UtiliSite.Pages.Dashboard
+namespace UtiliSite.Pages
 {
     public class ReturnModel : PageModel
     {
         public void OnGet()
         {
+            if (HttpContext.Request.Query.ContainsKey("error"))
+            {
+                HttpContext.Response.Redirect($"https://{HttpContext.Request.Host}/dashboard");
+                return;
+            }
+
             AuthDetails auth = Auth.GetAuthDetails(HttpContext, HttpContext.Request.Path);
             if(!auth.Authenticated) return;
 
@@ -25,6 +31,7 @@ namespace UtiliSite.Pages.Dashboard
         {
             if (_redirects.TryGetValue(userId, out string url))
             {
+                _redirects.Remove(userId);
                 return url;
             }
 

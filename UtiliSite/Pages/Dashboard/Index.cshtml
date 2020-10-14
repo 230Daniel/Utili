@@ -6,37 +6,24 @@
     Layout = "Shared/_Layout.cshtml";
 }
 
-@{
-    if (!HttpContext.Request.RouteValues.TryGetValue("guild", out _))
-    // This section of HTML is only included if no guild is specified
-    {
-        <div class="text-center">
-            <h1 class="display-4">Server Select</h1>
-            <p>Select one of your servers to configure it</p>
+<div class="text-center">
+    <h1 class="display-4">Server Select</h1>
+    <p>Select one of your servers to configure it</p>
 
-            <div class="row">
-                @{
-                    foreach (RestUserGuild guild in ViewData["guilds"] as IEnumerable)
-                    {
-                        <div class="col-sm">
-                            <a href="@HttpContext.Request.Path/@guild.Id">
-                                <div class="card" style="width: 9rem;">
-                                    <img src="@DiscordModule.SanitiseIconUrl(guild.IconUrl)" class="card-img-top" alt="...">
-                                    <div class="card-body">
-                                        <p class="card-text">@guild.Name</p>
-                                    </div>
-                                </div>
-                            </a>
+    <div class="row">
+
+        @foreach (RestUserGuild guild in ViewData["guilds"] as IEnumerable)
+        {
+            <div class="col-sm">
+                <a href="@HttpContext.Request.Path/@guild.Id">
+                    <div class="card" style="width: 9rem;">
+                        <img src="@DiscordModule.SanitiseIconUrl(guild.IconUrl)" class="card-img-top" alt="...">
+                        <div class="card-body">
+                            <p class="card-text">@guild.Name</p>
                         </div>
-                    }
-                }
+                    </div>
+                </a>
             </div>
-        </div>
-    }
-    else
-    {
-        ViewData["Title"] = $"{ViewData["guildName"]} - ";
-
-        <p>Selected guild: @ViewData["guildName"]</p>
-    }
-}
+        }
+    </div>
+</div>
