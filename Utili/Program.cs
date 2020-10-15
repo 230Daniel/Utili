@@ -5,7 +5,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using Discord;
 using System.Diagnostics;
+using System.Reflection;
 using Discord.Commands;
+using Utili.Handlers;
 
 namespace Utili
 {
@@ -14,10 +16,12 @@ namespace Utili
         
         // ReSharper disable InconsistentNaming
 
-        public static Logger _logger;
-        public static bool _ready;
-        public static Config _config;
         public static DiscordShardedClient _client;
+        public static CommandService _commands;
+
+        public static Logger _logger;
+        public static Config _config;
+        public static bool _ready;
 
         // ReSharper enable InconsistentNaming
 
@@ -59,12 +63,22 @@ namespace Utili
                 TotalShards = totalShards
             });
 
+            _commands = new CommandService(new CommandServiceConfig
+            {
+                CaseSensitiveCommands = false,
+                DefaultRunMode = RunMode.Async,
+                LogLevel = Discord.LogSeverity.Debug
+            });
+
+            await _commands.AddModulesAsync(assembly: Assembly.GetEntryAssembly(), services: null);
+
             _logger.Log("MainAsync", $"Running {_config.UpperShardId - (_config.LowerShardId - 1)} shards of Utili with {totalShards} total shards.", LogSeverity.Info);
             _logger.Log("MainAsync", $"Shard IDs: {_config.LowerShardId} - {_config.UpperShardId}", LogSeverity.Info);
             _logger.LogEmpty();
 
             _client.Log += Client_Log;
-            _client.MessageReceived += Client_MessageReceived;
+            _client.MessageReceived += MessageReceivedHandler.MessageReceived;
+            _client.ShardReady += ReadyHandler.ShardReady;
 
             await _client.LoginAsync(TokenType.Bot, _config.Token);
 
@@ -73,16 +87,7 @@ namespace Utili
             await Task.Delay(-1);
         }
 
-        private async Task Client_MessageReceived(SocketMessage partialMessage)
-        {
-            SocketUserMessage message = partialMessage as SocketUserMessage;
-            SocketTextChannel channel = message.Channel as SocketTextChannel;
-            SocketGuild guild = channel.Guild;
-
-            SocketCommandContext context = new SocketCommandContext(_client.GetShardFor(guild), message);
-
-
-        }
+        
 
         private async Task Client_Log(LogMessage logMessage)
         {
