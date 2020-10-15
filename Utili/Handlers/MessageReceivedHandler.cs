@@ -40,8 +40,8 @@ namespace Utili.Handlers
 
                             if (!string.IsNullOrEmpty(errorReason))
                             {
-                                errorReason += "\n\nSupport Server";
-                                await SendFailureAsync(context.Channel, "Command error", errorReason);
+                                errorReason += "\n[Support Server](https://discord.gg/WsxqABZ)";
+                                await SendFailureAsync(context.Channel, "Something went wrong", errorReason);
                             }
                         }
                     }
@@ -54,19 +54,19 @@ namespace Utili.Handlers
             switch (result.Error)
             {
                 case CommandError.BadArgCount:
-                    return "Invalid amount of command arguments\nTry wrapping arguments with speech marks (\"...\")";
+                    return "Invalid amount of command arguments\nTry wrapping arguments with speech marks";
 
                 case CommandError.ObjectNotFound:
-                    return "Failed to interpret a command argument\nObject not found\nTry wrapping arguments with speech marks (\"...\")";
+                    return "Failed to interpret a command argument (Object not found)\nTry wrapping arguments with speech marks";
 
                 case CommandError.MultipleMatches:
-                    return "Failed to interpret a command argument\nMultiple matches\nTry wrapping arguments with speech marks (\"...\")";
+                    return "Failed to interpret a command argument (Multiple matches)\nTry wrapping arguments with speech marks";
 
                 case CommandError.UnmetPrecondition:
                     return "Invalid command preconditions";
 
                 case CommandError.Exception:
-                    return "An error occured during command execution";
+                    return "An error occured while trying to execute the command";
 
                 default:
                     return null;

@@ -10,7 +10,7 @@ namespace Utili.Commands
 {
     public class InfoCommands : ModuleBase<SocketCommandContext>
     {
-        [Command("Hello")]
+        [Command("Hello"), Cooldown(2.5), Permission(Perm.BotOwner)]
         public async Task Hello(string arg)
         {
             await SendSuccessAsync(Context.Channel, "Hello", arg);
