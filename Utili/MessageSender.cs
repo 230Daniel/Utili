@@ -1,5 +1,6 @@
 ﻿using Discord;
 using Discord.WebSocket;
+using Org.BouncyCastle.Math.Field;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -9,23 +10,28 @@ namespace Utili
 {
     internal class MessageSender
     {
-        public static async Task SendSuccessAsync(IChannel channel, string title, string message)
+        public static async Task SendSuccessAsync(IChannel channel, string title, string message = null, string footer = null)
         {
             ISocketMessageChannel textChannel = channel as ISocketMessageChannel;
-            if(textChannel == null) return;
 
-            await textChannel.SendMessageAsync(embed: GenerateEmbed(EmbedType.Success, title, message));
+            await textChannel.SendMessageAsync(embed: GenerateEmbed(EmbedType.Success, title, message, footer));
         }
 
-        public static async Task SendFailureAsync(IChannel channel, string title, string message)
+        public static async Task SendFailureAsync(IChannel channel, string title, string message = null, string footer = null)
         {
             ISocketMessageChannel textChannel = channel as ISocketMessageChannel;
-            if(textChannel == null) return;
 
-            await textChannel.SendMessageAsync(embed: GenerateEmbed(EmbedType.Failure, title, message));
+            await textChannel.SendMessageAsync(embed: GenerateEmbed(EmbedType.Failure, title, message, footer));
         }
 
-        private static Embed GenerateEmbed(EmbedType embedType, string title, string content = null, string footer = null)
+        public static async Task SendInfoAsync(IChannel channel, string title, string message, string footer = null, (string, string)[] fields = null)
+        {
+            ISocketMessageChannel textChannel = channel as ISocketMessageChannel;
+
+            await textChannel.SendMessageAsync(embed: GenerateEmbed(EmbedType.Info, title, message, footer, fields));
+        }
+
+        private static Embed GenerateEmbed(EmbedType embedType, string title, string content = null, string footer = null, (string, string)[] fields = null)
         {
             EmbedBuilder embed = new EmbedBuilder();
 
@@ -60,6 +66,15 @@ namespace Utili
             {
                 embed.WithFooter(footer);
             }
+
+            if (fields != null)
+            {
+                foreach ((string, string) field in fields)
+                {
+                    embed.AddField(field.Item1, field.Item2, true);
+                }
+            }
+
 
             return embed.Build();
         }

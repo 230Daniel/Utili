@@ -1,6 +1,13 @@
-﻿using System;
+﻿using Discord;
+using Discord.WebSocket;
+using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices.ComTypes;
 using System.Text;
+using System.Threading.Tasks;
+using Discord.Rest;
+using static Utili.Program;
+using System.Linq;
 
 namespace Utili
 {
@@ -25,6 +32,11 @@ namespace Utili
                 default:
                     throw new Exception("What the heckin heck is this log severity bro?");
             }
+        }
+
+        public static DiscordSocketClient GetShardForGuild(IGuild guild)
+        {
+            return Program._client.GetShardFor(guild);
         }
     }
 }

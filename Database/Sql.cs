@@ -34,5 +34,10 @@ namespace Database
 
             return command;
         }
+
+        public static string ConvertToSqlTime(DateTime time)
+        {
+            return $"{time.Year:0000}-{time.Month:00}-{time.Day:00} {time.Hour:00}:{time.Minute:00}:{time.Second:00}";
+        }
     }
 }
