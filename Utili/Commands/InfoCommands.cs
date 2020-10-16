@@ -26,14 +26,14 @@ namespace Utili.Commands
                             [Get Premium](https://utili.bot/premium)
                             [Support & Requests Discord](https://discord.gg/hCYWk9x)";
 
-            await SendInfoAsync(Context.Channel, "Utili v2.0", about);
+            await SendInfoAsync(Context.Channel, "Utili v2 Beta", about);
         }
 
         [Command("Help"), Alias("Commands")]
         public async Task Help()
         {
             string help = $@"[List of Commands](https://utili.bot/commands)
-                            [Configure {Context.Guild.Name}](https://utili.bot/dashboard/{Context.Guild.Id}/core)";
+                            [Dashboard](https://utili.bot/dashboard/{Context.Guild.Id}/core)";
 
             await SendInfoAsync(Context.Channel, "Utili", help);
         }

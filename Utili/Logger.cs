@@ -7,7 +7,7 @@ using System.Timers;
 
 namespace Utili
 {
-    class Logger
+    internal class Logger
     {
         public LogSeverity LogSeverity { get; set; }
         private Timer Timer { get; set; }
@@ -78,5 +78,13 @@ namespace Utili
                 errorReport.Close();
             });
         }
+    }
+
+    public enum LogSeverity
+    {
+        Dbug,
+        Info,
+        Warn,
+        Error
     }
 }

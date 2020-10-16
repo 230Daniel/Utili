@@ -13,7 +13,7 @@ using System.Timers;
 
 namespace Utili
 {
-    class Program
+    internal class Program
     {
         
         // ReSharper disable InconsistentNaming

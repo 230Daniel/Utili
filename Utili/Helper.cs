@@ -11,7 +11,7 @@ using System.Linq;
 
 namespace Utili
 {
-    class Helper
+    internal class Helper
     {
         public static LogSeverity ConvertToLocalLogSeverity(Discord.LogSeverity severity)
         {
