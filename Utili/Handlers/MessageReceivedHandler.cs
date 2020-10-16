@@ -41,7 +41,7 @@ namespace Utili.Handlers
                             if (!string.IsNullOrEmpty(errorReason))
                             {
                                 errorReason += "\n[Support Server](https://discord.gg/WsxqABZ)";
-                                await SendFailureAsync(context.Channel, "Something went wrong", errorReason);
+                                await SendFailureAsync(context.Channel, "Error", errorReason);
                             }
                         }
                     }
