@@ -15,8 +15,7 @@ namespace Database
         {
             try
             {
-                string filename = "Config.json";
-                string json = File.ReadAllText(filename);
+                string json = File.ReadAllText("Config.json");
 
                 Config config = JsonSerializer.Deserialize<Config>(json);
 

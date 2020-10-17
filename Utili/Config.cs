@@ -5,25 +5,23 @@ using System.IO;
 
 namespace Utili
 {
-    class Config
+    internal class Config
     {
         public string Token { get; set; } = "";
         public int LowerShardId { get; set; } = 0;
         public int UpperShardId { get; set; } = 0;
-        public int TotalShards { get; set; } = 1;
 
         public static Config Load()
         {
             try
             {
-                string filename = "Config.json";
-                string json = File.ReadAllText(filename);
+                string json = File.ReadAllText("Config.json");
 
                 Config config = JsonSerializer.Deserialize<Config>(json);
 
                 return config;
             }
-            catch (FileNotFoundException e)
+            catch (FileNotFoundException)
             {
                 string json = JsonSerializer.Serialize(new Config(), new JsonSerializerOptions{WriteIndented = true});
 
