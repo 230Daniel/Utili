@@ -29,7 +29,7 @@
     </nav>
     <div class="d-flex" id="wrapper">
         <div class="border-right" id="sidebar-wrapper">
-            <div class="sidebar-heading"><h3>Menu</h3></div>
+            <div class="sidebar-heading, text-center">@ViewData["guildName"]</div>
             <div class="list-group list-group-flush">
                 <a href="#" class="list-group-item list-group-item-action bg-light">Dashboard</a>
                 <a href="#" class="list-group-item list-group-item-action bg-light">Shortcuts</a>
@@ -39,11 +39,10 @@
                 <a href="#" class="list-group-item list-group-item-action bg-light">Status</a>
             </div>
         </div>
-        <div id="page-content-wrapper">
-
-            <div class="container-fluid">
-                <h1 class="mt-4">Content</h1>
-            </div>
+        <div class="container">
+            <main role="main" class="pb-3" style="margin-top: 25px;">
+                @RenderBody()
+            </main>
         </div>
     </div>
     <footer class="border-top footer text-muted">
