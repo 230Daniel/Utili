@@ -30,6 +30,8 @@ namespace Utili
 
         // ReSharper enable InconsistentNaming
 
+        private static Features.Autopurge _autopurge = new Features.Autopurge();
+
         private static void Main()
         {
             _logger = new Logger
@@ -88,6 +90,8 @@ namespace Utili
             await _client.LoginAsync(TokenType.Bot, _config.Token);
 
             await _client.StartAsync();
+
+            _autopurge.Start();
 
             await Task.Delay(-1);
         }
