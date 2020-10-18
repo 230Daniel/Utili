@@ -14,6 +14,7 @@ namespace UtiliSite.Pages.Dashboard
             AuthDetails auth = Auth.GetAuthDetails(HttpContext, HttpContext.Request.Path);
             if(!auth.Authenticated) return;
 
+            ViewData["mainDashboardUrl"] = RedirectHelper.AddToUrl(HttpContext.Request.Host.ToString(), "dashboard");
             ViewData["guildName"] = auth.Guild.Name;
             ViewData["Title"] = $"{auth.Guild.Name} - ";
 
