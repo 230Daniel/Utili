@@ -50,11 +50,12 @@ namespace Utili
             return true;
         }
 
-        public static bool IsMissingPermissions(SocketGuildChannel channel, ChannelPermission[] requiredPermissions, out string missingPermissionsString)
+        public static bool IsMissingPermissions(IChannel channel, ChannelPermission[] requiredPermissions, out string missingPermissionsString)
         {
-            SocketGuildUser bot = channel.Guild.GetUser(_client.CurrentUser.Id);
+            SocketGuild guild = (channel as SocketGuildChannel).Guild;
+            SocketGuildUser bot = guild.GetUser(_client.CurrentUser.Id);
 
-            List<ChannelPermission> permissions = bot.GetPermissions(channel).ToList();
+            List<ChannelPermission> permissions = bot.GetPermissions(channel as ITextChannel).ToList();
 
             List<ChannelPermission> missingPermissions =
                 requiredPermissions.Where(x => !permissions.Contains(x)).ToList();

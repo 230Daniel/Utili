@@ -83,7 +83,7 @@ namespace Utili.Features
                     }
 
                     SocketGuild guild = _client.GetGuild(row.GuildId);
-                    SocketGuildChannel channel = guild.GetTextChannel(row.ChannelId);
+                    SocketTextChannel channel = guild.GetTextChannel(row.ChannelId);
 
                     if (!BotPermissions.IsMissingPermissions(channel,
                         new[]

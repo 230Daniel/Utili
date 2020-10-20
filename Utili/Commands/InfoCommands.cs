@@ -24,7 +24,7 @@ namespace Utili.Commands
                             [Website](https://utili.bot)
                             [Dashboard](https://utili.bot/dashboard)
                             [Get Premium](https://utili.bot/premium)
-                            [Support & Requests Discord](https://discord.gg/hCYWk9x)";
+                            [Support & Requests Server](https://discord.gg/hCYWk9x)";
 
             await SendInfoAsync(Context.Channel, "Utili v2 Beta", about);
         }
