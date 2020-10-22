@@ -1,9 +1,5 @@
 ﻿using Discord.Commands;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
-using Discord.Rest;
 using static Utili.Program;
 using static Utili.MessageSender;
 using static Utili.Helper;

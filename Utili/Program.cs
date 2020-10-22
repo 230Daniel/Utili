@@ -1,14 +1,10 @@
-﻿using Database.Data;
-using Discord.WebSocket;
-using System;
+﻿using Discord.WebSocket;
 using System.Linq;
 using System.Threading.Tasks;
 using Discord;
-using System.Diagnostics;
 using System.Reflection;
 using Discord.Commands;
 using Utili.Handlers;
-using Discord.Rest;
 using System.Timers;
 
 namespace Utili
