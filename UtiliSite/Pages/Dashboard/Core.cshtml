@@ -4,7 +4,7 @@
     Layout = "Shared/_Layout.cshtml";
 }
 
-<form id="settings0" method="post" onsubmit="return false;">
+<form id="form" method="post">
 
     <div class="row">
         <div class="col-3">
@@ -25,11 +25,33 @@
     </div>
 
     <button type="submit" class="btn btn-success">Save</button>
+</form>
 
-    <div class="toast" role="alert" data-delay="5000" aria-live="assertive" aria-atomic="true" id="success0">
-        <div class="toast-body">
-            <strong>Changes saved</strong> <br />
-            Your changes may take up to 30 seconds to take effect.
+<div aria-live="polite" aria-atomic="true" style="position: relative; min-height: 20px;">
+    <div style="position: absolute; top: 0; right: 0;">
+        <div class="toast" role="alert" data-delay="5000" aria-live="assertive" aria-atomic="true" style="width: 500px;" id="success">
+            <div class="toast-body">
+                <strong>Changes saved</strong> <br />
+                Your changes may take up to 30 seconds to take effect
+            </div>
+        </div>
+
+        <div class="toast" role="alert" data-delay="5000" aria-live="assertive" aria-atomic="true" style="width: 500px;" id="ratelimit">
+            <div class="toast-body">
+                <strong>Error</strong> <br />
+                    You're doing that too fast, please wait between requests
+            </div>
+        </div>
+
+        <div class="toast" role="alert" data-delay="5000" aria-live="assertive" aria-atomic="true" style="width: 500px;" id="error">
+            <div class="toast-body">
+                <strong>Error</strong> <br />
+                Something went wrong, please try again later
+            </div>
         </div>
     </div>
-</form>
+</div>
+
+<script src="~/lib/jquery/dist/jquery.js"></script>
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="~/js/dashboard/core.js" asp-append-version="true"></script>

@@ -50,7 +50,7 @@ namespace UtiliSite
             return client;
         }
 
-        private static DiscordCache _cachedGuildLists = new DiscordCache(8);
+        private static DiscordCache _cachedGuildLists = new DiscordCache(7.5);
         public static List<RestUserGuild> GetManageableGuilds(DiscordRestClient client)
         {
             List<RestUserGuild> guilds;
@@ -64,6 +64,39 @@ namespace UtiliSite
             guilds = client.GetGuildSummariesAsync().FlattenAsync().GetAwaiter().GetResult().Where(x => x.Permissions.ManageGuild).ToList();
             _cachedGuildLists.Add(client.CurrentUser.Id, guilds);
             return guilds;
+        }
+
+        public static bool IsGuildManageable(DiscordRestClient client, ulong guildId)
+        {
+            List<RestUserGuild> guilds = GetManageableGuilds(client);
+            return guilds.Select(x => x.Id).Contains(guildId);
+        }
+
+        private static DiscordCache _cachedGuilds = new DiscordCache(7.5);
+        public static async Task<RestGuild> GetGuildAsync(ulong guildId)
+        {
+            if (_cachedGuilds.TryGet(guildId, out object guildObj))
+            {
+                if (guildObj == null)
+                {
+                    _cachedGuilds.Remove(guildId);
+                }
+                else
+                {
+                    return (RestGuild) guildObj;
+                }
+            }
+
+            try
+            {
+                RestGuild guild = await _client.GetGuildAsync(guildId);
+                if(guild != null) _cachedGuilds.Add(guildId, guild);
+                return guild;
+            }
+            catch
+            {
+                return null;
+            }
         }
 
         public static string GetNickname(RestGuild guild)
@@ -123,27 +156,33 @@ namespace UtiliSite
         public bool TryGet(ulong userId, out object value)
         {
             value = null;
+            try
+            {
+                Items.RemoveAll(x => x.Expiry < DateTime.Now);
 
-            Items.RemoveAll(x => x.Expiry < DateTime.Now);
+                List<DiscordCacheItem> matches = Items.Where(x => x.UserId == userId).ToList();
 
-            List<DiscordCacheItem> matches = Items.Where(x => x.UserId == userId).ToList();
+                if (Items.Count == 0)
+                {
+                    return false;
+                }
 
-            if (Items.Count == 0)
+                if (Items.Count == 1)
+                {
+                    value = matches.First().Value;
+                    return true;
+                }
+
+                // If by some extremely unlikely circimstance there are multiple matches,
+                // Return the latest cached value
+                matches = matches.OrderBy(x => x.Expiry).ToList();
+                value = matches.Last().Value;
+                return true;
+            }
+            catch
             {
                 return false;
             }
-
-            if (Items.Count == 1)
-            {
-                value = matches.First().Value;
-                return true;
-            }
-
-            // If by some extremely unlikely circimstance there are multiple matches,
-            // Return the latest cached value
-            matches = matches.OrderBy(x => x.Expiry).ToList();
-            value = matches.Last().Value;
-            return true;
         }
     }
 

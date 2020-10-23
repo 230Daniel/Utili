@@ -1,5 +1,4 @@
-﻿@using Microsoft.AspNetCore.Http
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -22,7 +21,7 @@
                         <a class="nav-link text-dark" asp-area="" asp-page="/commands">Commands</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link text-dark" asp-route="/dashboard">Dashboard</a>
+                        <a class="nav-link text-dark" href="@RedirectHelper.GoToPage(ViewContext, "dashboard")">Dashboard</a>
                     </li>
                 </ul>
             </div>
@@ -30,14 +29,9 @@
     </nav>
     <div class="d-flex" id="wrapper">
         <div class="border-right" id="sidebar-wrapper">
-            <div class="sidebar-heading, text-center">@ViewData["guildName"]</div>
             <div class="list-group list-group-flush">
-                <a href="#" class="list-group-item list-group-item-action bg-light">Dashboard</a>
-                <a href="#" class="list-group-item list-group-item-action bg-light">Shortcuts</a>
-                <a href="#" class="list-group-item list-group-item-action bg-light">Overview</a>
-                <a href="#" class="list-group-item list-group-item-action bg-light">Events</a>
-                <a href="#" class="list-group-item list-group-item-action bg-light">Profile</a>
-                <a href="#" class="list-group-item list-group-item-action bg-light">Status</a>
+                <a href="@RedirectHelper.ChangeLastPage(ViewContext, "core")" class="list-group-item list-group-item-action bg-dark @SidebarHelper.GetIsActive(ViewContext, "core")">Core</a>
+                <a href="@RedirectHelper.ChangeLastPage(ViewContext, "autopurge")" class="list-group-item list-group-item-action bg-dark @SidebarHelper.GetIsActive(ViewContext, "autopurge")">Autopurge</a>
             </div>
         </div>
         <div class="container">

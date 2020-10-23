@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Timers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
@@ -12,6 +14,7 @@ namespace UtiliSite.Pages.Dashboard
         public void OnGet()
         {
             AuthDetails auth = Auth.GetAuthDetails(HttpContext, HttpContext.Request.Path);
+
             if(!auth.Authenticated) return;
 
             ViewData["mainDashboardUrl"] = RedirectHelper.AddToUrl(HttpContext.Request.Host.ToString(), "dashboard");
@@ -25,6 +28,7 @@ namespace UtiliSite.Pages.Dashboard
         public void OnPost()
         {
             AuthDetails auth = Auth.GetAuthDetails(HttpContext, HttpContext.Request.Path);
+
             if (!auth.Authenticated)
             {
                 HttpContext.Response.StatusCode = 403;
