@@ -1,0 +1,41 @@
+﻿@page "{guild?}/autopurge"
+@model UtiliSite.Pages.Dashboard.AutopurgeModel
+@{
+    Layout = "Shared/_Layout.cshtml";
+}
+
+
+
+<form name="form-main" method="post">
+
+    <div class="row">
+        <div class="col-3">
+            <label>Nickname</label>
+        </div>
+        <div class="col-3">
+            <input type="text" name="nickname" value="@ViewData["nickname"]" />
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-3">
+            <label>Command Prefix</label>
+        </div>
+        <div class="col-3">
+            <input type="text" name="prefix" value="@ViewData["prefix"]" />
+        </div>
+    </div>
+
+    <button type="submit" class="btn btn-success">Save</button>
+</form>
+
+
+
+
+
+
+
+<script src="~/lib/jquery/dist/jquery.js"></script>
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="~/js/dashboard/submit.js" asp-append-version="true"></script>
+<script src="~/js/dashboard/autopurge.js" asp-append-version="true"></script>

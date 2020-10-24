@@ -1,11 +1,4 @@
-﻿
-
-
-
-
-
-
-$("#form").submit(function(e) {
+﻿$("[name|='form']").submit(function(e) {
     var formData = $(this).serialize();
     $.ajax({
         type: "POST",
@@ -20,7 +13,6 @@ $("#form").submit(function(e) {
                 $("#error").toast("show");
             }
         }
-        });
+    });
     return false;
 });
-
