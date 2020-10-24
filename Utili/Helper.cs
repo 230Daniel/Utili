@@ -1,12 +1,6 @@
 ﻿using Discord;
 using Discord.WebSocket;
 using System;
-using System.Collections.Generic;
-using System.Runtime.InteropServices.ComTypes;
-using System.Text;
-using System.Threading.Tasks;
-using Discord.Rest;
-using static Utili.Program;
 using System.Linq;
 
 namespace Utili
@@ -37,6 +31,29 @@ namespace Utili
         public static DiscordSocketClient GetShardForGuild(IGuild guild)
         {
             return Program._client.GetShardFor(guild);
+        }
+
+        public static IEmote GetEmote(string input, SocketGuild guild)
+        {
+            try
+            {
+                return guild.Emotes.First(x => x.Name == input);
+            } 
+            catch { }
+
+            try
+            {
+                return guild.Emotes.First(x => x.Name == input.Split(":").ElementAt(1));
+            } 
+            catch { }
+
+            try
+            {
+                return new Emoji(input);
+            } 
+            catch { }
+
+            return null;
         }
     }
 }

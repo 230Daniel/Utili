@@ -20,30 +20,48 @@
                     <li class="nav-item">
                         <a class="nav-link text-dark" asp-area="" asp-page="/commands">Commands</a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link text-dark" asp-area="" asp-page="/dashboard/index/0">Dashboard</a>
-                    </li>
                 </ul>
             </div>
         </div>
     </nav>
     <div class="d-flex" id="wrapper">
         <div class="border-right" id="sidebar-wrapper">
-            <div class="sidebar-heading, text-center">@ViewData["guildName"]</div>
             <div class="list-group list-group-flush">
-                <a href="#" class="list-group-item list-group-item-action bg-light">Dashboard</a>
-                <a href="#" class="list-group-item list-group-item-action bg-light">Shortcuts</a>
-                <a href="#" class="list-group-item list-group-item-action bg-light">Overview</a>
-                <a href="#" class="list-group-item list-group-item-action bg-light">Events</a>
-                <a href="#" class="list-group-item list-group-item-action bg-light">Profile</a>
-                <a href="#" class="list-group-item list-group-item-action bg-light">Status</a>
+                <a href="@RedirectHelper.ChangeLastPage(ViewContext, "core")" class="list-group-item list-group-item-action bg-dark @SidebarHelper.GetIsActive(ViewContext, "core")">Core</a>
+                <a href="@RedirectHelper.ChangeLastPage(ViewContext, "autopurge")" class="list-group-item list-group-item-action bg-dark @SidebarHelper.GetIsActive(ViewContext, "autopurge")">Autopurge</a>
             </div>
         </div>
-        <div class="container">
-            <main role="main" class="pb-3" style="margin-top: 25px;">
-                @RenderBody()
-            </main>
+        <div class="container" style="margin-top: 25px; margin-left: 25px; margin-right: 25px; margin-bottom: 85px;">
+
+            @RenderBody()
+
         </div>
+        
+        <div aria-live="polite" aria-atomic="true" style="position: relative; min-height: 20px;" class="align-bottom">
+            <div style="position: absolute; bottom: 0; right: 0;">
+                <div class="toast" role="alert" data-delay="5000" aria-live="assertive" aria-atomic="true" style="width: 500px;" id="success">
+                    <div class="toast-body">
+                        <strong>Changes saved</strong> <br/>
+                        Your changes may take up to 30 seconds to take effect
+                    </div>
+                </div>
+
+                <div class="toast" role="alert" data-delay="5000" aria-live="assertive" aria-atomic="true" style="width: 500px;" id="ratelimit">
+                    <div class="toast-body">
+                        <strong>Error</strong> <br/>
+                        You're doing that too fast, please wait between requests
+                    </div>
+                </div>
+
+                <div class="toast" role="alert" data-delay="5000" aria-live="assertive" aria-atomic="true" style="width: 500px;" id="error">
+                    <div class="toast-body">
+                        <strong>Error</strong> <br/>
+                        Something went wrong, please try again later
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
     <footer class="border-top footer text-muted">
         <div class="container">

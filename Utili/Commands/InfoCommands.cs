@@ -1,9 +1,5 @@
 ﻿using Discord.Commands;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
-using Discord.Rest;
 using static Utili.Program;
 using static Utili.MessageSender;
 using static Utili.Helper;
@@ -24,7 +20,7 @@ namespace Utili.Commands
                             [Website](https://utili.bot)
                             [Dashboard](https://utili.bot/dashboard)
                             [Get Premium](https://utili.bot/premium)
-                            [Support & Requests Discord](https://discord.gg/hCYWk9x)";
+                            [Support & Requests Server](https://discord.gg/hCYWk9x)";
 
             await SendInfoAsync(Context.Channel, "Utili v2 Beta", about);
         }

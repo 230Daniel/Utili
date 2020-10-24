@@ -37,8 +37,9 @@ namespace UtiliSite
 
             services.AddRazorPages(options =>
             {
-                options.Conventions.AddPageRoute("/Dashboard", "dashboard/{guild?}");
-                options.Conventions.AddPageRoute("/Dashboard/Core", "dashboard/{guild?}/core");
+                options.Conventions.AddPageRoute("/dashboard", "dashboard/{guild?}");
+                options.Conventions.AddPageRoute("/dashboard/core", "dashboard/{guild?}/core");
+                options.Conventions.AddPageRoute("/dashboard/autopurge", "dashboard/{guild?}/autopurge");
             });
 
             services.AddAuthentication().AddCookie();

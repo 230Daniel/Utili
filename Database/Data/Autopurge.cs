@@ -47,8 +47,7 @@ namespace Database.Data
                         reader.GetString(1),
                         reader.GetString(2),
                         reader.GetString(3),
-                        reader.GetInt32(4),
-                        reader.GetInt32(5)));
+                        reader.GetInt32(4)));
                 }
             }
 
@@ -67,25 +66,23 @@ namespace Database.Data
             if (row.Id == 0) 
             // The row is a new entry so should be inserted into the database
             {
-                command = Sql.GetCommand("INSERT INTO Autopurge (GuildID, ChannelId, Timespan, Mode, Messages) VALUES (@GuildId, @ChannelId, @Timespan, @Mode, @Messages);",
+                command = Sql.GetCommand("INSERT INTO Autopurge (GuildID, ChannelId, Timespan, Mode) VALUES (@GuildId, @ChannelId, @Timespan, @Mode);",
                     new [] {("GuildId", row.GuildId.ToString()), 
                         ("ChannelId", row.ChannelId.ToString()),
                         ("Timespan", row.Timespan.ToString()),
-                        ("Mode", row.Mode.ToString()),
-                        ("Messages", row.Messages.ToString())});
+                        ("Mode", row.Mode.ToString())});
 
                 if(Cache.Initialised) Cache.Autopurge.Rows.Add(row);
             }
             else
             // The row already exists and should be updated
             {
-                command = Sql.GetCommand("UPDATE Autopurge SET GuildId = @GuildId, ChannelId = @ChannelId, Timespan = @Timespan, Mode = @Mode, Messages = @Messages WHERE Id = @Id;",
+                command = Sql.GetCommand("UPDATE Autopurge SET GuildId = @GuildId, ChannelId = @ChannelId, Timespan = @Timespan, Mode = @Mode WHERE Id = @Id;",
                     new [] {("Id", row.Id.ToString()),
                         ("GuildId", row.GuildId.ToString()), 
                         ("ChannelId", row.ChannelId.ToString()),
                         ("Timespan", row.Timespan.ToString()),
-                        ("Mode", row.Mode.ToString()),
-                        ("Messages", row.Messages.ToString())});
+                        ("Mode", row.Mode.ToString())});
 
                 if(Cache.Initialised) Cache.Autopurge.Rows[Cache.Autopurge.Rows.FindIndex(x => x.Id == row.Id)] = row;
             }
@@ -124,8 +121,7 @@ namespace Database.Data
                         reader.GetString(1),
                         reader.GetString(2),
                         reader.GetString(3),
-                        reader.GetInt32(4),
-                        reader.GetInt32(5)));
+                        reader.GetInt32(4)));
                 }
             }
             catch {}
@@ -134,23 +130,38 @@ namespace Database.Data
         }
     }
 
-    public class AutopurgeRow
+    public class AutopurgeRow : ICloneable
     {
         public int Id { get; }
         public ulong GuildId { get; set; }
         public ulong ChannelId { get; set; }
         public TimeSpan Timespan { get; set; }
         public int Mode { get; set; }
-        public int Messages { get; set; }
+        // 0 = All messages
+        // 1 = Bot messages
 
-        public AutopurgeRow(int id, string guildId, string channelId, string timespan, int mode, int messages)
+        public AutopurgeRow(int id, string guildId, string channelId, string timespan, int mode)
         {
             Id = id;
             GuildId = ulong.Parse(guildId);
             ChannelId = ulong.Parse(channelId);
             Timespan = TimeSpan.Parse(timespan);
             Mode = mode;
-            Messages = messages;
+        }
+
+        public AutopurgeRow(int id, ulong guildId, ulong channelId, TimeSpan timespan, int mode)
+        {
+            Id = id;
+            GuildId = guildId;
+            ChannelId = channelId;
+            Timespan = timespan;
+            Mode = mode;
+        }
+
+        public object Clone()
+        {
+            AutopurgeRow clone = new AutopurgeRow(Id, GuildId, ChannelId, Timespan, Mode);
+            return clone;
         }
     }
 }

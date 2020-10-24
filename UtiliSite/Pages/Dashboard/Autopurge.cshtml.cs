@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace UtiliSite.Pages.Dashboard
 {
-    public class CoreModel : PageModel
+    public class AutopurgeModel : PageModel
     {
         public void OnGet()
         {

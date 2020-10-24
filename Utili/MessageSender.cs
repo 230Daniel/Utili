@@ -1,34 +1,36 @@
 ﻿using Discord;
+using Discord.Rest;
 using Discord.WebSocket;
-using Org.BouncyCastle.Math.Field;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Utili
 {
     internal class MessageSender
     {
-        public static async Task SendSuccessAsync(IChannel channel, string title, string message = null, string footer = null)
+        public static async Task<RestUserMessage> SendSuccessAsync(IChannel channel, string title, string message = null, string footer = null)
         {
             ISocketMessageChannel textChannel = channel as ISocketMessageChannel;
 
-            await textChannel.SendMessageAsync(embed: GenerateEmbed(EmbedType.Success, title, message, footer));
+            return await textChannel.SendMessageAsync(embed: GenerateEmbed(EmbedType.Success, title, message, footer));
         }
 
-        public static async Task SendFailureAsync(IChannel channel, string title, string message = null, string footer = null)
+        public static async Task<RestUserMessage> SendFailureAsync(IChannel channel, string title, string message = null, string footer = null)
         {
             ISocketMessageChannel textChannel = channel as ISocketMessageChannel;
 
-            await textChannel.SendMessageAsync(embed: GenerateEmbed(EmbedType.Failure, title, message, footer));
+            if (!string.IsNullOrEmpty(message))
+            {
+                message += "\n[Support Server](https://discord.gg/hCYWk9x)";
+            }
+
+            return await textChannel.SendMessageAsync(embed: GenerateEmbed(EmbedType.Failure, title, message, footer));
         }
 
-        public static async Task SendInfoAsync(IChannel channel, string title, string message, string footer = null, (string, string)[] fields = null)
+        public static async Task<RestUserMessage> SendInfoAsync(IChannel channel, string title, string message, string footer = null, (string, string)[] fields = null)
         {
             ISocketMessageChannel textChannel = channel as ISocketMessageChannel;
 
-            await textChannel.SendMessageAsync(embed: GenerateEmbed(EmbedType.Info, title, message, footer, fields));
+            return await textChannel.SendMessageAsync(embed: GenerateEmbed(EmbedType.Info, title, message, footer, fields));
         }
 
         private static Embed GenerateEmbed(EmbedType embedType, string title, string content = null, string footer = null, (string, string)[] fields = null)

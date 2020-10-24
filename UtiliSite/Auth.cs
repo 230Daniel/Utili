@@ -40,22 +40,13 @@ namespace UtiliSite
             {
                 if (ulong.TryParse(guildValue.ToString(), out ulong guildId))
                 {
-                    bool hasGuildPermission = false;
-
                     if (guildId > 0)
                     {
-                        RestGuild guild = null;
-                        try
-                        {
-                            guild = _client.GetGuildAsync(guildId).GetAwaiter().GetResult();
-                        }
-                        catch
-                        {
-                        }
+                        RestGuild guild = GetGuildAsync(guildId).GetAwaiter().GetResult();
 
                         if (guild == null)
                         {
-                            if (GetManageableGuilds(client).Select(x => x.Id).Contains(guildId))
+                            if (IsGuildManageable(client, guildId))
                             {
                                 string inviteUrl = "https://discord.com/api/oauth2/authorize?permissions=8&scope=bot&response_type=code" +
                                                    $"&client_id={Main._config.DiscordClientId}" +
@@ -74,23 +65,17 @@ namespace UtiliSite
                             httpContext.Response.Redirect(unauthorisedGuildUrl);
                             return auth;
                         }
-                        RestGuildUser guildUser = guild.GetUserAsync(auth.Client.CurrentUser.Id).GetAwaiter().GetResult();
-                        if (guildUser != null)
-                        {
-                            if (guildUser.GuildPermissions.ManageGuild)
-                            {
-                                hasGuildPermission = true;
-                                auth.Guild = guild;
-                            }
-                        }
 
-                        if (!hasGuildPermission)
+                        if (IsGuildManageable(client, guild.Id))
+                        {
+                            auth.Guild = guild;
+                        }
+                        else
                         {
                             auth.Authenticated = false;
                             httpContext.Response.Redirect(unauthorisedGuildUrl);
                             return auth;
                         }
-
                     }
                     else
                     {

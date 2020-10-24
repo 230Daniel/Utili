@@ -1,14 +1,10 @@
-﻿using Database.Data;
-using Discord.WebSocket;
-using System;
+﻿using Discord.WebSocket;
 using System.Linq;
 using System.Threading.Tasks;
 using Discord;
-using System.Diagnostics;
 using System.Reflection;
 using Discord.Commands;
 using Utili.Handlers;
-using Discord.Rest;
 using System.Timers;
 
 namespace Utili
@@ -29,6 +25,8 @@ namespace Utili
         public static Timer _shardStatsUpdater;
 
         // ReSharper enable InconsistentNaming
+
+        private static Features.Autopurge _autopurge = new Features.Autopurge();
 
         private static void Main()
         {
@@ -77,7 +75,7 @@ namespace Utili
 
             await _commands.AddModulesAsync(assembly: Assembly.GetEntryAssembly(), services: null);
 
-            _logger.Log("MainAsync", $"Running {_config.UpperShardId - (_config.LowerShardId - 1)} shards of Utili with {_totalShards} total shards.", LogSeverity.Info);
+            _logger.Log("MainAsync", $"Running {_config.UpperShardId - (_config.LowerShardId - 1)} shards of Utili with {_totalShards} total shards", LogSeverity.Info);
             _logger.Log("MainAsync", $"Shard IDs: {_config.LowerShardId} - {_config.UpperShardId}", LogSeverity.Info);
             _logger.LogEmpty();
 
@@ -88,6 +86,8 @@ namespace Utili
             await _client.LoginAsync(TokenType.Bot, _config.Token);
 
             await _client.StartAsync();
+
+            _autopurge.Start();
 
             await Task.Delay(-1);
         }

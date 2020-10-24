@@ -1,35 +1,63 @@
-﻿@page "{guild?}/core";
+﻿@page "{guild?}/core"
 @model UtiliSite.Pages.Dashboard.CoreModel
 @{
     Layout = "Shared/_Layout.cshtml";
 }
 
-<form id="settings0" method="post" onsubmit="return false;">
+
+
+<form name="form-main" method="post">
 
     <div class="row">
         <div class="col-3">
-            <label for="Nickname">Nickname</label>
+            <label>Nickname</label>
         </div>
         <div class="col-3">
-            <input type="text" name="nickname" id="Nickname" value="@ViewData["nickname"]" />
+            <input type="text" name="nickname" value="@ViewData["nickname"]" />
         </div>
     </div>
 
     <div class="row">
         <div class="col-3">
-            <label for="Prefix">Command Prefix</label>
+            <label>Command Prefix</label>
         </div>
         <div class="col-3">
-            <input type="text" name="prefix" id="Prefix" value="@ViewData["prefix"]" />
+            <input type="text" name="prefix" value="@ViewData["prefix"]" />
         </div>
     </div>
 
     <button type="submit" class="btn btn-success">Save</button>
+</form>
 
-    <div class="toast" role="alert" data-delay="5000" aria-live="assertive" aria-atomic="true" id="success0">
-        <div class="toast-body">
-            <strong>Changes saved</strong> <br />
-            Your changes may take up to 30 seconds to take effect.
+
+
+<div aria-live="polite" aria-atomic="true" style="position: relative; min-height: 20px;">
+    <div style="position: absolute; top: 0; right: 0;">
+        <div class="toast" role="alert" data-delay="5000" aria-live="assertive" aria-atomic="true" style="width: 500px;" id="success">
+            <div class="toast-body">
+                <strong>Changes saved</strong> <br />
+                Your changes may take up to 30 seconds to take effect
+            </div>
+        </div>
+
+        <div class="toast" role="alert" data-delay="5000" aria-live="assertive" aria-atomic="true" style="width: 500px;" id="ratelimit">
+            <div class="toast-body">
+                <strong>Error</strong> <br />
+                You're doing that too fast, please wait between requests
+            </div>
+        </div>
+
+        <div class="toast" role="alert" data-delay="5000" aria-live="assertive" aria-atomic="true" style="width: 500px;" id="error">
+            <div class="toast-body">
+                <strong>Error</strong> <br />
+                Something went wrong, please try again later
+            </div>
         </div>
     </div>
-</form>
+</div>
+
+
+
+<script src="~/lib/jquery/dist/jquery.js"></script>
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="~/js/dashboard/submit.js" asp-append-version="true"></script>
