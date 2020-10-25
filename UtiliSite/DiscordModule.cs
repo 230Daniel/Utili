@@ -26,6 +26,7 @@ namespace UtiliSite
             _client.LoginAsync(TokenType.Bot, _config.DiscordToken).GetAwaiter().GetResult();
         }
 
+
         private static DiscordCache _cachedClients = new DiscordCache(900);
         public static DiscordRestClient GetClient(ulong userId, string token = null)
         {
@@ -50,6 +51,7 @@ namespace UtiliSite
             return client;
         }
 
+
         private static DiscordCache _cachedGuildLists = new DiscordCache(7.5);
         public static List<RestUserGuild> GetManageableGuilds(DiscordRestClient client)
         {
@@ -65,12 +67,12 @@ namespace UtiliSite
             _cachedGuildLists.Add(client.CurrentUser.Id, guilds);
             return guilds;
         }
-
         public static bool IsGuildManageable(DiscordRestClient client, ulong guildId)
         {
             List<RestUserGuild> guilds = GetManageableGuilds(client);
             return guilds.Select(x => x.Id).Contains(guildId);
         }
+
 
         private static DiscordCache _cachedGuilds = new DiscordCache(7.5);
         public static async Task<RestGuild> GetGuildAsync(ulong guildId)
@@ -99,6 +101,34 @@ namespace UtiliSite
             }
         }
 
+
+        private static DiscordCache _cachedChannelNames = new DiscordCache(30);
+        public static async Task<string> GetChannelNameAsync(RestGuild guild, ulong channelId)
+        {
+            if (_cachedChannelNames.TryGet(channelId, out object channelNameObj))
+            {
+                if (channelNameObj == null)
+                {
+                    _cachedChannelNames.Remove(channelId);
+                }
+                else
+                {
+                    return (string) channelNameObj;
+                }
+            }
+
+            try
+            {
+                RestTextChannel channel = await guild.GetTextChannelAsync(channelId);
+                _cachedChannelNames.Add(channelId, channel.Name);
+                return channel.Name;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
         public static string GetNickname(RestGuild guild)
         {
             string nickname = guild.GetUserAsync(_client.CurrentUser.Id).GetAwaiter().GetResult().Nickname;
@@ -110,12 +140,12 @@ namespace UtiliSite
 
             return nickname;
         }
-
         public static void SetNickname(RestGuild guild, string nickname)
         {
             _ = guild.GetUserAsync(DiscordModule._client.CurrentUser.Id).GetAwaiter().GetResult()
                 .ModifyAsync(x => x.Nickname = nickname);
         }
+
 
         public static string SanitiseIconUrl(string url)
         {
@@ -139,28 +169,28 @@ namespace UtiliSite
             Items = new List<DiscordCacheItem>();
         }
 
-        public void Add(ulong userId, object value)
+        public void Add(ulong key, object value)
         {
-            DiscordCacheItem item = new DiscordCacheItem(userId, value, Timeout);
-            Items.RemoveAll(x => x.UserId == userId);
+            DiscordCacheItem item = new DiscordCacheItem(key, value, Timeout);
+            Items.RemoveAll(x => x.Key == key);
             Items.Add(item);
 
             Items.RemoveAll(x => x.Expiry < DateTime.Now);
         }
 
-        public void Remove(ulong userId)
+        public void Remove(ulong key)
         {
-            Items.RemoveAll(x => x.UserId == userId);
+            Items.RemoveAll(x => x.Key == key);
         }
 
-        public bool TryGet(ulong userId, out object value)
+        public bool TryGet(ulong key, out object value)
         {
             value = null;
             try
             {
                 Items.RemoveAll(x => x.Expiry < DateTime.Now);
 
-                List<DiscordCacheItem> matches = Items.Where(x => x.UserId == userId).ToList();
+                List<DiscordCacheItem> matches = Items.Where(x => x.Key == key).ToList();
 
                 if (Items.Count == 0)
                 {
@@ -188,13 +218,13 @@ namespace UtiliSite
 
     internal class DiscordCacheItem
     {
-        public ulong UserId { get; }
+        public ulong Key { get; }
         public DateTime Expiry { get; }
         public object Value { get; }
 
-        public DiscordCacheItem(ulong userId, object value, TimeSpan timeout)
+        public DiscordCacheItem(ulong key, object value, TimeSpan timeout)
         {
-            UserId = userId;
+            Key = key;
             Expiry = DateTime.Now.Add(timeout);
             Value = value;
         }

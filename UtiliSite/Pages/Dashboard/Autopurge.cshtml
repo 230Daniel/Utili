@@ -1,37 +1,45 @@
 ﻿@page "{guild?}/autopurge"
+@using Database.Data
+@using Discord.Rest
 @model UtiliSite.Pages.Dashboard.AutopurgeModel
 @{
     Layout = "Shared/_Layout.cshtml";
 }
 
+@foreach (AutopurgeRow row in (List<AutopurgeRow>)ViewData["autopurgeRows"])
+{
+    string channelName = DiscordModule.GetChannelNameAsync(ViewData["Guild"] as RestGuild, row.ChannelId).GetAwaiter().GetResult();
+    <form name="form-@row.Id" method="post">
 
-
-<form name="form-main" method="post">
-
-    <div class="row">
-        <div class="col-3">
-            <label>Nickname</label>
+        <div class="input-group flex-nowrap">
+            <div class="input-group-prepend">
+                <span class="input-group-text" id="addon-wrapping">#</span>
+            </div>
+            <input type="text" class="form-control" style="background: unset;" value="@channelName" readonly aria-describedby="addon-wrapping">
         </div>
-        <div class="col-3">
-            <input type="text" name="nickname" value="@ViewData["nickname"]" />
+
+        <div class="input-group flex-nowrap">
+            <div class="input-group-prepend">
+                <span class="input-group-text" id="addon-wrapping">Threshold</span>
+            </div>
+            <input type="text" name="timespan" class="form-control" value="@row.Timespan" aria-describedby="addon-wrapping">
         </div>
-    </div>
 
-    <div class="row">
-        <div class="col-3">
-            <label>Command Prefix</label>
+        <div class="input-group flex-nowrap">
+
+            <div class="input-group-prepend">
+                <span class="input-group-text" id="addon-wrapping">Mode</span>
+            </div>
+
+            <select class="custom-select">
+                <!option value="0" @AutopurgeModel.GetIsSelected(0, row)>All messages</!option>
+                <!option value="1" @AutopurgeModel.GetIsSelected(1, row)>Bot messages</!option>
+            </select>
         </div>
-        <div class="col-3">
-            <input type="text" name="prefix" value="@ViewData["prefix"]" />
-        </div>
-    </div>
 
-    <button type="submit" class="btn btn-success">Save</button>
-</form>
-
-
-
-
+        <button type="submit" class="btn btn-success">Save</button>
+    </form>
+}
 
 
 

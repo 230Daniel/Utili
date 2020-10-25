@@ -46,7 +46,7 @@ namespace Utili.Features
 
         private async Task PurgeChannels(bool premiumOnly)
         {
-            List<AutopurgeRow> rows = Database.Data.Autopurge.GetRowsWhere();
+            List<AutopurgeRow> rows = Database.Data.Autopurge.GetRows();
             List<ulong> allGuildIds = _client.Guilds.Select(x => x.Id).ToList();
             List<ulong> premiumGuildIds = Premium.GetPremiumGuilds();
 

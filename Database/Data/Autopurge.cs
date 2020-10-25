@@ -10,7 +10,7 @@ namespace Database.Data
 {
     public class Autopurge
     {
-        public static List<AutopurgeRow> GetRowsWhere(ulong? guildId = null, ulong? channelId = null)
+        public static List<AutopurgeRow> GetRows(ulong? guildId = null, ulong? channelId = null)
         {
             List<AutopurgeRow> matchedRows = new List<AutopurgeRow>();
 

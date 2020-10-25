@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using System.Timers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Database.Data;
+using Discord.Rest;
 
 namespace UtiliSite.Pages.Dashboard
 {
@@ -19,10 +21,11 @@ namespace UtiliSite.Pages.Dashboard
 
             ViewData["mainDashboardUrl"] = RedirectHelper.AddToUrl(HttpContext.Request.Host.ToString(), "dashboard");
             ViewData["guildName"] = auth.Guild.Name;
+            ViewData["guild"] = auth.Guild;
             ViewData["Title"] = $"{auth.Guild.Name} - ";
 
-            ViewData["prefix"] = Database.Data.Misc.GetPrefix(auth.Guild.Id);
-            ViewData["nickname"] = DiscordModule.GetNickname(auth.Guild);
+            List<AutopurgeRow> autopurgeRows = Autopurge.GetRows(auth.Guild.Id);
+            ViewData["autopurgeRows"] = autopurgeRows;
         }
 
         public void OnPost()
@@ -35,20 +38,15 @@ namespace UtiliSite.Pages.Dashboard
                 return;
             }
 
-            string prefix = HttpContext.Request.Form["prefix"];
-            string nickname = HttpContext.Request.Form["nickname"];
-
-            if (prefix != (string) ViewData["prefix"])
-            {
-                Database.Data.Misc.SetPrefix(auth.Guild.Id, prefix);
-            }
-
-            if (nickname != (string) ViewData["nickname"])
-            {
-                DiscordModule.SetNickname(auth.Guild, nickname);
-            }
+            string timespanString = HttpContext.Request.Form["timespan"];
 
             HttpContext.Response.StatusCode = 200;
+        }
+
+        public static string GetIsSelected(int mode, AutopurgeRow row)
+        {
+            if (row.Mode == mode) return "selected";
+            return "";
         }
     }
 }
