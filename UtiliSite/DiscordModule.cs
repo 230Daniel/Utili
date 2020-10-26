@@ -129,6 +129,27 @@ namespace UtiliSite
             }
         }
 
+
+        private static DiscordCache _cachedTextChannels = new DiscordCache(15);
+        public static async Task<List<RestTextChannel>> GetTextChannelsAsync(RestGuild guild)
+        {
+            if (_cachedTextChannels.TryGet(guild.Id, out object channelsObj))
+            {
+                return (List<RestTextChannel>) channelsObj;
+            }
+
+            try
+            {
+                List<RestTextChannel> channels = (await guild.GetTextChannelsAsync()).OrderBy(x => x.Name).ToList();
+                _cachedTextChannels.Add(guild.Id, channels);
+                return channels;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
         public static string GetNickname(RestGuild guild)
         {
             string nickname = guild.GetUserAsync(_client.CurrentUser.Id).GetAwaiter().GetResult().Nickname;

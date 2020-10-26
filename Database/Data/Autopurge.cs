@@ -1,4 +1,5 @@
 ﻿using MySql.Data.MySqlClient;
+using Org.BouncyCastle.Asn1.Mozilla;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -146,6 +147,11 @@ namespace Database.Data
         public int Mode { get; set; }
         // 0 = All messages
         // 1 = Bot messages
+
+        public AutopurgeRow()
+        {
+            Id = 0;
+        }
 
         public AutopurgeRow(int id, string guildId, string channelId, string timespan, int mode)
         {

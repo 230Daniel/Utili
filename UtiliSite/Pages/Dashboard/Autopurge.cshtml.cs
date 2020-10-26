@@ -36,11 +36,43 @@ namespace UtiliSite.Pages.Dashboard
                 return;
             }
 
+            if (!string.IsNullOrEmpty(HttpContext.Request.Form["addChannel"]))
+            {
+                ulong channelId = ulong.Parse(HttpContext.Request.Form["addChannel"]);
+                RestTextChannel channel = auth.Guild.GetTextChannelAsync(channelId).GetAwaiter().GetResult();
+
+                AutopurgeRow newRow = new AutopurgeRow()
+                {
+                    GuildId = auth.Guild.Id,
+                    ChannelId = channel.Id,
+                    Timespan = TimeSpan.FromDays(1),
+                    Mode = 0
+                };
+
+                Autopurge.SaveRow(newRow);
+                HttpContext.Response.StatusCode = 200;
+                HttpContext.Response.Redirect(HttpContext.Request.Path);
+                return;
+            }
+
+            if (!string.IsNullOrEmpty(HttpContext.Request.Form["removeChannel"]))
+            {
+                int deleteId = int.Parse(HttpContext.Request.Form["removeChannel"]);
+
+                AutopurgeRow deleteRow = Autopurge.GetRows(id: deleteId, guildId: auth.Guild.Id).First();
+
+                Autopurge.DeleteRow(deleteRow);
+
+                HttpContext.Response.StatusCode = 200;
+                HttpContext.Response.Redirect(HttpContext.Request.Path);
+                return;
+            }
+
             int id = int.Parse(HttpContext.Request.Form["rowId"]);
             TimeSpan timespan = TimeSpan.Parse(HttpContext.Request.Form["timespan"]);
             int mode = int.Parse(HttpContext.Request.Form["mode"]);
 
-            AutopurgeRow row = Autopurge.GetRows(id: id).First();
+            AutopurgeRow row = Autopurge.GetRows(id: id, guildId: auth.Guild.Id).First();
 
             if (row.GuildId != auth.Guild.Id)
             {

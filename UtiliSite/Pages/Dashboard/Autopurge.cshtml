@@ -11,14 +11,19 @@
     {
         return;
     }
+
+    List<AutopurgeRow> autopurgeRows = (List<AutopurgeRow>)ViewData["autopurgeRows"];
+    RestGuild guild = ViewData["Guild"] as RestGuild;
+    List<RestTextChannel> textChannels = DiscordModule.GetTextChannelsAsync(ViewData["Guild"] as RestGuild).GetAwaiter().GetResult();
+    List<RestTextChannel> nonAutopurgeTextChannels = textChannels.Where(x => autopurgeRows.Count(y => y.ChannelId == x.Id) == 0).ToList();
 }
 
-@foreach (AutopurgeRow row in (List<AutopurgeRow>)ViewData["autopurgeRows"])
+@foreach (AutopurgeRow row in autopurgeRows)
 {
-    string channelName = DiscordModule.GetChannelNameAsync(ViewData["Guild"] as RestGuild, row.ChannelId).GetAwaiter().GetResult();
+    string channelName = textChannels.First(x => x.Id == row.ChannelId).Name;
     <form name="form-@row.Id" method="post">
 
-        <input type="hidden" name="rowId" value="@row.Id"/>
+        <input type="hidden" name="rowId" value="@row.Id" />
 
         <div class="input-group flex-nowrap">
             <div class="input-group-prepend">
@@ -48,8 +53,30 @@
 
         <button type="submit" class="btn btn-success">Save</button>
     </form>
+    <form method="post">
+        <input type="hidden" name="removeChannel" value="@row.Id" />
+        <button type="submit" class="btn btn-danger">Remove</button>
+    </form>
 }
 
+<div class="dropdown">
+    <button class="btn btn-secondary dropdown-toggle" type="button" data-toggle="dropdown" id="dropdownAddChannel" aria-haspopup="true" aria-expanded="false">
+        Add channel
+    </button>
+    <div class="dropdown-menu" aria-labelledby="dropdownAddChannel">
+
+        @foreach (RestTextChannel channel in nonAutopurgeTextChannels)
+        {
+            <form method="post">
+                <input type="hidden" name="addChannel" value="@channel.Id" />
+                <button class="dropdown-item" type="submit">
+                    #@channel.Name
+                </button>
+            </form>
+        }
+
+    </div>
+</div>
 
 <script src="~/lib/jquery/dist/jquery.js"></script>
 <script src="~/lib/jquery/dist/jquery.min.js"></script>
