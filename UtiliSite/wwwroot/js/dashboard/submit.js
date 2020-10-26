@@ -1,6 +1,6 @@
 ﻿
 
-$("[name|='form']").submit(function() {
+$("[name|='form']").submit(function(e) {
     var formData = $(this).serialize();
     console.log(formData);
     $.ajax({
@@ -10,8 +10,7 @@ $("[name|='form']").submit(function() {
             $("#success").toast("show");
         },
         error: function(xhr) {
-            console.log(xhr.error);
-            if (xhr.status == 469) {
+            if (xhr.status == 429) {
                 $("#ratelimit").toast("show");
             } else {
                 $("#error").toast("show");
@@ -20,3 +19,5 @@ $("[name|='form']").submit(function() {
     });
     return false;
 });
+
+

@@ -19,8 +19,6 @@ namespace UtiliSite.Pages.Dashboard
 
             if(!auth.Authenticated) return;
 
-            ViewData["mainDashboardUrl"] = RedirectHelper.AddToUrl(HttpContext.Request.Host.ToString(), "dashboard");
-            ViewData["guildName"] = auth.Guild.Name;
             ViewData["guild"] = auth.Guild;
             ViewData["Title"] = $"{auth.Guild.Name} - ";
 
@@ -38,7 +36,22 @@ namespace UtiliSite.Pages.Dashboard
                 return;
             }
 
-            string timespanString = HttpContext.Request.Form["timespan"];
+            int id = int.Parse(HttpContext.Request.Form["rowId"]);
+            TimeSpan timespan = TimeSpan.Parse(HttpContext.Request.Form["timespan"]);
+            int mode = int.Parse(HttpContext.Request.Form["mode"]);
+
+            AutopurgeRow row = Autopurge.GetRows(id: id).First();
+
+            if (row.GuildId != auth.Guild.Id)
+            {
+                HttpContext.Response.StatusCode = 403;
+                return;
+            }
+
+            row.Timespan = timespan;
+            row.Mode = mode;
+
+            Autopurge.SaveRow(row);
 
             HttpContext.Response.StatusCode = 200;
         }

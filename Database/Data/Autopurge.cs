@@ -10,7 +10,7 @@ namespace Database.Data
 {
     public class Autopurge
     {
-        public static List<AutopurgeRow> GetRows(ulong? guildId = null, ulong? channelId = null)
+        public static List<AutopurgeRow> GetRows(ulong? guildId = null, ulong? channelId = null, int? id = null)
         {
             List<AutopurgeRow> matchedRows = new List<AutopurgeRow>();
 
@@ -20,6 +20,7 @@ namespace Database.Data
 
                 if (guildId.HasValue) matchedRows.RemoveAll(x => x.GuildId != guildId.Value);
                 if (channelId.HasValue) matchedRows.RemoveAll(x => x.ChannelId != channelId.Value);
+                if (id.HasValue) matchedRows.RemoveAll(x => x.Id != id.Value);
             }
             else
             {
@@ -36,6 +37,12 @@ namespace Database.Data
                 {
                     command += " AND ChannelId = @ChannelId";
                     values.Add(("ChannelId", channelId.Value.ToString()));
+                }
+
+                if (id.HasValue)
+                {
+                    command += " AND Id = @Id";
+                    values.Add(("Id", id.Value.ToString()));
                 }
 
                 MySqlDataReader reader = Sql.GetCommand(command, values.ToArray()).ExecuteReader();

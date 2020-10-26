@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApplicationParts;
 using System.ComponentModel;
+using Microsoft.AspNetCore.Diagnostics;
 
 namespace UtiliSite
 {
@@ -86,6 +87,12 @@ namespace UtiliSite
             {
                 endpoints.MapRazorPages();
             });
+
+            app.UseExceptionHandler(builder => builder.Run(async context =>
+            {
+                var exception = context.Features.Get<IExceptionHandlerFeature>().Error;
+                Console.WriteLine("error");
+            }));
 
             // Initialise the database without using cache.
             Database.Database.Initialise(false);
