@@ -18,6 +18,25 @@
     List<RestTextChannel> nonAutopurgeTextChannels = textChannels.Where(x => autopurgeRows.Count(y => y.ChannelId == x.Id) == 0).ToList();
 }
 
+<div class="dropdown"">
+    <button class="btn btn-secondary dropdown-toggle" type="button" data-toggle="dropdown" id="dropdownAddChannel" aria-haspopup="true" aria-expanded="false">
+        Add channel
+    </button>
+    <div class="dropdown-menu" aria-labelledby="dropdownAddChannel">
+
+        @foreach (RestTextChannel channel in nonAutopurgeTextChannels)
+        {
+            <form method="post">
+                <input type="hidden" name="addChannel" value="@channel.Id" />
+                <button class="dropdown-item" type="submit">
+                    #@channel.Name
+                </button>
+            </form>
+        }
+
+    </div>
+</div>
+
 @foreach (AutopurgeRow row in autopurgeRows)
 {
     string channelName = textChannels.First(x => x.Id == row.ChannelId).Name;
@@ -58,25 +77,6 @@
         <button type="submit" class="btn btn-danger">Remove</button>
     </form>
 }
-
-<div class="dropdown">
-    <button class="btn btn-secondary dropdown-toggle" type="button" data-toggle="dropdown" id="dropdownAddChannel" aria-haspopup="true" aria-expanded="false">
-        Add channel
-    </button>
-    <div class="dropdown-menu" aria-labelledby="dropdownAddChannel">
-
-        @foreach (RestTextChannel channel in nonAutopurgeTextChannels)
-        {
-            <form method="post">
-                <input type="hidden" name="addChannel" value="@channel.Id" />
-                <button class="dropdown-item" type="submit">
-                    #@channel.Name
-                </button>
-            </form>
-        }
-
-    </div>
-</div>
 
 <script src="~/lib/jquery/dist/jquery.js"></script>
 <script src="~/lib/jquery/dist/jquery.min.js"></script>
