@@ -4,7 +4,6 @@ $("[name|='form']").submit(function(e) {
     var formData = $(this).serialize();
 
     var buttonUsed = $("button[clicked=true]")[0].name;
-
     if (buttonUsed === "noajax") return true;
 
     $.ajax({

@@ -24,9 +24,10 @@ namespace Utili
 
         public static Timer _shardStatsUpdater;
 
-        // ReSharper enable InconsistentNaming
+        public static Features.Autopurge _autopurge = new Features.Autopurge();
+        public static Features.VoiceLink _voicelink = new Features.VoiceLink();
 
-        private static Features.Autopurge _autopurge = new Features.Autopurge();
+        // ReSharper enable InconsistentNaming
 
         private static void Main()
         {
@@ -82,15 +83,19 @@ namespace Utili
             _client.Log += Client_Log;
             _client.MessageReceived += MessageReceivedHandler.MessageReceived;
             _client.ShardReady += ReadyHandler.ShardReady;
+            _client.UserVoiceStateUpdated += VoiceHandler.UserVoiceStateUpdated;
 
             await _client.LoginAsync(TokenType.Bot, _config.Token);
 
             await _client.StartAsync();
 
             _autopurge.Start();
+            _voicelink.Start();
 
             await Task.Delay(-1);
         }
+
+        
 
         private async Task Client_Log(LogMessage logMessage)
         {

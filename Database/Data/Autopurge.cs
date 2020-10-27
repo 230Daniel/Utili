@@ -62,11 +62,6 @@ namespace Database.Data
             return matchedRows;
         }
 
-        public List<AutopurgeRow> GetRowsForGuilds(List<ulong> guilds)
-        {
-            return Cache.Autopurge.Rows.Where(x => guilds.Contains(x.GuildId)).ToList();
-        }
-
         public static void SaveRow(AutopurgeRow row)
         {
             MySqlCommand command;

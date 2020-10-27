@@ -20,6 +20,7 @@ namespace Database
         private static Timer Timer { get; set; }
 
         public static AutopurgeTable Autopurge { get; set; } = new AutopurgeTable();
+        public static VoiceLinkTable VoiceLink { get; set; } = new VoiceLinkTable();
         public static MiscTable Misc { get; set; } = new MiscTable();
 
         public static void Initialise() 
@@ -43,6 +44,7 @@ namespace Database
         private static void DownloadTables()
         {
             Autopurge.LoadAsync();
+            VoiceLink.LoadAsync();
             Misc.LoadAsync();
         }
     }
