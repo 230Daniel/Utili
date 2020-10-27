@@ -27,10 +27,8 @@
         @foreach (RestTextChannel channel in nonAutopurgeTextChannels)
         {
             <form method="post">
-                <input type="hidden" name="addChannel" value="@channel.Id" />
-                <button class="dropdown-item" type="submit">
-                    #@channel.Name
-                </button>
+                <input type="hidden" name="channelId" value="@channel.Id" />
+                <button class="dropdown-item" asp-page-handler="Add" type="submit">#@channel.Name</button>
             </form>
         }
 
@@ -43,14 +41,12 @@
     <form name="form-@row.Id" method="post">
 
         <input type="hidden" name="rowId" value="@row.Id" />
-        
-        
 
         <div class="input-group flex-nowrap">
 
             @*
-            This input group is readonly so should be replaced with a label of some kind.
-            A box with a gap in the top left for some text (perhaps all caps) would be cool, but probably difficult to do.
+                This input group is readonly so should be replaced with a label of some kind.
+                A box with a gap in the top left for some text (perhaps all caps) would be cool, but probably difficult to do.
             *@
 
             <div class="input-group-prepend">
@@ -79,14 +75,12 @@
             </select>
         </div>
 
-        <button type="submit" class="btn btn-success">Save</button>
-    </form>
-    <form method="post">
-        <input type="hidden" name="removeChannel" value="@row.Id" />
-        <button type="submit" class="btn btn-danger">Remove</button>
+        <div class="input-group flex-nowrap">
+            <button type="submit" class="btn btn-success">Save</button>
+            <button type="submit" name="noajax" asp-page-handler="Remove" class="btn btn-danger">Remove</button>
+        </div>
     </form>
 }
-
 
 <script src="~/lib/jquery/dist/jquery.js"></script>
 <script src="~/lib/jquery/dist/jquery.min.js"></script>
