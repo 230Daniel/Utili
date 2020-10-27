@@ -46,7 +46,7 @@ namespace Utili.Features
 
         private async Task PurgeChannels(bool premiumOnly)
         {
-            List<AutopurgeRow> rows = Database.Data.Autopurge.GetRowsWhere();
+            List<AutopurgeRow> rows = Database.Data.Autopurge.GetRows();
             List<ulong> allGuildIds = _client.Guilds.Select(x => x.Id).ToList();
             List<ulong> premiumGuildIds = Premium.GetPremiumGuilds();
 
@@ -69,6 +69,9 @@ namespace Utili.Features
                 // Add the selection of non-premium channels
                 rows.AddRange(selectedNonPremiumRows);
             }
+
+            // Remove rows in mode 3 (disabled)
+            rows.RemoveAll(x => x.Mode == 3);
 
             foreach (AutopurgeRow row in rows)
             {

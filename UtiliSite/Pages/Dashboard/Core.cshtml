@@ -4,7 +4,12 @@
     Layout = "Shared/_Layout.cshtml";
 }
 
-
+@{
+    if (ViewData["authorised"] == null || !(bool)ViewData["authorised"])
+    {
+        return;
+    }
+}
 
 <form name="form-main" method="post">
 

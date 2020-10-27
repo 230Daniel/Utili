@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using System.Timers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Database.Data;
+using Discord.Rest;
 
 namespace UtiliSite.Pages.Dashboard
 {
@@ -13,16 +15,16 @@ namespace UtiliSite.Pages.Dashboard
     {
         public void OnGet()
         {
+            ViewData["authorised"] = false;
             AuthDetails auth = Auth.GetAuthDetails(HttpContext, HttpContext.Request.Path);
-
             if(!auth.Authenticated) return;
+            ViewData["authorised"] = true;
 
-            ViewData["mainDashboardUrl"] = RedirectHelper.AddToUrl(HttpContext.Request.Host.ToString(), "dashboard");
-            ViewData["guildName"] = auth.Guild.Name;
+            ViewData["guild"] = auth.Guild;
             ViewData["Title"] = $"{auth.Guild.Name} - ";
 
-            ViewData["prefix"] = Database.Data.Misc.GetPrefix(auth.Guild.Id);
-            ViewData["nickname"] = DiscordModule.GetNickname(auth.Guild);
+            List<AutopurgeRow> autopurgeRows = Autopurge.GetRows(auth.Guild.Id);
+            ViewData["autopurgeRows"] = autopurgeRows;
         }
 
         public void OnPost()
@@ -35,20 +37,76 @@ namespace UtiliSite.Pages.Dashboard
                 return;
             }
 
-            string prefix = HttpContext.Request.Form["prefix"];
-            string nickname = HttpContext.Request.Form["nickname"];
+            int id = int.Parse(HttpContext.Request.Form["rowId"]);
+            TimeSpan timespan = TimeSpan.Parse(HttpContext.Request.Form["timespan"]);
+            int mode = int.Parse(HttpContext.Request.Form["mode"]);
 
-            if (prefix != (string) ViewData["prefix"])
+            AutopurgeRow row = Autopurge.GetRows(id: id, guildId: auth.Guild.Id).First();
+
+            if (row.GuildId != auth.Guild.Id)
             {
-                Database.Data.Misc.SetPrefix(auth.Guild.Id, prefix);
+                HttpContext.Response.StatusCode = 403;
+                return;
             }
 
-            if (nickname != (string) ViewData["nickname"])
-            {
-                DiscordModule.SetNickname(auth.Guild, nickname);
-            }
+            row.Timespan = timespan;
+            row.Mode = mode;
+
+            Autopurge.SaveRow(row);
 
             HttpContext.Response.StatusCode = 200;
+        }
+
+        public void OnPostAdd()
+        {
+            AuthDetails auth = Auth.GetAuthDetails(HttpContext, HttpContext.Request.Path);
+
+            if (!auth.Authenticated)
+            {
+                HttpContext.Response.StatusCode = 403;
+                return;
+            }
+
+            ulong channelId = ulong.Parse(HttpContext.Request.Form["channelId"]);
+            RestTextChannel channel = auth.Guild.GetTextChannelAsync(channelId).GetAwaiter().GetResult();
+
+            AutopurgeRow newRow = new AutopurgeRow()
+            {
+                GuildId = auth.Guild.Id,
+                ChannelId = channel.Id,
+                Timespan = TimeSpan.FromMinutes(15),
+                Mode = 2
+            };
+
+            Autopurge.SaveRow(newRow);
+            HttpContext.Response.StatusCode = 200;
+            HttpContext.Response.Redirect(HttpContext.Request.Path);
+        }
+
+        public void OnPostRemove()
+        {
+            AuthDetails auth = Auth.GetAuthDetails(HttpContext, HttpContext.Request.Path);
+
+            if (!auth.Authenticated)
+            {
+                HttpContext.Response.StatusCode = 403;
+                return;
+            }
+
+            int deleteId = int.Parse(HttpContext.Request.Form["rowId"]);
+
+            AutopurgeRow deleteRow = Autopurge.GetRows(id: deleteId, guildId: auth.Guild.Id).First();
+
+            Autopurge.DeleteRow(deleteRow);
+
+            HttpContext.Response.StatusCode = 200;
+            HttpContext.Response.Redirect(HttpContext.Request.Path);
+        }
+
+        public static string GetIsSelected(int mode, AutopurgeRow row)
+        {
+            if (row.Mode == mode) return "selected";
+            return "";
         }
     }
 }
