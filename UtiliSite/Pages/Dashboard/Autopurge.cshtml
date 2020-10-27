@@ -14,7 +14,7 @@
 
     List<AutopurgeRow> autopurgeRows = (List<AutopurgeRow>)ViewData["autopurgeRows"];
     RestGuild guild = ViewData["Guild"] as RestGuild;
-    List<RestTextChannel> textChannels = DiscordModule.GetTextChannelsAsync(ViewData["Guild"] as RestGuild).GetAwaiter().GetResult();
+    List<RestTextChannel> textChannels = DiscordModule.GetTextChannelsAsync(guild).GetAwaiter().GetResult();
     List<RestTextChannel> nonAutopurgeTextChannels = textChannels.Where(x => autopurgeRows.Count(y => y.ChannelId == x.Id) == 0).ToList();
 }
 
@@ -43,8 +43,16 @@
     <form name="form-@row.Id" method="post">
 
         <input type="hidden" name="rowId" value="@row.Id" />
+        
+        
 
         <div class="input-group flex-nowrap">
+
+            @*
+            This input group is readonly so should be replaced with a label of some kind.
+            A box with a gap in the top left for some text (perhaps all caps) would be cool, but probably difficult to do.
+            *@
+
             <div class="input-group-prepend">
                 <span class="input-group-text">#</span>
             </div>
@@ -83,4 +91,3 @@
 <script src="~/lib/jquery/dist/jquery.js"></script>
 <script src="~/lib/jquery/dist/jquery.min.js"></script>
 <script src="~/js/dashboard/submit.js" asp-append-version="true"></script>
-<script src="~/js/dashboard/autopurge.js" asp-append-version="true"></script>
