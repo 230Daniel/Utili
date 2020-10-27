@@ -11,11 +11,11 @@ namespace Database.Data
 {
     public class Autopurge
     {
-        public static List<AutopurgeRow> GetRows(ulong? guildId = null, ulong? channelId = null, int? id = null)
+        public static List<AutopurgeRow> GetRows(ulong? guildId = null, ulong? channelId = null, int? id = null, bool ignoreCache = false)
         {
             List<AutopurgeRow> matchedRows = new List<AutopurgeRow>();
 
-            if (Cache.Initialised)
+            if (Cache.Initialised && !ignoreCache)
             {
                 matchedRows = Cache.Autopurge.Rows;
 
@@ -75,6 +75,10 @@ namespace Database.Data
                         ("Timespan", row.Timespan.ToString()),
                         ("Mode", row.Mode.ToString())});
 
+                command.ExecuteNonQuery();
+
+                row.Id = GetRows(row.GuildId, row.ChannelId, ignoreCache: true).First().Id;
+
                 if(Cache.Initialised) Cache.Autopurge.Rows.Add(row);
             }
             else
@@ -87,10 +91,10 @@ namespace Database.Data
                         ("Timespan", row.Timespan.ToString()),
                         ("Mode", row.Mode.ToString())});
 
+                command.ExecuteNonQuery();
+
                 if(Cache.Initialised) Cache.Autopurge.Rows[Cache.Autopurge.Rows.FindIndex(x => x.Id == row.Id)] = row;
             }
-
-            command.ExecuteNonQuery();
         }
 
         public static void DeleteRow(AutopurgeRow row)
@@ -135,7 +139,7 @@ namespace Database.Data
 
     public class AutopurgeRow : ICloneable
     {
-        public int Id { get; }
+        public int Id { get; set; }
         public ulong GuildId { get; set; }
         public ulong ChannelId { get; set; }
         public TimeSpan Timespan { get; set; }

@@ -24,7 +24,7 @@ namespace Utili.Features
         {
             _timer?.Dispose();
 
-            _timer = new Timer(1000);
+            _timer = new Timer(2500);
             _timer.Elapsed += Timer_Elapsed;
             _timer.Start();
         }
@@ -57,6 +57,7 @@ namespace Utili.Features
 
             _processingNow = true;
 
+            Database.Data.VoiceLink.DeleteUnrequiredRows();
             UpdateLinkedChannels().GetAwaiter().GetResult();
 
             _processingNow = false;
@@ -72,6 +73,7 @@ namespace Utili.Features
                 if (!channelsToUpdate.Select(x => x.Id).Contains(voiceChannel.Id))
                 {
                     channelsToUpdate.Add(voiceChannel);
+                    _logger.Log("VoiceLink", $"Updating channel: {voiceChannel.Name}", LogSeverity.Info);
                 }
             }
 
@@ -113,22 +115,29 @@ namespace Utili.Features
                 return;
             }
 
+            if (connectedUsers.Count == 0)
+            {
+                return;
+            }
+
+            bool newChannel = false;
+
             if (textChannel == null)
             {
                 RestTextChannel restTextChannel = await guild.CreateTextChannelAsync($"{metaRow.Prefix}{voiceChannel.Name}", x =>
                 {
                     if (voiceChannel.CategoryId.HasValue) x.CategoryId = voiceChannel.CategoryId.Value;
-                    x.Topic = "Automatically created by Utili";
+                    x.Topic = $"Users in {voiceChannel.Name} have access - Created by Utili";
                 });
 
                 row.TextChannelId = restTextChannel.Id;
+
                 Database.Data.VoiceLink.SaveRow(row);
 
                 await Task.Delay(500);
 
                 textChannel = guild.GetTextChannel(row.TextChannelId);
-                await textChannel.AddPermissionOverwriteAsync(guild.EveryoneRole,
-                    new OverwritePermissions(viewChannel: PermValue.Deny));
+                newChannel = true;
             }
 
             foreach(Overwrite existingOverwrite in textChannel.PermissionOverwrites)
@@ -150,6 +159,12 @@ namespace Utili.Features
                     await textChannel.AddPermissionOverwriteAsync(connectedUser,
                         new OverwritePermissions(viewChannel: PermValue.Allow));
                 }
+            }
+
+            if (newChannel)
+            {
+                await textChannel.AddPermissionOverwriteAsync(guild.EveryoneRole,
+                    new OverwritePermissions(viewChannel: PermValue.Deny));
             }
         }
     }

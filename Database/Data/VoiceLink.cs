@@ -11,11 +11,11 @@ namespace Database.Data
 {
     public class VoiceLink
     {
-        public static List<VoiceLinkRow> GetRows(ulong? guildId = null, ulong? voiceChannelId = null)
+        public static List<VoiceLinkRow> GetRows(ulong? guildId = null, ulong? voiceChannelId = null, bool ignoreCache = false)
         {
             List<VoiceLinkRow> matchedRows = new List<VoiceLinkRow>();
 
-            if (Cache.Initialised)
+            if (Cache.Initialised && !ignoreCache)
             {
                 matchedRows = Cache.VoiceLink.Rows;
 
@@ -35,8 +35,8 @@ namespace Database.Data
 
                 if (voiceChannelId.HasValue)
                 {
-                    command += " AND ChannelId = @ChannelId";
-                    values.Add(("ChannelId", voiceChannelId.Value.ToString()));
+                    command += " AND VoiceChannelId = @VoiceChannelId";
+                    values.Add(("VoiceChannelId", voiceChannelId.Value.ToString()));
                 }
 
                 MySqlDataReader reader = Sql.GetCommand(command, values.ToArray()).ExecuteReader();
@@ -64,8 +64,12 @@ namespace Database.Data
                 throw new InvalidOperationException("This method can only be used when cache has been initialised.");
             }
 
-            VoiceLinkRow row = Cache.VoiceLink.Rows.FirstOrDefault(x => x.GuildId == guildId && x.VoiceChannelId == voiceChannelId);
-            if (row == null)
+            VoiceLinkRow row;
+            try
+            {
+                row = Cache.VoiceLink.Rows.First(x => x.GuildId == guildId && x.VoiceChannelId == voiceChannelId);
+            }
+            catch
             {
                 row = new VoiceLinkRow(0, guildId, 0, voiceChannelId, false, true, "");
             }
@@ -80,7 +84,17 @@ namespace Database.Data
                 throw new InvalidOperationException("This method can only be used when cache has been initialised.");
             }
 
-            return Cache.VoiceLink.Rows.FirstOrDefault(x => x.GuildId == guildId && x.VoiceChannelId == 0);
+            VoiceLinkRow row;
+            try
+            {
+                row = Cache.VoiceLink.Rows.First(x => x.GuildId == guildId && x.VoiceChannelId == 0);
+            }
+            catch
+            {
+                row = new VoiceLinkRow(0, guildId, 0, 0, false, false, "");
+            }
+
+            return row;
         }
 
         public static void SaveRow(VoiceLinkRow row)
@@ -96,6 +110,10 @@ namespace Database.Data
                         ("VoiceChannelId", row.VoiceChannelId.ToString()),
                         ("Prefix", row.Prefix)});
 
+                command.ExecuteNonQuery();
+
+                row.Id = GetRows(row.GuildId, row.VoiceChannelId, true).First().Id;
+                
                 if(Cache.Initialised) Cache.VoiceLink.Rows.Add(row);
             }
             else
@@ -108,16 +126,9 @@ namespace Database.Data
                         ("VoiceChannelId", row.VoiceChannelId.ToString()),
                         ("Prefix", row.Prefix)});
 
-                if(Cache.Initialised) Cache.VoiceLink.Rows[Cache.VoiceLink.Rows.FindIndex(x => x.Id == row.Id)] = row;
-            }
-
-            try
-            {
                 command.ExecuteNonQuery();
-            }
-            catch(Exception e)
-            {
 
+                if(Cache.Initialised) Cache.VoiceLink.Rows[Cache.VoiceLink.Rows.FindIndex(x => x.Id == row.Id)] = row;
             }
         }
 
@@ -129,6 +140,17 @@ namespace Database.Data
 
             string command = "DELETE FROM VoiceLink WHERE Id = @Id";
             Sql.GetCommand(command, new[] {("Id", row.Id.ToString())}).ExecuteNonQuery();
+        }
+
+        public static void DeleteUnrequiredRows()
+        {
+            Cache.VoiceLink.Rows.RemoveAll(x =>
+                x.TextChannelId == 0 && x.VoiceChannelId != 0 && !x.Excluded && x.Enabled);
+
+            string command =
+                "DELETE FROM VoiceLink WHERE TextChannelId = '0' AND VoiceChannelID != '0' AND Excluded = FALSE AND Enabled = TRUE;";
+
+            Sql.GetCommand(command).ExecuteNonQuery();
         }
     }
 
@@ -165,7 +187,7 @@ namespace Database.Data
 
     public class VoiceLinkRow : ICloneable
     {
-        public int Id { get; }
+        public int Id { get; set; }
         public ulong GuildId { get; set; }
         public ulong TextChannelId { get; set; }
         public ulong VoiceChannelId { get; set; }
