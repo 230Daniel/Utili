@@ -7,7 +7,7 @@
 }
 
 @{
-    if (ViewData["autopurgeRows"] == null)
+    if (ViewData["authorised"] == null || !(bool)ViewData["authorised"])
     {
         return;
     }
@@ -18,7 +18,7 @@
     List<RestTextChannel> nonAutopurgeTextChannels = textChannels.Where(x => autopurgeRows.Count(y => y.ChannelId == x.Id) == 0).ToList();
 }
 
-<div class="dropdown"">
+<div class="dropdown">
     <button class="btn btn-secondary dropdown-toggle" type="button" data-toggle="dropdown" id="dropdownAddChannel" aria-haspopup="true" aria-expanded="false">
         Add channel
     </button>
@@ -67,6 +67,7 @@
             <select class="custom-select" name="mode">
                 <!option value="0" @AutopurgeModel.GetIsSelected(0, row)>All messages</!option>
                 <!option value="1" @AutopurgeModel.GetIsSelected(1, row)>Bot messages</!option>
+                <!option value="2" @AutopurgeModel.GetIsSelected(2, row)>Disabled</!option>
             </select>
         </div>
 
@@ -77,6 +78,7 @@
         <button type="submit" class="btn btn-danger">Remove</button>
     </form>
 }
+
 
 <script src="~/lib/jquery/dist/jquery.js"></script>
 <script src="~/lib/jquery/dist/jquery.min.js"></script>

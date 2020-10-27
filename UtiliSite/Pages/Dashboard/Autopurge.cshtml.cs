@@ -15,9 +15,10 @@ namespace UtiliSite.Pages.Dashboard
     {
         public void OnGet()
         {
+            ViewData["authorised"] = false;
             AuthDetails auth = Auth.GetAuthDetails(HttpContext, HttpContext.Request.Path);
-
             if(!auth.Authenticated) return;
+            ViewData["authorised"] = true;
 
             ViewData["guild"] = auth.Guild;
             ViewData["Title"] = $"{auth.Guild.Name} - ";
@@ -45,8 +46,8 @@ namespace UtiliSite.Pages.Dashboard
                 {
                     GuildId = auth.Guild.Id,
                     ChannelId = channel.Id,
-                    Timespan = TimeSpan.FromDays(1),
-                    Mode = 0
+                    Timespan = TimeSpan.FromMinutes(15),
+                    Mode = 2
                 };
 
                 Autopurge.SaveRow(newRow);

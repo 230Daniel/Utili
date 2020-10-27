@@ -70,6 +70,9 @@ namespace Utili.Features
                 rows.AddRange(selectedNonPremiumRows);
             }
 
+            // Remove rows in mode 3 (disabled)
+            rows.RemoveAll(x => x.Mode == 3);
+
             foreach (AutopurgeRow row in rows)
             {
                 try

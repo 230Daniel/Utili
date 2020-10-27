@@ -18,7 +18,6 @@ namespace UtiliSite
     public class DiscordModule
     {
         public static DiscordRestClient _client;
-        private static Timer _cacheTimer;
 
         public static void Initialise()
         {
