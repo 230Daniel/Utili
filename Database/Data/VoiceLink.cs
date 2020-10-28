@@ -52,6 +52,8 @@ namespace Database.Data
                         reader.GetBoolean(5),
                         reader.GetString(6)));
                 }
+
+                reader.Close();
             }
 
             return matchedRows;
@@ -95,7 +97,7 @@ namespace Database.Data
                         ("Prefix", row.Prefix)});
 
                 command.ExecuteNonQuery();
-
+                command.Connection.Close();
                 row.Id = GetRows(row.GuildId, row.VoiceChannelId, true).First().Id;
                 
                 if(Cache.Initialised) Cache.VoiceLink.Rows.Add(row);
@@ -111,6 +113,7 @@ namespace Database.Data
                         ("Prefix", row.Prefix)});
 
                 command.ExecuteNonQuery();
+                command.Connection.Close();
 
                 if(Cache.Initialised) Cache.VoiceLink.Rows[Cache.VoiceLink.Rows.FindIndex(x => x.Id == row.Id)] = row;
             }
@@ -136,6 +139,7 @@ namespace Database.Data
                     });
 
                 command.ExecuteNonQuery();
+                command.Connection.Close();
 
                 if(Cache.Initialised) Cache.VoiceLink.Rows[Cache.VoiceLink.Rows.FindIndex(x => x.Id == row.Id)] = row;
             }
@@ -147,21 +151,23 @@ namespace Database.Data
 
             if(Cache.Initialised) Cache.VoiceLink.Rows.RemoveAll(x => x.Id == row.Id);
 
-            string command = "DELETE FROM VoiceLink WHERE Id = @Id";
-            Sql.GetCommand(command, new[] {("Id", row.Id.ToString())}).ExecuteNonQuery();
+            string commandText = "DELETE FROM VoiceLink WHERE Id = @Id";
+            MySqlCommand command = Sql.GetCommand(commandText, new[] {("Id", row.Id.ToString())});
+            command.ExecuteNonQuery();
+            command.Connection.Close();
         }
 
         public static void DeleteUnrequiredRows()
         {
-            return;
-
             Cache.VoiceLink.Rows.RemoveAll(x =>
                 x.TextChannelId == 0 && x.VoiceChannelId != 0 && !x.Excluded);
 
-            string command =
+            string commandText =
                 "DELETE FROM VoiceLink WHERE TextChannelId = '0' AND VoiceChannelID != '0' AND Excluded = FALSE;";
 
-            Sql.GetCommand(command).ExecuteNonQuery();
+            MySqlCommand command = Sql.GetCommand(commandText);
+            command.ExecuteNonQuery();
+            command.Connection.Close();
         }
     }
 
@@ -192,11 +198,12 @@ namespace Database.Data
             }
             catch {}
 
+            reader.Close();
             Rows = newRows;
         }
     }
 
-    public class VoiceLinkRow : ICloneable
+    public class VoiceLinkRow
     {
         public int Id { get; set; }
         public ulong GuildId { get; set; }
@@ -231,12 +238,6 @@ namespace Database.Data
             Excluded = excluded;
             Enabled = enabled;
             Prefix = prefix;
-        }
-
-        public object Clone()
-        {
-            VoiceLinkRow clone = new VoiceLinkRow(Id, GuildId, TextChannelId, VoiceChannelId, Excluded, Enabled, Prefix);
-            return clone;
         }
     }
 }

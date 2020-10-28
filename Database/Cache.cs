@@ -20,9 +20,10 @@ namespace Database
         private static Timer Timer { get; set; }
 
         public static AutopurgeTable Autopurge { get; set; } = new AutopurgeTable();
-        public static VoiceLinkTable VoiceLink { get; set; } = new VoiceLinkTable();
+        public static MessageFilterTable MessageFilter { get; set; } = new MessageFilterTable();
         public static MiscTable Misc { get; set; } = new MiscTable();
-
+        public static VoiceLinkTable VoiceLink { get; set; } = new VoiceLinkTable();
+        
         public static void Initialise() 
         // Start the automatic cache downloads
         {
@@ -44,8 +45,9 @@ namespace Database
         private static void DownloadTables()
         {
             Autopurge.Load();
-            VoiceLink.Load();
+            MessageFilter.Load();
             Misc.Load();
+            VoiceLink.Load();
         }
     }
 }

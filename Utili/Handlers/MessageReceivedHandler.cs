@@ -43,6 +43,8 @@ namespace Utili.Handlers
                         }
                     }
                 }
+
+                _ = Features.MessageFilter.MessageReceived(context);
             });
         }
 

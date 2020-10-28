@@ -53,6 +53,8 @@ namespace Database.Data
                         reader.GetString(2),
                         reader.GetString(3)));
                 }
+
+                reader.Close();
             }
 
             return matchedRows;
@@ -80,6 +82,7 @@ namespace Database.Data
                         ("Value", row.Value)});
 
                 command.ExecuteNonQuery();
+                command.Connection.Close();
 
                 row.Id = GetRows(row.GuildId, row.Type, row.Value).First().Id;
 
@@ -97,6 +100,7 @@ namespace Database.Data
                         ("Value", row.Value)});
 
                 command.ExecuteNonQuery();
+                command.Connection.Close();
 
                 if(Cache.Initialised) Cache.Misc.Rows[Cache.Misc.Rows.FindIndex(x => x.Id == row.Id)] = row;
             }
@@ -108,8 +112,10 @@ namespace Database.Data
 
             if(Cache.Initialised) Cache.Misc.Rows.RemoveAll(x => x.Id == row.Id);
 
-            string command = "DELETE FROM Misc WHERE Id = @Id";
-            Sql.GetCommand(command, new[] {("Id", row.Id.ToString())}).ExecuteNonQuery();
+            string commandText = "DELETE FROM Misc WHERE Id = @Id";
+            MySqlCommand command = Sql.GetCommand(commandText, new[] {("Id", row.Id.ToString())});
+            command.ExecuteNonQuery();
+            command.Connection.Close();
         }
 
         public static string GetPrefix(ulong guildId)
@@ -166,6 +172,8 @@ namespace Database.Data
                 }
             }
             catch {}
+
+            reader.Close();
 
             Rows = newRows;
         }

@@ -9,15 +9,15 @@ using System.Threading.Tasks;
 
 namespace Database.Data
 {
-    public class Autopurge
+    public class MessageFilter
     {
-        public static List<AutopurgeRow> GetRows(ulong? guildId = null, ulong? channelId = null, int? id = null, bool ignoreCache = false)
+        public static List<MessageFilterRow> GetRows(ulong? guildId = null, ulong? channelId = null, int? id = null, bool ignoreCache = false)
         {
-            List<AutopurgeRow> matchedRows = new List<AutopurgeRow>();
+            List<MessageFilterRow> matchedRows = new List<MessageFilterRow>();
 
             if (Cache.Initialised && !ignoreCache)
             {
-                matchedRows.AddRange(Cache.Autopurge.Rows);
+                matchedRows.AddRange(Cache.MessageFilter.Rows);
 
                 if (guildId.HasValue) matchedRows.RemoveAll(x => x.GuildId != guildId.Value);
                 if (channelId.HasValue) matchedRows.RemoveAll(x => x.ChannelId != channelId.Value);
@@ -25,7 +25,7 @@ namespace Database.Data
             }
             else
             {
-                string command = "SELECT * FROM Autopurge WHERE TRUE";
+                string command = "SELECT * FROM MessageFilter WHERE TRUE";
                 List<(string, string)> values = new List<(string, string)>();
 
                 if (guildId.HasValue)
@@ -50,12 +50,12 @@ namespace Database.Data
 
                 while (reader.Read())
                 {
-                    matchedRows.Add(new AutopurgeRow(
+                    matchedRows.Add(new MessageFilterRow(
                         reader.GetInt32(0),
                         reader.GetString(1),
                         reader.GetString(2),
-                        reader.GetString(3),
-                        reader.GetInt32(4)));
+                        reader.GetInt32(3),
+                        reader.GetString(4)));
                 }
 
                 reader.Close();
@@ -64,77 +64,79 @@ namespace Database.Data
             return matchedRows;
         }
 
-        public static void SaveRow(AutopurgeRow row)
+        public static void SaveRow(MessageFilterRow row)
         {
             MySqlCommand command;
 
             if (row.Id == 0) 
             // The row is a new entry so should be inserted into the database
             {
-                command = Sql.GetCommand("INSERT INTO Autopurge (GuildID, ChannelId, Timespan, Mode) VALUES (@GuildId, @ChannelId, @Timespan, @Mode);",
+                command = Sql.GetCommand("INSERT INTO MessageFilter (GuildID, ChannelId, Mode, Complex) VALUES (@GuildId, @ChannelId, @Mode, @Complex);",
                     new [] {("GuildId", row.GuildId.ToString()), 
                         ("ChannelId", row.ChannelId.ToString()),
-                        ("Timespan", row.Timespan.ToString()),
-                        ("Mode", row.Mode.ToString())});
+                        ("Mode", row.Mode.ToString()),
+                        ("Complex", row.Complex)
+                    });
 
                 command.ExecuteNonQuery();
                 command.Connection.Close();
 
                 row.Id = GetRows(row.GuildId, row.ChannelId, ignoreCache: true).First().Id;
 
-                if(Cache.Initialised) Cache.Autopurge.Rows.Add(row);
+                if(Cache.Initialised) Cache.MessageFilter.Rows.Add(row);
             }
             else
             // The row already exists and should be updated
             {
-                command = Sql.GetCommand("UPDATE Autopurge SET GuildId = @GuildId, ChannelId = @ChannelId, Timespan = @Timespan, Mode = @Mode WHERE Id = @Id;",
+                command = Sql.GetCommand("UPDATE MessageFilter SET GuildId = @GuildId, ChannelId = @ChannelId, Mode = @Mode, Complex = @Complex WHERE Id = @Id;",
                     new [] {("Id", row.Id.ToString()),
                         ("GuildId", row.GuildId.ToString()), 
                         ("ChannelId", row.ChannelId.ToString()),
-                        ("Timespan", row.Timespan.ToString()),
-                        ("Mode", row.Mode.ToString())});
+                        ("Mode", row.Mode.ToString()),
+                        ("Complex", row.Complex)
+                    });
 
                 command.ExecuteNonQuery();
                 command.Connection.Close();
 
-                if(Cache.Initialised) Cache.Autopurge.Rows[Cache.Autopurge.Rows.FindIndex(x => x.Id == row.Id)] = row;
+                if(Cache.Initialised) Cache.MessageFilter.Rows[Cache.MessageFilter.Rows.FindIndex(x => x.Id == row.Id)] = row;
             }
         }
 
-        public static void DeleteRow(AutopurgeRow row)
+        public static void DeleteRow(MessageFilterRow row)
         {
             if(row == null) return;
 
-            if(Cache.Initialised) Cache.Autopurge.Rows.RemoveAll(x => x.Id == row.Id);
+            if(Cache.Initialised) Cache.MessageFilter.Rows.RemoveAll(x => x.Id == row.Id);
 
-            string commandText = "DELETE FROM Autopurge WHERE Id = @Id";
+            string commandText = "DELETE FROM MessageFilter WHERE Id = @Id";
             MySqlCommand command = Sql.GetCommand(commandText, new[] {("Id", row.Id.ToString())});
             command.ExecuteNonQuery();
             command.Connection.Close();
         }
     }
 
-    public class AutopurgeTable
+    public class MessageFilterTable
     {
-        public List<AutopurgeRow> Rows { get; set; }
+        public List<MessageFilterRow> Rows { get; set; }
 
         public void Load()
         // Load the table from the database
         {
-            List<AutopurgeRow> newRows = new List<AutopurgeRow>();
+            List<MessageFilterRow> newRows = new List<MessageFilterRow>();
 
-            MySqlDataReader reader = Sql.GetCommand("SELECT * FROM Autopurge;").ExecuteReader();
+            MySqlDataReader reader = Sql.GetCommand("SELECT * FROM MessageFilter;").ExecuteReader();
 
             try
             {
                 while (reader.Read())
                 {
-                    newRows.Add(new AutopurgeRow(
+                    newRows.Add(new MessageFilterRow(
                         reader.GetInt32(0),
                         reader.GetString(1),
                         reader.GetString(2),
-                        reader.GetString(3),
-                        reader.GetInt32(4)));
+                        reader.GetInt32(3),
+                        reader.GetString(4)));
                 }
             }
             catch {}
@@ -145,37 +147,45 @@ namespace Database.Data
         }
     }
 
-    public class AutopurgeRow
+    public class MessageFilterRow
     {
         public int Id { get; set; }
         public ulong GuildId { get; set; }
         public ulong ChannelId { get; set; }
-        public TimeSpan Timespan { get; set; }
         public int Mode { get; set; }
-        // 0 = All messages
-        // 1 = Bot messages
 
-        public AutopurgeRow()
+        // 0    All messages
+        // 1    Images
+        // 2    Videos
+        // 3    Media
+        // 4    Music
+        // 5    Attachments
+        // 6    URLs
+        // 7    RegEx
+
+        public string Complex { get; set; }
+
+        public MessageFilterRow()
         {
             Id = 0;
         }
 
-        public AutopurgeRow(int id, string guildId, string channelId, string timespan, int mode)
+        public MessageFilterRow(int id, string guildId, string channelId, int mode, string complex)
         {
             Id = id;
             GuildId = ulong.Parse(guildId);
             ChannelId = ulong.Parse(channelId);
-            Timespan = TimeSpan.Parse(timespan);
             Mode = mode;
+            Complex = complex;
         }
 
-        public AutopurgeRow(int id, ulong guildId, ulong channelId, TimeSpan timespan, int mode)
+        public MessageFilterRow(int id, ulong guildId, ulong channelId, int mode, string complex)
         {
             Id = id;
             GuildId = guildId;
             ChannelId = channelId;
-            Timespan = timespan;
             Mode = mode;
+            Complex = complex;
         }
     }
 }
