@@ -7,9 +7,12 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Database.Data;
+using Discord;
 using Discord.Commands;
+using Discord.Rest;
 using Discord.WebSocket;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using PostSharp.Aspects.Advices;
 
 namespace Utili.Features
 {
@@ -17,6 +20,11 @@ namespace Utili.Features
     {
         public static async Task MessageReceived(SocketCommandContext context)
         {
+            if (BotPermissions.IsMissingPermissions(context.Channel, new[] {ChannelPermission.ManageMessages}, out _))
+            {
+                return;
+            }
+
             List<MessageFilterRow> rows = Database.Data.MessageFilter.GetRows(context.Guild.Id, context.Channel.Id);
 
             if (rows.Count == 0)
@@ -28,7 +36,20 @@ namespace Utili.Features
 
             if (!DoesMessageObeyRule(context, row, out string allowedTypes))
             {
+                await context.Message.DeleteAsync();
+
+                if (BotPermissions.IsMissingPermissions(context.Channel, new[] {ChannelPermission.SendMessages}, out _))
+                {
+                    return;
+                }
+
                 string deletionReason = $"Only messages {allowedTypes} are allowed in <#{context.Channel.Id}>";
+
+                RestUserMessage sentMessage = await MessageSender.SendFailureAsync(context.Channel, "Message deleted", deletionReason);
+
+                await Task.Delay(5000);
+
+                await sentMessage.DeleteAsync();
             }
 
         }
@@ -191,9 +212,9 @@ namespace Utili.Features
             return false;
         }
 
-        public static bool IsRegex(SocketCommandContext context, string regexCode)
+        public static bool IsRegex(SocketCommandContext context, string pattern)
         {
-            Regex regex = new Regex(regexCode);
+            Regex regex = new Regex(pattern);
 
             foreach (string word in context.Message.Content.Split(" "))
             {
