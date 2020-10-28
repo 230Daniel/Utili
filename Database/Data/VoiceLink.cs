@@ -59,42 +59,26 @@ namespace Database.Data
 
         public static VoiceLinkRow GetRowForChannel(ulong guildId, ulong voiceChannelId)
         {
-            if (!Cache.Initialised)
-            {
-                throw new InvalidOperationException("This method can only be used when cache has been initialised.");
-            }
+            List<VoiceLinkRow> rows = GetRows(guildId, voiceChannelId);
 
-            VoiceLinkRow row;
-            try
+            if (rows.Count == 0)
             {
-                row = Cache.VoiceLink.Rows.First(x => x.GuildId == guildId && x.VoiceChannelId == voiceChannelId);
+                return new VoiceLinkRow(0, guildId, 0, voiceChannelId, false, false, "");
             }
-            catch
-            {
-                row = new VoiceLinkRow(0, guildId, 0, voiceChannelId, false, true, "");
-            }
-
-            return row;
+            
+            return rows.First();
         }
 
         public static VoiceLinkRow GetMetaRow(ulong guildId)
         {
-            if (!Cache.Initialised)
-            {
-                throw new InvalidOperationException("This method can only be used when cache has been initialised.");
-            }
+            List<VoiceLinkRow> rows = GetRows(guildId, 0);
 
-            VoiceLinkRow row;
-            try
+            if (rows.Count == 0)
             {
-                row = Cache.VoiceLink.Rows.First(x => x.GuildId == guildId && x.VoiceChannelId == 0);
+                return new VoiceLinkRow(0, guildId, 0, 0, false, false, "vc-");
             }
-            catch
-            {
-                row = new VoiceLinkRow(0, guildId, 0, 0, false, false, "");
-            }
-
-            return row;
+            
+            return rows.First();
         }
 
         public static void SaveRow(VoiceLinkRow row)
@@ -125,6 +109,31 @@ namespace Database.Data
                         ("TextChannelId", row.TextChannelId.ToString()),
                         ("VoiceChannelId", row.VoiceChannelId.ToString()),
                         ("Prefix", row.Prefix)});
+
+                command.ExecuteNonQuery();
+
+                if(Cache.Initialised) Cache.VoiceLink.Rows[Cache.VoiceLink.Rows.FindIndex(x => x.Id == row.Id)] = row;
+            }
+        }
+
+        public static void SaveTextChannel(VoiceLinkRow row)
+        {
+            MySqlCommand command;
+
+            if (row.Id == 0) 
+            // The row is a new entry so there's no need to protect existing values
+            {
+                SaveRow(row);
+            }
+            else
+            // The row already exists so another value could possibly have been changed
+            {
+                command = Sql.GetCommand($"UPDATE VoiceLink SET TextChannelId = @TextChannelId WHERE Id = @Id;",
+                    new[]
+                    {
+                        ("Id", row.Id.ToString()),
+                        ("TextChannelId", row.TextChannelId.ToString())
+                    });
 
                 command.ExecuteNonQuery();
 

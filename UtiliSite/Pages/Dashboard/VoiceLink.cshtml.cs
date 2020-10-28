@@ -11,7 +11,7 @@ using Discord.Rest;
 
 namespace UtiliSite.Pages.Dashboard
 {
-    public class AutopurgeModel : PageModel
+    public class VoiceLinkModel : PageModel
     {
         public void OnGet()
         {
@@ -23,8 +23,26 @@ namespace UtiliSite.Pages.Dashboard
             ViewData["guild"] = auth.Guild;
             ViewData["Title"] = $"{auth.Guild.Name} - ";
 
-            List<AutopurgeRow> autopurgeRows = Autopurge.GetRows(auth.Guild.Id);
-            ViewData["autopurgeRows"] = autopurgeRows;
+            List<RestVoiceChannel> voiceChannels = DiscordModule.GetVoiceChannelsAsync(auth.Guild).GetAwaiter().GetResult();
+            List<VoiceLinkRow> rows = VoiceLink.GetRows(auth.Guild.Id);
+
+            List<RestVoiceChannel> excludedChannels = new List<RestVoiceChannel>();
+
+            foreach (RestVoiceChannel voiceChannel in voiceChannels)
+            {
+                List<VoiceLinkRow> applicableRows = rows.Where(x => x.VoiceChannelId == voiceChannel.Id).ToList();
+                if (applicableRows.Count > 0 && applicableRows.First().Excluded)
+                {
+                    excludedChannels.Add(voiceChannel);
+                }
+            }
+
+            List<RestVoiceChannel> nonExcludedChannels =
+                voiceChannels.Where(x => !excludedChannels.Select(y => y.Id).Contains(x.Id)).ToList();
+
+            ViewData["excludedChannels"] = excludedChannels;
+            ViewData["nonExcludedChannels"] = nonExcludedChannels;
+            ViewData["metaRow"] = VoiceLink.GetMetaRow(auth.Guild.Id);
         }
 
         public void OnPost()
@@ -37,21 +55,18 @@ namespace UtiliSite.Pages.Dashboard
                 return;
             }
 
-            int id = int.Parse(HttpContext.Request.Form["rowId"]);
-            TimeSpan timespan = TimeSpan.Parse(HttpContext.Request.Form["timespan"]);
-            int mode = int.Parse(HttpContext.Request.Form["mode"]);
+            bool enabled = HttpContext.Request.Form["enabled"] == "on";
+            string prefix = HttpContext.Request.Form["prefix"].ToString();
 
-            AutopurgeRow row = Autopurge.GetRows(id: id, guildId: auth.Guild.Id).First();
-
-            row.Timespan = timespan;
-            row.Mode = mode;
-
-            Autopurge.SaveRow(row);
+            VoiceLinkRow row = VoiceLink.GetMetaRow(auth.Guild.Id);
+            row.Enabled = enabled;
+            row.Prefix = prefix;
+            VoiceLink.SaveRow(row);
 
             HttpContext.Response.StatusCode = 200;
         }
 
-        public void OnPostAdd()
+        public void OnPostExclude()
         {
             AuthDetails auth = Auth.GetAuthDetails(HttpContext, HttpContext.Request.Path);
 
@@ -62,17 +77,11 @@ namespace UtiliSite.Pages.Dashboard
             }
 
             ulong channelId = ulong.Parse(HttpContext.Request.Form["channelId"]);
-            RestTextChannel channel = auth.Guild.GetTextChannelAsync(channelId).GetAwaiter().GetResult();
 
-            AutopurgeRow newRow = new AutopurgeRow()
-            {
-                GuildId = auth.Guild.Id,
-                ChannelId = channel.Id,
-                Timespan = TimeSpan.FromMinutes(15),
-                Mode = 2
-            };
+            VoiceLinkRow row = VoiceLink.GetRowForChannel(auth.Guild.Id, channelId);
+            row.Excluded = true;
+            VoiceLink.SaveRow(row);
 
-            Autopurge.SaveRow(newRow);
             HttpContext.Response.StatusCode = 200;
             HttpContext.Response.Redirect(HttpContext.Request.Path);
         }
@@ -87,19 +96,19 @@ namespace UtiliSite.Pages.Dashboard
                 return;
             }
 
-            int deleteId = int.Parse(HttpContext.Request.Form["rowId"]);
+            ulong channelId = ulong.Parse(HttpContext.Request.Form["channelId"]);
 
-            AutopurgeRow deleteRow = Autopurge.GetRows(id: deleteId, guildId: auth.Guild.Id).First();
-
-            Autopurge.DeleteRow(deleteRow);
+            VoiceLinkRow row = VoiceLink.GetRowForChannel(auth.Guild.Id, channelId);
+            row.Excluded = false;
+            VoiceLink.SaveRow(row);
 
             HttpContext.Response.StatusCode = 200;
             HttpContext.Response.Redirect(HttpContext.Request.Path);
         }
 
-        public static string GetIsSelected(int mode, AutopurgeRow row)
+        public static string GetIsChecked(bool isChecked)
         {
-            if (row.Mode == mode) return "selected";
+            if (isChecked) return "checked";
             return "";
         }
     }

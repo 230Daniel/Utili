@@ -111,7 +111,7 @@ namespace Utili.Features
             {
                 await textChannel.DeleteAsync();
                 row.TextChannelId = 0;
-                Database.Data.VoiceLink.SaveRow(row);
+                Database.Data.VoiceLink.SaveTextChannel(row);
                 return;
             }
 
@@ -132,7 +132,7 @@ namespace Utili.Features
 
                 row.TextChannelId = restTextChannel.Id;
 
-                Database.Data.VoiceLink.SaveRow(row);
+                Database.Data.VoiceLink.SaveTextChannel(row);
 
                 await Task.Delay(500);
 
