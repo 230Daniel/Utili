@@ -73,7 +73,6 @@ namespace Utili.Features
                 if (!channelsToUpdate.Select(x => x.Id).Contains(voiceChannel.Id))
                 {
                     channelsToUpdate.Add(voiceChannel);
-                    _logger.Log("VoiceLink", $"Updating channel: {voiceChannel.Name}", LogSeverity.Info);
                 }
             }
 
