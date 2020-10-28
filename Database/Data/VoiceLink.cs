@@ -17,7 +17,7 @@ namespace Database.Data
 
             if (Cache.Initialised && !ignoreCache)
             {
-                matchedRows = Cache.VoiceLink.Rows;
+                matchedRows.AddRange(Cache.VoiceLink.Rows);
 
                 if (guildId.HasValue) matchedRows.RemoveAll(x => x.GuildId != guildId.Value);
                 if (voiceChannelId.HasValue) matchedRows.RemoveAll(x => x.VoiceChannelId != voiceChannelId.Value);
@@ -154,10 +154,10 @@ namespace Database.Data
         public static void DeleteUnrequiredRows()
         {
             Cache.VoiceLink.Rows.RemoveAll(x =>
-                x.TextChannelId == 0 && x.VoiceChannelId != 0 && !x.Excluded && x.Enabled);
+                x.TextChannelId == 0 && x.VoiceChannelId != 0 && !x.Excluded);
 
             string command =
-                "DELETE FROM VoiceLink WHERE TextChannelId = '0' AND VoiceChannelID != '0' AND Excluded = FALSE AND Enabled = TRUE;";
+                "DELETE FROM VoiceLink WHERE TextChannelId = '0' AND VoiceChannelID != '0' AND Excluded = FALSE;";
 
             Sql.GetCommand(command).ExecuteNonQuery();
         }

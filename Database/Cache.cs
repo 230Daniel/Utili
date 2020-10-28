@@ -28,7 +28,7 @@ namespace Database
         {
             DownloadTables();
 
-            Timer = new Timer(30000); // The cache will be updated every 30 seconds.
+            Timer = new Timer(5000); // The cache will be updated every 30 seconds.
             Timer.Elapsed += Timer_Elapsed;
             Timer.Start();
 

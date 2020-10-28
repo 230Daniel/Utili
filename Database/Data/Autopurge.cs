@@ -17,7 +17,7 @@ namespace Database.Data
 
             if (Cache.Initialised && !ignoreCache)
             {
-                matchedRows = Cache.Autopurge.Rows;
+                matchedRows.AddRange(Cache.Autopurge.Rows);
 
                 if (guildId.HasValue) matchedRows.RemoveAll(x => x.GuildId != guildId.Value);
                 if (channelId.HasValue) matchedRows.RemoveAll(x => x.ChannelId != channelId.Value);

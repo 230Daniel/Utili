@@ -14,10 +14,11 @@ namespace Database.Data
 
             if (Cache.Initialised && !ignoreCache)
             {
-                matchedRows = Cache.Misc.Rows;
+                matchedRows.AddRange(Cache.Misc.Rows);
 
                 if (guildId.HasValue) matchedRows.RemoveAll(x => x.GuildId != guildId.Value);
                 if (type != null) matchedRows.RemoveAll(x => x.Type != type);
+                if (value != null) matchedRows.RemoveAll(x => x.Value != value);
             }
             else
             {
