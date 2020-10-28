@@ -16,7 +16,7 @@ namespace Database
 
     internal static class Cache
     {
-        public static bool Initialised = false;
+        public static bool Initialised;
         private static Timer Timer { get; set; }
 
         public static AutopurgeTable Autopurge { get; set; } = new AutopurgeTable();
@@ -43,9 +43,9 @@ namespace Database
 
         private static void DownloadTables()
         {
-            Autopurge.LoadAsync();
-            VoiceLink.LoadAsync();
-            Misc.LoadAsync();
+            Autopurge.Load();
+            VoiceLink.Load();
+            Misc.Load();
         }
     }
 }

@@ -153,6 +153,8 @@ namespace Database.Data
 
         public static void DeleteUnrequiredRows()
         {
+            return;
+
             Cache.VoiceLink.Rows.RemoveAll(x =>
                 x.TextChannelId == 0 && x.VoiceChannelId != 0 && !x.Excluded);
 
@@ -167,7 +169,7 @@ namespace Database.Data
     {
         public List<VoiceLinkRow> Rows { get; set; }
 
-        public void LoadAsync()
+        public void Load()
         // Load the table from the database
         {
             List<VoiceLinkRow> newRows = new List<VoiceLinkRow>();

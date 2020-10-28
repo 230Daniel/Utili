@@ -112,7 +112,7 @@ namespace Database.Data
     {
         public List<AutopurgeRow> Rows { get; set; }
 
-        public void LoadAsync()
+        public void Load()
         // Load the table from the database
         {
             List<AutopurgeRow> newRows = new List<AutopurgeRow>();

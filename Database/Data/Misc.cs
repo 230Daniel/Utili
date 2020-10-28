@@ -147,7 +147,7 @@ namespace Database.Data
     {
         public List<MiscRow> Rows { get; set; }
 
-        public void LoadAsync()
+        public void Load()
         // Load the table from the database
         {
             List<MiscRow> newRows = new List<MiscRow>();

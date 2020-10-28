@@ -42,6 +42,7 @@ namespace Utili.Handlers
 
                 if (requireUpdate)
                 {
+                    _logger.Log("Voice", $"{user.Username} went from '{before.VoiceChannel}' to '{after.VoiceChannel}'.");
                     if(before.VoiceChannel != null) _voicelink.RequestUpdate(before.VoiceChannel);
                     if(after.VoiceChannel != null) _voicelink.RequestUpdate(after.VoiceChannel);
                 }
