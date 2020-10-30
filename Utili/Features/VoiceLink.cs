@@ -39,7 +39,6 @@ namespace Utili.Features
 
             if (enabled)
             {
-                _logger.Log("VoiceLink", $"Requested update for {channel.Name}");
                 while (!_safeToRequestUpdate)
                 {
                     Task.Delay(20).GetAwaiter().GetResult();
@@ -99,8 +98,6 @@ namespace Utili.Features
 
         private async Task UpdateLinkedChannel(SocketVoiceChannel voiceChannel)
         {
-            _logger.Log("VoiceLink", $"Updating {voiceChannel.Name}");
-
             SocketGuild guild = voiceChannel.Guild;
 
             List<SocketGuildUser> connectedUsers =

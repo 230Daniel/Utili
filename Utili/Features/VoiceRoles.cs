@@ -96,30 +96,34 @@ namespace Utili.Features
 
             List<VoiceRolesRow> rows = Database.Data.VoiceRoles.GetRows(guild.Id);
 
+            SocketRole beforeRole = guild.EveryoneRole;
+            SocketRole afterRole = guild.EveryoneRole;
+
             if (request.Before.VoiceChannel != null && rows.Count(x => x.ChannelId == request.Before.VoiceChannel.Id) > 0)
             {
                 VoiceRolesRow row = rows.First(x => x.ChannelId == request.Before.VoiceChannel.Id);
-                SocketRole role = guild.GetRole(row.RoleId);
-
-                if (role == null || !BotPermissions.CanManageRole(role))
-                {
-                    return;
-                }
-
-                await user.RemoveRoleAsync(role);
+                beforeRole = guild.GetRole(row.RoleId);
             }
 
             if (request.After.VoiceChannel != null && rows.Count(x => x.ChannelId == request.After.VoiceChannel.Id) > 0)
             {
                 VoiceRolesRow row = rows.First(x => x.ChannelId == request.After.VoiceChannel.Id);
-                SocketRole role = guild.GetRole(row.RoleId);
+                afterRole = guild.GetRole(row.RoleId);
+            }
 
-                if (role == null || !BotPermissions.CanManageRole(role))
-                {
-                    return;
-                }
+            if (beforeRole.Id == afterRole.Id)
+            {
+                return;
+            }
 
-                await user.AddRoleAsync(role);
+            if (beforeRole != guild.EveryoneRole && BotPermissions.CanManageRole(beforeRole))
+            {
+                await user.RemoveRoleAsync(beforeRole);
+            }
+
+            if (afterRole != guild.EveryoneRole && BotPermissions.CanManageRole(afterRole))
+            {
+                await user.AddRoleAsync(afterRole);
             }
         }
     }

@@ -93,6 +93,7 @@ namespace Utili
 
             _autopurge.Start();
             _voiceLink.Start();
+            _voiceRoles.Start();
 
             await Task.Delay(-1);
         }

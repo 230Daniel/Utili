@@ -49,6 +49,7 @@ namespace Database
             MessageFilter.Load();
             Misc.Load();
             VoiceLink.Load();
+            VoiceRoles.Load();
         }
     }
 }
