@@ -44,7 +44,7 @@ namespace Utili.Handlers
                     }
                 }
 
-                _ = Features.MessageFilter.MessageReceived(context);
+                _ = _messageFilter.MessageReceived(context);
             });
         }
 

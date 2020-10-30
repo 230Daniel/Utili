@@ -18,7 +18,7 @@ namespace Utili.Features
 {
     internal class MessageFilter
     {
-        public static async Task MessageReceived(SocketCommandContext context)
+        public async Task MessageReceived(SocketCommandContext context)
         {
             if (BotPermissions.IsMissingPermissions(context.Channel, new[] {ChannelPermission.ManageMessages}, out _))
             {
@@ -54,7 +54,7 @@ namespace Utili.Features
 
         }
 
-        public static bool DoesMessageObeyRule(SocketCommandContext context, MessageFilterRow row, out string allowedTypes)
+        public bool DoesMessageObeyRule(SocketCommandContext context, MessageFilterRow row, out string allowedTypes)
         {
             switch (row.Mode)
             {
@@ -96,7 +96,7 @@ namespace Utili.Features
             }
         }
 
-        public static bool IsImage(SocketCommandContext context)
+        public bool IsImage(SocketCommandContext context)
         {
             List<string> validAttachmentExtensions = new List<string>
             {
@@ -128,7 +128,7 @@ namespace Utili.Features
             return false;
         }
 
-        public static bool IsVideo(SocketCommandContext context)
+        public bool IsVideo(SocketCommandContext context)
         {
             List<string> validAttachmentExtensions = new List<string>
             {
@@ -163,7 +163,7 @@ namespace Utili.Features
             return false;
         }
 
-        public static bool IsMusic(SocketCommandContext context)
+        public bool IsMusic(SocketCommandContext context)
         {
             List<string> validAttachmentExtensions = new List<string>
             {
@@ -189,12 +189,12 @@ namespace Utili.Features
             return false;
         }
 
-        public static bool IsAttachment(SocketCommandContext context)
+        public bool IsAttachment(SocketCommandContext context)
         {
             return context.Message.Attachments.Count > 0;
         }
 
-        public static bool IsUrl(SocketCommandContext context)
+        public bool IsUrl(SocketCommandContext context)
         {
             foreach (string word in context.Message.Content.Split(" "))
             {
@@ -212,7 +212,7 @@ namespace Utili.Features
             return false;
         }
 
-        public static bool IsRegex(SocketCommandContext context, string pattern)
+        public bool IsRegex(SocketCommandContext context, string pattern)
         {
             Regex regex = new Regex(pattern);
 

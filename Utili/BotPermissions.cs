@@ -86,5 +86,25 @@ namespace Utili
 
             return true;
         }
+
+        public static bool CanManageRole(SocketRole role)
+        {
+            SocketGuild guild = role.Guild;
+            SocketGuildUser bot = guild.GetUser(_client.CurrentUser.Id);
+
+            if (IsMissingPermissions(guild, new[] {GuildPermission.ManageRoles}, out _))
+            {
+                return false;
+            }
+
+            int highestPossiblePosition = bot.Roles.Max(x => x.Position) - 1;
+
+            if (role.Position > highestPossiblePosition)
+            {
+                return false;
+            }
+
+            return true;
+        }
     }
 }

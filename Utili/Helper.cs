@@ -55,5 +55,25 @@ namespace Utili
 
             return null;
         }
+
+        public static bool RequiresUpdate(SocketVoiceState before, SocketVoiceState after)
+        {
+            if (before.VoiceChannel == null && after.VoiceChannel == null)
+            {
+                return false;
+            }
+
+            if (before.VoiceChannel == null && after.VoiceChannel != null)
+            {
+                return true;
+            }
+
+            if (after.VoiceChannel == null && before.VoiceChannel != null)
+            {
+                return true;
+            }
+
+            return after.VoiceChannel.Id != before.VoiceChannel.Id;
+        }
     }
 }

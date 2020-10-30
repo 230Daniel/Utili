@@ -148,7 +148,7 @@ namespace Database.Data
         {
             Id = id;
             GuildId = guildId;
-            ChannelId = ChannelId;
+            ChannelId = channelId;
             RoleId = roleId;
         }
     }

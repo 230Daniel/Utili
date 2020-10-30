@@ -18,33 +18,12 @@ namespace Utili.Handlers
         {
             _ = Task.Run(() =>
             {
-                bool requireUpdate = false;
-
-                if (before.VoiceChannel == null && after.VoiceChannel == null)
+                if (Helper.RequiresUpdate(before, after))
                 {
-                    return;
-                }
+                    if(before.VoiceChannel != null) _voiceLink.RequestUpdate(before.VoiceChannel);
+                    if(after.VoiceChannel != null) _voiceLink.RequestUpdate(after.VoiceChannel);
 
-                if (before.VoiceChannel == null && after.VoiceChannel != null)
-                {
-                    requireUpdate = true;
-                }
-
-                else if (after.VoiceChannel == null && before.VoiceChannel != null)
-                {
-                    requireUpdate = true;
-                }
-
-                else if (after.VoiceChannel.Id != before.VoiceChannel.Id)
-                {
-                    requireUpdate = true;
-                }
-
-                if (requireUpdate)
-                {
-                    _logger.Log("Voice", $"{user.Username} went from '{before.VoiceChannel}' to '{after.VoiceChannel}'.");
-                    if(before.VoiceChannel != null) _voicelink.RequestUpdate(before.VoiceChannel);
-                    if(after.VoiceChannel != null) _voicelink.RequestUpdate(after.VoiceChannel);
+                    _voiceRoles.RequestUpdate(user as SocketGuildUser, before, after);
                 }
             });
         }
