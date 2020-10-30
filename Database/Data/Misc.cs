@@ -8,16 +8,17 @@ namespace Database.Data
 {
     public class Misc
     {
-        public static List<MiscRow> GetRowsWhere(ulong? guildId = null, string type = null)
+        public static List<MiscRow> GetRows(ulong? guildId = null, string type = null, string value = null, bool ignoreCache = false)
         {
             List<MiscRow> matchedRows = new List<MiscRow>();
 
-            if (Cache.Initialised)
+            if (Cache.Initialised && !ignoreCache)
             {
-                matchedRows = Cache.Misc.Rows;
+                matchedRows.AddRange(Cache.Misc.Rows);
 
                 if (guildId.HasValue) matchedRows.RemoveAll(x => x.GuildId != guildId.Value);
                 if (type != null) matchedRows.RemoveAll(x => x.Type != type);
+                if (value != null) matchedRows.RemoveAll(x => x.Value != value);
             }
             else
             {
@@ -36,16 +37,24 @@ namespace Database.Data
                     values.Add(("Type", type));
                 }
 
+                if (value != null)
+                {
+                    command += " AND Value = @Value";
+                    values.Add(("Value", value));
+                }
+
                 MySqlDataReader reader = Sql.GetCommand(command, values.ToArray()).ExecuteReader();
 
                 while (reader.Read())
                 {
                     matchedRows.Add(new MiscRow(
                         reader.GetInt32(0),
-                        reader.GetString(1),
+                        reader.GetUInt64(1),
                         reader.GetString(2),
                         reader.GetString(3)));
                 }
+
+                reader.Close();
             }
 
             return matchedRows;
@@ -53,7 +62,7 @@ namespace Database.Data
 
         public static MiscRow GetRow(ulong? guildId = null, string type = null)
         {
-            List<MiscRow> rows = GetRowsWhere(guildId, type);
+            List<MiscRow> rows = GetRows(guildId, type);
             if (rows.Count == 0) return null; 
             return rows.First();
         }
@@ -72,6 +81,11 @@ namespace Database.Data
                         ("Type", row.Type),
                         ("Value", row.Value)});
 
+                command.ExecuteNonQuery();
+                command.Connection.Close();
+
+                row.Id = GetRows(row.GuildId, row.Type, row.Value).First().Id;
+
                 if(Cache.Initialised) Cache.Misc.Rows.Add(row);
             }
             else
@@ -85,10 +99,11 @@ namespace Database.Data
                         ("Type", row.Type),
                         ("Value", row.Value)});
 
+                command.ExecuteNonQuery();
+                command.Connection.Close();
+
                 if(Cache.Initialised) Cache.Misc.Rows[Cache.Misc.Rows.FindIndex(x => x.Id == row.Id)] = row;
             }
-
-            command.ExecuteNonQuery();
         }
 
         public static void DeleteRow(MiscRow row)
@@ -97,15 +112,17 @@ namespace Database.Data
 
             if(Cache.Initialised) Cache.Misc.Rows.RemoveAll(x => x.Id == row.Id);
 
-            string command = "DELETE FROM Misc WHERE Id = @Id";
-            Sql.GetCommand(command, new[] {("Id", row.Id.ToString())}).ExecuteNonQuery();
+            string commandText = "DELETE FROM Misc WHERE Id = @Id";
+            MySqlCommand command = Sql.GetCommand(commandText, new[] {("Id", row.Id.ToString())});
+            command.ExecuteNonQuery();
+            command.Connection.Close();
         }
 
         public static string GetPrefix(ulong guildId)
         {
             string prefix = ".";
 
-            var rows = GetRowsWhere(guildId, "Prefix");
+            var rows = GetRows(guildId, "Prefix");
             if (rows.Count > 0) prefix = rows.First().Value;
 
             return prefix;
@@ -136,7 +153,7 @@ namespace Database.Data
     {
         public List<MiscRow> Rows { get; set; }
 
-        public void LoadAsync()
+        public void Load()
         // Load the table from the database
         {
             List<MiscRow> newRows = new List<MiscRow>();
@@ -149,12 +166,14 @@ namespace Database.Data
                 {
                     newRows.Add(new MiscRow(
                         reader.GetInt32(0),
-                        reader.GetString(1),
+                        reader.GetUInt64(1),
                         reader.GetString(2),
                         reader.GetString(3)));
                 }
             }
             catch {}
+
+            reader.Close();
 
             Rows = newRows;
         }
@@ -162,7 +181,7 @@ namespace Database.Data
 
     public class MiscRow
     {
-        public int Id { get; }
+        public int Id { get; set; }
         public ulong GuildId { get; set; }
         public string Type { get; set; }
         public string Value { get; set; }
@@ -175,10 +194,10 @@ namespace Database.Data
             Value = value;
         }
 
-        public MiscRow(int id, string guildId, string type, string value)
+        public MiscRow(int id, ulong guildId, string type, string value)
         {
             Id = id;
-            GuildId = ulong.Parse(guildId);
+            GuildId = guildId;
             Type = type;
             Value = value;
         }

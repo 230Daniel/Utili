@@ -11,7 +11,7 @@ using Discord.Rest;
 
 namespace UtiliSite.Pages.Dashboard
 {
-    public class AutopurgeModel : PageModel
+    public class MessageFilterModel : PageModel
     {
         public void OnGet()
         {
@@ -23,14 +23,14 @@ namespace UtiliSite.Pages.Dashboard
             ViewData["guild"] = auth.Guild;
             ViewData["Title"] = $"{auth.Guild.Name} - ";
 
-            List<AutopurgeRow> autopurgeRows = Autopurge.GetRows(auth.Guild.Id);
-            ViewData["autopurgeRows"] = autopurgeRows;
+            List<MessageFilterRow> messageFilterRows = MessageFilter.GetRows(auth.Guild.Id);
+            ViewData["messageFilterRows"] = messageFilterRows;
 
             List<RestTextChannel> channels = DiscordModule.GetTextChannelsAsync(auth.Guild).GetAwaiter().GetResult();
             ViewData["channels"] = channels;
 
-            List<RestTextChannel> nonAutopurgeChannels = channels.Where(x => autopurgeRows.Count(y => y.ChannelId == x.Id) == 0).ToList();
-            ViewData["nonAutopurgeChannels"] = nonAutopurgeChannels;
+            List<RestTextChannel> nonMessageFilterChannels = channels.Where(x => messageFilterRows.Count(y => y.ChannelId == x.Id) == 0).ToList();
+            ViewData["nonMessageFilterChannels"] = nonMessageFilterChannels;
         }
 
         public void OnPost()
@@ -44,17 +44,25 @@ namespace UtiliSite.Pages.Dashboard
             }
 
             int id = int.Parse(HttpContext.Request.Form["rowId"]);
-            TimeSpan timespan = TimeSpan.Parse(HttpContext.Request.Form["timespan"]);
             int mode = int.Parse(HttpContext.Request.Form["mode"]);
+            string complex = HttpContext.Request.Form["complex"].ToString();
 
-            AutopurgeRow row = Autopurge.GetRows(id: id, guildId: auth.Guild.Id).First();
+            MessageFilterRow row = MessageFilter.GetRows(id: id, guildId: auth.Guild.Id).First();
 
-            row.Timespan = timespan;
+            int before = row.Mode;
+
             row.Mode = mode;
+            row.Complex = complex;
+            MessageFilter.SaveRow(row);
 
-            Autopurge.SaveRow(row);
-
-            HttpContext.Response.StatusCode = 200;
+            if ((before == 7 || mode == 7) && before != mode)
+            {
+                HttpContext.Response.StatusCode = 201;
+            }
+            else
+            {
+                HttpContext.Response.StatusCode = 200;
+            }
         }
 
         public void OnPostAdd()
@@ -70,15 +78,15 @@ namespace UtiliSite.Pages.Dashboard
             ulong channelId = ulong.Parse(HttpContext.Request.Form["channelId"]);
             RestTextChannel channel = auth.Guild.GetTextChannelAsync(channelId).GetAwaiter().GetResult();
 
-            AutopurgeRow newRow = new AutopurgeRow()
+            MessageFilterRow newRow = new MessageFilterRow()
             {
                 GuildId = auth.Guild.Id,
                 ChannelId = channel.Id,
-                Timespan = TimeSpan.FromMinutes(15),
-                Mode = 2
+                Mode = 0,
+                Complex = ""
             };
 
-            Autopurge.SaveRow(newRow);
+            MessageFilter.SaveRow(newRow);
             HttpContext.Response.StatusCode = 200;
             HttpContext.Response.Redirect(HttpContext.Request.Path);
         }
@@ -95,18 +103,24 @@ namespace UtiliSite.Pages.Dashboard
 
             int deleteId = int.Parse(HttpContext.Request.Form["rowId"]);
 
-            AutopurgeRow deleteRow = Autopurge.GetRows(id: deleteId, guildId: auth.Guild.Id).First();
+            MessageFilterRow deleteRow = MessageFilter.GetRows(id: deleteId, guildId: auth.Guild.Id).First();
 
-            Autopurge.DeleteRow(deleteRow);
+            MessageFilter.DeleteRow(deleteRow);
 
             HttpContext.Response.StatusCode = 200;
             HttpContext.Response.Redirect(HttpContext.Request.Path);
         }
 
-        public static string GetIsSelected(int mode, AutopurgeRow row)
+        public static string GetIsSelected(int mode, MessageFilterRow row)
         {
             if (row.Mode == mode) return "selected";
             return "";
+        }
+
+        public static string GetIsComplexHidden(MessageFilterRow row)
+        {
+            if (row.Mode == 7) return "";
+            return "hidden";
         }
     }
 }

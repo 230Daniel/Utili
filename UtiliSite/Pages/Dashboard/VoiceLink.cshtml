@@ -1,0 +1,78 @@
+﻿@page "{guild?}/voicelink"
+@using Database.Data
+@using Discord.Rest
+@model UtiliSite.Pages.Dashboard.VoiceLinkModel
+@{
+    Layout = "Shared/_Layout.cshtml";
+}
+
+@{
+    if (ViewData["authorised"] == null || !(bool)ViewData["authorised"])
+    {
+        return;
+    }
+
+    RestGuild guild = ViewData["Guild"] as RestGuild;
+    List<RestVoiceChannel> excludedChannels = (List<RestVoiceChannel>) ViewData["excludedChannels"];
+    List<RestVoiceChannel> nonExcludedChannels = (List<RestVoiceChannel>)ViewData["nonExcludedChannels"];
+    VoiceLinkRow metaRow = (VoiceLinkRow) ViewData["metaRow"];
+}
+
+<form name="form-enable" method="post">
+    <div class="input-group flex-nowrap">
+
+        <div class="input-group-prepend">
+            <span class="input-group-text">Enable</span>
+        </div>
+        <input type="checkbox" name="enabled" class="form-control" @VoiceLinkModel.GetIsChecked(metaRow.Enabled)>
+
+        <div class="input-group-prepend">
+            <span class="input-group-text">Prefix</span>
+        </div>
+        <input type="text" name="prefix" class="form-control" value="@metaRow.Prefix">
+        
+
+        <button type="submit" class="btn btn-success">Save</button>
+    </div>
+</form>
+
+<div class="dropdown">
+    <button class="btn btn-secondary dropdown-toggle" type="button" data-toggle="dropdown" id="dropdownAddChannel" aria-haspopup="true" aria-expanded="false">
+        Exclude channel
+    </button>
+    <div class="dropdown-menu" aria-labelledby="dropdownExcludeChannel">
+
+        @foreach (RestVoiceChannel channel in nonExcludedChannels)
+        {
+            <form method="post">
+                <input type="hidden" name="channelId" value="@channel.Id" />
+                <button class="dropdown-item" asp-page-handler="Exclude" type="submit">@channel.Name</button>
+            </form>
+        }
+
+    </div>
+</div>
+
+@foreach (RestVoiceChannel excludedChannel in excludedChannels)
+{
+    <form name="form-@excludedChannel.Id" method="post">
+
+        <input type="hidden" name="channelId" value="@excludedChannel.Id" />
+
+        <div class="input-group flex-nowrap">
+
+            <div class="input-group-prepend">
+                <span class="input-group-text">🔊</span>
+            </div>
+            <input type="text" class="form-control" style="background: unset;" value="@excludedChannel.Name" readonly>
+        </div>
+
+        <div class="input-group flex-nowrap">
+            <button type="submit" name="noajax" asp-page-handler="Remove" class="btn btn-danger">Remove</button>
+        </div>
+    </form>
+}
+
+<script src="~/lib/jquery/dist/jquery.js"></script>
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="~/js/dashboard/submit.js" asp-append-version="true"></script>

@@ -144,7 +144,8 @@ namespace Utili.Features
         {
             List<AutopurgeRow> channelsForThisPurge = new List<AutopurgeRow>();
 
-            List<AutopurgeRow> clonedRows = rows.Select(row => (AutopurgeRow) row.Clone()).ToList();
+            List<AutopurgeRow> clonedRows = new List<AutopurgeRow>();
+            clonedRows.AddRange(rows);
 
             foreach (AutopurgeRow row in clonedRows)
             {

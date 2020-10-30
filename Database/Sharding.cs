@@ -13,13 +13,15 @@ namespace Database
             MySqlDataReader reader = Sql.GetCommand("SELECT * FROM Sharding WHERE Id = 1;").ExecuteReader();
 
             reader.Read();
+            int result = reader.GetInt32(1);
+            reader.Close();
 
-            return reader.GetInt32(1);
+            return result;
         }
 
         public static void UpdateShardStats(int shards, int lowerShardId, int guilds)
         {
-            int modifiedRows = GetCommand(
+            MySqlCommand command = GetCommand(
                 "UPDATE Sharding SET Heartbeat = @Heartbeat, Guilds = @Guilds WHERE Shards = @Shards AND LowerShardId = @LowerShardId",
                 new[]
                 {
@@ -27,11 +29,14 @@ namespace Database
                     ("Guilds", guilds.ToString()),
                     ("Shards", shards.ToString()),
                     ("LowerShardId", lowerShardId.ToString())
-                }).ExecuteNonQuery();
+                });
+
+            int modifiedRows = command.ExecuteNonQuery();
+            command.Connection.Close();
 
             if (modifiedRows == 0)
             {
-                GetCommand(
+                command = GetCommand(
                     "INSERT INTO Sharding(Shards, LowerShardId, Heartbeat, Guilds) VALUES(@Shards, @LowerShardId, @Heartbeat, @Guilds)",
                     new[]
                     {
@@ -39,7 +44,10 @@ namespace Database
                         ("Guilds", guilds.ToString()),
                         ("Shards", shards.ToString()),
                         ("LowerShardId", lowerShardId.ToString())
-                    }).ExecuteNonQuery();
+                    });
+
+                command.ExecuteNonQuery();
+                command.Connection.Close();
             }
         }
 
@@ -56,6 +64,8 @@ namespace Database
             {
                 guilds += reader.GetInt32(0);
             }
+
+            reader.Close();
 
             return guilds;
         }

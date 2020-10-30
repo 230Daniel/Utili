@@ -9,23 +9,22 @@ using System.Threading.Tasks;
 
 namespace Database.Data
 {
-    public class Autopurge
+    public class VoiceRoles
     {
-        public static List<AutopurgeRow> GetRows(ulong? guildId = null, ulong? channelId = null, int? id = null, bool ignoreCache = false)
+        public static List<VoiceRolesRow> GetRows(ulong? guildId = null, ulong? channelId = null, bool ignoreCache = false)
         {
-            List<AutopurgeRow> matchedRows = new List<AutopurgeRow>();
+            List<VoiceRolesRow> matchedRows = new List<VoiceRolesRow>();
 
             if (Cache.Initialised && !ignoreCache)
             {
-                matchedRows.AddRange(Cache.Autopurge.Rows);
+                matchedRows.AddRange(Cache.VoiceRoles.Rows);
 
                 if (guildId.HasValue) matchedRows.RemoveAll(x => x.GuildId != guildId.Value);
                 if (channelId.HasValue) matchedRows.RemoveAll(x => x.ChannelId != channelId.Value);
-                if (id.HasValue) matchedRows.RemoveAll(x => x.Id != id.Value);
             }
             else
             {
-                string command = "SELECT * FROM Autopurge WHERE TRUE";
+                string command = "SELECT * FROM VoiceRoles WHERE TRUE";
                 List<(string, string)> values = new List<(string, string)>();
 
                 if (guildId.HasValue)
@@ -40,22 +39,15 @@ namespace Database.Data
                     values.Add(("ChannelId", channelId.Value.ToString()));
                 }
 
-                if (id.HasValue)
-                {
-                    command += " AND Id = @Id";
-                    values.Add(("Id", id.Value.ToString()));
-                }
-
                 MySqlDataReader reader = Sql.GetCommand(command, values.ToArray()).ExecuteReader();
 
                 while (reader.Read())
                 {
-                    matchedRows.Add(new AutopurgeRow(
+                    matchedRows.Add(new VoiceRolesRow(
                         reader.GetInt32(0),
                         reader.GetUInt64(1),
                         reader.GetUInt64(2),
-                        reader.GetString(3),
-                        reader.GetInt32(4)));
+                        reader.GetUInt64(3)));
                 }
 
                 reader.Close();
@@ -64,118 +56,100 @@ namespace Database.Data
             return matchedRows;
         }
 
-        public static void SaveRow(AutopurgeRow row)
+        public static void SaveRow(VoiceRolesRow row)
         {
             MySqlCommand command;
 
             if (row.Id == 0) 
             // The row is a new entry so should be inserted into the database
             {
-                command = Sql.GetCommand("INSERT INTO Autopurge (GuildID, ChannelId, Timespan, Mode) VALUES (@GuildId, @ChannelId, @Timespan, @Mode);",
-                    new [] {("GuildId", row.GuildId.ToString()), 
+                command = Sql.GetCommand($"INSERT INTO VoiceRoles (GuildID, ChannelId, RoleId) VALUES (@GuildId, @ChannelId, @RoleId);",
+                    new [] { ("GuildId", row.GuildId.ToString()), 
                         ("ChannelId", row.ChannelId.ToString()),
-                        ("Timespan", row.Timespan.ToString()),
-                        ("Mode", row.Mode.ToString())});
+                        ("RoleId", row.RoleId.ToString())});
 
                 command.ExecuteNonQuery();
                 command.Connection.Close();
-
-                row.Id = GetRows(row.GuildId, row.ChannelId, ignoreCache: true).First().Id;
-
-                if(Cache.Initialised) Cache.Autopurge.Rows.Add(row);
+                row.Id = GetRows(row.GuildId, row.ChannelId, true).First().Id;
+                
+                if(Cache.Initialised) Cache.VoiceRoles.Rows.Add(row);
             }
             else
             // The row already exists and should be updated
             {
-                command = Sql.GetCommand("UPDATE Autopurge SET GuildId = @GuildId, ChannelId = @ChannelId, Timespan = @Timespan, Mode = @Mode WHERE Id = @Id;",
+                command = Sql.GetCommand($"UPDATE VoiceRoles SET GuildId = @GuildId, ChannelId = @ChannelId, RoleId = @RoleId WHERE Id = @Id;",
                     new [] {("Id", row.Id.ToString()),
                         ("GuildId", row.GuildId.ToString()), 
                         ("ChannelId", row.ChannelId.ToString()),
-                        ("Timespan", row.Timespan.ToString()),
-                        ("Mode", row.Mode.ToString())});
+                        ("RoleId", row.RoleId.ToString())});
 
                 command.ExecuteNonQuery();
                 command.Connection.Close();
 
-                if(Cache.Initialised) Cache.Autopurge.Rows[Cache.Autopurge.Rows.FindIndex(x => x.Id == row.Id)] = row;
+                if(Cache.Initialised) Cache.VoiceRoles.Rows[Cache.VoiceRoles.Rows.FindIndex(x => x.Id == row.Id)] = row;
             }
         }
 
-        public static void DeleteRow(AutopurgeRow row)
+        public static void DeleteRow(VoiceRolesRow row)
         {
             if(row == null) return;
 
-            if(Cache.Initialised) Cache.Autopurge.Rows.RemoveAll(x => x.Id == row.Id);
+            if(Cache.Initialised) Cache.VoiceRoles.Rows.RemoveAll(x => x.Id == row.Id);
 
-            string commandText = "DELETE FROM Autopurge WHERE Id = @Id";
+            string commandText = "DELETE FROM VoiceRoles WHERE Id = @Id";
             MySqlCommand command = Sql.GetCommand(commandText, new[] {("Id", row.Id.ToString())});
             command.ExecuteNonQuery();
             command.Connection.Close();
         }
     }
 
-    public class AutopurgeTable
+    public class VoiceRolesTable
     {
-        public List<AutopurgeRow> Rows { get; set; }
+        public List<VoiceRolesRow> Rows { get; set; }
 
         public void Load()
         // Load the table from the database
         {
-            List<AutopurgeRow> newRows = new List<AutopurgeRow>();
+            List<VoiceRolesRow> newRows = new List<VoiceRolesRow>();
 
-            MySqlDataReader reader = Sql.GetCommand("SELECT * FROM Autopurge;").ExecuteReader();
+            MySqlDataReader reader = Sql.GetCommand("SELECT * FROM VoiceRoles;").ExecuteReader();
 
             try
             {
                 while (reader.Read())
                 {
-                    newRows.Add(new AutopurgeRow(
+                    newRows.Add(new VoiceRolesRow(
                         reader.GetInt32(0),
                         reader.GetUInt64(1),
                         reader.GetUInt64(2),
-                        reader.GetString(3),
-                        reader.GetInt32(4)));
+                        reader.GetUInt64(3)));
                 }
             }
             catch {}
 
             reader.Close();
-
             Rows = newRows;
         }
     }
 
-    public class AutopurgeRow
+    public class VoiceRolesRow
     {
         public int Id { get; set; }
         public ulong GuildId { get; set; }
         public ulong ChannelId { get; set; }
-        public TimeSpan Timespan { get; set; }
-        public int Mode { get; set; }
-        // 0 = All messages
-        // 1 = Bot messages
+        public ulong RoleId { get; set; }
 
-        public AutopurgeRow()
+        public VoiceRolesRow()
         {
             Id = 0;
         }
 
-        public AutopurgeRow(int id, ulong guildId, ulong channelId, string timespan, int mode)
+        public VoiceRolesRow(int id, ulong guildId, ulong channelId, ulong roleId)
         {
             Id = id;
             GuildId = guildId;
             ChannelId = channelId;
-            Timespan = TimeSpan.Parse(timespan);
-            Mode = mode;
-        }
-
-        public AutopurgeRow(int id, ulong guildId, ulong channelId, TimeSpan timespan, int mode)
-        {
-            Id = id;
-            GuildId = guildId;
-            ChannelId = channelId;
-            Timespan = timespan;
-            Mode = mode;
+            RoleId = roleId;
         }
     }
 }

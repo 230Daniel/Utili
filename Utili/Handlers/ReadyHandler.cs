@@ -14,6 +14,11 @@ namespace Utili.Handlers
         {
             _ = Task.Run(async () =>
             {
+                foreach (SocketGuild guild in shard.Guilds)
+                {
+                    await guild.DownloadUsersAsync();
+                }
+
                 await shard.SetGameAsync("utili.bot | .help");
 
                 _shardsStarted += 1;

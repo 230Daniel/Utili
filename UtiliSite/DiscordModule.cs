@@ -139,8 +139,28 @@ namespace UtiliSite
 
             try
             {
-                List<RestTextChannel> channels = (await guild.GetTextChannelsAsync()).OrderBy(x => x.Name).ToList();
+                List<RestTextChannel> channels = (await guild.GetTextChannelsAsync()).OrderBy(x => x.Position).ToList();
                 _cachedTextChannels.Add(guild.Id, channels);
+                return channels;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        private static DiscordCache _cachedVoiceChannels = new DiscordCache(15);
+        public static async Task<List<RestVoiceChannel>> GetVoiceChannelsAsync(RestGuild guild)
+        {
+            if (_cachedVoiceChannels.TryGet(guild.Id, out object channelsObj))
+            {
+                return (List<RestVoiceChannel>) channelsObj;
+            }
+
+            try
+            {
+                List<RestVoiceChannel> channels = (await guild.GetVoiceChannelsAsync()).OrderBy(x => x.Position).ToList();
+                _cachedVoiceChannels.Add(guild.Id, channels);
                 return channels;
             }
             catch
