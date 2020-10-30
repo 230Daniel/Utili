@@ -55,7 +55,7 @@ namespace UtiliSite.Pages.Dashboard
             row.Complex = complex;
             MessageFilter.SaveRow(row);
 
-            if ((before == 7 || mode == 7) && before != mode)
+            if ((before == 8 || mode == 8) && before != mode)
             {
                 HttpContext.Response.StatusCode = 201;
             }
@@ -119,7 +119,7 @@ namespace UtiliSite.Pages.Dashboard
 
         public static string GetIsComplexHidden(MessageFilterRow row)
         {
-            if (row.Mode == 7) return "";
+            if (row.Mode == 8) return "";
             return "hidden";
         }
     }

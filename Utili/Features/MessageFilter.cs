@@ -98,7 +98,11 @@ namespace Utili.Features
                     allowedTypes = "with urls";
                     return IsUrl(context);
 
-                case 7: // RegEx
+                case 7: // URLs or Media
+                    allowedTypes = "with images, videos or urls";
+                    return IsImage(context) || IsVideo(context) || IsUrl(context);
+
+                case 8: // RegEx
                     allowedTypes = $"which match regex \"{row.Complex}\"";
                     return IsRegex(context, row.Complex);
 
