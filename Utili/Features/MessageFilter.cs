@@ -25,6 +25,18 @@ namespace Utili.Features
                 return;
             }
 
+            if (context.User.Id == Program._client.CurrentUser.Id && context.Message.Embeds.Count > 0)
+            {
+                Embed embed = context.Message.Embeds.First();
+                if (embed.Author.HasValue)
+                {
+                    if (embed.Author.Value.Name == "Message deleted")
+                    {
+                        return;
+                    }
+                }
+            }
+
             List<MessageFilterRow> rows = Database.Data.MessageFilter.GetRows(context.Guild.Id, context.Channel.Id);
 
             if (rows.Count == 0)
@@ -87,7 +99,7 @@ namespace Utili.Features
                     return IsUrl(context);
 
                 case 7: // RegEx
-                    allowedTypes = $"following regex {row.Complex}";
+                    allowedTypes = $"which match regex \"{row.Complex}\"";
                     return IsRegex(context, row.Complex);
 
                 default:
@@ -214,17 +226,24 @@ namespace Utili.Features
 
         public bool IsRegex(SocketCommandContext context, string pattern)
         {
-            Regex regex = new Regex(pattern);
-
-            foreach (string word in context.Message.Content.Split(" "))
+            try
             {
-                if (regex.IsMatch(word))
-                {
-                    return true;
-                }
-            }
+                Regex regex = new Regex(pattern);
 
-            return false;
+                foreach (string word in context.Message.Content.Split(" "))
+                {
+                    if (regex.IsMatch(word))
+                    {
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+            catch
+            {
+                return false;
+            }
         }
     }
 }

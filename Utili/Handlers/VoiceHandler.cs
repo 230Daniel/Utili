@@ -18,6 +18,8 @@ namespace Utili.Handlers
         {
             _ = Task.Run(() =>
             {
+                if(user.IsBot) return;
+
                 if (Helper.RequiresUpdate(before, after))
                 {
                     if(before.VoiceChannel != null) _voiceLink.RequestUpdate(before.VoiceChannel);
