@@ -23,6 +23,7 @@ namespace Database
         public static MessageFilterTable MessageFilter { get; set; } = new MessageFilterTable();
         public static MiscTable Misc { get; set; } = new MiscTable();
         public static VoiceLinkTable VoiceLink { get; set; } = new VoiceLinkTable();
+        public static VoiceRolesTable VoiceRoles { get; set; } = new VoiceRolesTable();
         
         public static void Initialise() 
         // Start the automatic cache downloads

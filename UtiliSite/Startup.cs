@@ -42,6 +42,7 @@ namespace UtiliSite
                 options.Conventions.AddPageRoute("/dashboard/core", "dashboard/{guild?}/core");
                 options.Conventions.AddPageRoute("/dashboard/autopurge", "dashboard/{guild?}/autopurge");
                 options.Conventions.AddPageRoute("/dashboard/voicelink", "dashboard/{guild?}/voicelink");
+                options.Conventions.AddPageRoute("/dashboard/messagefilter", "dashboard/{guild?}/messagefilter");
             });
 
             services.AddAuthentication().AddCookie();
