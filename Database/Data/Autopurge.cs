@@ -52,8 +52,8 @@ namespace Database.Data
                 {
                     matchedRows.Add(new AutopurgeRow(
                         reader.GetInt32(0),
-                        reader.GetString(1),
-                        reader.GetString(2),
+                        reader.GetUInt64(1),
+                        reader.GetUInt64(2),
                         reader.GetString(3),
                         reader.GetInt32(4)));
                 }
@@ -131,8 +131,8 @@ namespace Database.Data
                 {
                     newRows.Add(new AutopurgeRow(
                         reader.GetInt32(0),
-                        reader.GetString(1),
-                        reader.GetString(2),
+                        reader.GetUInt64(1),
+                        reader.GetUInt64(2),
                         reader.GetString(3),
                         reader.GetInt32(4)));
                 }
@@ -160,11 +160,11 @@ namespace Database.Data
             Id = 0;
         }
 
-        public AutopurgeRow(int id, string guildId, string channelId, string timespan, int mode)
+        public AutopurgeRow(int id, ulong guildId, ulong channelId, string timespan, int mode)
         {
             Id = id;
-            GuildId = ulong.Parse(guildId);
-            ChannelId = ulong.Parse(channelId);
+            GuildId = guildId;
+            ChannelId = channelId;
             Timespan = TimeSpan.Parse(timespan);
             Mode = mode;
         }

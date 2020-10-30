@@ -49,7 +49,7 @@ namespace Database.Data
                 {
                     matchedRows.Add(new MiscRow(
                         reader.GetInt32(0),
-                        reader.GetString(1),
+                        reader.GetUInt64(1),
                         reader.GetString(2),
                         reader.GetString(3)));
                 }
@@ -166,7 +166,7 @@ namespace Database.Data
                 {
                     newRows.Add(new MiscRow(
                         reader.GetInt32(0),
-                        reader.GetString(1),
+                        reader.GetUInt64(1),
                         reader.GetString(2),
                         reader.GetString(3)));
                 }
@@ -194,10 +194,10 @@ namespace Database.Data
             Value = value;
         }
 
-        public MiscRow(int id, string guildId, string type, string value)
+        public MiscRow(int id, ulong guildId, string type, string value)
         {
             Id = id;
-            GuildId = ulong.Parse(guildId);
+            GuildId = guildId;
             Type = type;
             Value = value;
         }

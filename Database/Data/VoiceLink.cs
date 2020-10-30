@@ -45,9 +45,9 @@ namespace Database.Data
                 {
                     matchedRows.Add(new VoiceLinkRow(
                         reader.GetInt32(0),
-                        reader.GetString(1),
-                        reader.GetString(2),
-                        reader.GetString(3),
+                        reader.GetUInt64(1),
+                        reader.GetUInt64(2),
+                        reader.GetUInt64(3),
                         reader.GetBoolean(4),
                         reader.GetBoolean(5),
                         reader.GetString(6)));
@@ -188,9 +188,9 @@ namespace Database.Data
                 {
                     newRows.Add(new VoiceLinkRow(
                         reader.GetInt32(0),
-                        reader.GetString(1),
-                        reader.GetString(2),
-                        reader.GetString(3),
+                        reader.GetUInt64(1),
+                        reader.GetUInt64(2),
+                        reader.GetUInt64(3),
                         reader.GetBoolean(4),
                         reader.GetBoolean(5),
                         reader.GetString(6)));
@@ -216,17 +216,6 @@ namespace Database.Data
         public VoiceLinkRow()
         {
             Id = 0;
-        }
-
-        public VoiceLinkRow(int id, string guildId, string textChannelId, string voiceChannelId, bool excluded, bool enabled, string prefix)
-        {
-            Id = id;
-            GuildId = ulong.Parse(guildId);
-            TextChannelId = ulong.Parse(textChannelId);
-            VoiceChannelId = ulong.Parse(voiceChannelId);
-            Excluded = excluded;
-            Enabled = enabled;
-            Prefix = prefix;
         }
 
         public VoiceLinkRow(int id, ulong guildId, ulong textChannelId, ulong voiceChannelId, bool excluded, bool enabled, string prefix)

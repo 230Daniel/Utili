@@ -82,7 +82,8 @@ namespace UtiliSite.Pages.Dashboard
             {
                 GuildId = auth.Guild.Id,
                 ChannelId = channel.Id,
-                Mode = 0
+                Mode = 0,
+                Complex = ""
             };
 
             MessageFilter.SaveRow(newRow);

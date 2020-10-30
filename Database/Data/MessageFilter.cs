@@ -52,8 +52,8 @@ namespace Database.Data
                 {
                     matchedRows.Add(new MessageFilterRow(
                         reader.GetInt32(0),
-                        reader.GetString(1),
-                        reader.GetString(2),
+                        reader.GetUInt64(1),
+                        reader.GetUInt64(2),
                         reader.GetInt32(3),
                         reader.GetString(4)));
                 }
@@ -133,8 +133,8 @@ namespace Database.Data
                 {
                     newRows.Add(new MessageFilterRow(
                         reader.GetInt32(0),
-                        reader.GetString(1),
-                        reader.GetString(2),
+                        reader.GetUInt64(1),
+                        reader.GetUInt64(2),
                         reader.GetInt32(3),
                         reader.GetString(4)));
                 }
@@ -168,15 +168,6 @@ namespace Database.Data
         public MessageFilterRow()
         {
             Id = 0;
-        }
-
-        public MessageFilterRow(int id, string guildId, string channelId, int mode, string complex)
-        {
-            Id = id;
-            GuildId = ulong.Parse(guildId);
-            ChannelId = ulong.Parse(channelId);
-            Mode = mode;
-            Complex = complex;
         }
 
         public MessageFilterRow(int id, ulong guildId, ulong channelId, int mode, string complex)
