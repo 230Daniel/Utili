@@ -25,6 +25,12 @@ namespace UtiliSite.Pages.Dashboard
 
             List<AutopurgeRow> autopurgeRows = Autopurge.GetRows(auth.Guild.Id);
             ViewData["autopurgeRows"] = autopurgeRows;
+
+            List<RestTextChannel> channels = DiscordModule.GetTextChannelsAsync(auth.Guild).GetAwaiter().GetResult();
+            ViewData["channels"] = channels;
+
+            List<RestTextChannel> nonAutopurgeChannels = channels.Where(x => autopurgeRows.Count(y => y.ChannelId == x.Id) == 0).ToList();
+            ViewData["nonAutopurgeChannels"] = nonAutopurgeChannels;
         }
 
         public void OnPost()
