@@ -11,7 +11,7 @@ namespace Database.Data
 {
     public class VoiceRoles
     {
-        public static List<VoiceRolesRow> GetRows(ulong? guildId = null, ulong? channelId = null, bool ignoreCache = false)
+        public static List<VoiceRolesRow> GetRows(ulong? guildId = null, ulong? channelId = null, int? id = null, bool ignoreCache = false)
         {
             List<VoiceRolesRow> matchedRows = new List<VoiceRolesRow>();
 
@@ -19,6 +19,7 @@ namespace Database.Data
             {
                 matchedRows.AddRange(Cache.VoiceRoles.Rows);
 
+                if (id.HasValue) matchedRows.RemoveAll(x => x.Id != id.Value);
                 if (guildId.HasValue) matchedRows.RemoveAll(x => x.GuildId != guildId.Value);
                 if (channelId.HasValue) matchedRows.RemoveAll(x => x.ChannelId != channelId.Value);
             }
@@ -37,6 +38,12 @@ namespace Database.Data
                 {
                     command += " AND ChannelId = @ChannelId";
                     values.Add(("ChannelId", channelId.Value.ToString()));
+                }
+
+                if (id.HasValue)
+                {
+                    command += " AND Id = @Id";
+                    values.Add(("Id", id.Value.ToString()));
                 }
 
                 MySqlDataReader reader = Sql.GetCommand(command, values.ToArray()).ExecuteReader();
@@ -70,7 +77,7 @@ namespace Database.Data
 
                 command.ExecuteNonQuery();
                 command.Connection.Close();
-                row.Id = GetRows(row.GuildId, row.ChannelId, true).First().Id;
+                row.Id = GetRows(row.GuildId, row.ChannelId, null, true).First().Id;
                 
                 if(Cache.Initialised) Cache.VoiceRoles.Rows.Add(row);
             }
