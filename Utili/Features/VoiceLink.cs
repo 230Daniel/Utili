@@ -160,14 +160,16 @@ namespace Utili.Features
 
             foreach (SocketGuildUser connectedUser in connectedUsers)
             {
-                if (!voiceChannel.GetPermissionOverwrite(connectedUser).HasValue)
+                if (!textChannel.GetPermissionOverwrite(connectedUser).HasValue)
                 {
                     await textChannel.AddPermissionOverwriteAsync(connectedUser,
                         new OverwritePermissions(viewChannel: PermValue.Allow));
                 }
             }
 
-            if (newChannel)
+            OverwritePermissions? everyonePermissions = textChannel.GetPermissionOverwrite(guild.EveryoneRole);
+
+            if (!everyonePermissions.HasValue || everyonePermissions.Value.ViewChannel != PermValue.Deny)
             {
                 await textChannel.AddPermissionOverwriteAsync(guild.EveryoneRole,
                     new OverwritePermissions(viewChannel: PermValue.Deny));
