@@ -31,11 +31,11 @@ namespace Utili.Features
 
         public void RequestUpdate(SocketVoiceChannel channel)
         {
-            VoiceLinkRow row = Database.Data.VoiceLink.GetRowForChannel(channel.Guild.Id, channel.Id);
+            VoiceLinkChannelRow channelRow = Database.Data.VoiceLink.GetChannelRow(channel.Guild.Id, channel.Id);
             VoiceLinkRow metaRow = Database.Data.VoiceLink.GetMetaRow(channel.Guild.Id);
 
             bool enabled = metaRow.Enabled;
-            if(row != null && row.Excluded) enabled = false;
+            if(channelRow.Excluded) enabled = false;
 
             if (enabled)
             {
@@ -59,7 +59,7 @@ namespace Utili.Features
 
             try
             {
-                Database.Data.VoiceLink.DeleteUnrequiredRows();
+                Database.Data.VoiceLink.DeleteUnrequiredChannelRows();
                 UpdateLinkedChannels().GetAwaiter().GetResult();
             }
             catch (Exception err)
@@ -103,21 +103,21 @@ namespace Utili.Features
             List<SocketGuildUser> connectedUsers =
                 voiceChannel.Users.Where(x => x.VoiceChannel != null && x.VoiceChannel.Id == voiceChannel.Id).ToList();
 
-            VoiceLinkRow row = Database.Data.VoiceLink.GetRowForChannel(guild.Id, voiceChannel.Id);
+            VoiceLinkChannelRow channelRow = Database.Data.VoiceLink.GetChannelRow(guild.Id, voiceChannel.Id);
             VoiceLinkRow metaRow = Database.Data.VoiceLink.GetMetaRow(guild.Id);
 
             SocketTextChannel textChannel = null;
             try
             {
-                textChannel = guild.GetTextChannel(row.TextChannelId);
+                textChannel = guild.GetTextChannel(channelRow.TextChannelId);
             }
             catch {}
 
             if (connectedUsers.Count == 0 && textChannel != null)
             {
                 await textChannel.DeleteAsync();
-                row.TextChannelId = 0;
-                Database.Data.VoiceLink.SaveTextChannel(row);
+                channelRow.TextChannelId = 0;
+                Database.Data.VoiceLink.SaveTextChannel(channelRow);
                 return;
             }
 
@@ -125,8 +125,6 @@ namespace Utili.Features
             {
                 return;
             }
-
-            bool newChannel = false;
 
             if (textChannel == null)
             {
@@ -136,14 +134,13 @@ namespace Utili.Features
                     x.Topic = $"Users in {voiceChannel.Name} have access - Created by Utili";
                 });
 
-                row.TextChannelId = restTextChannel.Id;
+                channelRow.TextChannelId = restTextChannel.Id;
 
-                Database.Data.VoiceLink.SaveTextChannel(row);
+                Database.Data.VoiceLink.SaveTextChannel(channelRow);
 
                 await Task.Delay(500);
 
-                textChannel = guild.GetTextChannel(row.TextChannelId);
-                newChannel = true;
+                textChannel = guild.GetTextChannel(channelRow.TextChannelId);
             }
 
             foreach(Overwrite existingOverwrite in textChannel.PermissionOverwrites)

@@ -24,13 +24,13 @@ namespace UtiliSite.Pages.Dashboard
             ViewData["Title"] = $"{auth.Guild.Name} - ";
 
             List<RestVoiceChannel> voiceChannels = DiscordModule.GetVoiceChannelsAsync(auth.Guild).GetAwaiter().GetResult();
-            List<VoiceLinkRow> rows = VoiceLink.GetRows(auth.Guild.Id);
+            List<VoiceLinkChannelRow> rows = VoiceLink.GetChannelRows(auth.Guild.Id);
 
             List<RestVoiceChannel> excludedChannels = new List<RestVoiceChannel>();
 
             foreach (RestVoiceChannel voiceChannel in voiceChannels)
             {
-                List<VoiceLinkRow> applicableRows = rows.Where(x => x.VoiceChannelId == voiceChannel.Id).ToList();
+                List<VoiceLinkChannelRow> applicableRows = rows.Where(x => x.VoiceChannelId == voiceChannel.Id).ToList();
                 if (applicableRows.Count > 0 && applicableRows.First().Excluded)
                 {
                     excludedChannels.Add(voiceChannel);
@@ -56,12 +56,14 @@ namespace UtiliSite.Pages.Dashboard
             }
 
             bool enabled = HttpContext.Request.Form["enabled"] == "on";
+            bool deleteChannels = HttpContext.Request.Form["deleteChannels"] == "on";
             string prefix = HttpContext.Request.Form["prefix"].ToString();
 
             VoiceLinkRow row = VoiceLink.GetMetaRow(auth.Guild.Id);
             row.Enabled = enabled;
+            row.DeleteChannels = deleteChannels;
             row.Prefix = prefix;
-            VoiceLink.SaveRow(row);
+            VoiceLink.SaveMetaRow(row);
 
             HttpContext.Response.StatusCode = 200;
         }
@@ -78,9 +80,9 @@ namespace UtiliSite.Pages.Dashboard
 
             ulong channelId = ulong.Parse(HttpContext.Request.Form["channelId"]);
 
-            VoiceLinkRow row = VoiceLink.GetRowForChannel(auth.Guild.Id, channelId);
-            row.Excluded = true;
-            VoiceLink.SaveRow(row);
+            VoiceLinkChannelRow channelRow = VoiceLink.GetChannelRow(auth.Guild.Id, channelId);
+            channelRow.Excluded = true;
+            VoiceLink.SaveChannelRow(channelRow);
 
             HttpContext.Response.StatusCode = 200;
             HttpContext.Response.Redirect(HttpContext.Request.Path);
@@ -98,9 +100,9 @@ namespace UtiliSite.Pages.Dashboard
 
             ulong channelId = ulong.Parse(HttpContext.Request.Form["channelId"]);
 
-            VoiceLinkRow row = VoiceLink.GetRowForChannel(auth.Guild.Id, channelId);
-            row.Excluded = false;
-            VoiceLink.SaveRow(row);
+            VoiceLinkChannelRow channelRow = VoiceLink.GetChannelRow(auth.Guild.Id, channelId);
+            channelRow.Excluded = false;
+            VoiceLink.SaveChannelRow(channelRow);
 
             HttpContext.Response.StatusCode = 200;
             HttpContext.Response.Redirect(HttpContext.Request.Path);
