@@ -21,6 +21,7 @@ namespace Database
 
         public static AutopurgeTable Autopurge { get; set; } = new AutopurgeTable();
         public static MessageFilterTable MessageFilter { get; set; } = new MessageFilterTable();
+        public static MessageLogsTable MessageLogs { get; set; } = new MessageLogsTable();
         public static MiscTable Misc { get; set; } = new MiscTable();
         public static VoiceLinkTable VoiceLink { get; set; } = new VoiceLinkTable();
         public static VoiceRolesTable VoiceRoles { get; set; } = new VoiceRolesTable();
@@ -47,6 +48,7 @@ namespace Database
         {
             Autopurge.Load();
             MessageFilter.Load();
+            MessageLogs.Load();
             Misc.Load();
             VoiceLink.Load();
             VoiceRoles.Load();
