@@ -39,7 +39,7 @@ namespace Utili.Features
         public async Task MessageEdited(SocketCommandContext context)
         {
             MessageLogsRow row = Database.Data.MessageLogs.GetRow(context.Guild.Id);
-            if (row.DeletedChannelId == 0 && row.EditedChannelId == 0) return;
+            if ((row.DeletedChannelId == 0 && row.EditedChannelId == 0) || row.ExcludedChannels.Contains(context.Channel.Id)) return;
 
             MessageLogsMessageRow message = Database.Data.MessageLogs.GetMessage(context.Guild.Id, context.Channel.Id, context.Message.Id);
             if (message.Content == context.Message.Content) return;
@@ -57,10 +57,9 @@ namespace Utili.Features
         public async Task MessageDeleted(SocketGuild guild, SocketTextChannel channel, ulong messageId)
         {
             MessageLogsRow row = Database.Data.MessageLogs.GetRow(guild.Id);
-            if (row.DeletedChannelId == 0 && row.EditedChannelId == 0) return;
+            if ((row.DeletedChannelId == 0 && row.EditedChannelId == 0) || row.ExcludedChannels.Contains(channel.Id)) return;
 
             MessageLogsMessageRow message = Database.Data.MessageLogs.GetMessage(guild.Id, channel.Id, messageId);
-
             Embed embed = GetDeletedEmbed(guild, channel, message);
 
             Database.Data.MessageLogs.DeleteMessagesById(new [] {message.Id});
@@ -70,10 +69,18 @@ namespace Utili.Features
             await logChannel.SendMessageAsync(embed: embed);
         }
 
+        public async Task MessagesBulkDeleted(SocketGuild guild, SocketTextChannel channel, List<ulong> messageIds)
+        {
+            MessageLogsRow row = Database.Data.MessageLogs.GetRow(guild.Id);
+            if ((row.DeletedChannelId == 0 && row.EditedChannelId == 0) || row.ExcludedChannels.Contains(channel.Id)) return;
+
+            Embed embed = GetBulkDeletedEmbed(guild, channel, messageIds.Count);
+        }
+
         private Embed GetEditedEmbed(MessageLogsMessageRow before, SocketCommandContext after)
         {
             EmbedBuilder embed = new EmbedBuilder();
-
+            embed.WithColor(66, 182, 245);
             embed.WithDescription($"**Message by {after.User.Mention} edited in {after.Channel}** [Jump]({after.Message.GetJumpUrl()})");
 
             if(before == null)
@@ -103,8 +110,6 @@ namespace Utili.Features
                 embed.WithTimestamp(new DateTimeOffset(before.Timestamp));
             }
 
-            embed.WithColor(66, 182, 245);
-
             string avatar = after.User.GetAvatarUrl();
             if (string.IsNullOrEmpty(avatar)) avatar = after.User.GetDefaultAvatarUrl();
 
@@ -120,11 +125,17 @@ namespace Utili.Features
         private Embed GetDeletedEmbed(SocketGuild guild, SocketTextChannel channel, MessageLogsMessageRow message)
         {
             EmbedBuilder embed = new EmbedBuilder();
+            embed.WithColor(245, 66, 66);
 
             if(message == null)
             {
                 embed.WithDescription(
                     $"**Message deleted in {channel.Mention}**\nThe content of the message could not be retrieved");
+
+                embed.WithAuthor(new EmbedAuthorBuilder
+                {
+                    Name = "Unknown author"
+                });
             }
             else
             {
@@ -159,6 +170,23 @@ namespace Utili.Features
                 embed.WithFooter("Sent");
                 embed.WithTimestamp(new DateTimeOffset(message.Timestamp));
             }
+
+            return embed.Build();
+        }
+
+        private Embed GetBulkDeletedEmbed(SocketGuild guild, SocketTextChannel channel, int count)
+        {
+            EmbedBuilder embed = new EmbedBuilder();
+
+            embed.WithColor(245, 66, 66);
+            embed.WithDescription($"**{count} messages bulk deleted in {channel.Mention}**\nLogging of bulk deleted messages is not supported yet");
+
+            // TODO: Support logging of bulk deleted messages
+
+            embed.WithAuthor(new EmbedAuthorBuilder
+            {
+                Name = "Bulk deletion"
+            });
 
             return embed.Build();
         }

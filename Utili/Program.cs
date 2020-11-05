@@ -68,6 +68,7 @@ namespace Utili
                 GatewayIntents = GatewayIntents.GuildMembers,
                 TotalShards = _totalShards,
                 AlwaysDownloadUsers = true,
+                MessageCacheSize = 0,
 
                 ExclusiveBulkDelete = true,
                 LogLevel = Discord.LogSeverity.Info
@@ -89,7 +90,8 @@ namespace Utili
             _client.Log += Client_Log;
             _client.MessageReceived += MessagesHandler.MessageReceived;
             _client.MessageUpdated += MessagesHandler.MessageEdited;
-            _client.MessageDeleted += _client_MessageDeleted;
+            _client.MessageDeleted += MessagesHandler.MessageDeleted;
+            _client.MessagesBulkDeleted += MessagesHandler.MessagesBulkDeleted;
             _client.ShardReady += ReadyHandler.ShardReady;
             _client.UserVoiceStateUpdated += VoiceHandler.UserVoiceStateUpdated;
 
@@ -102,11 +104,6 @@ namespace Utili
             _voiceRoles.Start();
 
             await Task.Delay(-1);
-        }
-
-        private Task _client_MessageDeleted()
-        {
-            throw new System.NotImplementedException();
         }
 
         private async Task Client_Log(LogMessage logMessage)

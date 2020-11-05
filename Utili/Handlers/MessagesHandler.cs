@@ -6,6 +6,8 @@ using static Utili.Program;
 using static Utili.MessageSender;
 using Renci.SshNet.Security.Cryptography;
 using Discord;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Utili.Handlers
 {
@@ -68,6 +70,15 @@ namespace Utili.Handlers
             SocketTextChannel guildChannel = channel as SocketTextChannel;
 
             _ = _messageLogs.MessageDeleted(guildChannel.Guild, guildChannel, partialMessage.Id);
+        }
+
+        public static async Task MessagesBulkDeleted(IReadOnlyCollection<Cacheable<IMessage, ulong>> messageIds, ISocketMessageChannel channel)
+        {
+            if (channel is SocketDMChannel) return;
+
+            SocketTextChannel guildChannel = channel as SocketTextChannel;
+
+            _ = _messageLogs.MessagesBulkDeleted(guildChannel.Guild, guildChannel, messageIds.Select(x => x.Id).ToList());
         }
 
         public static string GetCommandErrorReason(IResult result)
