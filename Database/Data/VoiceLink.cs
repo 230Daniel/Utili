@@ -71,7 +71,7 @@ namespace Database.Data
             if (metaRow.Id == 0) 
                 // The row is a new entry so should be inserted into the database
             {
-                command = Sql.GetCommand($"INSERT INTO VoiceLink (GuildID, Enabled, DeleteChannels, Prefix) VALUES (@GuildId, {Sql.GetBool(metaRow.Enabled)}, {Sql.GetBool(metaRow.DeleteChannels)}, @Prefix );",
+                command = Sql.GetCommand($"INSERT INTO VoiceLink (GuildID, Enabled, DeleteChannels, Prefix) VALUES (@GuildId, {Sql.ToSqlBool(metaRow.Enabled)}, {Sql.ToSqlBool(metaRow.DeleteChannels)}, @Prefix );",
                     new [] {("GuildId", metaRow.GuildId.ToString()), 
                         ("Prefix", metaRow.Prefix)});
 
@@ -84,7 +84,7 @@ namespace Database.Data
             else
                 // The row already exists and should be updated
             {
-                command = Sql.GetCommand($"UPDATE VoiceLink SET GuildId = @GuildId, Enabled = {Sql.GetBool(metaRow.Enabled)}, DeleteChannels = {Sql.GetBool(metaRow.DeleteChannels)}, Prefix = @Prefix WHERE Id = @Id;",
+                command = Sql.GetCommand($"UPDATE VoiceLink SET GuildId = @GuildId, Enabled = {Sql.ToSqlBool(metaRow.Enabled)}, DeleteChannels = {Sql.ToSqlBool(metaRow.DeleteChannels)}, Prefix = @Prefix WHERE Id = @Id;",
                     new [] {("Id", metaRow.Id.ToString()),
                         ("GuildId", metaRow.GuildId.ToString()), 
                         ("Prefix", metaRow.Prefix)});
@@ -165,7 +165,7 @@ namespace Database.Data
             if (channelRow.Id == 0) 
             // The row is a new entry so should be inserted into the database
             {
-                command = Sql.GetCommand($"INSERT INTO VoiceLinkChannels (GuildID, TextChannelId, VoiceChannelId, Excluded) VALUES (@GuildId, @TextChannelId, @VoiceChannelId, {Sql.GetBool(channelRow.Excluded)});",
+                command = Sql.GetCommand($"INSERT INTO VoiceLinkChannels (GuildID, TextChannelId, VoiceChannelId, Excluded) VALUES (@GuildId, @TextChannelId, @VoiceChannelId, {Sql.ToSqlBool(channelRow.Excluded)});",
                     new [] { ("GuildId", channelRow.GuildId.ToString()), 
                         ("TextChannelId", channelRow.TextChannelId.ToString()),
                         ("VoiceChannelId", channelRow.VoiceChannelId.ToString())});
@@ -179,7 +179,7 @@ namespace Database.Data
             else
             // The row already exists and should be updated
             {
-                command = Sql.GetCommand($"UPDATE VoiceLinkChannels SET GuildId = @GuildId, TextChannelId = @TextChannelId, VoiceChannelId = @VoiceChannelId, Excluded = {Sql.GetBool(channelRow.Excluded)} WHERE Id = @Id;",
+                command = Sql.GetCommand($"UPDATE VoiceLinkChannels SET GuildId = @GuildId, TextChannelId = @TextChannelId, VoiceChannelId = @VoiceChannelId, Excluded = {Sql.ToSqlBool(channelRow.Excluded)} WHERE Id = @Id;",
                     new [] {("Id", channelRow.Id.ToString()),
                         ("GuildId", channelRow.GuildId.ToString()), 
                         ("TextChannelId", channelRow.TextChannelId.ToString()),

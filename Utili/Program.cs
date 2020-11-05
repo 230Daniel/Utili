@@ -27,6 +27,7 @@ namespace Utili
         public static Features.Autopurge _autopurge = new Features.Autopurge();
         public static Features.VoiceLink _voiceLink = new Features.VoiceLink();
         public static Features.MessageFilter _messageFilter = new Features.MessageFilter();
+        public static Features.MessageLogs _messageLogs = new Features.MessageLogs();
         public static Features.VoiceRoles _voiceRoles = new Features.VoiceRoles();
 
         // ReSharper enable InconsistentNaming
@@ -64,9 +65,12 @@ namespace Utili
 
             _client = new DiscordShardedClient(shardIds, new DiscordSocketConfig
             {
+                GatewayIntents = GatewayIntents.GuildMembers,
+                TotalShards = _totalShards,
+                AlwaysDownloadUsers = true,
+
                 ExclusiveBulkDelete = true,
-                LogLevel = Discord.LogSeverity.Info,
-                TotalShards = _totalShards
+                LogLevel = Discord.LogSeverity.Info
             });
 
             _commands = new CommandService(new CommandServiceConfig
@@ -83,7 +87,9 @@ namespace Utili
             _logger.LogEmpty();
 
             _client.Log += Client_Log;
-            _client.MessageReceived += MessageReceivedHandler.MessageReceived;
+            _client.MessageReceived += MessagesHandler.MessageReceived;
+            _client.MessageUpdated += MessagesHandler.MessageEdited;
+            _client.MessageDeleted += _client_MessageDeleted;
             _client.ShardReady += ReadyHandler.ShardReady;
             _client.UserVoiceStateUpdated += VoiceHandler.UserVoiceStateUpdated;
 
@@ -98,7 +104,10 @@ namespace Utili
             await Task.Delay(-1);
         }
 
-        
+        private Task _client_MessageDeleted()
+        {
+            throw new System.NotImplementedException();
+        }
 
         private async Task Client_Log(LogMessage logMessage)
         {

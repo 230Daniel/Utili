@@ -25,7 +25,7 @@ namespace Database
                 "UPDATE Sharding SET Heartbeat = @Heartbeat, Guilds = @Guilds WHERE Shards = @Shards AND LowerShardId = @LowerShardId",
                 new[]
                 {
-                    ("Heartbeat", ConvertToSqlTime(DateTime.UtcNow)),
+                    ("Heartbeat", ToSqlDateTime(DateTime.UtcNow)),
                     ("Guilds", guilds.ToString()),
                     ("Shards", shards.ToString()),
                     ("LowerShardId", lowerShardId.ToString())
@@ -40,7 +40,7 @@ namespace Database
                     "INSERT INTO Sharding(Shards, LowerShardId, Heartbeat, Guilds) VALUES(@Shards, @LowerShardId, @Heartbeat, @Guilds)",
                     new[]
                     {
-                        ("Heartbeat", ConvertToSqlTime(DateTime.UtcNow)),
+                        ("Heartbeat", ToSqlDateTime(DateTime.UtcNow)),
                         ("Guilds", guilds.ToString()),
                         ("Shards", shards.ToString()),
                         ("LowerShardId", lowerShardId.ToString())
@@ -56,7 +56,7 @@ namespace Database
             MySqlDataReader reader = GetCommand("SELECT Guilds FROM Sharding WHERE Heartbeat > @MinimumHeartbeat AND Guilds IS NOT NULL",
                 new[]
                 {
-                    ("MinimumHeartbeat", ConvertToSqlTime(DateTime.UtcNow - TimeSpan.FromSeconds(30)))
+                    ("MinimumHeartbeat", ToSqlDateTime(DateTime.UtcNow - TimeSpan.FromSeconds(30)))
                 }).ExecuteReader();
 
             int guilds = 0;

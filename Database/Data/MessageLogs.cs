@@ -57,6 +57,18 @@ namespace Database.Data
             return matchedRows;
         }
 
+        public static MessageLogsRow GetRow(ulong guildId)
+        {
+            List<MessageLogsRow> rows = GetRows(guildId);
+
+            if (rows.Count == 0)
+            {
+                return new MessageLogsRow(0, guildId, 0, 0, null);
+            }
+
+            return rows.First();
+        }
+
         public static void SaveRow(MessageLogsRow row)
         {
             MySqlCommand command;
@@ -94,7 +106,7 @@ namespace Database.Data
             }
         }
 
-        public static List<MessageLogsMessageRow> GetMessages(ulong? guildId = null, ulong? messageId = null, int? id = null)
+        public static List<MessageLogsMessageRow> GetMessages(ulong? guildId = null, ulong? channelId = null, ulong? messageId = null, int? id = null)
         {
             List<MessageLogsMessageRow> matchedRows = new List<MessageLogsMessageRow>();
 
@@ -105,6 +117,12 @@ namespace Database.Data
             {
                 command += " AND GuildId = @GuildId";
                 values.Add(("GuildId", guildId.Value.ToString()));
+            }
+
+            if (channelId.HasValue)
+            {
+                command += " AND ChannelId = @ChannelId";
+                values.Add(("ChannelId", channelId.Value.ToString()));
             }
 
             if (messageId.HasValue)
@@ -138,6 +156,17 @@ namespace Database.Data
             return matchedRows;
         }
 
+        public static MessageLogsMessageRow GetMessage(ulong guildId, ulong channelId, ulong messageId)
+        {
+            List<MessageLogsMessageRow> messages = GetMessages(guildId, channelId, messageId);
+
+            if (messages.Count == 0)
+            {
+                return null;
+            }
+
+            return messages.First();
+        }
         public static void SaveMessage(MessageLogsMessageRow row)
         {
             MySqlCommand command;
@@ -150,13 +179,13 @@ namespace Database.Data
                         ("ChannelId", row.ChannelId.ToString()),
                         ("MessageId", row.MessageId.ToString()),
                         ("UserId", row.UserId.ToString()),
-                        ("Timestamp", Sql.ConvertToSqlTime(row.Timestamp)),
+                        ("Timestamp", Sql.ToSqlDateTime(row.Timestamp)),
                         ("Content", row.Content)
                     });
 
                 command.ExecuteNonQuery();
                 command.Connection.Close();
-                row.Id = GetMessages(row.GuildId, row.MessageId).First().Id;
+                row.Id = GetMessages(row.GuildId, row.ChannelId, row.MessageId).First().Id;
             }
             else
             // The row already exists and should be updated
@@ -167,13 +196,40 @@ namespace Database.Data
                         ("ChannelId", row.ChannelId.ToString()),
                         ("MessageId", row.MessageId.ToString()),
                         ("UserId", row.UserId.ToString()),
-                        ("Timestamp", Sql.ConvertToSqlTime(row.Timestamp)),
+                        ("Timestamp", Sql.ToSqlDateTime(row.Timestamp)),
                         ("Content", row.Content)
                     });
 
                 command.ExecuteNonQuery();
                 command.Connection.Close();
             }
+        }
+
+        public static void DeleteMessagesById(int[] ids)
+        {
+            MySqlCommand command = Sql.GetCommand("DELETE FROM MessageLogsMessages WHERE Id IN @Ids",
+                new[]
+                {
+                    ("Ids", Sql.ToSqlArray(ids))
+                });
+
+            command.ExecuteNonQuery();
+
+            command.Connection.Close();
+        }
+
+        public static void DeleteOldMessages(ulong guildId, ulong channelId, bool premium)
+        // This is NOT to remove logs older than 30 days
+        {
+            List<MessageLogsMessageRow> messages = GetMessages(guildId, channelId).OrderBy(x => x.Id).ToList();
+            List<MessageLogsMessageRow> messagesToRemove = new List<MessageLogsMessageRow>();
+
+            if (!premium)
+            {
+                messagesToRemove.AddRange(messages.Take(messages.Count - 25));
+            }
+
+            DeleteMessagesById(messagesToRemove.Select(x => x.Id).ToArray());
         }
     }
 
@@ -228,11 +284,15 @@ namespace Database.Data
             EditedChannelId = editedChannelId;
 
             ExcludedChannels.Clear();
-            foreach (string excludedChannel in excludedChannels.Split(","))
+
+            if (!string.IsNullOrEmpty(excludedChannels))
             {
-                if (ulong.TryParse(excludedChannel, out ulong channelId))
+                foreach (string excludedChannel in excludedChannels.Split(","))
                 {
-                    ExcludedChannels.Add(channelId);
+                    if (ulong.TryParse(excludedChannel, out ulong channelId))
+                    {
+                        ExcludedChannels.Add(channelId);
+                    }
                 }
             }
         }
@@ -265,6 +325,11 @@ namespace Database.Data
         public DateTime Timestamp { get; set; }
         public string Content { get; set; }
 
+        public MessageLogsMessageRow()
+        {
+            Id = 0;
+        }
+
         public MessageLogsMessageRow(int id, ulong guildId, ulong channelId, ulong messageId, ulong userId, DateTime timestamp, string content)
         {
             Id = id;
@@ -272,7 +337,7 @@ namespace Database.Data
             ChannelId = channelId;
             MessageId = messageId;
             UserId = userId;
-            Timestamp = timestamp;
+            Timestamp = DateTime.SpecifyKind(timestamp, DateTimeKind.Utc);
             Content = content;
         }
     }

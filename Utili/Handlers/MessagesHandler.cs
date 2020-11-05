@@ -4,10 +4,12 @@ using Discord.Commands;
 using Discord.WebSocket;
 using static Utili.Program;
 using static Utili.MessageSender;
+using Renci.SshNet.Security.Cryptography;
+using Discord;
 
 namespace Utili.Handlers
 {
-    internal class MessageReceivedHandler
+    internal class MessagesHandler
     {
         public static async Task MessageReceived(SocketMessage partialMessage)
         {
@@ -46,6 +48,26 @@ namespace Utili.Handlers
 
                 _ = _messageFilter.MessageReceived(context);
             });
+        }
+
+        public static async Task MessageEdited(Cacheable<IMessage, ulong> partialMessage, SocketMessage message, ISocketMessageChannel channel)
+        {
+            if (message.Author.IsBot || channel is SocketDMChannel) return;
+
+            SocketTextChannel guildChannel = channel as SocketTextChannel;
+
+            SocketCommandContext context = new SocketCommandContext(Helper.GetShardForGuild(guildChannel.Guild), message as SocketUserMessage);
+
+            _ = _messageLogs.MessageEdited(context);
+        }
+
+        public static async Task MessageDeleted(Cacheable<IMessage, ulong> partialMessage, ISocketMessageChannel channel)
+        {
+            if (channel is SocketDMChannel) return;
+
+            SocketTextChannel guildChannel = channel as SocketTextChannel;
+
+            _ = _messageLogs.MessageDeleted(guildChannel.Guild, guildChannel, partialMessage.Id);
         }
 
         public static string GetCommandErrorReason(IResult result)
