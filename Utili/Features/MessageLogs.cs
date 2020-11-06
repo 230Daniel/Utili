@@ -88,7 +88,7 @@ namespace Utili.Features
         {
             EmbedBuilder embed = new EmbedBuilder();
             embed.WithColor(66, 182, 245);
-            embed.WithDescription($"**Message by {after.User.Mention} edited in {after.Channel}** [Jump]({after.Message.GetJumpUrl()})");
+            embed.WithDescription($"**Message by {after.User.Mention} edited in {(after.Channel as SocketTextChannel).Mention}** [Jump]({after.Message.GetJumpUrl()})");
 
             if(before.Content.Length > 1024 || after.Message.Content.Length > 1024)
             {
@@ -101,7 +101,7 @@ namespace Utili.Features
                     embed.Description += "\nThe message is too large to fit in this embed";
                 }
 
-                embed.WithFooter("Sent");
+                embed.WithFooter($"Message {before.MessageId}");
                 embed.WithTimestamp(new DateTimeOffset(before.Timestamp));
             }
             else
@@ -158,7 +158,7 @@ namespace Utili.Features
                 embed.Description += $"\n{message.Content}";
             }
 
-            embed.WithFooter("Sent");
+            embed.WithFooter($"Message {message.MessageId}");
             embed.WithTimestamp(new DateTimeOffset(message.Timestamp));
 
             return embed.Build();

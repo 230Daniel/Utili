@@ -1,10 +1,12 @@
 ﻿using MySql.Data.MySqlClient;
 using Org.BouncyCastle.Asn1.Mozilla;
+using Org.BouncyCastle.Utilities.Encoders;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security;
 using System.Text;
+using System.Text.Unicode;
 using System.Threading.Tasks;
 
 namespace Database.Data
@@ -180,7 +182,7 @@ namespace Database.Data
                         ("MessageId", row.MessageId.ToString()),
                         ("UserId", row.UserId.ToString()),
                         ("Timestamp", Sql.ToSqlDateTime(row.Timestamp)),
-                        ("Content", row.Content)
+                        ("Content", row.EncodedContent)
                     });
 
                 command.ExecuteNonQuery();
@@ -197,7 +199,7 @@ namespace Database.Data
                         ("MessageId", row.MessageId.ToString()),
                         ("UserId", row.UserId.ToString()),
                         ("Timestamp", Sql.ToSqlDateTime(row.Timestamp)),
-                        ("Content", row.Content)
+                        ("Content", row.EncodedContent)
                     });
 
                 command.ExecuteNonQuery();
@@ -237,9 +239,9 @@ namespace Database.Data
             List<MessageLogsMessageRow> messages = GetMessages(guildId, channelId).OrderBy(x => x.Id).ToList();
             List<MessageLogsMessageRow> messagesToRemove = new List<MessageLogsMessageRow>();
 
-            if (!premium || true)
+            if (!premium)
             {
-                messagesToRemove.AddRange(messages.Take(messages.Count - 5));
+                messagesToRemove.AddRange(messages.Take(messages.Count - 100));
             }
 
             DeleteMessagesById(messagesToRemove.Select(x => x.Id).ToArray());
@@ -336,7 +338,14 @@ namespace Database.Data
         public ulong MessageId { get; set; }
         public ulong UserId { get; set; }
         public DateTime Timestamp { get; set; }
-        public string Content { get; set; }
+
+        public string EncodedContent { get; private set; }
+
+        public string Content
+        {
+            get => Sql.DecodeString(EncodedContent);
+            set => EncodedContent = Sql.EncodeString(value);
+        }
 
         public MessageLogsMessageRow()
         {
@@ -351,7 +360,7 @@ namespace Database.Data
             MessageId = messageId;
             UserId = userId;
             Timestamp = DateTime.SpecifyKind(timestamp, DateTimeKind.Utc);
-            Content = content;
+            Content = Sql.DecodeString(content);
         }
     }
 }
