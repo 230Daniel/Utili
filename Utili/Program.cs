@@ -87,6 +87,7 @@ namespace Utili
                 LogLevel = Discord.LogSeverity.Debug
             });
 
+            _commands.AddTypeReader(typeof(IGuildUser), new UserTypeReader());
             await _commands.AddModulesAsync(assembly: Assembly.GetEntryAssembly(), services: null);
 
             _logger.Log("MainAsync", $"Running {_config.UpperShardId - (_config.LowerShardId - 1)} shards of Utili with {_totalShards} total shards", LogSeverity.Info);
