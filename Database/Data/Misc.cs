@@ -84,7 +84,7 @@ namespace Database.Data
                 command.ExecuteNonQuery();
                 command.Connection.Close();
 
-                row.Id = GetRows(row.GuildId, row.Type, row.Value.EncodedValue).First().Id;
+                row.Id = GetRows(row.GuildId, row.Type, row.Value.Value).First().Id;
 
                 if(Cache.Initialised) Cache.Misc.Rows.Add(row);
             }

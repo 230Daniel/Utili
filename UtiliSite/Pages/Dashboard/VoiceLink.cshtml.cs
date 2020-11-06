@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Timers;
+using Database;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Database.Data;
@@ -62,7 +63,7 @@ namespace UtiliSite.Pages.Dashboard
             VoiceLinkRow row = VoiceLink.GetMetaRow(auth.Guild.Id);
             row.Enabled = enabled;
             row.DeleteChannels = deleteChannels;
-            row.Prefix = prefix;
+            row.Prefix = EString.FromDecoded(prefix);
             VoiceLink.SaveMetaRow(row);
 
             HttpContext.Response.StatusCode = 200;
