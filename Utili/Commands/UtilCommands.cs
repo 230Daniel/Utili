@@ -108,5 +108,26 @@ namespace Utili.Commands
             await SendSuccessAsync(Context.Channel, "Reaction added",
                 $"The {emojiString} reaction was added to a message sent by {message.Author.Mention}");
         }
+
+        [Command("B64Encode")]
+        public async Task B64Encode([Remainder] string input)
+        {
+            string output = Helper.EncodeString(input);
+            await SendSuccessAsync(Context.Channel, "Encoded string to base 64", output);
+        }
+
+        [Command("B64Decode")]
+        public async Task B64Decode([Remainder] string input)
+        {
+            string output = Helper.DecodeString(input);
+
+            if (output == input)
+            {
+                await SendFailureAsync(Context.Channel, "Failed to decode string", "The input string is not valid base 64");
+                return;
+            }
+
+            await SendSuccessAsync(Context.Channel, "Decoded string from base 64", output);
+        }
     }
 }

@@ -343,8 +343,8 @@ namespace Database.Data
 
         public string Content
         {
-            get => Sql.DecodeString(EncodedContent);
-            set => EncodedContent = Sql.EncodeString(value);
+            get => Sql.DecryptString(EncodedContent, GuildId, ChannelId, MessageId, UserId);
+            set => EncodedContent = Sql.EncryptString(value, GuildId, ChannelId, MessageId, UserId);
         }
 
         public MessageLogsMessageRow()
@@ -360,7 +360,7 @@ namespace Database.Data
             MessageId = messageId;
             UserId = userId;
             Timestamp = DateTime.SpecifyKind(timestamp, DateTimeKind.Utc);
-            Content = Sql.DecodeString(content);
+            Content = Sql.DecryptString(content, guildId, channelId, messageId, userId);
         }
     }
 }

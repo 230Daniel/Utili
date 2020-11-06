@@ -2,6 +2,7 @@
 using Discord.WebSocket;
 using System;
 using System.Linq;
+using System.Text;
 
 namespace Utili
 {
@@ -74,6 +75,25 @@ namespace Utili
             }
 
             return after.VoiceChannel.Id != before.VoiceChannel.Id;
+        }
+
+        public static string EncodeString(string input)
+        {
+            byte[] bytes = Encoding.UTF8.GetBytes(input);
+            return Convert.ToBase64String(bytes);
+        }
+
+        public static string DecodeString(string input)
+        {
+            try
+            {
+                byte[] bytes = Convert.FromBase64String(input);
+                return Encoding.UTF8.GetString(bytes);
+            }
+            catch
+            {
+                return input;
+            }
         }
     }
 }
