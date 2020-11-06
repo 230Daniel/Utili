@@ -6,7 +6,7 @@ using static Utili.Program;
 
 namespace Utili.Handlers
 {
-    internal class ReadyHandler
+    internal class ShardHandler
     {
         private static int _shardsStarted;
 
@@ -14,6 +14,26 @@ namespace Utili.Handlers
         {
             _ = Task.Run(async () =>
             {
+                
+            });
+        }
+
+        public static async Task ShardConnected(DiscordSocketClient shard)
+        {
+            _ = Task.Run(async () =>
+            {
+                foreach (SocketGuild guild in _client.Guilds)
+                {
+                    await guild.DownloadUsersAsync();
+                }
+
+                int notDownloaded = _client.Guilds.Count(x => x.Users.Count != x.MemberCount);
+                if (notDownloaded > 0)
+                {
+                    _logger.Log("Connected", $"Users not fully downloaded for {notDownloaded} guilds",
+                        LogSeverity.Warn);
+                }
+                
                 await shard.SetGameAsync("utili.bot | .help");
 
                 _shardsStarted += 1;

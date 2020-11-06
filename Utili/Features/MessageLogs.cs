@@ -20,13 +20,14 @@ namespace Utili.Features
 
             MessageLogsRow row = Database.Data.MessageLogs.GetRow(context.Guild.Id);
 
-            if (row.DeletedChannelId == 0 && row.EditedChannelId == 0) return;
+            if ((row.DeletedChannelId == 0 && row.EditedChannelId == 0) || row.ExcludedChannels.Contains(context.Channel.Id)) return;
 
             MessageLogsMessageRow message = new MessageLogsMessageRow()
             {
                 GuildId = context.Guild.Id,
                 ChannelId = context.Channel.Id,
                 MessageId = context.Message.Id,
+                UserId = context.User.Id,
                 Timestamp = DateTime.UtcNow,
                 Content = context.Message.Content
             };
@@ -42,8 +43,7 @@ namespace Utili.Features
             if ((row.DeletedChannelId == 0 && row.EditedChannelId == 0) || row.ExcludedChannels.Contains(context.Channel.Id)) return;
 
             MessageLogsMessageRow message = Database.Data.MessageLogs.GetMessage(context.Guild.Id, context.Channel.Id, context.Message.Id);
-            if (message.Content == context.Message.Content) return;
-
+            if (message == null) return;
             Embed embed = GetEditedEmbed(message, context);
 
             message.Content = context.Message.Content;
@@ -60,9 +60,10 @@ namespace Utili.Features
             if ((row.DeletedChannelId == 0 && row.EditedChannelId == 0) || row.ExcludedChannels.Contains(channel.Id)) return;
 
             MessageLogsMessageRow message = Database.Data.MessageLogs.GetMessage(guild.Id, channel.Id, messageId);
+            if(message == null) return;
             Embed embed = GetDeletedEmbed(guild, channel, message);
 
-            Database.Data.MessageLogs.DeleteMessagesById(new [] {message.Id});
+            Database.Data.MessageLogs.DeleteMessagesById(new[] {message.Id});
 
             SocketTextChannel logChannel = guild.GetTextChannel(row.DeletedChannelId);
             if(logChannel == null) return;
@@ -75,6 +76,12 @@ namespace Utili.Features
             if ((row.DeletedChannelId == 0 && row.EditedChannelId == 0) || row.ExcludedChannels.Contains(channel.Id)) return;
 
             Embed embed = GetBulkDeletedEmbed(guild, channel, messageIds.Count);
+
+            Database.Data.MessageLogs.DeleteMessagesByMessageId(guild.Id, channel.Id, messageIds.ToArray());
+
+            SocketTextChannel logChannel = guild.GetTextChannel(row.DeletedChannelId);
+            if(logChannel == null) return;
+            await logChannel.SendMessageAsync(embed: embed);
         }
 
         private Embed GetEditedEmbed(MessageLogsMessageRow before, SocketCommandContext after)
@@ -83,11 +90,7 @@ namespace Utili.Features
             embed.WithColor(66, 182, 245);
             embed.WithDescription($"**Message by {after.User.Mention} edited in {after.Channel}** [Jump]({after.Message.GetJumpUrl()})");
 
-            if(before == null)
-            {
-                embed.Description += $"\nThe content of the message could not be retrieved";
-            }
-            else if(before.Content.Length > 1024 || after.Message.Content.Length > 1024)
+            if(before.Content.Length > 1024 || after.Message.Content.Length > 1024)
             {
                 if(before.Content.Length < 2024 - embed.Description.Length - 2)
                 {
@@ -127,49 +130,36 @@ namespace Utili.Features
             EmbedBuilder embed = new EmbedBuilder();
             embed.WithColor(245, 66, 66);
 
-            if(message == null)
+            SocketUser user = guild.GetUser(message.UserId);
+            string userMention = message.UserId.ToString();
+
+            if (user != null)
             {
-                embed.WithDescription(
-                    $"**Message deleted in {channel.Mention}**\nThe content of the message could not be retrieved");
+                userMention = user.Mention;
+
+                string avatar = user.GetAvatarUrl();
+                if (string.IsNullOrEmpty(avatar)) avatar = user.GetDefaultAvatarUrl();
 
                 embed.WithAuthor(new EmbedAuthorBuilder
                 {
-                    Name = "Unknown author"
+                    Name = $"{user.Username}#{user.Discriminator}",
+                    IconUrl = avatar
                 });
+            }
+
+            embed.WithDescription($"**Message by {userMention} deleted in {channel.Mention}**");
+
+            if(message.Content.Length > 2024 - embed.Description.Length - 2)
+            {
+                embed.Description += "\nThe message is too large to fit in this embed";
             }
             else
             {
-                SocketUser user = guild.GetUser(message.UserId);
-                string userMention = message.UserId.ToString();
-
-                if (user != null)
-                {
-                    userMention = user.Mention;
-
-                    string avatar = user.GetAvatarUrl();
-                    if (string.IsNullOrEmpty(avatar)) avatar = user.GetDefaultAvatarUrl();
-
-                    embed.WithAuthor(new EmbedAuthorBuilder
-                    {
-                        Name = $"{user.Username}#{user.Discriminator}",
-                        IconUrl = avatar
-                    });
-                }
-
-                embed.WithDescription($"**Message by {userMention} deleted in {channel.Mention}**");
-
-                if(message.Content.Length > 2024 - embed.Description.Length - 2)
-                {
-                    embed.Description += "\nThe message is too large to fit in this embed";
-                }
-                else
-                {
-                    embed.Description += $"\n{message.Content}";
-                }
-
-                embed.WithFooter("Sent");
-                embed.WithTimestamp(new DateTimeOffset(message.Timestamp));
+                embed.Description += $"\n{message.Content}";
             }
+
+            embed.WithFooter("Sent");
+            embed.WithTimestamp(new DateTimeOffset(message.Timestamp));
 
             return embed.Build();
         }

@@ -23,6 +23,9 @@ namespace Utili.Handlers
 
                 SocketCommandContext context = new SocketCommandContext(_client.GetShardFor(guild), message);
 
+                _logger.Log("Msg",
+                    $"Guild: {guild.Name}. Total members: {guild.MemberCount}. Downloaded members: {guild.Users.Count}");
+
                 if (!context.User.IsBot && !string.IsNullOrEmpty(context.Message.Content))
                 {
                     string prefix = Misc.GetPrefix(guild.Id);
@@ -49,36 +52,47 @@ namespace Utili.Handlers
                 }
 
                 _ = _messageFilter.MessageReceived(context);
+                _ = _messageLogs.MessageReceived(context);
             });
         }
 
         public static async Task MessageEdited(Cacheable<IMessage, ulong> partialMessage, SocketMessage message, ISocketMessageChannel channel)
         {
-            if (message.Author.IsBot || channel is SocketDMChannel) return;
+            _ = Task.Run(async () =>
+            {
+                if (message.Author.IsBot || channel is SocketDMChannel) return;
 
-            SocketTextChannel guildChannel = channel as SocketTextChannel;
+                SocketTextChannel guildChannel = channel as SocketTextChannel;
 
-            SocketCommandContext context = new SocketCommandContext(Helper.GetShardForGuild(guildChannel.Guild), message as SocketUserMessage);
+                SocketCommandContext context = new SocketCommandContext(Helper.GetShardForGuild(guildChannel.Guild), message as SocketUserMessage);
 
-            _ = _messageLogs.MessageEdited(context);
+                _ = _messageLogs.MessageEdited(context);
+            });
         }
 
         public static async Task MessageDeleted(Cacheable<IMessage, ulong> partialMessage, ISocketMessageChannel channel)
         {
-            if (channel is SocketDMChannel) return;
+            _ = Task.Run(async () =>
+            {
+                if (channel is SocketDMChannel) return;
 
-            SocketTextChannel guildChannel = channel as SocketTextChannel;
+                SocketTextChannel guildChannel = channel as SocketTextChannel;
 
-            _ = _messageLogs.MessageDeleted(guildChannel.Guild, guildChannel, partialMessage.Id);
+                _ = _messageLogs.MessageDeleted(guildChannel.Guild, guildChannel, partialMessage.Id);
+            });
         }
 
         public static async Task MessagesBulkDeleted(IReadOnlyCollection<Cacheable<IMessage, ulong>> messageIds, ISocketMessageChannel channel)
         {
-            if (channel is SocketDMChannel) return;
+            _ = Task.Run(async () =>
+            {
+                if (channel is SocketDMChannel) return;
 
-            SocketTextChannel guildChannel = channel as SocketTextChannel;
+                SocketTextChannel guildChannel = channel as SocketTextChannel;
 
-            _ = _messageLogs.MessagesBulkDeleted(guildChannel.Guild, guildChannel, messageIds.Select(x => x.Id).ToList());
+                _ = _messageLogs.MessagesBulkDeleted(guildChannel.Guild, guildChannel,
+                    messageIds.Select(x => x.Id).ToList());
+            });
         }
 
         public static string GetCommandErrorReason(IResult result)

@@ -207,10 +207,23 @@ namespace Database.Data
 
         public static void DeleteMessagesById(int[] ids)
         {
-            MySqlCommand command = Sql.GetCommand("DELETE FROM MessageLogsMessages WHERE Id IN @Ids",
+            if(ids.Length == 0) return;
+
+            MySqlCommand command =
+                Sql.GetCommand($"DELETE FROM MessageLogsMessages WHERE Id IN {Sql.ToSqlObjectArray(ids)};");
+
+            command.ExecuteNonQuery();
+
+            command.Connection.Close();
+        }
+
+        public static void DeleteMessagesByMessageId(ulong guildId, ulong channelId, ulong[] messageIds)
+        {
+            MySqlCommand command = Sql.GetCommand($"DELETE FROM MessageLogsMessages WHERE GuildId = @GuildId AND ChannelId = @ChannelID AND MessageId IN {Sql.ToSqlObjectArray(messageIds)}",
                 new[]
                 {
-                    ("Ids", Sql.ToSqlArray(ids))
+                    ("GuildId", guildId.ToString()),
+                    ("ChannelId", channelId.ToString())
                 });
 
             command.ExecuteNonQuery();
@@ -224,9 +237,9 @@ namespace Database.Data
             List<MessageLogsMessageRow> messages = GetMessages(guildId, channelId).OrderBy(x => x.Id).ToList();
             List<MessageLogsMessageRow> messagesToRemove = new List<MessageLogsMessageRow>();
 
-            if (!premium)
+            if (!premium || true)
             {
-                messagesToRemove.AddRange(messages.Take(messages.Count - 25));
+                messagesToRemove.AddRange(messages.Take(messages.Count - 5));
             }
 
             DeleteMessagesById(messagesToRemove.Select(x => x.Id).ToArray());

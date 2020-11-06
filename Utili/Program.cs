@@ -41,15 +41,16 @@ namespace Utili
             _logger.Initialise();
             _logger.LogEmpty(true);
 
-            _logger.Log("Main", "Connecting to the database", LogSeverity.Info);
+            _logger.Log("Main", "Downloading database cache", LogSeverity.Info);
 
             // Initialise the database and use cache
             Database.Database.Initialise(true);
 
-            _logger.Log("Main", "Connected to the database", LogSeverity.Info);
-            _logger.Log("Main", "Cache downloaded", LogSeverity.Info);
+            _logger.Log("Main", "Database cache downloaded", LogSeverity.Info);
 
             new Program().MainAsync().GetAwaiter().GetResult();
+
+            // TODO: Crash detection and auto-restart
         }
 
         public async Task MainAsync()
@@ -63,15 +64,20 @@ namespace Utili
             int[] shardIds = Enumerable.Range(_config.LowerShardId, _config.UpperShardId - (_config.LowerShardId - 1)).ToArray();
             _totalShards = Database.Sharding.GetTotalShards();
 
-            _client = new DiscordShardedClient(shardIds, new DiscordSocketConfig
+            _client = new DiscordShardedClient(shardIds, new DiscordSocketConfig 
             {
-                GatewayIntents = GatewayIntents.GuildMembers,
                 TotalShards = _totalShards,
-                AlwaysDownloadUsers = true,
                 MessageCacheSize = 0,
-
                 ExclusiveBulkDelete = true,
-                LogLevel = Discord.LogSeverity.Info
+                AlwaysDownloadUsers = true,
+                LogLevel = Discord.LogSeverity.Info,
+
+                GatewayIntents = 
+                    GatewayIntents.Guilds |
+                    GatewayIntents.GuildMembers |
+                    GatewayIntents.GuildMessageReactions | 
+                    GatewayIntents.GuildMessages | 
+                    GatewayIntents.GuildVoiceStates
             });
 
             _commands = new CommandService(new CommandServiceConfig
@@ -92,10 +98,13 @@ namespace Utili
             _client.MessageUpdated += MessagesHandler.MessageEdited;
             _client.MessageDeleted += MessagesHandler.MessageDeleted;
             _client.MessagesBulkDeleted += MessagesHandler.MessagesBulkDeleted;
-            _client.ShardReady += ReadyHandler.ShardReady;
+            _client.ShardReady += ShardHandler.ShardReady;
+            _client.ShardConnected += ShardHandler.ShardConnected;
             _client.UserVoiceStateUpdated += VoiceHandler.UserVoiceStateUpdated;
 
             await _client.LoginAsync(TokenType.Bot, _config.Token);
+
+            await _client.SetGameAsync("Starting up...");
 
             await _client.StartAsync();
 

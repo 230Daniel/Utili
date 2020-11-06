@@ -51,9 +51,9 @@ namespace Database
             return $"{time.Year:0000}-{time.Month:00}-{time.Day:00} {time.Hour:00}:{time.Minute:00}:{time.Second:00}";
         }
 
-        public static string ToSqlArray(int[] values)
+        public static string ToSqlObjectArray<T>(T[] values)
         {
-            string sqlArray = "";
+            string sqlArray = "(";
 
             for (int i = 0; i < values.Length; i++)
             {
@@ -62,6 +62,7 @@ namespace Database
                 if (i != values.Length - 1) sqlArray += ",";
             }
 
+            sqlArray += ")";
             return sqlArray;
         }
     }
