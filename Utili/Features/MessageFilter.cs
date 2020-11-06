@@ -103,8 +103,8 @@ namespace Utili.Features
                     return IsImage(context) || IsVideo(context) || IsUrl(context);
 
                 case 8: // RegEx
-                    allowedTypes = $"which match regex \"{row.Complex}\"";
-                    return IsRegex(context, row.Complex);
+                    allowedTypes = $"which match regex \"{row.Complex.Value}\"";
+                    return IsRegex(context, row.Complex.Value);
 
                 default:
                     allowedTypes = "";

@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Timers;
+using Database;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Database.Data;
@@ -52,7 +53,7 @@ namespace UtiliSite.Pages.Dashboard
             int before = row.Mode;
 
             row.Mode = mode;
-            row.Complex = complex;
+            row.Complex = EString.FromDecoded(complex);
             MessageFilter.SaveRow(row);
 
             if ((before == 8 || mode == 8) && before != mode)
@@ -83,7 +84,7 @@ namespace UtiliSite.Pages.Dashboard
                 GuildId = auth.Guild.Id,
                 ChannelId = channel.Id,
                 Mode = 0,
-                Complex = ""
+                Complex = EString.FromDecoded("")
             };
 
             MessageFilter.SaveRow(newRow);

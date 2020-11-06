@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -44,10 +45,17 @@ namespace Database
             }
         }
 
-        public static string GeneratePassword(ulong arg1, ulong arg2, ulong arg3, ulong arg4)
+        public static string GeneratePassword(ulong[] ids)
         {
-            string password = arg1.ToString().Substring(0, 16) + arg2.ToString().Substring(0, 14) +
-                              arg3.ToString().Substring(0, 12) + arg4.ToString().Substring(0, 10);
+            string password = "";
+
+            int amountTake = 16;
+            foreach (ulong id in ids)
+            {
+                password += id.ToString().Substring(0, amountTake);
+
+                if (amountTake > 2) amountTake -= 2;
+            }
 
             return password;
         }

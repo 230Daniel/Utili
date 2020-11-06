@@ -4,6 +4,7 @@ using Org.BouncyCastle.Utilities.Encoders;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Metadata.Ecma335;
 using System.Security;
 using System.Text;
 using System.Text.Unicode;
@@ -169,6 +170,7 @@ namespace Database.Data
 
             return messages.First();
         }
+
         public static void SaveMessage(MessageLogsMessageRow row)
         {
             MySqlCommand command;
@@ -182,7 +184,7 @@ namespace Database.Data
                         ("MessageId", row.MessageId.ToString()),
                         ("UserId", row.UserId.ToString()),
                         ("Timestamp", Sql.ToSqlDateTime(row.Timestamp)),
-                        ("Content", row.EncodedContent)
+                        ("Content", row.Content.GetEncryptedValue(row.Ids))
                     });
 
                 command.ExecuteNonQuery();
@@ -199,7 +201,7 @@ namespace Database.Data
                         ("MessageId", row.MessageId.ToString()),
                         ("UserId", row.UserId.ToString()),
                         ("Timestamp", Sql.ToSqlDateTime(row.Timestamp)),
-                        ("Content", row.EncodedContent)
+                        ("Content", row.Content.GetEncryptedValue(row.Ids))
                     });
 
                 command.ExecuteNonQuery();
@@ -338,14 +340,9 @@ namespace Database.Data
         public ulong MessageId { get; set; }
         public ulong UserId { get; set; }
         public DateTime Timestamp { get; set; }
+        public ulong[] Ids => new [] {GuildId, ChannelId, MessageId, UserId};
 
-        public string EncodedContent { get; private set; }
-
-        public string Content
-        {
-            get => Sql.DecryptString(EncodedContent, GuildId, ChannelId, MessageId, UserId);
-            set => EncodedContent = Sql.EncryptString(value, GuildId, ChannelId, MessageId, UserId);
-        }
+        public EString Content { get; set; }
 
         public MessageLogsMessageRow()
         {
@@ -360,7 +357,7 @@ namespace Database.Data
             MessageId = messageId;
             UserId = userId;
             Timestamp = DateTime.SpecifyKind(timestamp, DateTimeKind.Utc);
-            Content = Sql.DecryptString(content, guildId, channelId, messageId, userId);
+            Content = EString.FromEncrypted(content, Ids);
         }
     }
 }

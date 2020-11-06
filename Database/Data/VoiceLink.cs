@@ -58,7 +58,14 @@ namespace Database.Data
 
             if (rows.Count == 0)
             {
-                return new VoiceLinkRow(0, guildId, false, true, "vc-");
+                return new VoiceLinkRow
+                {
+                    Id = 0,
+                    GuildId = guildId,
+                    Enabled = false,
+                    DeleteChannels = true,
+                    Prefix = EString.FromDecoded("vc-")
+                };
             }
             
             return rows.First();
@@ -73,7 +80,7 @@ namespace Database.Data
             {
                 command = Sql.GetCommand($"INSERT INTO VoiceLink (GuildID, Enabled, DeleteChannels, Prefix) VALUES (@GuildId, {Sql.ToSqlBool(metaRow.Enabled)}, {Sql.ToSqlBool(metaRow.DeleteChannels)}, @Prefix );",
                     new [] {("GuildId", metaRow.GuildId.ToString()), 
-                        ("Prefix", metaRow.Prefix)});
+                        ("Prefix", metaRow.Prefix.EncodedValue)});
 
                 command.ExecuteNonQuery();
                 command.Connection.Close();
@@ -87,7 +94,7 @@ namespace Database.Data
                 command = Sql.GetCommand($"UPDATE VoiceLink SET GuildId = @GuildId, Enabled = {Sql.ToSqlBool(metaRow.Enabled)}, DeleteChannels = {Sql.ToSqlBool(metaRow.DeleteChannels)}, Prefix = @Prefix WHERE Id = @Id;",
                     new [] {("Id", metaRow.Id.ToString()),
                         ("GuildId", metaRow.GuildId.ToString()), 
-                        ("Prefix", metaRow.Prefix)});
+                        ("Prefix", metaRow.Prefix.EncodedValue)});
 
                 command.ExecuteNonQuery();
                 command.Connection.Close();
@@ -300,7 +307,7 @@ namespace Database.Data
         public ulong GuildId { get; set; }
         public bool Enabled { get; set; }
         public bool DeleteChannels { get; set; }
-        public string Prefix { get; set; }
+        public EString Prefix { get; set; }
 
         public VoiceLinkRow()
         {
@@ -313,7 +320,7 @@ namespace Database.Data
             GuildId = guildId;
             Enabled = enabled;
             DeleteChannels = deleteChannels;
-            Prefix = prefix;
+            Prefix = EString.FromEncoded(prefix);
         }
     }
 

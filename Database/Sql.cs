@@ -65,35 +65,5 @@ namespace Database
             sqlArray += ")";
             return sqlArray;
         }
-
-        public static string EncryptString(string input, ulong guildId, ulong channelId, ulong messageId, ulong userId)
-        {
-            byte[] bytes = Encoding.UTF8.GetBytes(input);
-
-            bytes = Encryption.Encrypt(bytes, Encryption.GeneratePassword(guildId, channelId, messageId, userId));
-
-            return Convert.ToBase64String(bytes);
-        }
-
-        public static string DecryptString(string input, ulong guildId, ulong channelId, ulong messageId, ulong userId)
-        {
-            try
-            {
-                byte[] bytes = Convert.FromBase64String(input);
-
-                bytes = Encryption.Decrypt(bytes, Encryption.GeneratePassword(guildId, channelId, messageId, userId));
-
-                return Encoding.UTF8.GetString(bytes);
-            }
-            catch
-            {
-                return input;
-            }
-        }
-    }
-
-    internal class ScrambleKey
-    {
-
     }
 }

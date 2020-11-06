@@ -75,7 +75,7 @@ namespace Database.Data
                     new [] {("GuildId", row.GuildId.ToString()), 
                         ("ChannelId", row.ChannelId.ToString()),
                         ("Mode", row.Mode.ToString()),
-                        ("Complex", row.Complex)
+                        ("Complex", row.Complex.EncodedValue)
                     });
 
                 command.ExecuteNonQuery();
@@ -93,7 +93,7 @@ namespace Database.Data
                         ("GuildId", row.GuildId.ToString()), 
                         ("ChannelId", row.ChannelId.ToString()),
                         ("Mode", row.Mode.ToString()),
-                        ("Complex", row.Complex)
+                        ("Complex", row.Complex.EncodedValue)
                     });
 
                 command.ExecuteNonQuery();
@@ -163,7 +163,7 @@ namespace Database.Data
         // 6    URLs
         // 7    RegEx
 
-        public string Complex { get; set; }
+        public EString Complex { get; set; }
 
         public MessageFilterRow()
         {
@@ -176,7 +176,7 @@ namespace Database.Data
             GuildId = guildId;
             ChannelId = channelId;
             Mode = mode;
-            Complex = complex;
+            Complex = EString.FromEncoded(complex);
         }
     }
 }

@@ -29,7 +29,7 @@ namespace Utili.Features
                 MessageId = context.Message.Id,
                 UserId = context.User.Id,
                 Timestamp = DateTime.UtcNow,
-                Content = context.Message.Content
+                Content = EString.FromDecoded(context.Message.Content)
             };
 
             Database.Data.MessageLogs.SaveMessage(message);
@@ -46,7 +46,7 @@ namespace Utili.Features
             if (message == null) return;
             Embed embed = GetEditedEmbed(message, context);
 
-            message.Content = context.Message.Content;
+            message.Content = EString.FromDecoded(context.Message.Content);
             Database.Data.MessageLogs.SaveMessage(message);
 
             SocketTextChannel channel = context.Guild.GetTextChannel(row.EditedChannelId);
@@ -90,9 +90,9 @@ namespace Utili.Features
             embed.WithColor(66, 182, 245);
             embed.WithDescription($"**Message by {after.User.Mention} edited in {(after.Channel as SocketTextChannel).Mention}** [Jump]({after.Message.GetJumpUrl()})");
 
-            if(before.Content.Length > 1024 || after.Message.Content.Length > 1024)
+            if(before.Content.Value.Length > 1024 || after.Message.Content.Length > 1024)
             {
-                if(before.Content.Length < 2024 - embed.Description.Length - 2)
+                if(before.Content.Value.Length < 2024 - embed.Description.Length - 2)
                 {
                     embed.Description += $"\n{before.Content}";
                 }
@@ -149,7 +149,7 @@ namespace Utili.Features
 
             embed.WithDescription($"**Message by {userMention} deleted in {channel.Mention}**");
 
-            if(message.Content.Length > 2024 - embed.Description.Length - 2)
+            if(message.Content.Value.Length > 2024 - embed.Description.Length - 2)
             {
                 embed.Description += "\nThe message is too large to fit in this embed";
             }
