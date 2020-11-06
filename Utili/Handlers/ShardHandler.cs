@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using System.Timers;
+using Discord;
 using static Utili.Program;
 
 namespace Utili.Handlers
@@ -22,18 +23,21 @@ namespace Utili.Handlers
         {
             _ = Task.Run(async () =>
             {
-                foreach (SocketGuild guild in _client.Guilds)
+                if (_config.FillUserCache)
                 {
-                    await guild.DownloadUsersAsync();
+                    foreach (SocketGuild guild in _client.Guilds)
+                    {
+                        await guild.DownloadUsersAsync();
+                    }
+
+                    int notDownloaded = _client.Guilds.Count(x => x.Users.Count != x.MemberCount);
+                    if (notDownloaded > 0)
+                    {
+                        _logger.Log("Connected", $"Users not fully downloaded for {notDownloaded} guilds",
+                            LogSeverity.Warn);
+                    }
                 }
 
-                int notDownloaded = _client.Guilds.Count(x => x.Users.Count != x.MemberCount);
-                if (notDownloaded > 0)
-                {
-                    _logger.Log("Connected", $"Users not fully downloaded for {notDownloaded} guilds",
-                        LogSeverity.Warn);
-                }
-                
                 await shard.SetGameAsync("utili.bot | .help");
 
                 _shardsStarted += 1;
@@ -50,6 +54,11 @@ namespace Utili.Handlers
                     _shardsStarted = 0;
                 }
             });
+        }
+
+        public static async Task Log(LogMessage logMessage)
+        {
+            _logger.Log(logMessage.Source, logMessage.Message, Helper.ConvertToLocalLogSeverity(logMessage.Severity));
         }
     }
 }

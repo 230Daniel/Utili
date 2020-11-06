@@ -23,8 +23,8 @@ namespace Utili.Handlers
 
                 SocketCommandContext context = new SocketCommandContext(_client.GetShardFor(guild), message);
 
-                _logger.Log("Msg",
-                    $"Guild: {guild.Name}. Total members: {guild.MemberCount}. Downloaded members: {guild.Users.Count}");
+                _logger.Log("Message",
+                    $"{guild.Users.Count} users downloaded, administrator {(context.User as SocketGuildUser).GuildPermissions.Administrator}, nickname {(context.User as SocketGuildUser).Nickname}");
 
                 if (!context.User.IsBot && !string.IsNullOrEmpty(context.Message.Content))
                 {

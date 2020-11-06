@@ -42,15 +42,12 @@ namespace Utili
             _logger.LogEmpty(true);
 
             _logger.Log("Main", "Downloading database cache", LogSeverity.Info);
-
-            // Initialise the database and use cache
             Database.Database.Initialise(true);
-
             _logger.Log("Main", "Database cache downloaded", LogSeverity.Info);
 
             new Program().MainAsync().GetAwaiter().GetResult();
 
-            // TODO: Crash detection and auto-restart
+            // TODO: Auto-restart
         }
 
         public async Task MainAsync()
@@ -69,7 +66,7 @@ namespace Utili
                 TotalShards = _totalShards,
                 MessageCacheSize = 0,
                 ExclusiveBulkDelete = true,
-                AlwaysDownloadUsers = true,
+                AlwaysDownloadUsers = _config.FillUserCache,
                 LogLevel = Discord.LogSeverity.Info,
 
                 GatewayIntents = 
@@ -94,19 +91,19 @@ namespace Utili
             _logger.Log("MainAsync", $"Shard IDs: {_config.LowerShardId} - {_config.UpperShardId}", LogSeverity.Info);
             _logger.LogEmpty();
 
-            _client.Log += Client_Log;
+            _client.Log += ShardHandler.Log;
+            _client.ShardReady += ShardHandler.ShardReady;
+            _client.ShardConnected += ShardHandler.ShardConnected;
+
             _client.MessageReceived += MessagesHandler.MessageReceived;
             _client.MessageUpdated += MessagesHandler.MessageEdited;
             _client.MessageDeleted += MessagesHandler.MessageDeleted;
             _client.MessagesBulkDeleted += MessagesHandler.MessagesBulkDeleted;
-            _client.ShardReady += ShardHandler.ShardReady;
-            _client.ShardConnected += ShardHandler.ShardConnected;
+            
             _client.UserVoiceStateUpdated += VoiceHandler.UserVoiceStateUpdated;
 
             await _client.LoginAsync(TokenType.Bot, _config.Token);
-
             await _client.SetGameAsync("Starting up...");
-
             await _client.StartAsync();
 
             _autopurge.Start();
@@ -114,11 +111,6 @@ namespace Utili
             _voiceRoles.Start();
 
             await Task.Delay(-1);
-        }
-
-        private async Task Client_Log(LogMessage logMessage)
-        {
-            _logger.Log(logMessage.Source, logMessage.Message, Helper.ConvertToLocalLogSeverity(logMessage.Severity));
         }
     }
 }
