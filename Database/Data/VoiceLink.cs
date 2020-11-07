@@ -43,7 +43,8 @@ namespace Database.Data
                         reader.GetUInt64(1),
                         reader.GetBoolean(2),
                         reader.GetBoolean(3),
-                        reader.GetString(4)));
+                        reader.GetString(4),
+                        reader.GetString(5)));
                 }
 
                 reader.Close();
@@ -76,11 +77,13 @@ namespace Database.Data
             MySqlCommand command;
 
             if (metaRow.Id == 0) 
-                // The row is a new entry so should be inserted into the database
+            // The row is a new entry so should be inserted into the database
             {
-                command = Sql.GetCommand($"INSERT INTO VoiceLink (GuildID, Enabled, DeleteChannels, Prefix) VALUES (@GuildId, {Sql.ToSqlBool(metaRow.Enabled)}, {Sql.ToSqlBool(metaRow.DeleteChannels)}, @Prefix );",
+                command = Sql.GetCommand($"INSERT INTO VoiceLink (GuildID, Enabled, DeleteChannels, Prefix, ExcludedChannels) VALUES (@GuildId, {Sql.ToSqlBool(metaRow.Enabled)}, {Sql.ToSqlBool(metaRow.DeleteChannels)}, @Prefix, @ExcludedChannels );",
                     new [] {("GuildId", metaRow.GuildId.ToString()), 
-                        ("Prefix", metaRow.Prefix.EncodedValue)});
+                        ("Prefix", metaRow.Prefix.EncodedValue),
+                        ("ExcludedChannels", metaRow.GetExcludedChannelsString())
+                    });
 
                 command.ExecuteNonQuery();
                 command.Connection.Close();
@@ -88,13 +91,15 @@ namespace Database.Data
                 
                 if(Cache.Initialised) Cache.VoiceLink.Rows.Add(metaRow);
             }
-            else
-                // The row already exists and should be updated
+            else 
+            // The row already exists and should be updated
             {
-                command = Sql.GetCommand($"UPDATE VoiceLink SET GuildId = @GuildId, Enabled = {Sql.ToSqlBool(metaRow.Enabled)}, DeleteChannels = {Sql.ToSqlBool(metaRow.DeleteChannels)}, Prefix = @Prefix WHERE Id = @Id;",
+                command = Sql.GetCommand($"UPDATE VoiceLink SET GuildId = @GuildId, Enabled = {Sql.ToSqlBool(metaRow.Enabled)}, DeleteChannels = {Sql.ToSqlBool(metaRow.DeleteChannels)}, Prefix = @Prefix, ExcludedChannels = @ExcludedChannels WHERE Id = @Id;",
                     new [] {("Id", metaRow.Id.ToString()),
                         ("GuildId", metaRow.GuildId.ToString()), 
-                        ("Prefix", metaRow.Prefix.EncodedValue)});
+                        ("Prefix", metaRow.Prefix.EncodedValue),
+                        ("ExcludedChannels", metaRow.GetExcludedChannelsString())
+                    });
 
                 command.ExecuteNonQuery();
                 command.Connection.Close();
@@ -143,8 +148,7 @@ namespace Database.Data
                         reader.GetInt32(0),
                         reader.GetUInt64(1),
                         reader.GetUInt64(2),
-                        reader.GetUInt64(3),
-                        reader.GetBoolean(4)));
+                        reader.GetUInt64(3)));
                 }
 
                 reader.Close();
@@ -159,7 +163,7 @@ namespace Database.Data
 
             if (rows.Count == 0)
             {
-                return new VoiceLinkChannelRow(0, guildId, 0, voiceChannelId, false);
+                return new VoiceLinkChannelRow(0, guildId, 0, voiceChannelId);
             }
             
             return rows.First();
@@ -172,7 +176,7 @@ namespace Database.Data
             if (channelRow.Id == 0) 
             // The row is a new entry so should be inserted into the database
             {
-                command = Sql.GetCommand($"INSERT INTO VoiceLinkChannels (GuildID, TextChannelId, VoiceChannelId, Excluded) VALUES (@GuildId, @TextChannelId, @VoiceChannelId, {Sql.ToSqlBool(channelRow.Excluded)});",
+                command = Sql.GetCommand($"INSERT INTO VoiceLinkChannels (GuildID, TextChannelId, VoiceChannelId) VALUES (@GuildId, @TextChannelId, @VoiceChannelId);",
                     new [] { ("GuildId", channelRow.GuildId.ToString()), 
                         ("TextChannelId", channelRow.TextChannelId.ToString()),
                         ("VoiceChannelId", channelRow.VoiceChannelId.ToString())});
@@ -186,7 +190,7 @@ namespace Database.Data
             else
             // The row already exists and should be updated
             {
-                command = Sql.GetCommand($"UPDATE VoiceLinkChannels SET GuildId = @GuildId, TextChannelId = @TextChannelId, VoiceChannelId = @VoiceChannelId, Excluded = {Sql.ToSqlBool(channelRow.Excluded)} WHERE Id = @Id;",
+                command = Sql.GetCommand($"UPDATE VoiceLinkChannels SET GuildId = @GuildId, TextChannelId = @TextChannelId, VoiceChannelId = @VoiceChannelId WHERE Id = @Id;",
                     new [] {("Id", channelRow.Id.ToString()),
                         ("GuildId", channelRow.GuildId.ToString()), 
                         ("TextChannelId", channelRow.TextChannelId.ToString()),
@@ -197,45 +201,6 @@ namespace Database.Data
 
                 if(Cache.Initialised) Cache.VoiceLink.Channels[Cache.VoiceLink.Channels.FindIndex(x => x.Id == channelRow.Id)] = channelRow;
             }
-        }
-
-        public static void SaveTextChannel(VoiceLinkChannelRow channelRow)
-        {
-            MySqlCommand command;
-
-            if (channelRow.Id == 0) 
-            // The row is a new entry so there's no need to protect existing values
-            {
-                SaveChannelRow(channelRow);
-            }
-            else
-            // The row already exists so another value could possibly have been changed
-            {
-                command = Sql.GetCommand($"UPDATE VoiceLinkChannels SET TextChannelId = @TextChannelId WHERE Id = @Id;",
-                    new[]
-                    {
-                        ("Id", channelRow.Id.ToString()),
-                        ("TextChannelId", channelRow.TextChannelId.ToString())
-                    });
-
-                command.ExecuteNonQuery();
-                command.Connection.Close();
-
-                if(Cache.Initialised) Cache.VoiceLink.Channels[Cache.VoiceLink.Channels.FindIndex(x => x.Id == channelRow.Id)] = channelRow;
-            }
-        }
-
-        public static void DeleteUnrequiredChannelRows()
-        {
-            Cache.VoiceLink.Channels.RemoveAll(x =>
-                x.TextChannelId == 0 && x.VoiceChannelId != 0 && !x.Excluded);
-
-            string commandText =
-                "DELETE FROM VoiceLinkChannels WHERE TextChannelId = '0' AND VoiceChannelID != '0' AND Excluded = FALSE;";
-
-            MySqlCommand command = Sql.GetCommand(commandText);
-            command.ExecuteNonQuery();
-            command.Connection.Close();
         }
 
         #endregion
@@ -264,7 +229,8 @@ namespace Database.Data
                         reader.GetUInt64(1),
                         reader.GetBoolean(2),
                         reader.GetBoolean(3),
-                        reader.GetString(4)));
+                        reader.GetString(4),
+                        reader.GetString(5)));
                 }
             }
             catch {}
@@ -288,8 +254,7 @@ namespace Database.Data
                         channelReader.GetInt32(0),
                         channelReader.GetUInt64(1),
                         channelReader.GetUInt64(2),
-                        channelReader.GetUInt64(3),
-                        channelReader.GetBoolean(4)));
+                        channelReader.GetUInt64(3)));
                 }
             }
             catch {}
@@ -308,19 +273,50 @@ namespace Database.Data
         public bool Enabled { get; set; }
         public bool DeleteChannels { get; set; }
         public EString Prefix { get; set; }
+        public List<ulong> ExcludedChannels { get; set; } = new List<ulong>();
 
         public VoiceLinkRow()
         {
             Id = 0;
         }
 
-        public VoiceLinkRow(int id, ulong guildId, bool enabled, bool deleteChannels, string prefix)
+        public VoiceLinkRow(int id, ulong guildId, bool enabled, bool deleteChannels, string prefix, string excludedChannels)
         {
             Id = id;
             GuildId = guildId;
             Enabled = enabled;
             DeleteChannels = deleteChannels;
             Prefix = EString.FromEncoded(prefix);
+
+            ExcludedChannels.Clear();
+
+            if (!string.IsNullOrEmpty(excludedChannels))
+            {
+                foreach (string excludedChannel in excludedChannels.Split(","))
+                {
+                    if (ulong.TryParse(excludedChannel, out ulong channelId))
+                    {
+                        ExcludedChannels.Add(channelId);
+                    }
+                }
+            }
+        }
+
+        public string GetExcludedChannelsString()
+        {
+            string excludedChannelsString = "";
+
+            for (int i = 0; i < ExcludedChannels.Count; i++)
+            {
+                ulong excludedChannelId = ExcludedChannels[i];
+                excludedChannelsString += excludedChannelId.ToString();
+                if (i != ExcludedChannels.Count - 1)
+                {
+                    excludedChannelsString += ",";
+                }
+            }
+
+            return excludedChannelsString;
         }
     }
 
@@ -330,20 +326,18 @@ namespace Database.Data
         public ulong GuildId { get; set; }
         public ulong TextChannelId { get; set; }
         public ulong VoiceChannelId { get; set; }
-        public bool Excluded { get; set; }
 
         public VoiceLinkChannelRow()
         {
             Id = 0;
         }
 
-        public VoiceLinkChannelRow(int id, ulong guildId, ulong textChannelId, ulong voiceChannelId, bool excluded)
+        public VoiceLinkChannelRow(int id, ulong guildId, ulong textChannelId, ulong voiceChannelId)
         {
             Id = id;
             GuildId = guildId;
             TextChannelId = textChannelId;
             VoiceChannelId = voiceChannelId;
-            Excluded = excluded;
         }
     }
 }

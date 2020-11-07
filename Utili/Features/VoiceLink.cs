@@ -31,13 +31,9 @@ namespace Utili.Features
 
         public void RequestUpdate(SocketVoiceChannel channel)
         {
-            VoiceLinkChannelRow channelRow = Database.Data.VoiceLink.GetChannelRow(channel.Guild.Id, channel.Id);
             VoiceLinkRow metaRow = Database.Data.VoiceLink.GetMetaRow(channel.Guild.Id);
 
-            bool enabled = metaRow.Enabled;
-            if(channelRow.Excluded) enabled = false;
-
-            if (enabled)
+            if (metaRow.Enabled && !metaRow.ExcludedChannels.Contains(channel.Id))
             {
                 while (!_safeToRequestUpdate)
                 {
@@ -59,7 +55,6 @@ namespace Utili.Features
 
             try
             {
-                Database.Data.VoiceLink.DeleteUnrequiredChannelRows();
                 UpdateLinkedChannels().GetAwaiter().GetResult();
             }
             catch (Exception err)
@@ -113,15 +108,15 @@ namespace Utili.Features
             }
             catch {}
 
-            if (connectedUsers.Count == 0 && textChannel != null)
+            if (connectedUsers.Count == 0 && textChannel != null && metaRow.DeleteChannels)
             {
                 await textChannel.DeleteAsync();
                 channelRow.TextChannelId = 0;
-                Database.Data.VoiceLink.SaveTextChannel(channelRow);
+                Database.Data.VoiceLink.SaveChannelRow(channelRow);
                 return;
             }
 
-            if (connectedUsers.Count == 0)
+            if (connectedUsers.Count == 0 && metaRow.DeleteChannels)
             {
                 return;
             }
@@ -132,11 +127,16 @@ namespace Utili.Features
                 {
                     if (voiceChannel.CategoryId.HasValue) x.CategoryId = voiceChannel.CategoryId.Value;
                     x.Topic = $"Users in {voiceChannel.Name} have access - Created by Utili";
+                    x.PermissionOverwrites = new List<Overwrite>
+                    {
+                        new Overwrite(guild.EveryoneRole.Id, PermissionTarget.Role,
+                            new OverwritePermissions(viewChannel: PermValue.Deny))
+                    };
                 });
 
                 channelRow.TextChannelId = restTextChannel.Id;
 
-                Database.Data.VoiceLink.SaveTextChannel(channelRow);
+                Database.Data.VoiceLink.SaveChannelRow(channelRow);
 
                 await Task.Delay(500);
 
@@ -147,11 +147,15 @@ namespace Utili.Features
             {
                 if (existingOverwrite.TargetType == PermissionTarget.User)
                 {
-                    SocketGuildUser existingUser = guild.GetUser(existingOverwrite.TargetId);
-                    if (existingUser.VoiceChannel == null || existingUser.VoiceChannel.Id != voiceChannel.Id)
+                    try
                     {
-                        await textChannel.RemovePermissionOverwriteAsync(existingUser);
+                        SocketGuildUser existingUser = guild.GetUser(existingOverwrite.TargetId);
+                        if (existingUser.VoiceChannel == null || existingUser.VoiceChannel.Id != voiceChannel.Id)
+                        {
+                            await textChannel.RemovePermissionOverwriteAsync(existingUser);
+                        }
                     }
+                    catch {}
                 }
             }
 
