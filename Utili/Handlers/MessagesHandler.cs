@@ -47,10 +47,14 @@ namespace Utili.Handlers
                     }
                 }
 
+                // High priority
                 await _messageLogs.MessageReceived(context);
                 await _messageFilter.MessageReceived(context);
 
+                // Low priority
                 _ = _voteChannels.MessageReceived(context);
+                _ = _inactiveRole.UpdateUserAsync(context.Guild, context.User as SocketGuildUser);
+
             });
         }
 

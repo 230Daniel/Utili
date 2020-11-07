@@ -11,7 +11,8 @@ namespace Database.Data
 {
     public class InactiveRole
     {
-        private static TimeSpan _gapBetweenUpdates = TimeSpan.FromHours(1);
+        // TODO: Change to more appropriate value after initial testing
+        private static TimeSpan _gapBetweenUpdates = TimeSpan.FromMinutes(15); 
 
         public static List<InactiveRoleRow> GetRows(ulong? guildId = null, int? id = null, bool ignoreCache = false)
         {

@@ -20,15 +20,18 @@ namespace Utili.Features
         private Timer _timer;
         private bool _startingProcessing;
 
-        public async Task MessageReceived(SocketCommandContext context)
+        public async Task UpdateUserAsync(SocketGuild guild, SocketGuildUser user)
         {
-            if (context.User.IsBot || context.Channel is SocketDMChannel) return;
+            InactiveRoleRow row = Database.Data.InactiveRole.GetRows(guild.Id).FirstOrDefault();
 
-            InactiveRoleRow row = Database.Data.InactiveRole.GetRows(context.Guild.Id).FirstOrDefault();
-
-            if (context.Guild.Roles.Select(x => x.Id).Contains(row.RoleId))
+            if(guild.Roles.Select(x => x.Id).Contains(row.RoleId))
             {
-                Database.Data.InactiveRole.UpdateUser(context.Guild.Id, context.User.Id);
+                Database.Data.InactiveRole.UpdateUser(guild.Id, user.Id);
+
+                if (user.Roles.Select(x => x.Id).Contains(row.RoleId))
+                {
+                    await user.RemoveRoleAsync(guild.GetRole(row.RoleId));
+                }
             }
         }
 
