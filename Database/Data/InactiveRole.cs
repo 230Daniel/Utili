@@ -52,7 +52,8 @@ namespace Database.Data
                         reader.GetUInt64(3),
                         reader.GetString(4),
                         reader.GetBoolean(5),
-                        reader.GetDateTime(6)));
+                        reader.GetDateTime(6),
+                        reader.GetDateTime(7)));
                 }
 
                 reader.Close();
@@ -90,7 +91,8 @@ namespace Database.Data
                         reader.GetUInt64(3),
                         reader.GetString(4),
                         reader.GetBoolean(5),
-                        reader.GetDateTime(6)));
+                        reader.GetDateTime(6),
+                        reader.GetDateTime(7)));
                 }
 
                 reader.Close();
@@ -106,11 +108,12 @@ namespace Database.Data
             if (row.Id == 0) 
             // The row is a new entry so should be inserted into the database
             {
-                command = Sql.GetCommand($"INSERT INTO InactiveRole (GuildID, RoleId, ImmuneRoleId, Threshold, Inverse, LastUpdate) VALUES (@GuildId, @RoleId, @ImmuneRoleId, @Threshold, {Sql.ToSqlBool(row.Inverse)}, @LastUpdate",
+                command = Sql.GetCommand($"INSERT INTO InactiveRole (GuildID, RoleId, ImmuneRoleId, Threshold, Inverse, DefaultLastAction, LastUpdate) VALUES (@GuildId, @RoleId, @ImmuneRoleId, @Threshold, {Sql.ToSqlBool(row.Inverse)}, @DefaultLastAction, @LastUpdate);",
                     new [] {("GuildId", row.GuildId.ToString()), 
                         ("RoleId", row.RoleId.ToString()),
                         ("ImmuneRoleId", row.ImmuneRoleId.ToString()),
                         ("Threshold", row.Threshold.ToString()),
+                        ("DefaultLastAction", Sql.ToSqlDateTime(row.DefaultLastAction)),
                         ("LastUpdate", Sql.ToSqlDateTime(row.LastUpdate))});
 
                 command.ExecuteNonQuery();
@@ -123,6 +126,7 @@ namespace Database.Data
             else
             // The row already exists and should be updated
             {
+                // Not updating DefaultLastAction is intentional
                 command = Sql.GetCommand($"UPDATE InactiveRole SET GuildId = @GuildId, RoleId = @RoleId, ImmuneRoleId = @ImmuneRoleId, Threshold = @Threshold, Inverse = {Sql.ToSqlBool(row.Inverse)}, LastUpdate = @LastUpdate WHERE Id = @Id;",
                     new [] {("Id", row.Id.ToString()),
                         ("GuildId", row.GuildId.ToString()), 
@@ -145,11 +149,13 @@ namespace Database.Data
             if (row.Id == 0) 
             // The row is a new entry so should be inserted into the database
             {
-                command = Sql.GetCommand($"INSERT INTO InactiveRole (GuildID, RoleId, ImmuneRoleId, Threshold, Inverse, LastUpdate) VALUES (@GuildId, @RoleId, @ImmuneRoleId, @Threshold, {Sql.ToSqlBool(row.Inverse)}, @LastUpdate",
+                // If the if statement is true then something has gone horribly wrong, but it will work anyway.
+                command = Sql.GetCommand($"INSERT INTO InactiveRole (GuildID, RoleId, ImmuneRoleId, Threshold, Inverse, DefaultLastAction, LastUpdate) VALUES (@GuildId, @RoleId, @ImmuneRoleId, @Threshold, {Sql.ToSqlBool(row.Inverse)}, @LastUpdate);",
                     new [] {("GuildId", row.GuildId.ToString()), 
                         ("RoleId", row.RoleId.ToString()),
                         ("ImmuneRoleId", row.ImmuneRoleId.ToString()),
                         ("Threshold", row.Threshold.ToString()),
+                        ("DefaultLastAction", Sql.ToSqlDateTime(row.DefaultLastAction)),
                         ("LastUpdate", Sql.ToSqlDateTime(row.LastUpdate))});
 
                 command.ExecuteNonQuery();
@@ -162,7 +168,7 @@ namespace Database.Data
             else
             // The row already exists and should be updated
             {
-                command = Sql.GetCommand($"UPDATE InactiveRole SET LastUpdate = @LastUpdate WHERE Id = @Id;",
+                command = Sql.GetCommand("UPDATE InactiveRole SET LastUpdate = @LastUpdate WHERE Id = @Id;",
                     new [] {("Id", row.Id.ToString()),
                         ("LastUpdate", Sql.ToSqlDateTime(row.LastUpdate))});
 
@@ -253,7 +259,8 @@ namespace Database.Data
                         reader.GetUInt64(3),
                         reader.GetString(4),
                         reader.GetBoolean(5),
-                        reader.GetDateTime(6)));
+                        reader.GetDateTime(6),
+                        reader.GetDateTime(7)));
                 }
             }
             catch {}
@@ -272,14 +279,15 @@ namespace Database.Data
         public ulong ImmuneRoleId { get; set; }
         public TimeSpan Threshold { get; set; }
         public bool Inverse { get; set; }
+        public DateTime DefaultLastAction { get; set; }
         public DateTime LastUpdate { get; set; }
-
+        
         public InactiveRoleRow()
         {
             Id = 0;
         }
 
-        public InactiveRoleRow(int id, ulong guildId, ulong roleId, ulong immuneRoleId, string threshold, bool inverse, DateTime lastUpdate)
+        public InactiveRoleRow(int id, ulong guildId, ulong roleId, ulong immuneRoleId, string threshold, bool inverse, DateTime defaultLastAction, DateTime lastUpdate)
         {
             Id = id;
             GuildId = guildId;
@@ -287,6 +295,7 @@ namespace Database.Data
             ImmuneRoleId = immuneRoleId;
             Threshold = TimeSpan.Parse(threshold);
             Inverse = inverse;
+            DefaultLastAction = defaultLastAction;
             LastUpdate = lastUpdate;
         }
     }

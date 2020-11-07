@@ -86,8 +86,11 @@ namespace Utili.Features
 
             foreach (IGuildUser user in users)
             {
-                DateTime lastAction = DateTime.MinValue;
-                if (bot.JoinedAt.HasValue) lastAction = bot.JoinedAt.Value.UtcDateTime;
+                // DefaultLastAction is set to the time when the activity data started being recorded
+                DateTime lastAction = row.DefaultLastAction;
+
+                if (bot.JoinedAt.HasValue && bot.JoinedAt > lastAction) 
+                    lastAction = bot.JoinedAt.Value.UtcDateTime;
 
                 List<InactiveRoleUserRow> matchingRows = userRows.Where(x => x.UserId == user.Id).ToList();
                 if (matchingRows.Count > 0 && matchingRows.First().LastAction > lastAction)
