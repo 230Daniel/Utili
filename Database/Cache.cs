@@ -25,6 +25,7 @@ namespace Database
         public static MiscTable Misc { get; set; } = new MiscTable();
         public static VoiceLinkTable VoiceLink { get; set; } = new VoiceLinkTable();
         public static VoiceRolesTable VoiceRoles { get; set; } = new VoiceRolesTable();
+        public static VoteChannelsTable VoteChannels { get; set; } = new VoteChannelsTable();
         
         public static void Initialise() 
         // Start the automatic cache downloads
@@ -52,6 +53,7 @@ namespace Database
             Misc.Load();
             VoiceLink.Load();
             VoiceRoles.Load();
+            VoteChannels.Load();
         }
     }
 }

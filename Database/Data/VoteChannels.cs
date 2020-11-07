@@ -6,18 +6,19 @@ using System.Linq;
 using System.Security;
 using System.Text;
 using System.Threading.Tasks;
+using Discord;
 
 namespace Database.Data
 {
-    public class Autopurge
+    public class VoteChannels
     {
-        public static List<AutopurgeRow> GetRows(ulong? guildId = null, ulong? channelId = null, int? id = null, bool ignoreCache = false)
+        public static List<VoteChannelsRow> GetRows(ulong? guildId = null, ulong? channelId = null, int? id = null, bool ignoreCache = false)
         {
-            List<AutopurgeRow> matchedRows = new List<AutopurgeRow>();
+            List<VoteChannelsRow> matchedRows = new List<VoteChannelsRow>();
 
             if (Cache.Initialised && !ignoreCache)
             {
-                matchedRows.AddRange(Cache.Autopurge.Rows);
+                matchedRows.AddRange(Cache.VoteChannels.Rows);
 
                 if (guildId.HasValue) matchedRows.RemoveAll(x => x.GuildId != guildId.Value);
                 if (channelId.HasValue) matchedRows.RemoveAll(x => x.ChannelId != channelId.Value);
@@ -25,7 +26,7 @@ namespace Database.Data
             }
             else
             {
-                string command = "SELECT * FROM Autopurge WHERE TRUE";
+                string command = "SELECT * FROM VoteChannels WHERE TRUE";
                 List<(string, string)> values = new List<(string, string)>();
 
                 if (guildId.HasValue)
@@ -50,12 +51,12 @@ namespace Database.Data
 
                 while (reader.Read())
                 {
-                    matchedRows.Add(new AutopurgeRow(
+                    matchedRows.Add(new VoteChannelsRow(
                         reader.GetInt32(0),
                         reader.GetUInt64(1),
                         reader.GetUInt64(2),
-                        reader.GetString(3),
-                        reader.GetInt32(4)));
+                        reader.GetInt32(3),
+                        reader.GetString(4)));
                 }
 
                 reader.Close();
@@ -64,77 +65,77 @@ namespace Database.Data
             return matchedRows;
         }
 
-        public static void SaveRow(AutopurgeRow row)
+        public static void SaveRow(VoteChannelsRow row)
         {
             MySqlCommand command;
 
             if (row.Id == 0) 
             // The row is a new entry so should be inserted into the database
             {
-                command = Sql.GetCommand("INSERT INTO Autopurge (GuildID, ChannelId, Timespan, Mode) VALUES (@GuildId, @ChannelId, @Timespan, @Mode);",
+                command = Sql.GetCommand("INSERT INTO VoteChannels (GuildID, ChannelId, Mode, Emotes) VALUES (@GuildId, @ChannelId, @Mode, @Emotes);",
                     new [] {("GuildId", row.GuildId.ToString()), 
                         ("ChannelId", row.ChannelId.ToString()),
-                        ("Timespan", row.Timespan.ToString()),
-                        ("Mode", row.Mode.ToString())});
+                        ("Mode", row.Mode.ToString()),
+                        ("Emotes", row.GetEmotesString())});
 
                 command.ExecuteNonQuery();
                 command.Connection.Close();
 
                 row.Id = GetRows(row.GuildId, row.ChannelId, ignoreCache: true).First().Id;
 
-                if(Cache.Initialised) Cache.Autopurge.Rows.Add(row);
+                if(Cache.Initialised) Cache.VoteChannels.Rows.Add(row);
             }
             else
             // The row already exists and should be updated
             {
-                command = Sql.GetCommand("UPDATE Autopurge SET GuildId = @GuildId, ChannelId = @ChannelId, Timespan = @Timespan, Mode = @Mode WHERE Id = @Id;",
+                command = Sql.GetCommand("UPDATE VoteChannels SET GuildId = @GuildId, ChannelId = @ChannelId, Mode = @Mode, Emotes = @Emotes WHERE Id = @Id;",
                     new [] {("Id", row.Id.ToString()),
                         ("GuildId", row.GuildId.ToString()), 
                         ("ChannelId", row.ChannelId.ToString()),
-                        ("Timespan", row.Timespan.ToString()),
-                        ("Mode", row.Mode.ToString())});
+                        ("Mode", row.Mode.ToString()),
+                        ("Emotes", row.GetEmotesString())});
 
                 command.ExecuteNonQuery();
                 command.Connection.Close();
 
-                if(Cache.Initialised) Cache.Autopurge.Rows[Cache.Autopurge.Rows.FindIndex(x => x.Id == row.Id)] = row;
+                if(Cache.Initialised) Cache.VoteChannels.Rows[Cache.VoteChannels.Rows.FindIndex(x => x.Id == row.Id)] = row;
             }
         }
 
-        public static void DeleteRow(AutopurgeRow row)
+        public static void DeleteRow(VoteChannelsRow row)
         {
             if(row == null) return;
 
-            if(Cache.Initialised) Cache.Autopurge.Rows.RemoveAll(x => x.Id == row.Id);
+            if(Cache.Initialised) Cache.VoteChannels.Rows.RemoveAll(x => x.Id == row.Id);
 
-            string commandText = "DELETE FROM Autopurge WHERE Id = @Id";
+            string commandText = "DELETE FROM VoteChannels WHERE Id = @Id";
             MySqlCommand command = Sql.GetCommand(commandText, new[] {("Id", row.Id.ToString())});
             command.ExecuteNonQuery();
             command.Connection.Close();
         }
     }
 
-    public class AutopurgeTable
+    public class VoteChannelsTable
     {
-        public List<AutopurgeRow> Rows { get; set; }
+        public List<VoteChannelsRow> Rows { get; set; }
 
         public void Load()
         // Load the table from the database
         {
-            List<AutopurgeRow> newRows = new List<AutopurgeRow>();
+            List<VoteChannelsRow> newRows = new List<VoteChannelsRow>();
 
-            MySqlDataReader reader = Sql.GetCommand("SELECT * FROM Autopurge;").ExecuteReader();
+            MySqlDataReader reader = Sql.GetCommand("SELECT * FROM VoteChannels;").ExecuteReader();
 
             try
             {
                 while (reader.Read())
                 {
-                    newRows.Add(new AutopurgeRow(
+                    newRows.Add(new VoteChannelsRow(
                         reader.GetInt32(0),
                         reader.GetUInt64(1),
                         reader.GetUInt64(2),
-                        reader.GetString(3),
-                        reader.GetInt32(4)));
+                        reader.GetInt32(3),
+                        reader.GetString(4)));
                 }
             }
             catch {}
@@ -145,28 +146,58 @@ namespace Database.Data
         }
     }
 
-    public class AutopurgeRow
+    public class VoteChannelsRow
     {
         public int Id { get; set; }
         public ulong GuildId { get; set; }
         public ulong ChannelId { get; set; }
-        public TimeSpan Timespan { get; set; }
         public int Mode { get; set; }
-        // 0 = All messages
-        // 1 = Bot messages
+        public List<IEmote> Emotes { get; set; }
 
-        public AutopurgeRow()
+        public VoteChannelsRow()
         {
             Id = 0;
         }
 
-        public AutopurgeRow(int id, ulong guildId, ulong channelId, string timespan, int mode)
+        public VoteChannelsRow(int id, ulong guildId, ulong channelId, int mode, string emotes)
         {
             Id = id;
             GuildId = guildId;
             ChannelId = channelId;
-            Timespan = TimeSpan.Parse(timespan);
             Mode = mode;
+
+            Emotes.Clear();
+
+            if (!string.IsNullOrEmpty(emotes))
+            {
+                foreach (string emoteString in emotes.Split(","))
+                {
+                    if (Emote.TryParse(emoteString, out Emote emote))
+                    {
+                        Emotes.Add(emote);
+                    }
+                    else
+                    {
+                        Emotes.Add(new Emoji(emoteString));
+                    }
+                }
+            }
+        }
+
+        public string GetEmotesString()
+        {
+            string emotesString = "";
+
+            for (int i = 0; i < Emotes.Count; i++)
+            {
+                emotesString += Emotes[i].ToString();
+                if (i != Emotes.Count - 1)
+                {
+                    emotesString += ",";
+                }
+            }
+
+            return emotesString;
         }
     }
 }

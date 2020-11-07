@@ -33,7 +33,7 @@ namespace Utili.Handlers
                     {
                         IResult result = await _commands.ExecuteAsync(context, argPos, null);
 
-                        // TODO: Log commands?
+                        // TODO: Log commands
 
                         if (!result.IsSuccess)
                         {
@@ -47,8 +47,10 @@ namespace Utili.Handlers
                     }
                 }
 
-                _ = _messageFilter.MessageReceived(context);
-                _ = _messageLogs.MessageReceived(context);
+                await _messageLogs.MessageReceived(context);
+                await _messageFilter.MessageReceived(context);
+
+                _ = _voteChannels.MessageReceived(context);
             });
         }
 

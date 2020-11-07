@@ -29,6 +29,7 @@ namespace Utili
         public static Features.MessageFilter _messageFilter = new Features.MessageFilter();
         public static Features.MessageLogs _messageLogs = new Features.MessageLogs();
         public static Features.VoiceRoles _voiceRoles = new Features.VoiceRoles();
+        public static Features.VoteChannels _voteChannels = new Features.VoteChannels();
 
         // ReSharper enable InconsistentNaming
 
