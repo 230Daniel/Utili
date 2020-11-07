@@ -49,6 +49,7 @@ namespace Database
         private static void DownloadTables()
         {
             Autopurge.Load();
+            InactiveRole.Load();
             MessageFilter.Load();
             MessageLogs.Load();
             Misc.Load();
