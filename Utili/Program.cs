@@ -25,6 +25,7 @@ namespace Utili
         public static Timer _shardStatsUpdater;
 
         public static Features.Autopurge _autopurge = new Features.Autopurge();
+        public static Features.InactiveRole _inactiveRole = new Features.InactiveRole();
         public static Features.VoiceLink _voiceLink = new Features.VoiceLink();
         public static Features.MessageFilter _messageFilter = new Features.MessageFilter();
         public static Features.MessageLogs _messageLogs = new Features.MessageLogs();
@@ -110,6 +111,7 @@ namespace Utili
             _autopurge.Start();
             _voiceLink.Start();
             _voiceRoles.Start();
+            _inactiveRole.Start();
 
             await Task.Delay(-1);
         }

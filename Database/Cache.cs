@@ -20,6 +20,7 @@ namespace Database
         private static Timer Timer { get; set; }
 
         public static AutopurgeTable Autopurge { get; set; } = new AutopurgeTable();
+        public static InactiveRoleTable InactiveRole { get; set; } = new InactiveRoleTable();
         public static MessageFilterTable MessageFilter { get; set; } = new MessageFilterTable();
         public static MessageLogsTable MessageLogs { get; set; } = new MessageLogsTable();
         public static MiscTable Misc { get; set; } = new MiscTable();
