@@ -10,9 +10,6 @@ using Database.Data;
 using Discord;
 using Discord.Commands;
 using Discord.Rest;
-using Discord.WebSocket;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using PostSharp.Aspects.Advices;
 
 namespace Utili.Features
 {
