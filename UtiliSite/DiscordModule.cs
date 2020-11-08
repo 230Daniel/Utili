@@ -2,16 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Discord.Net.Rest;
 using Discord;
-using Microsoft.AspNetCore.Http;
-using AspNet.Security.OAuth.Discord;
-using static UtiliSite.Main;
-using Microsoft.Extensions.Logging;
-using System.Text.Encodings.Web;
 using Discord.Rest;
-using Discord.WebSocket;
-using System.Timers;
+using static UtiliSite.Main;
 
 namespace UtiliSite
 {
@@ -182,7 +175,7 @@ namespace UtiliSite
         }
         public static void SetNickname(RestGuild guild, string nickname)
         {
-            _ = guild.GetUserAsync(DiscordModule._client.CurrentUser.Id).GetAwaiter().GetResult()
+            _ = guild.GetUserAsync(_client.CurrentUser.Id).GetAwaiter().GetResult()
                 .ModifyAsync(x => x.Nickname = nickname);
         }
 

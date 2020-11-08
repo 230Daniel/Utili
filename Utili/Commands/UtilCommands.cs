@@ -1,12 +1,12 @@
-﻿using Database;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Database;
 using Discord;
 using Discord.Commands;
 using Discord.Rest;
 using Discord.WebSocket;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using static Utili.MessageSender;
 
 namespace Utili.Commands
@@ -74,7 +74,7 @@ namespace Utili.Commands
                 title = $"{messages.Count} message deleted";
             }
 
-            RestUserMessage sentMessage = await MessageSender.SendSuccessAsync(Context.Channel, title, content);
+            RestUserMessage sentMessage = await SendSuccessAsync(Context.Channel, title, content);
 
             await Task.Delay(5000);
 

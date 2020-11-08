@@ -1,7 +1,7 @@
-﻿using Discord;
-using Discord.WebSocket;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
+using Discord;
+using Discord.WebSocket;
 using static Utili.Program;
 
 namespace Utili

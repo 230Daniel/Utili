@@ -1,14 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using System.Timers;
 using Database;
 using Database.Data;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
-using static Utili.Program;
 
 namespace Utili.Features
 {
@@ -22,7 +19,7 @@ namespace Utili.Features
 
             if ((row.DeletedChannelId == 0 && row.EditedChannelId == 0) || row.ExcludedChannels.Contains(context.Channel.Id)) return;
 
-            MessageLogsMessageRow message = new MessageLogsMessageRow()
+            MessageLogsMessageRow message = new MessageLogsMessageRow
             {
                 GuildId = context.Guild.Id,
                 ChannelId = context.Channel.Id,

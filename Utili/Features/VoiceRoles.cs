@@ -1,15 +1,9 @@
-﻿using Database.Data;
-using Discord;
-using Discord.Rest;
-using Discord.WebSocket;
-using System;
-using System.Collections.Generic;
-using System.Data.Common;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Timers;
-using static Utili.Program;
+using Database.Data;
+using Discord.WebSocket;
 
 namespace Utili.Features
 {

@@ -1,11 +1,12 @@
-﻿using Discord.WebSocket;
-using System.Linq;
-using System.Threading.Tasks;
-using Discord;
+﻿using System.Linq;
 using System.Reflection;
-using Discord.Commands;
-using Utili.Handlers;
+using System.Threading.Tasks;
 using System.Timers;
+using Discord;
+using Discord.Commands;
+using Discord.WebSocket;
+using Utili.Features;
+using Utili.Handlers;
 
 namespace Utili
 {
@@ -24,13 +25,13 @@ namespace Utili
 
         public static Timer _shardStatsUpdater;
 
-        public static Features.Autopurge _autopurge = new Features.Autopurge();
-        public static Features.InactiveRole _inactiveRole = new Features.InactiveRole();
-        public static Features.VoiceLink _voiceLink = new Features.VoiceLink();
-        public static Features.MessageFilter _messageFilter = new Features.MessageFilter();
-        public static Features.MessageLogs _messageLogs = new Features.MessageLogs();
-        public static Features.VoiceRoles _voiceRoles = new Features.VoiceRoles();
-        public static Features.VoteChannels _voteChannels = new Features.VoteChannels();
+        public static Autopurge _autopurge = new Autopurge();
+        public static InactiveRole _inactiveRole = new InactiveRole();
+        public static VoiceLink _voiceLink = new VoiceLink();
+        public static MessageFilter _messageFilter = new MessageFilter();
+        public static MessageLogs _messageLogs = new MessageLogs();
+        public static VoiceRoles _voiceRoles = new VoiceRoles();
+        public static VoteChannels _voteChannels = new VoteChannels();
 
         // ReSharper enable InconsistentNaming
 

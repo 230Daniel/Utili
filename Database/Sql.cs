@@ -1,10 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.Design;
-using System.Linq;
-using System.Text;
 using MySql.Data.MySqlClient;
-using Org.BouncyCastle.Asn1.Mozilla;
 
 namespace Database
 {

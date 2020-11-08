@@ -1,13 +1,12 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using Database.Data;
+using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using static Utili.Program;
 using static Utili.MessageSender;
-using Renci.SshNet.Security.Cryptography;
-using Discord;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Utili.Handlers
 {

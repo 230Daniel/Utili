@@ -1,7 +1,7 @@
-﻿using PostSharp.Aspects;
-using PostSharp.Serialization;
-using Discord.Commands;
+﻿using Discord.Commands;
 using Discord.WebSocket;
+using PostSharp.Aspects;
+using PostSharp.Serialization;
 
 namespace Utili.Commands
 {

@@ -1,9 +1,9 @@
-﻿using Discord.Commands;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
+using Discord.Commands;
+using Discord.WebSocket;
 using static Utili.Program;
 using static Utili.MessageSender;
 using static Utili.Helper;
-using Discord.WebSocket;
 
 namespace Utili.Commands
 {

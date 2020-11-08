@@ -1,16 +1,11 @@
-﻿using Database.Data;
-using Discord;
-using Discord.Rest;
-using Discord.WebSocket;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Data.Common;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Timers;
-using Database;
-using Discord.Commands;
+using Database.Data;
+using Discord;
+using Discord.WebSocket;
 using static Utili.Program;
 
 namespace Utili.Features

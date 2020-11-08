@@ -1,8 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
+using Database;
 using Database.Data;
 using Discord;
 using Discord.Commands;
@@ -35,7 +34,7 @@ namespace Utili.Features
 
             List<IEmote> emotes = row.Emotes;
 
-            if (Database.Premium.IsPremium(context.Guild.Id))
+            if (Premium.IsPremium(context.Guild.Id))
             {
                 emotes = emotes.Take(5).ToList();
             }

@@ -1,11 +1,6 @@
-﻿using MySql.Data.MySqlClient;
-using Org.BouncyCastle.Asn1.Mozilla;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Security;
-using System.Text;
-using System.Threading.Tasks;
+using MySql.Data.MySqlClient;
 
 namespace Database.Data
 {
@@ -176,7 +171,7 @@ namespace Database.Data
             if (channelRow.Id == 0) 
             // The row is a new entry so should be inserted into the database
             {
-                command = Sql.GetCommand($"INSERT INTO VoiceLinkChannels (GuildID, TextChannelId, VoiceChannelId) VALUES (@GuildId, @TextChannelId, @VoiceChannelId);",
+                command = Sql.GetCommand("INSERT INTO VoiceLinkChannels (GuildID, TextChannelId, VoiceChannelId) VALUES (@GuildId, @TextChannelId, @VoiceChannelId);",
                     new [] { ("GuildId", channelRow.GuildId.ToString()), 
                         ("TextChannelId", channelRow.TextChannelId.ToString()),
                         ("VoiceChannelId", channelRow.VoiceChannelId.ToString())});
@@ -190,7 +185,7 @@ namespace Database.Data
             else
             // The row already exists and should be updated
             {
-                command = Sql.GetCommand($"UPDATE VoiceLinkChannels SET GuildId = @GuildId, TextChannelId = @TextChannelId, VoiceChannelId = @VoiceChannelId WHERE Id = @Id;",
+                command = Sql.GetCommand("UPDATE VoiceLinkChannels SET GuildId = @GuildId, TextChannelId = @TextChannelId, VoiceChannelId = @VoiceChannelId WHERE Id = @Id;",
                     new [] {("Id", channelRow.Id.ToString()),
                         ("GuildId", channelRow.GuildId.ToString()), 
                         ("TextChannelId", channelRow.TextChannelId.ToString()),

@@ -1,14 +1,7 @@
-﻿using MySql.Data.MySqlClient;
-using Org.BouncyCastle.Asn1.Mozilla;
-using Org.BouncyCastle.Utilities.Encoders;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection.Metadata.Ecma335;
-using System.Security;
-using System.Text;
-using System.Text.Unicode;
-using System.Threading.Tasks;
+using MySql.Data.MySqlClient;
 
 namespace Database.Data
 {
@@ -79,7 +72,7 @@ namespace Database.Data
             if (row.Id == 0) 
             // The row is a new entry so should be inserted into the database
             {
-                command = Sql.GetCommand($"INSERT INTO MessageLogs (GuildID, DeletedChannelId, EditedChannelId, ExcludedChannels) VALUES (@GuildId, @DeletedChannelId, @EditedChannelId, @ExcludedChannels);",
+                command = Sql.GetCommand("INSERT INTO MessageLogs (GuildID, DeletedChannelId, EditedChannelId, ExcludedChannels) VALUES (@GuildId, @DeletedChannelId, @EditedChannelId, @ExcludedChannels);",
                     new [] { ("GuildId", row.GuildId.ToString()), 
                         ("DeletedChannelId", row.DeletedChannelId.ToString()),
                         ("EditedChannelId", row.EditedChannelId.ToString()),
@@ -95,7 +88,7 @@ namespace Database.Data
             else
             // The row already exists and should be updated
             {
-                command = Sql.GetCommand($"UPDATE MessageLogs SET GuildId = @GuildId, DeletedChannelId = @DeletedChannelId, EditedChannelId = @EditedChannelId, ExcludedChannels = @ExcludedChannels WHERE Id = @Id;",
+                command = Sql.GetCommand("UPDATE MessageLogs SET GuildId = @GuildId, DeletedChannelId = @DeletedChannelId, EditedChannelId = @EditedChannelId, ExcludedChannels = @ExcludedChannels WHERE Id = @Id;",
                     new [] {("Id", row.Id.ToString()),
                         ("GuildId", row.GuildId.ToString()), 
                         ("DeletedChannelId", row.DeletedChannelId.ToString()),
@@ -178,7 +171,7 @@ namespace Database.Data
             if (row.Id == 0) 
             // The row is a new entry so should be inserted into the database
             {
-                command = Sql.GetCommand($"INSERT INTO MessageLogsMessages (GuildID, ChannelId, MessageId, UserId, Timestamp, Content) VALUES (@GuildId, @ChannelId, @MessageId, @UserId, @Timestamp, @Content);",
+                command = Sql.GetCommand("INSERT INTO MessageLogsMessages (GuildID, ChannelId, MessageId, UserId, Timestamp, Content) VALUES (@GuildId, @ChannelId, @MessageId, @UserId, @Timestamp, @Content);",
                     new [] { ("GuildId", row.GuildId.ToString()), 
                         ("ChannelId", row.ChannelId.ToString()),
                         ("MessageId", row.MessageId.ToString()),
@@ -194,7 +187,7 @@ namespace Database.Data
             else
             // The row already exists and should be updated
             {
-                command = Sql.GetCommand($"UPDATE MessageLogsMessages SET GuildId = @GuildId, ChannelId = @ChannelId, MessageId = @MessageId, UserId = @UserId, Timestamp = @Timestamp, Content = @Content WHERE Id = @Id;",
+                command = Sql.GetCommand("UPDATE MessageLogsMessages SET GuildId = @GuildId, ChannelId = @ChannelId, MessageId = @MessageId, UserId = @UserId, Timestamp = @Timestamp, Content = @Content WHERE Id = @Id;",
                     new [] {("Id", row.Id.ToString()),
                         ("GuildId", row.GuildId.ToString()), 
                         ("ChannelId", row.ChannelId.ToString()),
@@ -236,7 +229,6 @@ namespace Database.Data
         }
 
         public static void DeleteOldMessages(ulong guildId, ulong channelId, bool premium)
-        // This is NOT to remove logs older than 30 days
         {
             List<MessageLogsMessageRow> messages = GetMessages(guildId, channelId).OrderBy(x => x.Id).ToList();
             List<MessageLogsMessageRow> messagesToRemove = new List<MessageLogsMessageRow>();
@@ -247,6 +239,23 @@ namespace Database.Data
             }
 
             DeleteMessagesById(messagesToRemove.Select(x => x.Id).ToArray());
+        }
+
+        public static void Delete30DayMessages()
+        {
+            // Deletes messages older than 30 days to comply with Discord's rule for storing message content
+            // "The maximum we can permit bots to store encrypted message content is 30 days"
+            // Called every 30 seconds from MessageLogsTable.Load
+
+            MySqlCommand command =
+                Sql.GetCommand("DELETE FROM MessageLogsMessages WHERE Timestamp <= @MinimumTimestamp;",
+                    new []
+                    {
+                        ("MinimumTimestamp", Sql.ToSqlDateTime(DateTime.UtcNow - TimeSpan.FromDays(30)))
+                    });
+
+            command.ExecuteNonQuery();
+            command.Connection.Close();
         }
     }
 
@@ -277,6 +286,8 @@ namespace Database.Data
 
             reader.Close();
             Rows = newRows;
+
+            MessageLogs.Delete30DayMessages();
         }
     }
 

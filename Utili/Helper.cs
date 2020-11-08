@@ -1,8 +1,8 @@
-﻿using Discord;
-using Discord.WebSocket;
-using System;
+﻿using System;
 using System.Linq;
 using System.Text;
+using Discord;
+using Discord.WebSocket;
 
 namespace Utili
 {

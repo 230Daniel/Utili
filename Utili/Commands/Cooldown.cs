@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Discord.Commands;
 using PostSharp.Aspects;
 using PostSharp.Serialization;
-using Discord.Commands;
+
 namespace Utili.Commands
 {
     [PSerializable]

@@ -1,7 +1,5 @@
-﻿using MySql.Data.MySqlClient;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System;
+using MySql.Data.MySqlClient;
 using static Database.Sql;
 
 namespace Database
@@ -10,7 +8,7 @@ namespace Database
     {
         public static int GetTotalShards()
         {
-            MySqlDataReader reader = Sql.GetCommand("SELECT * FROM Sharding WHERE Id = 1;").ExecuteReader();
+            MySqlDataReader reader = GetCommand("SELECT * FROM Sharding WHERE Id = 1;").ExecuteReader();
 
             reader.Read();
             int result = reader.GetInt32(1);

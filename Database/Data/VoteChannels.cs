@@ -1,12 +1,7 @@
-﻿using MySql.Data.MySqlClient;
-using Org.BouncyCastle.Asn1.Mozilla;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Security;
-using System.Text;
-using System.Threading.Tasks;
 using Discord;
+using MySql.Data.MySqlClient;
 
 namespace Database.Data
 {

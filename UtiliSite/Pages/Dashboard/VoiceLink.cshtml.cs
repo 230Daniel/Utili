@@ -1,14 +1,9 @@
-using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
-using System.Threading.Tasks;
-using System.Timers;
 using Database;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 using Database.Data;
 using Discord.Rest;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace UtiliSite.Pages.Dashboard
 {

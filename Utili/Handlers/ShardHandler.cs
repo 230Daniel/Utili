@@ -1,8 +1,8 @@
-﻿using Discord.WebSocket;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using System.Timers;
 using Discord;
+using Discord.WebSocket;
 using static Utili.Program;
 
 namespace Utili.Handlers
