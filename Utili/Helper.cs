@@ -10,23 +10,16 @@ namespace Utili
     {
         public static LogSeverity ConvertToLocalLogSeverity(Discord.LogSeverity severity)
         {
-            switch (severity)
+            return severity switch
             {
-                case Discord.LogSeverity.Critical:
-                    return LogSeverity.Error;
-                case Discord.LogSeverity.Error:
-                    return LogSeverity.Error;
-                case Discord.LogSeverity.Warning:
-                    return LogSeverity.Warn;
-                case Discord.LogSeverity.Info:
-                    return LogSeverity.Info;
-                case Discord.LogSeverity.Verbose:
-                    return LogSeverity.Dbug;
-                case Discord.LogSeverity.Debug:
-                    return LogSeverity.Dbug;
-                default:
-                    throw new Exception("What the heckin heck is this log severity bro?");
-            }
+                Discord.LogSeverity.Critical => LogSeverity.Error,
+                Discord.LogSeverity.Error => LogSeverity.Error,
+                Discord.LogSeverity.Warning => LogSeverity.Warn,
+                Discord.LogSeverity.Info => LogSeverity.Info,
+                Discord.LogSeverity.Verbose => LogSeverity.Dbug,
+                Discord.LogSeverity.Debug => LogSeverity.Dbug,
+                _ => throw new Exception("What the heckin heck is this log severity bro?"),
+            };
         }
 
         public static DiscordSocketClient GetShardForGuild(IGuild guild)

@@ -21,7 +21,7 @@ namespace Database
                 DiscordClientSecret = config.DiscordClientSecret;
                 DiscordToken = config.DiscordToken;
             }
-            catch (FileNotFoundException e)
+            catch (FileNotFoundException)
             {
                 string json = JsonSerializer.Serialize(this, new JsonSerializerOptions{WriteIndented = true});
 

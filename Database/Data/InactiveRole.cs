@@ -7,7 +7,7 @@ namespace Database.Data
 {
     public class InactiveRole
     {
-        private static TimeSpan _gapBetweenUpdates = TimeSpan.FromMinutes(60); 
+        private static readonly TimeSpan GapBetweenUpdates = TimeSpan.FromMinutes(60); 
 
         public static List<InactiveRoleRow> GetRows(ulong? guildId = null, int? id = null, bool ignoreCache = false)
         {
@@ -66,14 +66,14 @@ namespace Database.Data
             {
                 matchedRows.AddRange(Cache.InactiveRole.Rows);
 
-                matchedRows.RemoveAll(x => DateTime.UtcNow - x.LastUpdate < _gapBetweenUpdates);
+                matchedRows.RemoveAll(x => DateTime.UtcNow - x.LastUpdate < GapBetweenUpdates);
             }
             else
             {
                 string command = "SELECT * FROM InactiveRole WHERE LastUpdate < @LastUpdate";
                 List<(string, string)> values = new List<(string, string)>
                 {
-                    ("LastUpdate", Sql.ToSqlDateTime(DateTime.UtcNow - _gapBetweenUpdates))
+                    ("LastUpdate", Sql.ToSqlDateTime(DateTime.UtcNow - GapBetweenUpdates))
                 };
 
                 MySqlDataReader reader = Sql.GetCommand(command, values.ToArray()).ExecuteReader();

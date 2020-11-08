@@ -13,6 +13,7 @@ namespace Utili.Commands
         public Permission(Perm perm)
         {
             Perm = perm;
+            AspectPriority = 10;
         }
         
         public override void OnEntry(MethodExecutionArgs args)
@@ -36,70 +37,30 @@ namespace Utili.Commands
             SocketGuildUser user = context.User as SocketGuildUser;
             SocketGuildChannel channel = context.Channel as SocketGuildChannel;
 
-            switch (perm)
+            return perm switch
             {
-                case Perm.None:
-
-                    return true;
-
-                case Perm.ManageMessages:
-
-                    return user.GetPermissions(channel).ManageMessages;
-
-                case Perm.ManageGuild:
-
-                    return user.GuildPermissions.ManageGuild;
-
-                case Perm.Owner:
-
-                    return guild.Owner.Id == user.Id;
-
-                case Perm.BotStaff:
-
-                    return false;
-
-                case Perm.BotOwner:
-
-                    return user.Id == 218613903653863427;
-
-                default:
-
-                    return false;
-            }
+                Perm.None => true,
+                Perm.ManageMessages => user.GetPermissions(channel).ManageMessages,
+                Perm.ManageGuild => user.GuildPermissions.ManageGuild,
+                Perm.Owner => guild.Owner.Id == user.Id,
+                Perm.BotStaff => false,
+                Perm.BotOwner => user.Id == 218613903653863427,
+                _ => false,
+            };
         }
 
         public string GetPermissionRequirement(Perm perm)
         {
-            switch (perm)
+            return perm switch
             {
-                case Perm.None:
-
-                    return "no permissions";
-                
-                case Perm.ManageMessages:
-
-                    return "the manage messages permission";
-
-                case Perm.ManageGuild:
-
-                    return "the manage server permission";
-
-                case Perm.Owner:
-
-                    return "to be the owner of the guild";
-
-                case Perm.BotStaff:
-
-                    return "to be a trusted bot staff member";
-
-                case Perm.BotOwner:
-
-                    return "to be the bot owner";
-
-                default:
-
-                    return "";
-            }
+                Perm.None => "no permissions",
+                Perm.ManageMessages => "the manage messages permission",
+                Perm.ManageGuild => "the manage server permission",
+                Perm.Owner => "to be the owner of the guild",
+                Perm.BotStaff => "to be a trusted bot staff member",
+                Perm.BotOwner => "to be the bot owner",
+                _ => "",
+            };
         }
     }
 

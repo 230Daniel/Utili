@@ -23,7 +23,7 @@ namespace Database
                 Username = config.Username;
                 Password = config.Password;
             }
-            catch (FileNotFoundException e)
+            catch (FileNotFoundException)
             {
                 string json = JsonSerializer.Serialize(this, new JsonSerializerOptions{WriteIndented = true});
 

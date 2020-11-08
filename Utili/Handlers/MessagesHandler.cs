@@ -98,26 +98,15 @@ namespace Utili.Handlers
 
         public static string GetCommandErrorReason(IResult result)
         {
-            switch (result.Error)
+            return result.Error switch
             {
-                case CommandError.BadArgCount:
-                    return "Invalid amount of command arguments\nTry wrapping arguments with speech marks";
-
-                case CommandError.ObjectNotFound:
-                    return "Failed to interpret a command argument (Object not found)\nTry wrapping arguments with speech marks";
-
-                case CommandError.MultipleMatches:
-                    return "Failed to interpret a command argument (Multiple matches)\nTry wrapping arguments with speech marks";
-
-                case CommandError.UnmetPrecondition:
-                    return "Invalid command preconditions";
-
-                case CommandError.Exception:
-                    return "An error occured while trying to execute the command";
-
-                default:
-                    return null;
-            }
+                CommandError.BadArgCount => "Invalid amount of command arguments\nTry wrapping arguments with speech marks",
+                CommandError.ObjectNotFound => "Failed to interpret a command argument (Object not found)\nTry wrapping arguments with speech marks",
+                CommandError.MultipleMatches => "Failed to interpret a command argument (Multiple matches)\nTry wrapping arguments with speech marks",
+                CommandError.UnmetPrecondition => "Invalid command preconditions",
+                CommandError.Exception => "An error occured while trying to execute the command",
+                _ => null,
+            };
         }
     }
 }

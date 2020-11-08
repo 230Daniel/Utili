@@ -12,19 +12,21 @@ namespace Utili.Commands
     {
         private static List<CooldownItem> _cooldowns = new List<CooldownItem>();
 
-        private double FreeCooldown { get; set; }
-        private double PremiumCooldown { get; set; }
+        private double FreeCooldown { get; }
+        private double PremiumCooldown { get; }
 
         public Cooldown(double freeCooldown, double premiumCooldown)
         {
             FreeCooldown = freeCooldown;
             PremiumCooldown = premiumCooldown;
+            AspectPriority = 5;
         }
 
         public Cooldown(double cooldown)
         {
             FreeCooldown = cooldown;
             PremiumCooldown = cooldown;
+            AspectPriority = 5;
         }
         
         public override void OnEntry(MethodExecutionArgs args)
@@ -35,6 +37,8 @@ namespace Utili.Commands
             SocketCommandContext context = moduleBase.Context;
             
             double delay = FreeCooldown;
+            if (Database.Premium.IsPremium(context.Guild.Id)) delay = PremiumCooldown;
+
             CooldownItem cooldownItem = GetCooldown(context.Guild.Id, context.User.Id, command);
 
             if (cooldownItem != null)

@@ -48,35 +48,35 @@ namespace Utili.Features
 
         public bool DoesMessageObeyRule(SocketCommandContext context, VoteChannelsRow row)
         {
-            switch (row.Mode)
+            return row.Mode switch
             {
-                case 0: // All
-                    return true;
+                // All
+                0 => true,
 
-                case 1: // Images
-                    return _messageFilter.IsImage(context);
+                // Images
+                1 => _messageFilter.IsImage(context),
 
-                case 2: // Videos
-                    return _messageFilter.IsVideo(context);
+                // Videos
+                2 => _messageFilter.IsVideo(context),
 
-                case 3: // Media
-                    return _messageFilter.IsImage(context) || _messageFilter.IsVideo(context);
+                // Media
+                3 => _messageFilter.IsImage(context) || _messageFilter.IsVideo(context),
 
-                case 4: // Music
-                    return _messageFilter.IsMusic(context) || _messageFilter.IsVideo(context);
+                // Music
+                4 => _messageFilter.IsMusic(context) || _messageFilter.IsVideo(context),
 
-                case 5: // Attachments
-                    return _messageFilter.IsAttachment(context);
+                // Attachments
+                5 => _messageFilter.IsAttachment(context),
 
-                case 6: // URLs
-                    return _messageFilter.IsUrl(context);
+                // URLs
+                6 => _messageFilter.IsUrl(context),
 
-                case 7: // URLs or Media
-                    return _messageFilter.IsImage(context) || _messageFilter.IsVideo(context) || _messageFilter.IsUrl(context);
+                // URLs or Media
+                7 => _messageFilter.IsImage(context) || _messageFilter.IsVideo(context) || _messageFilter.IsUrl(context),
 
-                default:
-                    return true;
-            }
+                // Default
+                _ => true,
+            };
         }
     }
 }
