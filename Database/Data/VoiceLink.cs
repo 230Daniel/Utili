@@ -273,7 +273,7 @@ namespace Database.Data
         public bool Enabled { get; set; }
         public bool DeleteChannels { get; set; }
         public EString Prefix { get; set; }
-        public List<ulong> ExcludedChannels { get; set; } = new List<ulong>();
+        public List<ulong> ExcludedChannels { get; set; }
 
         public VoiceLinkRow()
         {
@@ -288,7 +288,7 @@ namespace Database.Data
             DeleteChannels = deleteChannels;
             Prefix = EString.FromEncoded(prefix);
 
-            ExcludedChannels.Clear();
+            ExcludedChannels = new List<ulong>();
 
             if (!string.IsNullOrEmpty(excludedChannels))
             {

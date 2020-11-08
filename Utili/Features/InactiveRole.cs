@@ -87,7 +87,7 @@ namespace Utili.Features
             IGuildUser bot = users.First(x => x.Id == _client.CurrentUser.Id);
             List<InactiveRoleUserRow> userRows = Database.Data.InactiveRole.GetUsers(guild.Id);
 
-            foreach (IGuildUser user in users)
+            foreach (IGuildUser user in users.Where(x => !x.IsBot).OrderBy(x => x.Id))
             {
                 // DefaultLastAction is set to the time when the activity data started being recorded
                 DateTime lastAction = row.DefaultLastAction;

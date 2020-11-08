@@ -94,7 +94,7 @@ namespace Utili.Features
             {
                 if(before.Content.Value.Length < 2024 - embed.Description.Length - 2)
                 {
-                    embed.Description += $"\n{before.Content}";
+                    embed.Description += $"\n{before.Content.Value}";
                 }
                 else
                 {
@@ -106,7 +106,7 @@ namespace Utili.Features
             }
             else
             {
-                embed.AddField("Before", before.Content);
+                embed.AddField("Before", before.Content.Value);
                 embed.AddField("After", after.Message.Content);
 
                 embed.WithFooter("Sent");
@@ -155,7 +155,7 @@ namespace Utili.Features
             }
             else
             {
-                embed.Description += $"\n{message.Content}";
+                embed.Description += $"\n{message.Content.Value}";
             }
 
             embed.WithFooter($"Message {message.MessageId}");

@@ -166,7 +166,9 @@ namespace Database.Data
             ChannelId = channelId;
             Mode = mode;
 
-            Emotes.Clear();
+            Emotes = new List<IEmote>();
+
+            emotes = EString.FromEncoded(emotes).Value;
 
             if (!string.IsNullOrEmpty(emotes))
             {
@@ -197,7 +199,7 @@ namespace Database.Data
                 }
             }
 
-            return emotesString;
+            return EString.FromDecoded(emotesString).EncodedValue;
         }
     }
 }

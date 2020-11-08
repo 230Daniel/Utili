@@ -11,8 +11,7 @@ namespace Database.Data
 {
     public class InactiveRole
     {
-        // TODO: Change to more appropriate value after initial testing
-        private static TimeSpan _gapBetweenUpdates = TimeSpan.FromMinutes(15); 
+        private static TimeSpan _gapBetweenUpdates = TimeSpan.FromMinutes(60); 
 
         public static List<InactiveRoleRow> GetRows(ulong? guildId = null, int? id = null, bool ignoreCache = false)
         {
@@ -151,7 +150,7 @@ namespace Database.Data
             // The row is a new entry so should be inserted into the database
             {
                 // If the if statement is true then something has gone horribly wrong, but it will work anyway.
-                command = Sql.GetCommand($"INSERT INTO InactiveRole (GuildID, RoleId, ImmuneRoleId, Threshold, Inverse, DefaultLastAction, LastUpdate) VALUES (@GuildId, @RoleId, @ImmuneRoleId, @Threshold, {Sql.ToSqlBool(row.Inverse)}, @LastUpdate);",
+                command = Sql.GetCommand($"INSERT INTO InactiveRole (GuildID, RoleId, ImmuneRoleId, Threshold, Inverse, DefaultLastAction, LastUpdate) VALUES (@GuildId, @RoleId, @ImmuneRoleId, @Threshold, {Sql.ToSqlBool(row.Inverse)}, @DefaultLastAction, @LastUpdate);",
                     new [] {("GuildId", row.GuildId.ToString()), 
                         ("RoleId", row.RoleId.ToString()),
                         ("ImmuneRoleId", row.ImmuneRoleId.ToString()),
@@ -216,7 +215,7 @@ namespace Database.Data
         {
             List<InactiveRoleUserRow> matchedRows = new List<InactiveRoleUserRow>();
 
-            string command = "SELECT * FROM InactiveRole WHERE GuildId = @GuildId";
+            string command = "SELECT * FROM InactiveRoleUsers WHERE GuildId = @GuildId";
             List<(string, string)> values = new List<(string, string)>
             {
                 ("GuildId", guildId.ToString())

@@ -58,7 +58,7 @@ namespace Utili.Features
                     return _messageFilter.IsImage(context);
 
                 case 2: // Videos
-                    return true;
+                    return _messageFilter.IsVideo(context);
 
                 case 3: // Media
                     return _messageFilter.IsImage(context) || _messageFilter.IsVideo(context);

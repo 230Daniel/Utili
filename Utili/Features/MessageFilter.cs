@@ -77,7 +77,7 @@ namespace Utili.Features
 
                 case 2: // Videos
                     allowedTypes = "with videos";
-                    return true;
+                    return IsVideo(context);
 
                 case 3: // Media
                     allowedTypes = "with images or videos";

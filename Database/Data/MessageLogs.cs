@@ -286,7 +286,7 @@ namespace Database.Data
         public ulong GuildId { get; set; }
         public ulong DeletedChannelId { get; set; }
         public ulong EditedChannelId { get; set; }
-        public List<ulong> ExcludedChannels { get; set; } = new List<ulong>();
+        public List<ulong> ExcludedChannels { get; set; }
 
         public MessageLogsRow()
         {
@@ -300,7 +300,7 @@ namespace Database.Data
             DeletedChannelId = deletedChannelId;
             EditedChannelId = editedChannelId;
 
-            ExcludedChannels.Clear();
+            ExcludedChannels = new List<ulong>();
 
             if (!string.IsNullOrEmpty(excludedChannels))
             {
