@@ -12,8 +12,12 @@ namespace Utili.Commands
     {
         private static List<CooldownItem> _cooldowns = new List<CooldownItem>();
 
-        private double FreeCooldown { get; }
-        private double PremiumCooldown { get; }
+        // ReSharper disable AutoPropertyCanBeMadeGetOnly.Local
+
+        private double FreeCooldown { get; set; }
+        private double PremiumCooldown { get; set; }
+
+        // ReSharper enable AutoPropertyCanBeMadeGetOnly.Local
 
         public Cooldown(double freeCooldown, double premiumCooldown)
         {
