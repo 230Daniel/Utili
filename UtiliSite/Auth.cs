@@ -1,7 +1,9 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using Discord.Rest;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
+using Ubiety.Dns.Core;
 using UtiliSite.Pages;
 using static UtiliSite.DiscordModule;
 
@@ -15,7 +17,9 @@ namespace UtiliSite
             {
                 AuthenticationProperties authProperties = new AuthenticationProperties
                 {
-                    RedirectUri = redirectUrl
+                    RedirectUri = redirectUrl,
+                    AllowRefresh = true,
+                    IsPersistent = true
                 };
 
                 httpContext.ChallengeAsync("Discord", authProperties).GetAwaiter().GetResult();
