@@ -1,11 +1,7 @@
-﻿using MySql.Data.MySqlClient;
-using Org.BouncyCastle.Asn1.Mozilla;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security;
-using System.Text;
-using System.Threading.Tasks;
+using MySql.Data.MySqlClient;
 
 namespace Database.Data
 {
@@ -166,15 +162,6 @@ namespace Database.Data
             GuildId = guildId;
             ChannelId = channelId;
             Timespan = TimeSpan.Parse(timespan);
-            Mode = mode;
-        }
-
-        public AutopurgeRow(int id, ulong guildId, ulong channelId, TimeSpan timespan, int mode)
-        {
-            Id = id;
-            GuildId = guildId;
-            ChannelId = channelId;
-            Timespan = timespan;
             Mode = mode;
         }
     }

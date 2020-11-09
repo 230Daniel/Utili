@@ -1,10 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Timers;
-using Microsoft.AspNetCore.Mvc;
+using Database.Data;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace UtiliSite.Pages.Dashboard
@@ -22,7 +16,7 @@ namespace UtiliSite.Pages.Dashboard
             ViewData["guildName"] = auth.Guild.Name;
             ViewData["Title"] = $"{auth.Guild.Name} - ";
 
-            ViewData["prefix"] = Database.Data.Misc.GetPrefix(auth.Guild.Id);
+            ViewData["prefix"] = Misc.GetPrefix(auth.Guild.Id);
             ViewData["nickname"] = DiscordModule.GetNickname(auth.Guild);
         }
 
@@ -41,7 +35,7 @@ namespace UtiliSite.Pages.Dashboard
 
             if (prefix != (string) ViewData["prefix"])
             {
-                Database.Data.Misc.SetPrefix(auth.Guild.Id, prefix);
+                Misc.SetPrefix(auth.Guild.Id, prefix);
             }
 
             if (nickname != (string) ViewData["nickname"])

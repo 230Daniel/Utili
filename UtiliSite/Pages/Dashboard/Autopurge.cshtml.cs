@@ -1,13 +1,9 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
-using System.Threading.Tasks;
-using System.Timers;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 using Database.Data;
 using Discord.Rest;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace UtiliSite.Pages.Dashboard
 {
@@ -70,7 +66,7 @@ namespace UtiliSite.Pages.Dashboard
             ulong channelId = ulong.Parse(HttpContext.Request.Form["channelId"]);
             RestTextChannel channel = auth.Guild.GetTextChannelAsync(channelId).GetAwaiter().GetResult();
 
-            AutopurgeRow newRow = new AutopurgeRow()
+            AutopurgeRow newRow = new AutopurgeRow
             {
                 GuildId = auth.Guild.Id,
                 ChannelId = channel.Id,

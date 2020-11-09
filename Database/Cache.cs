@@ -1,10 +1,5 @@
-﻿using Database.Data;
-using System;
-using System.Collections.Generic;
-using System.Net;
-using System.Text;
-using System.Threading.Tasks;
-using System.Timers;
+﻿using System.Timers;
+using Database.Data;
 
 namespace Database
 {
@@ -20,10 +15,13 @@ namespace Database
         private static Timer Timer { get; set; }
 
         public static AutopurgeTable Autopurge { get; set; } = new AutopurgeTable();
+        public static InactiveRoleTable InactiveRole { get; set; } = new InactiveRoleTable();
         public static MessageFilterTable MessageFilter { get; set; } = new MessageFilterTable();
+        public static MessageLogsTable MessageLogs { get; set; } = new MessageLogsTable();
         public static MiscTable Misc { get; set; } = new MiscTable();
         public static VoiceLinkTable VoiceLink { get; set; } = new VoiceLinkTable();
         public static VoiceRolesTable VoiceRoles { get; set; } = new VoiceRolesTable();
+        public static VoteChannelsTable VoteChannels { get; set; } = new VoteChannelsTable();
         
         public static void Initialise() 
         // Start the automatic cache downloads
@@ -46,10 +44,13 @@ namespace Database
         private static void DownloadTables()
         {
             Autopurge.Load();
+            InactiveRole.Load();
             MessageFilter.Load();
+            MessageLogs.Load();
             Misc.Load();
             VoiceLink.Load();
             VoiceRoles.Load();
+            VoteChannels.Load();
         }
     }
 }

@@ -1,17 +1,12 @@
-﻿using MySql.Data.MySqlClient;
-using Org.BouncyCastle.Asn1.Mozilla;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Security;
-using System.Text;
-using System.Threading.Tasks;
+using MySql.Data.MySqlClient;
 
 namespace Database.Data
 {
     public class VoiceRoles
     {
-        public static List<VoiceRolesRow> GetRows(ulong? guildId = null, ulong? channelId = null, bool ignoreCache = false)
+        public static List<VoiceRolesRow> GetRows(ulong? guildId = null, ulong? channelId = null, int? id = null, bool ignoreCache = false)
         {
             List<VoiceRolesRow> matchedRows = new List<VoiceRolesRow>();
 
@@ -19,6 +14,7 @@ namespace Database.Data
             {
                 matchedRows.AddRange(Cache.VoiceRoles.Rows);
 
+                if (id.HasValue) matchedRows.RemoveAll(x => x.Id != id.Value);
                 if (guildId.HasValue) matchedRows.RemoveAll(x => x.GuildId != guildId.Value);
                 if (channelId.HasValue) matchedRows.RemoveAll(x => x.ChannelId != channelId.Value);
             }
@@ -37,6 +33,12 @@ namespace Database.Data
                 {
                     command += " AND ChannelId = @ChannelId";
                     values.Add(("ChannelId", channelId.Value.ToString()));
+                }
+
+                if (id.HasValue)
+                {
+                    command += " AND Id = @Id";
+                    values.Add(("Id", id.Value.ToString()));
                 }
 
                 MySqlDataReader reader = Sql.GetCommand(command, values.ToArray()).ExecuteReader();
@@ -63,21 +65,21 @@ namespace Database.Data
             if (row.Id == 0) 
             // The row is a new entry so should be inserted into the database
             {
-                command = Sql.GetCommand($"INSERT INTO VoiceRoles (GuildID, ChannelId, RoleId) VALUES (@GuildId, @ChannelId, @RoleId);",
+                command = Sql.GetCommand("INSERT INTO VoiceRoles (GuildID, ChannelId, RoleId) VALUES (@GuildId, @ChannelId, @RoleId);",
                     new [] { ("GuildId", row.GuildId.ToString()), 
                         ("ChannelId", row.ChannelId.ToString()),
                         ("RoleId", row.RoleId.ToString())});
 
                 command.ExecuteNonQuery();
                 command.Connection.Close();
-                row.Id = GetRows(row.GuildId, row.ChannelId, true).First().Id;
+                row.Id = GetRows(row.GuildId, row.ChannelId, null, true).First().Id;
                 
                 if(Cache.Initialised) Cache.VoiceRoles.Rows.Add(row);
             }
             else
             // The row already exists and should be updated
             {
-                command = Sql.GetCommand($"UPDATE VoiceRoles SET GuildId = @GuildId, ChannelId = @ChannelId, RoleId = @RoleId WHERE Id = @Id;",
+                command = Sql.GetCommand("UPDATE VoiceRoles SET GuildId = @GuildId, ChannelId = @ChannelId, RoleId = @RoleId WHERE Id = @Id;",
                     new [] {("Id", row.Id.ToString()),
                         ("GuildId", row.GuildId.ToString()), 
                         ("ChannelId", row.ChannelId.ToString()),

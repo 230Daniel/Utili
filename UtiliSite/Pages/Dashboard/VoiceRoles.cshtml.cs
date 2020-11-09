@@ -1,13 +1,12 @@
 using System.Collections.Generic;
 using System.Linq;
-using Database;
 using Database.Data;
 using Discord.Rest;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace UtiliSite.Pages.Dashboard
 {
-    public class VoiceLinkModel : PageModel
+    public class VoiceRolesModel : PageModel
     {
         public void OnGet()
         {
@@ -19,15 +18,18 @@ namespace UtiliSite.Pages.Dashboard
             ViewData["guild"] = auth.Guild;
             ViewData["Title"] = $"{auth.Guild.Name} - ";
 
-            VoiceLinkRow metaRow = VoiceLink.GetMetaRow(auth.Guild.Id);
+            List<RestVoiceChannel> voiceChannels = DiscordModule.GetVoiceChannelsAsync(auth.Guild).GetAwaiter().GetResult().OrderBy(x => x.Position).ToList();
+            List<VoiceRolesRow> rows = VoiceRoles.GetRows(auth.Guild.Id);
 
-            List<RestVoiceChannel> voiceChannels = DiscordModule.GetVoiceChannelsAsync(auth.Guild).GetAwaiter().GetResult();
-            List<RestVoiceChannel> excludedChannels = voiceChannels.Where(x => metaRow.ExcludedChannels.Contains(x.Id)).ToList();
-            List<RestVoiceChannel> nonExcludedChannels = voiceChannels.Where(x => !metaRow.ExcludedChannels.Contains(x.Id)).ToList();
+            List<RestVoiceChannel> addedChannels =
+                voiceChannels.Where(x => rows.Select(y => y.ChannelId).Contains(x.Id)).ToList();
 
-            ViewData["excludedChannels"] = excludedChannels;
-            ViewData["nonExcludedChannels"] = nonExcludedChannels;
-            ViewData["metaRow"] = metaRow;
+            List<RestVoiceChannel> nonAddedChannels =
+                voiceChannels.Where(x => !addedChannels.Select(y => y.Id).Contains(x.Id)).ToList();
+
+            ViewData["addedChannels"] = addedChannels;
+            ViewData["nonAddedChannels"] = nonAddedChannels;
+            ViewData["rows"] = rows;
         }
 
         public void OnPost()
@@ -40,20 +42,17 @@ namespace UtiliSite.Pages.Dashboard
                 return;
             }
 
-            bool enabled = HttpContext.Request.Form["enabled"] == "on";
-            bool deleteChannels = HttpContext.Request.Form["deleteChannels"] == "on";
-            string prefix = HttpContext.Request.Form["prefix"].ToString();
+            int rowId = int.Parse(HttpContext.Request.Form["rowId"]);
+            ulong roleId = ulong.Parse(HttpContext.Request.Form["role"]);
 
-            VoiceLinkRow row = VoiceLink.GetMetaRow(auth.Guild.Id);
-            row.Enabled = enabled;
-            row.DeleteChannels = deleteChannels;
-            row.Prefix = EString.FromDecoded(prefix);
-            VoiceLink.SaveMetaRow(row);
+            VoiceRolesRow row = VoiceRoles.GetRows(auth.Guild.Id, null, rowId).First();
+            row.RoleId = roleId;
+            VoiceRoles.SaveRow(row);
 
             HttpContext.Response.StatusCode = 200;
         }
 
-        public void OnPostExclude()
+        public void OnPostAdd()
         {
             AuthDetails auth = Auth.GetAuthDetails(HttpContext, HttpContext.Request.Path);
 
@@ -65,12 +64,14 @@ namespace UtiliSite.Pages.Dashboard
 
             ulong channelId = ulong.Parse(HttpContext.Request.Form["channelId"]);
 
-            VoiceLinkRow metaRow = VoiceLink.GetMetaRow(auth.Guild.Id);
-            if (!metaRow.ExcludedChannels.Contains(channelId))
+            VoiceRolesRow row = new VoiceRolesRow
             {
-                metaRow.ExcludedChannels.Add(channelId);
-            }
-            VoiceLink.SaveMetaRow(metaRow);
+                GuildId = auth.Guild.Id,
+                ChannelId = channelId,
+                RoleId = 0
+            };
+
+            VoiceRoles.SaveRow(row);
 
             HttpContext.Response.StatusCode = 200;
             HttpContext.Response.Redirect(HttpContext.Request.Path);
@@ -86,19 +87,18 @@ namespace UtiliSite.Pages.Dashboard
                 return;
             }
 
-            ulong channelId = ulong.Parse(HttpContext.Request.Form["channelId"]);
+            int rowId = int.Parse(HttpContext.Request.Form["rowId"]);
 
-            VoiceLinkRow metaRow = VoiceLink.GetMetaRow(auth.Guild.Id);
-            metaRow.ExcludedChannels.RemoveAll(x => x == channelId);
-            VoiceLink.SaveMetaRow(metaRow);
+            VoiceRolesRow row = VoiceRoles.GetRows(auth.Guild.Id, null, rowId).First();
+            VoiceRoles.DeleteRow(row);
 
             HttpContext.Response.StatusCode = 200;
             HttpContext.Response.Redirect(HttpContext.Request.Path);
         }
 
-        public static string GetIsChecked(bool isChecked)
+        public static string GetIsSelected(ulong roleId, VoiceRolesRow row)
         {
-            if (isChecked) return "checked";
+            if (row.RoleId == roleId) return "selected";
             return "";
         }
     }

@@ -5,7 +5,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="MySql.Data" Version="8.0.21" />
+    <PackageReference Include="Discord.Net" Version="2.3.0-dev-20201106.1" />
+    <PackageReference Include="MySql.Data" Version="8.0.22" />
+    <PackageReference Include="Microsoft.NETCore.Targets" Version="3.0.0" PrivateAssets="all" />
   </ItemGroup>
 
 </Project>

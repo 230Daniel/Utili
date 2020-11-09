@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 
 namespace Database
 {
@@ -8,14 +6,17 @@ namespace Database
     {
         public static bool IsPremium(ulong guildId)
         {
-            return true;
+            return new List<ulong>
+            {
+                611527825929011231
+            }.Contains(guildId);
         }
 
         public static List<ulong> GetPremiumGuilds()
         {
             return new List<ulong>
             {
-                763298540591513643
+                611527825929011231
             };
         }
     }

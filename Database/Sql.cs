@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.Design;
-using System.Text;
 using MySql.Data.MySqlClient;
-using Org.BouncyCastle.Asn1.Mozilla;
 
 namespace Database
 {
@@ -11,9 +7,9 @@ namespace Database
     {
         private static string ConnectionString { get; set; }
 
-        public static void SetCredentials(string server, string database, string username, string password)
+        public static void SetCredentials(string server, int port, string database, string username, string password)
         {
-            ConnectionString = $"Server={server};Database={database};Uid={username};Pwd={password};";
+            ConnectionString = $"Server={server};Port={port};Database={database};Uid={username};Pwd={password};";
         }
 
         public static MySqlCommand GetCommand(string commandText, (string, string)[] values = null)
@@ -35,7 +31,7 @@ namespace Database
             return command;
         }
 
-        public static string GetBool(bool boolean)
+        public static string ToSqlBool(bool boolean)
         {
             if (boolean)
             {
@@ -45,9 +41,24 @@ namespace Database
             return "FALSE";
         }
 
-        public static string ConvertToSqlTime(DateTime time)
+        public static string ToSqlDateTime(DateTime time)
         {
             return $"{time.Year:0000}-{time.Month:00}-{time.Day:00} {time.Hour:00}:{time.Minute:00}:{time.Second:00}";
+        }
+
+        public static string ToSqlObjectArray<T>(T[] values)
+        {
+            string sqlArray = "(";
+
+            for (int i = 0; i < values.Length; i++)
+            {
+                sqlArray += $"{values[i]}";
+
+                if (i != values.Length - 1) sqlArray += ",";
+            }
+
+            sqlArray += ")";
+            return sqlArray;
         }
     }
 }

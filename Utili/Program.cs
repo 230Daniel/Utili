@@ -1,11 +1,12 @@
-﻿using Discord.WebSocket;
-using System.Linq;
-using System.Threading.Tasks;
-using Discord;
+﻿using System.Linq;
 using System.Reflection;
-using Discord.Commands;
-using Utili.Handlers;
+using System.Threading.Tasks;
 using System.Timers;
+using Discord;
+using Discord.Commands;
+using Discord.WebSocket;
+using Utili.Features;
+using Utili.Handlers;
 
 namespace Utili
 {
@@ -24,10 +25,13 @@ namespace Utili
 
         public static Timer _shardStatsUpdater;
 
-        public static Features.Autopurge _autopurge = new Features.Autopurge();
-        public static Features.VoiceLink _voiceLink = new Features.VoiceLink();
-        public static Features.MessageFilter _messageFilter = new Features.MessageFilter();
-        public static Features.VoiceRoles _voiceRoles = new Features.VoiceRoles();
+        public static Autopurge _autopurge = new Autopurge();
+        public static InactiveRole _inactiveRole = new InactiveRole();
+        public static VoiceLink _voiceLink = new VoiceLink();
+        public static MessageFilter _messageFilter = new MessageFilter();
+        public static MessageLogs _messageLogs = new MessageLogs();
+        public static VoiceRoles _voiceRoles = new VoiceRoles();
+        public static VoteChannels _voteChannels = new VoteChannels();
 
         // ReSharper enable InconsistentNaming
 
@@ -40,15 +44,13 @@ namespace Utili
             _logger.Initialise();
             _logger.LogEmpty(true);
 
-            _logger.Log("Main", "Connecting to the database", LogSeverity.Info);
-
-            // Initialise the database and use cache
+            _logger.Log("Main", "Downloading database cache", LogSeverity.Info);
             Database.Database.Initialise(true);
-
-            _logger.Log("Main", "Connected to the database", LogSeverity.Info);
-            _logger.Log("Main", "Cache downloaded", LogSeverity.Info);
+            _logger.Log("Main", "Database cache downloaded", LogSeverity.Info);
 
             new Program().MainAsync().GetAwaiter().GetResult();
+
+            // TODO: Auto-restart
         }
 
         public async Task MainAsync()
@@ -62,11 +64,20 @@ namespace Utili
             int[] shardIds = Enumerable.Range(_config.LowerShardId, _config.UpperShardId - (_config.LowerShardId - 1)).ToArray();
             _totalShards = Database.Sharding.GetTotalShards();
 
-            _client = new DiscordShardedClient(shardIds, new DiscordSocketConfig
+            _client = new DiscordShardedClient(shardIds, new DiscordSocketConfig 
             {
+                TotalShards = _totalShards,
+                MessageCacheSize = 0,
                 ExclusiveBulkDelete = true,
+                AlwaysDownloadUsers = _config.FillUserCache,
                 LogLevel = Discord.LogSeverity.Info,
-                TotalShards = _totalShards
+
+                GatewayIntents = 
+                    GatewayIntents.Guilds |
+                    GatewayIntents.GuildMembers |
+                    GatewayIntents.GuildMessageReactions | 
+                    GatewayIntents.GuildMessages | 
+                    GatewayIntents.GuildVoiceStates
             });
 
             _commands = new CommandService(new CommandServiceConfig
@@ -76,33 +87,34 @@ namespace Utili
                 LogLevel = Discord.LogSeverity.Debug
             });
 
+            _commands.AddTypeReader(typeof(IGuildUser), new UserTypeReader());
             await _commands.AddModulesAsync(assembly: Assembly.GetEntryAssembly(), services: null);
 
             _logger.Log("MainAsync", $"Running {_config.UpperShardId - (_config.LowerShardId - 1)} shards of Utili with {_totalShards} total shards", LogSeverity.Info);
             _logger.Log("MainAsync", $"Shard IDs: {_config.LowerShardId} - {_config.UpperShardId}", LogSeverity.Info);
             _logger.LogEmpty();
 
-            _client.Log += Client_Log;
-            _client.MessageReceived += MessageReceivedHandler.MessageReceived;
-            _client.ShardReady += ReadyHandler.ShardReady;
+            _client.Log += ShardHandler.Log;
+            _client.ShardReady += ShardHandler.ShardReady;
+            _client.ShardConnected += ShardHandler.ShardConnected;
+
+            _client.MessageReceived += MessagesHandler.MessageReceived;
+            _client.MessageUpdated += MessagesHandler.MessageEdited;
+            _client.MessageDeleted += MessagesHandler.MessageDeleted;
+            _client.MessagesBulkDeleted += MessagesHandler.MessagesBulkDeleted;
+            
             _client.UserVoiceStateUpdated += VoiceHandler.UserVoiceStateUpdated;
 
             await _client.LoginAsync(TokenType.Bot, _config.Token);
-
+            await _client.SetGameAsync("Starting up...");
             await _client.StartAsync();
 
             _autopurge.Start();
             _voiceLink.Start();
             _voiceRoles.Start();
+            _inactiveRole.Start();
 
             await Task.Delay(-1);
-        }
-
-        
-
-        private async Task Client_Log(LogMessage logMessage)
-        {
-            _logger.Log(logMessage.Source, logMessage.Message, Helper.ConvertToLocalLogSeverity(logMessage.Severity));
         }
     }
 }

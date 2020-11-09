@@ -64,7 +64,8 @@
             <!option value="4" @MessageFilterModel.GetIsSelected(4, row)>Music</!option>
             <!option value="5" @MessageFilterModel.GetIsSelected(5, row)>Attachments</!option>
             <!option value="6" @MessageFilterModel.GetIsSelected(6, row)>URLs</!option>
-            <!option value="7" @MessageFilterModel.GetIsSelected(7, row)>RegEx</!option>
+            <!option value="7" @MessageFilterModel.GetIsSelected(7, row)>URLs and Media</!option>
+            <!option value="7" @MessageFilterModel.GetIsSelected(8, row)>RegEx</!option>
         </select>
     </div>
 
@@ -72,7 +73,7 @@
         <div class="input-group-prepend">
             <span class="input-group-text">RegEx</span>
         </div>
-        <input type="text" name="complex" class="form-control" style="background: unset;" value="@row.Complex">
+        <input type="text" name="complex" class="form-control" style="background: unset;" value="@row.Complex.Value">
     </div>
 
     <div class="input-group flex-nowrap">

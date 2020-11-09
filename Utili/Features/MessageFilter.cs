@@ -1,18 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Runtime.Serialization;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Database.Data;
 using Discord;
 using Discord.Commands;
 using Discord.Rest;
-using Discord.WebSocket;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using PostSharp.Aspects.Advices;
 
 namespace Utili.Features
 {
@@ -23,6 +17,18 @@ namespace Utili.Features
             if (BotPermissions.IsMissingPermissions(context.Channel, new[] {ChannelPermission.ManageMessages}, out _))
             {
                 return;
+            }
+
+            if (context.User.Id == Program._client.CurrentUser.Id && context.Message.Embeds.Count > 0)
+            {
+                Embed embed = context.Message.Embeds.First();
+                if (embed.Author.HasValue)
+                {
+                    if (embed.Author.Value.Name == "Message deleted")
+                    {
+                        return;
+                    }
+                }
             }
 
             List<MessageFilterRow> rows = Database.Data.MessageFilter.GetRows(context.Guild.Id, context.Channel.Id);
@@ -68,7 +74,7 @@ namespace Utili.Features
 
                 case 2: // Videos
                     allowedTypes = "with videos";
-                    return true;
+                    return IsVideo(context);
 
                 case 3: // Media
                     allowedTypes = "with images or videos";
@@ -86,9 +92,13 @@ namespace Utili.Features
                     allowedTypes = "with urls";
                     return IsUrl(context);
 
-                case 7: // RegEx
-                    allowedTypes = $"following regex {row.Complex}";
-                    return IsRegex(context, row.Complex);
+                case 7: // URLs or Media
+                    allowedTypes = "with images, videos or urls";
+                    return IsImage(context) || IsVideo(context) || IsUrl(context);
+
+                case 8: // RegEx
+                    allowedTypes = $"which match regex \"{row.Complex.Value}\"";
+                    return IsRegex(context, row.Complex.Value);
 
                 default:
                     allowedTypes = "";
@@ -214,17 +224,24 @@ namespace Utili.Features
 
         public bool IsRegex(SocketCommandContext context, string pattern)
         {
-            Regex regex = new Regex(pattern);
-
-            foreach (string word in context.Message.Content.Split(" "))
+            try
             {
-                if (regex.IsMatch(word))
-                {
-                    return true;
-                }
-            }
+                Regex regex = new Regex(pattern);
 
-            return false;
+                foreach (string word in context.Message.Content.Split(" "))
+                {
+                    if (regex.IsMatch(word))
+                    {
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+            catch
+            {
+                return false;
+            }
         }
     }
 }

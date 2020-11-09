@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Discord.Commands;
 using PostSharp.Aspects;
 using PostSharp.Serialization;
-using Discord.Commands;
+
 namespace Utili.Commands
 {
     [PSerializable]
@@ -11,19 +12,25 @@ namespace Utili.Commands
     {
         private static List<CooldownItem> _cooldowns = new List<CooldownItem>();
 
+        // ReSharper disable AutoPropertyCanBeMadeGetOnly.Local
+
         private double FreeCooldown { get; set; }
         private double PremiumCooldown { get; set; }
+
+        // ReSharper enable AutoPropertyCanBeMadeGetOnly.Local
 
         public Cooldown(double freeCooldown, double premiumCooldown)
         {
             FreeCooldown = freeCooldown;
             PremiumCooldown = premiumCooldown;
+            AspectPriority = 5;
         }
 
         public Cooldown(double cooldown)
         {
             FreeCooldown = cooldown;
             PremiumCooldown = cooldown;
+            AspectPriority = 5;
         }
         
         public override void OnEntry(MethodExecutionArgs args)
@@ -34,6 +41,8 @@ namespace Utili.Commands
             SocketCommandContext context = moduleBase.Context;
             
             double delay = FreeCooldown;
+            if (Database.Premium.IsPremium(context.Guild.Id)) delay = PremiumCooldown;
+
             CooldownItem cooldownItem = GetCooldown(context.Guild.Id, context.User.Id, command);
 
             if (cooldownItem != null)

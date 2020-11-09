@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using MySql.Data.MySqlClient;
 
 namespace Database.Data
@@ -18,7 +16,7 @@ namespace Database.Data
 
                 if (guildId.HasValue) matchedRows.RemoveAll(x => x.GuildId != guildId.Value);
                 if (type != null) matchedRows.RemoveAll(x => x.Type != type);
-                if (value != null) matchedRows.RemoveAll(x => x.Value != value);
+                if (value != null) matchedRows.RemoveAll(x => x.Value.Value != value);
             }
             else
             {
@@ -40,7 +38,7 @@ namespace Database.Data
                 if (value != null)
                 {
                     command += " AND Value = @Value";
-                    values.Add(("Value", value));
+                    values.Add(("Value", EString.FromDecoded(value).EncodedValue));
                 }
 
                 MySqlDataReader reader = Sql.GetCommand(command, values.ToArray()).ExecuteReader();
@@ -79,12 +77,12 @@ namespace Database.Data
                     {
                         ("GuildId", row.GuildId.ToString()),
                         ("Type", row.Type),
-                        ("Value", row.Value)});
+                        ("Value", row.Value.EncodedValue)});
 
                 command.ExecuteNonQuery();
                 command.Connection.Close();
 
-                row.Id = GetRows(row.GuildId, row.Type, row.Value).First().Id;
+                row.Id = GetRows(row.GuildId, row.Type, row.Value.Value).First().Id;
 
                 if(Cache.Initialised) Cache.Misc.Rows.Add(row);
             }
@@ -97,7 +95,7 @@ namespace Database.Data
                         ("Id", row.Id.ToString()),
                         ("GuildId", row.GuildId.ToString()),
                         ("Type", row.Type),
-                        ("Value", row.Value)});
+                        ("Value", row.Value.EncodedValue)});
 
                 command.ExecuteNonQuery();
                 command.Connection.Close();
@@ -122,8 +120,8 @@ namespace Database.Data
         {
             string prefix = ".";
 
-            var rows = GetRows(guildId, "Prefix");
-            if (rows.Count > 0) prefix = rows.First().Value;
+            List<MiscRow> rows = GetRows(guildId, "Prefix");
+            if (rows.Count > 0) prefix = rows.First().Value.Value;
 
             return prefix;
         }
@@ -143,7 +141,7 @@ namespace Database.Data
                 row = new MiscRow(guildId, "Prefix", prefix);
             }
 
-            row.Value = prefix;
+            row.Value = EString.FromDecoded(prefix);
 
             SaveRow(row);
         }
@@ -184,14 +182,14 @@ namespace Database.Data
         public int Id { get; set; }
         public ulong GuildId { get; set; }
         public string Type { get; set; }
-        public string Value { get; set; }
+        public EString Value { get; set; }
 
         public MiscRow(ulong guildId, string type, string value)
         {
             Id = 0;
             GuildId = guildId;
             Type = type;
-            Value = value;
+            Value = EString.FromDecoded(value);
         }
 
         public MiscRow(int id, ulong guildId, string type, string value)
@@ -199,7 +197,7 @@ namespace Database.Data
             Id = id;
             GuildId = guildId;
             Type = type;
-            Value = value;
+            Value = EString.FromEncoded(value);
         }
     }
 }

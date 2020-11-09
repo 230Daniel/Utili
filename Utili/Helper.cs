@@ -1,7 +1,8 @@
-﻿using Discord;
-using Discord.WebSocket;
-using System;
+﻿using System;
 using System.Linq;
+using System.Text;
+using Discord;
+using Discord.WebSocket;
 
 namespace Utili
 {
@@ -9,23 +10,16 @@ namespace Utili
     {
         public static LogSeverity ConvertToLocalLogSeverity(Discord.LogSeverity severity)
         {
-            switch (severity)
+            return severity switch
             {
-                case Discord.LogSeverity.Critical:
-                    return LogSeverity.Error;
-                case Discord.LogSeverity.Error:
-                    return LogSeverity.Error;
-                case Discord.LogSeverity.Warning:
-                    return LogSeverity.Warn;
-                case Discord.LogSeverity.Info:
-                    return LogSeverity.Info;
-                case Discord.LogSeverity.Verbose:
-                    return LogSeverity.Dbug;
-                case Discord.LogSeverity.Debug:
-                    return LogSeverity.Dbug;
-                default:
-                    throw new Exception("What the heckin heck is this log severity bro?");
-            }
+                Discord.LogSeverity.Critical => LogSeverity.Error,
+                Discord.LogSeverity.Error => LogSeverity.Error,
+                Discord.LogSeverity.Warning => LogSeverity.Warn,
+                Discord.LogSeverity.Info => LogSeverity.Info,
+                Discord.LogSeverity.Verbose => LogSeverity.Dbug,
+                Discord.LogSeverity.Debug => LogSeverity.Dbug,
+                _ => throw new Exception("What the heckin heck is this log severity bro?"),
+            };
         }
 
         public static DiscordSocketClient GetShardForGuild(IGuild guild)
@@ -74,6 +68,25 @@ namespace Utili
             }
 
             return after.VoiceChannel.Id != before.VoiceChannel.Id;
+        }
+
+        public static string EncodeString(string input)
+        {
+            byte[] bytes = Encoding.UTF8.GetBytes(input);
+            return Convert.ToBase64String(bytes);
+        }
+
+        public static string DecodeString(string input)
+        {
+            try
+            {
+                byte[] bytes = Convert.FromBase64String(input);
+                return Encoding.UTF8.GetString(bytes);
+            }
+            catch
+            {
+                return input;
+            }
         }
     }
 }

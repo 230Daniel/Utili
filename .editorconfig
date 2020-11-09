@@ -2,3 +2,9 @@
 
 # CS1998: Async method lacks 'await' operators and will run synchronously
 dotnet_diagnostic.CS1998.severity = none
+
+# IDE0044: Add readonly modifier
+dotnet_style_readonly_field = true:silent
+
+# IDE0057: Use range operator
+csharp_style_prefer_range_operator = true:silent

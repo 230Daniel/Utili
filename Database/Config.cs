@@ -1,13 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.IO;
 using System.Text.Json;
-using System.IO;
 
 namespace Database
 {
     class Config
     {
         public string Server { get; set; } = "";
+        public int Port { get; set; }
         public string Database { get; set; } = "";
         public string Username { get; set; } = "";
         public string Password { get; set; } = "";
@@ -21,11 +20,12 @@ namespace Database
                 Config config = JsonSerializer.Deserialize<Config>(json);
 
                 Server = config.Server;
+                Port = config.Port;
                 Database = config.Database;
                 Username = config.Username;
                 Password = config.Password;
             }
-            catch (FileNotFoundException e)
+            catch (FileNotFoundException)
             {
                 string json = JsonSerializer.Serialize(this, new JsonSerializerOptions{WriteIndented = true});
 

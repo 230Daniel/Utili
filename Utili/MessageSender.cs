@@ -1,7 +1,7 @@
-﻿using Discord;
+﻿using System.Threading.Tasks;
+using Discord;
 using Discord.Rest;
 using Discord.WebSocket;
-using System.Threading.Tasks;
 
 namespace Utili
 {

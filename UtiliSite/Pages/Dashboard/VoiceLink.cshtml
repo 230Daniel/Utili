@@ -27,10 +27,15 @@
         <input type="checkbox" name="enabled" class="form-control" @VoiceLinkModel.GetIsChecked(metaRow.Enabled)>
 
         <div class="input-group-prepend">
+            <span class="input-group-text">Delete Text Channels</span>
+        </div>
+        <input type="checkbox" name="deleteChannels" class="form-control" @VoiceLinkModel.GetIsChecked(metaRow.DeleteChannels)>
+
+        <div class="input-group-prepend">
             <span class="input-group-text">Prefix</span>
         </div>
-        <input type="text" name="prefix" class="form-control" value="@metaRow.Prefix">
-        
+        <input type="text" name="prefix" class="form-control" value="@metaRow.Prefix.Value">
+
 
         <button type="submit" class="btn btn-success">Save</button>
     </div>

@@ -1,15 +1,11 @@
-﻿using Microsoft.AspNetCore.Http;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Linq;
-using System.Security.Claims;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authentication;
-using static UtiliSite.DiscordModule;
 using Discord.Rest;
-using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Http;
+using Ubiety.Dns.Core;
 using UtiliSite.Pages;
-using UtiliSite.Pages.Dashboard;
+using static UtiliSite.DiscordModule;
 
 namespace UtiliSite
 {
@@ -21,7 +17,9 @@ namespace UtiliSite
             {
                 AuthenticationProperties authProperties = new AuthenticationProperties
                 {
-                    RedirectUri = redirectUrl
+                    RedirectUri = redirectUrl,
+                    AllowRefresh = true,
+                    IsPersistent = true
                 };
 
                 httpContext.ChallengeAsync("Discord", authProperties).GetAwaiter().GetResult();

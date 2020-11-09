@@ -1,13 +1,9 @@
-using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
-using System.Threading.Tasks;
-using System.Timers;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
+using Database;
 using Database.Data;
 using Discord.Rest;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace UtiliSite.Pages.Dashboard
 {
@@ -52,10 +48,10 @@ namespace UtiliSite.Pages.Dashboard
             int before = row.Mode;
 
             row.Mode = mode;
-            row.Complex = complex;
+            row.Complex = EString.FromDecoded(complex);
             MessageFilter.SaveRow(row);
 
-            if ((before == 7 || mode == 7) && before != mode)
+            if ((before == 8 || mode == 8) && before != mode)
             {
                 HttpContext.Response.StatusCode = 201;
             }
@@ -78,12 +74,12 @@ namespace UtiliSite.Pages.Dashboard
             ulong channelId = ulong.Parse(HttpContext.Request.Form["channelId"]);
             RestTextChannel channel = auth.Guild.GetTextChannelAsync(channelId).GetAwaiter().GetResult();
 
-            MessageFilterRow newRow = new MessageFilterRow()
+            MessageFilterRow newRow = new MessageFilterRow
             {
                 GuildId = auth.Guild.Id,
                 ChannelId = channel.Id,
                 Mode = 0,
-                Complex = ""
+                Complex = EString.FromDecoded("")
             };
 
             MessageFilter.SaveRow(newRow);
@@ -119,7 +115,7 @@ namespace UtiliSite.Pages.Dashboard
 
         public static string GetIsComplexHidden(MessageFilterRow row)
         {
-            if (row.Mode == 7) return "";
+            if (row.Mode == 8) return "";
             return "hidden";
         }
     }
