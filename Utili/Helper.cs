@@ -27,27 +27,16 @@ namespace Utili
             return Program._client.GetShardFor(guild);
         }
 
-        public static IEmote GetEmote(string input, SocketGuild guild)
+        public static IEmote GetEmote(string emoteString)
         {
-            try
+            if (Emote.TryParse(emoteString, out Emote emote))
             {
-                return guild.Emotes.First(x => x.Name == input);
-            } 
-            catch { }
-
-            try
+                return emote;
+            }
+            else
             {
-                return guild.Emotes.First(x => x.Name == input.Split(":").ElementAt(1));
-            } 
-            catch { }
-
-            try
-            {
-                return new Emoji(input);
-            } 
-            catch { }
-
-            return null;
+                return new Emoji(emoteString);
+            }
         }
 
         public static bool RequiresUpdate(SocketVoiceState before, SocketVoiceState after)

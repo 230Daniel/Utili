@@ -47,8 +47,8 @@ namespace Utili.Handlers
                 }
 
                 // High priority
-                await _messageLogs.MessageReceived(context);
-                await _messageFilter.MessageReceived(context);
+                try { await _messageLogs.MessageReceived(context); } catch {}
+                try { await _messageFilter.MessageReceived(context); } catch {}
 
                 // Low priority
                 _ = _voteChannels.MessageReceived(context);

@@ -94,19 +94,62 @@ namespace Utili.Commands
                 return;
             }
 
-            IEmote emoji = Helper.GetEmote(emojiString, Context.Guild);
+            IEmote emoji = Helper.GetEmote(emojiString);
 
-            if (emoji == null)
+            try
+            {
+                await message.AddReactionAsync(emoji);
+
+                await SendSuccessAsync(Context.Channel, "Reaction added",
+                    $"The {emojiString} reaction was added to a message sent by {message.Author.Mention}");
+            }
+            catch
             {
                 await SendFailureAsync(Context.Channel, "Error",
-                    $"No emoji was found matching {emojiString}\nType the emoji itself in the command\nEmojis from other servers don't work");
+                    $"No emoji was found matching {emojiString}\nType the emoji itself in the command");
+            }
+        }
+
+        [Command("React"), Alias("AddReaction", "AddEmoji"), Cooldown(2), Permission(Perm.ManageMessages)]
+        public async Task React(SocketTextChannel channel, ulong messageId, [Remainder] string emojiString)
+        {
+            IMessage message = await channel.GetMessageAsync(messageId);
+
+            if (message == null)
+            {
+                await SendFailureAsync(Context.Channel, "Error",
+                    $"No message was found in <#{Context.Channel.Id}> with ID {messageId}\n[How do I get a message ID?](https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID-)");
                 return;
             }
 
-            await message.AddReactionAsync(emoji);
+            IEmote emoji = Helper.GetEmote(emojiString);
 
-            await SendSuccessAsync(Context.Channel, "Reaction added",
-                $"The {emojiString} reaction was added to a message sent by {message.Author.Mention}");
+            try
+            {
+                await message.AddReactionAsync(emoji);
+
+                await SendSuccessAsync(Context.Channel, "Reaction added",
+                    $"The {emojiString} reaction was added to a message sent by {message.Author.Mention} in {channel.Mention}");
+            }
+            catch
+            {
+                await SendFailureAsync(Context.Channel, "Error",
+                    $"No emoji was found matching {emojiString}\nType the emoji itself in the command");
+            }
+        }
+
+
+        [Command("Paste")]
+        public async Task Paste([Remainder] string paste)
+        {
+            try
+            {
+                await SendSuccessAsync(Context.Channel, "Pasted", $"[View]({Program._haste.PasteAsync(paste, "txt")})");
+            }
+            catch
+            {
+                await SendFailureAsync(Context.Channel, "Error", "Failed to upload to haste server");
+            }
         }
 
         [Command("B64Encode")]
