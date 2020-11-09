@@ -76,7 +76,7 @@ body {
 -------------------------------------------------- */
 .wrapper {
     display: flex;
-    width: 100%;
+    width: inherit;
     margin-top: 0px;
 }
 
@@ -85,12 +85,53 @@ body {
     position: fixed;
     top: 0;
     left: 0;
-    height: 100vh;
+    height: 100%;
     z-index: 999;
     background: #808080;
     transition: all 0.3s;
 }
 
 #sidebar-wrapper {
-    height: 84vh;
+    height: inherit;
+    min-height: 100vh;
+}
+
+/* Making things look neat.
+-------------------------------------------------- */
+* {
+    border-radius: 0 !important;
+}
+.bg-dark {
+    background-color: #292c2f !important;
+}
+.input-group-text {
+    width: 100px;
+    text-align: center;
+}
+
+.list-group-item.active {
+    background-color: #d86335;
+    border-color: #d86335;
+}
+.autopurge-card{
+    width: 45vh;
+}
+.btn-width{
+    width: 100px;
+}
+.btn-success {
+    border-color: #d86335;
+    background-color: #495057;
+}
+.btn-success:hover {
+    background-color: #d86335;
+    border-color: #d86335;
+}
+.btn-danger {
+    background-color: #d86335;
+    border-color: #d86335;
+}
+.btn-danger:hover {
+    background-color: #e0480d;
+    border-color: #e0480d;
 }

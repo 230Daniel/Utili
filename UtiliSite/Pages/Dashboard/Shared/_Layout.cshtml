@@ -25,7 +25,7 @@
             </div>
         </div>
     </nav>
-    <div class="d-flex" id="wrapper">
+    <div class="d-flex bg-dark" id="wrapper">
         <div class="border-right" id="sidebar-wrapper">
             <div class="list-group list-group-flush">
                 <a href="@RedirectHelper.ChangeLastPage(ViewContext, "core")" class="list-group-item list-group-item-action bg-dark @SidebarHelper.GetIsActive(ViewContext, "core")">Core</a>
@@ -35,12 +35,11 @@
                 <a href="@RedirectHelper.ChangeLastPage(ViewContext, "messagefilter")" class="list-group-item list-group-item-action bg-dark @SidebarHelper.GetIsActive(ViewContext, "messagefilter")">Message Filter</a>
             </div>
         </div>
-        <div class="container" style="margin-top: 25px; margin-left: 25px; margin-right: 25px; margin-bottom: 85px;">
-
+        <div style="margin-top: 25px; margin-left: 25px; margin-right: 25px; margin-bottom: 85px;">
+            
             @RenderBody()
 
         </div>
-        
         <div aria-live="polite" aria-atomic="true" style="position: relative; min-height: 20px;" class="align-bottom">
             <div style="position: absolute; bottom: 0; right: 0;">
                 <div class="toast" role="alert" data-delay="5000" aria-live="assertive" aria-atomic="true" style="width: 500px;" id="success">
