@@ -9,7 +9,7 @@
             _config = new Config();
             _config.Load();
 
-            Sql.SetCredentials(_config.Server, _config.Database, _config.Username, _config.Password);
+            Sql.SetCredentials(_config.Server, _config.Port, _config.Database, _config.Username, _config.Password);
 
             if (useCache)
             {

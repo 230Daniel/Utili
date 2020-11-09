@@ -7,9 +7,9 @@ namespace Database
     {
         private static string ConnectionString { get; set; }
 
-        public static void SetCredentials(string server, string database, string username, string password)
+        public static void SetCredentials(string server, int port, string database, string username, string password)
         {
-            ConnectionString = $"Server={server};Database={database};Uid={username};Pwd={password};";
+            ConnectionString = $"Server={server};Port={port};Database={database};Uid={username};Pwd={password};";
         }
 
         public static MySqlCommand GetCommand(string commandText, (string, string)[] values = null)
