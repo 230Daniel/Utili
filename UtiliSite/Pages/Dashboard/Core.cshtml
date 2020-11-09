@@ -10,59 +10,55 @@
         return;
     }
 }
+    <div class="card">
+        <form name="form-main" method="post">
+            <div class="input-group flex-nowrap">
+                <div class="input-group-prepend">
+                    <span class="input-group-text">Nickname</span>
+                </div>
+                <input type="text" name="nickname" class="form-control" style="" value="@ViewData["nickname"]" readonly>
+            </div>
 
-<form name="form-main" method="post">
-
-    <div class="row">
-        <div class="col-3">
-            <label>Nickname</label>
-        </div>
-        <div class="col-3">
-            <input type="text" name="nickname" value="@ViewData["nickname"]" />
-        </div>
+            <div class="input-group flex-nowrap">
+                <div class="input-group-prepend">
+                    <span class="input-group-text">Prefix</span>
+                </div>
+                <input type="text" name="prefix" class="form-control" style="" value="@ViewData["prefix"]" readonly>
+            </div>
+            <div class="input-group flex-nowrap">
+                <button type="submit" class="btn btn-success btn-width">Save</button>
+            </div>
+        </form>
     </div>
 
-    <div class="row">
-        <div class="col-3">
-            <label>Command Prefix</label>
-        </div>
-        <div class="col-3">
-            <input type="text" name="prefix" value="@ViewData["prefix"]" />
-        </div>
-    </div>
 
-    <button type="submit" class="btn btn-success">Save</button>
-</form>
-
-
-
-<div aria-live="polite" aria-atomic="true" style="position: relative; min-height: 20px;">
-    <div style="position: absolute; top: 0; right: 0;">
-        <div class="toast" role="alert" data-delay="5000" aria-live="assertive" aria-atomic="true" style="width: 500px;" id="success">
-            <div class="toast-body">
-                <strong>Changes saved</strong> <br />
-                Your changes may take up to 30 seconds to take effect
+    <div aria-live="polite" aria-atomic="true" style="position: relative; min-height: 20px;">
+        <div style="position: absolute; top: 0; right: 0;">
+            <div class="toast" role="alert" data-delay="5000" aria-live="assertive" aria-atomic="true" style="width: 500px;" id="success">
+                <div class="toast-body">
+                    <strong>Changes saved</strong> <br />
+                    Your changes may take up to 30 seconds to take effect
+                </div>
             </div>
-        </div>
 
-        <div class="toast" role="alert" data-delay="5000" aria-live="assertive" aria-atomic="true" style="width: 500px;" id="ratelimit">
-            <div class="toast-body">
-                <strong>Error</strong> <br />
-                You're doing that too fast, please wait between requests
+            <div class="toast" role="alert" data-delay="5000" aria-live="assertive" aria-atomic="true" style="width: 500px;" id="ratelimit">
+                <div class="toast-body">
+                    <strong>Error</strong> <br />
+                    You're doing that too fast, please wait between requests
+                </div>
             </div>
-        </div>
 
-        <div class="toast" role="alert" data-delay="5000" aria-live="assertive" aria-atomic="true" style="width: 500px;" id="error">
-            <div class="toast-body">
-                <strong>Error</strong> <br />
-                Something went wrong, please try again later
+            <div class="toast" role="alert" data-delay="5000" aria-live="assertive" aria-atomic="true" style="width: 500px;" id="error">
+                <div class="toast-body">
+                    <strong>Error</strong> <br />
+                    Something went wrong, please try again later
+                </div>
             </div>
         </div>
     </div>
-</div>
 
 
 
-<script src="~/lib/jquery/dist/jquery.js"></script>
-<script src="~/lib/jquery/dist/jquery.min.js"></script>
-<script src="~/js/dashboard/submit.js" asp-append-version="true"></script>
+        <script src="~/lib/jquery/dist/jquery.js"></script>
+        <script src="~/lib/jquery/dist/jquery.min.js"></script>
+        <script src="~/js/dashboard/submit.js" asp-append-version="true"></script>
