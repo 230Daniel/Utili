@@ -88,5 +88,10 @@ namespace Utili
                 return input;
             }
         }
+
+        public static string ToUniversalDateTime(DateTime dt)
+        {
+            return $"{dt.Year}-{dt.Month}-{dt.Day} {dt.Hour}:{dt.Minute}:{dt.Second}";
+        }
     }
 }

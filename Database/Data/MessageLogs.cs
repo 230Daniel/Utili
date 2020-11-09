@@ -152,6 +152,36 @@ namespace Database.Data
             return matchedRows;
         }
 
+        public static List<MessageLogsMessageRow> GetMessages(ulong guildId, ulong channelId, ulong[] messageIds = null)
+        {
+            List<MessageLogsMessageRow> matchedRows = new List<MessageLogsMessageRow>();
+
+            string command = $"SELECT * FROM MessageLogsMessages WHERE GuildId = @GuildId AND ChannelId = @ChannelId AND MessageId IN {Sql.ToSqlObjectArray(messageIds)}";
+            List<(string, string)> values = new List<(string, string)>
+            {
+                ("GuildId", guildId.ToString()), 
+                ("ChannelId", channelId.ToString())
+            };
+
+            MySqlDataReader reader = Sql.GetCommand(command, values.ToArray()).ExecuteReader();
+
+            while (reader.Read())
+            {
+                matchedRows.Add(new MessageLogsMessageRow(
+                    reader.GetInt32(0),
+                    reader.GetUInt64(1),
+                    reader.GetUInt64(2),
+                    reader.GetUInt64(3),
+                    reader.GetUInt64(4),
+                    reader.GetDateTime(5),
+                    reader.GetString(6)));
+            }
+
+            reader.Close();
+
+            return matchedRows;
+        }
+
         public static MessageLogsMessageRow GetMessage(ulong guildId, ulong channelId, ulong messageId)
         {
             List<MessageLogsMessageRow> messages = GetMessages(guildId, channelId, messageId);

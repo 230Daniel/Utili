@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
 using System.Threading.Tasks;
 using Database;
 using Database.Data;
@@ -72,7 +73,10 @@ namespace Utili.Features
             MessageLogsRow row = Database.Data.MessageLogs.GetRow(guild.Id);
             if ((row.DeletedChannelId == 0 && row.EditedChannelId == 0) || row.ExcludedChannels.Contains(channel.Id)) return;
 
-            Embed embed = GetBulkDeletedEmbed(guild, channel, messageIds.Count);
+            List<MessageLogsMessageRow> messages =
+                Database.Data.MessageLogs.GetMessages(guild.Id, channel.Id, messageIds.ToArray());
+
+            Embed embed = await GetBulkDeletedEmbedAsync(guild, channel, messages, messageIds.Count);
 
             Database.Data.MessageLogs.DeleteMessagesByMessageId(guild.Id, channel.Id, messageIds.ToArray());
 
@@ -161,14 +165,19 @@ namespace Utili.Features
             return embed.Build();
         }
 
-        private Embed GetBulkDeletedEmbed(SocketGuild guild, SocketTextChannel channel, int count)
+        private async Task<Embed> GetBulkDeletedEmbedAsync(SocketGuild guild, SocketTextChannel channel, List<MessageLogsMessageRow> messages, int total)
         {
             EmbedBuilder embed = new EmbedBuilder();
 
-            embed.WithColor(245, 66, 66);
-            embed.WithDescription($"**{count} messages bulk deleted in {channel.Mention}**\nLogging of bulk deleted messages is not supported yet");
+            string paste = "Failed to upload message logs to haste server";
+            try
+            {
+                paste = $"[View {messages.Count} of {total} logged]({await PasteMessagesAsync(guild, channel, messages, total)})";
+            } 
+            catch {}
 
-            // TODO: Support logging of bulk deleted messages
+            embed.WithColor(245, 66, 66);
+            embed.WithDescription($"**{total} messages bulk deleted in {channel.Mention}**\n{paste}");
 
             embed.WithAuthor(new EmbedAuthorBuilder
             {
@@ -176,6 +185,33 @@ namespace Utili.Features
             });
 
             return embed.Build();
+        }
+
+        private async Task<string> PasteMessagesAsync(SocketGuild guild, SocketTextChannel channel, List<MessageLogsMessageRow> messages, int total)
+        {
+            StringBuilder sb = new StringBuilder();
+
+            sb.AppendLine($"Messages {total}");
+            sb.AppendLine($"Logged   {messages.Count}");
+            sb.AppendLine();
+            sb.AppendLine();
+
+            await guild.DownloadUsersAsync();
+
+            foreach (MessageLogsMessageRow message in messages)
+            {
+                SocketGuildUser user = guild.GetUser(message.UserId);
+                if (user == null) sb.AppendLine($"{user.Id}");
+                else sb.AppendLine($"{user} ({user.Id})");
+                sb.AppendLine($" at {Helper.ToUniversalDateTime(message.Timestamp)} UTC");
+
+                string messageContent = "    " + message.Content.Value.Replace("\n", "\n    ");
+
+                sb.AppendLine($"{messageContent}\n");
+            }
+
+            string content = sb.ToString().TrimEnd('\r', '\n');
+            return await Program._haste.PasteAsync(content, "txt");
         }
     }
 }

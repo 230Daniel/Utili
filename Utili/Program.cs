@@ -2,6 +2,7 @@
 using System.Reflection;
 using System.Threading.Tasks;
 using System.Timers;
+using Database;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
@@ -20,6 +21,7 @@ namespace Utili
 
         public static Logger _logger;
         public static Config _config;
+        public static Haste _haste;
         public static bool _ready;
         public static int _totalShards;
 
@@ -58,8 +60,8 @@ namespace Utili
             _logger.LogEmpty();
 
             _ready = false;
-
             _config = Config.Load();
+            _haste = new Haste(_config.HasteServer);
 
             int[] shardIds = Enumerable.Range(_config.LowerShardId, _config.UpperShardId - (_config.LowerShardId - 1)).ToArray();
             _totalShards = Database.Sharding.GetTotalShards();

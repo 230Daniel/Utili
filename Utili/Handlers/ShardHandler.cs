@@ -38,7 +38,7 @@ namespace Utili.Handlers
                     }
                 }
 
-                await shard.SetGameAsync("utili.ml | .help");
+                await shard.SetGameAsync($"{_config.Domain} | .help");
 
                 _shardsStarted += 1;
 
