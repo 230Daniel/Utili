@@ -147,7 +147,7 @@ namespace Utili.Features
                 {
                     try
                     {
-                        SocketGuildUser existingUser = guild.GetUser(existingOverwrite.TargetId);
+                        SocketGuildUser existingUser = voiceChannel.GetUser(existingOverwrite.TargetId);
                         if (existingUser.VoiceChannel == null || existingUser.VoiceChannel.Id != voiceChannel.Id)
                         {
                             await textChannel.RemovePermissionOverwriteAsync(existingUser);

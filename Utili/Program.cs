@@ -5,6 +5,7 @@ using System.Timers;
 using Database;
 using Discord;
 using Discord.Commands;
+using Discord.Rest;
 using Discord.WebSocket;
 using Utili.Features;
 using Utili.Handlers;
@@ -18,6 +19,7 @@ namespace Utili
 
         public static DiscordShardedClient _client;
         public static CommandService _commands;
+        public static DiscordRestClient _rest => _client.Rest;
 
         public static Logger _logger;
         public static Config _config;

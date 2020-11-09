@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Database;
 using Database.Data;
 using Discord;
 using Discord.Commands;
+using Discord.Rest;
 using Discord.WebSocket;
+using static Utili.Program;
 
 namespace Utili.Features
 {
@@ -42,7 +45,7 @@ namespace Utili.Features
 
             MessageLogsMessageRow message = Database.Data.MessageLogs.GetMessage(context.Guild.Id, context.Channel.Id, context.Message.Id);
             if (message == null) return;
-            Embed embed = GetEditedEmbed(message, context);
+            Embed embed = await GetEditedEmbedAsync(message, context);
 
             message.Content = EString.FromDecoded(context.Message.Content);
             Database.Data.MessageLogs.SaveMessage(message);
@@ -59,7 +62,7 @@ namespace Utili.Features
 
             MessageLogsMessageRow message = Database.Data.MessageLogs.GetMessage(guild.Id, channel.Id, messageId);
             if(message == null) return;
-            Embed embed = GetDeletedEmbed(guild, channel, message);
+            Embed embed = await GetDeletedEmbedAsync(channel, message);
 
             Database.Data.MessageLogs.DeleteMessagesById(new[] {message.Id});
 
@@ -76,7 +79,7 @@ namespace Utili.Features
             List<MessageLogsMessageRow> messages =
                 Database.Data.MessageLogs.GetMessages(guild.Id, channel.Id, messageIds.ToArray());
 
-            Embed embed = await GetBulkDeletedEmbedAsync(guild, channel, messages, messageIds.Count);
+            Embed embed = await GetBulkDeletedEmbedAsync(channel, messages, messageIds.Count);
 
             Database.Data.MessageLogs.DeleteMessagesByMessageId(guild.Id, channel.Id, messageIds.ToArray());
 
@@ -85,7 +88,7 @@ namespace Utili.Features
             await logChannel.SendMessageAsync(embed: embed);
         }
 
-        private Embed GetEditedEmbed(MessageLogsMessageRow before, SocketCommandContext after)
+        private async Task<Embed> GetEditedEmbedAsync(MessageLogsMessageRow before, SocketCommandContext after)
         {
             EmbedBuilder embed = new EmbedBuilder();
             embed.WithColor(66, 182, 245);
@@ -126,12 +129,12 @@ namespace Utili.Features
             return embed.Build();
         }
 
-        private Embed GetDeletedEmbed(SocketGuild guild, SocketTextChannel channel, MessageLogsMessageRow message)
+        private async Task<Embed> GetDeletedEmbedAsync(SocketTextChannel channel, MessageLogsMessageRow message)
         {
             EmbedBuilder embed = new EmbedBuilder();
             embed.WithColor(245, 66, 66);
 
-            SocketUser user = guild.GetUser(message.UserId);
+            RestUser user = await _rest.GetUserAsync(message.UserId);
             string userMention = message.UserId.ToString();
 
             if (user != null)
@@ -165,14 +168,14 @@ namespace Utili.Features
             return embed.Build();
         }
 
-        private async Task<Embed> GetBulkDeletedEmbedAsync(SocketGuild guild, SocketTextChannel channel, List<MessageLogsMessageRow> messages, int total)
+        private async Task<Embed> GetBulkDeletedEmbedAsync(SocketTextChannel channel, List<MessageLogsMessageRow> messages, int total)
         {
             EmbedBuilder embed = new EmbedBuilder();
 
             string paste = "Failed to upload message logs to haste server";
             try
             {
-                paste = $"[View {messages.Count} of {total} logged]({await PasteMessagesAsync(guild, channel, messages, total)})";
+                paste = $"[View {messages.Count} of {total} logged]({await PasteMessagesAsync(messages, total)})";
             } 
             catch {}
 
@@ -187,7 +190,7 @@ namespace Utili.Features
             return embed.Build();
         }
 
-        private async Task<string> PasteMessagesAsync(SocketGuild guild, SocketTextChannel channel, List<MessageLogsMessageRow> messages, int total)
+        private async Task<string> PasteMessagesAsync(List<MessageLogsMessageRow> messages, int total)
         {
             StringBuilder sb = new StringBuilder();
 
@@ -196,11 +199,19 @@ namespace Utili.Features
             sb.AppendLine();
             sb.AppendLine();
 
-            await guild.DownloadUsersAsync();
+            List<RestUser> cachedUsers = new List<RestUser>();
 
             foreach (MessageLogsMessageRow message in messages)
             {
-                SocketGuildUser user = guild.GetUser(message.UserId);
+                RestUser user;
+                if (cachedUsers.Count(x => x.Id == message.UserId) > 0)
+                    user = cachedUsers.First(x => x.Id == message.UserId);
+                else
+                {
+                    user = await _rest.GetUserAsync(message.UserId);
+                    cachedUsers.Add(user);
+                }
+
                 if (user == null) sb.AppendLine($"{user.Id}");
                 else sb.AppendLine($"{user} ({user.Id})");
                 sb.AppendLine($" at {Helper.ToUniversalDateTime(message.Timestamp)} UTC");
