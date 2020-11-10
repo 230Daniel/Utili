@@ -60,7 +60,8 @@ namespace Database.Data
                     GuildId = guildId,
                     Enabled = false,
                     DeleteChannels = true,
-                    Prefix = EString.FromDecoded("vc-")
+                    Prefix = EString.FromDecoded("vc-"),
+                    ExcludedChannels = new List<ulong>()
                 };
             }
             
