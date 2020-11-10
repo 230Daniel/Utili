@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Text.RegularExpressions;
@@ -119,7 +120,7 @@ namespace Utili.Features
                 return true;
             }
 
-            foreach (string word in context.Message.Content.Split(" "))
+            foreach (string word in context.Message.Content.Split(' ', '\n'))
             {
                 try
                 {
@@ -154,7 +155,7 @@ namespace Utili.Features
             }
 
             Regex youtubeRegex = new Regex(@"^(http(s)??\:\/\/)?(www\.)?((youtube\.com\/watch\?v=)|(youtu.be\/))([a-zA-Z0-9\-_])+$");
-            foreach (string word in context.Message.Content.Split(" "))
+            foreach (string word in context.Message.Content.Split(' ', '\n'))
             {
                 if (youtubeRegex.IsMatch(word))
                 {
@@ -188,7 +189,7 @@ namespace Utili.Features
                 return true;
             }
 
-            foreach (string word in context.Message.Content.Split(" "))
+            foreach (string word in context.Message.Content.Split(' ', '\n'))
             {
                 if (word.ToLower().Contains("spotify.com/") || word.ToLower().Contains("soundcloud.com/"))
                 {
@@ -206,15 +207,12 @@ namespace Utili.Features
 
         public bool IsUrl(SocketCommandContext context)
         {
-            foreach (string word in context.Message.Content.Split(" "))
+            foreach (string word in context.Message.Content.Split(' ', '\n'))
             {
                 try
                 {
-                    WebRequest request = WebRequest.Create(word);
-                    request.Timeout = 2000;
-                    request.GetResponse();
-
-                    return true;
+                    if(Uri.TryCreate(word, UriKind.Absolute, out Uri uriResult) 
+                                  && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps)) return true;
                 }
                 catch { }
             }
@@ -228,15 +226,7 @@ namespace Utili.Features
             {
                 Regex regex = new Regex(pattern);
 
-                foreach (string word in context.Message.Content.Split(" "))
-                {
-                    if (regex.IsMatch(word))
-                    {
-                        return true;
-                    }
-                }
-
-                return false;
+                return regex.IsMatch(context.Message.Content);
             }
             catch
             {

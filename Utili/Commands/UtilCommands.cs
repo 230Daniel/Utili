@@ -144,7 +144,7 @@ namespace Utili.Commands
         {
             try
             {
-                await SendSuccessAsync(Context.Channel, "Pasted", $"[View]({Program._haste.PasteAsync(paste, "txt")})");
+                await SendSuccessAsync(Context.Channel, "Pasted", $"[View]({await Program._haste.PasteAsync(paste, "txt")})");
             }
             catch
             {
