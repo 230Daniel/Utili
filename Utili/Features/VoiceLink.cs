@@ -93,6 +93,11 @@ namespace Utili.Features
         {
             SocketGuild guild = voiceChannel.Guild;
 
+            if (BotPermissions.IsMissingPermissions(voiceChannel, new[] {ChannelPermission.ManageChannels}, out _))
+            {
+                return;
+            }
+
             List<SocketGuildUser> connectedUsers =
                 voiceChannel.Users.Where(x => x.VoiceChannel != null && x.VoiceChannel.Id == voiceChannel.Id).ToList();
 
@@ -147,8 +152,8 @@ namespace Utili.Features
                 {
                     try
                     {
-                        SocketGuildUser existingUser = voiceChannel.GetUser(existingOverwrite.TargetId);
-                        if (existingUser.VoiceChannel == null || existingUser.VoiceChannel.Id != voiceChannel.Id)
+                        SocketGuildUser existingUser = guild.GetUser(existingOverwrite.TargetId);
+                        if (existingUser == null || existingUser.VoiceChannel == null || existingUser.VoiceChannel.Id != voiceChannel.Id)
                         {
                             await textChannel.RemovePermissionOverwriteAsync(existingUser);
                         }

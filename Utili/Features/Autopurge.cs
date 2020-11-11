@@ -105,6 +105,8 @@ namespace Utili.Features
         {
             SocketTextChannel channel = guildChannel as SocketTextChannel;
 
+            if(BotPermissions.IsMissingPermissions(channel, new [] { ChannelPermission.ManageMessages }, out _)) return;
+
             List<IMessage> messages = (await channel.GetMessagesAsync(messageCap).FlattenAsync()).ToList();
             bool exceedesCap = messages.Count == messageCap;
             IMessage lastMessage = messages.Last();

@@ -8,6 +8,8 @@ using Database.Data;
 using Discord;
 using Discord.Commands;
 using Discord.Rest;
+using static Utili.MessageSender;
+using static Utili.Program;
 
 namespace Utili.Features
 {
@@ -45,14 +47,9 @@ namespace Utili.Features
             {
                 await context.Message.DeleteAsync();
 
-                if (BotPermissions.IsMissingPermissions(context.Channel, new[] {ChannelPermission.SendMessages}, out _))
-                {
-                    return;
-                }
-
                 string deletionReason = $"Only messages {allowedTypes} are allowed in <#{context.Channel.Id}>";
 
-                RestUserMessage sentMessage = await MessageSender.SendFailureAsync(context.Channel, "Message deleted", deletionReason);
+                RestUserMessage sentMessage = await SendFailureAsync(context.Channel, "Message deleted", deletionReason, supportLink: false);
 
                 await Task.Delay(5000);
 

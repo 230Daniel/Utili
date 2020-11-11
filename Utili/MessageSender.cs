@@ -10,15 +10,17 @@ namespace Utili
         public static async Task<RestUserMessage> SendSuccessAsync(IChannel channel, string title, string message = null, string footer = null)
         {
             ISocketMessageChannel textChannel = channel as ISocketMessageChannel;
+            if(BotPermissions.IsMissingPermissions(channel, new [] {ChannelPermission.SendMessages}, out _)) return null;
 
             return await textChannel.SendMessageAsync(embed: GenerateEmbed(EmbedType.Success, title, message, footer));
         }
 
-        public static async Task<RestUserMessage> SendFailureAsync(IChannel channel, string title, string message = null, string footer = null)
+        public static async Task<RestUserMessage> SendFailureAsync(IChannel channel, string title, string message = null, string footer = null, bool supportLink = true)
         {
             ISocketMessageChannel textChannel = channel as ISocketMessageChannel;
+            if(BotPermissions.IsMissingPermissions(channel, new [] {ChannelPermission.SendMessages}, out _)) return null;
 
-            if (!string.IsNullOrEmpty(message))
+            if (!string.IsNullOrEmpty(message) && supportLink)
             {
                 message += "\n[Support Server](https://discord.gg/hCYWk9x)";
             }
@@ -29,8 +31,17 @@ namespace Utili
         public static async Task<RestUserMessage> SendInfoAsync(IChannel channel, string title, string message, string footer = null, (string, string)[] fields = null)
         {
             ISocketMessageChannel textChannel = channel as ISocketMessageChannel;
+            if(BotPermissions.IsMissingPermissions(channel, new [] {ChannelPermission.SendMessages}, out _)) return null;
 
             return await textChannel.SendMessageAsync(embed: GenerateEmbed(EmbedType.Info, title, message, footer, fields));
+        }
+
+        public static async Task<RestUserMessage> SendEmbedAsync(IChannel channel, Embed embed)
+        {
+            ISocketMessageChannel textChannel = channel as ISocketMessageChannel;
+            if(BotPermissions.IsMissingPermissions(channel, new [] {ChannelPermission.SendMessages}, out _)) return null;
+
+            return await textChannel.SendMessageAsync(embed: embed);
         }
 
         private static Embed GenerateEmbed(EmbedType embedType, string title, string content = null, string footer = null, (string, string)[] fields = null)

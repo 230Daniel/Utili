@@ -10,10 +10,11 @@ using Discord.Commands;
 using Discord.Rest;
 using Discord.WebSocket;
 using static Utili.Program;
+using static Utili.MessageSender;
 
 namespace Utili.Features
 {
-    class MessageLogs
+    internal class MessageLogs
     {
         public async Task MessageReceived(SocketCommandContext context)
         {
@@ -52,7 +53,7 @@ namespace Utili.Features
 
             SocketTextChannel channel = context.Guild.GetTextChannel(row.EditedChannelId);
             if(channel == null) return;
-            await channel.SendMessageAsync(embed: embed);
+            await SendEmbedAsync(channel, embed);
         }
 
         public async Task MessageDeleted(SocketGuild guild, SocketTextChannel channel, ulong messageId)
@@ -68,7 +69,7 @@ namespace Utili.Features
 
             SocketTextChannel logChannel = guild.GetTextChannel(row.DeletedChannelId);
             if(logChannel == null) return;
-            await logChannel.SendMessageAsync(embed: embed);
+            await SendEmbedAsync(logChannel, embed);
         }
 
         public async Task MessagesBulkDeleted(SocketGuild guild, SocketTextChannel channel, List<ulong> messageIds)
@@ -85,7 +86,7 @@ namespace Utili.Features
 
             SocketTextChannel logChannel = guild.GetTextChannel(row.DeletedChannelId);
             if(logChannel == null) return;
-            await logChannel.SendMessageAsync(embed: embed);
+            await SendEmbedAsync(logChannel, embed);
         }
 
         private async Task<Embed> GetEditedEmbedAsync(MessageLogsMessageRow before, SocketCommandContext after)
