@@ -15,6 +15,7 @@ namespace Database
         private static Timer Timer { get; set; }
 
         public static AutopurgeTable Autopurge { get; set; } = new AutopurgeTable();
+        public static ChannelMirroringTable ChannelMirroring { get; set; } = new ChannelMirroringTable();
         public static InactiveRoleTable InactiveRole { get; set; } = new InactiveRoleTable();
         public static MessageFilterTable MessageFilter { get; set; } = new MessageFilterTable();
         public static MessageLogsTable MessageLogs { get; set; } = new MessageLogsTable();
@@ -44,6 +45,7 @@ namespace Database
         private static void DownloadTables()
         {
             Autopurge.Load();
+            ChannelMirroring.Load();
             InactiveRole.Load();
             MessageFilter.Load();
             MessageLogs.Load();

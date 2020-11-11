@@ -53,6 +53,7 @@ namespace Utili.Handlers
                 // Low priority
                 _ = _voteChannels.MessageReceived(context);
                 _ = _inactiveRole.UpdateUserAsync(context.Guild, context.User as SocketGuildUser);
+                _ = _channelMirroring.MessageReceived(context);
 
             });
         }

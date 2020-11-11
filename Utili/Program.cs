@@ -30,6 +30,7 @@ namespace Utili
         public static Timer _shardStatsUpdater;
 
         public static Autopurge _autopurge = new Autopurge();
+        public static ChannelMirroring _channelMirroring = new ChannelMirroring();
         public static InactiveRole _inactiveRole = new InactiveRole();
         public static VoiceLink _voiceLink = new VoiceLink();
         public static MessageFilter _messageFilter = new MessageFilter();
