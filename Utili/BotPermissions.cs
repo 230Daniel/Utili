@@ -52,7 +52,7 @@ namespace Utili
             SocketGuild guild = (channel as SocketGuildChannel).Guild;
             SocketGuildUser bot = guild.GetUser(_client.CurrentUser.Id);
 
-            List<ChannelPermission> permissions = bot.GetPermissions(channel as ITextChannel).ToList();
+            List<ChannelPermission> permissions = bot.GetPermissions(channel as IGuildChannel).ToList();
 
             List<ChannelPermission> missingPermissions =
                 requiredPermissions.Where(x => !permissions.Contains(x)).ToList();

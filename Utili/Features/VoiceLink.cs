@@ -99,7 +99,7 @@ namespace Utili.Features
             }
 
             List<SocketGuildUser> connectedUsers =
-                voiceChannel.Users.Where(x => x.VoiceChannel != null && x.VoiceChannel.Id == voiceChannel.Id).ToList();
+                guild.Users.Where(x => x.VoiceChannel != null && x.VoiceChannel.Id == voiceChannel.Id).ToList();
 
             VoiceLinkChannelRow channelRow = Database.Data.VoiceLink.GetChannelRow(guild.Id, voiceChannel.Id);
             VoiceLinkRow metaRow = Database.Data.VoiceLink.GetMetaRow(guild.Id);
@@ -153,7 +153,7 @@ namespace Utili.Features
                     try
                     {
                         SocketGuildUser existingUser = guild.GetUser(existingOverwrite.TargetId);
-                        if (existingUser == null || existingUser.VoiceChannel == null || existingUser.VoiceChannel.Id != voiceChannel.Id)
+                        if (existingUser?.VoiceChannel == null || existingUser.VoiceChannel.Id != voiceChannel.Id)
                         {
                             await textChannel.RemovePermissionOverwriteAsync(existingUser);
                         }
