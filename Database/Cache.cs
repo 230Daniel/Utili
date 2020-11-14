@@ -17,6 +17,7 @@ namespace Database
         public static AutopurgeTable Autopurge { get; set; } = new AutopurgeTable();
         public static ChannelMirroringTable ChannelMirroring { get; set; } = new ChannelMirroringTable();
         public static InactiveRoleTable InactiveRole { get; set; } = new InactiveRoleTable();
+        public static JoinMessageTable JoinMessage { get; set; } = new JoinMessageTable();
         public static MessageFilterTable MessageFilter { get; set; } = new MessageFilterTable();
         public static MessageLogsTable MessageLogs { get; set; } = new MessageLogsTable();
         public static MiscTable Misc { get; set; } = new MiscTable();
@@ -47,6 +48,7 @@ namespace Database
             Autopurge.Load();
             ChannelMirroring.Load();
             InactiveRole.Load();
+            JoinMessage.Load();
             MessageFilter.Load();
             MessageLogs.Load();
             Misc.Load();

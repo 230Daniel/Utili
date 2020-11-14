@@ -32,6 +32,7 @@ namespace Utili
         public static Autopurge _autopurge = new Autopurge();
         public static ChannelMirroring _channelMirroring = new ChannelMirroring();
         public static InactiveRole _inactiveRole = new InactiveRole();
+        public static JoinMessage _joinMessage = new JoinMessage();
         public static VoiceLink _voiceLink = new VoiceLink();
         public static MessageFilter _messageFilter = new MessageFilter();
         public static MessageLogs _messageLogs = new MessageLogs();
@@ -109,6 +110,8 @@ namespace Utili
             _client.MessagesBulkDeleted += MessagesHandler.MessagesBulkDeleted;
             
             _client.UserVoiceStateUpdated += VoiceHandler.UserVoiceStateUpdated;
+
+            _client.UserJoined += GuildHandler.UserJoined;
 
             await _client.LoginAsync(TokenType.Bot, _config.Token);
             await _client.SetGameAsync("Starting up...");

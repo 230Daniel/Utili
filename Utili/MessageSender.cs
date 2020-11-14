@@ -36,12 +36,12 @@ namespace Utili
             return await textChannel.SendMessageAsync(embed: GenerateEmbed(EmbedType.Info, title, message, footer, fields));
         }
 
-        public static async Task<RestUserMessage> SendEmbedAsync(IChannel channel, Embed embed)
+        public static async Task<RestUserMessage> SendEmbedAsync(IChannel channel, Embed embed, string text = null)
         {
             ISocketMessageChannel textChannel = channel as ISocketMessageChannel;
             if(BotPermissions.IsMissingPermissions(channel, new [] {ChannelPermission.SendMessages}, out _)) return null;
 
-            return await textChannel.SendMessageAsync(embed: embed);
+            return await textChannel.SendMessageAsync(text, embed: embed);
         }
 
         private static Embed GenerateEmbed(EmbedType embedType, string title, string content = null, string footer = null, (string, string)[] fields = null)
