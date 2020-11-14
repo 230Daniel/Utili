@@ -21,6 +21,7 @@ namespace Database
         public static MessageFilterTable MessageFilter { get; set; } = new MessageFilterTable();
         public static MessageLogsTable MessageLogs { get; set; } = new MessageLogsTable();
         public static MiscTable Misc { get; set; } = new MiscTable();
+        public static NoticesTable Notices { get; set; } = new NoticesTable();
         public static VoiceLinkTable VoiceLink { get; set; } = new VoiceLinkTable();
         public static VoiceRolesTable VoiceRoles { get; set; } = new VoiceRolesTable();
         public static VoteChannelsTable VoteChannels { get; set; } = new VoteChannelsTable();

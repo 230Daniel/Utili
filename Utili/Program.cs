@@ -33,6 +33,7 @@ namespace Utili
         public static ChannelMirroring _channelMirroring = new ChannelMirroring();
         public static InactiveRole _inactiveRole = new InactiveRole();
         public static JoinMessage _joinMessage = new JoinMessage();
+        public static Notices _notices = new Notices();
         public static VoiceLink _voiceLink = new VoiceLink();
         public static MessageFilter _messageFilter = new MessageFilter();
         public static MessageLogs _messageLogs = new MessageLogs();
@@ -121,6 +122,7 @@ namespace Utili
             _voiceLink.Start();
             _voiceRoles.Start();
             _inactiveRole.Start();
+            _notices.Start();
 
             await Task.Delay(-1);
         }

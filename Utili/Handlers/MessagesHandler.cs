@@ -54,6 +54,7 @@ namespace Utili.Handlers
                 _ = _voteChannels.MessageReceived(context);
                 _ = _inactiveRole.UpdateUserAsync(context.Guild, context.User as SocketGuildUser);
                 _ = _channelMirroring.MessageReceived(context);
+                _ = _notices.MessageReceived(context);
 
             });
         }
