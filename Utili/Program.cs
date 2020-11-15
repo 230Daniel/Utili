@@ -114,6 +114,7 @@ namespace Utili
             _client.UserVoiceStateUpdated += VoiceHandler.UserVoiceStateUpdated;
 
             _client.UserJoined += GuildHandler.UserJoined;
+            _client.UserLeft += GuildHandler.UserLeft;
 
             await _client.LoginAsync(TokenType.Bot, _config.Token);
             await _client.SetGameAsync("Starting up...");
