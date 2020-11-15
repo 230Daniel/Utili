@@ -21,17 +21,14 @@ namespace Utili.Features
 
             if (TryGetJoinMessage(guild.Id, user, out(JoinMessageRow, string, Embed) joinMessage))
             {
-                IChannel channel;
                 if (joinMessage.Item1.Direct)
                 {
-                    channel = user.GetOrCreateDMChannelAsync() as IChannel;
+                    await (await user.GetOrCreateDMChannelAsync()).SendMessageAsync(joinMessage.Item2, embed: joinMessage.Item3);
                 }
                 else
                 {
-                    channel = guild.GetTextChannel(joinMessage.Item1.ChannelId);
+                    await guild.GetTextChannel(joinMessage.Item1.ChannelId).SendMessageAsync(joinMessage.Item2, embed: joinMessage.Item3);
                 }
-
-                await SendEmbedAsync(channel, joinMessage.Item3, joinMessage.Item2);
             }
         }
 

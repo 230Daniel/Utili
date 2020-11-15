@@ -13,8 +13,14 @@ namespace Utili.Handlers
         {
             _ = Task.Run(async () =>
             {
-                _joinMessage.UserJoined(user);
+                _ = _roles.UserJoined(user);
+                _ = _joinMessage.UserJoined(user);
             });
+        }
+
+        public static async Task UserLeft(SocketGuildUser user)
+        {
+            _ = _roles.UserLeft(user);
         }
     }
 }

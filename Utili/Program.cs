@@ -34,6 +34,7 @@ namespace Utili
         public static InactiveRole _inactiveRole = new InactiveRole();
         public static JoinMessage _joinMessage = new JoinMessage();
         public static Notices _notices = new Notices();
+        public static Roles _roles = new Roles();
         public static VoiceLink _voiceLink = new VoiceLink();
         public static MessageFilter _messageFilter = new MessageFilter();
         public static MessageLogs _messageLogs = new MessageLogs();
