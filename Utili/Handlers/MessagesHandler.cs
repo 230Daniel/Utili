@@ -16,6 +16,12 @@ namespace Utili.Handlers
         {
             _ = Task.Run(async () =>
             {
+                if (partialMessage.Author.Id == _client.CurrentUser.Id && partialMessage.GetType() == typeof(SocketSystemMessage))
+                {
+                    await partialMessage.DeleteAsync();
+                    return;
+                }
+
                 SocketUserMessage message = partialMessage as SocketUserMessage;
                 SocketTextChannel channel = message.Channel as SocketTextChannel;
                 SocketGuild guild = channel.Guild;
@@ -54,7 +60,7 @@ namespace Utili.Handlers
                 _ = _voteChannels.MessageReceived(context);
                 _ = _inactiveRole.UpdateUserAsync(context.Guild, context.User as SocketGuildUser);
                 _ = _channelMirroring.MessageReceived(context);
-                _ = _notices.MessageReceived(context);
+                _ = _notices.MessageReceived(context, partialMessage);
 
             });
         }

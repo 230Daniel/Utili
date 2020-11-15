@@ -54,6 +54,9 @@ namespace Utili.Features
             }
         }
 
+        // TODO: Download users for guilds using this feature
+        // Therefore it should be premium??
+
         public async Task UserLeft(SocketGuildUser user)
         {
             RolesPersistantRolesRow persistRow = new RolesPersistantRolesRow

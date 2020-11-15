@@ -28,21 +28,27 @@ namespace Utili.Features
             _timer.Start();
         }
 
-        public async Task MessageReceived(SocketCommandContext context)
+        public async Task MessageReceived(SocketCommandContext context, SocketMessage partialMessage)
         {
             List<NoticesRow> rows = Database.Data.Notices.GetRows(context.Guild.Id, context.Channel.Id);
             if(rows.Count == 0) return;
             NoticesRow row = rows.First();
             if (!row.Enabled) return;
 
-            if (_requiredUpdates.Count(x => x.Item1.ChannelId == context.Channel.Id) > 0)
+            lock (_requiredUpdates)
             {
-                (NoticesRow, DateTime) update = _requiredUpdates.First(x => x.Item1.ChannelId == context.Channel.Id);
-                update.Item2 = DateTime.UtcNow + row.Delay;
-            }
-            else
-            {
-                _requiredUpdates.Add((row, DateTime.UtcNow + row.Delay));
+                if (_requiredUpdates.Count(x => x.Item1.ChannelId == context.Channel.Id) > 0)
+                {
+                    (NoticesRow, DateTime) update = _requiredUpdates.First(x => x.Item1.ChannelId == context.Channel.Id);
+                    update.Item2 = DateTime.UtcNow + row.Delay;
+                    _requiredUpdates.RemoveAll(x => x.Item1.ChannelId == context.Channel.Id);
+                    _requiredUpdates.Add(update);
+                }
+                else
+                {
+                    if(context.User.IsBot) return;
+                    _requiredUpdates.Add((row, DateTime.UtcNow + row.Delay));
+                }
             }
         }
 
@@ -58,21 +64,31 @@ namespace Utili.Features
         {
             _updating = true;
 
-            foreach ((NoticesRow, DateTime) update in _requiredUpdates.Where(x => x.Item2 <= DateTime.UtcNow))
+            List<(NoticesRow, DateTime)> updates = new List<(NoticesRow, DateTime)>();
+
+            lock (_requiredUpdates)
+            {
+                updates.AddRange(_requiredUpdates.Where(x => x.Item2 <= DateTime.UtcNow));
+                _requiredUpdates.RemoveAll(x => x.Item2 <= DateTime.UtcNow);
+            }
+            
+            foreach ((NoticesRow, DateTime) update in updates)
             {
                 try
                 {
                     NoticesRow row = update.Item1;
-                    _requiredUpdates.RemoveAll(x => x.Item1.ChannelId == row.ChannelId);
 
                     SocketGuild guild = _client.GetGuild(row.GuildId);
                     SocketTextChannel channel = guild.GetTextChannel(row.ChannelId);
 
                     if(BotPermissions.IsMissingPermissions(channel, new [] { ChannelPermission.ViewChannel, ChannelPermission.ReadMessageHistory, ChannelPermission.ManageMessages }, out _)) return;
 
-                    IMessage message = await channel.GetMessageAsync(row.MessageId);
-
-                    await message.DeleteAsync();
+                    try
+                    {
+                        IMessage message = await channel.GetMessageAsync(row.MessageId);
+                        await message.DeleteAsync();
+                    }
+                    catch {}
 
                     (string, Embed) notice = GetNotice(row);
                     RestUserMessage sent = await MessageSender.SendEmbedAsync(channel, notice.Item2, notice.Item1);
