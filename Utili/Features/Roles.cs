@@ -54,19 +54,25 @@ namespace Utili.Features
             }
         }
 
-        // TODO: Download users for guilds using this feature
-        // Therefore it should be premium??
-
         public async Task UserLeft(SocketGuildUser user)
         {
-            RolesPersistantRolesRow persistRow = new RolesPersistantRolesRow
-            {
-                GuildId = user.Guild.Id,
-                UserId = user.Id,
-                Roles = user.Roles.Select(x => x.Id).ToList()
-            };
+            SocketGuild guild = user.Guild;
 
-            Database.Data.Roles.SavePersistRow(persistRow);
+            List<RolesRow> rows = Database.Data.Roles.GetRows(guild.Id);
+            if(rows.Count == 0) return;
+            RolesRow row = rows.First();
+
+            if (row.RolePersist)
+            {
+                RolesPersistantRolesRow persistRow = new RolesPersistantRolesRow
+                {
+                    GuildId = user.Guild.Id,
+                    UserId = user.Id,
+                    Roles = user.Roles.Select(x => x.Id).ToList()
+                };
+
+                Database.Data.Roles.SavePersistRow(persistRow);
+            }
         }
     }
 }
