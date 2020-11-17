@@ -86,7 +86,14 @@ namespace Utili.Handlers
             }
             else
             {
-                _logger.ReportError(logMessage.Source, logMessage.Exception);
+                if (logMessage.Exception.Message == "Server requested a reconnect")
+                {
+                    _logger.Log(logMessage.Source, "Server requested a reconnect", LogSeverity.Info);
+                }
+                else
+                {
+                    _logger.ReportError(logMessage.Source, logMessage.Exception, Helper.ConvertToLocalLogSeverity(logMessage.Severity));
+                }
             }
         }
     }

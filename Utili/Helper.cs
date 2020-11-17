@@ -12,8 +12,8 @@ namespace Utili
         {
             return severity switch
             {
-                Discord.LogSeverity.Critical => LogSeverity.Error,
-                Discord.LogSeverity.Error => LogSeverity.Error,
+                Discord.LogSeverity.Critical => LogSeverity.Crit,
+                Discord.LogSeverity.Error => LogSeverity.Errr,
                 Discord.LogSeverity.Warning => LogSeverity.Warn,
                 Discord.LogSeverity.Info => LogSeverity.Info,
                 Discord.LogSeverity.Verbose => LogSeverity.Dbug,

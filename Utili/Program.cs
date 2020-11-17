@@ -103,7 +103,6 @@ namespace Utili
             _logger.LogEmpty();
 
             _client.Log += ShardHandler.Log;
-            _client.ShardReady += ShardHandler.ShardReady;
             _client.ShardConnected += ShardHandler.ShardConnected;
 
             _client.MessageReceived += MessagesHandler.MessageReceived;

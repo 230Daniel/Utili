@@ -51,7 +51,7 @@ namespace Utili
             Buffer.Append("\n");
         }
 
-        public void ReportError(string module, Exception exception)
+        public void ReportError(string module, Exception exception, LogSeverity severity = LogSeverity.Errr)
         // Returns instantly, in the background creates an error report for the exception
         {
             _ = Task.Run(() =>
@@ -60,7 +60,7 @@ namespace Utili
 
                 string errorReportFilename = $"Errors/Error-{DateTime.Now.Year:0000}-{DateTime.Now.Month:00}-{DateTime.Now.Day:00} {DateTime.Now.Hour:00}-{DateTime.Now.Minute:00}-{DateTime.Now.Second:00}-{DateTime.Now.Millisecond}.txt";
 
-                Log(module, $"{exception.Message}", LogSeverity.Error);
+                Log(module, $"{exception.Message}", severity);
 
                 StreamWriter errorReport = File.CreateText(errorReportFilename);
 
@@ -84,6 +84,7 @@ namespace Utili
         Dbug,
         Info,
         Warn,
-        Error
+        Errr,
+        Crit
     }
 }
