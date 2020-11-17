@@ -8,9 +8,9 @@ namespace Utili
         public string Token { get; set; } = "";
         public int LowerShardId { get; set; } = 0;
         public int UpperShardId { get; set; } = 0;
-        public bool FillUserCache { get; set; } = false;
         public string Domain { get; set; } = "";
         public string HasteServer { get; set; } = "";
+        public bool LogCommands { get; set; } = false;
 
         public static Config Load()
         {

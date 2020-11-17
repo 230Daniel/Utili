@@ -14,7 +14,6 @@ namespace Utili
         private StringBuilder Buffer { get; set; }
 
         public void Initialise()
-        // Start the regular save of the log
         {
             Buffer = new StringBuilder();
 
@@ -24,7 +23,6 @@ namespace Utili
         }
 
         private void Timer_Elapsed(object sender, ElapsedEventArgs e)
-        // Save the log to the output file, called every 5 seconds
         {
             if (!Directory.Exists("Logs")) Directory.CreateDirectory("Logs");
             string logFilename = $"Logs/Log-{DateTime.Now.Year:0000}-{DateTime.Now.Month:00}-{DateTime.Now.Day:00}.txt";
@@ -36,7 +34,6 @@ namespace Utili
         }
 
         public void Log(string module, string message, LogSeverity severity = LogSeverity.Dbug)
-        // Outputs relavent log messages to the console and adds them to the buffer
         {
             string time = $"{DateTime.Now.Hour:00}:{DateTime.Now.Minute:00}:{DateTime.Now.Second:00}";
             string output = $"{time}  {severity,-4}  {module,-10}  {message}\n";
@@ -52,7 +49,6 @@ namespace Utili
         }
 
         public void ReportError(string module, Exception exception, LogSeverity severity = LogSeverity.Errr)
-        // Returns instantly, in the background creates an error report for the exception
         {
             _ = Task.Run(() =>
             {

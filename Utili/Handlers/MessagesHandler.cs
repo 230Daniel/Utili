@@ -38,7 +38,10 @@ namespace Utili.Handlers
                     {
                         IResult result = await _commands.ExecuteAsync(context, argPos, null);
 
-                        // TODO: Log commands
+                        if (_config.LogCommands)
+                        {
+                            _logger.Log("Command", $"{context.Guild.Id} {context.User}: {context.Message.Content}");
+                        }
 
                         if (!result.IsSuccess)
                         {
