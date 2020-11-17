@@ -58,7 +58,14 @@ namespace Utili.Handlers
 
         public static async Task Log(LogMessage logMessage)
         {
-            _logger.Log(logMessage.Source, logMessage.Message, Helper.ConvertToLocalLogSeverity(logMessage.Severity));
+            if (logMessage.Exception == null)
+            {
+                _logger.Log(logMessage.Source, logMessage.Message, Helper.ConvertToLocalLogSeverity(logMessage.Severity));
+            }
+            else
+            {
+                _logger.ReportError(logMessage.Source, logMessage.Exception);
+            }
         }
     }
 }
