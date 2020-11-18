@@ -58,7 +58,7 @@ namespace Utili
 
             new Program().MainAsync().GetAwaiter().GetResult();
 
-            // TODO: Auto-restart
+            // TODO: Auto-restart or Pterodactyl equivalent
         }
 
         public async Task MainAsync()
@@ -77,11 +77,9 @@ namespace Utili
                 TotalShards = _totalShards,
                 MessageCacheSize = 0,
                 ExclusiveBulkDelete = true,
-                AlwaysDownloadUsers = _config.FillUserCache,
                 LogLevel = Discord.LogSeverity.Info,
 
-                GatewayIntents = 
-                    GatewayIntents.Guilds |
+                GatewayIntents =
                     GatewayIntents.GuildMembers |
                     GatewayIntents.GuildMessageReactions | 
                     GatewayIntents.GuildMessages | 
@@ -92,11 +90,10 @@ namespace Utili
             {
                 CaseSensitiveCommands = false,
                 DefaultRunMode = RunMode.Async,
-                LogLevel = Discord.LogSeverity.Debug
+                LogLevel = Discord.LogSeverity.Info
             });
-
             _commands.AddTypeReader(typeof(IGuildUser), new UserTypeReader());
-            await _commands.AddModulesAsync(assembly: Assembly.GetEntryAssembly(), services: null);
+            await _commands.AddModulesAsync(Assembly.GetEntryAssembly(), null);
 
             _logger.Log("MainAsync", $"Running {_config.UpperShardId - (_config.LowerShardId - 1)} shards of Utili with {_totalShards} total shards", LogSeverity.Info);
             _logger.Log("MainAsync", $"Shard IDs: {_config.LowerShardId} - {_config.UpperShardId}", LogSeverity.Info);
@@ -109,9 +106,8 @@ namespace Utili
             _client.MessageUpdated += MessagesHandler.MessageEdited;
             _client.MessageDeleted += MessagesHandler.MessageDeleted;
             _client.MessagesBulkDeleted += MessagesHandler.MessagesBulkDeleted;
-            
-            _client.UserVoiceStateUpdated += VoiceHandler.UserVoiceStateUpdated;
 
+            _client.UserVoiceStateUpdated += VoiceHandler.UserVoiceStateUpdated;
             _client.UserJoined += GuildHandler.UserJoined;
             _client.UserLeft += GuildHandler.UserLeft;
 
