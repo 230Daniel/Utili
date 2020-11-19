@@ -80,6 +80,7 @@ namespace Utili
                 LogLevel = Discord.LogSeverity.Info,
 
                 GatewayIntents =
+                    GatewayIntents.Guilds |
                     GatewayIntents.GuildMembers |
                     GatewayIntents.GuildMessageReactions | 
                     GatewayIntents.GuildMessages | 
