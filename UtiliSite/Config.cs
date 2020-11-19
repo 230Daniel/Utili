@@ -14,7 +14,6 @@ namespace Database
             try
             {
                 string json = File.ReadAllText("Config.json");
-                string directory = System.IO.Directory.GetCurrentDirectory();
                 Config config = JsonSerializer.Deserialize<Config>(json);
 
                 DiscordClientId = config.DiscordClientId;

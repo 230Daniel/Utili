@@ -33,5 +33,7 @@ namespace Utili.Commands
 
             await SendInfoAsync(Context.Channel, "Utili", help);
         }
+
+        // TODO: Ping command
     }
 }
