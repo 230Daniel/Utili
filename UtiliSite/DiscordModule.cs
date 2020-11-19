@@ -24,22 +24,30 @@ namespace UtiliSite
         {
             DiscordRestClient client;
 
-            if (_cachedClients.TryGet(userId, out object cacheResult))
+            try
             {
-                client = cacheResult as DiscordRestClient;
-
-                if (client.LoginState == LoginState.LoggedIn)
+                if (_cachedClients.TryGet(userId, out object cacheResult))
                 {
-                    return client;
+                    client = cacheResult as DiscordRestClient;
+
+                    if (client.LoginState == LoginState.LoggedIn)
+                    {
+                        return client;
+                    }
+
+                    _cachedClients.Remove(userId);
                 }
-                
-                _cachedClients.Remove(userId);
+
+                client = new DiscordRestClient();
+                client.LoginAsync(TokenType.Bearer, token).GetAwaiter().GetResult();
+
+                _cachedClients.Add(userId, client);
+            }
+            catch
+            {
+                return null;
             }
 
-            client = new DiscordRestClient();
-            client.LoginAsync(TokenType.Bearer, token).GetAwaiter().GetResult();
-
-            _cachedClients.Add(userId, client);
             return client;
         }
 

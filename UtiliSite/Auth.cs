@@ -13,15 +13,15 @@ namespace UtiliSite
     {
         public static AuthDetails GetAuthDetails(HttpContext httpContext, string redirectUrl, string unauthorisedGuildUrl = "/dashboard")
         {
+            AuthenticationProperties authProperties = new AuthenticationProperties
+            {
+                RedirectUri = redirectUrl,
+                AllowRefresh = true,
+                IsPersistent = true
+            };
+
             if (!httpContext.User.Identity.IsAuthenticated)
             {
-                AuthenticationProperties authProperties = new AuthenticationProperties
-                {
-                    RedirectUri = redirectUrl,
-                    AllowRefresh = true,
-                    IsPersistent = true
-                };
-
                 httpContext.ChallengeAsync("Discord", authProperties).GetAwaiter().GetResult();
 
                 return new AuthDetails(false);
@@ -31,6 +31,12 @@ namespace UtiliSite
             string token = httpContext.GetTokenAsync("Discord", "access_token").GetAwaiter().GetResult();
 
             DiscordRestClient client = GetClient(userId, token);
+
+            if (client == null)
+            {
+                httpContext.ChallengeAsync("Discord", authProperties).GetAwaiter().GetResult();
+                return new AuthDetails(false);
+            }
 
             AuthDetails auth = new AuthDetails(true, client, client.CurrentUser);
 
