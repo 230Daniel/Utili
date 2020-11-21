@@ -96,10 +96,12 @@ body {
     min-height: 100vh;
 }
 img.guild-icon {
-    height: 25vh;
-    width: 25vh;
+    height: 21vh;
+    width: 21vh;
     border-radius: 50% !important;
-    margin: 1vh;
+    margin: auto;
+    margin-top: 3vh;
+    margin-bottom: 0vh;
 }
 
 /* Making things look neat.
@@ -119,13 +121,27 @@ img.guild-icon {
 .bg-dark {
     background-color: #292c2f !important;
 }
+.input-group-text{
+    height:38px;
+}
 .input-group-text {
     width: 100px;
     text-align: center;
+    background-color:#fff;
+    border-style:initial;
+}
+.card-emphasis{
+    background-color: #e9ecef !important;
+    border-style: initial;
+}
+.card-component {
+    background-color: #fff;
+    border-style: initial;
 }
 .list-group-item {
     border-bottom-style: initial;
     border-top-style: initial;
+    
 }
 .list-group-item.active {
     border-left-width: 3px;
@@ -134,8 +150,8 @@ img.guild-icon {
     border-bottom-style: initial;
     border-top-style: initial;
 }
-.autopurge-card{
-    width: 45vh;
+.list-input{
+    border-style:hidden;
 }
 .voicelink-prepend {
     width:170px;
@@ -158,4 +174,9 @@ img.guild-icon {
 .btn-danger:hover {
     background-color: #e0480d;
     border-color: #e0480d;
+}
+.card-btn{
+    width:90px;
+    height:28px;
+    margin:auto;
 }

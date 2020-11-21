@@ -27,9 +27,9 @@
     </nav>
     <div class="d-flex bg-dark" id="wrapper">
         <div class="border-right" id="sidebar-wrapper">
-            <div class="card">
+            <div class="card" style="width:30vh; height:30vh;">
                 <img src=" https://via.placeholder.com/150" class="guild-icon card-img-top" alt="...">
-                <div class="card-body">
+                <div class="card-body" style="padding-top:1vh;">
                     <p class="card-text text-center">Server</p>
                 </div>
             </div>
@@ -41,7 +41,7 @@
                 <a href="@RedirectHelper.ChangeLastPage(ViewContext, "messagefilter")" class="list-group-item list-group-item-action bg-dark @SidebarHelper.GetIsActive(ViewContext, "messagefilter")">Message Filter</a>
             </div>
         </div>
-        <div style="margin-top: 25px; margin-left: 25px; margin-right: 25px; margin-bottom: 85px;">
+        <div style="margin-top: 3vh; margin-left: 3vh; margin-right: 3vh; margin-bottom: 3vh; ">
             
             @RenderBody()
 

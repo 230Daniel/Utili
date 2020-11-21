@@ -52,17 +52,15 @@
                         <input type="hidden" name="rowId" value="@row.Id" />
 
                         <div class="input-group flex-nowrap">
-                            <div class="input-group-prepend">
-                                <span class="input-group-text">#</span>
-                            </div>
-                            <input type="text" class="form-control" style="" value="@channelName" readonly>
+                            
+                            <input type="text" class="form-control card-emphasis" style="" value="# @channelName" readonly>
                         </div>
 
                         <div class="input-group flex-nowrap">
                             <div class="input-group-prepend">
                                 <span class="input-group-text">Threshold</span>
                             </div>
-                            <input type="text" name="timespan" class="form-control" value="@row.Timespan">
+                            <input type="text" name="timespan" class="form-control card-component" value="@row.Timespan">
                         </div>
 
                         <div class="input-group flex-nowrap">
@@ -71,7 +69,7 @@
                                 <span class="input-group-text">Mode</span>
                             </div>
 
-                            <select class="custom-select" name="mode">
+                            <select class="custom-select card-component" name="mode">
                                 <!option value="0" @AutopurgeModel.GetIsSelected(0, row)>All messages</!option>
                                 <!option value="1" @AutopurgeModel.GetIsSelected(1, row)>Bot messages</!option>
                                 <!option value="2" @AutopurgeModel.GetIsSelected(2, row)>Disabled</!option>
@@ -79,8 +77,12 @@
                         </div>
 
                         <div class="input-group flex-nowrap">
+                            <div class="input-group-prepend card-emphasis">
+                                <span class="input-group-text card-emphasis"></span>
+                            </div>
                             <button type="submit" class="btn btn-success btn-width">Save</button>
                             <button type="submit" name="noajax" asp-page-handler="Remove" class="btn btn-danger btn-width">Remove</button>
+                            
                         </div>
                     </form>
                 </div>
