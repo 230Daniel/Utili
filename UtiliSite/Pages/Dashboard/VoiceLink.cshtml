@@ -17,67 +17,74 @@
     List<RestVoiceChannel> nonExcludedChannels = (List<RestVoiceChannel>)ViewData["nonExcludedChannels"];
     VoiceLinkRow metaRow = (VoiceLinkRow) ViewData["metaRow"];
 }
+    <div class="autopurge-card pb-4">
+        <div class="card">
+            <form name="form-enable" method="post">
+                <div class="input-group flex-nowrap">
 
-<form name="form-enable" method="post">
-    <div class="input-group flex-nowrap">
-
-        <div class="input-group-prepend">
-            <span class="input-group-text">Enable</span>
+                    <div class="input-group-prepend ">
+                        <span class="input-group-text voicelink-prepend">Enable</span>
+                    </div>
+                    <input type="checkbox" name="enabled" class="form-control" @VoiceLinkModel.GetIsChecked(metaRow.Enabled)>
+                </div>
+                <div class="input-group flex-nowrap">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text voicelink-prepend">Delete Text Channels</span>
+                    </div>
+                    <input type="checkbox" name="deleteChannels" class="form-control" @VoiceLinkModel.GetIsChecked(metaRow.DeleteChannels)>
+                </div>
+                <div class="input-group flex-nowrap">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text voicelink-prepend">Prefix</span>
+                    </div>
+                    <input type="text" name="prefix" class="form-control" value="@metaRow.Prefix.Value">
+                </div>
+                <button type="submit" class="btn btn-success">Save</button>
+            </form>
         </div>
-        <input type="checkbox" name="enabled" class="form-control" @VoiceLinkModel.GetIsChecked(metaRow.Enabled)>
-
-        <div class="input-group-prepend">
-            <span class="input-group-text">Delete Text Channels</span>
-        </div>
-        <input type="checkbox" name="deleteChannels" class="form-control" @VoiceLinkModel.GetIsChecked(metaRow.DeleteChannels)>
-
-        <div class="input-group-prepend">
-            <span class="input-group-text">Prefix</span>
-        </div>
-        <input type="text" name="prefix" class="form-control" value="@metaRow.Prefix.Value">
-
-
-        <button type="submit" class="btn btn-success">Save</button>
     </div>
-</form>
+    <div class="dropdown">
+        <button class="btn btn-secondary dropdown-toggle" type="button" data-toggle="dropdown" id="dropdownAddChannel" aria-haspopup="true" aria-expanded="false">
+            Exclude channel
+        </button>
+        <div class="dropdown-menu" aria-labelledby="dropdownExcludeChannel">
+            <div class="row">
+                @foreach (RestVoiceChannel channel in nonExcludedChannels)
+                {
+                <div class="col-md-12">
+                    <div class="card" style="width: 18rem;">
+                        <form method="post">
+                            <input type="hidden" name="channelId" value="@channel.Id" />
+                            <button class="dropdown-item" asp-page-handler="Exclude" type="submit">@channel.Name</button>
+                        </form>
+                    </div>
+                </div>
+                        }
+                    
+                </div>
+    </div>
 
-<div class="dropdown">
-    <button class="btn btn-secondary dropdown-toggle" type="button" data-toggle="dropdown" id="dropdownAddChannel" aria-haspopup="true" aria-expanded="false">
-        Exclude channel
-    </button>
-    <div class="dropdown-menu" aria-labelledby="dropdownExcludeChannel">
-
-        @foreach (RestVoiceChannel channel in nonExcludedChannels)
+        @foreach (RestVoiceChannel excludedChannel in excludedChannels)
         {
-            <form method="post">
-                <input type="hidden" name="channelId" value="@channel.Id" />
-                <button class="dropdown-item" asp-page-handler="Exclude" type="submit">@channel.Name</button>
+            <form name="form-@excludedChannel.Id" method="post">
+
+                <input type="hidden" name="channelId" value="@excludedChannel.Id" />
+
+                <div class="input-group flex-nowrap">
+
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">🔊</span>
+                    </div>
+                    <input type="text" class="form-control" style="background: unset;" value="@excludedChannel.Name" readonly>
+                  
+                </div>
+
+                <div class="input-group flex-nowrap">
+                    <button type="submit" name="noajax" asp-page-handler="Remove" class="btn btn-danger">Remove</button>
+                </div>
             </form>
         }
 
-    </div>
-</div>
-
-@foreach (RestVoiceChannel excludedChannel in excludedChannels)
-{
-    <form name="form-@excludedChannel.Id" method="post">
-
-        <input type="hidden" name="channelId" value="@excludedChannel.Id" />
-
-        <div class="input-group flex-nowrap">
-
-            <div class="input-group-prepend">
-                <span class="input-group-text">🔊</span>
-            </div>
-            <input type="text" class="form-control" style="background: unset;" value="@excludedChannel.Name" readonly>
-        </div>
-
-        <div class="input-group flex-nowrap">
-            <button type="submit" name="noajax" asp-page-handler="Remove" class="btn btn-danger">Remove</button>
-        </div>
-    </form>
-}
-
-<script src="~/lib/jquery/dist/jquery.js"></script>
-<script src="~/lib/jquery/dist/jquery.min.js"></script>
-<script src="~/js/dashboard/submit.js" asp-append-version="true"></script>
+        <script src="~/lib/jquery/dist/jquery.js"></script>
+        <script src="~/lib/jquery/dist/jquery.min.js"></script>
+        <script src="~/js/dashboard/submit.js" asp-append-version="true"></script>

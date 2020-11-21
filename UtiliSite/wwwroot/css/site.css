@@ -95,11 +95,26 @@ body {
     height: inherit;
     min-height: 100vh;
 }
+img.guild-icon {
+    height: 25vh;
+    width: 25vh;
+    border-radius: 50% !important;
+    margin: 1vh;
+}
 
 /* Making things look neat.
 -------------------------------------------------- */
 * {
     border-radius: 0 !important;
+}
+.jumbotron {
+    background-color: inherit;
+}
+.page-heading.display-4 {
+    color: #fff;
+}
+.lead {
+    color: #e9ecef;
 }
 .bg-dark {
     background-color: #292c2f !important;
@@ -108,13 +123,22 @@ body {
     width: 100px;
     text-align: center;
 }
-
+.list-group-item {
+    border-bottom-style: initial;
+    border-top-style: initial;
+}
 .list-group-item.active {
-    background-color: #d86335;
-    border-color: #d86335;
+    border-left-width: 3px;
+    border-left-style: solid;
+    border-left-color: #4287f5;
+    border-bottom-style: initial;
+    border-top-style: initial;
 }
 .autopurge-card{
     width: 45vh;
+}
+.voicelink-prepend {
+    width:170px;
 }
 .btn-width{
     width: 100px;

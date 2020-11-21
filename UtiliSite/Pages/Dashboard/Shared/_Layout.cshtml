@@ -27,6 +27,12 @@
     </nav>
     <div class="d-flex bg-dark" id="wrapper">
         <div class="border-right" id="sidebar-wrapper">
+            <div class="card">
+                <img src=" https://via.placeholder.com/150" class="guild-icon card-img-top" alt="...">
+                <div class="card-body">
+                    <p class="card-text text-center">Server</p>
+                </div>
+            </div>
             <div class="list-group list-group-flush">
                 <a href="@RedirectHelper.ChangeLastPage(ViewContext, "core")" class="list-group-item list-group-item-action bg-dark @SidebarHelper.GetIsActive(ViewContext, "core")">Core</a>
                 <a href="@RedirectHelper.ChangeLastPage(ViewContext, "autopurge")" class="list-group-item list-group-item-action bg-dark @SidebarHelper.GetIsActive(ViewContext, "autopurge")">Autopurge</a>
