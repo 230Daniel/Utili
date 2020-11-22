@@ -42,6 +42,8 @@ namespace Utili
         public static VoiceRoles _voiceRoles = new VoiceRoles();
         public static VoteChannels _voteChannels = new VoteChannels();
 
+        public static RoslynEngine _roslyn = new RoslynEngine();
+
         // ReSharper enable InconsistentNaming
 
         private static void Main()
