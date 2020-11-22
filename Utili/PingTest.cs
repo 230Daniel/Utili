@@ -43,7 +43,7 @@ namespace Utili
 
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
-            IUserMessage message = await channel.SendMessageAsync("Test");
+            await channel.SendMessageAsync("Test");
             stopwatch.Stop();
 
             RestLatency = (int)stopwatch.ElapsedMilliseconds;
