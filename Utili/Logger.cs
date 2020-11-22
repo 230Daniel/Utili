@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
@@ -9,8 +10,9 @@ namespace Utili
     internal class Logger
     {
         public LogSeverity LogSeverity { get; set; }
+
         private Timer Timer { get; set; }
-        
+        private string Filename { get; set;}
         private StringBuilder Buffer { get; set; }
 
         public void Initialise()
@@ -20,17 +22,29 @@ namespace Utili
             Timer = new Timer(5000);
             Timer.Elapsed += Timer_Elapsed;
             Timer.Start();
+
+            if (!Directory.Exists("Logs")) Directory.CreateDirectory("Logs");
+
+            int highest = 0;
+            foreach(string filename in Directory.GetFiles("Logs"))
+            {
+                if (int.TryParse(filename.Replace(".txt", "").Split("-")[1], out int number))
+                {
+                    if (number > highest) highest = number;
+                }
+            }
+
+            Filename = $"Logs\\Log-{highest + 1}.txt";
+
+            Title();
         }
 
         private void Timer_Elapsed(object sender, ElapsedEventArgs e)
         {
-            if (!Directory.Exists("Logs")) Directory.CreateDirectory("Logs");
-            string logFilename = $"Logs/Log-{DateTime.Now.Year:0000}-{DateTime.Now.Month:00}-{DateTime.Now.Day:00}.txt";
-
             string output = Buffer.ToString();
             Buffer.Clear();
 
-            File.AppendAllText(logFilename, output);
+            File.AppendAllText(Filename, output);
         }
 
         public void Log(string module, string message, LogSeverity severity = LogSeverity.Dbug)
@@ -38,14 +52,19 @@ namespace Utili
             string time = $"{DateTime.Now.Hour:00}:{DateTime.Now.Minute:00}:{DateTime.Now.Second:00}";
             string output = $"{time}  {severity,-4}  {module,-10}  {message}\n";
 
-            Console.Write(output);
-            Buffer.Append(output);
+            LogRaw(output);
         }
 
         public void LogEmpty(bool fileOnly = false)
         {
             if(!fileOnly) Console.Write("\n");
             Buffer.Append("\n");
+        }
+
+        public void LogRaw(string message)
+        {
+            Console.Write(message);
+            Buffer.Append(message);
         }
 
         public void ReportError(string module, Exception exception, LogSeverity severity = LogSeverity.Errr)
@@ -72,6 +91,30 @@ namespace Utili
 
                 errorReport.Close();
             });
+        }
+
+        private void Title()
+        {
+            string title = 
+@"                               @@
+                           @@@@
+                       @@@@@@
+                  @@@@@@@@
+              @@@@@@@@@@
+          @@@@@@@@@@@@                          ================
+      @@@@@@@@@@@@@@@@@@@@@@                        Utili v2
+  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@              Daniel Baynton
+         @@@@@@@@@@@@@@@@@@@@@@                 ================
+               @@@@@@@@@@@
+             @@@@@@@@@
+          @@@@@@@@
+        @@@@@@
+      @@@@
+    @@
+
+";
+
+            LogRaw(title);
         }
     }
 
