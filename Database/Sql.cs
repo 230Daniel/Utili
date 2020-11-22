@@ -6,6 +6,7 @@ namespace Database
     internal static class Sql
     {
         private static string ConnectionString { get; set; }
+        public static int Queries { get; set; }
 
         public static void SetCredentials(string server, int port, string database, string username, string password)
         {
@@ -16,6 +17,7 @@ namespace Database
         {
             MySqlConnection connection = new MySqlConnection(ConnectionString);
             MySqlCommand command = connection.CreateCommand();
+            Queries++;
 
             connection.Open();
             command.CommandText = commandText;

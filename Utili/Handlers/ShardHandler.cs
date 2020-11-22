@@ -55,23 +55,15 @@ namespace Utili.Handlers
 
             _currentlyDownloading = true;
 
-            List<ulong> guildIds = new List<ulong>();
-
-            // Role persist enabled
-            guildIds.AddRange(Database.Data.Roles.GetRows().Where(x => x.RolePersist).Select(x => x.GuildId));
-
             try
             {
-                foreach (DiscordSocketClient shard in _client.Shards)
-                {
-                    foreach(SocketGuild guild in shard.Guilds.Where(x => x.DownloadedMemberCount < x.MemberCount && guildIds.Contains(x.Id)))
-                    {
-                        // Ratelimit is 120 requests per minute, I believe that this is global over all shards
+                List<ulong> guildIds = new List<ulong>();
 
-                        _ = guild.DownloadUsersAsync();
-                        await Task.Delay(900);
-                    }
-                }
+                // Role persist enabled
+                guildIds.AddRange(Database.Data.Roles.GetRows().Where(x => x.RolePersist).Select(x => x.GuildId));
+
+                List<SocketGuild> guilds = _client.Guilds.Where(x => x.DownloadedMemberCount < x.MemberCount && guildIds.Contains(x.Id)).ToList();
+                await _client.DownloadUsersAsync(guilds);
             }
             catch { }
 

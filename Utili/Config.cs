@@ -11,6 +11,9 @@ namespace Utili
         public string Domain { get; set; } = "";
         public string HasteServer { get; set; } = "";
         public bool LogCommands { get; set; } = false;
+        public ulong SystemGuildId { get; set; } = 0;
+        public ulong SystemChannelId { get; set; } = 0;
+        public ulong StatusChannelId { get; set; } = 0;
 
         public static Config Load()
         {

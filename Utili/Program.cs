@@ -24,10 +24,11 @@ namespace Utili
         public static Logger _logger;
         public static Config _config;
         public static Haste _haste;
-        public static bool _ready;
         public static int _totalShards;
 
         public static Timer _shardStatsUpdater;
+        public static PingTest _pingTest = new PingTest();
+        public static Database.PingTest _dbPingTest = new Database.PingTest();
 
         public static Autopurge _autopurge = new Autopurge();
         public static ChannelMirroring _channelMirroring = new ChannelMirroring();
@@ -65,7 +66,6 @@ namespace Utili
         {
             _logger.LogEmpty();
 
-            _ready = false;
             _config = Config.Load();
             _haste = new Haste(_config.HasteServer);
 
@@ -78,7 +78,8 @@ namespace Utili
                 MessageCacheSize = 0,
                 ExclusiveBulkDelete = true,
                 LogLevel = Discord.LogSeverity.Info,
-
+                AlwaysDownloadUsers = false,
+                
                 GatewayIntents =
                     GatewayIntents.Guilds |
                     GatewayIntents.GuildMembers |
@@ -112,9 +113,12 @@ namespace Utili
             _client.UserJoined += GuildHandler.UserJoined;
             _client.UserLeft += GuildHandler.UserLeft;
 
-            await _client.LoginAsync(TokenType.Bot, _config.Token);
             await _client.SetGameAsync("Starting up...");
+            await _client.LoginAsync(TokenType.Bot, _config.Token);
             await _client.StartAsync();
+
+            _pingTest.Start();
+            _dbPingTest.Start();
 
             _autopurge.Start();
             _voiceLink.Start();

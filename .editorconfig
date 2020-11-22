@@ -8,3 +8,6 @@ dotnet_style_readonly_field = true:silent
 
 # IDE0057: Use range operator
 csharp_style_prefer_range_operator = true:silent
+
+# CS8524: The switch expression does not handle some values of its input type (it is not exhaustive) involving an unnamed enum value.
+dotnet_diagnostic.CS8524.severity = none
