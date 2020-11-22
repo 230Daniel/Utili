@@ -144,7 +144,7 @@ img.guild-icon {
     
 }
 .list-group-item.active {
-    border-left-width: 3px;
+    border-left-width: 2px;
     border-left-style: solid;
     border-left-color: #4287f5;
     border-bottom-style: initial;
@@ -159,21 +159,29 @@ img.guild-icon {
 .btn-width{
     width: 100px;
 }
-.btn-success {
-    border-color: #d86335;
-    background-color: #495057;
+.btn-save {
+    border-color: #4287f5;
+    border-style: solid !important;
+    border-width: 3px;
+    background-color: none;
+    color: #495057;
 }
-.btn-success:hover {
-    background-color: #d86335;
-    border-color: #d86335;
+.btn-save:hover {
+    background-color: #4287f5 !important;
+    border-color: #4287f5;
+    color: #fff;
 }
-.btn-danger {
-    background-color: #d86335;
-    border-color: #d86335;
+.btn-remove {
+    background: none;
+    border-style: initial;
+    color: #495057;
+    width:38px;
+    height:38px;
 }
-.btn-danger:hover {
-    background-color: #e0480d;
-    border-color: #e0480d;
+.btn-remove:hover {
+    background-color: #d0d0d0 !important;
+    color: #495057;
+    
 }
 .card-btn{
     width:90px;
