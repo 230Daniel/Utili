@@ -140,35 +140,24 @@ namespace Database.Data
             return matchedRows;
         }
 
-        public static void SaveUserRow(ReputationUserRow row)
+        public static void AlterUserReputation(ulong guildId, ulong userId, int reputationChange)
         {
-            MySqlCommand command;
+            MySqlCommand command = Sql.GetCommand("UPDATE ReputationUsers SET Reputation = Reputation + @ReputationChange WHERE GuildId = @GuildId AND UserId = @UserId;",
+                new [] {("GuildId", guildId.ToString()), 
+                    ("UserId", userId.ToString()),
+                    ("ReputationChange", reputationChange.ToString())});
 
-            if (row.Id == 0) 
-            // The row is a new entry so should be inserted into the database
+            if (command.ExecuteNonQuery() == 0)
             {
-                command = Sql.GetCommand("INSERT INTO ReputationUsers (GuildId, UserId, Reputation) VALUES (@GuildId, @UserId, @Reputation);",
-                    new [] {("GuildId", row.GuildId.ToString()), 
-                        ("UserId", row.UserId.ToString()),
-                        ("Reputation", row.Reputation.ToString())});
+                command = Sql.GetCommand("INSERT INTO ReputationUsers (GuildId, UserId, Reputation) VALUES(@GuildId, @UserId, @Reputation)",
+                    new [] {("GuildId", guildId.ToString()), 
+                        ("UserId", userId.ToString()),
+                        ("Reputation", reputationChange.ToString())});
 
                 command.ExecuteNonQuery();
-                command.Connection.Close();
-
-                row.Id = GetRows(row.GuildId, ignoreCache: true).First().Id;
             }
-            else
-            // The row already exists and should be updated
-            {
-                command = Sql.GetCommand("UPDATE Reputation SET GuildId = @GuildId, UserId = @UserId, Reputation = @Reputation WHERE Id = @Id;",
-                    new [] {("Id", row.Id.ToString()),
-                        ("GuildId", row.GuildId.ToString()), 
-                        ("UserId", row.UserId.ToString()),
-                        ("Reputation", row.Reputation.ToString())});
 
-                command.ExecuteNonQuery();
-                command.Connection.Close();
-            }
+            command.Connection.Close();
         }
     }
 
