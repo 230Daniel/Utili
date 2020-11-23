@@ -161,15 +161,13 @@ img.guild-icon {
 }
 .btn-save {
     border-color: #4287f5;
-    border-style: solid !important;
-    border-width: 3px;
+    border-style: initial;
     background-color: none;
     color: #495057;
 }
 .btn-save:hover {
-    background-color: #4287f5 !important;
-    border-color: #4287f5;
-    color: #fff;
+    background-color:#d0d0d0 !important;
+    border-style: initial;
 }
 .btn-remove {
     background: none;
@@ -177,6 +175,7 @@ img.guild-icon {
     color: #495057;
     width:38px;
     height:38px;
+    padding:0;
 }
 .btn-remove:hover {
     background-color: #d0d0d0 !important;

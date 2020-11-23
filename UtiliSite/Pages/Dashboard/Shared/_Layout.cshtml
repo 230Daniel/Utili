@@ -9,8 +9,8 @@
     <script src="https://kit.fontawesome.com/4c685c9379.js" crossorigin="anonymous"></script>
 </head>
 <body>
-    <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow ">
-        <div class="container">
+    <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light border-bottom box-shadow " id="navbar">
+        <div class="container" id="hide">
             <a class="navbar-brand" asp-area="" asp-page="/Index">Utili</a>
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                     aria-expanded="false" aria-label="Toggle navigation">
@@ -42,7 +42,7 @@
             </div>
         </div>
         <div style="margin-top: 3vh; margin-left: 3vh; margin-right: 3vh; margin-bottom: 3vh; ">
-            
+
             @RenderBody()
 
         </div>
@@ -50,21 +50,21 @@
             <div style="position: absolute; bottom: 0; right: 0;">
                 <div class="toast" role="alert" data-delay="5000" aria-live="assertive" aria-atomic="true" style="width: 500px;" id="success">
                     <div class="toast-body">
-                        <strong>Changes saved</strong> <br/>
+                        <strong>Changes saved</strong> <br />
                         Your changes may take up to 30 seconds to take effect
                     </div>
                 </div>
 
                 <div class="toast" role="alert" data-delay="5000" aria-live="assertive" aria-atomic="true" style="width: 500px;" id="ratelimit">
                     <div class="toast-body">
-                        <strong>Error</strong> <br/>
+                        <strong>Error</strong> <br />
                         You're doing that too fast, please wait between requests
                     </div>
                 </div>
 
                 <div class="toast" role="alert" data-delay="5000" aria-live="assertive" aria-atomic="true" style="width: 500px;" id="error">
                     <div class="toast-body">
-                        <strong>Error</strong> <br/>
+                        <strong>Error</strong> <br />
                         Something went wrong, please try again later
                     </div>
                 </div>
@@ -81,6 +81,7 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/js/dashboard/notification.js" asp-append-version="true"></script>
 
     @RenderSection("Scripts", required: false)
 </body>
