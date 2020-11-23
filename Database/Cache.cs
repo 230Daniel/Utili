@@ -22,6 +22,7 @@ namespace Database
         public static MessageLogsTable MessageLogs { get; set; } = new MessageLogsTable();
         public static MiscTable Misc { get; set; } = new MiscTable();
         public static NoticesTable Notices { get; set; } = new NoticesTable();
+        public static ReputationTable Reputation { get; set; } = new ReputationTable();
         public static RolesTable Roles { get; set; } = new RolesTable();
         public static VoiceLinkTable VoiceLink { get; set; } = new VoiceLinkTable();
         public static VoiceRolesTable VoiceRoles { get; set; } = new VoiceRolesTable();
