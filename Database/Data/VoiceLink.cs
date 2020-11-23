@@ -75,7 +75,7 @@ namespace Database.Data
             if (metaRow.Id == 0) 
             // The row is a new entry so should be inserted into the database
             {
-                command = Sql.GetCommand($"INSERT INTO VoiceLink (GuildID, Enabled, DeleteChannels, Prefix, ExcludedChannels) VALUES (@GuildId, {Sql.ToSqlBool(metaRow.Enabled)}, {Sql.ToSqlBool(metaRow.DeleteChannels)}, @Prefix, @ExcludedChannels );",
+                command = Sql.GetCommand($"INSERT INTO VoiceLink (GuildId, Enabled, DeleteChannels, Prefix, ExcludedChannels) VALUES (@GuildId, {Sql.ToSqlBool(metaRow.Enabled)}, {Sql.ToSqlBool(metaRow.DeleteChannels)}, @Prefix, @ExcludedChannels );",
                     new [] {("GuildId", metaRow.GuildId.ToString()), 
                         ("Prefix", metaRow.Prefix.EncodedValue),
                         ("ExcludedChannels", metaRow.GetExcludedChannelsString())
@@ -172,7 +172,7 @@ namespace Database.Data
             if (channelRow.Id == 0) 
             // The row is a new entry so should be inserted into the database
             {
-                command = Sql.GetCommand("INSERT INTO VoiceLinkChannels (GuildID, TextChannelId, VoiceChannelId) VALUES (@GuildId, @TextChannelId, @VoiceChannelId);",
+                command = Sql.GetCommand("INSERT INTO VoiceLinkChannels (GuildId, TextChannelId, VoiceChannelId) VALUES (@GuildId, @TextChannelId, @VoiceChannelId);",
                     new [] { ("GuildId", channelRow.GuildId.ToString()), 
                         ("TextChannelId", channelRow.TextChannelId.ToString()),
                         ("VoiceChannelId", channelRow.VoiceChannelId.ToString())});

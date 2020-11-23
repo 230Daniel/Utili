@@ -67,7 +67,7 @@ namespace Database.Data
             if (row.Id == 0) 
             // The row is a new entry so should be inserted into the database
             {
-                command = Sql.GetCommand("INSERT INTO ChannelMirroring (GuildID, FromChannelId, ToChannelId, WebhookId) VALUES (@GuildId, @FromChannelId, @ToChannelId, @WebhookId);",
+                command = Sql.GetCommand("INSERT INTO ChannelMirroring (GuildId, FromChannelId, ToChannelId, WebhookId) VALUES (@GuildId, @FromChannelId, @ToChannelId, @WebhookId);",
                     new [] {("GuildId", row.GuildId.ToString()), 
                         ("FromChannelId", row.FromChannelId.ToString()),
                         ("ToChannelId", row.ToChannelId.ToString()),
@@ -104,7 +104,7 @@ namespace Database.Data
             if (row.Id == 0) 
             // The row is a new entry so should be inserted into the database
             {
-                command = Sql.GetCommand("INSERT INTO ChannelMirroring (GuildID, FromChannelId, ToChannelId, WebhookId) VALUES (@GuildId, @FromChannelId, @ToChannelId, @WebhookId);",
+                command = Sql.GetCommand("INSERT INTO ChannelMirroring (GuildId, FromChannelId, ToChannelId, WebhookId) VALUES (@GuildId, @FromChannelId, @ToChannelId, @WebhookId);",
                     new [] {("GuildId", row.GuildId.ToString()), 
                         ("FromChannelId", row.FromChannelId.ToString()),
                         ("ToChannelId", row.ToChannelId.ToString()),

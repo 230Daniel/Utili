@@ -78,7 +78,7 @@ namespace Database.Data
             // The row is a new entry so should be inserted into the database
             {
                 command = Sql.GetCommand(
-                    $"INSERT INTO Notices (GuildID, ChannelId, MessageId, Enabled, Delay, Title, Footer, Content, Text, Image, Thumbnail, Icon, Colour) VALUES (@GuildID, @ChannelId, @MessageId, {Sql.ToSqlBool(row.Enabled)}, @Delay, @Title, @Footer, @Content, @Text, @Image, @Thumbnail, @Icon, @Colour);",
+                    $"INSERT INTO Notices (GuildId, ChannelId, MessageId, Enabled, Delay, Title, Footer, Content, Text, Image, Thumbnail, Icon, Colour) VALUES (@GuildId, @ChannelId, @MessageId, {Sql.ToSqlBool(row.Enabled)}, @Delay, @Title, @Footer, @Content, @Text, @Image, @Thumbnail, @Icon, @Colour);",
                     new[]
                     {
                         ("GuildId", row.GuildId.ToString()),
@@ -105,7 +105,7 @@ namespace Database.Data
             else
             // The row already exists and should be updated
             {
-                command = Sql.GetCommand($"UPDATE Notices SET GuildID = @GuildId, ChannelId = @ChannelId, MessageId = @MessageId, Enabled = {Sql.ToSqlBool(row.Enabled)}, Delay = @Delay, Title = @Title, Footer = @Footer, Content = @Content, Text = @Text, Image = @Image, Thumbnail = @Thumbnail, Icon = @Icon, Colour = @Colour WHERE Id = @Id;",
+                command = Sql.GetCommand($"UPDATE Notices SET GuildId = @GuildId, ChannelId = @ChannelId, MessageId = @MessageId, Enabled = {Sql.ToSqlBool(row.Enabled)}, Delay = @Delay, Title = @Title, Footer = @Footer, Content = @Content, Text = @Text, Image = @Image, Thumbnail = @Thumbnail, Icon = @Icon, Colour = @Colour WHERE Id = @Id;",
                     new [] 
                     {
                         ("Id", row.Id.ToString()),
@@ -138,7 +138,7 @@ namespace Database.Data
             // The row is a new entry so should be inserted into the database
             {
                 command = Sql.GetCommand(
-                    $"INSERT INTO Notices (GuildID, ChannelId, MessageId, Enabled, Delay, Title, Footer, Content, Text, Image, Thumbnail, Icon, Colour) VALUES (@GuildID, @ChannelId, @MessageId, {Sql.ToSqlBool(row.Enabled)}, @Delay, @Title, @Footer, @Content, @Text, @Image, @Thumbnail, @Icon, @Colour);",
+                    $"INSERT INTO Notices (GuildId, ChannelId, MessageId, Enabled, Delay, Title, Footer, Content, Text, Image, Thumbnail, Icon, Colour) VALUES (@GuildId, @ChannelId, @MessageId, {Sql.ToSqlBool(row.Enabled)}, @Delay, @Title, @Footer, @Content, @Text, @Image, @Thumbnail, @Icon, @Colour);",
                     new[]
                     {
                         ("GuildId", row.GuildId.ToString()),

@@ -65,7 +65,7 @@ namespace Database.Data
             if (row.Id == 0) 
             // The row is a new entry so should be inserted into the database
             {
-                command = Sql.GetCommand("INSERT INTO VoiceRoles (GuildID, ChannelId, RoleId) VALUES (@GuildId, @ChannelId, @RoleId);",
+                command = Sql.GetCommand("INSERT INTO VoiceRoles (GuildId, ChannelId, RoleId) VALUES (@GuildId, @ChannelId, @RoleId);",
                     new [] { ("GuildId", row.GuildId.ToString()), 
                         ("ChannelId", row.ChannelId.ToString()),
                         ("RoleId", row.RoleId.ToString())});

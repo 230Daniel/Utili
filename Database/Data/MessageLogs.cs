@@ -72,7 +72,7 @@ namespace Database.Data
             if (row.Id == 0) 
             // The row is a new entry so should be inserted into the database
             {
-                command = Sql.GetCommand("INSERT INTO MessageLogs (GuildID, DeletedChannelId, EditedChannelId, ExcludedChannels) VALUES (@GuildId, @DeletedChannelId, @EditedChannelId, @ExcludedChannels);",
+                command = Sql.GetCommand("INSERT INTO MessageLogs (GuildId, DeletedChannelId, EditedChannelId, ExcludedChannels) VALUES (@GuildId, @DeletedChannelId, @EditedChannelId, @ExcludedChannels);",
                     new [] { ("GuildId", row.GuildId.ToString()), 
                         ("DeletedChannelId", row.DeletedChannelId.ToString()),
                         ("EditedChannelId", row.EditedChannelId.ToString()),
@@ -201,7 +201,7 @@ namespace Database.Data
             if (row.Id == 0) 
             // The row is a new entry so should be inserted into the database
             {
-                command = Sql.GetCommand("INSERT INTO MessageLogsMessages (GuildID, ChannelId, MessageId, UserId, Timestamp, Content) VALUES (@GuildId, @ChannelId, @MessageId, @UserId, @Timestamp, @Content);",
+                command = Sql.GetCommand("INSERT INTO MessageLogsMessages (GuildId, ChannelId, MessageId, UserId, Timestamp, Content) VALUES (@GuildId, @ChannelId, @MessageId, @UserId, @Timestamp, @Content);",
                     new [] { ("GuildId", row.GuildId.ToString()), 
                         ("ChannelId", row.ChannelId.ToString()),
                         ("MessageId", row.MessageId.ToString()),
@@ -246,7 +246,7 @@ namespace Database.Data
 
         public static void DeleteMessagesByMessageId(ulong guildId, ulong channelId, ulong[] messageIds)
         {
-            MySqlCommand command = Sql.GetCommand($"DELETE FROM MessageLogsMessages WHERE GuildId = @GuildId AND ChannelId = @ChannelID AND MessageId IN {Sql.ToSqlObjectArray(messageIds)}",
+            MySqlCommand command = Sql.GetCommand($"DELETE FROM MessageLogsMessages WHERE GuildId = @GuildId AND ChannelId = @ChannelId AND MessageId IN {Sql.ToSqlObjectArray(messageIds)}",
                 new[]
                 {
                     ("GuildId", guildId.ToString()),

@@ -69,7 +69,7 @@ namespace Database.Data
             // The row is a new entry so should be inserted into the database
             {
                 command = Sql.GetCommand(
-                    $"INSERT INTO JoinMessage (GuildID, Direct, ChannelId, Title, Footer, Content, Text, Image, Thumbnail, Icon, Colour) VALUES (@GuildID, {Sql.ToSqlBool(row.Direct)}, @ChannelId, @Title, @Footer, @Content, @Text, @Image, @Thumbnail, @Icon, @Colour);",
+                    $"INSERT INTO JoinMessage (GuildId, Direct, ChannelId, Title, Footer, Content, Text, Image, Thumbnail, Icon, Colour) VALUES (@GuildId, {Sql.ToSqlBool(row.Direct)}, @ChannelId, @Title, @Footer, @Content, @Text, @Image, @Thumbnail, @Icon, @Colour);",
                     new[]
                     {
                         ("GuildId", row.GuildId.ToString()),
@@ -94,7 +94,7 @@ namespace Database.Data
             else
             // The row already exists and should be updated
             {
-                command = Sql.GetCommand($"UPDATE JoinMessage SET GuildID = @GuildId, Direct = {Sql.ToSqlBool(row.Direct)}, ChannelId = @ChannelId, Title = @Title, Footer = @Footer, Content = @Content, Text = @Text, Image = @Image, Thumbnail = @Thumbnail, Icon = @Icon, Colour = @Colour WHERE Id = @Id;",
+                command = Sql.GetCommand($"UPDATE JoinMessage SET GuildId = @GuildId, Direct = {Sql.ToSqlBool(row.Direct)}, ChannelId = @ChannelId, Title = @Title, Footer = @Footer, Content = @Content, Text = @Text, Image = @Image, Thumbnail = @Thumbnail, Icon = @Icon, Colour = @Colour WHERE Id = @Id;",
                     new [] 
                     {
                         ("Id", row.Id.ToString()),

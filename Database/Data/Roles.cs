@@ -59,7 +59,7 @@ namespace Database.Data
             if (row.Id == 0) 
             // The row is a new entry so should be inserted into the database
             {
-                command = Sql.GetCommand($"INSERT INTO Roles (GuildID, RolePersist, JoinRoles) VALUES (@GuildId, {Sql.ToSqlBool(row.RolePersist)}, @JoinRoles);",
+                command = Sql.GetCommand($"INSERT INTO Roles (GuildId, RolePersist, JoinRoles) VALUES (@GuildId, {Sql.ToSqlBool(row.RolePersist)}, @JoinRoles);",
                     new [] {
                         ("GuildId", row.GuildId.ToString()),
                         ("JoinRoles", row.GetJoinRolesString())
@@ -148,7 +148,7 @@ namespace Database.Data
             if (row.Id == 0) 
             // The row is a new entry so should be inserted into the database
             {
-                command = Sql.GetCommand("INSERT INTO RolesPersistantRoles (GuildID, UserId, Roles) VALUES (@GuildId, @UserId, @Roles);",
+                command = Sql.GetCommand("INSERT INTO RolesPersistantRoles (GuildId, UserId, Roles) VALUES (@GuildId, @UserId, @Roles);",
                     new [] {
                         ("GuildId", row.GuildId.ToString()),
                         ("UserId", row.UserId.ToString()),

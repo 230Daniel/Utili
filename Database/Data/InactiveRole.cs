@@ -104,7 +104,7 @@ namespace Database.Data
             if (row.Id == 0) 
             // The row is a new entry so should be inserted into the database
             {
-                command = Sql.GetCommand($"INSERT INTO InactiveRole (GuildID, RoleId, ImmuneRoleId, Threshold, Inverse, DefaultLastAction, LastUpdate) VALUES (@GuildId, @RoleId, @ImmuneRoleId, @Threshold, {Sql.ToSqlBool(row.Inverse)}, @DefaultLastAction, @LastUpdate);",
+                command = Sql.GetCommand($"INSERT INTO InactiveRole (GuildId, RoleId, ImmuneRoleId, Threshold, Inverse, DefaultLastAction, LastUpdate) VALUES (@GuildId, @RoleId, @ImmuneRoleId, @Threshold, {Sql.ToSqlBool(row.Inverse)}, @DefaultLastAction, @LastUpdate);",
                     new [] {("GuildId", row.GuildId.ToString()), 
                         ("RoleId", row.RoleId.ToString()),
                         ("ImmuneRoleId", row.ImmuneRoleId.ToString()),
@@ -146,7 +146,7 @@ namespace Database.Data
             // The row is a new entry so should be inserted into the database
             {
                 // If the if statement is true then something has gone horribly wrong, but it will work anyway.
-                command = Sql.GetCommand($"INSERT INTO InactiveRole (GuildID, RoleId, ImmuneRoleId, Threshold, Inverse, DefaultLastAction, LastUpdate) VALUES (@GuildId, @RoleId, @ImmuneRoleId, @Threshold, {Sql.ToSqlBool(row.Inverse)}, @DefaultLastAction, @LastUpdate);",
+                command = Sql.GetCommand($"INSERT INTO InactiveRole (GuildId, RoleId, ImmuneRoleId, Threshold, Inverse, DefaultLastAction, LastUpdate) VALUES (@GuildId, @RoleId, @ImmuneRoleId, @Threshold, {Sql.ToSqlBool(row.Inverse)}, @DefaultLastAction, @LastUpdate);",
                     new [] {("GuildId", row.GuildId.ToString()), 
                         ("RoleId", row.RoleId.ToString()),
                         ("ImmuneRoleId", row.ImmuneRoleId.ToString()),
@@ -196,7 +196,7 @@ namespace Database.Data
 
             if (command.ExecuteNonQuery() == 0)
             {
-                command = Sql.GetCommand("INSERT INTO InactiveRoleUsers (GuildID, UserId, LastAction) VALUES (@GuildId, @UserId, @LastAction)",
+                command = Sql.GetCommand("INSERT INTO InactiveRoleUsers (GuildId, UserId, LastAction) VALUES (@GuildId, @UserId, @LastAction)",
                     new [] {("GuildId", guildId.ToString()), 
                         ("UserId", userId.ToString()),
                         ("LastAction", Sql.ToSqlDateTime(DateTime.UtcNow))});
