@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using Discord.Rest;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace UtiliSite

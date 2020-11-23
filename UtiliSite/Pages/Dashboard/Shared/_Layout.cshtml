@@ -1,4 +1,5 @@
-﻿<!DOCTYPE html>
+﻿@using Discord.Rest
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -28,9 +29,9 @@
     <div class="d-flex bg-dark" id="wrapper">
         <div class="border-right" id="sidebar-wrapper">
             <div class="card" style="width:30vh; height:30vh;">
-                <img src=" https://via.placeholder.com/150" class="guild-icon card-img-top" alt="...">
+                <img src="@((ViewData["guild"] as RestGuild).IconUrl ?? "https://cdn.discordapp.com/embed/avatars/0.png")" class="guild-icon card-img-top" alt="...">
                 <div class="card-body" style="padding-top:1vh;">
-                    <p class="card-text text-center">Server</p>
+                    <p class="card-text text-center">@((ViewData["guild"] as RestGuild).Name)</p>
                 </div>
             </div>
             <div class="list-group list-group-flush">
