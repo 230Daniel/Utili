@@ -16,9 +16,8 @@ namespace Utili.Features
 {
     internal class Reputation
     {
-        public async Task ReactionAdded(IUserMessage message, SocketGuildUser reactor, IEmote emote)
+        public async Task ReactionAdded(IGuild guild, IUserMessage message, IUser reactor, IEmote emote)
         {
-            SocketGuild guild = reactor.Guild;
             IUser user = message.Author;
             if(user.Id == reactor.Id || user.IsBot || reactor.IsBot) return;
 
@@ -32,9 +31,8 @@ namespace Utili.Features
             Database.Data.Reputation.AlterUserReputation(guild.Id, user.Id, change);
         }
 
-        public async Task ReactionRemoved(IUserMessage message, SocketGuildUser reactor, IEmote emote)
+        public async Task ReactionRemoved(IGuild guild, IUserMessage message, IUser reactor, IEmote emote)
         {
-            SocketGuild guild = reactor.Guild;
             IUser user = message.Author;
             if(user.Id == reactor.Id) return;
 
@@ -54,8 +52,10 @@ namespace Utili.Features
     public class ReputationCommands : ModuleBase<SocketCommandContext>
     {
         [Command("")]
-        public async Task Reputation(IUser user) // TODO: Write or yoink an IUser typereader
+        public async Task Reputation(IUser user = null)
         {
+            if (user == null) user = Context.User as IGuildUser;
+
             int reputation = 0;
             List<ReputationUserRow> rows = Database.Data.Reputation.GetUserRows(Context.Guild.Id, user.Id);
             if (rows.Count > 0) reputation = rows.First().Reputation;
@@ -75,7 +75,7 @@ namespace Utili.Features
             rows = rows.OrderByDescending(x => x.Reputation).ToList();
 
             List<IGuildUser> users = Context.Guild.Users.Select(x => x as IGuildUser).ToList();
-            if(users.Count < Context.Guild.DownloadedMemberCount) users = (await Context.Guild.GetUsersAsync().FlattenAsync()).ToList();
+            if(users.Count < Context.Guild.MemberCount) users = (await Context.Guild.GetUsersAsync().FlattenAsync()).ToList();
             List<ulong> userIds = users.Select(x => x.Id).ToList();
 
             int position = 1;
@@ -85,7 +85,7 @@ namespace Utili.Features
                 if (userIds.Contains(row.UserId))
                 {
                     IGuildUser user = users.First(x => x.Id == row.UserId);
-                    content += $"{position}. {user.Mention}: {row.Reputation}\n";
+                    content += $"{position}. {user.Mention} {row.Reputation}\n";
                     if(position == 10) break;
                     position++;
                 }
@@ -101,7 +101,7 @@ namespace Utili.Features
             rows = rows.OrderBy(x => x.Reputation).ToList();
 
             List<IGuildUser> users = Context.Guild.Users.Select(x => x as IGuildUser).ToList();
-            if(users.Count < Context.Guild.DownloadedMemberCount) users = (await Context.Guild.GetUsersAsync().FlattenAsync()).ToList();
+            if(users.Count < Context.Guild.MemberCount) users = (await Context.Guild.GetUsersAsync().FlattenAsync()).ToList();
             List<ulong> userIds = users.Select(x => x.Id).ToList();
 
             int position = rows.Count;
@@ -111,7 +111,7 @@ namespace Utili.Features
                 if (userIds.Contains(row.UserId))
                 {
                     IGuildUser user = users.First(x => x.Id == row.UserId);
-                    content += $"{position}. {user.Mention}: {row.Reputation}\n";
+                    content += $"{position}. {user.Mention} {row.Reputation}\n";
                     if(position == rows.Count - 10) break;
                     position--;
                 }

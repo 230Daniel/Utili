@@ -15,11 +15,13 @@ namespace Utili.Handlers
         {
             _ = Task.Run(async () =>
             {
+                IGuild guild = (channel as IGuildChannel).Guild;
                 IUserMessage message = await partialMessage.GetOrDownloadAsync();
-                SocketGuildUser reactor = reaction.User.Value as SocketGuildUser; // TODO: Verify this works without user cache
+                IUser reactor = await _rest.GetGuildUserAsync(guild.Id, reaction.UserId);
                 IEmote emote = reaction.Emote;
+                
 
-                await _reputation.ReactionAdded(message, reactor, emote);
+                await _reputation.ReactionAdded(guild, message, reactor, emote);
             });
         }
 
@@ -27,11 +29,12 @@ namespace Utili.Handlers
         {
             _ = Task.Run(async () =>
             {
+                IGuild guild = (channel as IGuildChannel).Guild;
                 IUserMessage message = await partialMessage.GetOrDownloadAsync();
-                SocketGuildUser reactor = reaction.User.Value as SocketGuildUser; // TODO: Verify this works without user cache
+                IUser reactor = await _rest.GetGuildUserAsync(guild.Id, reaction.UserId);
                 IEmote emote = reaction.Emote;
 
-                await _reputation.ReactionRemoved(message, reactor, emote);
+                await _reputation.ReactionRemoved(guild, message, reactor, emote);
             });
         }
 
