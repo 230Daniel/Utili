@@ -56,6 +56,7 @@ namespace Database
             MessageLogs.Load();
             Misc.Load();
             Notices.Load();
+            Reputation.Load();
             Roles.Load();
             VoiceLink.Load();
             VoiceRoles.Load();

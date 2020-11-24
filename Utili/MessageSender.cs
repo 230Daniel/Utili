@@ -28,12 +28,12 @@ namespace Utili
             return await textChannel.SendMessageAsync(embed: GenerateEmbed(EmbedType.Failure, title, message, footer));
         }
 
-        public static async Task<RestUserMessage> SendInfoAsync(IChannel channel, string title, string message, string footer = null, (string, string)[] fields = null)
+        public static async Task<RestUserMessage> SendInfoAsync(IChannel channel, string title, string message, string footer = null, (string, string)[] fields = null, Color? colour = null)
         {
             ISocketMessageChannel textChannel = channel as ISocketMessageChannel;
             if(BotPermissions.IsMissingPermissions(channel, new [] {ChannelPermission.SendMessages}, out _)) return null;
 
-            return await textChannel.SendMessageAsync(embed: GenerateEmbed(EmbedType.Info, title, message, footer, fields));
+            return await textChannel.SendMessageAsync(embed: GenerateEmbed(EmbedType.Info, title, message, footer, fields, colour));
         }
 
         public static async Task<RestUserMessage> SendEmbedAsync(IChannel channel, Embed embed, string text = null)
@@ -44,31 +44,36 @@ namespace Utili
             return await textChannel.SendMessageAsync(text, embed: embed);
         }
 
-        private static Embed GenerateEmbed(EmbedType embedType, string title, string content = null, string footer = null, (string, string)[] fields = null)
+        private static Embed GenerateEmbed(EmbedType embedType, string title, string content = null, string footer = null, (string, string)[] fields = null, Color? colour = null)
         {
             EmbedBuilder embed = new EmbedBuilder();
 
             EmbedAuthorBuilder author = new EmbedAuthorBuilder();
 
-            switch (embedType)
+            if (!string.IsNullOrEmpty(title))
             {
-                case EmbedType.Info:
+                switch (embedType)
+                {
+                    case EmbedType.Info:
                     embed.WithColor(67, 181, 129);
                     break;
 
-                case EmbedType.Success:
+                    case EmbedType.Success:
                     embed.WithColor(67, 181, 129);
                     author.WithIconUrl("https://i.imgur.com/XnVa7ta.png");
                     break;
 
-                case EmbedType.Failure:
+                    case EmbedType.Failure:
                     embed.WithColor(181, 67, 67);
                     author.WithIconUrl("https://i.imgur.com/Sg4663k.png");
                     break;
+                }
+
+                author.WithName(title);
+                embed.WithAuthor(author);
             }
 
-            author.WithName(title);
-            embed.WithAuthor(author);
+            if (colour.HasValue) embed.WithColor(colour.Value);
 
             if (!string.IsNullOrEmpty(content))
             {

@@ -10,7 +10,7 @@ using static Utili.MessageSender;
 
 namespace Utili.Handlers
 {
-    internal class MessagesHandler
+    internal class MessageHandler
     {
         public static async Task MessageReceived(SocketMessage partialMessage)
         {
@@ -114,9 +114,10 @@ namespace Utili.Handlers
                 CommandError.BadArgCount => "Invalid amount of command arguments\nTry wrapping arguments with speech marks",
                 CommandError.ObjectNotFound => "Failed to interpret a command argument (Object not found)\nTry wrapping arguments with speech marks",
                 CommandError.MultipleMatches => "Failed to interpret a command argument (Multiple matches)\nTry wrapping arguments with speech marks",
+                CommandError.Exception => "An error occured while trying to execute the command\nTry wrapping arguments with speech marks",
                 CommandError.UnmetPrecondition => "Invalid command preconditions",
-                CommandError.Exception => "An error occured while trying to execute the command",
-                _ => null,
+                CommandError.ParseFailed => "Failed to interpret a command argument (Parse failed)",
+                _ => "An error occured while trying to execute the command",
             };
         }
     }

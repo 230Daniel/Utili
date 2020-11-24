@@ -99,11 +99,11 @@ namespace Database.Data
             command.Connection.Close();
         }
 
-        public static List<ReputationUserRow> GetUserRows(ulong? guildId = null, ulong? userId = null, int? id = null)
+        public static List<ReputationUserRow> GetUserRows(ulong? guildId = null, ulong? userId = null)
         {
             List<ReputationUserRow> matchedRows = new List<ReputationUserRow>();
 
-            string command = "SELECT * FROM Reputation WHERE TRUE";
+            string command = "SELECT * FROM ReputationUsers WHERE TRUE";
             List<(string, string)> values = new List<(string, string)>();
 
             if (guildId.HasValue)
@@ -118,21 +118,14 @@ namespace Database.Data
                 values.Add(("UserId", userId.Value.ToString()));
             }
 
-            if (id.HasValue)
-            {
-                command += " AND Id = @Id";
-                values.Add(("Id", id.Value.ToString()));
-            }
-
             MySqlDataReader reader = Sql.GetCommand(command, values.ToArray()).ExecuteReader();
 
             while (reader.Read())
             {
                 matchedRows.Add(new ReputationUserRow(
-                    reader.GetInt32(0),
+                    reader.GetUInt64(0),
                     reader.GetUInt64(1),
-                    reader.GetUInt64(2),
-                    reader.GetInt32(3)));
+                    reader.GetInt32(2)));
             }
 
             reader.Close();
@@ -153,6 +146,26 @@ namespace Database.Data
                     new [] {("GuildId", guildId.ToString()), 
                         ("UserId", userId.ToString()),
                         ("Reputation", reputationChange.ToString())});
+
+                command.ExecuteNonQuery();
+            }
+
+            command.Connection.Close();
+        }
+
+        public static void SetUserReputation(ulong guildId, ulong userId, int reputation)
+        {
+            MySqlCommand command = Sql.GetCommand("UPDATE ReputationUsers SET Reputation = @Reputation WHERE GuildId = @GuildId AND UserId = @UserId;",
+                new [] {("GuildId", guildId.ToString()), 
+                    ("UserId", userId.ToString()),
+                    ("Reputation", reputation.ToString())});
+
+            if (command.ExecuteNonQuery() == 0)
+            {
+                command = Sql.GetCommand("INSERT INTO ReputationUsers (GuildId, UserId, Reputation) VALUES(@GuildId, @UserId, @Reputation)",
+                    new [] {("GuildId", guildId.ToString()), 
+                        ("UserId", userId.ToString()),
+                        ("Reputation", reputation.ToString())});
 
                 command.ExecuteNonQuery();
             }
@@ -214,8 +227,8 @@ namespace Database.Data
             {
                 foreach (string emoteString in emotes.Split(","))
                 {
-                    int value = int.Parse(emoteString.Split("///").Last());
-                    if (Emote.TryParse(emoteString.Split("///").First(), out Emote emote))
+                    int value = int.Parse(emoteString.Split("/").Last());
+                    if (Emote.TryParse(emoteString.Split("/").First(), out Emote emote))
                     {
                         Emotes.Add((emote, value));
                     }
@@ -246,19 +259,12 @@ namespace Database.Data
 
     public class ReputationUserRow
     {
-        public int Id { get; set; }
         public ulong GuildId { get; set; }
         public ulong UserId { get; set; }
         public int Reputation { get; set; }
 
-        public ReputationUserRow()
+        public ReputationUserRow(ulong guildId, ulong userId, int reputation)
         {
-            Id = 0;
-        }
-
-        public ReputationUserRow(int id, ulong guildId, ulong userId, int reputation)
-        {
-            Id = id;
             GuildId = guildId;
             UserId = userId;
             Reputation = reputation;

@@ -35,6 +35,7 @@ namespace Utili
         public static InactiveRole _inactiveRole = new InactiveRole();
         public static JoinMessage _joinMessage = new JoinMessage();
         public static Notices _notices = new Notices();
+        public static Reputation _reputation = new Reputation();
         public static Roles _roles = new Roles();
         public static VoiceLink _voiceLink = new VoiceLink();
         public static MessageFilter _messageFilter = new MessageFilter();
@@ -96,7 +97,7 @@ namespace Utili
                 DefaultRunMode = RunMode.Async,
                 LogLevel = Discord.LogSeverity.Info
             });
-            _commands.AddTypeReader(typeof(IGuildUser), new UserTypeReader());
+            _commands.AddTypeReader(typeof(IUser), new UserTypeReader());
             await _commands.AddModulesAsync(Assembly.GetEntryAssembly(), null);
 
             _logger.Log("MainAsync", $"Running {_config.UpperShardId - (_config.LowerShardId - 1)} shards of Utili with {_totalShards} total shards", LogSeverity.Info);
@@ -106,10 +107,15 @@ namespace Utili
             _client.Log += ShardHandler.Log;
             _client.ShardConnected += ShardHandler.ShardConnected;
 
-            _client.MessageReceived += MessagesHandler.MessageReceived;
-            _client.MessageUpdated += MessagesHandler.MessageEdited;
-            _client.MessageDeleted += MessagesHandler.MessageDeleted;
-            _client.MessagesBulkDeleted += MessagesHandler.MessagesBulkDeleted;
+            _client.MessageReceived += MessageHandler.MessageReceived;
+            _client.MessageUpdated += MessageHandler.MessageEdited;
+            _client.MessageDeleted += MessageHandler.MessageDeleted;
+            _client.MessagesBulkDeleted += MessageHandler.MessagesBulkDeleted;
+
+            _client.ReactionAdded += ReactionHandler.ReactionAdded;
+            _client.ReactionRemoved += ReactionHandler.ReactionRemoved;
+            _client.ReactionsCleared += ReactionHandler.ReactionsCleared;
+            _client.ReactionsRemovedForEmote += ReactionHandler.ReactionsRemovedForEmote;
 
             _client.UserVoiceStateUpdated += VoiceHandler.UserVoiceStateUpdated;
             _client.UserJoined += GuildHandler.UserJoined;
