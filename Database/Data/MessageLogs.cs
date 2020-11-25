@@ -7,7 +7,7 @@ namespace Database.Data
 {
     public class MessageLogs
     {
-        public static List<MessageLogsRow> GetRows(ulong? guildId = null, int? id = null, bool ignoreCache = false)
+        public static List<MessageLogsRow> GetRows(ulong? guildId = null, long? id = null, bool ignoreCache = false)
         {
             List<MessageLogsRow> matchedRows = new List<MessageLogsRow>();
 
@@ -40,7 +40,7 @@ namespace Database.Data
                 while (reader.Read())
                 {
                     matchedRows.Add(new MessageLogsRow(
-                        reader.GetInt32(0),
+                        reader.GetInt64(0),
                         reader.GetUInt64(1),
                         reader.GetUInt64(2),
                         reader.GetUInt64(3),
@@ -102,7 +102,7 @@ namespace Database.Data
             }
         }
 
-        public static List<MessageLogsMessageRow> GetMessages(ulong? guildId = null, ulong? channelId = null, ulong? messageId = null, int? id = null)
+        public static List<MessageLogsMessageRow> GetMessages(ulong? guildId = null, ulong? channelId = null, ulong? messageId = null, long? id = null)
         {
             List<MessageLogsMessageRow> matchedRows = new List<MessageLogsMessageRow>();
 
@@ -138,7 +138,7 @@ namespace Database.Data
             while (reader.Read())
             {
                 matchedRows.Add(new MessageLogsMessageRow(
-                    reader.GetInt32(0),
+                    reader.GetInt64(0),
                     reader.GetUInt64(1),
                     reader.GetUInt64(2),
                     reader.GetUInt64(3),
@@ -168,7 +168,7 @@ namespace Database.Data
             while (reader.Read())
             {
                 matchedRows.Add(new MessageLogsMessageRow(
-                    reader.GetInt32(0),
+                    reader.GetInt64(0),
                     reader.GetUInt64(1),
                     reader.GetUInt64(2),
                     reader.GetUInt64(3),
@@ -260,13 +260,12 @@ namespace Database.Data
 
         public static void DeleteOldMessages(ulong guildId, ulong channelId, bool premium)
         {
+            if(premium) return;
+
             List<MessageLogsMessageRow> messages = GetMessages(guildId, channelId).OrderBy(x => x.Id).ToList();
             List<MessageLogsMessageRow> messagesToRemove = new List<MessageLogsMessageRow>();
 
-            if (!premium)
-            {
-                messagesToRemove.AddRange(messages.Take(messages.Count - 100));
-            }
+            messagesToRemove.AddRange(messages.Take(messages.Count - 100));
 
             DeleteMessagesById(messagesToRemove.Select(x => x.Id).ToArray());
         }
@@ -305,7 +304,7 @@ namespace Database.Data
                 while (reader.Read())
                 {
                     newRows.Add(new MessageLogsRow(
-                        reader.GetInt32(0),
+                        reader.GetInt64(0),
                         reader.GetUInt64(1),
                         reader.GetUInt64(2),
                         reader.GetUInt64(3),
@@ -323,7 +322,7 @@ namespace Database.Data
 
     public class MessageLogsRow
     {
-        public int Id { get; set; }
+        public long Id { get; set; }
         public ulong GuildId { get; set; }
         public ulong DeletedChannelId { get; set; }
         public ulong EditedChannelId { get; set; }
@@ -334,7 +333,7 @@ namespace Database.Data
             Id = 0;
         }
 
-        public MessageLogsRow(int id, ulong guildId, ulong deletedChannelId, ulong editedChannelId, string excludedChannels)
+        public MessageLogsRow(long id, ulong guildId, ulong deletedChannelId, ulong editedChannelId, string excludedChannels)
         {
             Id = id;
             GuildId = guildId;
@@ -375,7 +374,7 @@ namespace Database.Data
 
     public class MessageLogsMessageRow
     {
-        public int Id { get; set; }
+        public long Id { get; set; }
         public ulong GuildId { get; set; }
         public ulong ChannelId { get; set; }
         public ulong MessageId { get; set; }
@@ -390,7 +389,7 @@ namespace Database.Data
             Id = 0;
         }
 
-        public MessageLogsMessageRow(int id, ulong guildId, ulong channelId, ulong messageId, ulong userId, DateTime timestamp, string content)
+        public MessageLogsMessageRow(long id, ulong guildId, ulong channelId, ulong messageId, ulong userId, DateTime timestamp, string content)
         {
             Id = id;
             GuildId = guildId;

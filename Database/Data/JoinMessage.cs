@@ -8,7 +8,7 @@ namespace Database.Data
 {
     public class JoinMessage
     {
-        public static List<JoinMessageRow> GetRows(ulong? guildId = null, int? id = null, bool ignoreCache = false)
+        public static List<JoinMessageRow> GetRows(ulong? guildId = null, long? id = null, bool ignoreCache = false)
         {
             List<JoinMessageRow> matchedRows = new List<JoinMessageRow>();
 
@@ -41,7 +41,7 @@ namespace Database.Data
                 while (reader.Read())
                 {
                     matchedRows.Add(new JoinMessageRow(
-                        reader.GetInt32(0),
+                        reader.GetInt64(0),
                         reader.GetUInt64(1),
                         reader.GetBoolean(2),
                         reader.GetUInt64(3),
@@ -146,7 +146,7 @@ namespace Database.Data
                 while (reader.Read())
                 {
                     newRows.Add(new JoinMessageRow(
-                        reader.GetInt32(0),
+                        reader.GetInt64(0),
                         reader.GetUInt64(1),
                         reader.GetBoolean(2),
                         reader.GetUInt64(3),
@@ -170,7 +170,7 @@ namespace Database.Data
 
     public class JoinMessageRow
     {
-        public int Id { get; set; }
+        public long Id { get; set; }
         public ulong GuildId { get; set; }
         public bool Direct { get; set; }
         public ulong ChannelId { get; set; }
@@ -188,7 +188,7 @@ namespace Database.Data
             Id = 0;
         }
 
-        public JoinMessageRow(int id, ulong guildId, bool direct, ulong channelId, string title, string footer, string content, string text, string image, string thumbnail, string icon, uint colour)
+        public JoinMessageRow(long id, ulong guildId, bool direct, ulong channelId, string title, string footer, string content, string text, string image, string thumbnail, string icon, uint colour)
         {
             Id = id;
             GuildId = guildId;

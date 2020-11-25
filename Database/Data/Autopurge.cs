@@ -7,7 +7,7 @@ namespace Database.Data
 {
     public class Autopurge
     {
-        public static List<AutopurgeRow> GetRows(ulong? guildId = null, ulong? channelId = null, int? id = null, bool ignoreCache = false)
+        public static List<AutopurgeRow> GetRows(ulong? guildId = null, ulong? channelId = null, long? id = null, bool ignoreCache = false)
         {
             List<AutopurgeRow> matchedRows = new List<AutopurgeRow>();
 
@@ -47,7 +47,7 @@ namespace Database.Data
                 while (reader.Read())
                 {
                     matchedRows.Add(new AutopurgeRow(
-                        reader.GetInt32(0),
+                        reader.GetInt64(0),
                         reader.GetUInt64(1),
                         reader.GetUInt64(2),
                         reader.GetString(3),
@@ -126,7 +126,7 @@ namespace Database.Data
                 while (reader.Read())
                 {
                     newRows.Add(new AutopurgeRow(
-                        reader.GetInt32(0),
+                        reader.GetInt64(0),
                         reader.GetUInt64(1),
                         reader.GetUInt64(2),
                         reader.GetString(3),
@@ -143,7 +143,7 @@ namespace Database.Data
 
     public class AutopurgeRow
     {
-        public int Id { get; set; }
+        public long Id { get; set; }
         public ulong GuildId { get; set; }
         public ulong ChannelId { get; set; }
         public TimeSpan Timespan { get; set; }
@@ -156,7 +156,7 @@ namespace Database.Data
             Id = 0;
         }
 
-        public AutopurgeRow(int id, ulong guildId, ulong channelId, string timespan, int mode)
+        public AutopurgeRow(long id, ulong guildId, ulong channelId, string timespan, int mode)
         {
             Id = id;
             GuildId = guildId;

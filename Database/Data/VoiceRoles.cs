@@ -6,7 +6,7 @@ namespace Database.Data
 {
     public class VoiceRoles
     {
-        public static List<VoiceRolesRow> GetRows(ulong? guildId = null, ulong? channelId = null, int? id = null, bool ignoreCache = false)
+        public static List<VoiceRolesRow> GetRows(ulong? guildId = null, ulong? channelId = null, long? id = null, bool ignoreCache = false)
         {
             List<VoiceRolesRow> matchedRows = new List<VoiceRolesRow>();
 
@@ -46,7 +46,7 @@ namespace Database.Data
                 while (reader.Read())
                 {
                     matchedRows.Add(new VoiceRolesRow(
-                        reader.GetInt32(0),
+                        reader.GetInt64(0),
                         reader.GetUInt64(1),
                         reader.GetUInt64(2),
                         reader.GetUInt64(3)));
@@ -121,7 +121,7 @@ namespace Database.Data
                 while (reader.Read())
                 {
                     newRows.Add(new VoiceRolesRow(
-                        reader.GetInt32(0),
+                        reader.GetInt64(0),
                         reader.GetUInt64(1),
                         reader.GetUInt64(2),
                         reader.GetUInt64(3)));
@@ -136,7 +136,7 @@ namespace Database.Data
 
     public class VoiceRolesRow
     {
-        public int Id { get; set; }
+        public long Id { get; set; }
         public ulong GuildId { get; set; }
         public ulong ChannelId { get; set; }
         public ulong RoleId { get; set; }
@@ -146,7 +146,7 @@ namespace Database.Data
             Id = 0;
         }
 
-        public VoiceRolesRow(int id, ulong guildId, ulong channelId, ulong roleId)
+        public VoiceRolesRow(long id, ulong guildId, ulong channelId, ulong roleId)
         {
             Id = id;
             GuildId = guildId;

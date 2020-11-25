@@ -34,7 +34,7 @@ namespace Database.Data
                 while (reader.Read())
                 {
                     matchedRows.Add(new VoiceLinkRow(
-                        reader.GetInt32(0),
+                        reader.GetInt64(0),
                         reader.GetUInt64(1),
                         reader.GetBoolean(2),
                         reader.GetBoolean(3),
@@ -141,7 +141,7 @@ namespace Database.Data
                 while (reader.Read())
                 {
                     matchedRows.Add(new VoiceLinkChannelRow(
-                        reader.GetInt32(0),
+                        reader.GetInt64(0),
                         reader.GetUInt64(1),
                         reader.GetUInt64(2),
                         reader.GetUInt64(3)));
@@ -221,7 +221,7 @@ namespace Database.Data
                 while (reader.Read())
                 {
                     newRows.Add(new VoiceLinkRow(
-                        reader.GetInt32(0),
+                        reader.GetInt64(0),
                         reader.GetUInt64(1),
                         reader.GetBoolean(2),
                         reader.GetBoolean(3),
@@ -247,7 +247,7 @@ namespace Database.Data
                 while (channelReader.Read())
                 {
                     newChannelRows.Add(new VoiceLinkChannelRow(
-                        channelReader.GetInt32(0),
+                        channelReader.GetInt64(0),
                         channelReader.GetUInt64(1),
                         channelReader.GetUInt64(2),
                         channelReader.GetUInt64(3)));
@@ -264,7 +264,7 @@ namespace Database.Data
 
     public class VoiceLinkRow
     {
-        public int Id { get; set; }
+        public long Id { get; set; }
         public ulong GuildId { get; set; }
         public bool Enabled { get; set; }
         public bool DeleteChannels { get; set; }
@@ -276,7 +276,7 @@ namespace Database.Data
             Id = 0;
         }
 
-        public VoiceLinkRow(int id, ulong guildId, bool enabled, bool deleteChannels, string prefix, string excludedChannels)
+        public VoiceLinkRow(long id, ulong guildId, bool enabled, bool deleteChannels, string prefix, string excludedChannels)
         {
             Id = id;
             GuildId = guildId;
@@ -318,7 +318,7 @@ namespace Database.Data
 
     public class VoiceLinkChannelRow
     {
-        public int Id { get; set; }
+        public long Id { get; set; }
         public ulong GuildId { get; set; }
         public ulong TextChannelId { get; set; }
         public ulong VoiceChannelId { get; set; }
@@ -328,7 +328,7 @@ namespace Database.Data
             Id = 0;
         }
 
-        public VoiceLinkChannelRow(int id, ulong guildId, ulong textChannelId, ulong voiceChannelId)
+        public VoiceLinkChannelRow(long id, ulong guildId, ulong textChannelId, ulong voiceChannelId)
         {
             Id = id;
             GuildId = guildId;

@@ -8,7 +8,7 @@ namespace Database.Data
 {
     public class Notices
     {
-        public static List<NoticesRow> GetRows(ulong? guildId = null, ulong? channelId = null, int? id = null, bool ignoreCache = false)
+        public static List<NoticesRow> GetRows(ulong? guildId = null, ulong? channelId = null, long? id = null, bool ignoreCache = false)
         {
             List<NoticesRow> matchedRows = new List<NoticesRow>();
 
@@ -48,7 +48,7 @@ namespace Database.Data
                 while (reader.Read())
                 {
                     matchedRows.Add(new NoticesRow(
-                        reader.GetInt32(0),
+                        reader.GetInt64(0),
                         reader.GetUInt64(1),
                         reader.GetUInt64(2),
                         reader.GetUInt64(3),
@@ -208,7 +208,7 @@ namespace Database.Data
                 while (reader.Read())
                 {
                     newRows.Add(new NoticesRow(
-                        reader.GetInt32(0),
+                        reader.GetInt64(0),
                         reader.GetUInt64(1),
                         reader.GetUInt64(2),
                         reader.GetUInt64(3),
@@ -234,7 +234,7 @@ namespace Database.Data
 
     public class NoticesRow
     {
-        public int Id { get; set; }
+        public long Id { get; set; }
         public ulong GuildId { get; set; }
         public ulong ChannelId { get; set; }
         public ulong MessageId { get; set; }
@@ -254,7 +254,7 @@ namespace Database.Data
             Id = 0;
         }
 
-        public NoticesRow(int id, ulong guildId, ulong channelId, ulong messageId, bool enabled, string delay, string title, string footer, string content, string text, string image, string thumbnail, string icon, uint colour)
+        public NoticesRow(long id, ulong guildId, ulong channelId, ulong messageId, bool enabled, string delay, string title, string footer, string content, string text, string image, string thumbnail, string icon, uint colour)
         {
             Id = id;
             GuildId = guildId;

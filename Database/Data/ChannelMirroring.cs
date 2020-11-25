@@ -7,7 +7,7 @@ namespace Database.Data
 {
     public class ChannelMirroring
     {
-        public static List<ChannelMirroringRow> GetRows(ulong? guildId = null, ulong? fromChannelId = null, int? id = null, bool ignoreCache = false)
+        public static List<ChannelMirroringRow> GetRows(ulong? guildId = null, ulong? fromChannelId = null, long? id = null, bool ignoreCache = false)
         {
             List<ChannelMirroringRow> matchedRows = new List<ChannelMirroringRow>();
 
@@ -47,7 +47,7 @@ namespace Database.Data
                 while (reader.Read())
                 {
                     matchedRows.Add(new ChannelMirroringRow(
-                        reader.GetInt32(0),
+                        reader.GetInt64(0),
                         reader.GetUInt64(1),
                         reader.GetUInt64(2),
                         reader.GetUInt64(3),
@@ -160,7 +160,7 @@ namespace Database.Data
                 while (reader.Read())
                 {
                     newRows.Add(new ChannelMirroringRow(
-                        reader.GetInt32(0),
+                        reader.GetInt64(0),
                         reader.GetUInt64(1),
                         reader.GetUInt64(2),
                         reader.GetUInt64(3),
@@ -177,7 +177,7 @@ namespace Database.Data
 
     public class ChannelMirroringRow
     {
-        public int Id { get; set; }
+        public long Id { get; set; }
         public ulong GuildId { get; set; }
         public ulong FromChannelId { get; set; }
         public ulong ToChannelId { get; set; }
@@ -188,7 +188,7 @@ namespace Database.Data
             Id = 0;
         }
 
-        public ChannelMirroringRow(int id, ulong guildId, ulong fromChannelId, ulong toChannelId, ulong webhookId)
+        public ChannelMirroringRow(long id, ulong guildId, ulong fromChannelId, ulong toChannelId, ulong webhookId)
         {
             Id = id;
             GuildId = guildId;

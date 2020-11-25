@@ -9,7 +9,7 @@ namespace Database.Data
     {
         private static readonly TimeSpan GapBetweenUpdates = TimeSpan.FromMinutes(60); 
 
-        public static List<InactiveRoleRow> GetRows(ulong? guildId = null, int? id = null, bool ignoreCache = false)
+        public static List<InactiveRoleRow> GetRows(ulong? guildId = null, long? id = null, bool ignoreCache = false)
         {
             List<InactiveRoleRow> matchedRows = new List<InactiveRoleRow>();
 
@@ -42,7 +42,7 @@ namespace Database.Data
                 while (reader.Read())
                 {
                     matchedRows.Add(new InactiveRoleRow(
-                        reader.GetInt32(0),
+                        reader.GetInt64(0),
                         reader.GetUInt64(1),
                         reader.GetUInt64(2),
                         reader.GetUInt64(3),
@@ -81,7 +81,7 @@ namespace Database.Data
                 while (reader.Read())
                 {
                     matchedRows.Add(new InactiveRoleRow(
-                        reader.GetInt32(0),
+                        reader.GetInt64(0),
                         reader.GetUInt64(1),
                         reader.GetUInt64(2),
                         reader.GetUInt64(3),
@@ -249,7 +249,7 @@ namespace Database.Data
                 while (reader.Read())
                 {
                     newRows.Add(new InactiveRoleRow(
-                        reader.GetInt32(0),
+                        reader.GetInt64(0),
                         reader.GetUInt64(1),
                         reader.GetUInt64(2),
                         reader.GetUInt64(3),
@@ -269,7 +269,7 @@ namespace Database.Data
 
     public class InactiveRoleRow
     {
-        public int Id { get; set; }
+        public long Id { get; set; }
         public ulong GuildId { get; set; }
         public ulong RoleId { get; set; }
         public ulong ImmuneRoleId { get; set; }
@@ -283,7 +283,7 @@ namespace Database.Data
             Id = 0;
         }
 
-        public InactiveRoleRow(int id, ulong guildId, ulong roleId, ulong immuneRoleId, string threshold, bool inverse, DateTime defaultLastAction, DateTime lastUpdate)
+        public InactiveRoleRow(long id, ulong guildId, ulong roleId, ulong immuneRoleId, string threshold, bool inverse, DateTime defaultLastAction, DateTime lastUpdate)
         {
             Id = id;
             GuildId = guildId;

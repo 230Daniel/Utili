@@ -7,7 +7,7 @@ namespace Database.Data
 {
     public class Roles
     {
-        public static List<RolesRow> GetRows(ulong? guildId = null, int? id = null, bool ignoreCache = false)
+        public static List<RolesRow> GetRows(ulong? guildId = null, long? id = null, bool ignoreCache = false)
         {
             List<RolesRow> matchedRows = new List<RolesRow>();
 
@@ -40,7 +40,7 @@ namespace Database.Data
                 while (reader.Read())
                 {
                     matchedRows.Add(new RolesRow(
-                        reader.GetInt32(0),
+                        reader.GetInt64(0),
                         reader.GetUInt64(1),
                         reader.GetBoolean(2),
                         reader.GetString(3)));
@@ -101,7 +101,7 @@ namespace Database.Data
         }
 
 
-        public static List<RolesPersistantRolesRow> GetPersistRows(ulong? guildId = null, ulong? userId = null, int? id = null)
+        public static List<RolesPersistantRolesRow> GetPersistRows(ulong? guildId = null, ulong? userId = null, long? id = null)
         {
             List<RolesPersistantRolesRow> matchedRows = new List<RolesPersistantRolesRow>();
 
@@ -131,7 +131,7 @@ namespace Database.Data
             while (reader.Read())
             {
                 matchedRows.Add(new RolesPersistantRolesRow(
-                    reader.GetInt32(0),
+                    reader.GetInt64(0),
                     reader.GetUInt64(1),
                     reader.GetString(3)));
             }
@@ -202,7 +202,7 @@ namespace Database.Data
                 while (reader.Read())
                 {
                     newRows.Add(new RolesRow(
-                        reader.GetInt32(0),
+                        reader.GetInt64(0),
                         reader.GetUInt64(1),
                         reader.GetBoolean(2),
                         reader.GetString(3)));
@@ -218,7 +218,7 @@ namespace Database.Data
 
     public class RolesRow
     {
-        public int Id { get; set; }
+        public long Id { get; set; }
         public ulong GuildId { get; set; }
         public bool RolePersist { get; set; }
         public List<ulong> JoinRoles { get; set; }
@@ -228,7 +228,7 @@ namespace Database.Data
             Id = 0;
         }
 
-        public RolesRow(int id, ulong guildId, bool rolePersist, string joinRoles)
+        public RolesRow(long id, ulong guildId, bool rolePersist, string joinRoles)
         {
             Id = id;
             GuildId = guildId;
@@ -268,7 +268,7 @@ namespace Database.Data
 
     public class RolesPersistantRolesRow
     {
-        public int Id { get; set; }
+        public long Id { get; set; }
         public ulong GuildId { get; set; }
         public ulong UserId { get; set; }
         public List<ulong> Roles { get; set; }
@@ -278,7 +278,7 @@ namespace Database.Data
             Id = 0;
         }
 
-        public RolesPersistantRolesRow(int id, ulong guildId, string roles)
+        public RolesPersistantRolesRow(long id, ulong guildId, string roles)
         {
             Id = id;
             GuildId = guildId;

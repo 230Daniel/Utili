@@ -7,7 +7,7 @@ namespace Database.Data
 {
     public class VoteChannels
     {
-        public static List<VoteChannelsRow> GetRows(ulong? guildId = null, ulong? channelId = null, int? id = null, bool ignoreCache = false)
+        public static List<VoteChannelsRow> GetRows(ulong? guildId = null, ulong? channelId = null, long? id = null, bool ignoreCache = false)
         {
             List<VoteChannelsRow> matchedRows = new List<VoteChannelsRow>();
 
@@ -47,7 +47,7 @@ namespace Database.Data
                 while (reader.Read())
                 {
                     matchedRows.Add(new VoteChannelsRow(
-                        reader.GetInt32(0),
+                        reader.GetInt64(0),
                         reader.GetUInt64(1),
                         reader.GetUInt64(2),
                         reader.GetInt32(3),
@@ -126,7 +126,7 @@ namespace Database.Data
                 while (reader.Read())
                 {
                     newRows.Add(new VoteChannelsRow(
-                        reader.GetInt32(0),
+                        reader.GetInt64(0),
                         reader.GetUInt64(1),
                         reader.GetUInt64(2),
                         reader.GetInt32(3),
@@ -143,7 +143,7 @@ namespace Database.Data
 
     public class VoteChannelsRow
     {
-        public int Id { get; set; }
+        public long Id { get; set; }
         public ulong GuildId { get; set; }
         public ulong ChannelId { get; set; }
         public int Mode { get; set; }
@@ -154,7 +154,7 @@ namespace Database.Data
             Id = 0;
         }
 
-        public VoteChannelsRow(int id, ulong guildId, ulong channelId, int mode, string emotes)
+        public VoteChannelsRow(long id, ulong guildId, ulong channelId, int mode, string emotes)
         {
             Id = id;
             GuildId = guildId;

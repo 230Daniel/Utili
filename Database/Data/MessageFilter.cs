@@ -6,7 +6,7 @@ namespace Database.Data
 {
     public class MessageFilter
     {
-        public static List<MessageFilterRow> GetRows(ulong? guildId = null, ulong? channelId = null, int? id = null, bool ignoreCache = false)
+        public static List<MessageFilterRow> GetRows(ulong? guildId = null, ulong? channelId = null, long? id = null, bool ignoreCache = false)
         {
             List<MessageFilterRow> matchedRows = new List<MessageFilterRow>();
 
@@ -46,7 +46,7 @@ namespace Database.Data
                 while (reader.Read())
                 {
                     matchedRows.Add(new MessageFilterRow(
-                        reader.GetInt32(0),
+                        reader.GetInt64(0),
                         reader.GetUInt64(1),
                         reader.GetUInt64(2),
                         reader.GetInt32(3),
@@ -127,7 +127,7 @@ namespace Database.Data
                 while (reader.Read())
                 {
                     newRows.Add(new MessageFilterRow(
-                        reader.GetInt32(0),
+                        reader.GetInt64(0),
                         reader.GetUInt64(1),
                         reader.GetUInt64(2),
                         reader.GetInt32(3),
@@ -144,7 +144,7 @@ namespace Database.Data
 
     public class MessageFilterRow
     {
-        public int Id { get; set; }
+        public long Id { get; set; }
         public ulong GuildId { get; set; }
         public ulong ChannelId { get; set; }
         public int Mode { get; set; }
@@ -165,7 +165,7 @@ namespace Database.Data
             Id = 0;
         }
 
-        public MessageFilterRow(int id, ulong guildId, ulong channelId, int mode, string complex)
+        public MessageFilterRow(long id, ulong guildId, ulong channelId, int mode, string complex)
         {
             Id = id;
             GuildId = guildId;

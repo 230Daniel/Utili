@@ -46,7 +46,7 @@ namespace Database.Data
                 while (reader.Read())
                 {
                     matchedRows.Add(new MiscRow(
-                        reader.GetInt32(0),
+                        reader.GetInt64(0),
                         reader.GetUInt64(1),
                         reader.GetString(2),
                         reader.GetString(3)));
@@ -163,7 +163,7 @@ namespace Database.Data
                 while (reader.Read())
                 {
                     newRows.Add(new MiscRow(
-                        reader.GetInt32(0),
+                        reader.GetInt64(0),
                         reader.GetUInt64(1),
                         reader.GetString(2),
                         reader.GetString(3)));
@@ -179,7 +179,7 @@ namespace Database.Data
 
     public class MiscRow
     {
-        public int Id { get; set; }
+        public long Id { get; set; }
         public ulong GuildId { get; set; }
         public string Type { get; set; }
         public EString Value { get; set; }
@@ -192,7 +192,7 @@ namespace Database.Data
             Value = EString.FromDecoded(value);
         }
 
-        public MiscRow(int id, ulong guildId, string type, string value)
+        public MiscRow(long id, ulong guildId, string type, string value)
         {
             Id = id;
             GuildId = guildId;

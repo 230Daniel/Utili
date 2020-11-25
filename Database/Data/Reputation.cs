@@ -10,7 +10,7 @@ namespace Database.Data
 {
     public class Reputation
     {
-        public static List<ReputationRow> GetRows(ulong? guildId = null, int? id = null, bool ignoreCache = false)
+        public static List<ReputationRow> GetRows(ulong? guildId = null, long? id = null, bool ignoreCache = false)
         {
             List<ReputationRow> matchedRows = new List<ReputationRow>();
 
@@ -43,7 +43,7 @@ namespace Database.Data
                 while (reader.Read())
                 {
                     matchedRows.Add(new ReputationRow(
-                        reader.GetInt32(0),
+                        reader.GetInt64(0),
                         reader.GetUInt64(1),
                         reader.GetString(2)));
                 }
@@ -125,7 +125,7 @@ namespace Database.Data
                 matchedRows.Add(new ReputationUserRow(
                     reader.GetUInt64(0),
                     reader.GetUInt64(1),
-                    reader.GetInt32(2)));
+                    reader.GetInt64(2)));
             }
 
             reader.Close();
@@ -153,7 +153,7 @@ namespace Database.Data
             command.Connection.Close();
         }
 
-        public static void SetUserReputation(ulong guildId, ulong userId, int reputation)
+        public static void SetUserReputation(ulong guildId, ulong userId, long reputation)
         {
             MySqlCommand command = Sql.GetCommand("UPDATE ReputationUsers SET Reputation = @Reputation WHERE GuildId = @GuildId AND UserId = @UserId;",
                 new [] {("GuildId", guildId.ToString()), 
@@ -190,7 +190,7 @@ namespace Database.Data
                 while (reader.Read())
                 {
                     newRows.Add(new ReputationRow(
-                        reader.GetInt32(0),
+                        reader.GetInt64(0),
                         reader.GetUInt64(1),
                         reader.GetString(2)));
                 }
@@ -205,7 +205,7 @@ namespace Database.Data
 
     public class ReputationRow
     {
-        public int Id { get; set; }
+        public long Id { get; set; }
         public ulong GuildId { get; set; }
         public List<(IEmote, int)> Emotes { get; set; }
 
@@ -214,7 +214,7 @@ namespace Database.Data
             Id = 0;
         }
 
-        public ReputationRow(int id, ulong guildId, string emotes)
+        public ReputationRow(long id, ulong guildId, string emotes)
         {
             Id = id;
             GuildId = guildId;
@@ -261,9 +261,9 @@ namespace Database.Data
     {
         public ulong GuildId { get; set; }
         public ulong UserId { get; set; }
-        public int Reputation { get; set; }
+        public long Reputation { get; set; }
 
-        public ReputationUserRow(ulong guildId, ulong userId, int reputation)
+        public ReputationUserRow(ulong guildId, ulong userId, long reputation)
         {
             GuildId = guildId;
             UserId = userId;
