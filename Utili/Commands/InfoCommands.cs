@@ -41,7 +41,7 @@ namespace Utili.Commands
         }
 
         [Command("Ping"), Alias("Lag")]
-        public async Task Ping([Remainder] string categoriesString = "Discord Database")
+        public async Task Ping([Remainder] string categoriesString = "discord database")
         {
             List<string> categories = categoriesString.ToLower().Split(" ").ToList();
 

@@ -81,6 +81,78 @@ namespace Utili.Commands
             await sentMessage.DeleteAsync();
         }
 
+        [Command("PruneTo"), Alias("PurgeTo", "ClearTo"), Cooldown(10), Permission(Perm.ManageMessages)]
+        public async Task PruneTo(ulong messageId)
+        {
+            if (BotPermissions.IsMissingPermissions(Context.Channel, new[] {
+                    ChannelPermission.ViewChannel, 
+                    ChannelPermission.ReadMessageHistory,
+                    ChannelPermission.ManageMessages},
+                out string missingPermissions))
+            {
+                await SendFailureAsync(Context.Channel, "Error",
+                    $"I'm missing the following permissions: {missingPermissions}");
+            }
+
+            await Context.Message.DeleteAsync();
+
+            IMessage message = await Context.Channel.GetMessageAsync(messageId);
+
+            int count = 100;
+            if (Premium.IsPremium(Context.Guild.Id)) count = 1000;
+
+            string content = "";
+            
+            List<IMessage> messages = (await Context.Channel.GetMessagesAsync(count).FlattenAsync()).ToList();
+
+            if(messages.Any(x => x.Id == message.Id))
+            {
+                int index = messages.FindIndex(x => x.Id == message.Id);
+                messages = messages.Take(index).ToList();
+            }
+            else
+            {
+                if (count == 100) content = "For non-premium servers, you can delete up to 100 messages at once\n";
+                else content = "For premium servers, you can delete up to 1000 messages at once\n";
+            }
+
+            int pinned = messages.RemoveAll(x => x.IsPinned);
+            int outdated = messages.RemoveAll(x => x.CreatedAt.UtcDateTime < DateTime.UtcNow - TimeSpan.FromDays(13.9));
+
+            if (pinned == 1)
+            {
+                content += $"{pinned} message was not deleted because it is pinned\n";
+            }
+            else if (pinned > 1)
+            {
+                content += $"{pinned} messages were not deleted because they are pinned\n";
+            }
+
+            if (outdated == 1)
+            {
+                content += $"{outdated} message was not deleted because it is older than 14 days\n";
+            }
+            else if (outdated > 1)
+            {
+                content += $"{outdated} messages were not deleted because they are older than 14 days\n";
+            }
+            
+            SocketTextChannel channel = Context.Channel as SocketTextChannel;
+
+            await channel.DeleteMessagesAsync(messages);
+
+            string title = $"{messages.Count} messages deleted";
+            if (messages.Count == 1)
+            {
+                title = $"{messages.Count} message deleted";
+            }
+
+            RestUserMessage sentMessage = await SendSuccessAsync(Context.Channel, title, content);
+
+            await Task.Delay(5000);
+
+            await sentMessage.DeleteAsync();
+        }
 
         [Command("React"), Alias("AddReaction", "AddEmoji"), Cooldown(2), Permission(Perm.ManageMessages)]
         public async Task React(ulong messageId, [Remainder] string emojiString)
