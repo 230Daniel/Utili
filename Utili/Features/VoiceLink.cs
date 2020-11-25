@@ -39,14 +39,7 @@ namespace Utili.Features
 
         private void Timer_Elapsed(object sender, ElapsedEventArgs e)
         {
-            try
-            {
-                UpdateLinkedChannelsAsync().GetAwaiter().GetResult();
-            }
-            catch (Exception err)
-            {
-                _logger.ReportError("VoiceLink", err);
-            }
+            UpdateLinkedChannelsAsync().GetAwaiter().GetResult();
         }
 
         private async Task UpdateLinkedChannelsAsync()

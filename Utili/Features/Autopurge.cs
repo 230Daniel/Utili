@@ -41,10 +41,10 @@ namespace Utili.Features
                 premiumOnly = true;
             }
 
-            _ = PurgeChannels(premiumOnly);
+            _ = PurgeChannelsAsync(premiumOnly);
         }
 
-        private async Task PurgeChannels(bool premiumOnly)
+        private async Task PurgeChannelsAsync(bool premiumOnly)
         {
             List<AutopurgeRow> rows = Database.Data.Autopurge.GetRows();
             List<ulong> allGuildIds = _client.Guilds.Select(x => x.Id).ToList();
@@ -73,6 +73,8 @@ namespace Utili.Features
             // Remove rows in mode 3 (disabled)
             rows.RemoveAll(x => x.Mode == 3);
 
+            List<Task> tasks = new List<Task>();
+
             foreach (AutopurgeRow row in rows)
             {
                 try
@@ -94,15 +96,19 @@ namespace Utili.Features
                             ChannelPermission.ManageMessages
                         }, out _))
                     {
-                        await PurgeChannel(channel, row.Timespan, row.Mode, messageCap);
+                        tasks.Add(PurgeChannelAsync(channel, row.Timespan, row.Mode, messageCap));
                     }
                 }
                 catch { }
             }
+
+            await Task.WhenAll(tasks);
         }
 
-        private async Task PurgeChannel(SocketGuildChannel guildChannel, TimeSpan timespan, int mode, int messageCap)
+        private async Task PurgeChannelAsync(SocketGuildChannel guildChannel, TimeSpan timespan, int mode, int messageCap)
         {
+            await Task.Delay(1);
+
             SocketTextChannel channel = guildChannel as SocketTextChannel;
 
             if(BotPermissions.IsMissingPermissions(channel, new [] { ChannelPermission.ManageMessages }, out _)) return;

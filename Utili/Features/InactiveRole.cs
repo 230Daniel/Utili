@@ -13,7 +13,6 @@ namespace Utili.Features
     internal class InactiveRole
     {
         private Timer _timer;
-        private bool _startingProcessing;
 
         public async Task UpdateUserAsync(SocketGuild guild, SocketGuildUser user)
         {
@@ -41,16 +40,12 @@ namespace Utili.Features
 
         private void Timer_Elapsed(object sender, ElapsedEventArgs e)
         {
-            if (_startingProcessing) return;
-
-            _startingProcessing = true;
-            UpdateGuilds().GetAwaiter().GetResult();
-            _startingProcessing = false;
+            UpdateGuildsAsync().GetAwaiter().GetResult();
         }
 
-        private async Task UpdateGuilds()
+        private async Task UpdateGuildsAsync()
         {
-            List<InactiveRoleRow> guildsRequiringUpdate = Database.Data.InactiveRole.GetUpdateRequiredRows();
+            List<InactiveRoleRow> guildsRequiringUpdate = Database.Data.InactiveRole.GetUpdateRequiredRows().Take(5).ToList();
 
             guildsRequiringUpdate.ForEach(x =>
             {
@@ -58,18 +53,18 @@ namespace Utili.Features
                 Database.Data.InactiveRole.SaveLastUpdate(x);
             });
 
-            foreach (InactiveRoleRow row in guildsRequiringUpdate)
+            List<Task> tasks = new List<Task>();
+
+            foreach (InactiveRoleRow row in guildsRequiringUpdate.Where(x => _client.Guilds.Any(y => y.Id == x.GuildId)))
             {
-                try
-                {
-                    SocketGuild guild = _client.GetGuild(row.GuildId);
-                    _ = UpdateGuild(row, guild);
-                }
-                catch{}
+                SocketGuild guild = _client.GetGuild(row.GuildId);
+                tasks.Add(UpdateGuildAsync(row, guild));
             }
+
+            await Task.WhenAll(tasks);
         }
 
-        private async Task UpdateGuild(InactiveRoleRow row, SocketGuild guild)
+        private async Task UpdateGuildAsync(InactiveRoleRow row, SocketGuild guild)
         {
             SocketRole inactiveRole = guild.GetRole(row.RoleId);
 

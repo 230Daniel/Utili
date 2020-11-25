@@ -52,18 +52,13 @@ namespace Utili.Features
             }
         }
 
-        private bool _updating;
         private void Timer_Elapsed(object sender, ElapsedEventArgs e)
         {
-            if(_updating) return;
-
-            _ = UpdateNotices();
+            UpdateNoticesAsync().GetAwaiter().GetResult();
         }
 
-        private async Task UpdateNotices()
+        private async Task UpdateNoticesAsync()
         {
-            _updating = true;
-
             List<(NoticesRow, DateTime)> updates = new List<(NoticesRow, DateTime)>();
 
             lock (_requiredUpdates)
@@ -71,36 +66,35 @@ namespace Utili.Features
                 updates.AddRange(_requiredUpdates.Where(x => x.Item2 <= DateTime.UtcNow));
                 _requiredUpdates.RemoveAll(x => x.Item2 <= DateTime.UtcNow);
             }
-            
-            foreach ((NoticesRow, DateTime) update in updates)
+
+            List<Task> tasks = updates.Select(UpdateNoticeAsync).ToList();
+            await Task.WhenAll(tasks);
+        }
+
+        private async Task UpdateNoticeAsync((NoticesRow, DateTime) update)
+        {
+            await Task.Delay(1);
+
+            NoticesRow row = update.Item1;
+
+            SocketGuild guild = _client.GetGuild(row.GuildId);
+            SocketTextChannel channel = guild.GetTextChannel(row.ChannelId);
+
+            if(BotPermissions.IsMissingPermissions(channel, new [] { ChannelPermission.ViewChannel, ChannelPermission.ReadMessageHistory, ChannelPermission.ManageMessages }, out _)) return;
+
+            try
             {
-                try
-                {
-                    NoticesRow row = update.Item1;
-
-                    SocketGuild guild = _client.GetGuild(row.GuildId);
-                    SocketTextChannel channel = guild.GetTextChannel(row.ChannelId);
-
-                    if(BotPermissions.IsMissingPermissions(channel, new [] { ChannelPermission.ViewChannel, ChannelPermission.ReadMessageHistory, ChannelPermission.ManageMessages }, out _)) return;
-
-                    try
-                    {
-                        IMessage message = await channel.GetMessageAsync(row.MessageId);
-                        await message.DeleteAsync();
-                    }
-                    catch {}
-
-                    (string, Embed) notice = GetNotice(row);
-                    RestUserMessage sent = await MessageSender.SendEmbedAsync(channel, notice.Item2, notice.Item1);
-                    row.MessageId = sent.Id;
-                    Database.Data.Notices.SaveMessageId(row);
-
-                    await sent.PinAsync();
-                }
-                catch {}
+                IMessage message = await channel.GetMessageAsync(row.MessageId);
+                await message.DeleteAsync();
             }
+            catch {}
 
-            _updating = false;
+            (string, Embed) notice = GetNotice(row);
+            RestUserMessage sent = await MessageSender.SendEmbedAsync(channel, notice.Item2, notice.Item1);
+            row.MessageId = sent.Id;
+            Database.Data.Notices.SaveMessageId(row);
+
+            await sent.PinAsync();
         }
 
         public (string, Embed) GetNotice(NoticesRow row)
