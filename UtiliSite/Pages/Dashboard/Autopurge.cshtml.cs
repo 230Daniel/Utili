@@ -39,7 +39,7 @@ namespace UtiliSite.Pages.Dashboard
                 return;
             }
 
-            int id = int.Parse(HttpContext.Request.Form["rowId"]);
+            long id = int.Parse(HttpContext.Request.Form["rowId"]);
             TimeSpan timespan = TimeSpan.Parse(HttpContext.Request.Form["timespan"]);
             int mode = int.Parse(HttpContext.Request.Form["mode"]);
 

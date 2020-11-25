@@ -39,7 +39,7 @@ namespace UtiliSite.Pages.Dashboard
                 return;
             }
 
-            int id = int.Parse(HttpContext.Request.Form["rowId"]);
+            long id = int.Parse(HttpContext.Request.Form["rowId"]);
             int mode = int.Parse(HttpContext.Request.Form["mode"]);
             string complex = HttpContext.Request.Form["complex"].ToString();
 

@@ -42,7 +42,7 @@ namespace UtiliSite.Pages.Dashboard
                 return;
             }
 
-            int rowId = int.Parse(HttpContext.Request.Form["rowId"]);
+            long rowId = int.Parse(HttpContext.Request.Form["rowId"]);
             ulong roleId = ulong.Parse(HttpContext.Request.Form["role"]);
 
             VoiceRolesRow row = VoiceRoles.GetRows(auth.Guild.Id, null, rowId).First();
@@ -87,7 +87,7 @@ namespace UtiliSite.Pages.Dashboard
                 return;
             }
 
-            int rowId = int.Parse(HttpContext.Request.Form["rowId"]);
+            long rowId = int.Parse(HttpContext.Request.Form["rowId"]);
 
             VoiceRolesRow row = VoiceRoles.GetRows(auth.Guild.Id, null, rowId).First();
             VoiceRoles.DeleteRow(row);
