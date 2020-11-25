@@ -7,6 +7,7 @@ using static Utili.Program;
 using static Utili.MessageSender;
 using static Utili.Helper;
 using System.Linq;
+using System.Collections.Generic;
 
 namespace Utili.Commands
 {
@@ -18,12 +19,12 @@ namespace Utili.Commands
             DiscordSocketClient shard = GetShardForGuild(Context.Guild);
 
             string about = string.Concat(
-                "By 230Daniel#1920",
-                $"In {Database.Sharding.GetGuildCount()} servers",
-                $"Shard {shard.ShardId} ({_totalShards} total)",
-                $"[Website](https://{_config.Domain})",
-                $"[Dashboard](https://{_config.Domain}/dashboard)",
-                $"[Get Premium](https://{_config.Domain}/premium)",
+                "By 230Daniel#1920\n",
+                $"In {Database.Sharding.GetGuildCount()} servers\n",
+                $"Shard {shard.ShardId} ({_totalShards} total)\n",
+                $"[Website](https://{_config.Domain})\n",
+                $"[Dashboard](https://{_config.Domain}/dashboard)\n",
+                $"[Get Premium](https://{_config.Domain}/premium)\n",
                 "[Support & Requests Server](https://discord.gg/hCYWk9x)");
 
             await SendInfoAsync(Context.Channel, "Utili v2 Beta", about);
@@ -33,15 +34,17 @@ namespace Utili.Commands
         public async Task Help()
         {
             string help = string.Concat(
-                $"[List of Commands](https://{_config.Domain}/commands)",
-                "[Dashboard](https://{_config.Domain}/dashboard/{Context.Guild.Id}/core)");
+                $"[List of Commands](https://{_config.Domain}/commands)\n",
+                $"[Dashboard](https://{_config.Domain}/dashboard/{Context.Guild.Id}/core)\n");
 
             await SendInfoAsync(Context.Channel, "Utili", help);
         }
 
         [Command("Ping"), Alias("Lag")]
-        public async Task Ping()
+        public async Task Ping([Remainder] string categoriesString = "Discord Database")
         {
+            List<string> categories = categoriesString.ToLower().Split(" ").ToList();
+
             int largestLatency = 0;
             DiscordSocketClient shard = GetShardForGuild(Context.Guild);
 
@@ -71,12 +74,13 @@ namespace Utili.Commands
             EmbedBuilder embed = new EmbedBuilder
             {
                 Author = new EmbedAuthorBuilder { Name = $"Pong! Status: {status}" },
-                Color = color,
-                Footer = new EmbedFooterBuilder { Text = $"Shard on {shard.Guilds.Count} servers, {shard.Guilds.Count(x => x.DownloadedMemberCount >= x.MemberCount)} have all users downloaded" }
+                Color = color
             };
 
-            embed.AddField("Discord", $"Gateway: {gateway}ms\nRest: {rest}ms", true);
-            embed.AddField("Database", $"Latency: {database}ms\nQueries: {databaseQueries}/s", true);
+            if (categories.Contains("discord")) embed.AddField("Discord", $"Gateway: {gateway}ms\nRest: {rest}ms", true);
+            if (categories.Contains("database")) embed.AddField("Database", $"Latency: {database}ms\nQueries: {databaseQueries}/s", true);
+            if (categories.Contains("guilds")) embed.AddField("Guilds", $"Cluster: {_client.Guilds.Count}\nShard: {shard.Guilds.Count}", true);
+            if (categories.Contains("users")) embed.AddField("Users", $"Total: {_client.Guilds.Sum(x => x.MemberCount)}\nDownloaded: {_client.Guilds.Sum(x => x.DownloadedMemberCount)}", true);
 
             await SendEmbedAsync(Context.Channel, embed.Build());
         }
