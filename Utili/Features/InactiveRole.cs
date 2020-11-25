@@ -10,7 +10,7 @@ using static Utili.Program;
 
 namespace Utili.Features
 {
-    class InactiveRole
+    internal class InactiveRole
     {
         private Timer _timer;
         private bool _startingProcessing;

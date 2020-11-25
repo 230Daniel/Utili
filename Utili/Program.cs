@@ -47,7 +47,7 @@ namespace Utili
 
         // ReSharper enable InconsistentNaming
 
-        private static void Main()
+        private static async Task Main()
         {
             _logger = new Logger
             {
@@ -60,7 +60,7 @@ namespace Utili
             Database.Database.Initialise(true);
             _logger.Log("Main", "Database cache downloaded", LogSeverity.Info);
 
-            new Program().MainAsync().GetAwaiter().GetResult();
+            await new Program().MainAsync();
 
             // TODO: Auto-restart or Pterodactyl equivalent
         }

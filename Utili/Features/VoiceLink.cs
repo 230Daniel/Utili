@@ -11,11 +11,9 @@ using static Utili.Program;
 
 namespace Utili.Features
 {
-    class VoiceLink
+    internal class VoiceLink
     {
         private Timer _timer;
-        private bool _processingNow;
-        private bool _safeToRequestUpdate = true;
         private List<SocketVoiceChannel> _channelsRequiringUpdate = new List<SocketVoiceChannel>();
 
         public void Start()
@@ -31,66 +29,51 @@ namespace Utili.Features
         {
             VoiceLinkRow metaRow = Database.Data.VoiceLink.GetMetaRow(channel.Guild.Id);
 
-            if (metaRow.Enabled && !metaRow.ExcludedChannels.Contains(channel.Id))
+            if (!metaRow.Enabled || metaRow.ExcludedChannels.Contains(channel.Id)) return;
+            
+            lock (_channelsRequiringUpdate)
             {
-                while (!_safeToRequestUpdate)
-                {
-                    Task.Delay(20).GetAwaiter().GetResult();
-                }
-
                 _channelsRequiringUpdate.Add(channel);
             }
         }
 
         private void Timer_Elapsed(object sender, ElapsedEventArgs e)
         {
-            if (_processingNow)
-            {
-                return;
-            }
-
-            _processingNow = true;
-
             try
             {
-                UpdateLinkedChannels().GetAwaiter().GetResult();
+                UpdateLinkedChannelsAsync().GetAwaiter().GetResult();
             }
             catch (Exception err)
             {
                 _logger.ReportError("VoiceLink", err);
             }
-
-            _processingNow = false;
         }
 
-        private async Task UpdateLinkedChannels()
+        private async Task UpdateLinkedChannelsAsync()
         {
             List<SocketVoiceChannel> channelsToUpdate = new List<SocketVoiceChannel>();
-            _safeToRequestUpdate = false;
 
-            foreach (SocketVoiceChannel voiceChannel in _channelsRequiringUpdate)
+            lock (_channelsRequiringUpdate)
             {
-                if (!channelsToUpdate.Select(x => x.Id).Contains(voiceChannel.Id))
+                foreach (SocketVoiceChannel voiceChannel in _channelsRequiringUpdate)
                 {
-                    channelsToUpdate.Add(voiceChannel);
+                    if (!channelsToUpdate.Select(x => x.Id).Contains(voiceChannel.Id))
+                    {
+                        channelsToUpdate.Add(voiceChannel);
+                    }
                 }
+
+                _channelsRequiringUpdate.Clear();
             }
 
-            _channelsRequiringUpdate.Clear();
-            _safeToRequestUpdate = true;
-
-            foreach (SocketVoiceChannel voiceChannel in channelsToUpdate)
-            {
-                try
-                {
-                    await UpdateLinkedChannel(voiceChannel);
-                }
-                catch {}
-            }
+            List<Task> tasks = channelsToUpdate.Select(UpdateLinkedChannelAsync).ToList();
+            await Task.WhenAll(tasks);
         }
 
-        private async Task UpdateLinkedChannel(SocketVoiceChannel voiceChannel)
+        private async Task UpdateLinkedChannelAsync(SocketVoiceChannel voiceChannel)
         {
+            await Task.Delay(1);
+
             SocketGuild guild = voiceChannel.Guild;
 
             if (BotPermissions.IsMissingPermissions(voiceChannel, new[] {ChannelPermission.ManageChannels}, out _))
