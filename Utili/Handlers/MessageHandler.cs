@@ -111,12 +111,13 @@ namespace Utili.Handlers
         {
             return result.Error switch
             {
-                CommandError.BadArgCount => "Invalid amount of command arguments\nTry wrapping arguments with speech marks",
-                CommandError.ObjectNotFound => "Failed to interpret a command argument (Object not found)\nTry wrapping arguments with speech marks",
-                CommandError.MultipleMatches => "Failed to interpret a command argument (Multiple matches)\nTry wrapping arguments with speech marks",
-                CommandError.Exception => "An error occured while trying to execute the command\nTry wrapping arguments with speech marks",
-                CommandError.UnmetPrecondition => "Invalid command preconditions",
+                CommandError.BadArgCount => "Invalid amount of command arguments",
+                CommandError.ObjectNotFound => "Failed to interpret a command argument (Object not found)",
+                CommandError.MultipleMatches => "Failed to interpret a command argument (Multiple matches)",
                 CommandError.ParseFailed => "Failed to interpret a command argument (Parse failed)",
+                CommandError.Exception => "An exception occured while trying to execute the command",
+                CommandError.UnmetPrecondition => "Invalid command preconditions",
+                CommandError.UnknownCommand => null,
                 _ => "An error occured while trying to execute the command",
             };
         }
