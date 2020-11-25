@@ -44,7 +44,7 @@ namespace Utili.Features
                     }
                 }
 
-                if (guild.Users.Select(x => x.Id).Contains(user.Id))
+                if (guild.Users.Any(x => x.Id == user.Id))
                 {
                     foreach (RolesPersistantRolesRow persistRow in persistRows)
                     {

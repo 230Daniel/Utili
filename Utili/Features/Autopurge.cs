@@ -151,7 +151,7 @@ namespace Utili.Features
 
             foreach (AutopurgeRow row in clonedRows)
             {
-                if (!channelsForThisPurge.Select(x => x.GuildId).Contains(row.GuildId))
+                if (channelsForThisPurge.All(x => x.GuildId != row.GuildId))
                 {
                     List<AutopurgeRow> guildRows = rows.Where(x => x.GuildId == row.GuildId).OrderBy(x => x.Id).ToList();
 

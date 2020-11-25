@@ -37,7 +37,7 @@ namespace Utili.Features
 
             lock (_requiredUpdates)
             {
-                if (_requiredUpdates.Count(x => x.Item1.ChannelId == context.Channel.Id) > 0)
+                if (_requiredUpdates.Any(x => x.Item1.ChannelId == context.Channel.Id))
                 {
                     (NoticesRow, DateTime) update = _requiredUpdates.First(x => x.Item1.ChannelId == context.Channel.Id);
                     update.Item2 = DateTime.UtcNow + row.Delay;

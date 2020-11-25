@@ -205,7 +205,7 @@ namespace Utili.Features
             foreach (MessageLogsMessageRow message in messages)
             {
                 RestUser user;
-                if (cachedUsers.Count(x => x.Id == message.UserId) > 0)
+                if (cachedUsers.Any(x => x.Id == message.UserId))
                     user = cachedUsers.First(x => x.Id == message.UserId);
                 else
                 {

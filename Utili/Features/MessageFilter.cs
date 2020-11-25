@@ -112,7 +112,7 @@ namespace Utili.Features
                 "jpg"
             };
 
-            if(context.Message.Attachments.Count(x => validAttachmentExtensions.Contains(x.Filename.Split(".").Last().ToLower())) > 0)
+            if(context.Message.Attachments.Any(x => validAttachmentExtensions.Contains(x.Filename.Split(".").Last().ToLower())))
             {
                 return true;
             }
@@ -146,7 +146,7 @@ namespace Utili.Features
                 "gif"
             };
 
-            if(context.Message.Attachments.Count(x => validAttachmentExtensions.Contains(x.Filename.Split(".").Last().ToLower())) > 0)
+            if(context.Message.Attachments.Any(x => validAttachmentExtensions.Contains(x.Filename.Split(".").Last().ToLower())))
             {
                 return true;
             }
@@ -181,7 +181,7 @@ namespace Utili.Features
                 "flac"
             };
 
-            if(context.Message.Attachments.Count(x => validAttachmentExtensions.Contains(x.Filename.Split(".").Last().ToLower())) > 0)
+            if(context.Message.Attachments.Any(x => validAttachmentExtensions.Contains(x.Filename.Split(".").Last().ToLower())))
             {
                 return true;
             }

@@ -19,11 +19,11 @@ namespace Utili.Features
         {
             InactiveRoleRow row = Database.Data.InactiveRole.GetRows(guild.Id).FirstOrDefault();
 
-            if(guild.Roles.Select(x => x.Id).Contains(row.RoleId))
+            if(guild.Roles.Any(x => x.Id == row.RoleId))
             {
                 Database.Data.InactiveRole.UpdateUser(guild.Id, user.Id);
 
-                if (user.Roles.Select(x => x.Id).Contains(row.RoleId))
+                if (user.Roles.Any(x => x.Id == row.RoleId))
                 {
                     await user.RemoveRoleAsync(guild.GetRole(row.RoleId));
                 }

@@ -18,7 +18,7 @@ namespace Utili.Handlers
             {
                 _readyShardIds.RemoveAll(x => x == shard.ShardId);
 
-                if (_client.Shards.Count(x => x.ConnectionState == ConnectionState.Connected) == _client.Shards.Count)
+                if (_client.Shards.All(x => x.ConnectionState == ConnectionState.Connected))
                 {
                     Database.Sharding.UpdateShardStats(_client.Shards.Count,
                         _client.Shards.OrderBy(x => x.ShardId).First().ShardId, _client.Guilds.Count);

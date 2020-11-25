@@ -25,7 +25,7 @@ namespace Utili.Features
             if(rows.Count == 0) return;
             ReputationRow row = rows.First();
 
-            if (!row.Emotes.Select(x => x.Item1).Contains(emote)) return;
+            if (!row.Emotes.Any(x => x.Item1.Equals(emote))) return;
             int change = row.Emotes.First(x => Equals(x.Item1, emote)).Item2;
 
             Database.Data.Reputation.AlterUserReputation(guild.Id, user.Id, change);
@@ -40,7 +40,7 @@ namespace Utili.Features
             if(rows.Count == 0) return;
             ReputationRow row = rows.First();
 
-            if (!row.Emotes.Select(x => x.Item1).Contains(emote)) return;
+            if (!row.Emotes.Any(x => x.Item1.Equals(emote))) return;
             int change = row.Emotes.First(x => Equals(x.Item1, emote)).Item2;
             change *= -1;
 

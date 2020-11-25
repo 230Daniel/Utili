@@ -57,7 +57,7 @@ namespace Utili.Features
             {
                 foreach (SocketVoiceChannel voiceChannel in _channelsRequiringUpdate)
                 {
-                    if (!channelsToUpdate.Select(x => x.Id).Contains(voiceChannel.Id))
+                    if (channelsToUpdate.All(x => x.Id != voiceChannel.Id))
                     {
                         channelsToUpdate.Add(voiceChannel);
                     }
