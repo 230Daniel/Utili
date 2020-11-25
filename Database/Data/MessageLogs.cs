@@ -232,7 +232,7 @@ namespace Database.Data
             }
         }
 
-        public static void DeleteMessagesById(int[] ids)
+        public static void DeleteMessagesById(long[] ids)
         {
             if(ids.Length == 0) return;
 

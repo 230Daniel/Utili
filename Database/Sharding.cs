@@ -60,7 +60,7 @@ namespace Database
             int guilds = 0;
             while (reader.Read())
             {
-                guilds += reader.GetInt64(0);
+                guilds += reader.GetInt32(0);
             }
 
             reader.Close();
