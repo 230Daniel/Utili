@@ -133,7 +133,7 @@ namespace Database.Data
             return matchedRows;
         }
 
-        public static void AlterUserReputation(ulong guildId, ulong userId, int reputationChange)
+        public static void AlterUserReputation(ulong guildId, ulong userId, long reputationChange)
         {
             MySqlCommand command = Sql.GetCommand("UPDATE ReputationUsers SET Reputation = Reputation + @ReputationChange WHERE GuildId = @GuildId AND UserId = @UserId;",
                 new [] {("GuildId", guildId.ToString()), 

@@ -56,7 +56,7 @@ namespace Utili.Features
         {
             if (user == null) user = Context.User as IGuildUser;
 
-            int reputation = 0;
+            long reputation = 0;
             List<ReputationUserRow> rows = Database.Data.Reputation.GetUserRows(Context.Guild.Id, user.Id);
             if (rows.Count > 0) reputation = rows.First().Reputation;
 
@@ -121,21 +121,21 @@ namespace Utili.Features
         }
 
         [Command("Give"), Permission(Perm.ManageGuild), Cooldown(2)]
-        public async Task Give(IUser user, uint change)
+        public async Task Give(IUser user, ulong change)
         {
-            Database.Data.Reputation.AlterUserReputation(Context.Guild.Id, user.Id, (int)change);
+            Database.Data.Reputation.AlterUserReputation(Context.Guild.Id, user.Id, (long)change);
             await SendSuccessAsync(Context.Channel, "Reputation given", $"Gave {change} reputation to {user.Mention}");
         }
 
         [Command("Take"), Permission(Perm.ManageGuild), Cooldown(2)]
-        public async Task Take(IUser user, uint change)
+        public async Task Take(IUser user, ulong change)
         {
-            Database.Data.Reputation.AlterUserReputation(Context.Guild.Id, user.Id, -(int)change);
+            Database.Data.Reputation.AlterUserReputation(Context.Guild.Id, user.Id, -(long)change);
             await SendSuccessAsync(Context.Channel, "Reputation taken", $"Took {change} reputation from {user.Mention}");
         }
 
         [Command("Set"), Permission(Perm.ManageGuild), Cooldown(2)]
-        public async Task Take(IUser user, int amount)
+        public async Task Take(IUser user, long amount)
         {
             Database.Data.Reputation.SetUserReputation(Context.Guild.Id, user.Id, amount);
             await SendSuccessAsync(Context.Channel, "Reputation set", $"Set {user.Mention}'s reputation to {amount}");
