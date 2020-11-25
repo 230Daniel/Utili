@@ -96,7 +96,15 @@ namespace Utili.Commands
 
             await Context.Message.DeleteAsync();
 
-            IMessage message = await Context.Channel.GetMessageAsync(messageId);
+            IMessage message = null;
+            try { message = await Context.Channel.GetMessageAsync(messageId); } catch { }
+
+            if (message == null)
+            {
+                await SendFailureAsync(Context.Channel, "Error",
+                    $"No message was found in <#{Context.Channel.Id}> with ID {messageId}\n[How do I get a message ID?](https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID-)");
+                return;
+            }
 
             int count = 100;
             if (Premium.IsPremium(Context.Guild.Id)) count = 1000;
@@ -153,6 +161,7 @@ namespace Utili.Commands
 
             await sentMessage.DeleteAsync();
         }
+
 
         [Command("React"), Alias("AddReaction", "AddEmoji"), Cooldown(2), Permission(Perm.ManageMessages)]
         public async Task React(ulong messageId, [Remainder] string emojiString)
