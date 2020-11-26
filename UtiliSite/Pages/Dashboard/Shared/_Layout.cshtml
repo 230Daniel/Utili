@@ -11,6 +11,27 @@
 </head>
 <body>
     <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light border-bottom box-shadow " id="navbar">
+        <div class="container" id="success" hidden>
+            <ul class="navbar-nav flex-grow-1">
+                <li class="nav-item">
+                    <a class="nav-link text-light">Changes saved - Your changes may take up to 30 seconds to take effect</a>
+                </li>
+            </ul>
+        </div>
+        <div class="container" id="error-too-fast" hidden>
+            <ul class="navbar-nav flex-grow-1">
+                <li class="nav-item">
+                    <a class="nav-link text-light">Error - You're doing that too fast, please wait between requests</a>
+                </li>
+            </ul>
+        </div>
+        <div class="container" id="error-failure" hidden>
+            <ul class="navbar-nav flex-grow-1">
+                <li class="nav-item">
+                    <a class="nav-link text-light">Error - Something went wrong, please try again later</a>
+                </li>
+            </ul>
+        </div>
         <div class="container" id="hide">
             <a class="navbar-brand" asp-area="" asp-page="/Index">Utili</a>
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target=".navbar-collapse" aria-controls="navbarSupportedContent"
@@ -47,30 +68,7 @@
             @RenderBody()
 
         </div>
-        <div aria-live="polite" aria-atomic="true" style="position: relative; min-height: 20px;" class="align-bottom">
-            <div style="position: absolute; bottom: 0; right: 0;">
-                <div class="toast" role="alert" data-delay="5000" aria-live="assertive" aria-atomic="true" style="width: 500px;" id="success">
-                    <div class="toast-body">
-                        <strong>Changes saved</strong> <br />
-                        Your changes may take up to 30 seconds to take effect
-                    </div>
-                </div>
-
-                <div class="toast" role="alert" data-delay="5000" aria-live="assertive" aria-atomic="true" style="width: 500px;" id="ratelimit">
-                    <div class="toast-body">
-                        <strong>Error</strong> <br />
-                        You're doing that too fast, please wait between requests
-                    </div>
-                </div>
-
-                <div class="toast" role="alert" data-delay="5000" aria-live="assertive" aria-atomic="true" style="width: 500px;" id="error">
-                    <div class="toast-body">
-                        <strong>Error</strong> <br />
-                        Something went wrong, please try again later
-                    </div>
-                </div>
-            </div>
-        </div>
+        
 
     </div>
     <footer class="border-top footer text-muted">

@@ -96,8 +96,8 @@ body {
     min-height: 100vh;
 }
 img.guild-icon {
-    height: 21vh;
-    width: 21vh;
+    height: 20vh;
+    width: 20vh;
     border-radius: 50% !important;
     margin: auto;
     margin-top: 3vh;
@@ -186,4 +186,11 @@ img.guild-icon {
     width:90px;
     height:28px;
     margin:auto;
+}
+.checkbox{
+    width:1em;
+}
+
+#navbar{
+    transition: background-color 1s;
 }
