@@ -14,13 +14,13 @@ $("[name|='form']").submit(function(e) {
                 location.reload();
                 return false;
             }
-            $("#success").toast("show");
+            successNotification();
         },
         error: function(xhr) {
             if (xhr.status === 429) {
-                $("#ratelimit").toast("show");
+                errorNotificationTooFast();
             } else {
-                $("#error").toast("show");
+                errorNotificationFailure();
             }
         }
     });

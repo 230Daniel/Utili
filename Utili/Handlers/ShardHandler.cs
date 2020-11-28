@@ -31,7 +31,9 @@ namespace Utili.Handlers
                     StartDownloadTimer();
                 }
 
-                await DownloadRequiredUsersAsync(shard);
+                await DownloadRequiredUsersAsync(shard); 
+                // TODO: Ensure all relevant guilds are downloaded before continuing
+
                 await shard.SetGameAsync($"{_config.Domain} | .help");
 
                 _readyShardIds.Add(shard.ShardId);

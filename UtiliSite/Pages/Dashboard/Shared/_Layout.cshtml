@@ -1,10 +1,15 @@
 ﻿@using Discord.Rest
+@if (ViewData["guild"] == null)
+{
+    return;
+}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"]Utili Dashboard</title>
+    <title>@ViewData["Title"]</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" />
     <script src="https://kit.fontawesome.com/4c685c9379.js" crossorigin="anonymous"></script>
@@ -12,25 +17,13 @@
 <body>
     <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light border-bottom box-shadow " id="navbar">
         <div class="container" id="success" hidden>
-            <ul class="navbar-nav flex-grow-1">
-                <li class="nav-item">
-                    <a class="nav-link text-light">Changes saved - Your changes may take up to 30 seconds to take effect</a>
-                </li>
-            </ul>
+            <span class="notification text-light">Changes saved</span>
         </div>
         <div class="container" id="error-too-fast" hidden>
-            <ul class="navbar-nav flex-grow-1">
-                <li class="nav-item">
-                    <a class="nav-link text-light">Error - You're doing that too fast, please wait between requests</a>
-                </li>
-            </ul>
+            <span class="notification text-light">You're doing that too fast</span>
         </div>
         <div class="container" id="error-failure" hidden>
-            <ul class="navbar-nav flex-grow-1">
-                <li class="nav-item">
-                    <a class="nav-link text-light">Error - Something went wrong, please try again later</a>
-                </li>
-            </ul>
+            <span class="notification text-light">Something went wrong</span>
         </div>
         <div class="container" id="hide">
             <a class="navbar-brand" asp-area="" asp-page="/Index">Utili</a>
@@ -68,7 +61,7 @@
             @RenderBody()
 
         </div>
-        
+
 
     </div>
     <footer class="border-top footer text-muted">

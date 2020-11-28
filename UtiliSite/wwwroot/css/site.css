@@ -194,3 +194,10 @@ img.guild-icon {
 #navbar{
     transition: background-color 1s;
 }
+
+.notification {
+    padding: 0.5rem 1rem;
+    display: block;
+    display: flex;
+    list-style: none;
+}
