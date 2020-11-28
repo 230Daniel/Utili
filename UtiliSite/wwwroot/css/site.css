@@ -205,3 +205,7 @@ img.guild-icon {
 .dropdown {
     padding-bottom: 20px;
 }
+
+.card-settings {
+    width: 18rem;
+}

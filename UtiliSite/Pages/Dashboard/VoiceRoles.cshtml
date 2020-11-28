@@ -3,20 +3,26 @@
 @using Discord.Rest
 @model UtiliSite.Pages.Dashboard.VoiceRolesModel
 @{
-    Layout = "Shared/_Layout.cshtml";
-}
-
-@{
-    if (ViewData["authorised"] == null || !(bool)ViewData["authorised"])
+    if (ViewData["guild"] == null)
     {
         return;
     }
+
+    Layout = "Shared/_Layout.cshtml";
+    ViewData["Title"] = "Voice Roles - Utili Dashboard";
 
     RestGuild guild = ViewData["Guild"] as RestGuild;
     List<RestVoiceChannel> addedChannels = (List<RestVoiceChannel>) ViewData["addedChannels"];
     List<RestVoiceChannel> nonAddedChannels = (List<RestVoiceChannel>)ViewData["nonAddedChannels"];
     List<VoiceRolesRow> rows = (List<VoiceRolesRow>)ViewData["rows"];
 }
+
+<div class="jumbotron jumbotron-fluid">
+    <div class="container">
+        <h1 class="display-4 page-heading">Voice Roles</h1>
+        <p class="lead">Users will be given a role while they're in a specific voice channel</p>
+    </div>
+</div>
 
 <div class="dropdown">
     <button class="btn btn-secondary dropdown-toggle" type="button" data-toggle="dropdown" id="dropdownAddChannel" aria-haspopup="true" aria-expanded="false">
@@ -35,42 +41,59 @@
     </div>
 </div>
 
-@foreach(RestVoiceChannel channel in addedChannels)
-{
-    VoiceRolesRow row = rows.First(x => x.ChannelId == channel.Id);
+<div class="row">
+    @foreach (RestVoiceChannel channel in addedChannels)
+    {
+        VoiceRolesRow row = rows.First(x => x.ChannelId == channel.Id);
+        <div class="pb-4">
+            <div class="col-md-12">
+                <div class="card" style="width: 18rem;">
+                    <form name="form-@row.Id" method="post">
 
-    <form name="form-@row.Id" method="post">
+                        <input type="hidden" name="rowId" value="@row.Id" />
 
-        <input type="hidden" name="rowId" value="@row.Id" />
+                        <div class="input-group flex-nowrap">
 
-        <div class="input-group flex-nowrap">
+                            <input type="text" class="form-control card-emphasis" style="" value="@channel.Name" readonly>
 
-            <div class="input-group-prepend">
-                <span class="input-group-text">🔊</span>
+                            <button type="submit" name="noajax" asp-page-handler="Remove" class="btn btn-remove card-emphasis">
+                                <svg width="38px" height="38px" viewBox="0 0 16 16" class="bi bi-x" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                    <path fill-rule="evenodd" d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z" />
+                                </svg>
+                            </button>
+
+                        </div>
+
+                        <div class="input-group flex-nowrap">
+
+                            <div class="input-group-prepend">
+                                <span class="input-group-text">Role</span>
+                            </div>
+
+                            <select class="custom-select card-component" name="role">
+                                @foreach (RestRole role in guild.Roles.OrderBy(x => -x.Position))
+                                {
+                                    <!option value="@role.Id" @VoiceRolesModel.GetIsSelected(role.Id, row)>@role.Name</!option>
+                                }
+                            </select>
+                        </div>
+
+                        <div class="input-group flex-nowrap">
+                            <div class="input-group-prepend card-emphasis">
+                                <span class="input-group-text card-emphasis"></span>
+                            </div>
+                            <div class="input-group-prepend card-emphasis">
+                                <span class="input-group-text card-emphasis"></span>
+                            </div>
+
+                            <button type="submit" class="btn btn-save btn-width card-emphasis">Save</button>
+                        </div>
+                    </form>
+                </div>
             </div>
-            <input type="text" class="form-control" style="background: unset;" value="@channel.Name" readonly>
         </div>
-
-        <div class="input-group flex-nowrap">
-
-            <div class="input-group-prepend">
-                <span class="input-group-text">Role</span>
-            </div>
-
-            <select class="custom-select" name="role">
-                @foreach (RestRole role in guild.Roles.OrderBy(x => -x.Position))
-                {
-                    <!option value="@role.Id" @VoiceRolesModel.GetIsSelected(role.Id, row)>@role.Name</!option>
-                }
-            </select>
-        </div>
-
-        <div class="input-group flex-nowrap">
-            <button type="submit" class="btn btn-success">Save</button>
-            <button type="submit" asp-page-handler="Remove" name="noajax" class="btn btn-danger">Remove</button>
-        </div>
-    </form>
-}
+    }
+</div>
 
 <script src="~/lib/jquery/dist/jquery.js"></script>
 <script src="~/lib/jquery/dist/jquery.min.js"></script>

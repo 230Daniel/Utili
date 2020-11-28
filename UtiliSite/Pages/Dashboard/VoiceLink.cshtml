@@ -3,14 +3,13 @@
 @using Discord.Rest
 @model UtiliSite.Pages.Dashboard.VoiceLinkModel
 @{
-    Layout = "Shared/_Layout.cshtml";
-}
-
-@{
-    if (ViewData["authorised"] == null || !(bool)ViewData["authorised"])
+    if (ViewData["guild"] == null)
     {
         return;
     }
+
+    Layout = "Shared/_Layout.cshtml";
+    ViewData["Title"] = "Voice Link - Utili Dashboard";
 
     RestGuild guild = ViewData["Guild"] as RestGuild;
     List<RestVoiceChannel> excludedChannels = (List<RestVoiceChannel>) ViewData["excludedChannels"];
@@ -18,12 +17,15 @@
     VoiceLinkRow metaRow = (VoiceLinkRow) ViewData["metaRow"];
 }
     <div class="pb-2">
-        <div class="card">
+        <div class="card card-settings">
             <form name="form-enable" method="post">
+
+                <input type="text" class="form-control card-emphasis" style="" value="Settings" readonly>
+
                 <div class="input-group flex-nowrap">
 
                     <div class="input-group-prepend ">
-                        <span class="input-group-text voicelink-prepend">Enable</span>
+                        <span class="input-group-text">Enable</span>
                     </div>
                     <div class="input-group-text">
                         <input type="checkbox" name="enabled" class="form-control checkbox" @VoiceLinkModel.GetIsChecked(metaRow.Enabled)>
@@ -32,19 +34,30 @@
                 </div>
                 <div class="input-group flex-nowrap">
                     <div class="input-group-prepend">
-                        <span class="input-group-text voicelink-prepend">Delete Text Channels</span>
+                        <span class="input-group-text">Delete Channels</span>
                     </div>
                     <div class="input-group-text">
                         <input type="checkbox" name="deleteChannels" class="form-control checkbox" @VoiceLinkModel.GetIsChecked(metaRow.DeleteChannels)>
-                    </div> 
+                    </div>
                 </div>
                 <div class="input-group flex-nowrap">
                     <div class="input-group-prepend">
                         <span class="input-group-text voicelink-prepend">Prefix</span>
                     </div>
-                    <input type="text" name="prefix" class="form-control" value="@metaRow.Prefix.Value">
+                    <input type="text" name="prefix" class="form-control card-component" value="@metaRow.Prefix.Value">
                 </div>
-                <button type="submit" class="btn btn-success">Save</button>
+
+                <div class="input-group flex-nowrap">
+                    <div class="input-group-prepend card-emphasis">
+                        <span class="input-group-text card-emphasis"></span>
+                    </div>
+                    <div class="input-group-prepend card-emphasis">
+                        <span class="input-group-text card-emphasis"></span>
+                    </div>
+
+                    <button type="submit" class="btn btn-save btn-width card-emphasis">Save</button>
+                </div>
+
             </form>
         </div>
     </div>

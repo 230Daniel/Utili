@@ -3,20 +3,26 @@
 @using Discord.Rest
 @model UtiliSite.Pages.Dashboard.MessageFilterModel
 @{
-    Layout = "Shared/_Layout.cshtml";
-}
-
-@{
-    if (ViewData["authorised"] == null || !(bool)ViewData["authorised"])
+    if (ViewData["guild"] == null)
     {
         return;
     }
+
+    Layout = "Shared/_Layout.cshtml";
+    ViewData["Title"] = "Message Filter - Utili Dashboard";
 
     List<MessageFilterRow> messageFilterRows = (List<MessageFilterRow>)ViewData["messageFilterRows"];
     RestGuild guild = (RestGuild)ViewData["Guild"];
     List<RestTextChannel> channels = (List<RestTextChannel>)ViewData["channels"];
     List<RestTextChannel> nonMessageFilterChannels = (List<RestTextChannel>)ViewData["nonMessageFilterChannels"];
 }
+
+<div class="jumbotron jumbotron-fluid">
+    <div class="container">
+        <h1 class="display-4 page-heading">Message Filter</h1>
+        <p class="lead">Only allows certain types of message in a channel</p>
+    </div>
+</div>
 
 <div class="dropdown">
     <button class="btn btn-secondary dropdown-toggle" type="button" data-toggle="dropdown" id="dropdownAddChannel" aria-haspopup="true" aria-expanded="false">
@@ -34,22 +40,28 @@
 
     </div>
 </div>
+
 <div class="row">
 @foreach (MessageFilterRow row in messageFilterRows)
 {
     string channelName = channels.First(x => x.Id == row.ChannelId).Name;
     <div class="autopurge-card pb-4">
         <div class="col-md-12">
-            <div class="card" style="width: 18rem;">
+            <div class="card card-settings">
                 <form name="form-@row.Id" method="post">
 
                     <input type="hidden" name="rowId" value="@row.Id" />
 
                     <div class="input-group flex-nowrap">
-                        <div class="input-group-prepend">
-                            <span class="input-group-text">#</span>
-                        </div>
-                        <input type="text" class="form-control" style="background: unset;" value="@channelName" readonly>
+
+                        <input type="text" class="form-control card-emphasis" style="" value="@channelName" readonly>
+
+                        <button type="submit" name="noajax" asp-page-handler="Remove" class="btn btn-remove card-emphasis">
+                            <svg width="38px" height="38px" viewBox="0 0 16 16" class="bi bi-x" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                <path fill-rule="evenodd" d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z" />
+                            </svg>
+                        </button>
+
                     </div>
 
                     <div class="input-group flex-nowrap">
@@ -58,7 +70,7 @@
                             <span class="input-group-text">Mode</span>
                         </div>
 
-                        <select class="custom-select" name="mode">
+                        <select class="custom-select card-component" name="mode">
                             <!option value="0" @MessageFilterModel.GetIsSelected(0, row)>All</!option>
                             <!option value="1" @MessageFilterModel.GetIsSelected(1, row)>Images</!option>
                             <!option value="2" @MessageFilterModel.GetIsSelected(2, row)>Videos</!option>
@@ -75,12 +87,18 @@
                         <div class="input-group-prepend">
                             <span class="input-group-text">RegEx</span>
                         </div>
-                        <input type="text" name="complex" class="form-control" style="background: unset;" value="@row.Complex.Value">
+                        <input type="text" name="complex" class="form-control card-component" value="@row.Complex.Value">
                     </div>
 
                     <div class="input-group flex-nowrap">
-                        <button type="submit" class="btn btn-success">Save</button>
-                        <button type="submit" name="noajax" asp-page-handler="Remove" class="btn btn-danger">Remove</button>
+                        <div class="input-group-prepend card-emphasis">
+                            <span class="input-group-text card-emphasis"></span>
+                        </div>
+                        <div class="input-group-prepend card-emphasis">
+                            <span class="input-group-text card-emphasis"></span>
+                        </div>
+
+                        <button type="submit" class="btn btn-save btn-width card-emphasis">Save</button>
                     </div>
                 </form>
             </div>

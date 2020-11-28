@@ -3,7 +3,7 @@
     document.getElementById("main-nav").setAttribute("hidden", "");
     document.getElementById("success").removeAttribute("hidden");
     setTimeout(() => {
-        document.getElementById("navbar").style.backgroundColor = "#fff";
+        document.getElementById("navbar").style.backgroundColor = "#e9ecef";
         document.getElementById("success").setAttribute("hidden", "");
         document.getElementById("main-nav").removeAttribute("hidden");
     }, 2500);
@@ -14,7 +14,7 @@ function errorNotificationTooFast() {
     document.getElementById("main-nav").setAttribute("hidden", "");
     document.getElementById("error-too-fast").removeAttribute("hidden");
     setTimeout(() => {
-        document.getElementById("navbar").style.backgroundColor = "#fff";
+        document.getElementById("navbar").style.backgroundColor = "#e9ecef";
         document.getElementById("error-too-fast").setAttribute("hidden", "");
         document.getElementById("main-nav").removeAttribute("hidden");
     }, 2500);
@@ -25,7 +25,7 @@ function errorNotificationFailure() {
     document.getElementById("main-nav").setAttribute("hidden", "");
     document.getElementById("error-failure").removeAttribute("hidden");
     setTimeout(() => {
-        document.getElementById("navbar").style.backgroundColor = "#fff";
+        document.getElementById("navbar").style.backgroundColor = "#e9ecef";
         document.getElementById("error-failure").setAttribute("hidden", "");
         document.getElementById("main-nav").removeAttribute("hidden");
     }, 2500);

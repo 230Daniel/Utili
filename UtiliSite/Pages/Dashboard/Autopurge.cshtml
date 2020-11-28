@@ -9,6 +9,7 @@
     }
 
     Layout = "Shared/_Layout.cshtml";
+    ViewData["Title"] = "Autopurge - Utili Dashboard";
 
     List<AutopurgeRow> autopurgeRows = (List<AutopurgeRow>)ViewData["autopurgeRows"];
     RestGuild guild = (RestGuild)ViewData["Guild"];
@@ -23,6 +24,7 @@
         <p class="lead">Automatically deletes messages</p>
     </div>
 </div>
+
 <div class="dropdown">
     <button class="btn btn-secondary dropdown-toggle" type="button" data-toggle="dropdown" id="dropdownAddChannel" aria-haspopup="true" aria-expanded="false">
         Add channel
@@ -46,7 +48,7 @@
         string channelName = channels.First(x => x.Id == row.ChannelId).Name;
         <div class="pb-4">
             <div class="col-md-12">
-                <div class="card" style="width: 18rem;">
+                <div class="card-settings">
                     <form name="form-@row.Id" method="post">
 
                         <input type="hidden" name="rowId" value="@row.Id" />
@@ -92,8 +94,6 @@
                             </div>
 
                             <button type="submit" class="btn btn-save btn-width card-emphasis">Save</button>
-
-
                         </div>
                     </form>
                 </div>

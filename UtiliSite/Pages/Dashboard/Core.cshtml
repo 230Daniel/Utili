@@ -1,64 +1,63 @@
 ﻿@page "{guild?}/core"
 @model UtiliSite.Pages.Dashboard.CoreModel
 @{
-    Layout = "Shared/_Layout.cshtml";
-}
-
-@{
-    if (ViewData["authorised"] == null || !(bool)ViewData["authorised"])
+    if (ViewData["guild"] == null)
     {
         return;
     }
+
+    Layout = "Shared/_Layout.cshtml";
+    ViewData["Title"] = "Utili Dashboard";
+
+    string nickname = ViewData["nickname"].ToString();
+    string prefix = ViewData["prefix"].ToString();
 }
-    <div class="card">
+
+<div class="jumbotron jumbotron-fluid">
+    <div class="container">
+        <h1 class="display-4 page-heading">Utili</h1>
+        <p class="lead">Configure Utili's features using the sidebar</p>
+    </div>
+</div>
+
+<div class="pb-2">
+    <div class="card card-settings">
         <form name="form-main" method="post">
+
+            <input type="text" class="form-control card-emphasis" style="" value="Settings" readonly>
+
             <div class="input-group flex-nowrap">
-                <div class="input-group-prepend">
-                    <span class="input-group-text">Nickname</span>
+                <div class="input-group-prepend ">
+                    <span class="input-group-text voicelink-prepend">Nickname</span>
                 </div>
-                <input type="text" name="nickname" class="form-control" style="" value="@ViewData["nickname"]" readonly>
+                <div class="input-group-text">
+                    <input type="text" name="nickname" class="form-control card-component" value="@nickname">
+                </div>
             </div>
 
             <div class="input-group flex-nowrap">
-                <div class="input-group-prepend">
-                    <span class="input-group-text">Prefix</span>
+                <div class="input-group-prepend ">
+                    <span class="input-group-text voicelink-prepend">Prefix</span>
                 </div>
-                <input type="text" name="prefix" class="form-control" style="" value="@ViewData["prefix"]" readonly>
+                <div class="input-group-text">
+                    <input type="text" name="prefix" class="form-control card-component" value="@prefix">
+                </div>
             </div>
+
             <div class="input-group flex-nowrap">
-                <button type="submit" class="btn btn-success btn-width">Save</button>
+                <div class="input-group-prepend card-emphasis">
+                    <span class="input-group-text card-emphasis"></span>
+                </div>
+                <div class="input-group-prepend card-emphasis">
+                    <span class="input-group-text card-emphasis"></span>
+                </div>
+
+                <button type="submit" class="btn btn-save btn-width card-emphasis">Save</button>
             </div>
         </form>
     </div>
+</div>
 
-
-    <div aria-live="polite" aria-atomic="true" style="position: relative; min-height: 20px;">
-        <div style="position: absolute; top: 0; right: 0;">
-            <div class="toast" role="alert" data-delay="5000" aria-live="assertive" aria-atomic="true" style="width: 500px;" id="success">
-                <div class="toast-body">
-                    <strong>Changes saved</strong> <br />
-                    Your changes may take up to 30 seconds to take effect
-                </div>
-            </div>
-
-            <div class="toast" role="alert" data-delay="5000" aria-live="assertive" aria-atomic="true" style="width: 500px;" id="ratelimit">
-                <div class="toast-body">
-                    <strong>Error</strong> <br />
-                    You're doing that too fast, please wait between requests
-                </div>
-            </div>
-
-            <div class="toast" role="alert" data-delay="5000" aria-live="assertive" aria-atomic="true" style="width: 500px;" id="error">
-                <div class="toast-body">
-                    <strong>Error</strong> <br />
-                    Something went wrong, please try again later
-                </div>
-            </div>
-        </div>
-    </div>
-
-
-
-        <script src="~/lib/jquery/dist/jquery.js"></script>
-        <script src="~/lib/jquery/dist/jquery.min.js"></script>
-        <script src="~/js/dashboard/submit.js" asp-append-version="true"></script>
+<script src="~/lib/jquery/dist/jquery.js"></script>
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="~/js/dashboard/submit.js" asp-append-version="true"></script>
