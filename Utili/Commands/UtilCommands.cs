@@ -13,22 +13,90 @@ namespace Utili.Commands
 {
     public class UtilCommands : ModuleBase<SocketCommandContext>
     {
-        [Command("Prune"), Alias("Purge", "Clear"), Cooldown(10), Permission(Perm.ManageMessages)]
-        public async Task Prune(int count)
+        [Command("Prune"), Alias("Purge", "Clear")]
+        public async Task Prune([Remainder] string argsString = null)
         {
-            if (BotPermissions.IsMissingPermissions(Context.Channel, new[] {
-                    ChannelPermission.ViewChannel, 
-                    ChannelPermission.ReadMessageHistory,
-                    ChannelPermission.ManageMessages},
-                out string missingPermissions))
+            if (string.IsNullOrEmpty(argsString))
             {
-                await SendFailureAsync(Context.Channel, "Error",
-                    $"I'm missing the following permissions: {missingPermissions}");
+                await SendInfoAsync(Context.Channel, "Prune",
+                    "Add one or more of the following arguments in any order to delete messages\n" +
+                    "[amount] - The amount of messages to delete (default 100)\n" +
+                    "before [message id] - Only messages before a particular message\n" +
+                    "after [message id] - Only messages after a particular message\n\n" +
+                    "[How do I get a message ID?](https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID-)");
+                return;
+            }
+
+            SocketTextChannel channel = Context.Channel as SocketTextChannel;
+
+            string[] args = argsString.Split(" ");
+
+            uint count = 0;
+            bool countSet = false;
+
+            IMessage afterMessage = null;
+            IMessage beforeMessage = null;
+
+            for (int i = 0; i < args.Length; i++)
+            {
+                if (uint.TryParse(args[i], out uint newCount))
+                {
+                    count = newCount;
+                    countSet = true;
+                }
+                else
+                {
+                    switch (args[i].ToLower())
+                    {
+                        case "before":
+                            try
+                            {
+                                i++;
+                                ulong messageId = ulong.Parse(args[i]);
+                                beforeMessage = await Context.Channel.GetMessageAsync(messageId);
+                                if (beforeMessage == null) throw new Exception();
+                                break;
+                            }
+                            catch
+                            {
+                                await SendFailureAsync(channel, "Error", "Invalid message ID after \"before\"\n[How do I get a message ID?](https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID-)");
+                                return;
+                            }
+
+                        case "after":
+                            try
+                            {
+                                i++;
+                                ulong messageId = ulong.Parse(args[i]);
+                                afterMessage = await Context.Channel.GetMessageAsync(messageId);
+                                if (afterMessage == null) throw new Exception();
+                                break;
+                            }
+                            catch
+                            {
+                                await SendFailureAsync(channel, "Error", "Invalid message ID after \"after\"\n[How do I get a message ID?](https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID-)");
+                                return;
+                            }
+                            
+                        default:
+                            await SendFailureAsync(channel, "Error", $"Invalid argument \"{args[i].ToLower()}\"");
+                            return;
+                    }
+                }
+            }
+
+            if(afterMessage != null && beforeMessage != null && afterMessage.Timestamp >= beforeMessage.Timestamp)
+            {
+                await SendFailureAsync(channel, "Error", "There are no messages between the after and before messages");
+                return;
             }
 
             await Context.Message.DeleteAsync();
+            Task delay = Task.Delay(800);
 
             string content = "";
+
+            if(!countSet) count = 100;
 
             if (count > 1000)
             {
@@ -36,132 +104,46 @@ namespace Utili.Commands
                 content = "For premium servers, you can delete up to 1000 messages at once\n";
             }
 
-            else if (!Premium.IsPremium(Context.Guild.Id) && count > 200)
+            else if (!Premium.IsPremium(Context.Guild.Id) && count > 100)
             {
                 count = 100;
                 content = "For non-premium servers, you can delete up to 100 messages at once\n";
             }
 
-            List<IMessage> messages = (await Context.Channel.GetMessagesAsync(count).FlattenAsync()).ToList();
-            int pinned = messages.RemoveAll(x => x.IsPinned);
-            int outdated = messages.RemoveAll(x => x.CreatedAt.UtcDateTime < DateTime.UtcNow - TimeSpan.FromDays(13.9));
+            await delay;
 
-            if (pinned == 1)
+            List<IMessage> messages;
+            if(afterMessage != null) messages = (await channel.GetMessagesAsync(afterMessage.Id, Direction.After, (int)count).FlattenAsync()).ToList();
+            else if (beforeMessage != null) messages = (await channel.GetMessagesAsync(beforeMessage, Direction.Before, (int)count).FlattenAsync()).ToList();
+            else messages = (await channel.GetMessagesAsync((int)count).FlattenAsync()).ToList();
+
+            messages = messages.OrderBy(x => x.Timestamp.UtcDateTime).ToList();
+            if (beforeMessage != null)
             {
-                content += $"{pinned} message was not deleted because it is pinned";
-            }
-            else if (pinned > 1)
-            {
-                content += $"{pinned} messages were not deleted because they are pinned";
-            }
-
-            if (outdated == 1)
-            {
-                content += $"{outdated} message was not deleted because it is older than 14 days";
-            }
-            else if (outdated > 1)
-            {
-                content += $"{outdated} messages were not deleted because they are older than 14 days";
-            }
-            
-            SocketTextChannel channel = Context.Channel as SocketTextChannel;
-
-            await channel.DeleteMessagesAsync(messages);
-
-            string title = $"{messages.Count} messages deleted";
-            if (messages.Count == 1)
-            {
-                title = $"{messages.Count} message deleted";
-            }
-
-            RestUserMessage sentMessage = await SendSuccessAsync(Context.Channel, title, content);
-
-            await Task.Delay(5000);
-
-            await sentMessage.DeleteAsync();
-        }
-
-        [Command("PruneTo"), Alias("PurgeTo", "ClearTo"), Cooldown(10), Permission(Perm.ManageMessages)]
-        public async Task PruneTo(ulong messageId)
-        {
-            if (BotPermissions.IsMissingPermissions(Context.Channel, new[] {
-                    ChannelPermission.ViewChannel, 
-                    ChannelPermission.ReadMessageHistory,
-                    ChannelPermission.ManageMessages},
-                out string missingPermissions))
-            {
-                await SendFailureAsync(Context.Channel, "Error",
-                    $"I'm missing the following permissions: {missingPermissions}");
-            }
-
-            await Context.Message.DeleteAsync();
-
-            IMessage message = null;
-            try { message = await Context.Channel.GetMessageAsync(messageId); } catch { }
-
-            if (message == null)
-            {
-                await SendFailureAsync(Context.Channel, "Error",
-                    $"No message was found in <#{Context.Channel.Id}> with ID {messageId}\n[How do I get a message ID?](https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID-)");
-                return;
-            }
-
-            int count = 100;
-            if (Premium.IsPremium(Context.Guild.Id)) count = 1000;
-
-            string content = "";
-            
-            List<IMessage> messages = (await Context.Channel.GetMessagesAsync(count).FlattenAsync()).ToList();
-
-            if(messages.Any(x => x.Id == message.Id))
-            {
-                int index = messages.FindIndex(x => x.Id == message.Id);
-                messages = messages.Take(index).ToList();
-            }
-            else
-            {
-                if (count == 100) content = "For non-premium servers, you can delete up to 100 messages at once\n";
-                else content = "For premium servers, you can delete up to 1000 messages at once\n";
+                if (messages.Any(x => x.Id == beforeMessage.Id))
+                {
+                    int index = messages.FindIndex(x => x.Id == beforeMessage.Id);
+                    messages.RemoveRange(index, messages.Count - index);
+                }
             }
 
             int pinned = messages.RemoveAll(x => x.IsPinned);
             int outdated = messages.RemoveAll(x => x.CreatedAt.UtcDateTime < DateTime.UtcNow - TimeSpan.FromDays(13.9));
 
-            if (pinned == 1)
-            {
-                content += $"{pinned} message was not deleted because it is pinned\n";
-            }
-            else if (pinned > 1)
-            {
-                content += $"{pinned} messages were not deleted because they are pinned\n";
-            }
-
-            if (outdated == 1)
-            {
-                content += $"{outdated} message was not deleted because it is older than 14 days\n";
-            }
-            else if (outdated > 1)
-            {
-                content += $"{outdated} messages were not deleted because they are older than 14 days\n";
-            }
-            
-            SocketTextChannel channel = Context.Channel as SocketTextChannel;
+            if (pinned == 1) content += $"{pinned} message was not deleted because it is pinned";
+            else if (pinned > 1) content += $"{pinned} messages were not deleted because they are pinned";
+            if (outdated == 1) content += $"{outdated} message was not deleted because it is older than 14 days";
+            else if (outdated > 1) content += $"{outdated} messages were not deleted because they are older than 14 days";
 
             await channel.DeleteMessagesAsync(messages);
 
             string title = $"{messages.Count} messages deleted";
-            if (messages.Count == 1)
-            {
-                title = $"{messages.Count} message deleted";
-            }
+            if (messages.Count == 1) title = $"{messages.Count} message deleted";
 
             RestUserMessage sentMessage = await SendSuccessAsync(Context.Channel, title, content);
-
             await Task.Delay(5000);
-
             await sentMessage.DeleteAsync();
         }
-
 
         [Command("React"), Alias("AddReaction", "AddEmoji"), Cooldown(2), Permission(Perm.ManageMessages)]
         public async Task React(ulong messageId, [Remainder] string emojiString)

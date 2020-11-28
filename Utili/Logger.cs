@@ -13,7 +13,7 @@ namespace Utili
 
         private Timer Timer { get; set; }
         private string Filename { get; set;}
-        private StringBuilder Buffer { get; set; }
+        private StringBuilder Buffer { get; set; } = new StringBuilder();
 
         public void Initialise()
         {

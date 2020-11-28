@@ -53,7 +53,7 @@ namespace Utili
             {
                 LogSeverity = LogSeverity.Dbug
             };
-            _logger.Initialise();
+            //_logger.Initialise();
             _logger.LogEmpty(true);
 
             _logger.Log("Main", "Downloading database cache", LogSeverity.Info);
@@ -78,7 +78,7 @@ namespace Utili
             _client = new DiscordShardedClient(shardIds, new DiscordSocketConfig 
             {
                 TotalShards = _totalShards,
-                MessageCacheSize = 5,
+                MessageCacheSize = 0,
                 ExclusiveBulkDelete = true,
                 LogLevel = Discord.LogSeverity.Info,
                 AlwaysDownloadUsers = false,
@@ -125,14 +125,14 @@ namespace Utili
             await _client.LoginAsync(TokenType.Bot, _config.Token);
             await _client.StartAsync();
 
-            _pingTest.Start();
-            _dbPingTest.Start();
+            //_pingTest.Start();
+            //_dbPingTest.Start();
 
-            _autopurge.Start();
-            _voiceLink.Start();
-            _voiceRoles.Start();
-            _inactiveRole.Start();
-            _notices.Start();
+            //_autopurge.Start();
+            //_voiceLink.Start();
+            //_voiceRoles.Start();
+            //_inactiveRole.Start();
+            //_notices.Start();
 
             await Task.Delay(-1);
         }
