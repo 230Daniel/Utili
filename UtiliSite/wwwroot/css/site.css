@@ -95,43 +95,102 @@ body {
     height: inherit;
     min-height: 100vh;
 }
+img.guild-icon {
+    height: 20vh;
+    width: 20vh;
+    border-radius: 50% !important;
+    margin: auto;
+    margin-top: 3vh;
+    margin-bottom: 0vh;
+}
 
 /* Making things look neat.
 -------------------------------------------------- */
 * {
     border-radius: 0 !important;
 }
+.jumbotron {
+    background-color: inherit;
+}
+.page-heading.display-4 {
+    color: #fff;
+}
+.lead {
+    color: #e9ecef;
+}
 .bg-dark {
     background-color: #292c2f !important;
+}
+.input-group-text{
+    height:38px;
 }
 .input-group-text {
     width: 100px;
     text-align: center;
+    background-color:#fff;
+    border-style:initial;
 }
-
+.card-emphasis{
+    background-color: #e9ecef !important;
+    border-style: initial;
+}
+.card-component {
+    background-color: #fff;
+    border-style: initial;
+}
+.list-group-item {
+    border-bottom-style: initial;
+    border-top-style: initial;
+    
+}
 .list-group-item.active {
-    background-color: #d86335;
-    border-color: #d86335;
+    border-left-width: 2px;
+    border-left-style: solid;
+    border-left-color: #4287f5;
+    border-bottom-style: initial;
+    border-top-style: initial;
 }
-.autopurge-card{
-    width: 45vh;
+.list-input{
+    border-style:hidden;
+}
+.voicelink-prepend {
+    width:170px;
 }
 .btn-width{
     width: 100px;
 }
-.btn-success {
-    border-color: #d86335;
-    background-color: #495057;
+.btn-save {
+    border-color: #4287f5;
+    border-style: initial;
+    background-color: none;
+    color: #495057;
 }
-.btn-success:hover {
-    background-color: #d86335;
-    border-color: #d86335;
+.btn-save:hover {
+    background-color:#d0d0d0 !important;
+    border-style: initial;
 }
-.btn-danger {
-    background-color: #d86335;
-    border-color: #d86335;
+.btn-remove {
+    background: none;
+    border-style: initial;
+    color: #495057;
+    width:38px;
+    height:38px;
+    padding:0;
 }
-.btn-danger:hover {
-    background-color: #e0480d;
-    border-color: #e0480d;
+.btn-remove:hover {
+    background-color: #d0d0d0 !important;
+    color: #495057;
+    
+}
+.card-btn{
+    width:90px;
+    height:28px;
+    margin:auto;
+}
+.checkbox{
+    width:1em;
+}
+
+#navbar{
+    transition: background-color 1s;
 }

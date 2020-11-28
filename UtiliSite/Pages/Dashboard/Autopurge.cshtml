@@ -19,7 +19,7 @@
 }
 <div class="jumbotron jumbotron-fluid">
     <div class="container">
-        <h1 class="display-4">Autopurge</h1>
+        <h1 class="display-4 page-heading">Autopurge</h1>
         <p class="lead">Blah blah blah</p>
     </div>
 </div>
@@ -52,17 +52,22 @@
                         <input type="hidden" name="rowId" value="@row.Id" />
 
                         <div class="input-group flex-nowrap">
-                            <div class="input-group-prepend">
-                                <span class="input-group-text">#</span>
-                            </div>
-                            <input type="text" class="form-control" style="" value="@channelName" readonly>
+
+                            <input type="text" class="form-control card-emphasis" style="" value="# @channelName" readonly>
+                            
+                            <button type="submit" name="noajax" asp-page-handler="Remove" class="btn btn-remove card-emphasis">
+                                <svg width="38px" height="38px" viewBox="0 0 16 16" class="bi bi-x" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                    <path fill-rule="evenodd" d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z" />
+                                </svg>
+                            </button>
+
                         </div>
 
                         <div class="input-group flex-nowrap">
                             <div class="input-group-prepend">
                                 <span class="input-group-text">Threshold</span>
                             </div>
-                            <input type="text" name="timespan" class="form-control" value="@row.Timespan">
+                            <input type="text" name="timespan" class="form-control card-component" value="@row.Timespan">
                         </div>
 
                         <div class="input-group flex-nowrap">
@@ -71,7 +76,7 @@
                                 <span class="input-group-text">Mode</span>
                             </div>
 
-                            <select class="custom-select" name="mode">
+                            <select class="custom-select card-component" name="mode">
                                 <!option value="0" @AutopurgeModel.GetIsSelected(0, row)>All messages</!option>
                                 <!option value="1" @AutopurgeModel.GetIsSelected(1, row)>Bot messages</!option>
                                 <!option value="2" @AutopurgeModel.GetIsSelected(2, row)>Disabled</!option>
@@ -79,8 +84,16 @@
                         </div>
 
                         <div class="input-group flex-nowrap">
-                            <button type="submit" class="btn btn-success btn-width">Save</button>
-                            <button type="submit" name="noajax" asp-page-handler="Remove" class="btn btn-danger btn-width">Remove</button>
+                            <div class="input-group-prepend card-emphasis">
+                                <span class="input-group-text card-emphasis"></span>
+                            </div>
+                            <div class="input-group-prepend card-emphasis">
+                                <span class="input-group-text card-emphasis"></span>
+                            </div>
+
+                            <button type="submit" class="btn btn-save btn-width card-emphasis">Save</button>
+
+
                         </div>
                     </form>
                 </div>

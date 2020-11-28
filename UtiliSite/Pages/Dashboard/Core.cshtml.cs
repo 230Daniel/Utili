@@ -13,7 +13,7 @@ namespace UtiliSite.Pages.Dashboard
             ViewData["authorised"] = true;
 
             ViewData["mainDashboardUrl"] = RedirectHelper.AddToUrl(HttpContext.Request.Host.ToString(), "dashboard");
-            ViewData["guildName"] = auth.Guild.Name;
+            ViewData["guild"] = auth.Guild;
             ViewData["Title"] = $"{auth.Guild.Name} - ";
 
             ViewData["prefix"] = Misc.GetPrefix(auth.Guild.Id);

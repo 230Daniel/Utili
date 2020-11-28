@@ -17,67 +17,90 @@
     List<RestVoiceChannel> nonExcludedChannels = (List<RestVoiceChannel>)ViewData["nonExcludedChannels"];
     VoiceLinkRow metaRow = (VoiceLinkRow) ViewData["metaRow"];
 }
+    <div class="pb-2">
+        <div class="card">
+            <form name="form-enable" method="post">
+                <div class="input-group flex-nowrap">
 
-<form name="form-enable" method="post">
-    <div class="input-group flex-nowrap">
+                    <div class="input-group-prepend ">
+                        <span class="input-group-text voicelink-prepend">Enable</span>
+                    </div>
+                    <div class="input-group-text">
+                        <input type="checkbox" name="enabled" class="form-control checkbox" @VoiceLinkModel.GetIsChecked(metaRow.Enabled)>
+                    </div>
 
-        <div class="input-group-prepend">
-            <span class="input-group-text">Enable</span>
+                </div>
+                <div class="input-group flex-nowrap">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text voicelink-prepend">Delete Text Channels</span>
+                    </div>
+                    <div class="input-group-text">
+                        <input type="checkbox" name="deleteChannels" class="form-control checkbox" @VoiceLinkModel.GetIsChecked(metaRow.DeleteChannels)>
+                    </div> 
+                </div>
+                <div class="input-group flex-nowrap">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text voicelink-prepend">Prefix</span>
+                    </div>
+                    <input type="text" name="prefix" class="form-control" value="@metaRow.Prefix.Value">
+                </div>
+                <button type="submit" class="btn btn-success">Save</button>
+            </form>
         </div>
-        <input type="checkbox" name="enabled" class="form-control" @VoiceLinkModel.GetIsChecked(metaRow.Enabled)>
-
-        <div class="input-group-prepend">
-            <span class="input-group-text">Delete Text Channels</span>
-        </div>
-        <input type="checkbox" name="deleteChannels" class="form-control" @VoiceLinkModel.GetIsChecked(metaRow.DeleteChannels)>
-
-        <div class="input-group-prepend">
-            <span class="input-group-text">Prefix</span>
-        </div>
-        <input type="text" name="prefix" class="form-control" value="@metaRow.Prefix.Value">
-
-
-        <button type="submit" class="btn btn-success">Save</button>
     </div>
-</form>
+    <div class="dropdown">
+        <button class="btn btn-secondary dropdown-toggle" type="button" data-toggle="dropdown" id="dropdownAddChannel" aria-haspopup="true" aria-expanded="false">
+            Exclude channel
+        </button>
+        <div class="dropdown-menu" aria-labelledby="dropdownExcludeChannel">
+            <div class="row">
+                @foreach (RestVoiceChannel channel in nonExcludedChannels)
+                {
+                <div class="col-md-12">
+                    <div class="card" style="width: 18rem;">
+                        <form method="post">
+                            <input type="hidden" name="channelId" value="@channel.Id" />
+                            <button class="dropdown-item" asp-page-handler="Exclude" type="submit">@channel.Name</button>
+                        </form>
+                    </div>
+                </div>
+                        }
+                    
+                </div>
+    </div>
 
-<div class="dropdown">
-    <button class="btn btn-secondary dropdown-toggle" type="button" data-toggle="dropdown" id="dropdownAddChannel" aria-haspopup="true" aria-expanded="false">
-        Exclude channel
-    </button>
-    <div class="dropdown-menu" aria-labelledby="dropdownExcludeChannel">
-
-        @foreach (RestVoiceChannel channel in nonExcludedChannels)
+        @foreach (RestVoiceChannel excludedChannel in excludedChannels)
         {
-            <form method="post">
-                <input type="hidden" name="channelId" value="@channel.Id" />
-                <button class="dropdown-item" asp-page-handler="Exclude" type="submit">@channel.Name</button>
+            <form name="form-@excludedChannel.Id" method="post">
+
+                <input type="hidden" name="channelId" value="@excludedChannel.Id" />
+
+                <div class="input-group flex-nowrap">
+
+                    <div class="input-group-prepend list-input card-emphasis">
+                        <span class="input-group-text list-input card-emphasis">
+                            <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-volume-up-fill" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M11.536 14.01A8.473 8.473 0 0 0 14.026 8a8.473 8.473 0 0 0-2.49-6.01l-.708.707A7.476 7.476 0 0 1 13.025 8c0 2.071-.84 3.946-2.197 5.303l.708.707z" />
+                                <path d="M10.121 12.596A6.48 6.48 0 0 0 12.025 8a6.48 6.48 0 0 0-1.904-4.596l-.707.707A5.483 5.483 0 0 1 11.025 8a5.483 5.483 0 0 1-1.61 3.89l.706.706z" />
+                                <path d="M8.707 11.182A4.486 4.486 0 0 0 10.025 8a4.486 4.486 0 0 0-1.318-3.182L8 5.525A3.489 3.489 0 0 1 9.025 8 3.49 3.49 0 0 1 8 10.475l.707.707z" />
+                                <path fill-rule="evenodd" d="M6.717 3.55A.5.5 0 0 1 7 4v8a.5.5 0 0 1-.812.39L3.825 10.5H1.5A.5.5 0 0 1 1 10V6a.5.5 0 0 1 .5-.5h2.325l2.363-1.89a.5.5 0 0 1 .529-.06z" />
+                            </svg>
+                        </span>
+                    </div>
+                    <input type="text" class="form-control input-group-text list-input text-left" value="@excludedChannel.Name" readonly>
+                    <button type="submit" name="noajax" asp-page-handler="Remove" class="btn btn-remove card-emphasis">
+                        <svg width="38px" height="38px" viewBox="0 0 16 16" class="bi bi-x" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                            <path fill-rule="evenodd" d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z" />
+                        </svg>
+                    </button>
+
+                </div>
+
+               
             </form>
         }
-
-    </div>
-</div>
-
-@foreach (RestVoiceChannel excludedChannel in excludedChannels)
-{
-    <form name="form-@excludedChannel.Id" method="post">
-
-        <input type="hidden" name="channelId" value="@excludedChannel.Id" />
-
-        <div class="input-group flex-nowrap">
-
-            <div class="input-group-prepend">
-                <span class="input-group-text">🔊</span>
-            </div>
-            <input type="text" class="form-control" style="background: unset;" value="@excludedChannel.Name" readonly>
         </div>
 
-        <div class="input-group flex-nowrap">
-            <button type="submit" name="noajax" asp-page-handler="Remove" class="btn btn-danger">Remove</button>
-        </div>
-    </form>
-}
-
-<script src="~/lib/jquery/dist/jquery.js"></script>
-<script src="~/lib/jquery/dist/jquery.min.js"></script>
-<script src="~/js/dashboard/submit.js" asp-append-version="true"></script>
+        <script src="~/lib/jquery/dist/jquery.js"></script>
+        <script src="~/lib/jquery/dist/jquery.min.js"></script>
+        <script src="~/js/dashboard/submit.js" asp-append-version="true"></script>
