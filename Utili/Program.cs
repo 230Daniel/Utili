@@ -63,7 +63,7 @@ namespace Utili
 
             try
             {
-                await new Program().MainAsync();
+                await MainAsync();
             }
             catch(Exception e)
             {
@@ -73,7 +73,7 @@ namespace Utili
             // TODO: Auto-restart or Pterodactyl equivalent
         }
 
-        public async Task MainAsync()
+        public static async Task MainAsync()
         {
             _logger.LogEmpty();
 

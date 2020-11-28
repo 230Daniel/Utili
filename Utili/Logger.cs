@@ -57,8 +57,8 @@ namespace Utili
 
         public void LogEmpty(bool fileOnly = false)
         {
-            if(!fileOnly) Console.Write("\n");
-            Buffer.Append("\n");
+            if(!fileOnly) Console.Write('\n');
+            Buffer.Append('\n');
         }
 
         public void LogRaw(string message)
