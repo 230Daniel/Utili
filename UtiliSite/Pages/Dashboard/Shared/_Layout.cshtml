@@ -25,7 +25,7 @@
         <div class="container" id="error-failure" hidden>
             <span class="notification text-light">Something went wrong</span>
         </div>
-        <div class="container" id="hide">
+        <div class="container" id="main-nav">
             <a class="navbar-brand" asp-area="" asp-page="/Index">Utili</a>
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                     aria-expanded="false" aria-label="Toggle navigation">
@@ -42,10 +42,10 @@
     </nav>
     <div class="d-flex bg-dark" id="wrapper">
         <div class="border-right" id="sidebar-wrapper">
-            <div class="card" style="width:30vh; height:30vh;">
-                <img src="@((ViewData["guild"] as RestGuild).IconUrl ?? "https://cdn.discordapp.com/embed/avatars/0.png")" class="guild-icon card-img-top" alt="...">
+            <div class="card" style="width:30vh; height:30vh; background-color: #292c2f; border: 0;">
+                <img src="@DiscordModule.GetGuildIconUrl(ViewData["guild"] as RestGuild)" class="guild-icon card-img-top" alt="Server Icon">
                 <div class="card-body" style="padding-top:1vh;">
-                    <p class="card-text text-center">@((ViewData["guild"] as RestGuild).Name)</p>
+                    <p class="card-text text-light text-center">@((ViewData["guild"] as RestGuild).Name)</p>
                 </div>
             </div>
             <div class="list-group list-group-flush">
@@ -64,13 +64,8 @@
 
 
     </div>
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2020
-        </div>
-    </footer>
 
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     <script src="~/js/dashboard/notification.js" asp-append-version="true"></script>

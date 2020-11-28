@@ -162,7 +162,7 @@ img.guild-icon {
 .btn-save {
     border-color: #4287f5;
     border-style: initial;
-    background-color: none;
+    background-color: transparent;
     color: #495057;
 }
 .btn-save:hover {
@@ -200,4 +200,8 @@ img.guild-icon {
     display: block;
     display: flex;
     list-style: none;
+}
+
+.dropdown {
+    padding-bottom: 20px;
 }

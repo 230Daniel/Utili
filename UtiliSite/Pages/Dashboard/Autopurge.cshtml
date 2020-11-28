@@ -20,7 +20,7 @@
 <div class="jumbotron jumbotron-fluid">
     <div class="container">
         <h1 class="display-4 page-heading">Autopurge</h1>
-        <p class="lead">Blah blah blah</p>
+        <p class="lead">Automatically deletes messages</p>
     </div>
 </div>
 <div class="dropdown">
@@ -33,7 +33,7 @@
         {
             <form method="post">
                 <input type="hidden" name="channelId" value="@channel.Id" />
-                <button class="dropdown-item" asp-page-handler="Add" type="submit">#@channel.Name</button>
+                <button class="dropdown-item" asp-page-handler="Add" type="submit">@channel.Name</button>
             </form>
         }
 
@@ -44,7 +44,7 @@
     @foreach (AutopurgeRow row in autopurgeRows)
     {
         string channelName = channels.First(x => x.Id == row.ChannelId).Name;
-        <div class="autopurge-card pb-4">
+        <div class="pb-4">
             <div class="col-md-12">
                 <div class="card" style="width: 18rem;">
                     <form name="form-@row.Id" method="post">
@@ -53,7 +53,7 @@
 
                         <div class="input-group flex-nowrap">
 
-                            <input type="text" class="form-control card-emphasis" style="" value="# @channelName" readonly>
+                            <input type="text" class="form-control card-emphasis" style="" value="@channelName" readonly>
 
                             <button type="submit" name="noajax" asp-page-handler="Remove" class="btn btn-remove card-emphasis">
                                 <svg width="38px" height="38px" viewBox="0 0 16 16" class="bi bi-x" fill="currentColor" xmlns="http://www.w3.org/2000/svg">

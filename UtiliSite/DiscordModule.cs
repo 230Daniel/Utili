@@ -197,6 +197,26 @@ namespace UtiliSite
 
             return url;
         }
+
+        public static string GetGuildIconUrl(RestGuild guild)
+        {
+            string url = guild.IconUrl;
+            if (string.IsNullOrEmpty(url)) return "https://cdn.discordapp.com/embed/avatars/0.png";
+
+            url = url.Remove(url.Length - 4);
+            url += ".png?size=1024";
+            return url;
+        }
+
+        public static string GetGuildIconUrl(RestUserGuild guild)
+        {
+            string url = guild.IconUrl;
+            if (string.IsNullOrEmpty(url)) return "https://cdn.discordapp.com/embed/avatars/0.png";
+
+            url = url.Remove(url.Length - 4);
+            url += ".png?size=1024";
+            return url;
+        }
     }
 
     internal class DiscordCache

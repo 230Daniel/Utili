@@ -17,7 +17,7 @@
             <div class="col-sm">
                 <a href="@RedirectHelper.AddToUrl(ViewContext, guild.Id.ToString())">
                     <div class="card" style="width: 9rem;">
-                        <img src="@DiscordModule.SanitiseIconUrl(guild.IconUrl)" class="card-img-top" alt="...">
+                        <img src="@DiscordModule.GetGuildIconUrl(guild)" class="card-img-top" alt="...">
                         <div class="card-body">
                             <p class="card-text">@guild.Name</p>
                         </div>
