@@ -47,7 +47,7 @@ namespace UtiliSite
         {
             string path = viewContext.HttpContext.Request.Path;
 
-            if(path.ToLower().EndsWith(page) || path.ToLower().EndsWith(page + "/"))
+            if(path.ToLower().EndsWith("/" + page) || path.ToLower().EndsWith("/" + page + "/"))
             {
                 return "active";
             }

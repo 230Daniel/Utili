@@ -1,6 +1,7 @@
 ﻿@using Discord.Rest
 @if (ViewData["guild"] == null)
 {
+    IgnoreBody();
     return;
 }
 
@@ -54,6 +55,7 @@
                 <a href="@RedirectHelper.ChangeLastPage(ViewContext, "voicelink")" class="list-group-item list-group-item-action bg-dark @SidebarHelper.GetIsActive(ViewContext, "voicelink")">Voice Link</a>
                 <a href="@RedirectHelper.ChangeLastPage(ViewContext, "voiceroles")" class="list-group-item list-group-item-action bg-dark @SidebarHelper.GetIsActive(ViewContext, "voiceroles")">Voice Roles</a>
                 <a href="@RedirectHelper.ChangeLastPage(ViewContext, "messagefilter")" class="list-group-item list-group-item-action bg-dark @SidebarHelper.GetIsActive(ViewContext, "messagefilter")">Message Filter</a>
+                <a href="@RedirectHelper.ChangeLastPage(ViewContext, "roles")" class="list-group-item list-group-item-action bg-dark @SidebarHelper.GetIsActive(ViewContext, "roles")">Roles</a>
             </div>
         </div>
         <div style="margin-top: 3vh; margin-left: 3vh; margin-right: 3vh; margin-bottom: 3vh; ">

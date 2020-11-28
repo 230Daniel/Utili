@@ -209,3 +209,7 @@ img.guild-icon {
 .card-settings {
     width: 18rem;
 }
+
+body {
+    border-bottom: 0;
+}

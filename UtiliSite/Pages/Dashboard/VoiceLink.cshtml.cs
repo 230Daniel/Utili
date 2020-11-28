@@ -98,8 +98,7 @@ namespace UtiliSite.Pages.Dashboard
 
         public static string GetIsChecked(bool isChecked)
         {
-            if (isChecked) return "checked";
-            return "";
+            return isChecked ? "checked" : "";
         }
     }
 }

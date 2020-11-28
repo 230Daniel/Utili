@@ -221,7 +221,7 @@ namespace Database.Data
         public long Id { get; set; }
         public ulong GuildId { get; set; }
         public bool RolePersist { get; set; }
-        public List<ulong> JoinRoles { get; set; }
+        public List<ulong> JoinRoles { get; set; } = new List<ulong>();
 
         public RolesRow()
         {
