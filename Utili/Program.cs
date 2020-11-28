@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using System.Timers;
@@ -53,14 +54,21 @@ namespace Utili
             {
                 LogSeverity = LogSeverity.Dbug
             };
-            //_logger.Initialise();
+            _logger.Initialise();
             _logger.LogEmpty(true);
 
             _logger.Log("Main", "Downloading database cache", LogSeverity.Info);
             Database.Database.Initialise(true);
             _logger.Log("Main", "Database cache downloaded", LogSeverity.Info);
 
-            await new Program().MainAsync();
+            try
+            {
+                await new Program().MainAsync();
+            }
+            catch(Exception e)
+            {
+                _logger.ReportError("Main", e);
+            }
 
             // TODO: Auto-restart or Pterodactyl equivalent
         }
@@ -125,14 +133,14 @@ namespace Utili
             await _client.LoginAsync(TokenType.Bot, _config.Token);
             await _client.StartAsync();
 
-            //_pingTest.Start();
-            //_dbPingTest.Start();
+            _pingTest.Start();
+            _dbPingTest.Start();
 
-            //_autopurge.Start();
-            //_voiceLink.Start();
-            //_voiceRoles.Start();
-            //_inactiveRole.Start();
-            //_notices.Start();
+            _autopurge.Start();
+            _voiceLink.Start();
+            _voiceRoles.Start();
+            _inactiveRole.Start();
+            _notices.Start();
 
             await Task.Delay(-1);
         }
