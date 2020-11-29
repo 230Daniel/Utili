@@ -10,12 +10,13 @@ using Microsoft.CodeAnalysis.Scripting;
 using Utili.Commands;
 using static Utili.Program;
 using static Utili.MessageSender;
+using Utili.Features;
 
 namespace Utili.Features
 {
-    internal class RoslynEngine
+    internal static class Roslyn
     {
-        public async Task<RoslynResult> EvaluateAsync(string code, RoslynGlobals globals = null)
+        public static async Task<RoslynResult> EvaluateAsync(string code, RoslynGlobals globals = null)
         {
             ScriptOptions options = ScriptOptions.Default;
             options = options.WithImports(
@@ -54,7 +55,7 @@ namespace Utili.Features
         {
             RoslynGlobals globals = new RoslynGlobals(_client, Context);
 
-            RoslynResult result = await _roslyn.EvaluateAsync(code, globals);
+            RoslynResult result = await Roslyn.EvaluateAsync(code, globals);
 
             if (result.Success)
             {

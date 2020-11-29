@@ -9,9 +9,9 @@ using static Utili.MessageSender;
 
 namespace Utili.Features
 {
-    internal class Reputation
+    internal static class Reputation
     {
-        public async Task ReactionAdded(IGuild guild, IUserMessage message, IUser reactor, IEmote emote)
+        public static async Task ReactionAdded(IGuild guild, IUserMessage message, IUser reactor, IEmote emote)
         {
             IUser user = message.Author;
             if(user.Id == reactor.Id || user.IsBot || reactor.IsBot) return;
@@ -23,7 +23,7 @@ namespace Utili.Features
             Database.Data.Reputation.AlterUserReputation(guild.Id, user.Id, change);
         }
 
-        public async Task ReactionRemoved(IGuild guild, IUserMessage message, IUser reactor, IEmote emote)
+        public static async Task ReactionRemoved(IGuild guild, IUserMessage message, IUser reactor, IEmote emote)
         {
             IUser user = message.Author;
             if(user.Id == reactor.Id) return;

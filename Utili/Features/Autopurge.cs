@@ -11,12 +11,12 @@ using static Utili.Program;
 
 namespace Utili.Features
 {
-    internal class Autopurge
+    internal static class Autopurge
     {
-        private Timer _timer;
-        private int _freeCounter;
+        private static Timer _timer;
+        private static int _freeCounter;
 
-        public void Start()
+        public static void Start()
         {
             _timer?.Dispose();
 
@@ -25,7 +25,7 @@ namespace Utili.Features
             _timer.Start();
         }
 
-        private void Timer_Elapsed(object sender, ElapsedEventArgs e)
+        private static void Timer_Elapsed(object sender, ElapsedEventArgs e)
         {
             bool premiumOnly;
 
@@ -44,7 +44,7 @@ namespace Utili.Features
             _ = PurgeChannelsAsync(premiumOnly);
         }
 
-        private async Task PurgeChannelsAsync(bool premiumOnly)
+        private static async Task PurgeChannelsAsync(bool premiumOnly)
         {
             List<AutopurgeRow> rows = Database.Data.Autopurge.GetRows();
             List<ulong> allGuildIds = _client.Guilds.Select(x => x.Id).ToList();
@@ -105,7 +105,7 @@ namespace Utili.Features
             await Task.WhenAll(tasks);
         }
 
-        private async Task PurgeChannelAsync(SocketGuildChannel guildChannel, TimeSpan timespan, int mode, int messageCap)
+        private static async Task PurgeChannelAsync(SocketGuildChannel guildChannel, TimeSpan timespan, int mode, int messageCap)
         {
             await Task.Delay(1);
 
@@ -147,8 +147,8 @@ namespace Utili.Features
             }
         }
 
-        private int _purgeNumber;
-        private List<AutopurgeRow> GetChannelsForThisPurge(List<AutopurgeRow> rows)
+        private static int _purgeNumber;
+        private static List<AutopurgeRow> GetChannelsForThisPurge(List<AutopurgeRow> rows)
         {
             List<AutopurgeRow> channelsForThisPurge = new List<AutopurgeRow>();
 

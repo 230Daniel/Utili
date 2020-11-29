@@ -6,9 +6,9 @@ using Database.Data;
 
 namespace Utili.Features
 {
-    internal class Roles
+    internal static class Roles
     {
-        public async Task UserJoined(SocketGuildUser user)
+        public static async Task UserJoined(SocketGuildUser user)
         {
             // TODO: Test rolepersist, I think it's not working
 
@@ -51,7 +51,7 @@ namespace Utili.Features
             }
         }
 
-        public async Task UserLeft(SocketGuildUser user)
+        public static async Task UserLeft(SocketGuildUser user)
         {
             SocketGuild guild = user.Guild;
 

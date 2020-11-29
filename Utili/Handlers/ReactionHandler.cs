@@ -2,6 +2,7 @@
 using Discord;
 using Discord.WebSocket;
 using static Utili.Program;
+using Utili.Features;
 
 namespace Utili.Handlers
 {
@@ -17,7 +18,7 @@ namespace Utili.Handlers
                 IEmote emote = reaction.Emote;
                 
 
-                await _reputation.ReactionAdded(guild, message, reactor, emote);
+                await Reputation.ReactionAdded(guild, message, reactor, emote);
             });
         }
 
@@ -30,7 +31,7 @@ namespace Utili.Handlers
                 IUser reactor = await _rest.GetGuildUserAsync(guild.Id, reaction.UserId);
                 IEmote emote = reaction.Emote;
 
-                await _reputation.ReactionRemoved(guild, message, reactor, emote);
+                await Reputation.ReactionRemoved(guild, message, reactor, emote);
             });
         }
 

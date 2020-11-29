@@ -10,11 +10,11 @@ using static Utili.Program;
 
 namespace Utili.Features
 {
-    internal class InactiveRole
+    internal static class InactiveRole
     {
-        private Timer _timer;
+        private static Timer _timer;
 
-        public async Task UpdateUserAsync(SocketGuild guild, SocketGuildUser user)
+        public static async Task UpdateUserAsync(SocketGuild guild, SocketGuildUser user)
         {
             InactiveRoleRow row = Database.Data.InactiveRole.GetRow(guild.Id);
 
@@ -29,7 +29,7 @@ namespace Utili.Features
             }
         }
 
-        public void Start()
+        public static void Start()
         {
             _timer?.Dispose();
 
@@ -38,12 +38,12 @@ namespace Utili.Features
             _timer.Start();
         }
 
-        private void Timer_Elapsed(object sender, ElapsedEventArgs e)
+        private static void Timer_Elapsed(object sender, ElapsedEventArgs e)
         {
             UpdateGuildsAsync().GetAwaiter().GetResult();
         }
 
-        private async Task UpdateGuildsAsync()
+        private static async Task UpdateGuildsAsync()
         {
             List<InactiveRoleRow> guildsRequiringUpdate = Database.Data.InactiveRole.GetUpdateRequiredRows().Take(5).ToList();
 
@@ -64,7 +64,7 @@ namespace Utili.Features
             await Task.WhenAll(tasks);
         }
 
-        private async Task UpdateGuildAsync(InactiveRoleRow row, SocketGuild guild)
+        private static async Task UpdateGuildAsync(InactiveRoleRow row, SocketGuild guild)
         {
             SocketRole inactiveRole = guild.GetRole(row.RoleId);
 

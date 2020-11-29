@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 using Discord.WebSocket;
-using static Utili.Program;
+using Utili.Features;
 
 namespace Utili.Handlers
 {
@@ -10,14 +10,14 @@ namespace Utili.Handlers
         {
             _ = Task.Run(async () =>
             {
-                _ = _roles.UserJoined(user);
-                _ = _joinMessage.UserJoined(user);
+                _ = Roles.UserJoined(user);
+                _ = JoinMessage.UserJoined(user);
             });
         }
 
         public static async Task UserLeft(SocketGuildUser user)
         {
-            _ = _roles.UserLeft(user);
+            _ = Roles.UserLeft(user);
         }
     }
 }

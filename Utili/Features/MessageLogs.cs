@@ -14,9 +14,9 @@ using static Utili.MessageSender;
 
 namespace Utili.Features
 {
-    internal class MessageLogs
+    internal static class MessageLogs
     {
-        public async Task MessageReceived(SocketCommandContext context)
+        public static async Task MessageReceived(SocketCommandContext context)
         {
             if (context.User.IsBot || context.Channel is SocketDMChannel) return;
 
@@ -39,7 +39,7 @@ namespace Utili.Features
                 Premium.IsPremium(context.Guild.Id));
         }
 
-        public async Task MessageEdited(SocketCommandContext context)
+        public static async Task MessageEdited(SocketCommandContext context)
         {
             MessageLogsRow row = Database.Data.MessageLogs.GetRow(context.Guild.Id);
             if ((row.DeletedChannelId == 0 && row.EditedChannelId == 0) || row.ExcludedChannels.Contains(context.Channel.Id)) return;
@@ -56,7 +56,7 @@ namespace Utili.Features
             await SendEmbedAsync(channel, embed);
         }
 
-        public async Task MessageDeleted(SocketGuild guild, SocketTextChannel channel, ulong messageId)
+        public static async Task MessageDeleted(SocketGuild guild, SocketTextChannel channel, ulong messageId)
         {
             MessageLogsRow row = Database.Data.MessageLogs.GetRow(guild.Id);
             if ((row.DeletedChannelId == 0 && row.EditedChannelId == 0) || row.ExcludedChannels.Contains(channel.Id)) return;
@@ -72,7 +72,7 @@ namespace Utili.Features
             await SendEmbedAsync(logChannel, embed);
         }
 
-        public async Task MessagesBulkDeleted(SocketGuild guild, SocketTextChannel channel, List<ulong> messageIds)
+        public static async Task MessagesBulkDeleted(SocketGuild guild, SocketTextChannel channel, List<ulong> messageIds)
         {
             MessageLogsRow row = Database.Data.MessageLogs.GetRow(guild.Id);
             if ((row.DeletedChannelId == 0 && row.EditedChannelId == 0) || row.ExcludedChannels.Contains(channel.Id)) return;
@@ -89,7 +89,7 @@ namespace Utili.Features
             await SendEmbedAsync(logChannel, embed);
         }
 
-        private async Task<Embed> GetEditedEmbedAsync(MessageLogsMessageRow before, SocketCommandContext after)
+        private static async Task<Embed> GetEditedEmbedAsync(MessageLogsMessageRow before, SocketCommandContext after)
         {
             EmbedBuilder embed = new EmbedBuilder();
             embed.WithColor(66, 182, 245);
@@ -130,7 +130,7 @@ namespace Utili.Features
             return embed.Build();
         }
 
-        private async Task<Embed> GetDeletedEmbedAsync(SocketTextChannel channel, MessageLogsMessageRow message)
+        private static async Task<Embed> GetDeletedEmbedAsync(SocketTextChannel channel, MessageLogsMessageRow message)
         {
             EmbedBuilder embed = new EmbedBuilder();
             embed.WithColor(245, 66, 66);
@@ -169,7 +169,7 @@ namespace Utili.Features
             return embed.Build();
         }
 
-        private async Task<Embed> GetBulkDeletedEmbedAsync(SocketTextChannel channel, List<MessageLogsMessageRow> messages, int total)
+        private static async Task<Embed> GetBulkDeletedEmbedAsync(SocketTextChannel channel, List<MessageLogsMessageRow> messages, int total)
         {
             EmbedBuilder embed = new EmbedBuilder();
 
@@ -191,7 +191,7 @@ namespace Utili.Features
             return embed.Build();
         }
 
-        private async Task<string> PasteMessagesAsync(List<MessageLogsMessageRow> messages, int total)
+        private static async Task<string> PasteMessagesAsync(List<MessageLogsMessageRow> messages, int total)
         {
             StringBuilder sb = new StringBuilder();
 

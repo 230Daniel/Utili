@@ -1,12 +1,13 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Database.Data;
+
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using static Utili.Program;
 using static Utili.MessageSender;
+using Utili.Features;
 
 namespace Utili.Handlers
 {
@@ -30,7 +31,7 @@ namespace Utili.Handlers
 
                 if (!context.User.IsBot && !string.IsNullOrEmpty(context.Message.Content))
                 {
-                    string prefix = Misc.GetPrefix(guild.Id);
+                    string prefix = Database.Data.Misc.GetPrefix(guild.Id);
 
                     int argPos = 0;
                     if (context.Message.HasStringPrefix(prefix, ref argPos) ||
@@ -56,14 +57,14 @@ namespace Utili.Handlers
                 }
 
                 // High priority
-                try { await _messageLogs.MessageReceived(context); } catch {}
-                try { await _messageFilter.MessageReceived(context); } catch {}
+                try { await MessageLogs.MessageReceived(context); } catch {}
+                try { await MessageFilter.MessageReceived(context); } catch {}
 
                 // Low priority
-                _ = _voteChannels.MessageReceived(context);
-                _ = _inactiveRole.UpdateUserAsync(context.Guild, context.User as SocketGuildUser);
-                _ = _channelMirroring.MessageReceived(context);
-                _ = _notices.MessageReceived(context, partialMessage);
+                _ = VoteChannels.MessageReceived(context);
+                _ = InactiveRole.UpdateUserAsync(context.Guild, context.User as SocketGuildUser);
+                _ = ChannelMirroring.MessageReceived(context);
+                _ = Notices.MessageReceived(context, partialMessage);
 
             });
         }
@@ -78,7 +79,7 @@ namespace Utili.Handlers
 
                 SocketCommandContext context = new SocketCommandContext(Helper.GetShardForGuild(guildChannel.Guild), message as SocketUserMessage);
 
-                _ = _messageLogs.MessageEdited(context);
+                _ = MessageLogs.MessageEdited(context);
             });
         }
 
@@ -90,7 +91,7 @@ namespace Utili.Handlers
 
                 SocketTextChannel guildChannel = channel as SocketTextChannel;
 
-                _ = _messageLogs.MessageDeleted(guildChannel.Guild, guildChannel, partialMessage.Id);
+                _ = MessageLogs.MessageDeleted(guildChannel.Guild, guildChannel, partialMessage.Id);
             });
         }
 
@@ -102,7 +103,7 @@ namespace Utili.Handlers
 
                 SocketTextChannel guildChannel = channel as SocketTextChannel;
 
-                _ = _messageLogs.MessagesBulkDeleted(guildChannel.Guild, guildChannel,
+                _ = MessageLogs.MessagesBulkDeleted(guildChannel.Guild, guildChannel,
                     messageIds.Select(x => x.Id).ToList());
             });
         }

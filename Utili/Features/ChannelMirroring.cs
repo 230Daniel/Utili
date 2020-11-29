@@ -12,9 +12,9 @@ using Discord.WebSocket;
 
 namespace Utili.Features
 {
-    internal class ChannelMirroring
+    internal static class ChannelMirroring
     {
-        public async Task MessageReceived(SocketCommandContext context)
+        public static async Task MessageReceived(SocketCommandContext context)
         {
             if(context.User.IsWebhook) return;
 

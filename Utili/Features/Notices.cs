@@ -13,12 +13,12 @@ using static Utili.Program;
 
 namespace Utili.Features
 {
-    internal class Notices
+    internal static class Notices
     {
-        private List<(NoticesRow, DateTime)> _requiredUpdates = new List<(NoticesRow, DateTime)>();
-        private Timer _timer;
+        private static List<(NoticesRow, DateTime)> _requiredUpdates = new List<(NoticesRow, DateTime)>();
+        private static Timer _timer;
 
-        public void Start()
+        public static void Start()
         {
             _timer?.Dispose();
 
@@ -27,7 +27,7 @@ namespace Utili.Features
             _timer.Start();
         }
 
-        public async Task MessageReceived(SocketCommandContext context, SocketMessage partialMessage)
+        public static async Task MessageReceived(SocketCommandContext context, SocketMessage partialMessage)
         {
             List<NoticesRow> rows = Database.Data.Notices.GetRows(context.Guild.Id, context.Channel.Id);
             if(rows.Count == 0) return;
@@ -51,12 +51,12 @@ namespace Utili.Features
             }
         }
 
-        private void Timer_Elapsed(object sender, ElapsedEventArgs e)
+        private static void Timer_Elapsed(object sender, ElapsedEventArgs e)
         {
             UpdateNoticesAsync().GetAwaiter().GetResult();
         }
 
-        private async Task UpdateNoticesAsync()
+        private static async Task UpdateNoticesAsync()
         {
             List<(NoticesRow, DateTime)> updates = new List<(NoticesRow, DateTime)>();
 
@@ -70,7 +70,7 @@ namespace Utili.Features
             await Task.WhenAll(tasks);
         }
 
-        private async Task UpdateNoticeAsync((NoticesRow, DateTime) update)
+        private static async Task UpdateNoticeAsync((NoticesRow, DateTime) update)
         {
             await Task.Delay(1);
 
@@ -96,7 +96,7 @@ namespace Utili.Features
             await sent.PinAsync();
         }
 
-        public (string, Embed) GetNotice(NoticesRow row)
+        private static (string, Embed) GetNotice(NoticesRow row)
         {
             string iconUrl = row.Icon.Value;
             string thumbnailUrl = row.Thumbnail.Value;
@@ -126,7 +126,7 @@ namespace Utili.Features
             return (row.Text.Value, embed.Build());
         }
 
-        private bool IsValidImageUrl(string url)
+        private static bool IsValidImageUrl(string url)
         {
             try
             {
@@ -134,8 +134,7 @@ namespace Utili.Features
                 request.Timeout = 2000;
                 WebResponse response = request.GetResponse();
 
-                if (response.ContentType.ToLower().StartsWith("image/")) return true;
-                return false;
+                return response.ContentType.ToLower().StartsWith("image/");
             }
             catch
             {

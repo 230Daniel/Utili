@@ -11,9 +11,9 @@ using Utili.Commands;
 
 namespace Utili.Features
 {
-    internal class VoteChannels
+    internal static class VoteChannels
     {
-        public async Task MessageReceived(SocketCommandContext context)
+        public static async Task MessageReceived(SocketCommandContext context)
         {
             if (BotPermissions.IsMissingPermissions(context.Channel, new[] {ChannelPermission.AddReactions}, out _))
             {
@@ -48,7 +48,7 @@ namespace Utili.Features
             await context.Message.AddReactionsAsync(emotes.ToArray());
         }
 
-        public bool DoesMessageObeyRule(SocketCommandContext context, VoteChannelsRow row)
+        public static bool DoesMessageObeyRule(SocketCommandContext context, VoteChannelsRow row)
         {
             return row.Mode switch
             {
@@ -56,25 +56,25 @@ namespace Utili.Features
                 0 => true,
 
                 // Images
-                1 => _messageFilter.IsImage(context),
+                1 => MessageFilter.IsImage(context),
 
                 // Videos
-                2 => _messageFilter.IsVideo(context),
+                2 => MessageFilter.IsVideo(context),
 
                 // Media
-                3 => _messageFilter.IsImage(context) || _messageFilter.IsVideo(context),
+                3 => MessageFilter.IsImage(context) || MessageFilter.IsVideo(context),
 
                 // Music
-                4 => _messageFilter.IsMusic(context) || _messageFilter.IsVideo(context),
+                4 => MessageFilter.IsMusic(context) || MessageFilter.IsVideo(context),
 
                 // Attachments
-                5 => _messageFilter.IsAttachment(context),
+                5 => MessageFilter.IsAttachment(context),
 
                 // URLs
-                6 => _messageFilter.IsUrl(context),
+                6 => MessageFilter.IsUrl(context),
 
                 // URLs or Media
-                7 => _messageFilter.IsImage(context) || _messageFilter.IsVideo(context) || _messageFilter.IsUrl(context),
+                7 => MessageFilter.IsImage(context) || MessageFilter.IsVideo(context) || MessageFilter.IsUrl(context),
 
                 // Default
                 _ => false,

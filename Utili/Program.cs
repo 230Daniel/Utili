@@ -31,21 +31,6 @@ namespace Utili
         public static readonly PingTest _pingTest = new PingTest();
         public static readonly Database.PingTest _dbPingTest = new Database.PingTest();
 
-        public static readonly Autopurge _autopurge = new Autopurge();
-        public static readonly ChannelMirroring _channelMirroring = new ChannelMirroring();
-        public static readonly InactiveRole _inactiveRole = new InactiveRole();
-        public static readonly JoinMessage _joinMessage = new JoinMessage();
-        public static readonly Notices _notices = new Notices();
-        public static readonly Reputation _reputation = new Reputation();
-        public static readonly Roles _roles = new Roles();
-        public static readonly VoiceLink _voiceLink = new VoiceLink();
-        public static readonly MessageFilter _messageFilter = new MessageFilter();
-        public static readonly MessageLogs _messageLogs = new MessageLogs();
-        public static readonly VoiceRoles _voiceRoles = new VoiceRoles();
-        public static readonly VoteChannels _voteChannels = new VoteChannels();
-
-        public static RoslynEngine _roslyn = new RoslynEngine();
-
         // ReSharper enable InconsistentNaming
 
         private static async Task Main()
@@ -136,11 +121,11 @@ namespace Utili
             _pingTest.Start();
             _dbPingTest.Start();
 
-            _autopurge.Start();
-            _voiceLink.Start();
-            _voiceRoles.Start();
-            _inactiveRole.Start();
-            _notices.Start();
+            Autopurge.Start();
+            VoiceLink.Start();
+            VoiceRoles.Start();
+            InactiveRole.Start();
+            Notices.Start();
 
             await Task.Delay(-1);
         }

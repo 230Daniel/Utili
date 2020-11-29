@@ -9,9 +9,9 @@ using static Utili.Program;
 
 namespace Utili.Features
 {
-    internal class JoinMessage
+    internal static class JoinMessage
     {
-        public async Task UserJoined(SocketGuildUser user)
+        public static async Task UserJoined(SocketGuildUser user)
         {
             SocketGuild guild = user.Guild;
 
@@ -28,7 +28,7 @@ namespace Utili.Features
             }
         }
 
-        public bool TryGetJoinMessage(ulong guildId, SocketGuildUser user, out (JoinMessageRow, string, Embed) joinMessage)
+        public static bool TryGetJoinMessage(ulong guildId, SocketGuildUser user, out (JoinMessageRow, string, Embed) joinMessage)
         {
             joinMessage = (null, null, null);
 
@@ -75,7 +75,7 @@ namespace Utili.Features
             return true;
         }
 
-        private bool IsValidImageUrl(string url)
+        private static bool IsValidImageUrl(string url)
         {
             try
             {
@@ -99,7 +99,7 @@ namespace Utili.Features
         [Command("Preview")]
         public async Task Preview()
         {
-            if (_joinMessage.TryGetJoinMessage(Context.Guild.Id, Context.User as SocketGuildUser, out (JoinMessageRow, string, Embed) joinMessage))
+            if (JoinMessage.TryGetJoinMessage(Context.Guild.Id, Context.User as SocketGuildUser, out (JoinMessageRow, string, Embed) joinMessage))
             {
                 await SendEmbedAsync(Context.Channel, joinMessage.Item3, joinMessage.Item2);
             }

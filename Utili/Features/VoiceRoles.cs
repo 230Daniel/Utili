@@ -7,12 +7,12 @@ using Discord.WebSocket;
 
 namespace Utili.Features
 {
-    internal class VoiceRoles
+    internal static class VoiceRoles
     {
-        private Timer _timer;
-        private List<VoiceUpdateRequest> _updateRequests = new List<VoiceUpdateRequest>();
+        private static Timer _timer;
+        private static List<VoiceUpdateRequest> _updateRequests = new List<VoiceUpdateRequest>();
 
-        public void Start()
+        public static void Start()
         {
             _timer?.Dispose();
 
@@ -21,7 +21,7 @@ namespace Utili.Features
             _timer.Start();
         }
 
-        public void RequestUpdate(SocketGuildUser user, SocketVoiceState before, SocketVoiceState after)
+        public static void RequestUpdate(SocketGuildUser user, SocketVoiceState before, SocketVoiceState after)
         {
             lock (_updateRequests)
             {
@@ -29,12 +29,12 @@ namespace Utili.Features
             }
         }
 
-        private void Timer_Elapsed(object sender, ElapsedEventArgs e)
+        private static void Timer_Elapsed(object sender, ElapsedEventArgs e)
         {
             UpdateUsersAsync().GetAwaiter().GetResult();
         }
 
-        private async Task UpdateUsersAsync()
+        private static async Task UpdateUsersAsync()
         {
             List<VoiceUpdateRequest> requests = new List<VoiceUpdateRequest>();
 
@@ -60,7 +60,7 @@ namespace Utili.Features
             await Task.WhenAll(tasks);
         }
 
-        private async Task UpdateUserAsync(VoiceUpdateRequest request)
+        private static async Task UpdateUserAsync(VoiceUpdateRequest request)
         {
             await Task.Delay(1);
 

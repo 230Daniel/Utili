@@ -12,9 +12,9 @@ using static Utili.MessageSender;
 
 namespace Utili.Features
 {
-    internal class MessageFilter
+    internal static class MessageFilter
     {
-        public async Task MessageReceived(SocketCommandContext context)
+        public static async Task MessageReceived(SocketCommandContext context)
         {
             if (BotPermissions.IsMissingPermissions(context.Channel, new[] {ChannelPermission.ManageMessages}, out _))
             {
@@ -57,7 +57,7 @@ namespace Utili.Features
 
         }
 
-        public bool DoesMessageObeyRule(SocketCommandContext context, MessageFilterRow row, out string allowedTypes)
+        private static bool DoesMessageObeyRule(SocketCommandContext context, MessageFilterRow row, out string allowedTypes)
         {
             switch (row.Mode)
             {
@@ -103,7 +103,7 @@ namespace Utili.Features
             }
         }
 
-        public bool IsImage(SocketCommandContext context)
+        public static bool IsImage(SocketCommandContext context)
         {
             List<string> validAttachmentExtensions = new List<string>
             {
@@ -135,7 +135,7 @@ namespace Utili.Features
             return false;
         }
 
-        public bool IsVideo(SocketCommandContext context)
+        public static bool IsVideo(SocketCommandContext context)
         {
             List<string> validAttachmentExtensions = new List<string>
             {
@@ -170,7 +170,7 @@ namespace Utili.Features
             return false;
         }
 
-        public bool IsMusic(SocketCommandContext context)
+        public static bool IsMusic(SocketCommandContext context)
         {
             List<string> validAttachmentExtensions = new List<string>
             {
@@ -196,12 +196,12 @@ namespace Utili.Features
             return false;
         }
 
-        public bool IsAttachment(SocketCommandContext context)
+        public static bool IsAttachment(SocketCommandContext context)
         {
             return context.Message.Attachments.Count > 0;
         }
 
-        public bool IsUrl(SocketCommandContext context)
+        public static bool IsUrl(SocketCommandContext context)
         {
             foreach (string word in context.Message.Content.Split(' ', '\n'))
             {
@@ -216,7 +216,7 @@ namespace Utili.Features
             return false;
         }
 
-        public bool IsRegex(SocketCommandContext context, string pattern)
+        public static bool IsRegex(SocketCommandContext context, string pattern)
         {
             try
             {

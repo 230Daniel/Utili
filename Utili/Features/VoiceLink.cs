@@ -9,12 +9,12 @@ using Discord.WebSocket;
 
 namespace Utili.Features
 {
-    internal class VoiceLink
+    internal static class VoiceLink
     {
-        private Timer _timer;
-        private List<SocketVoiceChannel> _channelsRequiringUpdate = new List<SocketVoiceChannel>();
+        private static Timer _timer;
+        private static List<SocketVoiceChannel> _channelsRequiringUpdate = new List<SocketVoiceChannel>();
 
-        public void Start()
+        public static void Start()
         {
             _timer?.Dispose();
 
@@ -23,7 +23,7 @@ namespace Utili.Features
             _timer.Start();
         }
 
-        public void RequestUpdate(SocketVoiceChannel channel)
+        public static void RequestUpdate(SocketVoiceChannel channel)
         {
             VoiceLinkRow metaRow = Database.Data.VoiceLink.GetMetaRow(channel.Guild.Id);
 
@@ -35,12 +35,12 @@ namespace Utili.Features
             }
         }
 
-        private void Timer_Elapsed(object sender, ElapsedEventArgs e)
+        private static void Timer_Elapsed(object sender, ElapsedEventArgs e)
         {
             UpdateLinkedChannelsAsync().GetAwaiter().GetResult();
         }
 
-        private async Task UpdateLinkedChannelsAsync()
+        private static async Task UpdateLinkedChannelsAsync()
         {
             List<SocketVoiceChannel> channelsToUpdate = new List<SocketVoiceChannel>();
 
@@ -61,7 +61,7 @@ namespace Utili.Features
             await Task.WhenAll(tasks);
         }
 
-        private async Task UpdateLinkedChannelAsync(SocketVoiceChannel voiceChannel)
+        private static async Task UpdateLinkedChannelAsync(SocketVoiceChannel voiceChannel)
         {
             await Task.Delay(1);
 
