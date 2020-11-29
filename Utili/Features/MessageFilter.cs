@@ -9,7 +9,6 @@ using Discord;
 using Discord.Commands;
 using Discord.Rest;
 using static Utili.MessageSender;
-using static Utili.Program;
 
 namespace Utili.Features
 {

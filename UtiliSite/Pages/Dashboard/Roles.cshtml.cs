@@ -1,8 +1,5 @@
-using System.Collections.Generic;
 using System.Linq;
-using Database;
 using Database.Data;
-using Discord.Rest;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace UtiliSite.Pages.Dashboard
@@ -17,8 +14,7 @@ namespace UtiliSite.Pages.Dashboard
             ViewData["guild"] = auth.Guild;
             ViewData["Title"] = $"{auth.Guild.Name} - ";
 
-            List<RolesRow> rows = Roles.GetRows(auth.Guild.Id);
-            RolesRow row = rows.Count == 0 ? new RolesRow() : rows.First();
+            RolesRow row = Roles.GetRow(auth.Guild.Id);
 
             ViewData["joinRoles"] = auth.Guild.Roles.Where(x => row.JoinRoles.Contains(x.Id)).ToList();
             ViewData["nonJoinRoles"] = auth.Guild.Roles.Where(x => !row.JoinRoles.Contains(x.Id)).ToList();
@@ -37,8 +33,7 @@ namespace UtiliSite.Pages.Dashboard
 
             bool rolePersist = HttpContext.Request.Form["rolePersist"] == "on";
 
-            List<RolesRow> rows = Roles.GetRows(auth.Guild.Id);
-            RolesRow row = rows.Count == 0 ? new RolesRow() : rows.First();
+            RolesRow row = Roles.GetRow(auth.Guild.Id);
             row.RolePersist = rolePersist;
             Roles.SaveRow(row);
 
@@ -57,8 +52,7 @@ namespace UtiliSite.Pages.Dashboard
 
             ulong roleId = ulong.Parse(HttpContext.Request.Form["roleId"]);
 
-            List<RolesRow> rows = Roles.GetRows(auth.Guild.Id);
-            RolesRow row = rows.Count == 0 ? new RolesRow() : rows.First();
+            RolesRow row = Roles.GetRow(auth.Guild.Id);
             if (!row.JoinRoles.Contains(roleId)) row.JoinRoles.Add(roleId);
             Roles.SaveRow(row);
 
@@ -78,8 +72,7 @@ namespace UtiliSite.Pages.Dashboard
 
             ulong roleId = ulong.Parse(HttpContext.Request.Form["roleId"]);
 
-            List<RolesRow> rows = Roles.GetRows(auth.Guild.Id);
-            RolesRow row = rows.Count == 0 ? new RolesRow() : rows.First();
+            RolesRow row = Roles.GetRow(auth.Guild.Id);
             if (row.JoinRoles.Contains(roleId)) row.JoinRoles.Remove(roleId);
             Roles.SaveRow(row);
 

@@ -5,7 +5,7 @@ using MySql.Data.MySqlClient;
 
 namespace Database.Data
 {
-    public class VoteChannels
+    public static class VoteChannels
     {
         public static List<VoteChannelsRow> GetRows(ulong? guildId = null, ulong? channelId = null, long? id = null, bool ignoreCache = false)
         {

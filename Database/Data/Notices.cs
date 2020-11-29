@@ -6,7 +6,7 @@ using MySql.Data.MySqlClient;
 
 namespace Database.Data
 {
-    public class Notices
+    public static class Notices
     {
         public static List<NoticesRow> GetRows(ulong? guildId = null, ulong? channelId = null, long? id = null, bool ignoreCache = false)
         {

@@ -1,16 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Database.Data;
 using Discord;
 using Discord.Commands;
-using Discord.Rest;
-using Discord.WebSocket;
 using Utili.Commands;
 using static Utili.MessageSender;
-using static Utili.Program;
 
 namespace Utili.Features
 {
@@ -21,10 +16,7 @@ namespace Utili.Features
             IUser user = message.Author;
             if(user.Id == reactor.Id || user.IsBot || reactor.IsBot) return;
 
-            List<ReputationRow> rows = Database.Data.Reputation.GetRows(guild.Id);
-            if(rows.Count == 0) return;
-            ReputationRow row = rows.First();
-
+            ReputationRow row = Database.Data.Reputation.GetRow(guild.Id);
             if (!row.Emotes.Any(x => x.Item1.Equals(emote))) return;
             int change = row.Emotes.First(x => Equals(x.Item1, emote)).Item2;
 
@@ -36,10 +28,7 @@ namespace Utili.Features
             IUser user = message.Author;
             if(user.Id == reactor.Id) return;
 
-            List<ReputationRow> rows = Database.Data.Reputation.GetRows(guild.Id);
-            if(rows.Count == 0) return;
-            ReputationRow row = rows.First();
-
+            ReputationRow row = Database.Data.Reputation.GetRow(guild.Id);
             if (!row.Emotes.Any(x => x.Item1.Equals(emote))) return;
             int change = row.Emotes.First(x => Equals(x.Item1, emote)).Item2;
             change *= -1;
@@ -54,18 +43,16 @@ namespace Utili.Features
         [Command("")]
         public async Task Reputation(IUser user = null)
         {
-            if (user == null) user = Context.User as IGuildUser;
+            if (user == null) user = Context.User;
 
-            long reputation = 0;
-            List<ReputationUserRow> rows = Database.Data.Reputation.GetUserRows(Context.Guild.Id, user.Id);
-            if (rows.Count > 0) reputation = rows.First().Reputation;
+            ReputationUserRow row = Database.Data.Reputation.GetUserRow(Context.Guild.Id, user.Id);
 
             Color colour;
-            if (reputation == 0) colour = new Color(195, 195, 195);
-            else if (reputation > 0) colour = new Color(67, 181, 129);
+            if (row.Reputation == 0) colour = new Color(195, 195, 195);
+            else if (row.Reputation > 0) colour = new Color(67, 181, 129);
             else colour = new Color(181, 67, 67);
 
-            await SendInfoAsync(Context.Channel, null, $"{user.Mention}'s reputation: **{reputation}**", colour: colour);
+            await SendInfoAsync(Context.Channel, null, $"{user.Mention}'s reputation: **{row.Reputation}**", colour: colour);
         }
 
         [Command("Leaderboard"), Alias("Top"), Cooldown(10)]
@@ -91,7 +78,7 @@ namespace Utili.Features
                 }
             }
 
-            await SendInfoAsync(Context.Channel, $"Reputation Leaderboard", content);
+            await SendInfoAsync(Context.Channel, "Reputation Leaderboard", content);
         }
 
         [Command("InverseLeaderboard"), Alias("Bottom"), Cooldown(10)]

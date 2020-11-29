@@ -4,7 +4,7 @@ using static Utili.Program;
 
 namespace Utili
 {
-    internal class Sharding
+    internal static class Sharding
     {
         public static void Update(object sender, ElapsedEventArgs e)
         {

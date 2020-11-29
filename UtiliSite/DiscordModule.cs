@@ -8,9 +8,9 @@ using static UtiliSite.Main;
 
 namespace UtiliSite
 {
-    public class DiscordModule
+    public static class DiscordModule
     {
-        public static DiscordRestClient _client;
+        private static DiscordRestClient _client;
 
         public static void Initialise()
         {

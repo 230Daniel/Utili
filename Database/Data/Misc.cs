@@ -4,7 +4,7 @@ using MySql.Data.MySqlClient;
 
 namespace Database.Data
 {
-    public class Misc
+    public static class Misc
     {
         public static List<MiscRow> GetRows(ulong? guildId = null, string type = null, string value = null, bool ignoreCache = false)
         {
@@ -61,8 +61,7 @@ namespace Database.Data
         public static MiscRow GetRow(ulong? guildId = null, string type = null)
         {
             List<MiscRow> rows = GetRows(guildId, type);
-            if (rows.Count == 0) return null; 
-            return rows.First();
+            return rows.Count == 0 ? null : rows.First();
         }
 
         public static void SaveRow(MiscRow row)

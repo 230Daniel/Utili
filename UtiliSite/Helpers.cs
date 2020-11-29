@@ -1,10 +1,9 @@
 ﻿using System.Linq;
-using Discord.Rest;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace UtiliSite
 {
-    public class RedirectHelper
+    public static class RedirectHelper
     {
         public static string AddToUrl(ViewContext viewContext, string page)
         {
@@ -41,7 +40,7 @@ namespace UtiliSite
         }
     }
 
-    public class SidebarHelper
+    public static class SidebarHelper
     {
         public static string GetIsActive(ViewContext viewContext, string page)
         {

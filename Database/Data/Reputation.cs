@@ -1,14 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Discord;
 using MySql.Data.MySqlClient;
 
 namespace Database.Data
 {
-    public class Reputation
+    public static class Reputation
     {
         public static List<ReputationRow> GetRows(ulong? guildId = null, long? id = null, bool ignoreCache = false)
         {
@@ -52,6 +49,12 @@ namespace Database.Data
             }
 
             return matchedRows;
+        }
+
+        public static ReputationRow GetRow(ulong guildId)
+        {
+            List<ReputationRow> rows = GetRows(guildId);
+            return rows.Count > 0 ? rows.First() : new ReputationRow(guildId);
         }
 
         public static void SaveRow(ReputationRow row)
@@ -133,6 +136,12 @@ namespace Database.Data
             return matchedRows;
         }
 
+        public static ReputationUserRow GetUserRow(ulong guildId, ulong userId)
+        {
+            List<ReputationUserRow> rows = GetUserRows(guildId, userId);
+            return rows.Count > 0 ? rows.First() : new ReputationUserRow(guildId, userId);
+        }
+
         public static void AlterUserReputation(ulong guildId, ulong userId, long reputationChange)
         {
             MySqlCommand command = Sql.GetCommand("UPDATE ReputationUsers SET Reputation = Reputation + @ReputationChange WHERE GuildId = @GuildId AND UserId = @UserId;",
@@ -209,9 +218,11 @@ namespace Database.Data
         public ulong GuildId { get; set; }
         public List<(IEmote, int)> Emotes { get; set; }
 
-        public ReputationRow()
+        public ReputationRow(ulong guildId)
         {
             Id = 0;
+            GuildId = guildId;
+            Emotes = new List<(IEmote, int)>();
         }
 
         public ReputationRow(long id, ulong guildId, string emotes)
@@ -262,6 +273,13 @@ namespace Database.Data
         public ulong GuildId { get; set; }
         public ulong UserId { get; set; }
         public long Reputation { get; set; }
+
+        public ReputationUserRow(ulong guildId, ulong userId)
+        {
+            GuildId = guildId;
+            UserId = userId;
+            Reputation = 0;
+        }
 
         public ReputationUserRow(ulong guildId, ulong userId, long reputation)
         {

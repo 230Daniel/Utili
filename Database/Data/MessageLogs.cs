@@ -5,7 +5,7 @@ using MySql.Data.MySqlClient;
 
 namespace Database.Data
 {
-    public class MessageLogs
+    public static class MessageLogs
     {
         public static List<MessageLogsRow> GetRows(ulong? guildId = null, long? id = null, bool ignoreCache = false)
         {
@@ -56,13 +56,7 @@ namespace Database.Data
         public static MessageLogsRow GetRow(ulong guildId)
         {
             List<MessageLogsRow> rows = GetRows(guildId);
-
-            if (rows.Count == 0)
-            {
-                return new MessageLogsRow(0, guildId, 0, 0, null);
-            }
-
-            return rows.First();
+            return rows.Count > 0 ? rows.First() : new MessageLogsRow(guildId);
         }
 
         public static void SaveRow(MessageLogsRow row)
@@ -328,9 +322,13 @@ namespace Database.Data
         public ulong EditedChannelId { get; set; }
         public List<ulong> ExcludedChannels { get; set; }
 
-        public MessageLogsRow()
+        public MessageLogsRow(ulong guildId)
         {
             Id = 0;
+            GuildId = guildId;
+            DeletedChannelId = 0;
+            EditedChannelId = 0;
+            ExcludedChannels = new List<ulong>();
         }
 
         public MessageLogsRow(long id, ulong guildId, ulong deletedChannelId, ulong editedChannelId, string excludedChannels)

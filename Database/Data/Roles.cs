@@ -1,11 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using Database;
 using MySql.Data.MySqlClient;
 
 namespace Database.Data
 {
-    public class Roles
+    public static class Roles
     {
         public static List<RolesRow> GetRows(ulong? guildId = null, long? id = null, bool ignoreCache = false)
         {
@@ -50,6 +49,12 @@ namespace Database.Data
             }
 
             return matchedRows;
+        }
+
+        public static RolesRow GetRow(ulong guildId)
+        {
+            List<RolesRow> rows = GetRows(guildId);
+            return rows.Count > 0 ? rows.First() : new RolesRow(guildId);
         }
 
         public static void SaveRow(RolesRow row)
@@ -221,11 +226,14 @@ namespace Database.Data
         public long Id { get; set; }
         public ulong GuildId { get; set; }
         public bool RolePersist { get; set; }
-        public List<ulong> JoinRoles { get; set; } = new List<ulong>();
+        public List<ulong> JoinRoles { get; set; }
 
-        public RolesRow()
+        public RolesRow(ulong guildId)
         {
             Id = 0;
+            GuildId = guildId;
+            RolePersist = false;
+            JoinRoles = new List<ulong>();
         }
 
         public RolesRow(long id, ulong guildId, bool rolePersist, string joinRoles)

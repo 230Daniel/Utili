@@ -5,7 +5,7 @@ using MySql.Data.MySqlClient;
 
 namespace Database.Data
 {
-    public class InactiveRole
+    public static class InactiveRole
     {
         private static readonly TimeSpan GapBetweenUpdates = TimeSpan.FromMinutes(60); 
 
@@ -95,6 +95,12 @@ namespace Database.Data
             }
 
             return matchedRows;
+        }
+
+        public static InactiveRoleRow GetRow(ulong guildId)
+        {
+            List<InactiveRoleRow> rows = GetRows(guildId);
+            return rows.Count > 0 ? rows.First() : new InactiveRoleRow(guildId);
         }
 
         public static void SaveRow(InactiveRoleRow row)
@@ -278,9 +284,16 @@ namespace Database.Data
         public DateTime DefaultLastAction { get; set; }
         public DateTime LastUpdate { get; set; }
         
-        public InactiveRoleRow()
+        public InactiveRoleRow(ulong guildId)
         {
             Id = 0;
+            GuildId = guildId;
+            RoleId = 0;
+            ImmuneRoleId = 0;
+            Threshold = TimeSpan.FromDays(30);
+            Inverse = false;
+            DefaultLastAction = DateTime.MinValue;
+            LastUpdate = DateTime.MinValue;
         }
 
         public InactiveRoleRow(long id, ulong guildId, ulong roleId, ulong immuneRoleId, string threshold, bool inverse, DateTime defaultLastAction, DateTime lastUpdate)

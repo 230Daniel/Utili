@@ -13,7 +13,7 @@ using Utili.Handlers;
 
 namespace Utili
 {
-    internal class Program
+    internal static class Program
     {
         
         // ReSharper disable InconsistentNaming
@@ -28,21 +28,21 @@ namespace Utili
         public static int _totalShards;
 
         public static Timer _shardStatsUpdater;
-        public static PingTest _pingTest = new PingTest();
-        public static Database.PingTest _dbPingTest = new Database.PingTest();
+        public static readonly PingTest _pingTest = new PingTest();
+        public static readonly Database.PingTest _dbPingTest = new Database.PingTest();
 
-        public static Autopurge _autopurge = new Autopurge();
-        public static ChannelMirroring _channelMirroring = new ChannelMirroring();
-        public static InactiveRole _inactiveRole = new InactiveRole();
-        public static JoinMessage _joinMessage = new JoinMessage();
-        public static Notices _notices = new Notices();
-        public static Reputation _reputation = new Reputation();
-        public static Roles _roles = new Roles();
-        public static VoiceLink _voiceLink = new VoiceLink();
-        public static MessageFilter _messageFilter = new MessageFilter();
-        public static MessageLogs _messageLogs = new MessageLogs();
-        public static VoiceRoles _voiceRoles = new VoiceRoles();
-        public static VoteChannels _voteChannels = new VoteChannels();
+        public static readonly Autopurge _autopurge = new Autopurge();
+        public static readonly ChannelMirroring _channelMirroring = new ChannelMirroring();
+        public static readonly InactiveRole _inactiveRole = new InactiveRole();
+        public static readonly JoinMessage _joinMessage = new JoinMessage();
+        public static readonly Notices _notices = new Notices();
+        public static readonly Reputation _reputation = new Reputation();
+        public static readonly Roles _roles = new Roles();
+        public static readonly VoiceLink _voiceLink = new VoiceLink();
+        public static readonly MessageFilter _messageFilter = new MessageFilter();
+        public static readonly MessageLogs _messageLogs = new MessageLogs();
+        public static readonly VoiceRoles _voiceRoles = new VoiceRoles();
+        public static readonly VoteChannels _voteChannels = new VoteChannels();
 
         public static RoslynEngine _roslyn = new RoslynEngine();
 

@@ -4,7 +4,7 @@ using MySql.Data.MySqlClient;
 
 namespace Database.Data
 {
-    public class MessageFilter
+    public static class MessageFilter
     {
         public static List<MessageFilterRow> GetRows(ulong? guildId = null, ulong? channelId = null, long? id = null, bool ignoreCache = false)
         {

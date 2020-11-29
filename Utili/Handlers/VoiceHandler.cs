@@ -4,7 +4,7 @@ using static Utili.Program;
 
 namespace Utili.Handlers
 {
-    internal class VoiceHandler
+    internal static class VoiceHandler
     {
         public static async Task UserVoiceStateUpdated(SocketUser user, SocketVoiceState before, SocketVoiceState after)
         {

@@ -1,12 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using Discord;
 using MySql.Data.MySqlClient;
 
 namespace Database.Data
 {
-    public class JoinMessage
+    public static class JoinMessage
     {
         public static List<JoinMessageRow> GetRows(ulong? guildId = null, long? id = null, bool ignoreCache = false)
         {
@@ -44,21 +43,28 @@ namespace Database.Data
                         reader.GetInt64(0),
                         reader.GetUInt64(1),
                         reader.GetBoolean(2),
-                        reader.GetUInt64(3),
-                        reader.GetString(4),
+                        reader.GetBoolean(3),
+                        reader.GetUInt64(4),
                         reader.GetString(5),
                         reader.GetString(6),
                         reader.GetString(7),
                         reader.GetString(8),
                         reader.GetString(9),
                         reader.GetString(10),
-                        reader.GetUInt32(11)));
+                        reader.GetString(11),
+                        reader.GetUInt32(12)));
                 }
 
                 reader.Close();
             }
 
             return matchedRows;
+        }
+
+        public static JoinMessageRow GetRow(ulong guildId)
+        {
+            List<JoinMessageRow> rows = GetRows(guildId);
+            return rows.Count > 0 ? rows.First() : new JoinMessageRow(guildId);
         }
 
         public static void SaveRow(JoinMessageRow row)
@@ -69,7 +75,7 @@ namespace Database.Data
             // The row is a new entry so should be inserted into the database
             {
                 command = Sql.GetCommand(
-                    $"INSERT INTO JoinMessage (GuildId, Direct, ChannelId, Title, Footer, Content, Text, Image, Thumbnail, Icon, Colour) VALUES (@GuildId, {Sql.ToSqlBool(row.Direct)}, @ChannelId, @Title, @Footer, @Content, @Text, @Image, @Thumbnail, @Icon, @Colour);",
+                    $"INSERT INTO JoinMessage (GuildId, Enabled, Direct, ChannelId, Title, Footer, Content, Text, Image, Thumbnail, Icon, Colour) VALUES (@GuildId, {Sql.ToSqlBool(row.Enabled)}, {Sql.ToSqlBool(row.Direct)}, @ChannelId, @Title, @Footer, @Content, @Text, @Image, @Thumbnail, @Icon, @Colour);",
                     new[]
                     {
                         ("GuildId", row.GuildId.ToString()),
@@ -94,7 +100,7 @@ namespace Database.Data
             else
             // The row already exists and should be updated
             {
-                command = Sql.GetCommand($"UPDATE JoinMessage SET GuildId = @GuildId, Direct = {Sql.ToSqlBool(row.Direct)}, ChannelId = @ChannelId, Title = @Title, Footer = @Footer, Content = @Content, Text = @Text, Image = @Image, Thumbnail = @Thumbnail, Icon = @Icon, Colour = @Colour WHERE Id = @Id;",
+                command = Sql.GetCommand($"UPDATE JoinMessage SET GuildId = @GuildId, Enabled = {Sql.ToSqlBool(row.Enabled)}, Direct = {Sql.ToSqlBool(row.Direct)}, ChannelId = @ChannelId, Title = @Title, Footer = @Footer, Content = @Content, Text = @Text, Image = @Image, Thumbnail = @Thumbnail, Icon = @Icon, Colour = @Colour WHERE Id = @Id;",
                     new [] 
                     {
                         ("Id", row.Id.ToString()),
@@ -149,15 +155,16 @@ namespace Database.Data
                         reader.GetInt64(0),
                         reader.GetUInt64(1),
                         reader.GetBoolean(2),
-                        reader.GetUInt64(3),
-                        reader.GetString(4),
+                        reader.GetBoolean(3),
+                        reader.GetUInt64(4),
                         reader.GetString(5),
                         reader.GetString(6),
                         reader.GetString(7),
                         reader.GetString(8),
                         reader.GetString(9),
                         reader.GetString(10),
-                        reader.GetUInt32(11)));
+                        reader.GetString(11),
+                        reader.GetUInt32(12)));
                 }
             }
             catch {}
@@ -172,6 +179,7 @@ namespace Database.Data
     {
         public long Id { get; set; }
         public ulong GuildId { get; set; }
+        public bool Enabled { get; set; }
         public bool Direct { get; set; }
         public ulong ChannelId { get; set; }
         public EString Title { get; set; }
@@ -183,15 +191,27 @@ namespace Database.Data
         public EString Icon { get; set; }
         public Color Colour { get; set; }
 
-        public JoinMessageRow()
+        public JoinMessageRow(ulong guildId)
         {
             Id = 0;
+            GuildId = guildId;
+            Enabled = false;
+            Direct = false;
+            ChannelId = 0;
+            Title = EString.Empty;
+            Footer = EString.Empty;
+            Content = EString.Empty;
+            Text = EString.Empty;
+            Thumbnail = EString.Empty;
+            Icon = EString.Empty;
+            Colour = new Color(67, 181, 129);
         }
 
-        public JoinMessageRow(long id, ulong guildId, bool direct, ulong channelId, string title, string footer, string content, string text, string image, string thumbnail, string icon, uint colour)
+        public JoinMessageRow(long id, ulong guildId, bool enabled, bool direct, ulong channelId, string title, string footer, string content, string text, string image, string thumbnail, string icon, uint colour)
         {
             Id = id;
             GuildId = guildId;
+            Enabled = enabled;
             Direct = direct;
             ChannelId = channelId;
             Title = EString.FromEncoded(title);

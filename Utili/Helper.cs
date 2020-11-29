@@ -1,12 +1,11 @@
 ﻿using System;
-using System.Linq;
 using System.Text;
 using Discord;
 using Discord.WebSocket;
 
 namespace Utili
 {
-    internal class Helper
+    internal static class Helper
     {
         public static LogSeverity ConvertToLocalLogSeverity(Discord.LogSeverity severity)
         {

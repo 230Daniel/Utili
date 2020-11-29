@@ -10,7 +10,7 @@ using static Utili.MessageSender;
 
 namespace Utili.Handlers
 {
-    internal class MessageHandler
+    internal static class MessageHandler
     {
         public static async Task MessageReceived(SocketMessage partialMessage)
         {

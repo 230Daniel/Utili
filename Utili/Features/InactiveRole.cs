@@ -16,7 +16,7 @@ namespace Utili.Features
 
         public async Task UpdateUserAsync(SocketGuild guild, SocketGuildUser user)
         {
-            InactiveRoleRow row = Database.Data.InactiveRole.GetRows(guild.Id).FirstOrDefault();
+            InactiveRoleRow row = Database.Data.InactiveRole.GetRow(guild.Id);
 
             if(guild.Roles.Any(x => x.Id == row.RoleId))
             {

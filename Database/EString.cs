@@ -69,5 +69,7 @@ namespace Database
 
             return Encoding.UTF8.GetString(bytes);
         }
+
+        public static readonly EString Empty = FromDecoded("");
     }
 }

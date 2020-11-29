@@ -8,7 +8,7 @@ using static Utili.Program;
 
 namespace Utili.Handlers
 {
-    internal class ShardHandler
+    internal static class ShardHandler
     {
         private static List<int> _readyShardIds = new List<int>();
 

@@ -1,13 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
+﻿using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Timers;
 using Discord;
-using Discord.Rest;
-using Discord.WebSocket;
 using static Utili.Program;
 
 namespace Utili

@@ -5,7 +5,7 @@ using Discord.WebSocket;
 
 namespace Utili
 {
-    internal class MessageSender
+    internal static class MessageSender
     {
         public static async Task<RestUserMessage> SendSuccessAsync(IChannel channel, string title, string message = null, string footer = null)
         {

@@ -5,7 +5,7 @@ using MySql.Data.MySqlClient;
 
 namespace Database.Data
 {
-    public class Autopurge
+    public static class Autopurge
     {
         public static List<AutopurgeRow> GetRows(ulong? guildId = null, ulong? channelId = null, long? id = null, bool ignoreCache = false)
         {

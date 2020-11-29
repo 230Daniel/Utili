@@ -6,7 +6,7 @@ using static Utili.Program;
 
 namespace Utili
 {
-    internal class BotPermissions
+    internal static class BotPermissions
     {
         public static bool IsMissingPermissions(SocketGuild guild, GuildPermission[] requiredPermissions, out string missingPermissionsString)
         {

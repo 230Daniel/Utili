@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Text;
+﻿using System.Net;
 using System.Threading.Tasks;
 using Database.Data;
 using Discord;
@@ -36,10 +32,9 @@ namespace Utili.Features
         {
             joinMessage = (null, null, null);
 
-            List<JoinMessageRow> rows = Database.Data.JoinMessage.GetRows(guildId);
-            if(rows.Count == 0) return false;
+            JoinMessageRow row = Database.Data.JoinMessage.GetRow(guildId);
+            if(!row.Enabled) return false;
 
-            JoinMessageRow row = rows.First();
             joinMessage.Item1 = row;
             joinMessage.Item2 = row.Text.Value;
 

@@ -4,7 +4,7 @@ using MySql.Data.MySqlClient;
 
 namespace Database.Data
 {
-    public class VoiceRoles
+    public static class VoiceRoles
     {
         public static List<VoiceRolesRow> GetRows(ulong? guildId = null, ulong? channelId = null, long? id = null, bool ignoreCache = false)
         {

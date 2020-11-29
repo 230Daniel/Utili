@@ -2,7 +2,7 @@
 
 namespace Database
 {
-    public class Premium
+    public static class Premium
     {
         public static bool IsPremium(ulong guildId)
         {

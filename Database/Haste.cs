@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Net.Http;
-using System.Text;
+﻿using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
 
@@ -9,7 +6,7 @@ namespace Database
 {
     public class Haste
     {
-        public string BaseUrl { get; set; }
+        private string BaseUrl { get; set; }
 
         public async Task<string> PasteAsync(string content, string format)
         {
@@ -25,7 +22,8 @@ namespace Database
             BaseUrl = baseUrl;
         }
 
-        public class PasteResponse
+        // ReSharper disable once ClassNeverInstantiated.Local
+        private class PasteResponse
         {
             // ReSharper disable once InconsistentNaming
             public string key { get; set; }

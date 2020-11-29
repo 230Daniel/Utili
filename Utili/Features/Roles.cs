@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Discord.WebSocket;
 using Database.Data;
-using static Utili.Program;
 
 namespace Utili.Features
 {
@@ -13,11 +10,11 @@ namespace Utili.Features
     {
         public async Task UserJoined(SocketGuildUser user)
         {
+            // TODO: Test rolepersist, I think it's not working
+
             SocketGuild guild = user.Guild;
 
-            List<RolesRow> rows = Database.Data.Roles.GetRows(guild.Id);
-            if(rows.Count == 0) return;
-            RolesRow row = rows.First();
+            RolesRow row = Database.Data.Roles.GetRow(guild.Id);
 
             foreach (ulong roleId in row.JoinRoles)
             {
@@ -58,9 +55,7 @@ namespace Utili.Features
         {
             SocketGuild guild = user.Guild;
 
-            List<RolesRow> rows = Database.Data.Roles.GetRows(guild.Id);
-            if(rows.Count == 0) return;
-            RolesRow row = rows.First();
+            RolesRow row = Database.Data.Roles.GetRow(guild.Id);
 
             if (row.RolePersist)
             {

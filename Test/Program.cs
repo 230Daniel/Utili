@@ -7,9 +7,9 @@ namespace Test
 {
     internal class Program
     {
-        private List<string> values = new List<string>();
+        private List<string> _values = new List<string>();
 
-        private static async Task Main(string[] args)
+        private static async Task Main()
         {
             await new Program().ProcessAllAsync();
         }
@@ -24,10 +24,10 @@ namespace Test
                 tasks.Add(ProcessAsync(number));
             }
 
-            lock (values)
+            lock (_values)
             {
-                values.Add("hello");
-                foreach (string value in values)
+                _values.Add("hello");
+                foreach (string value in _values)
                 {
                     Task.Delay(5000).GetAwaiter().GetResult();
                 }
@@ -38,7 +38,7 @@ namespace Test
 
             Console.WriteLine("Finished");
 
-            foreach (string value in values)
+            foreach (string value in _values)
             {
                 Console.WriteLine(value);
             }
@@ -48,7 +48,7 @@ namespace Test
         {
             Console.WriteLine($"{number} started");
             await Task.Delay(1000);
-            values.Add($"{number} added by task");
+            _values.Add($"{number} added by task");
             Console.WriteLine($"{number} finished");
         }
     }

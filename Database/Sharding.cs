@@ -4,7 +4,7 @@ using static Database.Sql;
 
 namespace Database
 {
-    public class Sharding
+    public static class Sharding
     {
         public static int GetTotalShards()
         {

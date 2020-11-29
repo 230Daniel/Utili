@@ -4,7 +4,7 @@ using MySql.Data.MySqlClient;
 
 namespace Database.Data
 {
-    public class VoiceLink
+    public static class VoiceLink
     {
         #region Meta Rows
 
@@ -51,21 +51,7 @@ namespace Database.Data
         public static VoiceLinkRow GetMetaRow(ulong guildId)
         {
             List<VoiceLinkRow> rows = GetMetaRows(guildId);
-
-            if (rows.Count == 0)
-            {
-                return new VoiceLinkRow
-                {
-                    Id = 0,
-                    GuildId = guildId,
-                    Enabled = false,
-                    DeleteChannels = true,
-                    Prefix = EString.FromDecoded("vc-"),
-                    ExcludedChannels = new List<ulong>()
-                };
-            }
-            
-            return rows.First();
+            return rows.Count > 0 ? rows.First() : new VoiceLinkRow(guildId);
         }
 
         public static void SaveMetaRow(VoiceLinkRow metaRow)
@@ -271,9 +257,14 @@ namespace Database.Data
         public EString Prefix { get; set; }
         public List<ulong> ExcludedChannels { get; set; }
 
-        public VoiceLinkRow()
+        public VoiceLinkRow(ulong guildId)
         {
             Id = 0;
+            GuildId = guildId;
+            Enabled = false;
+            DeleteChannels = true;
+            Prefix = EString.FromDecoded("vc-");
+            ExcludedChannels = new List<ulong>();
         }
 
         public VoiceLinkRow(long id, ulong guildId, bool enabled, bool deleteChannels, string prefix, string excludedChannels)

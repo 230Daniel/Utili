@@ -1,11 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using MySql.Data.MySqlClient;
 
 namespace Database.Data
 {
-    public class ChannelMirroring
+    public static class ChannelMirroring
     {
         public static List<ChannelMirroringRow> GetRows(ulong? guildId = null, ulong? fromChannelId = null, long? id = null, bool ignoreCache = false)
         {

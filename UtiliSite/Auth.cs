@@ -1,15 +1,13 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using Discord.Rest;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
-using Ubiety.Dns.Core;
 using UtiliSite.Pages;
 using static UtiliSite.DiscordModule;
 
 namespace UtiliSite
 {
-    public class Auth
+    public static class Auth
     {
         public static AuthDetails GetAuthDetails(HttpContext httpContext, string redirectUrl, string unauthorisedGuildUrl = "/dashboard")
         {

@@ -1,15 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
 using static Utili.Program;
 
 namespace Utili.Handlers
 {
-    internal class ReactionHandler
+    internal static class ReactionHandler
     {
         public static async Task ReactionAdded(Cacheable<IUserMessage, ulong> partialMessage, ISocketMessageChannel channel, SocketReaction reaction)
         {
