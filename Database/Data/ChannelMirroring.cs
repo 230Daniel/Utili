@@ -182,9 +182,11 @@ namespace Database.Data
         public ulong ToChannelId { get; set; }
         public ulong WebhookId { get; set; }
 
-        public ChannelMirroringRow()
+        public ChannelMirroringRow(ulong guildId, ulong fromChannelId)
         {
             Id = 0;
+            GuildId = guildId;
+            FromChannelId = fromChannelId;
         }
 
         public ChannelMirroringRow(long id, ulong guildId, ulong fromChannelId, ulong toChannelId, ulong webhookId)

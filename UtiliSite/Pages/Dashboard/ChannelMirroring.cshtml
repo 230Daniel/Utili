@@ -1,0 +1,102 @@
+﻿@page "{guild?}/channelmirroring"
+@using Database.Data
+@using Discord.Rest
+@model UtiliSite.Pages.Dashboard.ChannelMirroringModel
+@{
+    if (ViewData["guild"] == null)
+    {
+        return;
+    }
+
+    Layout = "Shared/_Layout.cshtml";
+    ViewData["Title"] = "Channel Mirroring - Utili Dashboard";
+
+    List<ChannelMirroringRow> rows = (List<ChannelMirroringRow>)ViewData["rows"];
+    RestGuild guild = (RestGuild)ViewData["Guild"];
+    List<RestTextChannel> channels = (List<RestTextChannel>)ViewData["channels"];
+}
+
+
+<div class="jumbotron jumbotron-fluid">
+    <div class="container">
+        <h1 class="display-4 page-heading">Channel Mirroring</h1>
+        <p class="lead">Uses webhooks to clone messages from one channel to another</p>
+    </div>
+</div>
+
+<div class="dropdown">
+    <button class="btn btn-secondary dropdown-toggle" type="button" data-toggle="dropdown" id="dropdownAddChannel" aria-haspopup="true" aria-expanded="false">
+        Mirror from...
+    </button>
+    <div class="dropdown-menu" aria-labelledby="dropdownAddChannel">
+
+        @foreach (RestTextChannel channel in channels.Where(x => rows.All(y => y.FromChannelId != x.Id)))
+        {
+            <form method="post">
+                <input type="hidden" name="channelId" value="@channel.Id" />
+                <button class="dropdown-item" asp-page-handler="Add" type="submit">@channel.Name</button>
+            </form>
+        }
+
+    </div>
+</div>
+
+<div class="row">
+    @foreach (ChannelMirroringRow row in rows)
+    {
+        RestTextChannel fromChannel = channels.First(x => x.Id == row.FromChannelId);
+        <div class="pb-4">
+            <div class="col-md-12">
+                <div class="card-settings">
+                    <form name="form-@row.Id" method="post">
+
+                        <input type="hidden" name="rowId" value="@row.Id" />
+
+                        <div class="input-group flex-nowrap">
+
+                            <input type="text" class="form-control card-emphasis" style="" value="@fromChannel.Name" readonly>
+
+                            <button type="submit" name="noajax" asp-page-handler="Remove" class="btn btn-remove card-emphasis">
+                                <svg width="38px" height="38px" viewBox="0 0 16 16" class="bi bi-x" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                    <path fill-rule="evenodd" d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z" />
+                                </svg>
+                            </button>
+
+                        </div>
+
+                        <div class="input-group flex-nowrap">
+
+                            <div class="input-group-prepend">
+                                <span class="input-group-text">Mirror to</span>
+                            </div>
+
+                            <select class="custom-select card-component" name="toChannel">
+                                @foreach (RestTextChannel channel in channels.Where(x => x.Id != fromChannel.Id).OrderBy(x => -x.Position))
+                                {
+                                    string selected = row.ToChannelId == channel.Id ? "selected" : "";
+
+                                    <!option value="@channel.Id" @selected >@channel.Name</!option>
+                                }
+                            </select>
+                        </div>
+
+                        <div class="input-group flex-nowrap">
+                            <div class="input-group-prepend card-emphasis">
+                                <span class="input-group-text card-emphasis"></span>
+                            </div>
+                            <div class="input-group-prepend card-emphasis">
+                                <span class="input-group-text card-emphasis"></span>
+                            </div>
+
+                            <button type="submit" class="btn btn-save btn-width card-emphasis">Save</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<script src="~/lib/jquery/dist/jquery.js"></script>
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="~/js/dashboard/submit.js" asp-append-version="true"></script>
