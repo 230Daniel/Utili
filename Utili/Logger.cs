@@ -11,7 +11,6 @@ namespace Utili
         public LogSeverity LogSeverity { get; set; }
 
         private Timer Timer { get; set; }
-        private string Filename { get; set;}
         private StringBuilder Buffer { get; set; } = new StringBuilder();
 
         public void Initialise()
@@ -24,17 +23,6 @@ namespace Utili
 
             if (!Directory.Exists("Logs")) Directory.CreateDirectory("Logs");
 
-            int highest = 0;
-            foreach(string filename in Directory.GetFiles("Logs"))
-            {
-                if (int.TryParse(filename.Replace(".txt", "").Split("-")[1], out int number))
-                {
-                    if (number > highest) highest = number;
-                }
-            }
-
-            Filename = $"Logs/Log-{highest + 1}.txt";
-
             Title();
         }
 
@@ -43,7 +31,7 @@ namespace Utili
             string output = Buffer.ToString();
             Buffer.Clear();
 
-            File.AppendAllText(Filename, output);
+            File.AppendAllText($"{DateTime.Now.Date}", output);
         }
 
         public void Log(string module, string message, LogSeverity severity = LogSeverity.Dbug)
@@ -95,7 +83,7 @@ namespace Utili
         private void Title()
         {
             string title = @"
-===============================================================================
+
                                //
                            ////
                        //////
@@ -111,7 +99,6 @@ namespace Utili
         //////
       ////
     //
-===============================================================================
 
 
 ";
