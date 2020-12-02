@@ -28,7 +28,7 @@
     <button class="btn btn-secondary dropdown-toggle" type="button" data-toggle="dropdown" id="dropdownAddChannel" aria-haspopup="true" aria-expanded="false">
         Mirror from...
     </button>
-    <div class="dropdown-menu" aria-labelledby="dropdownAddChannel">
+    <div class="dropdown-menu scrollable-menu noverticalpadding" aria-labelledby="dropdownAddChannel">
 
         @foreach (RestTextChannel channel in channels.Where(x => rows.All(y => y.FromChannelId != x.Id)))
         {

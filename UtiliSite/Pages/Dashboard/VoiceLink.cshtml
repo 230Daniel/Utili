@@ -74,21 +74,15 @@
     <button class="btn btn-secondary dropdown-toggle" type="button" data-toggle="dropdown" id="dropdownAddChannel" aria-haspopup="true" aria-expanded="false">
         Exclude channel
     </button>
-    <div class="dropdown-menu" aria-labelledby="dropdownExcludeChannel">
-        <div class="row">
-            @foreach (RestVoiceChannel channel in nonExcludedChannels)
-            {
-                <div class="col-md-12">
-                    <div class="card" style="width: 18rem;">
-                        <form method="post">
-                            <input type="hidden" name="channelId" value="@channel.Id" />
-                            <button class="dropdown-item" asp-page-handler="Exclude" type="submit">@channel.Name</button>
-                        </form>
-                    </div>
-                </div>
-            }
-        </div>
-</div>
+    <div class="dropdown-menu scrollable-menu noverticalpadding" aria-labelledby="dropdownExcludeChannel">
+        @foreach (RestVoiceChannel channel in nonExcludedChannels)
+        {
+            <form method="post">
+                <input type="hidden" name="channelId" value="@channel.Id" />
+                <button class="dropdown-item" asp-page-handler="Exclude" type="submit">@channel.Name</button>
+            </form>
+        }
+    </div>
 
     @foreach (RestVoiceChannel excludedChannel in excludedChannels)
     {

@@ -93,8 +93,9 @@ body {
 
 #sidebar-wrapper {
     height: inherit;
-    min-height: 100vh;
+    min-height: calc(100vh - 57px);
 }
+
 img.guild-icon {
     height: 20vh;
     width: 20vh;
@@ -211,5 +212,27 @@ img.guild-icon {
 }
 
 body {
-    border-bottom: 0;
+    margin-bottom: 0;
+}
+
+.scrollable-menu {
+    height: auto;
+    max-height: 200px;
+    overflow-x: hidden;
+}
+
+.scrollable-menu::-webkit-scrollbar {
+    -webkit-appearance: none;
+    width: 5px;
+    background-color: white;
+}
+
+.scrollable-menu::-webkit-scrollbar-thumb {
+    background-color: lightgray;
+    -webkit-box-shadow: 0 0 1px rgba(255,255,255,.75);
+}
+
+.noverticalpadding {
+    padding-top: 0;
+    padding-bottom: 0;
 }
