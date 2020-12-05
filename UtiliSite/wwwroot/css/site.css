@@ -105,6 +105,14 @@ img.guild-icon {
     margin-bottom: 0vh;
 }
 
+img.user-icon {
+    height: 32px;
+    width: 32px;
+    border-radius: 50% !important;
+    margin-top: 4px;
+    margin-bottom: 4px;
+}
+
 /* Making things look neat.
 -------------------------------------------------- */
 * {

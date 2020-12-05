@@ -15,6 +15,7 @@ namespace UtiliSite.Pages.Dashboard
             if(!auth.Authenticated) return;
 
             ViewData["guild"] = auth.Guild;
+            ViewData["user"] = auth.User;
 
             List<ChannelMirroringRow> rows = ChannelMirroring.GetRows(auth.Guild.Id);
             ViewData["rows"] = rows;

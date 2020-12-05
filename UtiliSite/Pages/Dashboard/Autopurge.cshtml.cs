@@ -17,7 +17,7 @@ namespace UtiliSite.Pages.Dashboard
             ViewData["authorised"] = true;
 
             ViewData["guild"] = auth.Guild;
-            ViewData["Title"] = $"{auth.Guild.Name} - ";
+            ViewData["user"] = auth.User;
 
             List<AutopurgeRow> autopurgeRows = Autopurge.GetRows(auth.Guild.Id);
             ViewData["autopurgeRows"] = autopurgeRows;

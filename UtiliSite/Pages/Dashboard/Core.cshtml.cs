@@ -15,6 +15,7 @@ namespace UtiliSite.Pages.Dashboard
             ViewData["mainDashboardUrl"] = RedirectHelper.AddToUrl(HttpContext.Request.Host.ToString(), "dashboard");
             ViewData["guild"] = auth.Guild;
             ViewData["Title"] = $"{auth.Guild.Name} - ";
+            ViewData["user"] = auth.User;
 
             ViewData["prefix"] = Misc.GetPrefix(auth.Guild.Id);
             ViewData["nickname"] = DiscordModule.GetNickname(auth.Guild);

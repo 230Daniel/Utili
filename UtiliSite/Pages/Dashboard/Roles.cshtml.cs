@@ -12,7 +12,7 @@ namespace UtiliSite.Pages.Dashboard
             if(!auth.Authenticated) return;
 
             ViewData["guild"] = auth.Guild;
-            ViewData["Title"] = $"{auth.Guild.Name} - ";
+            ViewData["user"] = auth.User;
 
             RolesRow row = Roles.GetRow(auth.Guild.Id);
 
