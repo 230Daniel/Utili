@@ -70,12 +70,12 @@
     </div>
 </div>
 
-<div class="dropdown">
+<div class="dropdown belowcards">
     <button class="btn btn-secondary dropdown-toggle" type="button" data-toggle="dropdown" id="dropdownAddChannel" aria-haspopup="true" aria-expanded="false">
-        Exclude channel
+        Exclude channel...
     </button>
-    <div class="dropdown-menu scrollable-menu noverticalpadding" aria-labelledby="dropdownExcludeChannel">
-        @foreach (RestVoiceChannel channel in nonExcludedChannels)
+    <div class="dropdown-menu scrollable noverticalpadding" aria-labelledby="dropdownExcludeChannel">
+        @foreach (RestVoiceChannel channel in nonExcludedChannels.OrderBy(x => x.Position))
         {
             <form method="post">
                 <input type="hidden" name="channelId" value="@channel.Id" />

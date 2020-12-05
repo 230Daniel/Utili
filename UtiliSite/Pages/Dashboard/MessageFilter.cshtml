@@ -26,15 +26,15 @@
 
 <div class="dropdown">
     <button class="btn btn-secondary dropdown-toggle" type="button" data-toggle="dropdown" id="dropdownAddChannel" aria-haspopup="true" aria-expanded="false">
-        Add channel
+        Filter channel...
     </button>
-    <div class="dropdown-menu scrollable-menu noverticalpadding" aria-labelledby="dropdownAddChannel">
+    <div class="dropdown-menu scrollable noverticalpadding" aria-labelledby="dropdownAddChannel">
 
         @foreach (RestTextChannel channel in nonMessageFilterChannels)
         {
             <form method="post">
                 <input type="hidden" name="channelId" value="@channel.Id" />
-                <button class="dropdown-item" asp-page-handler="Add" type="submit">#@channel.Name</button>
+                <button class="dropdown-item" asp-page-handler="Add" type="submit">@channel.Name</button>
             </form>
         }
 
@@ -45,7 +45,7 @@
 @foreach (MessageFilterRow row in messageFilterRows)
 {
     string channelName = channels.First(x => x.Id == row.ChannelId).Name;
-    <div class="autopurge-card pb-4">
+    <div class="pb-4">
         <div class="col-md-12">
             <div class="card card-settings">
                 <form name="form-@row.Id" method="post">

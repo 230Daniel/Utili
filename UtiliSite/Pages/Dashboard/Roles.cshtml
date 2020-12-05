@@ -56,12 +56,12 @@
     </div>
 </div>
 
-<div class="dropdown">
+<div class="dropdown belowcards">
     <button class="btn btn-secondary dropdown-toggle" type="button" data-toggle="dropdown" id="dropdownAddChannel" aria-haspopup="true" aria-expanded="false">
-        Add join role
+        Give role on join...
     </button>
-    <div class="dropdown-menu scrollable-menu noverticalpadding" aria-labelledby="dropdownExcludeChannel">
-        @foreach (RestRole role in nonjoinRoles)
+    <div class="dropdown-menu scrollable noverticalpadding" aria-labelledby="dropdownExcludeChannel">
+        @foreach (RestRole role in nonjoinRoles.OrderBy(x => -x.Position))
         {
             <form method="post">
                 <input type="hidden" name="roleId" value="@role.Id" />
