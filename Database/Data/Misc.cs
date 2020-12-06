@@ -45,11 +45,10 @@ namespace Database.Data
 
                 while (reader.Read())
                 {
-                    matchedRows.Add(new MiscRow(
-                        reader.GetInt64(0),
-                        reader.GetUInt64(1),
-                        reader.GetString(2),
-                        reader.GetString(3)));
+                    matchedRows.Add(MiscRow.FromDatabase(
+                        reader.GetUInt64(0),
+                        reader.GetString(1),
+                        reader.GetString(2)));
                 }
 
                 reader.Close();
@@ -68,7 +67,7 @@ namespace Database.Data
         {
             MySqlCommand command;
 
-            if (row.Id == 0) 
+            if (row.New) 
             // The row is a new entry so should be inserted into the database
             {
                 command = Sql.GetCommand("INSERT INTO Misc (GuildId, Type, Value) VALUES (@GuildId, @Type, @Value);",
@@ -81,25 +80,25 @@ namespace Database.Data
                 command.ExecuteNonQuery();
                 command.Connection.Close();
 
-                row.Id = GetRows(row.GuildId, row.Type, row.Value.Value).First().Id;
+                row.New = false;
 
                 if(Cache.Initialised) Cache.Misc.Rows.Add(row);
             }
             else
             // The row already exists and should be updated
             {
-                command = Sql.GetCommand("UPDATE Misc SET GuildId = @GuildId, Type = @Type, Value = @Value WHERE Id = @Id;",
+                command = Sql.GetCommand("UPDATE Misc SET Value = @Value WHERE GuildId = @GuildId AND Type = @Type;",
                     new[]
                     {
-                        ("Id", row.Id.ToString()),
                         ("GuildId", row.GuildId.ToString()),
                         ("Type", row.Type),
-                        ("Value", row.Value.EncodedValue)});
+                        ("Value", row.Value.EncodedValue)
+                    });
 
                 command.ExecuteNonQuery();
                 command.Connection.Close();
 
-                if(Cache.Initialised) Cache.Misc.Rows[Cache.Misc.Rows.FindIndex(x => x.Id == row.Id)] = row;
+                if(Cache.Initialised) Cache.Misc.Rows[Cache.Misc.Rows.FindIndex(x => x.GuildId == row.GuildId && x.Type == row.Type)] = row;
             }
         }
 
@@ -107,10 +106,13 @@ namespace Database.Data
         {
             if(row == null) return;
 
-            if(Cache.Initialised) Cache.Misc.Rows.RemoveAll(x => x.Id == row.Id);
+            if(Cache.Initialised) Cache.Misc.Rows.RemoveAll(x => x.GuildId == row.GuildId && x.Type == row.Type);
 
-            string commandText = "DELETE FROM Misc WHERE Id = @Id";
-            MySqlCommand command = Sql.GetCommand(commandText, new[] {("Id", row.Id.ToString())});
+            string commandText = "DELETE FROM Misc WHERE GuildId = @GuildId AND Type = @Type";
+            MySqlCommand command = Sql.GetCommand(commandText, 
+                new[] {
+                    ("GuildId", row.GuildId.ToString()),
+                    ("Type", row.Type)});
             command.ExecuteNonQuery();
             command.Connection.Close();
         }
@@ -150,54 +152,37 @@ namespace Database.Data
     public class MiscTable
     {
         public List<MiscRow> Rows { get; set; }
-
-        public void Load()
-        // Load the table from the database
-        {
-            List<MiscRow> newRows = new List<MiscRow>();
-
-            MySqlDataReader reader = Sql.GetCommand("SELECT * FROM Misc;").ExecuteReader();
-
-            try
-            {
-                while (reader.Read())
-                {
-                    newRows.Add(new MiscRow(
-                        reader.GetInt64(0),
-                        reader.GetUInt64(1),
-                        reader.GetString(2),
-                        reader.GetString(3)));
-                }
-            }
-            catch {}
-
-            reader.Close();
-
-            Rows = newRows;
-        }
     }
 
     public class MiscRow
     {
-        public long Id { get; set; }
+        public bool New { get; set; }
         public ulong GuildId { get; set; }
         public string Type { get; set; }
         public EString Value { get; set; }
 
+        private MiscRow()
+        {
+
+        }
+
         public MiscRow(ulong guildId, string type, string value)
         {
-            Id = 0;
+            New = true;
             GuildId = guildId;
             Type = type;
             Value = EString.FromDecoded(value);
         }
 
-        public MiscRow(long id, ulong guildId, string type, string value)
+        public static MiscRow FromDatabase(ulong guildId, string type, string value)
         {
-            Id = id;
-            GuildId = guildId;
-            Type = type;
-            Value = EString.FromEncoded(value);
+            return new MiscRow
+            {
+                New = false,
+                GuildId = guildId,
+                Type = type,
+                Value = EString.FromDecoded(value)
+            };
         }
     }
 }

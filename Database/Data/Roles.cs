@@ -6,7 +6,7 @@ namespace Database.Data
 {
     public static class Roles
     {
-        public static List<RolesRow> GetRows(ulong? guildId = null, long? id = null, bool ignoreCache = false)
+        public static List<RolesRow> GetRows(ulong? guildId = null, bool ignoreCache = false)
         {
             List<RolesRow> matchedRows = new List<RolesRow>();
 
@@ -15,7 +15,6 @@ namespace Database.Data
                 matchedRows.AddRange(Cache.Roles.Rows);
 
                 if (guildId.HasValue) matchedRows.RemoveAll(x => x.GuildId != guildId.Value);
-                if (id.HasValue) matchedRows.RemoveAll(x => x.Id != id.Value);
             }
             else
             {
@@ -28,21 +27,14 @@ namespace Database.Data
                     values.Add(("GuildId", guildId.Value.ToString()));
                 }
 
-                if (id.HasValue)
-                {
-                    command += " AND Id = @Id";
-                    values.Add(("Id", id.Value.ToString()));
-                }
-
                 MySqlDataReader reader = Sql.GetCommand(command, values.ToArray()).ExecuteReader();
 
                 while (reader.Read())
                 {
-                    matchedRows.Add(new RolesRow(
-                        reader.GetInt64(0),
-                        reader.GetUInt64(1),
-                        reader.GetBoolean(2),
-                        reader.GetString(3)));
+                    matchedRows.Add(RolesRow.FromDatabase(
+                        reader.GetUInt64(0),
+                        reader.GetBoolean(1),
+                        reader.GetString(2)));
                 }
 
                 reader.Close();
@@ -61,7 +53,7 @@ namespace Database.Data
         {
             MySqlCommand command;
 
-            if (row.Id == 0) 
+            if (row.New) 
             // The row is a new entry so should be inserted into the database
             {
                 command = Sql.GetCommand($"INSERT INTO Roles (GuildId, RolePersist, JoinRoles) VALUES (@GuildId, {Sql.ToSqlBool(row.RolePersist)}, @JoinRoles);",
@@ -73,15 +65,15 @@ namespace Database.Data
                 command.ExecuteNonQuery();
                 command.Connection.Close();
 
-                row.Id = GetRows(row.GuildId, ignoreCache: true).First().Id;
+                row.New = false;
 
                 if(Cache.Initialised) Cache.Roles.Rows.Add(row);
             }
             else
             // The row already exists and should be updated
             {
-                command = Sql.GetCommand($"UPDATE Roles SET GuildId = @GuildId, RolePersist = {Sql.ToSqlBool(row.RolePersist)}, JoinRoles = @JoinRoles WHERE Id = @Id;",
-                    new [] {("Id", row.Id.ToString()),
+                command = Sql.GetCommand($"UPDATE Roles SET RolePersist = {Sql.ToSqlBool(row.RolePersist)}, JoinRoles = @JoinRoles WHERE GuildId = @GuildId;",
+                    new [] {
                         ("GuildId", row.GuildId.ToString()), 
                         ("JoinRoles", row.GetJoinRolesString())
                     });
@@ -89,7 +81,7 @@ namespace Database.Data
                 command.ExecuteNonQuery();
                 command.Connection.Close();
 
-                if(Cache.Initialised) Cache.Roles.Rows[Cache.Roles.Rows.FindIndex(x => x.Id == row.Id)] = row;
+                if(Cache.Initialised) Cache.Roles.Rows[Cache.Roles.Rows.FindIndex(x => x.GuildId == row.GuildId)] = row;
             }
         }
 
@@ -97,10 +89,11 @@ namespace Database.Data
         {
             if(row == null) return;
 
-            if(Cache.Initialised) Cache.Roles.Rows.RemoveAll(x => x.Id == row.Id);
+            if(Cache.Initialised) Cache.Roles.Rows.RemoveAll(x => x.GuildId == row.GuildId);
 
-            string commandText = "DELETE FROM Roles WHERE Id = @Id";
-            MySqlCommand command = Sql.GetCommand(commandText, new[] {("Id", row.Id.ToString())});
+            string commandText = "DELETE FROM Roles WHERE GuildId = @GuildId";
+            MySqlCommand command = Sql.GetCommand(commandText, 
+                new[] {("GuildId", row.GuildId.ToString())});
             command.ExecuteNonQuery();
             command.Connection.Close();
         }
@@ -137,8 +130,8 @@ namespace Database.Data
             {
                 matchedRows.Add(new RolesPersistantRolesRow(
                     reader.GetInt64(0),
-                    reader.GetUInt64(1),
-                    reader.GetString(3)));
+                    reader.GetUInt64(0),
+                    reader.GetString(2)));
             }
 
             reader.Close();
@@ -194,55 +187,38 @@ namespace Database.Data
     public class RolesTable
     {
         public List<RolesRow> Rows { get; set; }
-
-        public void Load()
-        // Load the table from the database
-        {
-            List<RolesRow> newRows = new List<RolesRow>();
-
-            MySqlDataReader reader = Sql.GetCommand("SELECT * FROM Roles;").ExecuteReader();
-
-            try
-            {
-                while (reader.Read())
-                {
-                    newRows.Add(new RolesRow(
-                        reader.GetInt64(0),
-                        reader.GetUInt64(1),
-                        reader.GetBoolean(2),
-                        reader.GetString(3)));
-                }
-            }
-            catch {}
-
-            reader.Close();
-
-            Rows = newRows;
-        }
     }
 
     public class RolesRow
     {
-        public long Id { get; set; }
+        public bool New { get; set; }
         public ulong GuildId { get; set; }
         public bool RolePersist { get; set; }
         public List<ulong> JoinRoles { get; set; }
 
+        private RolesRow()
+        {
+
+        }
+
         public RolesRow(ulong guildId)
         {
-            Id = 0;
+            New = true;
             GuildId = guildId;
             RolePersist = false;
             JoinRoles = new List<ulong>();
         }
 
-        public RolesRow(long id, ulong guildId, bool rolePersist, string joinRoles)
+        public static RolesRow FromDatabase(ulong guildId, bool rolePersist, string joinRoles)
         {
-            Id = id;
-            GuildId = guildId;
-            RolePersist = rolePersist;
-
-            JoinRoles = new List<ulong>();
+            RolesRow row = new RolesRow
+            {
+                New = false,
+                GuildId = guildId,
+                RolePersist = rolePersist,
+                JoinRoles = new List<ulong>()
+            };
+            
 
             if (!string.IsNullOrEmpty(joinRoles))
             {
@@ -250,10 +226,12 @@ namespace Database.Data
                 {
                     if (ulong.TryParse(joinRole, out ulong channelId))
                     {
-                        JoinRoles.Add(channelId);
+                        row.JoinRoles.Add(channelId);
                     }
                 }
             }
+
+            return row;
         }
 
         public string GetJoinRolesString()
@@ -276,6 +254,8 @@ namespace Database.Data
 
     public class RolesPersistantRolesRow
     {
+        // TODO: Refactor properly, these have to be unique as of current
+
         public long Id { get; set; }
         public ulong GuildId { get; set; }
         public ulong UserId { get; set; }

@@ -7,7 +7,7 @@ namespace Database.Data
 {
     public static class Autopurge
     {
-        public static List<AutopurgeRow> GetRows(ulong? guildId = null, ulong? channelId = null, long? id = null, bool ignoreCache = false)
+        public static List<AutopurgeRow> GetRows(ulong? guildId = null, ulong? channelId = null, bool ignoreCache = false)
         {
             List<AutopurgeRow> matchedRows = new List<AutopurgeRow>();
 
@@ -17,7 +17,6 @@ namespace Database.Data
 
                 if (guildId.HasValue) matchedRows.RemoveAll(x => x.GuildId != guildId.Value);
                 if (channelId.HasValue) matchedRows.RemoveAll(x => x.ChannelId != channelId.Value);
-                if (id.HasValue) matchedRows.RemoveAll(x => x.Id != id.Value);
             }
             else
             {
@@ -36,22 +35,15 @@ namespace Database.Data
                     values.Add(("ChannelId", channelId.Value.ToString()));
                 }
 
-                if (id.HasValue)
-                {
-                    command += " AND Id = @Id";
-                    values.Add(("Id", id.Value.ToString()));
-                }
-
                 MySqlDataReader reader = Sql.GetCommand(command, values.ToArray()).ExecuteReader();
 
                 while (reader.Read())
                 {
-                    matchedRows.Add(new AutopurgeRow(
-                        reader.GetInt64(0),
+                    matchedRows.Add(AutopurgeRow.FromDatabase(
+                        reader.GetUInt64(0),
                         reader.GetUInt64(1),
-                        reader.GetUInt64(2),
-                        reader.GetString(3),
-                        reader.GetInt32(4)));
+                        reader.GetString(2),
+                        reader.GetInt32(3)));
                 }
 
                 reader.Close();
@@ -64,7 +56,7 @@ namespace Database.Data
         {
             MySqlCommand command;
 
-            if (row.Id == 0) 
+            if (row.New) 
             // The row is a new entry so should be inserted into the database
             {
                 command = Sql.GetCommand("INSERT INTO Autopurge (GuildId, ChannelId, Timespan, Mode) VALUES (@GuildId, @ChannelId, @Timespan, @Mode);",
@@ -76,15 +68,15 @@ namespace Database.Data
                 command.ExecuteNonQuery();
                 command.Connection.Close();
 
-                row.Id = GetRows(row.GuildId, row.ChannelId, ignoreCache: true).First().Id;
+                row.New = false;
 
                 if(Cache.Initialised) Cache.Autopurge.Rows.Add(row);
             }
             else
             // The row already exists and should be updated
             {
-                command = Sql.GetCommand("UPDATE Autopurge SET GuildId = @GuildId, ChannelId = @ChannelId, Timespan = @Timespan, Mode = @Mode WHERE Id = @Id;",
-                    new [] {("Id", row.Id.ToString()),
+                command = Sql.GetCommand("UPDATE Autopurge SET Timespan = @Timespan, Mode = @Mode WHERE GuildId = @GuildId AND ChannelId = @ChannelId;",
+                    new [] {
                         ("GuildId", row.GuildId.ToString()), 
                         ("ChannelId", row.ChannelId.ToString()),
                         ("Timespan", row.Timespan.ToString()),
@@ -93,7 +85,7 @@ namespace Database.Data
                 command.ExecuteNonQuery();
                 command.Connection.Close();
 
-                if(Cache.Initialised) Cache.Autopurge.Rows[Cache.Autopurge.Rows.FindIndex(x => x.Id == row.Id)] = row;
+                if(Cache.Initialised) Cache.Autopurge.Rows[Cache.Autopurge.Rows.FindIndex(x => x.GuildId == row.GuildId && x.ChannelId == row.ChannelId)] = row;
             }
         }
 
@@ -101,10 +93,14 @@ namespace Database.Data
         {
             if(row == null) return;
 
-            if(Cache.Initialised) Cache.Autopurge.Rows.RemoveAll(x => x.Id == row.Id);
+            if(Cache.Initialised) Cache.Autopurge.Rows.RemoveAll(x => x.GuildId == row.GuildId && x.ChannelId == row.ChannelId);
 
-            string commandText = "DELETE FROM Autopurge WHERE Id = @Id";
-            MySqlCommand command = Sql.GetCommand(commandText, new[] {("Id", row.Id.ToString())});
+            string commandText = "DELETE FROM Autopurge WHERE GuildId = @GuildId AND ChannelId = @ChannelId";
+            MySqlCommand command = Sql.GetCommand(commandText, 
+                new[] {
+                ("GuildId", row.GuildId.ToString()),
+                ("ChannelId", row.ChannelId.ToString())});
+
             command.ExecuteNonQuery();
             command.Connection.Close();
         }
@@ -113,37 +109,11 @@ namespace Database.Data
     public class AutopurgeTable
     {
         public List<AutopurgeRow> Rows { get; set; }
-
-        public void Load()
-        // Load the table from the database
-        {
-            List<AutopurgeRow> newRows = new List<AutopurgeRow>();
-
-            MySqlDataReader reader = Sql.GetCommand("SELECT * FROM Autopurge;").ExecuteReader();
-
-            try
-            {
-                while (reader.Read())
-                {
-                    newRows.Add(new AutopurgeRow(
-                        reader.GetInt64(0),
-                        reader.GetUInt64(1),
-                        reader.GetUInt64(2),
-                        reader.GetString(3),
-                        reader.GetInt32(4)));
-                }
-            }
-            catch {}
-
-            reader.Close();
-
-            Rows = newRows;
-        }
     }
 
     public class AutopurgeRow
     {
-        public long Id { get; set; }
+        public bool New { get; set; }
         public ulong GuildId { get; set; }
         public ulong ChannelId { get; set; }
         public TimeSpan Timespan { get; set; }
@@ -153,16 +123,19 @@ namespace Database.Data
 
         public AutopurgeRow()
         {
-            Id = 0;
+            New = true;
         }
 
-        public AutopurgeRow(long id, ulong guildId, ulong channelId, string timespan, int mode)
+        public static AutopurgeRow FromDatabase(ulong guildId, ulong channelId, string timespan, int mode)
         {
-            Id = id;
-            GuildId = guildId;
-            ChannelId = channelId;
-            Timespan = TimeSpan.Parse(timespan);
-            Mode = mode;
+            return new AutopurgeRow
+            {
+                New = false,
+                GuildId = guildId,
+                ChannelId = channelId,
+                Timespan = TimeSpan.Parse(timespan),
+                Mode = mode
+            };
         }
     }
 }

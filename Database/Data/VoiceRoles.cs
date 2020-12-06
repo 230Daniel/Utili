@@ -6,7 +6,7 @@ namespace Database.Data
 {
     public static class VoiceRoles
     {
-        public static List<VoiceRolesRow> GetRows(ulong? guildId = null, ulong? channelId = null, long? id = null, bool ignoreCache = false)
+        public static List<VoiceRolesRow> GetRows(ulong? guildId = null, ulong? channelId = null, bool ignoreCache = false)
         {
             List<VoiceRolesRow> matchedRows = new List<VoiceRolesRow>();
 
@@ -14,7 +14,6 @@ namespace Database.Data
             {
                 matchedRows.AddRange(Cache.VoiceRoles.Rows);
 
-                if (id.HasValue) matchedRows.RemoveAll(x => x.Id != id.Value);
                 if (guildId.HasValue) matchedRows.RemoveAll(x => x.GuildId != guildId.Value);
                 if (channelId.HasValue) matchedRows.RemoveAll(x => x.ChannelId != channelId.Value);
             }
@@ -35,21 +34,14 @@ namespace Database.Data
                     values.Add(("ChannelId", channelId.Value.ToString()));
                 }
 
-                if (id.HasValue)
-                {
-                    command += " AND Id = @Id";
-                    values.Add(("Id", id.Value.ToString()));
-                }
-
                 MySqlDataReader reader = Sql.GetCommand(command, values.ToArray()).ExecuteReader();
 
                 while (reader.Read())
                 {
-                    matchedRows.Add(new VoiceRolesRow(
-                        reader.GetInt64(0),
+                    matchedRows.Add(VoiceRolesRow.FromDatabase(
+                        reader.GetUInt64(0),
                         reader.GetUInt64(1),
-                        reader.GetUInt64(2),
-                        reader.GetUInt64(3)));
+                        reader.GetUInt64(2)));
                 }
 
                 reader.Close();
@@ -62,7 +54,7 @@ namespace Database.Data
         {
             MySqlCommand command;
 
-            if (row.Id == 0) 
+            if (row.New) 
             // The row is a new entry so should be inserted into the database
             {
                 command = Sql.GetCommand("INSERT INTO VoiceRoles (GuildId, ChannelId, RoleId) VALUES (@GuildId, @ChannelId, @RoleId);",
@@ -72,15 +64,15 @@ namespace Database.Data
 
                 command.ExecuteNonQuery();
                 command.Connection.Close();
-                row.Id = GetRows(row.GuildId, row.ChannelId, null, true).First().Id;
+                row.New = false;
                 
                 if(Cache.Initialised) Cache.VoiceRoles.Rows.Add(row);
             }
             else
             // The row already exists and should be updated
             {
-                command = Sql.GetCommand("UPDATE VoiceRoles SET GuildId = @GuildId, ChannelId = @ChannelId, RoleId = @RoleId WHERE Id = @Id;",
-                    new [] {("Id", row.Id.ToString()),
+                command = Sql.GetCommand("UPDATE VoiceRoles SET RoleId = @RoleId WHERE GuildId = @GuildId AND ChannelId = @ChannelId;",
+                    new [] {
                         ("GuildId", row.GuildId.ToString()), 
                         ("ChannelId", row.ChannelId.ToString()),
                         ("RoleId", row.RoleId.ToString())});
@@ -88,7 +80,7 @@ namespace Database.Data
                 command.ExecuteNonQuery();
                 command.Connection.Close();
 
-                if(Cache.Initialised) Cache.VoiceRoles.Rows[Cache.VoiceRoles.Rows.FindIndex(x => x.Id == row.Id)] = row;
+                if(Cache.Initialised) Cache.VoiceRoles.Rows[Cache.VoiceRoles.Rows.FindIndex(x => x.GuildId == row.GuildId && x.ChannelId == row.ChannelId)] = row;
             }
         }
 
@@ -96,10 +88,13 @@ namespace Database.Data
         {
             if(row == null) return;
 
-            if(Cache.Initialised) Cache.VoiceRoles.Rows.RemoveAll(x => x.Id == row.Id);
+            if(Cache.Initialised) Cache.VoiceRoles.Rows.RemoveAll(x => x.GuildId == row.GuildId && x.ChannelId == row.ChannelId);
 
-            string commandText = "DELETE FROM VoiceRoles WHERE Id = @Id";
-            MySqlCommand command = Sql.GetCommand(commandText, new[] {("Id", row.Id.ToString())});
+            string commandText = "DELETE FROM VoiceRoles WHERE GuildId = @GuildId AND ChannelId = @ChannelId";
+            MySqlCommand command = Sql.GetCommand(commandText, 
+                new[] {
+                    ("GuildId", row.GuildId.ToString()),
+                    ("ChannelId", row.ChannelId.ToString())});
             command.ExecuteNonQuery();
             command.Connection.Close();
         }
@@ -108,50 +103,29 @@ namespace Database.Data
     public class VoiceRolesTable
     {
         public List<VoiceRolesRow> Rows { get; set; }
-
-        public void Load()
-        // Load the table from the database
-        {
-            List<VoiceRolesRow> newRows = new List<VoiceRolesRow>();
-
-            MySqlDataReader reader = Sql.GetCommand("SELECT * FROM VoiceRoles;").ExecuteReader();
-
-            try
-            {
-                while (reader.Read())
-                {
-                    newRows.Add(new VoiceRolesRow(
-                        reader.GetInt64(0),
-                        reader.GetUInt64(1),
-                        reader.GetUInt64(2),
-                        reader.GetUInt64(3)));
-                }
-            }
-            catch {}
-
-            reader.Close();
-            Rows = newRows;
-        }
     }
 
     public class VoiceRolesRow
     {
-        public long Id { get; set; }
+        public bool New { get; set; }
         public ulong GuildId { get; set; }
         public ulong ChannelId { get; set; }
         public ulong RoleId { get; set; }
 
         public VoiceRolesRow()
         {
-            Id = 0;
+            New = true;
         }
 
-        public VoiceRolesRow(long id, ulong guildId, ulong channelId, ulong roleId)
+        public static VoiceRolesRow FromDatabase(ulong guildId, ulong channelId, ulong roleId)
         {
-            Id = id;
-            GuildId = guildId;
-            ChannelId = channelId;
-            RoleId = roleId;
+            return new VoiceRolesRow
+            {
+                New = false,
+                GuildId = guildId,
+                ChannelId = channelId,
+                RoleId = roleId
+            };
         }
     }
 }

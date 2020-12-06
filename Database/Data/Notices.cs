@@ -8,7 +8,7 @@ namespace Database.Data
 {
     public static class Notices
     {
-        public static List<NoticesRow> GetRows(ulong? guildId = null, ulong? channelId = null, long? id = null, bool ignoreCache = false)
+        public static List<NoticesRow> GetRows(ulong? guildId = null, ulong? channelId = null, bool ignoreCache = false)
         {
             List<NoticesRow> matchedRows = new List<NoticesRow>();
 
@@ -18,7 +18,6 @@ namespace Database.Data
 
                 if (guildId.HasValue) matchedRows.RemoveAll(x => x.GuildId != guildId.Value);
                 if (channelId.HasValue) matchedRows.RemoveAll(x => x.ChannelId != channelId.Value);
-                if (id.HasValue) matchedRows.RemoveAll(x => x.Id != id.Value);
             }
             else
             {
@@ -37,22 +36,16 @@ namespace Database.Data
                     values.Add(("ChannelId", channelId.Value.ToString()));
                 }
 
-                if (id.HasValue)
-                {
-                    command += " AND Id = @Id";
-                    values.Add(("Id", id.Value.ToString()));
-                }
-
                 MySqlDataReader reader = Sql.GetCommand(command, values.ToArray()).ExecuteReader();
 
                 while (reader.Read())
                 {
-                    matchedRows.Add(new NoticesRow(
-                        reader.GetInt64(0),
+                    matchedRows.Add(NoticesRow.FromDatabase(
+                        reader.GetUInt64(0),
                         reader.GetUInt64(1),
                         reader.GetUInt64(2),
-                        reader.GetUInt64(3),
-                        reader.GetBoolean(4),
+                        reader.GetBoolean(3),
+                        reader.GetString(4),
                         reader.GetString(5),
                         reader.GetString(6),
                         reader.GetString(7),
@@ -60,8 +53,7 @@ namespace Database.Data
                         reader.GetString(9),
                         reader.GetString(10),
                         reader.GetString(11),
-                        reader.GetString(12),
-                        reader.GetUInt32(13)));
+                        reader.GetUInt32(12)));
                 }
 
                 reader.Close();
@@ -74,7 +66,7 @@ namespace Database.Data
         {
             MySqlCommand command;
 
-            if (row.Id == 0) 
+            if (row.New) 
             // The row is a new entry so should be inserted into the database
             {
                 command = Sql.GetCommand(
@@ -98,17 +90,16 @@ namespace Database.Data
                 command.ExecuteNonQuery();
                 command.Connection.Close();
 
-                row.Id = GetRows(row.GuildId, ignoreCache: true).First().Id;
+                row.New = false;
 
                 if(Cache.Initialised) Cache.Notices.Rows.Add(row);
             }
             else
             // The row already exists and should be updated
             {
-                command = Sql.GetCommand($"UPDATE Notices SET GuildId = @GuildId, ChannelId = @ChannelId, MessageId = @MessageId, Enabled = {Sql.ToSqlBool(row.Enabled)}, Delay = @Delay, Title = @Title, Footer = @Footer, Content = @Content, Text = @Text, Image = @Image, Thumbnail = @Thumbnail, Icon = @Icon, Colour = @Colour WHERE Id = @Id;",
+                command = Sql.GetCommand($"UPDATE Notices SET MessageId = @MessageId, Enabled = {Sql.ToSqlBool(row.Enabled)}, Delay = @Delay, Title = @Title, Footer = @Footer, Content = @Content, Text = @Text, Image = @Image, Thumbnail = @Thumbnail, Icon = @Icon, Colour = @Colour WHERE GuildId = @GuildId AND ChannelId = @ChannelId;",
                     new [] 
                     {
-                        ("Id", row.Id.ToString()),
                         ("GuildId", row.GuildId.ToString()),
                         ("ChannelId", row.ChannelId.ToString()),
                         ("MessageId", row.MessageId.ToString()),
@@ -126,7 +117,7 @@ namespace Database.Data
                 command.ExecuteNonQuery();
                 command.Connection.Close();
 
-                if(Cache.Initialised) Cache.Notices.Rows[Cache.Notices.Rows.FindIndex(x => x.Id == row.Id)] = row;
+                if(Cache.Initialised) Cache.Notices.Rows[Cache.Notices.Rows.FindIndex(x => x.GuildId == row.GuildId && x.ChannelId == row.ChannelId)] = row;
             }
         }
 
@@ -134,7 +125,7 @@ namespace Database.Data
         {
             MySqlCommand command;
 
-            if (row.Id == 0) 
+            if (row.New) 
             // The row is a new entry so should be inserted into the database
             {
                 command = Sql.GetCommand(
@@ -158,24 +149,25 @@ namespace Database.Data
                 command.ExecuteNonQuery();
                 command.Connection.Close();
 
-                row.Id = GetRows(row.GuildId, ignoreCache: true).First().Id;
+                row.New = false;
 
                 if(Cache.Initialised) Cache.Notices.Rows.Add(row);
             }
             else
             // The row already exists and should be updated
             {
-                command = Sql.GetCommand($"UPDATE Notices SET MessageId = @MessageId WHERE Id = @Id;",
+                command = Sql.GetCommand($"UPDATE Notices SET MessageId = @MessageId WHERE GuildId = @GuildId AND ChannelId = @ChannelId;",
                     new [] 
                     {
-                        ("Id", row.Id.ToString()),
+                        ("GuildId", row.GuildId.ToString()),
+                        ("ChannelId", row.ChannelId.ToString()),
                         ("MessageId", row.MessageId.ToString())
                     });
 
                 command.ExecuteNonQuery();
                 command.Connection.Close();
 
-                if(Cache.Initialised) Cache.Notices.Rows[Cache.Notices.Rows.FindIndex(x => x.Id == row.Id)] = row;
+                if(Cache.Initialised) Cache.Notices.Rows[Cache.Notices.Rows.FindIndex(x => x.GuildId == row.GuildId && x.ChannelId == row.ChannelId)] = row;
             }
         }
 
@@ -183,10 +175,13 @@ namespace Database.Data
         {
             if(row == null) return;
 
-            if(Cache.Initialised) Cache.Notices.Rows.RemoveAll(x => x.Id == row.Id);
+            if(Cache.Initialised) Cache.Notices.Rows.RemoveAll(x => x.GuildId == row.GuildId && x.ChannelId == row.ChannelId);
 
-            string commandText = "DELETE FROM Notices WHERE Id = @Id";
-            MySqlCommand command = Sql.GetCommand(commandText, new[] {("Id", row.Id.ToString())});
+            string commandText = "DELETE FROM Notices WHERE GuildId = @GuildId AND ChannelId = @ChannelId";
+            MySqlCommand command = Sql.GetCommand(commandText, 
+                new[] {
+                    ("GuildId", row.GuildId.ToString()),
+                    ("ChannelId", row.ChannelId.ToString())});
             command.ExecuteNonQuery();
             command.Connection.Close();
         }
@@ -195,46 +190,11 @@ namespace Database.Data
     public class NoticesTable
     {
         public List<NoticesRow> Rows { get; set; }
-
-        public void Load()
-        // Load the table from the database
-        {
-            List<NoticesRow> newRows = new List<NoticesRow>();
-
-            MySqlDataReader reader = Sql.GetCommand("SELECT * FROM Notices;").ExecuteReader();
-
-            try
-            {
-                while (reader.Read())
-                {
-                    newRows.Add(new NoticesRow(
-                        reader.GetInt64(0),
-                        reader.GetUInt64(1),
-                        reader.GetUInt64(2),
-                        reader.GetUInt64(3),
-                        reader.GetBoolean(4),
-                        reader.GetString(5),
-                        reader.GetString(6),
-                        reader.GetString(7),
-                        reader.GetString(8),
-                        reader.GetString(9),
-                        reader.GetString(10),
-                        reader.GetString(11),
-                        reader.GetString(12),
-                        reader.GetUInt32(13)));
-                }
-            }
-            catch {}
-
-            reader.Close();
-
-            Rows = newRows;
-        }
     }
 
     public class NoticesRow
     {
-        public long Id { get; set; }
+        public bool New { get; set; }
         public ulong GuildId { get; set; }
         public ulong ChannelId { get; set; }
         public ulong MessageId { get; set; }
@@ -251,25 +211,28 @@ namespace Database.Data
 
         public NoticesRow()
         {
-            Id = 0;
+            New = true;
         }
 
-        public NoticesRow(long id, ulong guildId, ulong channelId, ulong messageId, bool enabled, string delay, string title, string footer, string content, string text, string image, string thumbnail, string icon, uint colour)
+        public static NoticesRow FromDatabase(ulong guildId, ulong channelId, ulong messageId, bool enabled, string delay, string title, string footer, string content, string text, string image, string thumbnail, string icon, uint colour)
         {
-            Id = id;
-            GuildId = guildId;
-            ChannelId = channelId;
-            MessageId = messageId;
-            Enabled = enabled;
-            Delay = TimeSpan.Parse(delay);
-            Title = EString.FromEncoded(title);
-            Footer = EString.FromEncoded(footer);
-            Content = EString.FromEncoded(content);
-            Text = EString.FromEncoded(text);
-            Image = EString.FromEncoded(image);
-            Thumbnail = EString.FromEncoded(thumbnail);
-            Icon = EString.FromEncoded(icon);
-            Colour = new Color(colour);
+            return new NoticesRow
+            {
+                New = false,
+                GuildId = guildId,
+                ChannelId = channelId,
+                MessageId = messageId,
+                Enabled = enabled,
+                Delay = TimeSpan.Parse(delay),
+                Title = EString.FromEncoded(title),
+                Footer = EString.FromEncoded(footer),
+                Content = EString.FromEncoded(content),
+                Text = EString.FromEncoded(text),
+                Image = EString.FromEncoded(image),
+                Thumbnail = EString.FromEncoded(thumbnail),
+                Icon = EString.FromEncoded(icon),
+                Colour = new Color(colour)
+            };
         }
     }
 }

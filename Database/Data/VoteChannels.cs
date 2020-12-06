@@ -7,7 +7,7 @@ namespace Database.Data
 {
     public static class VoteChannels
     {
-        public static List<VoteChannelsRow> GetRows(ulong? guildId = null, ulong? channelId = null, long? id = null, bool ignoreCache = false)
+        public static List<VoteChannelsRow> GetRows(ulong? guildId = null, ulong? channelId = null, bool ignoreCache = false)
         {
             List<VoteChannelsRow> matchedRows = new List<VoteChannelsRow>();
 
@@ -17,7 +17,6 @@ namespace Database.Data
 
                 if (guildId.HasValue) matchedRows.RemoveAll(x => x.GuildId != guildId.Value);
                 if (channelId.HasValue) matchedRows.RemoveAll(x => x.ChannelId != channelId.Value);
-                if (id.HasValue) matchedRows.RemoveAll(x => x.Id != id.Value);
             }
             else
             {
@@ -36,22 +35,15 @@ namespace Database.Data
                     values.Add(("ChannelId", channelId.Value.ToString()));
                 }
 
-                if (id.HasValue)
-                {
-                    command += " AND Id = @Id";
-                    values.Add(("Id", id.Value.ToString()));
-                }
-
                 MySqlDataReader reader = Sql.GetCommand(command, values.ToArray()).ExecuteReader();
 
                 while (reader.Read())
                 {
-                    matchedRows.Add(new VoteChannelsRow(
-                        reader.GetInt64(0),
+                    matchedRows.Add(VoteChannelsRow.FromDatabase(
+                        reader.GetUInt64(0),
                         reader.GetUInt64(1),
-                        reader.GetUInt64(2),
-                        reader.GetInt32(3),
-                        reader.GetString(4)));
+                        reader.GetInt32(2),
+                        reader.GetString(3)));
                 }
 
                 reader.Close();
@@ -64,7 +56,7 @@ namespace Database.Data
         {
             MySqlCommand command;
 
-            if (row.Id == 0) 
+            if (row.New) 
             // The row is a new entry so should be inserted into the database
             {
                 command = Sql.GetCommand("INSERT INTO VoteChannels (GuildId, ChannelId, Mode, Emotes) VALUES (@GuildId, @ChannelId, @Mode, @Emotes);",
@@ -76,15 +68,15 @@ namespace Database.Data
                 command.ExecuteNonQuery();
                 command.Connection.Close();
 
-                row.Id = GetRows(row.GuildId, row.ChannelId, ignoreCache: true).First().Id;
+                row.New = false;
 
                 if(Cache.Initialised) Cache.VoteChannels.Rows.Add(row);
             }
             else
             // The row already exists and should be updated
             {
-                command = Sql.GetCommand("UPDATE VoteChannels SET GuildId = @GuildId, ChannelId = @ChannelId, Mode = @Mode, Emotes = @Emotes WHERE Id = @Id;",
-                    new [] {("Id", row.Id.ToString()),
+                command = Sql.GetCommand("UPDATE VoteChannels SET Mode = @Mode, Emotes = @Emotes WHERE GuildId = @GuildId AND ChannelId = @ChannelId;",
+                    new [] {
                         ("GuildId", row.GuildId.ToString()), 
                         ("ChannelId", row.ChannelId.ToString()),
                         ("Mode", row.Mode.ToString()),
@@ -93,7 +85,7 @@ namespace Database.Data
                 command.ExecuteNonQuery();
                 command.Connection.Close();
 
-                if(Cache.Initialised) Cache.VoteChannels.Rows[Cache.VoteChannels.Rows.FindIndex(x => x.Id == row.Id)] = row;
+                if(Cache.Initialised) Cache.VoteChannels.Rows[Cache.VoteChannels.Rows.FindIndex(x => x.GuildId == row.GuildId && x.ChannelId == row.ChannelId)] = row;
             }
         }
 
@@ -101,10 +93,13 @@ namespace Database.Data
         {
             if(row == null) return;
 
-            if(Cache.Initialised) Cache.VoteChannels.Rows.RemoveAll(x => x.Id == row.Id);
+            if(Cache.Initialised) Cache.VoteChannels.Rows.RemoveAll(x => x.GuildId == row.GuildId && x.ChannelId == row.ChannelId);
 
-            string commandText = "DELETE FROM VoteChannels WHERE Id = @Id";
-            MySqlCommand command = Sql.GetCommand(commandText, new[] {("Id", row.Id.ToString())});
+            string commandText = "DELETE FROM VoteChannels WHERE GuildId = @GuildId AND ChannelId = @ChannelId";
+            MySqlCommand command = Sql.GetCommand(commandText, 
+                new[] {
+                    ("GuildId", row.GuildId.ToString()),
+                    ("ChannelId", row.ChannelId.ToString())});
             command.ExecuteNonQuery();
             command.Connection.Close();
         }
@@ -113,37 +108,11 @@ namespace Database.Data
     public class VoteChannelsTable
     {
         public List<VoteChannelsRow> Rows { get; set; }
-
-        public void Load()
-        // Load the table from the database
-        {
-            List<VoteChannelsRow> newRows = new List<VoteChannelsRow>();
-
-            MySqlDataReader reader = Sql.GetCommand("SELECT * FROM VoteChannels;").ExecuteReader();
-
-            try
-            {
-                while (reader.Read())
-                {
-                    newRows.Add(new VoteChannelsRow(
-                        reader.GetInt64(0),
-                        reader.GetUInt64(1),
-                        reader.GetUInt64(2),
-                        reader.GetInt32(3),
-                        reader.GetString(4)));
-                }
-            }
-            catch {}
-
-            reader.Close();
-
-            Rows = newRows;
-        }
     }
 
     public class VoteChannelsRow
     {
-        public long Id { get; set; }
+        public bool New { get; set; }
         public ulong GuildId { get; set; }
         public ulong ChannelId { get; set; }
         public int Mode { get; set; }
@@ -151,34 +120,37 @@ namespace Database.Data
 
         public VoteChannelsRow()
         {
-            Id = 0;
+            New = true;
         }
 
-        public VoteChannelsRow(long id, ulong guildId, ulong channelId, int mode, string emotes)
+        public static VoteChannelsRow FromDatabase(ulong guildId, ulong channelId, int mode, string emotes)
         {
-            Id = id;
-            GuildId = guildId;
-            ChannelId = channelId;
-            Mode = mode;
-
-            Emotes = new List<IEmote>();
+            VoteChannelsRow row = new VoteChannelsRow
+            {
+                New = false,
+                GuildId = guildId,
+                ChannelId = channelId,
+                Mode = mode,
+                Emotes = new List<IEmote>()
+            };
 
             emotes = EString.FromEncoded(emotes).Value;
-
             if (!string.IsNullOrEmpty(emotes))
             {
                 foreach (string emoteString in emotes.Split(","))
                 {
                     if (Emote.TryParse(emoteString, out Emote emote))
                     {
-                        Emotes.Add(emote);
+                        row.Emotes.Add(emote);
                     }
                     else
                     {
-                        Emotes.Add(new Emoji(emoteString));
+                        row.Emotes.Add(new Emoji(emoteString));
                     }
                 }
             }
+
+            return row;
         }
 
         public string GetEmotesString()

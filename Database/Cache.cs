@@ -48,19 +48,20 @@ namespace Database
 
         private static void DownloadTables()
         {
-            Autopurge.Load();
-            ChannelMirroring.Load();
-            InactiveRole.Load();
-            JoinMessage.Load();
-            MessageFilter.Load();
-            MessageLogs.Load();
-            Misc.Load();
-            Notices.Load();
-            Reputation.Load();
-            Roles.Load();
-            VoiceLink.Load();
-            VoiceRoles.Load();
-            VoteChannels.Load();
+            Autopurge.Rows = Data.Autopurge.GetRows(ignoreCache: true);
+            ChannelMirroring.Rows = Data.ChannelMirroring.GetRows(ignoreCache: true);
+            InactiveRole.Rows = Data.InactiveRole.GetRows(ignoreCache: true);
+            JoinMessage.Rows = Data.JoinMessage.GetRows(ignoreCache: true);
+            MessageFilter.Rows = Data.MessageFilter.GetRows(ignoreCache: true);
+            MessageLogs.Rows = Data.MessageLogs.GetRows(ignoreCache: true);
+            Misc.Rows = Data.Misc.GetRows(ignoreCache: true);
+            Notices.Rows = Data.Notices.GetRows(ignoreCache: true);
+            Reputation.Rows = Data.Reputation.GetRows(ignoreCache: true);
+            Roles.Rows = Data.Roles.GetRows(ignoreCache: true);
+            VoiceLink.Rows = Data.VoiceLink.GetMetaRows(ignoreCache: true);
+            VoiceLink.Channels = Data.VoiceLink.GetChannelRows(ignoreCache: true);
+            VoiceRoles.Rows = Data.VoiceRoles.GetRows(ignoreCache: true);
+            VoteChannels.Rows = Data.VoteChannels.GetRows(ignoreCache: true);
         }
     }
 }

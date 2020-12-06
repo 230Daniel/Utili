@@ -7,7 +7,7 @@ namespace Database.Data
 {
     public static class MessageLogs
     {
-        public static List<MessageLogsRow> GetRows(ulong? guildId = null, long? id = null, bool ignoreCache = false)
+        public static List<MessageLogsRow> GetRows(ulong? guildId = null, bool ignoreCache = false)
         {
             List<MessageLogsRow> matchedRows = new List<MessageLogsRow>();
 
@@ -15,7 +15,6 @@ namespace Database.Data
             {
                 matchedRows.AddRange(Cache.MessageLogs.Rows);
 
-                if (id.HasValue) matchedRows.RemoveAll(x => x.Id != id.Value);
                 if (guildId.HasValue) matchedRows.RemoveAll(x => x.GuildId != guildId.Value);
             }
             else
@@ -29,22 +28,15 @@ namespace Database.Data
                     values.Add(("GuildId", guildId.Value.ToString()));
                 }
 
-                if (id.HasValue)
-                {
-                    command += " AND Id = @Id";
-                    values.Add(("Id", id.Value.ToString()));
-                }
-
                 MySqlDataReader reader = Sql.GetCommand(command, values.ToArray()).ExecuteReader();
 
                 while (reader.Read())
                 {
-                    matchedRows.Add(new MessageLogsRow(
-                        reader.GetInt64(0),
+                    matchedRows.Add(MessageLogsRow.FromDatabase(
+                        reader.GetUInt64(0),
                         reader.GetUInt64(1),
                         reader.GetUInt64(2),
-                        reader.GetUInt64(3),
-                        reader.GetString(4)));
+                        reader.GetString(3)));
                 }
 
                 reader.Close();
@@ -63,7 +55,7 @@ namespace Database.Data
         {
             MySqlCommand command;
 
-            if (row.Id == 0) 
+            if (row.New) 
             // The row is a new entry so should be inserted into the database
             {
                 command = Sql.GetCommand("INSERT INTO MessageLogs (GuildId, DeletedChannelId, EditedChannelId, ExcludedChannels) VALUES (@GuildId, @DeletedChannelId, @EditedChannelId, @ExcludedChannels);",
@@ -75,15 +67,15 @@ namespace Database.Data
 
                 command.ExecuteNonQuery();
                 command.Connection.Close();
-                row.Id = GetRows(row.GuildId, null, true).First().Id;
+                row.New = false;
                 
                 if(Cache.Initialised) Cache.MessageLogs.Rows.Add(row);
             }
             else
             // The row already exists and should be updated
             {
-                command = Sql.GetCommand("UPDATE MessageLogs SET GuildId = @GuildId, DeletedChannelId = @DeletedChannelId, EditedChannelId = @EditedChannelId, ExcludedChannels = @ExcludedChannels WHERE Id = @Id;",
-                    new [] {("Id", row.Id.ToString()),
+                command = Sql.GetCommand("UPDATE MessageLogs SET DeletedChannelId = @DeletedChannelId, EditedChannelId = @EditedChannelId, ExcludedChannels = @ExcludedChannels WHERE GuildId = @GuildId;",
+                    new [] {
                         ("GuildId", row.GuildId.ToString()), 
                         ("DeletedChannelId", row.DeletedChannelId.ToString()),
                         ("EditedChannelId", row.EditedChannelId.ToString()),
@@ -92,11 +84,11 @@ namespace Database.Data
                 command.ExecuteNonQuery();
                 command.Connection.Close();
 
-                if(Cache.Initialised) Cache.MessageLogs.Rows[Cache.MessageLogs.Rows.FindIndex(x => x.Id == row.Id)] = row;
+                if(Cache.Initialised) Cache.MessageLogs.Rows[Cache.MessageLogs.Rows.FindIndex(x => x.GuildId == row.GuildId)] = row;
             }
         }
 
-        public static List<MessageLogsMessageRow> GetMessages(ulong? guildId = null, ulong? channelId = null, ulong? messageId = null, long? id = null)
+        public static List<MessageLogsMessageRow> GetMessages(ulong? guildId = null, ulong? channelId = null, ulong? messageId = null)
         {
             List<MessageLogsMessageRow> matchedRows = new List<MessageLogsMessageRow>();
 
@@ -121,24 +113,17 @@ namespace Database.Data
                 values.Add(("MessageId", messageId.Value.ToString()));
             }
 
-            if (id.HasValue)
-            {
-                command += " AND Id = @Id";
-                values.Add(("Id", id.Value.ToString()));
-            }
-
             MySqlDataReader reader = Sql.GetCommand(command, values.ToArray()).ExecuteReader();
 
             while (reader.Read())
             {
-                matchedRows.Add(new MessageLogsMessageRow(
-                    reader.GetInt64(0),
+                matchedRows.Add(MessageLogsMessageRow.FromDatabase(
+                    reader.GetUInt64(0),
                     reader.GetUInt64(1),
                     reader.GetUInt64(2),
                     reader.GetUInt64(3),
-                    reader.GetUInt64(4),
-                    reader.GetDateTime(5),
-                    reader.GetString(6)));
+                    reader.GetDateTime(4),
+                    reader.GetString(5)));
             }
 
             reader.Close();
@@ -161,14 +146,13 @@ namespace Database.Data
 
             while (reader.Read())
             {
-                matchedRows.Add(new MessageLogsMessageRow(
-                    reader.GetInt64(0),
+                matchedRows.Add(MessageLogsMessageRow.FromDatabase(
+                    reader.GetUInt64(0),
                     reader.GetUInt64(1),
                     reader.GetUInt64(2),
                     reader.GetUInt64(3),
-                    reader.GetUInt64(4),
-                    reader.GetDateTime(5),
-                    reader.GetString(6)));
+                    reader.GetDateTime(4),
+                    reader.GetString(5)));
             }
 
             reader.Close();
@@ -192,7 +176,7 @@ namespace Database.Data
         {
             MySqlCommand command;
 
-            if (row.Id == 0) 
+            if (row.New) 
             // The row is a new entry so should be inserted into the database
             {
                 command = Sql.GetCommand("INSERT INTO MessageLogsMessages (GuildId, ChannelId, MessageId, UserId, Timestamp, Content) VALUES (@GuildId, @ChannelId, @MessageId, @UserId, @Timestamp, @Content);",
@@ -206,13 +190,13 @@ namespace Database.Data
 
                 command.ExecuteNonQuery();
                 command.Connection.Close();
-                row.Id = GetMessages(row.GuildId, row.ChannelId, row.MessageId).First().Id;
+                row.New = false;
             }
             else
             // The row already exists and should be updated
             {
-                command = Sql.GetCommand("UPDATE MessageLogsMessages SET GuildId = @GuildId, ChannelId = @ChannelId, MessageId = @MessageId, UserId = @UserId, Timestamp = @Timestamp, Content = @Content WHERE Id = @Id;",
-                    new [] {("Id", row.Id.ToString()),
+                command = Sql.GetCommand("UPDATE MessageLogsMessages SET GuildId = @GuildId, ChannelId = @ChannelId, MessageId = @MessageId, UserId = @UserId, Timestamp = @Timestamp, Content = @Content WHERE GuildId = @GuildId AND ChannelId = @ChannelId AND MessageId = @MessageId",
+                    new [] {
                         ("GuildId", row.GuildId.ToString()), 
                         ("ChannelId", row.ChannelId.ToString()),
                         ("MessageId", row.MessageId.ToString()),
@@ -226,26 +210,16 @@ namespace Database.Data
             }
         }
 
-        public static void DeleteMessagesById(long[] ids)
+        public static void DeleteMessages(ulong guildId, ulong channelId, ulong[] messageIds)
         {
-            if(ids.Length == 0) return;
+            if(messageIds.Length == 0) return;
 
             MySqlCommand command =
-                Sql.GetCommand($"DELETE FROM MessageLogsMessages WHERE Id IN {Sql.ToSqlObjectArray(ids)};");
-
-            command.ExecuteNonQuery();
-
-            command.Connection.Close();
-        }
-
-        public static void DeleteMessagesByMessageId(ulong guildId, ulong channelId, ulong[] messageIds)
-        {
-            MySqlCommand command = Sql.GetCommand($"DELETE FROM MessageLogsMessages WHERE GuildId = @GuildId AND ChannelId = @ChannelId AND MessageId IN {Sql.ToSqlObjectArray(messageIds)}",
-                new[]
-                {
-                    ("GuildId", guildId.ToString()),
-                    ("ChannelId", channelId.ToString())
-                });
+                Sql.GetCommand($"DELETE FROM MessageLogsMessages WHERE GuildId = @GuildId AND ChannelId = @ChannelId AND MessageId IN {Sql.ToSqlObjectArray(messageIds)};",
+                    new [] {
+                        ("GuildId", guildId.ToString()), 
+                        ("ChannelId", channelId.ToString())
+                    });
 
             command.ExecuteNonQuery();
 
@@ -256,12 +230,12 @@ namespace Database.Data
         {
             if(premium) return;
 
-            List<MessageLogsMessageRow> messages = GetMessages(guildId, channelId).OrderBy(x => x.Id).ToList();
+            List<MessageLogsMessageRow> messages = GetMessages(guildId, channelId).OrderBy(x => x.Timestamp).ToList();
             List<MessageLogsMessageRow> messagesToRemove = new List<MessageLogsMessageRow>();
 
             messagesToRemove.AddRange(messages.Take(messages.Count - 100));
 
-            DeleteMessagesById(messagesToRemove.Select(x => x.Id).ToArray());
+            DeleteMessages(guildId, channelId, messagesToRemove.Select(x => x.MessageId).ToArray());
         }
 
         public static void Delete30DayMessages()
@@ -285,60 +259,40 @@ namespace Database.Data
     public class MessageLogsTable
     {
         public List<MessageLogsRow> Rows { get; set; }
-
-        public void Load()
-        // Load the table from the database
-        {
-            List<MessageLogsRow> newRows = new List<MessageLogsRow>();
-
-            MySqlDataReader reader = Sql.GetCommand("SELECT * FROM MessageLogs;").ExecuteReader();
-
-            try
-            {
-                while (reader.Read())
-                {
-                    newRows.Add(new MessageLogsRow(
-                        reader.GetInt64(0),
-                        reader.GetUInt64(1),
-                        reader.GetUInt64(2),
-                        reader.GetUInt64(3),
-                        reader.GetString(4)));
-                }
-            }
-            catch {}
-
-            reader.Close();
-            Rows = newRows;
-
-            MessageLogs.Delete30DayMessages();
-        }
     }
 
     public class MessageLogsRow
     {
-        public long Id { get; set; }
+        public bool New { get; set; }
         public ulong GuildId { get; set; }
         public ulong DeletedChannelId { get; set; }
         public ulong EditedChannelId { get; set; }
         public List<ulong> ExcludedChannels { get; set; }
 
+        private MessageLogsRow()
+        {
+
+        }
+
         public MessageLogsRow(ulong guildId)
         {
-            Id = 0;
+            New = true;
             GuildId = guildId;
             DeletedChannelId = 0;
             EditedChannelId = 0;
             ExcludedChannels = new List<ulong>();
         }
 
-        public MessageLogsRow(long id, ulong guildId, ulong deletedChannelId, ulong editedChannelId, string excludedChannels)
+        public static MessageLogsRow FromDatabase(ulong guildId, ulong deletedChannelId, ulong editedChannelId, string excludedChannels)
         {
-            Id = id;
-            GuildId = guildId;
-            DeletedChannelId = deletedChannelId;
-            EditedChannelId = editedChannelId;
-
-            ExcludedChannels = new List<ulong>();
+            MessageLogsRow row = new MessageLogsRow
+            {
+                New = false,
+                GuildId = guildId,
+                DeletedChannelId = deletedChannelId,
+                EditedChannelId = editedChannelId,
+                ExcludedChannels = new List<ulong>()
+            };
 
             if (!string.IsNullOrEmpty(excludedChannels))
             {
@@ -346,10 +300,12 @@ namespace Database.Data
                 {
                     if (ulong.TryParse(excludedChannel, out ulong channelId))
                     {
-                        ExcludedChannels.Add(channelId);
+                        row.ExcludedChannels.Add(channelId);
                     }
                 }
             }
+
+            return row;
         }
 
         public string GetExcludedChannelsString()
@@ -372,7 +328,7 @@ namespace Database.Data
 
     public class MessageLogsMessageRow
     {
-        public long Id { get; set; }
+        public bool New { get; set; }
         public ulong GuildId { get; set; }
         public ulong ChannelId { get; set; }
         public ulong MessageId { get; set; }
@@ -384,18 +340,22 @@ namespace Database.Data
 
         public MessageLogsMessageRow()
         {
-            Id = 0;
+            New = true;
         }
 
-        public MessageLogsMessageRow(long id, ulong guildId, ulong channelId, ulong messageId, ulong userId, DateTime timestamp, string content)
+        public static MessageLogsMessageRow FromDatabase(ulong guildId, ulong channelId, ulong messageId, ulong userId, DateTime timestamp, string content)
         {
-            Id = id;
-            GuildId = guildId;
-            ChannelId = channelId;
-            MessageId = messageId;
-            UserId = userId;
-            Timestamp = DateTime.SpecifyKind(timestamp, DateTimeKind.Utc);
-            Content = EString.FromEncrypted(content, Ids);
+            MessageLogsMessageRow row = new MessageLogsMessageRow
+            {
+                New = false,
+                GuildId = guildId,
+                ChannelId = channelId,
+                MessageId = messageId,
+                UserId = userId,
+                Timestamp = DateTime.SpecifyKind(timestamp, DateTimeKind.Utc)
+            };
+            row.Content = EString.FromEncrypted(content, row.Ids);
+            return row;
         }
     }
 }

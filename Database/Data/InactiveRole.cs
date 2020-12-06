@@ -9,7 +9,7 @@ namespace Database.Data
     {
         private static readonly TimeSpan GapBetweenUpdates = TimeSpan.FromMinutes(60); 
 
-        public static List<InactiveRoleRow> GetRows(ulong? guildId = null, long? id = null, bool ignoreCache = false)
+        public static List<InactiveRoleRow> GetRows(ulong? guildId = null, bool ignoreCache = false)
         {
             List<InactiveRoleRow> matchedRows = new List<InactiveRoleRow>();
 
@@ -18,7 +18,6 @@ namespace Database.Data
                 matchedRows.AddRange(Cache.InactiveRole.Rows);
 
                 if (guildId.HasValue) matchedRows.RemoveAll(x => x.GuildId != guildId.Value);
-                if (id.HasValue) matchedRows.RemoveAll(x => x.Id != id.Value);
             }
             else
             {
@@ -31,25 +30,18 @@ namespace Database.Data
                     values.Add(("GuildId", guildId.Value.ToString()));
                 }
 
-                if (id.HasValue)
-                {
-                    command += " AND Id = @Id";
-                    values.Add(("Id", id.Value.ToString()));
-                }
-
                 MySqlDataReader reader = Sql.GetCommand(command, values.ToArray()).ExecuteReader();
 
                 while (reader.Read())
                 {
-                    matchedRows.Add(new InactiveRoleRow(
-                        reader.GetInt64(0),
+                    matchedRows.Add(InactiveRoleRow.FromDatabase(
+                        reader.GetUInt64(0),
                         reader.GetUInt64(1),
                         reader.GetUInt64(2),
-                        reader.GetUInt64(3),
-                        reader.GetString(4),
-                        reader.GetBoolean(5),
-                        reader.GetDateTime(6),
-                        reader.GetDateTime(7)));
+                        reader.GetString(3),
+                        reader.GetBoolean(4),
+                        reader.GetDateTime(5),
+                        reader.GetDateTime(6)));
                 }
 
                 reader.Close();
@@ -80,15 +72,14 @@ namespace Database.Data
 
                 while (reader.Read())
                 {
-                    matchedRows.Add(new InactiveRoleRow(
-                        reader.GetInt64(0),
+                    matchedRows.Add(InactiveRoleRow.FromDatabase(
+                        reader.GetUInt64(0),
                         reader.GetUInt64(1),
                         reader.GetUInt64(2),
-                        reader.GetUInt64(3),
-                        reader.GetString(4),
-                        reader.GetBoolean(5),
-                        reader.GetDateTime(6),
-                        reader.GetDateTime(7)));
+                        reader.GetString(3),
+                        reader.GetBoolean(4),
+                        reader.GetDateTime(5),
+                        reader.GetDateTime(6)));
                 }
 
                 reader.Close();
@@ -107,7 +98,7 @@ namespace Database.Data
         {
             MySqlCommand command;
 
-            if (row.Id == 0) 
+            if (row.New) 
             // The row is a new entry so should be inserted into the database
             {
                 command = Sql.GetCommand($"INSERT INTO InactiveRole (GuildId, RoleId, ImmuneRoleId, Threshold, Inverse, DefaultLastAction, LastUpdate) VALUES (@GuildId, @RoleId, @ImmuneRoleId, @Threshold, {Sql.ToSqlBool(row.Inverse)}, @DefaultLastAction, @LastUpdate);",
@@ -121,7 +112,7 @@ namespace Database.Data
                 command.ExecuteNonQuery();
                 command.Connection.Close();
 
-                row.Id = GetRows(row.GuildId, ignoreCache: true).First().Id;
+                row.New = false;
 
                 if(Cache.Initialised) Cache.InactiveRole.Rows.Add(row);
             }
@@ -129,8 +120,8 @@ namespace Database.Data
             // The row already exists and should be updated
             {
                 // Not updating DefaultLastAction is intentional
-                command = Sql.GetCommand($"UPDATE InactiveRole SET GuildId = @GuildId, RoleId = @RoleId, ImmuneRoleId = @ImmuneRoleId, Threshold = @Threshold, Inverse = {Sql.ToSqlBool(row.Inverse)}, LastUpdate = @LastUpdate WHERE Id = @Id;",
-                    new [] {("Id", row.Id.ToString()),
+                command = Sql.GetCommand($"UPDATE InactiveRole SET RoleId = @RoleId, ImmuneRoleId = @ImmuneRoleId, Threshold = @Threshold, Inverse = {Sql.ToSqlBool(row.Inverse)}, LastUpdate = @LastUpdate WHERE GuildId = @GuildId;",
+                    new [] {
                         ("GuildId", row.GuildId.ToString()), 
                         ("RoleId", row.RoleId.ToString()),
                         ("ImmuneRoleId", row.ImmuneRoleId.ToString()),
@@ -140,7 +131,7 @@ namespace Database.Data
                 command.ExecuteNonQuery();
                 command.Connection.Close();
 
-                if(Cache.Initialised) Cache.InactiveRole.Rows[Cache.InactiveRole.Rows.FindIndex(x => x.Id == row.Id)] = row;
+                if(Cache.Initialised) Cache.InactiveRole.Rows[Cache.InactiveRole.Rows.FindIndex(x => x.GuildId == row.GuildId)] = row;
             }
         }
 
@@ -148,7 +139,7 @@ namespace Database.Data
         {
             MySqlCommand command;
 
-            if (row.Id == 0) 
+            if (row.New) 
             // The row is a new entry so should be inserted into the database
             {
                 // If the if statement is true then something has gone horribly wrong, but it will work anyway.
@@ -163,21 +154,22 @@ namespace Database.Data
                 command.ExecuteNonQuery();
                 command.Connection.Close();
 
-                row.Id = GetRows(row.GuildId, ignoreCache: true).First().Id;
+                row.New = false;
 
                 if(Cache.Initialised) Cache.InactiveRole.Rows.Add(row);
             }
             else
             // The row already exists and should be updated
             {
-                command = Sql.GetCommand("UPDATE InactiveRole SET LastUpdate = @LastUpdate WHERE Id = @Id;",
-                    new [] {("Id", row.Id.ToString()),
+                command = Sql.GetCommand("UPDATE InactiveRole SET LastUpdate = @LastUpdate WHERE GuildId = @GuildId;",
+                    new [] {
+                        ("GuildId", row.GuildId.ToString()), 
                         ("LastUpdate", Sql.ToSqlDateTime(row.LastUpdate))});
 
                 command.ExecuteNonQuery();
                 command.Connection.Close();
 
-                if(Cache.Initialised) Cache.InactiveRole.Rows[Cache.InactiveRole.Rows.FindIndex(x => x.Id == row.Id)].LastUpdate = row.LastUpdate;
+                if(Cache.Initialised) Cache.InactiveRole.Rows[Cache.InactiveRole.Rows.FindIndex(x => x.GuildId == row.GuildId)].LastUpdate = row.LastUpdate;
             }
         }
 
@@ -185,10 +177,11 @@ namespace Database.Data
         {
             if(row == null) return;
 
-            if(Cache.Initialised) Cache.InactiveRole.Rows.RemoveAll(x => x.Id == row.Id);
+            if(Cache.Initialised) Cache.InactiveRole.Rows.RemoveAll(x => x.GuildId == row.GuildId);
 
-            string commandText = "DELETE FROM InactiveRole WHERE Id = @Id";
-            MySqlCommand command = Sql.GetCommand(commandText, new[] {("Id", row.Id.ToString())});
+            string commandText = "DELETE FROM InactiveRole WHERE GuildId = @GuildId";
+            MySqlCommand command = Sql.GetCommand(commandText, 
+                new[] {("GuildId", row.GuildId.ToString())});
             command.ExecuteNonQuery();
             command.Connection.Close();
         }
@@ -229,8 +222,8 @@ namespace Database.Data
             {
                 matchedRows.Add(new InactiveRoleUserRow(
                     reader.GetUInt64(0),
-                    reader.GetUInt64(1),
-                    reader.GetDateTime(2)));
+                    reader.GetUInt64(0),
+                    reader.GetDateTime(1)));
             }
 
             reader.Close();
@@ -242,40 +235,11 @@ namespace Database.Data
     public class InactiveRoleTable
     {
         public List<InactiveRoleRow> Rows { get; set; }
-
-        public void Load()
-        // Load the table from the database
-        {
-            List<InactiveRoleRow> newRows = new List<InactiveRoleRow>();
-
-            MySqlDataReader reader = Sql.GetCommand("SELECT * FROM InactiveRole;").ExecuteReader();
-
-            try
-            {
-                while (reader.Read())
-                {
-                    newRows.Add(new InactiveRoleRow(
-                        reader.GetInt64(0),
-                        reader.GetUInt64(1),
-                        reader.GetUInt64(2),
-                        reader.GetUInt64(3),
-                        reader.GetString(4),
-                        reader.GetBoolean(5),
-                        reader.GetDateTime(6),
-                        reader.GetDateTime(7)));
-                }
-            }
-            catch {}
-
-            reader.Close();
-
-            Rows = newRows;
-        }
     }
 
     public class InactiveRoleRow
     {
-        public long Id { get; set; }
+        public bool New { get; set; }
         public ulong GuildId { get; set; }
         public ulong RoleId { get; set; }
         public ulong ImmuneRoleId { get; set; }
@@ -283,10 +247,15 @@ namespace Database.Data
         public bool Inverse { get; set; }
         public DateTime DefaultLastAction { get; set; }
         public DateTime LastUpdate { get; set; }
-        
+
+        private InactiveRoleRow()
+        {
+
+        }
+
         public InactiveRoleRow(ulong guildId)
         {
-            Id = 0;
+            New = true;
             GuildId = guildId;
             RoleId = 0;
             ImmuneRoleId = 0;
@@ -296,16 +265,19 @@ namespace Database.Data
             LastUpdate = DateTime.MinValue;
         }
 
-        public InactiveRoleRow(long id, ulong guildId, ulong roleId, ulong immuneRoleId, string threshold, bool inverse, DateTime defaultLastAction, DateTime lastUpdate)
+        public static InactiveRoleRow FromDatabase(ulong guildId, ulong roleId, ulong immuneRoleId, string threshold, bool inverse, DateTime defaultLastAction, DateTime lastUpdate)
         {
-            Id = id;
-            GuildId = guildId;
-            RoleId = roleId;
-            ImmuneRoleId = immuneRoleId;
-            Threshold = TimeSpan.Parse(threshold);
-            Inverse = inverse;
-            DefaultLastAction = defaultLastAction;
-            LastUpdate = lastUpdate;
+            return new InactiveRoleRow
+            {
+                New = false,
+                GuildId = guildId,
+                RoleId = roleId,
+                ImmuneRoleId = immuneRoleId,
+                Threshold = TimeSpan.Parse(threshold),
+                Inverse = inverse,
+                DefaultLastAction = defaultLastAction,
+                LastUpdate = lastUpdate
+            };
         }
     }
 

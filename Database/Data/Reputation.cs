@@ -7,7 +7,7 @@ namespace Database.Data
 {
     public static class Reputation
     {
-        public static List<ReputationRow> GetRows(ulong? guildId = null, long? id = null, bool ignoreCache = false)
+        public static List<ReputationRow> GetRows(ulong? guildId = null, bool ignoreCache = false)
         {
             List<ReputationRow> matchedRows = new List<ReputationRow>();
 
@@ -16,7 +16,6 @@ namespace Database.Data
                 matchedRows.AddRange(Cache.Reputation.Rows);
 
                 if (guildId.HasValue) matchedRows.RemoveAll(x => x.GuildId != guildId.Value);
-                if (id.HasValue) matchedRows.RemoveAll(x => x.Id != id.Value);
             }
             else
             {
@@ -29,20 +28,13 @@ namespace Database.Data
                     values.Add(("GuildId", guildId.Value.ToString()));
                 }
 
-                if (id.HasValue)
-                {
-                    command += " AND Id = @Id";
-                    values.Add(("Id", id.Value.ToString()));
-                }
-
                 MySqlDataReader reader = Sql.GetCommand(command, values.ToArray()).ExecuteReader();
 
                 while (reader.Read())
                 {
-                    matchedRows.Add(new ReputationRow(
-                        reader.GetInt64(0),
-                        reader.GetUInt64(1),
-                        reader.GetString(2)));
+                    matchedRows.Add(ReputationRow.FromDatabase(
+                        reader.GetUInt64(0),
+                        reader.GetString(1)));
                 }
 
                 reader.Close();
@@ -61,7 +53,7 @@ namespace Database.Data
         {
             MySqlCommand command;
 
-            if (row.Id == 0) 
+            if (row.New) 
             // The row is a new entry so should be inserted into the database
             {
                 command = Sql.GetCommand("INSERT INTO Reputation (GuildId, Emotes) VALUES (@GuildId, @Emotes);",
@@ -71,22 +63,23 @@ namespace Database.Data
                 command.ExecuteNonQuery();
                 command.Connection.Close();
 
-                row.Id = GetRows(row.GuildId, ignoreCache: true).First().Id;
+                row.New = false;
 
                 if(Cache.Initialised) Cache.Reputation.Rows.Add(row);
             }
             else
             // The row already exists and should be updated
             {
-                command = Sql.GetCommand("UPDATE Reputation SET GuildId = @GuildId, Emotes = @Emotes WHERE Id = @Id;",
-                    new [] {("Id", row.Id.ToString()),
+                command = Sql.GetCommand("UPDATE Reputation SET Emotes = @Emotes WHERE GuildId = @GuildId;",
+                    new [] {
                         ("GuildId", row.GuildId.ToString()), 
-                        ("Emotes", row.GetEmotesString())});
+                        ("Emotes", row.GetEmotesString())
+                    });
 
                 command.ExecuteNonQuery();
                 command.Connection.Close();
 
-                if(Cache.Initialised) Cache.Reputation.Rows[Cache.Reputation.Rows.FindIndex(x => x.Id == row.Id)] = row;
+                if(Cache.Initialised) Cache.Reputation.Rows[Cache.Reputation.Rows.FindIndex(x => x.GuildId == row.GuildId)] = row;
             }
         }
 
@@ -94,10 +87,11 @@ namespace Database.Data
         {
             if(row == null) return;
 
-            if(Cache.Initialised) Cache.Reputation.Rows.RemoveAll(x => x.Id == row.Id);
+            if(Cache.Initialised) Cache.Reputation.Rows.RemoveAll(x => x.GuildId == row.GuildId);
 
-            string commandText = "DELETE FROM Reputation WHERE Id = @Id";
-            MySqlCommand command = Sql.GetCommand(commandText, new[] {("Id", row.Id.ToString())});
+            string commandText = "DELETE FROM Reputation WHERE GuildId = @GuildId";
+            MySqlCommand command = Sql.GetCommand(commandText, 
+                new[] {("GuildId", row.GuildId.ToString())});
             command.ExecuteNonQuery();
             command.Connection.Close();
         }
@@ -127,8 +121,8 @@ namespace Database.Data
             {
                 matchedRows.Add(new ReputationUserRow(
                     reader.GetUInt64(0),
-                    reader.GetUInt64(1),
-                    reader.GetInt64(2)));
+                    reader.GetUInt64(0),
+                    reader.GetInt64(1)));
             }
 
             reader.Close();
@@ -186,54 +180,36 @@ namespace Database.Data
     public class ReputationTable
     {
         public List<ReputationRow> Rows { get; set; }
-
-        public void Load()
-        // Load the table from the database
-        {
-            List<ReputationRow> newRows = new List<ReputationRow>();
-
-            MySqlDataReader reader = Sql.GetCommand("SELECT * FROM Reputation;").ExecuteReader();
-
-            try
-            {
-                while (reader.Read())
-                {
-                    newRows.Add(new ReputationRow(
-                        reader.GetInt64(0),
-                        reader.GetUInt64(1),
-                        reader.GetString(2)));
-                }
-            }
-            catch {}
-
-            reader.Close();
-
-            Rows = newRows;
-        }
     }
 
     public class ReputationRow
     {
-        public long Id { get; set; }
+        public bool New { get; set; }
         public ulong GuildId { get; set; }
         public List<(IEmote, int)> Emotes { get; set; }
 
+        private ReputationRow()
+        {
+
+        }
+
         public ReputationRow(ulong guildId)
         {
-            Id = 0;
+            New = true;
             GuildId = guildId;
             Emotes = new List<(IEmote, int)>();
         }
 
-        public ReputationRow(long id, ulong guildId, string emotes)
+        public static ReputationRow FromDatabase(ulong guildId, string emotes)
         {
-            Id = id;
-            GuildId = guildId;
-
-            Emotes = new List<(IEmote, int)>();
+            ReputationRow row = new ReputationRow
+            {
+                New = false,
+                GuildId = guildId,
+                Emotes = new List<(IEmote, int)>()
+            };
 
             emotes = EString.FromEncoded(emotes).Value;
-
             if (!string.IsNullOrEmpty(emotes))
             {
                 foreach (string emoteString in emotes.Split(","))
@@ -241,14 +217,16 @@ namespace Database.Data
                     int value = int.Parse(emoteString.Split("/").Last());
                     if (Emote.TryParse(emoteString.Split("/").First(), out Emote emote))
                     {
-                        Emotes.Add((emote, value));
+                        row.Emotes.Add((emote, value));
                     }
                     else
                     {
-                        Emotes.Add((new Emoji(emoteString), value));
+                        row.Emotes.Add((new Emoji(emoteString), value));
                     }
                 }
             }
+
+            return row;
         }
 
         public string GetEmotesString()

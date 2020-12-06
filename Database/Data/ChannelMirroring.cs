@@ -6,7 +6,7 @@ namespace Database.Data
 {
     public static class ChannelMirroring
     {
-        public static List<ChannelMirroringRow> GetRows(ulong? guildId = null, ulong? fromChannelId = null, long? id = null, bool ignoreCache = false)
+        public static List<ChannelMirroringRow> GetRows(ulong? guildId = null, ulong? fromChannelId = null, bool ignoreCache = false)
         {
             List<ChannelMirroringRow> matchedRows = new List<ChannelMirroringRow>();
 
@@ -16,7 +16,6 @@ namespace Database.Data
 
                 if (guildId.HasValue) matchedRows.RemoveAll(x => x.GuildId != guildId.Value);
                 if (fromChannelId.HasValue) matchedRows.RemoveAll(x => x.FromChannelId != fromChannelId.Value);
-                if (id.HasValue) matchedRows.RemoveAll(x => x.Id != id.Value);
             }
             else
             {
@@ -35,22 +34,15 @@ namespace Database.Data
                     values.Add(("FromChannelId", fromChannelId.Value.ToString()));
                 }
 
-                if (id.HasValue)
-                {
-                    command += " AND Id = @Id";
-                    values.Add(("Id", id.Value.ToString()));
-                }
-
                 MySqlDataReader reader = Sql.GetCommand(command, values.ToArray()).ExecuteReader();
 
                 while (reader.Read())
                 {
-                    matchedRows.Add(new ChannelMirroringRow(
-                        reader.GetInt64(0),
+                    matchedRows.Add(ChannelMirroringRow.FromDatabase(
+                        reader.GetUInt64(0),
                         reader.GetUInt64(1),
                         reader.GetUInt64(2),
-                        reader.GetUInt64(3),
-                        reader.GetUInt64(4)));
+                        reader.GetUInt64(3)));
                 }
 
                 reader.Close();
@@ -63,7 +55,7 @@ namespace Database.Data
         {
             MySqlCommand command;
 
-            if (row.Id == 0) 
+            if (row.New) 
             // The row is a new entry so should be inserted into the database
             {
                 command = Sql.GetCommand("INSERT INTO ChannelMirroring (GuildId, FromChannelId, ToChannelId, WebhookId) VALUES (@GuildId, @FromChannelId, @ToChannelId, @WebhookId);",
@@ -75,15 +67,15 @@ namespace Database.Data
                 command.ExecuteNonQuery();
                 command.Connection.Close();
 
-                row.Id = GetRows(row.GuildId, row.FromChannelId, ignoreCache: true).First().Id;
+                row.New = false;
 
                 if(Cache.Initialised) Cache.ChannelMirroring.Rows.Add(row);
             }
             else
             // The row already exists and should be updated
             {
-                command = Sql.GetCommand("UPDATE ChannelMirroring SET GuildId = @GuildId, FromChannelId = @FromChannelId, ToChannelId = @ToChannelId, WebhookId = @WebhookId WHERE Id = @Id;",
-                    new [] {("Id", row.Id.ToString()),
+                command = Sql.GetCommand("UPDATE ChannelMirroring SET ToChannelId = @ToChannelId, WebhookId = @WebhookId WHERE GuildId = @GuildId AND FromChannelId = @FromChannelId;",
+                    new [] {
                         ("GuildId", row.GuildId.ToString()), 
                         ("FromChannelId", row.FromChannelId.ToString()),
                         ("ToChannelId", row.ToChannelId.ToString()),
@@ -92,7 +84,7 @@ namespace Database.Data
                 command.ExecuteNonQuery();
                 command.Connection.Close();
 
-                if(Cache.Initialised) Cache.ChannelMirroring.Rows[Cache.ChannelMirroring.Rows.FindIndex(x => x.Id == row.Id)] = row;
+                if(Cache.Initialised) Cache.ChannelMirroring.Rows[Cache.ChannelMirroring.Rows.FindIndex(x => x.GuildId == row.GuildId && x.FromChannelId == row.FromChannelId)] = row;
             }
         }
 
@@ -100,7 +92,7 @@ namespace Database.Data
         {
             MySqlCommand command;
 
-            if (row.Id == 0) 
+            if (row.New) 
             // The row is a new entry so should be inserted into the database
             {
                 command = Sql.GetCommand("INSERT INTO ChannelMirroring (GuildId, FromChannelId, ToChannelId, WebhookId) VALUES (@GuildId, @FromChannelId, @ToChannelId, @WebhookId);",
@@ -112,21 +104,23 @@ namespace Database.Data
                 command.ExecuteNonQuery();
                 command.Connection.Close();
 
-                row.Id = GetRows(row.GuildId, row.FromChannelId, ignoreCache: true).First().Id;
+                row.New = false;
 
                 if(Cache.Initialised) Cache.ChannelMirroring.Rows.Add(row);
             }
             else
             // The row already exists and should be updated
             {
-                command = Sql.GetCommand("UPDATE ChannelMirroring SET WebhookId = @WebhookId WHERE Id = @Id;",
-                    new [] {("Id", row.Id.ToString()),
+                command = Sql.GetCommand("UPDATE ChannelMirroring SET WebhookId = @WebhookId WHERE GuildId = @GuildId AND FromChannelId = @FromChannelId;",
+                    new [] {
+                        ("GuildId", row.GuildId.ToString()), 
+                        ("FromChannelId", row.FromChannelId.ToString()),
                         ("WebhookId", row.WebhookId.ToString())});
 
                 command.ExecuteNonQuery();
                 command.Connection.Close();
 
-                if(Cache.Initialised) Cache.ChannelMirroring.Rows[Cache.ChannelMirroring.Rows.FindIndex(x => x.Id == row.Id)] = row;
+                if(Cache.Initialised) Cache.ChannelMirroring.Rows[Cache.ChannelMirroring.Rows.FindIndex(x => x.GuildId == row.GuildId && x.FromChannelId == row.FromChannelId)] = row;
             }
         }
 
@@ -134,10 +128,14 @@ namespace Database.Data
         {
             if(row == null) return;
 
-            if(Cache.Initialised) Cache.ChannelMirroring.Rows.RemoveAll(x => x.Id == row.Id);
+            if(Cache.Initialised) Cache.ChannelMirroring.Rows.RemoveAll(x => x.GuildId == row.GuildId && x.FromChannelId == row.FromChannelId);
 
-            string commandText = "DELETE FROM ChannelMirroring WHERE Id = @Id";
-            MySqlCommand command = Sql.GetCommand(commandText, new[] {("Id", row.Id.ToString())});
+            string commandText = "DELETE FROM  WHERE GuildId = @GuildId AND FromChannelId = @FromChannelId";
+            MySqlCommand command = Sql.GetCommand(commandText, 
+                new[] {
+                    ("GuildId", row.GuildId.ToString()),
+                    ("FromChannelId", row.FromChannelId.ToString())});
+
             command.ExecuteNonQuery();
             command.Connection.Close();
         }
@@ -146,56 +144,38 @@ namespace Database.Data
     public class ChannelMirroringTable
     {
         public List<ChannelMirroringRow> Rows { get; set; }
-
-        public void Load()
-        // Load the table from the database
-        {
-            List<ChannelMirroringRow> newRows = new List<ChannelMirroringRow>();
-
-            MySqlDataReader reader = Sql.GetCommand("SELECT * FROM ChannelMirroring;").ExecuteReader();
-
-            try
-            {
-                while (reader.Read())
-                {
-                    newRows.Add(new ChannelMirroringRow(
-                        reader.GetInt64(0),
-                        reader.GetUInt64(1),
-                        reader.GetUInt64(2),
-                        reader.GetUInt64(3),
-                        reader.GetUInt64(4)));
-                }
-            }
-            catch {}
-
-            reader.Close();
-
-            Rows = newRows;
-        }
     }
 
     public class ChannelMirroringRow
     {
-        public long Id { get; set; }
+        public bool New { get; set; }
         public ulong GuildId { get; set; }
         public ulong FromChannelId { get; set; }
         public ulong ToChannelId { get; set; }
         public ulong WebhookId { get; set; }
 
+        private ChannelMirroringRow()
+        {
+
+        }
+
         public ChannelMirroringRow(ulong guildId, ulong fromChannelId)
         {
-            Id = 0;
+            New = true;
             GuildId = guildId;
             FromChannelId = fromChannelId;
         }
 
-        public ChannelMirroringRow(long id, ulong guildId, ulong fromChannelId, ulong toChannelId, ulong webhookId)
+        public static ChannelMirroringRow FromDatabase(ulong guildId, ulong fromChannelId, ulong toChannelId, ulong webhookId)
         {
-            Id = id;
-            GuildId = guildId;
-            FromChannelId = fromChannelId;
-            ToChannelId = toChannelId;
-            WebhookId = webhookId;
+            return new ChannelMirroringRow
+            {
+                New = false,
+                GuildId = guildId,
+                FromChannelId = fromChannelId,
+                ToChannelId = toChannelId,
+                WebhookId = webhookId
+            };
         }
     }
 }
