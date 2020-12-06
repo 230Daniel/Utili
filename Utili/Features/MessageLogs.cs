@@ -65,7 +65,7 @@ namespace Utili.Features
             if(message == null) return;
             Embed embed = await GetDeletedEmbedAsync(channel, message);
 
-            Database.Data.MessageLogs.DeleteMessagesById(new[] {message.Id});
+            Database.Data.MessageLogs.DeleteMessages(guild.Id, channel.Id, new[] { messageId });
 
             SocketTextChannel logChannel = guild.GetTextChannel(row.DeletedChannelId);
             if(logChannel == null) return;
@@ -82,7 +82,7 @@ namespace Utili.Features
 
             Embed embed = await GetBulkDeletedEmbedAsync(channel, messages, messageIds.Count);
 
-            Database.Data.MessageLogs.DeleteMessagesByMessageId(guild.Id, channel.Id, messageIds.ToArray());
+            Database.Data.MessageLogs.DeleteMessages(guild.Id, channel.Id, messageIds.ToArray());
 
             SocketTextChannel logChannel = guild.GetTextChannel(row.DeletedChannelId);
             if(logChannel == null) return;

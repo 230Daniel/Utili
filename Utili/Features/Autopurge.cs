@@ -159,7 +159,7 @@ namespace Utili.Features
             {
                 if (channelsForThisPurge.All(x => x.GuildId != row.GuildId))
                 {
-                    List<AutopurgeRow> guildRows = rows.Where(x => x.GuildId == row.GuildId).OrderBy(x => x.Id).ToList();
+                    List<AutopurgeRow> guildRows = rows.Where(x => x.GuildId == row.GuildId).OrderBy(x => x.ChannelId).ToList();
 
                     if (_purgeNumber == 0)
                     {
