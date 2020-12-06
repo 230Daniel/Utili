@@ -36,11 +36,11 @@ namespace UtiliSite.Pages.Dashboard
                 return;
             }
 
-            long id = int.Parse(HttpContext.Request.Form["rowId"]);
+            ulong channelId = ulong.Parse(HttpContext.Request.Form["channelId"]);
             TimeSpan timespan = TimeSpan.Parse(HttpContext.Request.Form["timespan"]);
             int mode = int.Parse(HttpContext.Request.Form["mode"]);
 
-            AutopurgeRow row = Autopurge.GetRows(id: id, guildId: auth.Guild.Id).First();
+            AutopurgeRow row = Autopurge.GetRows(auth.Guild.Id, channelId).First();
 
             row.Timespan = timespan;
             row.Mode = mode;
@@ -60,7 +60,7 @@ namespace UtiliSite.Pages.Dashboard
                 return;
             }
 
-            ulong channelId = ulong.Parse(HttpContext.Request.Form["channelId"]);
+            ulong channelId = ulong.Parse(HttpContext.Request.Form["channel"]);
             RestTextChannel channel = auth.Guild.GetTextChannelAsync(channelId).GetAwaiter().GetResult();
 
             AutopurgeRow newRow = new AutopurgeRow
@@ -86,9 +86,9 @@ namespace UtiliSite.Pages.Dashboard
                 return;
             }
 
-            int deleteId = int.Parse(HttpContext.Request.Form["rowId"]);
+            ulong channelId = ulong.Parse(HttpContext.Request.Form["channel"]);
 
-            AutopurgeRow deleteRow = Autopurge.GetRows(id: deleteId, guildId: auth.Guild.Id).First();
+            AutopurgeRow deleteRow = Autopurge.GetRows(auth.Guild.Id, channelId).First();
 
             Autopurge.DeleteRow(deleteRow);
 

@@ -39,10 +39,10 @@ namespace UtiliSite.Pages.Dashboard
                 return;
             }
 
-            long rowId = int.Parse(HttpContext.Request.Form["rowId"]);
+            ulong channelId = ulong.Parse(HttpContext.Request.Form["channel"]);
             ulong roleId = ulong.Parse(HttpContext.Request.Form["role"]);
 
-            VoiceRolesRow row = VoiceRoles.GetRows(auth.Guild.Id, null, rowId).First();
+            VoiceRolesRow row = VoiceRoles.GetRows(auth.Guild.Id, channelId).First();
             row.RoleId = roleId;
             VoiceRoles.SaveRow(row);
 
@@ -84,9 +84,9 @@ namespace UtiliSite.Pages.Dashboard
                 return;
             }
 
-            long rowId = int.Parse(HttpContext.Request.Form["rowId"]);
+            ulong channelId = ulong.Parse(HttpContext.Request.Form["channel"]);
 
-            VoiceRolesRow row = VoiceRoles.GetRows(auth.Guild.Id, null, rowId).First();
+            VoiceRolesRow row = VoiceRoles.GetRows(auth.Guild.Id, channelId).First();
             VoiceRoles.DeleteRow(row);
 
             HttpContext.Response.StatusCode = 200;

@@ -33,10 +33,10 @@ namespace UtiliSite.Pages.Dashboard
                 return;
             }
 
-            long id = int.Parse(HttpContext.Request.Form["rowId"]);
+            ulong fromChannelId = ulong.Parse(HttpContext.Request.Form["fromChannel"]);
             ulong toChannelId = ulong.Parse(HttpContext.Request.Form["toChannel"]);
 
-            ChannelMirroringRow row = ChannelMirroring.GetRows(id: id, guildId: auth.Guild.Id).First();
+            ChannelMirroringRow row = ChannelMirroring.GetRows(auth.Guild.Id, fromChannelId).First();
 
             if (row.FromChannelId == toChannelId)
             {
@@ -81,9 +81,9 @@ namespace UtiliSite.Pages.Dashboard
                 return;
             }
 
-            long deleteId = long.Parse(HttpContext.Request.Form["rowId"]);
+            ulong fromChannelId = ulong.Parse(HttpContext.Request.Form["fromChannel"]);
 
-            ChannelMirroringRow deleteRow = ChannelMirroring.GetRows(id: deleteId, guildId: auth.Guild.Id).First();
+            ChannelMirroringRow deleteRow = ChannelMirroring.GetRows(auth.Guild.Id, fromChannelId).First();
 
             ChannelMirroring.DeleteRow(deleteRow);
 

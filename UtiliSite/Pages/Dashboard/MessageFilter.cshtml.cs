@@ -36,11 +36,11 @@ namespace UtiliSite.Pages.Dashboard
                 return;
             }
 
-            long id = int.Parse(HttpContext.Request.Form["rowId"]);
+            ulong channelId = ulong.Parse(HttpContext.Request.Form["channel"]);
             int mode = int.Parse(HttpContext.Request.Form["mode"]);
             string complex = HttpContext.Request.Form["complex"].ToString();
 
-            MessageFilterRow row = MessageFilter.GetRows(id: id, guildId: auth.Guild.Id).First();
+            MessageFilterRow row = MessageFilter.GetRows(auth.Guild.Id, channelId).First();
 
             int before = row.Mode;
 
@@ -94,9 +94,9 @@ namespace UtiliSite.Pages.Dashboard
                 return;
             }
 
-            int deleteId = int.Parse(HttpContext.Request.Form["rowId"]);
+            ulong channelId = ulong.Parse(HttpContext.Request.Form["channel"]);
 
-            MessageFilterRow deleteRow = MessageFilter.GetRows(id: deleteId, guildId: auth.Guild.Id).First();
+            MessageFilterRow deleteRow = MessageFilter.GetRows(auth.Guild.Id, channelId).First();
 
             MessageFilter.DeleteRow(deleteRow);
 
