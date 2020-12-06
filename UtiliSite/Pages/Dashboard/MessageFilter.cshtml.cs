@@ -11,13 +11,10 @@ namespace UtiliSite.Pages.Dashboard
     {
         public void OnGet()
         {
-            ViewData["authorised"] = false;
             AuthDetails auth = Auth.GetAuthDetails(HttpContext, HttpContext.Request.Path);
             if(!auth.Authenticated) return;
-            ViewData["authorised"] = true;
-
-            ViewData["guild"] = auth.Guild;
             ViewData["user"] = auth.User;
+            ViewData["guild"] = auth.Guild;
 
             List<MessageFilterRow> messageFilterRows = MessageFilter.GetRows(auth.Guild.Id);
             ViewData["messageFilterRows"] = messageFilterRows;

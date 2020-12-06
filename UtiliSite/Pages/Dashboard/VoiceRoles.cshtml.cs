@@ -10,11 +10,8 @@ namespace UtiliSite.Pages.Dashboard
     {
         public void OnGet()
         {
-            ViewData["authorised"] = false;
             AuthDetails auth = Auth.GetAuthDetails(HttpContext, HttpContext.Request.Path);
             if(!auth.Authenticated) return;
-            ViewData["authorised"] = true;
-
             ViewData["user"] = auth.User;
             ViewData["guild"] = auth.Guild;
 

@@ -13,9 +13,8 @@ namespace UtiliSite.Pages.Dashboard
         {
             AuthDetails auth = Auth.GetAuthDetails(HttpContext, HttpContext.Request.Path);
             if(!auth.Authenticated) return;
-
-            ViewData["guild"] = auth.Guild;
             ViewData["user"] = auth.User;
+            ViewData["guild"] = auth.Guild;
 
             List<ChannelMirroringRow> rows = ChannelMirroring.GetRows(auth.Guild.Id);
             ViewData["rows"] = rows;

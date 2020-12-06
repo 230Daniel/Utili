@@ -3,10 +3,7 @@
 @using Discord.Rest
 @model UtiliSite.Pages.Dashboard.VoiceRolesModel
 @{
-    if (ViewData["guild"] == null)
-    {
-        return;
-    }
+    if (ViewData["guild"] == null) { return; }
 
     Layout = "Shared/_Layout.cshtml";
     ViewData["Title"] = "Voice Roles - Utili Dashboard";

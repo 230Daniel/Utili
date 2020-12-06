@@ -10,6 +10,8 @@ namespace UtiliSite
 {
     public static class DiscordModule
     {
+        // TODO: Make asyncronous
+
         private static DiscordRestClient _client;
 
         public static void Initialise()
@@ -19,7 +21,7 @@ namespace UtiliSite
         }
 
 
-        private static DiscordCache _cachedClients = new DiscordCache(900);
+        private static DiscordCache _cachedClients = new DiscordCache(600);
         public static DiscordRestClient GetClient(ulong userId, string token = null)
         {
             DiscordRestClient client;
@@ -67,14 +69,42 @@ namespace UtiliSite
             _cachedGuildLists.Add(client.CurrentUser.Id, guilds);
             return guilds;
         }
-        public static bool IsGuildManageable(DiscordRestClient client, ulong guildId)
+
+
+        private static DiscordCache _cachedGuildUsers = new DiscordCache(60);
+        public static RestGuildUser GetGuildUser(ulong userId, ulong guildId)
         {
-            List<RestUserGuild> guilds = GetManageableGuilds(client);
-            return guilds.Select(x => x.Id).Contains(guildId);
+            if (_cachedGuildUsers.TryGet($"{guildId}/{userId}", out object guildUserObj))
+            {
+                if (guildUserObj == null)
+                {
+                    _cachedGuildUsers.Remove($"{guildId}/{userId}");
+                }
+                else
+                {
+                    return (RestGuildUser) guildUserObj;
+                }
+            }
+
+            try
+            {
+                RestGuildUser guildUser = _client.GetGuildUserAsync(guildId, userId).GetAwaiter().GetResult();
+                if(guildUser != null) _cachedGuildUsers.Add($"{guildId}/{userId}", guildUser);
+                return guildUser;
+            }
+            catch
+            {
+                return null;
+            }
         }
 
+        public static bool IsGuildManageable(ulong userId, ulong guildId)
+        {
+            RestGuildUser user = GetGuildUser(userId, guildId);
+            return user.GuildPermissions.ManageGuild;
+        }
 
-        private static DiscordCache _cachedGuilds = new DiscordCache(7.5);
+        private static DiscordCache _cachedGuilds = new DiscordCache(60);
         public static async Task<RestGuild> GetGuildAsync(ulong guildId)
         {
             if (_cachedGuilds.TryGet(guildId, out object guildObj))
@@ -230,7 +260,7 @@ namespace UtiliSite
             Items = new List<DiscordCacheItem>();
         }
 
-        public void Add(ulong key, object value)
+        public void Add(object key, object value)
         {
             DiscordCacheItem item = new DiscordCacheItem(key, value, Timeout);
             Items.RemoveAll(x => x.Key == key);
@@ -239,12 +269,12 @@ namespace UtiliSite
             Items.RemoveAll(x => x.Expiry < DateTime.Now);
         }
 
-        public void Remove(ulong key)
+        public void Remove(object key)
         {
             Items.RemoveAll(x => x.Key == key);
         }
 
-        public bool TryGet(ulong key, out object value)
+        public bool TryGet(object key, out object value)
         {
             value = null;
             try
@@ -279,11 +309,11 @@ namespace UtiliSite
 
     internal class DiscordCacheItem
     {
-        public ulong Key { get; }
+        public object Key { get; }
         public DateTime Expiry { get; }
         public object Value { get; }
 
-        public DiscordCacheItem(ulong key, object value, TimeSpan timeout)
+        public DiscordCacheItem(object key, object value, TimeSpan timeout)
         {
             Key = key;
             Expiry = DateTime.Now.Add(timeout);

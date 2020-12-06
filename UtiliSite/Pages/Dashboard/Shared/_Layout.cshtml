@@ -1,8 +1,10 @@
-﻿@using Discord.Rest
-@if (ViewData["guild"] == null)
-{
-    IgnoreBody();
-    return;
+﻿@using Discord.Rest;
+@{
+    if (ViewData["guild"] == null)
+    {
+        IgnoreBody();
+        return;
+    }
 }
 
 <!DOCTYPE html>

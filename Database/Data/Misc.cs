@@ -129,6 +129,8 @@ namespace Database.Data
         {
             MiscRow row = GetRow(guildId, "Prefix");
 
+            if(prefix == "." && row == null) return;
+
             if (prefix == ".")
             {
                 DeleteRow(row);
@@ -141,7 +143,6 @@ namespace Database.Data
             }
 
             row.Value = EString.FromDecoded(prefix);
-
             SaveRow(row);
         }
     }

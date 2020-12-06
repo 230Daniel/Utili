@@ -1,10 +1,7 @@
 ﻿@page "{guild?}/core"
 @model UtiliSite.Pages.Dashboard.CoreModel
 @{
-    if (ViewData["guild"] == null)
-    {
-        return;
-    }
+    if (ViewData["guild"] == null) { return; }
 
     Layout = "Shared/_Layout.cshtml";
     ViewData["Title"] = "Utili Dashboard";

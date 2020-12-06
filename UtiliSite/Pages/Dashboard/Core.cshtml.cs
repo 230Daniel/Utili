@@ -7,15 +7,10 @@ namespace UtiliSite.Pages.Dashboard
     {
         public void OnGet()
         {
-            ViewData["authorised"] = false;
             AuthDetails auth = Auth.GetAuthDetails(HttpContext, HttpContext.Request.Path);
             if(!auth.Authenticated) return;
-            ViewData["authorised"] = true;
-
-            ViewData["mainDashboardUrl"] = RedirectHelper.AddToUrl(HttpContext.Request.Host.ToString(), "dashboard");
-            ViewData["guild"] = auth.Guild;
-            ViewData["Title"] = $"{auth.Guild.Name} - ";
             ViewData["user"] = auth.User;
+            ViewData["guild"] = auth.Guild;
 
             ViewData["prefix"] = Misc.GetPrefix(auth.Guild.Id);
             ViewData["nickname"] = DiscordModule.GetNickname(auth.Guild);

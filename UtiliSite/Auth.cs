@@ -48,27 +48,20 @@ namespace UtiliSite
 
                         if (guild == null)
                         {
-                            if (IsGuildManageable(client, guildId))
-                            {
-                                string inviteUrl = "https://discord.com/api/oauth2/authorize?permissions=8&scope=bot&response_type=code" +
-                                                   $"&client_id={Main._config.DiscordClientId}" +
-                                                   $"&guild_id={guildId}" +
-                                                   $"&redirect_uri=https%3A%2F%2F{httpContext.Request.Host.Value}%2Freturn";
+                            string inviteUrl = "https://discord.com/api/oauth2/authorize?permissions=8&scope=bot&response_type=code" +
+                                               $"&client_id={Main._config.DiscordClientId}" +
+                                               $"&guild_id={guildId}" +
+                                               $"&redirect_uri=https%3A%2F%2F{httpContext.Request.Host.Value}%2Freturn";
 
-                                ReturnModel.SaveRedirect(userId,
-                                    $"https://{httpContext.Request.Host.Value}/dashboard/{guildId}");
+                            ReturnModel.SaveRedirect(userId,
+                                $"https://{httpContext.Request.Host.Value}/dashboard/{guildId}");
 
-                                httpContext.Response.Redirect(inviteUrl);
-                                auth.Authenticated = false;
-                                return auth;
-                            }
-                            
+                            httpContext.Response.Redirect(inviteUrl);
                             auth.Authenticated = false;
-                            httpContext.Response.Redirect(unauthorisedGuildUrl);
                             return auth;
                         }
 
-                        if (IsGuildManageable(client, guild.Id))
+                        if (IsGuildManageable(client.CurrentUser.Id, guild.Id))
                         {
                             auth.Guild = guild;
                         }
