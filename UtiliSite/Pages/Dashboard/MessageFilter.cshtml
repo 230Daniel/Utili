@@ -8,10 +8,9 @@
     Layout = "Shared/_Layout.cshtml";
     ViewData["Title"] = "Message Filter - Utili Dashboard";
 
-    List<MessageFilterRow> messageFilterRows = (List<MessageFilterRow>)ViewData["messageFilterRows"];
-    RestGuild guild = (RestGuild)ViewData["Guild"];
-    List<RestTextChannel> channels = (List<RestTextChannel>)ViewData["channels"];
-    List<RestTextChannel> nonMessageFilterChannels = (List<RestTextChannel>)ViewData["nonMessageFilterChannels"];
+    List<MessageFilterRow> rows = (List<MessageFilterRow>) ViewData["messageFilterRows"];
+    List<RestTextChannel> channels = (List<RestTextChannel>) ViewData["channels"];
+    List<RestTextChannel> nonMessageFilterChannels = (List<RestTextChannel>) ViewData["nonMessageFilterChannels"];
 }
 
 <div class="jumbotron jumbotron-fluid">
@@ -39,7 +38,7 @@
 </div>
 
 <div class="row">
-@foreach (MessageFilterRow row in messageFilterRows)
+@foreach (MessageFilterRow row in rows)
 {
     string channelName = channels.First(x => x.Id == row.ChannelId).Name;
     <div class="pb-4">

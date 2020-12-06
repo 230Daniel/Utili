@@ -8,10 +8,10 @@
     Layout = "Shared/_Layout.cshtml";
     ViewData["Title"] = "Voice Roles - Utili Dashboard";
 
-    RestGuild guild = ViewData["Guild"] as RestGuild;
+    List<VoiceRolesRow> rows = (List<VoiceRolesRow>) ViewData["rows"];
+    RestGuild guild = (RestGuild) ViewData["guild"];
     List<RestVoiceChannel> addedChannels = (List<RestVoiceChannel>) ViewData["addedChannels"];
     List<RestVoiceChannel> nonAddedChannels = (List<RestVoiceChannel>)ViewData["nonAddedChannels"];
-    List<VoiceRolesRow> rows = (List<VoiceRolesRow>)ViewData["rows"];
 }
 
 <div class="jumbotron jumbotron-fluid">

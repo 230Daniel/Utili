@@ -6,8 +6,8 @@
     Layout = "Shared/_Layout.cshtml";
     ViewData["Title"] = "Utili Dashboard";
 
-    string nickname = ViewData["nickname"].ToString();
-    string prefix = ViewData["prefix"].ToString();
+    string nickname = (string) ViewData["nickname"];
+    string prefix = (string) ViewData["prefix"];
 }
 
 <div class="jumbotron jumbotron-fluid">

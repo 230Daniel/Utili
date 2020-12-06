@@ -8,10 +8,9 @@
     Layout = "Shared/_Layout.cshtml";
     ViewData["Title"] = "Autopurge - Utili Dashboard";
 
-    List<AutopurgeRow> autopurgeRows = (List<AutopurgeRow>)ViewData["autopurgeRows"];
-    RestGuild guild = (RestGuild)ViewData["Guild"];
-    List<RestTextChannel> channels = (List<RestTextChannel>)ViewData["channels"];
-    List<RestTextChannel> nonAutopurgeChannels = (List<RestTextChannel>)ViewData["nonAutopurgeChannels"];
+    List<AutopurgeRow> rows = (List<AutopurgeRow>) ViewData["autopurgeRows"];
+    List<RestTextChannel> channels = (List<RestTextChannel>) ViewData["channels"];
+    List<RestTextChannel> nonAutopurgeChannels = (List<RestTextChannel>) ViewData["nonAutopurgeChannels"];
 }
 
 
@@ -40,7 +39,7 @@
 </div>
 
 <div class="row">
-    @foreach (AutopurgeRow row in autopurgeRows)
+    @foreach (AutopurgeRow row in rows)
     {
         string channelName = channels.First(x => x.Id == row.ChannelId).Name;
         <div class="pb-4">

@@ -5,6 +5,9 @@
         IgnoreBody();
         return;
     }
+
+    RestGuild guild = (RestGuild) ViewData["guild"];
+    RestUser user = (RestUser) ViewData["user"];
 }
 
 <!DOCTYPE html>
@@ -46,10 +49,10 @@
                 </div>
 
                 <div class="navbar-nav flex-grow-1" style="justify-content: flex-end;">
-                    <img src="@((ViewData["user"] as RestSelfUser).GetAvatarUrl())" class="user-icon" alt="User Icon">
+                    <img src="@(user.GetAvatarUrl())" class="user-icon" alt="User Icon">
                     <div class="dropdown noverticalpadding">
                         <a class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" id="userDropdown" aria-haspopup="true" aria-expanded="false" href="#">
-                            @((ViewData["user"] as RestSelfUser).Username)
+                            @(user.Username)
                         </a>
                         <div class="dropdown-menu dropdown-menu-right" aria-labelledby="userDropdown">
                             <a class="dropdown-item" asp-area="" asp-page="/logout">Log out</a>
@@ -65,9 +68,9 @@
     <div class="d-flex bg-dark" id="wrapper">
         <div class="border-right" id="sidebar-wrapper">
             <div class="card" style="width:30vh; height:30vh; background-color: #292c2f; border: 0;">
-                <img src="@DiscordModule.GetGuildIconUrl(ViewData["guild"] as RestGuild)" class="guild-icon card-img-top" alt="Server Icon">
+                <img src="@DiscordModule.GetGuildIconUrl(guild)" class="guild-icon card-img-top" alt="Server Icon">
                 <div class="card-body" style="padding-top:1vh;">
-                    <p class="card-text text-light text-center">@((ViewData["guild"] as RestGuild).Name)</p>
+                    <p class="card-text text-light text-center">@(guild.Name)</p>
                 </div>
             </div>
             <div class="list-group list-group-flush">
@@ -89,7 +92,7 @@
 
     </div>
 
-<script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     <script src="~/js/dashboard/notification.js" asp-append-version="true"></script>

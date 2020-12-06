@@ -16,15 +16,15 @@ namespace UtiliSite.Pages.Dashboard
             ViewData["user"] = auth.User;
             ViewData["guild"] = auth.Guild;
 
-            VoiceLinkRow metaRow = VoiceLink.GetMetaRow(auth.Guild.Id);
+            VoiceLinkRow row = VoiceLink.GetMetaRow(auth.Guild.Id);
 
             List<RestVoiceChannel> voiceChannels = DiscordModule.GetVoiceChannelsAsync(auth.Guild).GetAwaiter().GetResult();
-            List<RestVoiceChannel> excludedChannels = voiceChannels.Where(x => metaRow.ExcludedChannels.Contains(x.Id)).ToList();
-            List<RestVoiceChannel> nonExcludedChannels = voiceChannels.Where(x => !metaRow.ExcludedChannels.Contains(x.Id)).ToList();
+            List<RestVoiceChannel> excludedChannels = voiceChannels.Where(x => row.ExcludedChannels.Contains(x.Id)).ToList();
+            List<RestVoiceChannel> nonExcludedChannels = voiceChannels.Where(x => !row.ExcludedChannels.Contains(x.Id)).ToList();
 
             ViewData["excludedChannels"] = excludedChannels;
             ViewData["nonExcludedChannels"] = nonExcludedChannels;
-            ViewData["metaRow"] = metaRow;
+            ViewData["row"] = row;
         }
 
         public void OnPost()

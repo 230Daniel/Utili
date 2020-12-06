@@ -8,10 +8,9 @@
     Layout = "Shared/_Layout.cshtml";
     ViewData["Title"] = "Roles - Utili Dashboard";
 
-    RestGuild guild = ViewData["Guild"] as RestGuild;
-    List<RestRole> joinRoles = (List<RestRole>)ViewData["joinRoles"];
-    List<RestRole> nonjoinRoles = (List<RestRole>)ViewData["nonjoinRoles"];
-    RolesRow row = ViewData["row"] as RolesRow;
+    RolesRow row = (RolesRow) ViewData["row"];
+    List<RestRole> joinRoles = (List<RestRole>) ViewData["joinRoles"];
+    List<RestRole> nonjoinRoles = (List<RestRole>) ViewData["nonjoinRoles"];
 }
 
 <div class="jumbotron jumbotron-fluid">

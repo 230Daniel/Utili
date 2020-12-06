@@ -8,10 +8,9 @@
     Layout = "Shared/_Layout.cshtml";
     ViewData["Title"] = "Voice Link - Utili Dashboard";
 
-    RestGuild guild = ViewData["Guild"] as RestGuild;
+    VoiceLinkRow row = (VoiceLinkRow)ViewData["row"];
     List<RestVoiceChannel> excludedChannels = (List<RestVoiceChannel>) ViewData["excludedChannels"];
-    List<RestVoiceChannel> nonExcludedChannels = (List<RestVoiceChannel>)ViewData["nonExcludedChannels"];
-    VoiceLinkRow metaRow = (VoiceLinkRow) ViewData["metaRow"];
+    List<RestVoiceChannel> nonExcludedChannels = (List<RestVoiceChannel>) ViewData["nonExcludedChannels"];
 }
 
 <div class="jumbotron jumbotron-fluid">
@@ -34,7 +33,7 @@
                     <span class="input-group-text">Enable</span>
                 </div>
                 <div class="input-group-text">
-                    <input type="checkbox" name="enabled" class="form-control checkbox" @VoiceLinkModel.GetIsChecked(metaRow.Enabled)>
+                    <input type="checkbox" name="enabled" class="form-control checkbox" @VoiceLinkModel.GetIsChecked(row.Enabled)>
                 </div>
 
             </div>
@@ -43,14 +42,14 @@
                     <span class="input-group-text">Delete Channels</span>
                 </div>
                 <div class="input-group-text">
-                    <input type="checkbox" name="deleteChannels" class="form-control checkbox" @VoiceLinkModel.GetIsChecked(metaRow.DeleteChannels)>
+                    <input type="checkbox" name="deleteChannels" class="form-control checkbox" @VoiceLinkModel.GetIsChecked(row.DeleteChannels)>
                 </div>
             </div>
             <div class="input-group flex-nowrap">
                 <div class="input-group-prepend">
                     <span class="input-group-text voicelink-prepend">Prefix</span>
                 </div>
-                <input type="text" name="prefix" class="form-control card-component" value="@metaRow.Prefix.Value">
+                <input type="text" name="prefix" class="form-control card-component" value="@row.Prefix.Value">
             </div>
 
             <div class="input-group flex-nowrap">
