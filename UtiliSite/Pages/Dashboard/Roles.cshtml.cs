@@ -49,7 +49,7 @@ namespace UtiliSite.Pages.Dashboard
                 return;
             }
 
-            ulong roleId = ulong.Parse(HttpContext.Request.Form["roleId"]);
+            ulong roleId = ulong.Parse(HttpContext.Request.Form["role"]);
 
             RolesRow row = Roles.GetRow(auth.Guild.Id);
             if (!row.JoinRoles.Contains(roleId)) row.JoinRoles.Add(roleId);
@@ -69,7 +69,7 @@ namespace UtiliSite.Pages.Dashboard
                 return;
             }
 
-            ulong roleId = ulong.Parse(HttpContext.Request.Form["roleId"]);
+            ulong roleId = ulong.Parse(HttpContext.Request.Form["role"]);
 
             RolesRow row = Roles.GetRow(auth.Guild.Id);
             if (row.JoinRoles.Contains(roleId)) row.JoinRoles.Remove(roleId);

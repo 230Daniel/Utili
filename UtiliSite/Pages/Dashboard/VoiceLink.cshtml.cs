@@ -60,7 +60,7 @@ namespace UtiliSite.Pages.Dashboard
                 return;
             }
 
-            ulong channelId = ulong.Parse(HttpContext.Request.Form["channelId"]);
+            ulong channelId = ulong.Parse(HttpContext.Request.Form["channel"]);
 
             VoiceLinkRow metaRow = VoiceLink.GetMetaRow(auth.Guild.Id);
             if (!metaRow.ExcludedChannels.Contains(channelId))
@@ -83,7 +83,7 @@ namespace UtiliSite.Pages.Dashboard
                 return;
             }
 
-            ulong channelId = ulong.Parse(HttpContext.Request.Form["channelId"]);
+            ulong channelId = ulong.Parse(HttpContext.Request.Form["channel"]);
 
             VoiceLinkRow metaRow = VoiceLink.GetMetaRow(auth.Guild.Id);
             metaRow.ExcludedChannels.RemoveAll(x => x == channelId);

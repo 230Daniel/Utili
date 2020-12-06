@@ -59,8 +59,8 @@
     <div class="dropdown-menu scrollable noverticalpadding" aria-labelledby="dropdownExcludeChannel">
         @foreach (RestRole role in nonjoinRoles.OrderBy(x => -x.Position))
         {
-            <form method="post">
-                <input type="hidden" name="roleId" value="@role.Id" />
+            <form method="post" name="noajax">
+                <input type="hidden" name="role" value="@role.Id" />
                 <button class="dropdown-item" asp-page-handler="AddJoinRole" type="submit">@role.Name</button>
             </form>
         }
@@ -69,9 +69,9 @@
 
 @foreach (RestRole role in joinRoles)
 {
-    <form name="form-@role.Id" method="post">
+    <form method="post">
 
-        <input type="hidden" name="roleId" value="@role.Id" />
+        <input type="hidden" name="role" value="@role.Id" />
 
         <div class="input-group flex-nowrap">
 

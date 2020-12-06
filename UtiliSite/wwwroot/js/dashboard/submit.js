@@ -1,11 +1,11 @@
 ﻿
 
-$("[name|='form']").submit(function(e) {
+$("form").submit(function(e) {
+
+    if (e.currentTarget.name === "noajax") return true;
+    if ($("button[clicked=true]")[0].name === "noajax") return true;
+
     var formData = $(this).serialize();
-
-    var buttonUsed = $("button[clicked=true]")[0].name;
-    if (buttonUsed === "noajax") return true;
-
     $.ajax({
         type: "POST",
         data: formData,

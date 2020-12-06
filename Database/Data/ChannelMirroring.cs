@@ -130,7 +130,7 @@ namespace Database.Data
 
             if(Cache.Initialised) Cache.ChannelMirroring.Rows.RemoveAll(x => x.GuildId == row.GuildId && x.FromChannelId == row.FromChannelId);
 
-            string commandText = "DELETE FROM  WHERE GuildId = @GuildId AND FromChannelId = @FromChannelId";
+            string commandText = "DELETE FROM ChannelMirroring WHERE GuildId = @GuildId AND FromChannelId = @FromChannelId";
             MySqlCommand command = Sql.GetCommand(commandText, 
                 new[] {
                     ("GuildId", row.GuildId.ToString()),

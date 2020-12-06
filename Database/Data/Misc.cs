@@ -181,7 +181,7 @@ namespace Database.Data
                 New = false,
                 GuildId = guildId,
                 Type = type,
-                Value = EString.FromDecoded(value)
+                Value = EString.FromEncoded(value)
             };
         }
     }

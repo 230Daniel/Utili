@@ -28,7 +28,7 @@
 
         @foreach (RestTextChannel channel in channels.Where(x => rows.All(y => y.FromChannelId != x.Id)))
         {
-            <form method="post">
+            <form method="post" name="noajax">
                 <input type="hidden" name="channelId" value="@channel.Id" />
                 <button class="dropdown-item" asp-page-handler="Add" type="submit">@channel.Name</button>
             </form>

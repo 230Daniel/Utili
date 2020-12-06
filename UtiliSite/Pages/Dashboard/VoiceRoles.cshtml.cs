@@ -59,7 +59,7 @@ namespace UtiliSite.Pages.Dashboard
                 return;
             }
 
-            ulong channelId = ulong.Parse(HttpContext.Request.Form["channelId"]);
+            ulong channelId = ulong.Parse(HttpContext.Request.Form["channel"]);
 
             VoiceRolesRow row = new VoiceRolesRow
             {

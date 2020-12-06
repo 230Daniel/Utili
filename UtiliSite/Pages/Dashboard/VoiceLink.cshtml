@@ -73,8 +73,8 @@
     <div class="dropdown-menu scrollable noverticalpadding" aria-labelledby="dropdownExcludeChannel">
         @foreach (RestVoiceChannel channel in nonExcludedChannels.OrderBy(x => x.Position))
         {
-            <form method="post">
-                <input type="hidden" name="channelId" value="@channel.Id" />
+            <form method="post" name="noajax">
+                <input type="hidden" name="channel" value="@channel.Id" />
                 <button class="dropdown-item" asp-page-handler="Exclude" type="submit">@channel.Name</button>
             </form>
         }
@@ -82,9 +82,9 @@
 
     @foreach (RestVoiceChannel excludedChannel in excludedChannels)
     {
-        <form name="form-@excludedChannel.Id" method="post">
+        <form method="post">
 
-            <input type="hidden" name="channelId" value="@excludedChannel.Id" />
+            <input type="hidden" name="channel" value="@excludedChannel.Id" />
 
             <div class="input-group flex-nowrap">
 

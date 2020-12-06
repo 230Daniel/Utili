@@ -68,7 +68,7 @@ namespace UtiliSite.Pages.Dashboard
                 return;
             }
 
-            ulong channelId = ulong.Parse(HttpContext.Request.Form["channelId"]);
+            ulong channelId = ulong.Parse(HttpContext.Request.Form["channel"]);
             RestTextChannel channel = auth.Guild.GetTextChannelAsync(channelId).GetAwaiter().GetResult();
 
             MessageFilterRow newRow = new MessageFilterRow

@@ -36,7 +36,7 @@ namespace UtiliSite.Pages.Dashboard
                 return;
             }
 
-            ulong channelId = ulong.Parse(HttpContext.Request.Form["channelId"]);
+            ulong channelId = ulong.Parse(HttpContext.Request.Form["channel"]);
             TimeSpan timespan = TimeSpan.Parse(HttpContext.Request.Form["timespan"]);
             int mode = int.Parse(HttpContext.Request.Form["mode"]);
 

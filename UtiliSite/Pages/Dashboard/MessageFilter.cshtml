@@ -28,8 +28,8 @@
 
         @foreach (RestTextChannel channel in nonMessageFilterChannels)
         {
-            <form method="post">
-                <input type="hidden" name="channelId" value="@channel.Id" />
+            <form method="post" name="noajax">
+                <input type="hidden" name="channel" value="@channel.Id" />
                 <button class="dropdown-item" asp-page-handler="Add" type="submit">@channel.Name</button>
             </form>
         }
