@@ -68,7 +68,7 @@
                             </div>
 
                             <select class="custom-select card-component" name="role">
-                                @foreach (RestRole role in guild.Roles.OrderBy(x => -x.Position))
+                                @foreach (RestRole role in guild.Roles.Where(x => !x.IsEveryone).OrderBy(x => -x.Position))
                                 {
                                     <!option value="@role.Id" @VoiceRolesModel.GetIsSelected(role.Id, row)>@role.Name</!option>
                                 }

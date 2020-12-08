@@ -95,8 +95,7 @@ namespace UtiliSite.Pages.Dashboard
 
         public static string GetIsSelected(ulong roleId, VoiceRolesRow row)
         {
-            if (row.RoleId == roleId) return "selected";
-            return "";
+            return row.RoleId == roleId ? "selected" : "";
         }
     }
 }
