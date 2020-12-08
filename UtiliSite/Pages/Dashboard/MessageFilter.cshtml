@@ -8,17 +8,14 @@
     Layout = "Shared/_Layout.cshtml";
     ViewData["Title"] = "Message Filter - Utili Dashboard";
 
+    ViewData["heading"] = "Message Filter";
+    ViewData["subheading"] = "Only allow certain types of messages in a channel";
+    ViewData["detailed"] = "Utili will delete any messages which don't match the criteria for that channel.\nA message will be sent telling the user why their message was deleted.";
+
     List<MessageFilterRow> rows = (List<MessageFilterRow>) ViewData["messageFilterRows"];
     List<RestTextChannel> channels = (List<RestTextChannel>) ViewData["channels"];
     List<RestTextChannel> nonMessageFilterChannels = (List<RestTextChannel>) ViewData["nonMessageFilterChannels"];
 }
-
-<div class="jumbotron jumbotron-fluid">
-    <div class="container">
-        <h1 class="display-4 page-heading">Message Filter</h1>
-        <p class="lead">Only allows certain types of message in a channel</p>
-    </div>
-</div>
 
 <div class="dropdown">
     <button class="btn btn-secondary dropdown-toggle" type="button" data-toggle="dropdown" id="dropdownAddChannel" aria-haspopup="true" aria-expanded="false">

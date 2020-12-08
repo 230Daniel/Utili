@@ -15,6 +15,7 @@ namespace UtiliSite.Pages.Dashboard
             if(!auth.Authenticated) return;
             ViewData["user"] = auth.User;
             ViewData["guild"] = auth.Guild;
+            ViewData["premium"] = Database.Premium.IsPremium(auth.Guild.Id);
 
             List<AutopurgeRow> autopurgeRows = Autopurge.GetRows(auth.Guild.Id);
             ViewData["autopurgeRows"] = autopurgeRows;
@@ -24,6 +25,8 @@ namespace UtiliSite.Pages.Dashboard
 
             List<RestTextChannel> nonAutopurgeChannels = channels.Where(x => autopurgeRows.Count(y => y.ChannelId == x.Id) == 0).ToList();
             ViewData["nonAutopurgeChannels"] = nonAutopurgeChannels;
+
+            
         }
 
         public void OnPost()

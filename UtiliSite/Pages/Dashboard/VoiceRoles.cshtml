@@ -8,18 +8,15 @@
     Layout = "Shared/_Layout.cshtml";
     ViewData["Title"] = "Voice Roles - Utili Dashboard";
 
+    ViewData["heading"] = "Voice Roles";
+    ViewData["subheading"] = "Set roles to give to users while they're in a voice channel";
+    ViewData["detailed"] = "";
+
     List<VoiceRolesRow> rows = (List<VoiceRolesRow>) ViewData["rows"];
     RestGuild guild = (RestGuild) ViewData["guild"];
     List<RestVoiceChannel> addedChannels = (List<RestVoiceChannel>) ViewData["addedChannels"];
     List<RestVoiceChannel> nonAddedChannels = (List<RestVoiceChannel>)ViewData["nonAddedChannels"];
 }
-
-<div class="jumbotron jumbotron-fluid">
-    <div class="container">
-        <h1 class="display-4 page-heading">Voice Roles</h1>
-        <p class="lead">Users will be given a role while they're in a specific voice channel</p>
-    </div>
-</div>
 
 <div class="dropdown">
     <button class="btn btn-secondary dropdown-toggle" type="button" data-toggle="dropdown" id="dropdownAddChannel" aria-haspopup="true" aria-expanded="false">

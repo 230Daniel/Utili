@@ -8,17 +8,14 @@
     Layout = "Shared/_Layout.cshtml";
     ViewData["Title"] = "Roles - Utili Dashboard";
 
+    ViewData["heading"] = "Roles";
+    ViewData["subheading"] = "Enable role persist and set roles to give to users when they join";
+    ViewData["detailed"] = "If role persist is enabled, a users roles will be recorded when they leave the server. These roles will be added back to them if they rejoin.\nJoin roles are given to any user when they join the server.";
+    
     RolesRow row = (RolesRow) ViewData["row"];
     List<RestRole> joinRoles = (List<RestRole>) ViewData["joinRoles"];
     List<RestRole> nonjoinRoles = (List<RestRole>) ViewData["nonjoinRoles"];
 }
-
-<div class="jumbotron jumbotron-fluid">
-    <div class="container">
-        <h1 class="display-4 page-heading">Roles</h1>
-        <p class="lead">Set roles to be given when a user joins and enable role persist</p>
-    </div>
-</div>
 
 
 <div class="pb-2">

@@ -14,6 +14,7 @@ namespace UtiliSite.Pages.Dashboard
             if(!auth.Authenticated) return;
             ViewData["user"] = auth.User;
             ViewData["guild"] = auth.Guild;
+            ViewData["premium"] = Database.Premium.IsPremium(auth.Guild.Id);
 
             List<RestVoiceChannel> voiceChannels = DiscordModule.GetVoiceChannelsAsync(auth.Guild).GetAwaiter().GetResult().OrderBy(x => x.Position).ToList();
             List<VoiceRolesRow> rows = VoiceRoles.GetRows(auth.Guild.Id);

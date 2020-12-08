@@ -8,19 +8,23 @@
     Layout = "Shared/_Layout.cshtml";
     ViewData["Title"] = "Message Logs - Utili Dashboard";
 
+    bool premium = (bool) ViewData["premium"];
+    ViewData["heading"] = "Message Logs";
+    ViewData["subheading"] = "Log the content of deleted and edited messages";
+    if (premium)
+    {
+        ViewData["detailed"] = "If a log channel is set for either event, the content of messages sent on your server will be stored for up to 30 days.\nMessage content in excluded channels will not be saved.\nBecause you have premium, there is no cap on the amount of messages stored per channel.";
+    }
+    else
+    {
+        ViewData["detailed"] = "If a log channel is set for either event, the content of messages sent on your server will be stored for up to 30 days.\nMessage content in excluded channels will not be saved.\nUp to 50 messages will be stored per channel, get premium to remove this limit.";
+    }
+
     MessageLogsRow row = (MessageLogsRow)ViewData["row"];
     List<RestTextChannel> channels = (List<RestTextChannel>)ViewData["channels"];
     List<RestTextChannel> excludedChannels = channels.Where(x => row.ExcludedChannels.Contains(x.Id)).ToList();
     List<RestTextChannel> nonExcludedChannels = channels.Where(x => !row.ExcludedChannels.Contains(x.Id)).ToList();
 }
-
-<div class="jumbotron jumbotron-fluid">
-    <div class="container">
-        <h1 class="display-4 page-heading">Message Logs</h1>
-        <p class="lead">Record the content of deleted and edited messages in a log channel</p>
-    </div>
-</div>
-
 
 <div class="pb-2">
     <div class="card card-settings">

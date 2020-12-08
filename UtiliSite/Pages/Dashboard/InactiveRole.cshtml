@@ -8,17 +8,13 @@
     Layout = "Shared/_Layout.cshtml";
     ViewData["Title"] = "Inactive Role - Utili Dashboard";
 
+    ViewData["heading"] = "Inactive Role";
+    ViewData["subheading"] = "Set a role to be given to or taken from inactive users";
+    ViewData["detailed"] = "Utili checks for inactive users every 60 minutes\nA user is inactive if they haven't sent a message or joined a voice channel for the duration of the threshold you set below.\nUsers with the immune role will never be marked as inactive.";
+
     InactiveRoleRow row = (InactiveRoleRow)ViewData["row"];
     RestGuild guild = (RestGuild)ViewData["guild"];
 }
-
-<div class="jumbotron jumbotron-fluid">
-    <div class="container">
-        <h1 class="display-4 page-heading">Inactive Role</h1>
-        <p class="lead">Set a role to be given to users that are inactive</p>
-    </div>
-</div>
-
 
 <div class="pb-2">
     <div class="card card-settings">

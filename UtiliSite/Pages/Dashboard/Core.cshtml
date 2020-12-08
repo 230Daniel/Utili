@@ -6,16 +6,13 @@
     Layout = "Shared/_Layout.cshtml";
     ViewData["Title"] = "Utili Dashboard";
 
+    ViewData["heading"] = "Utili Dashboard";
+    ViewData["subheading"] = "Configure Utili's features using the sidebar";
+    ViewData["detailed"] = "Only users with the manage server permission can view or edit settings on the Utili dashboard.";
+
     string nickname = (string) ViewData["nickname"];
     string prefix = (string) ViewData["prefix"];
 }
-
-<div class="jumbotron jumbotron-fluid">
-    <div class="container">
-        <h1 class="display-4 page-heading">Utili</h1>
-        <p class="lead">Configure Utili's features using the sidebar</p>
-    </div>
-</div>
 
 <div class="pb-2">
     <div class="card card-settings">

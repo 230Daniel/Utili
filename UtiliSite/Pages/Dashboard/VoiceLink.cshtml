@@ -8,17 +8,14 @@
     Layout = "Shared/_Layout.cshtml";
     ViewData["Title"] = "Voice Link - Utili Dashboard";
 
+    ViewData["heading"] = "Voice Link";
+    ViewData["subheading"] = "Create a text channel which only people connected to voice can see";
+    ViewData["detailed"] = "";
+
     VoiceLinkRow row = (VoiceLinkRow)ViewData["row"];
     List<RestVoiceChannel> excludedChannels = (List<RestVoiceChannel>) ViewData["excludedChannels"];
     List<RestVoiceChannel> nonExcludedChannels = (List<RestVoiceChannel>) ViewData["nonExcludedChannels"];
 }
-
-<div class="jumbotron jumbotron-fluid">
-    <div class="container">
-        <h1 class="display-4 page-heading">Voice Link</h1>
-        <p class="lead">Creates a text channel which only users in the voice chat can see</p>
-    </div>
-</div>
 
 
 <div class="pb-2">

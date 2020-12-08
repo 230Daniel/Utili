@@ -8,18 +8,18 @@
     Layout = "Shared/_Layout.cshtml";
     ViewData["Title"] = "Autopurge - Utili Dashboard";
 
+    bool premium = (bool) ViewData["premium"];
+
+    ViewData["heading"] = "Autopurge";
+    ViewData["subheading"] = "Automatically delete messages";
+
+    if (premium) { ViewData["detailed"] = "Every channel is purged once per 10 seconds.\nMessages are deleted when they're older than the timespan you set, or when they are 500 messages up in the channel."; }
+    else { ViewData["detailed"] = "One channel is purged every 30 seconds.\nMessages are deleted when they're older than the timespan you set, or when they are 100 messages up in the channel.\nGet premium to upgrade this feature."; }
+
     List<AutopurgeRow> rows = (List<AutopurgeRow>) ViewData["autopurgeRows"];
     List<RestTextChannel> channels = (List<RestTextChannel>) ViewData["channels"];
     List<RestTextChannel> nonAutopurgeChannels = (List<RestTextChannel>) ViewData["nonAutopurgeChannels"];
 }
-
-
-<div class="jumbotron jumbotron-fluid">
-    <div class="container">
-        <h1 class="display-4 page-heading">Autopurge</h1>
-        <p class="lead">Automatically deletes messages</p>
-    </div>
-</div>
 
 <div class="dropdown">
     <button class="btn btn-secondary dropdown-toggle" type="button" data-toggle="dropdown" id="dropdownAddChannel" aria-haspopup="true" aria-expanded="false">

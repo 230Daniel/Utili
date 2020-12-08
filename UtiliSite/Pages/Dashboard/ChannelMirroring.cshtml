@@ -8,17 +8,13 @@
     Layout = "Shared/_Layout.cshtml";
     ViewData["Title"] = "Channel Mirroring - Utili Dashboard";
 
+    ViewData["heading"] = "Channel Mirroring";
+    ViewData["subheading"] = "Clone messages from one channel to another";
+    ViewData["detailed"] = "This does not clone existing messages, it clones new ones.\nCloned messages use the sender's avatar and username, but the user's role colour can not be copied.";
+
     List<ChannelMirroringRow> rows = (List<ChannelMirroringRow>)ViewData["rows"];
     List<RestTextChannel> channels = (List<RestTextChannel>)ViewData["channels"];
 }
-
-
-<div class="jumbotron jumbotron-fluid">
-    <div class="container">
-        <h1 class="display-4 page-heading">Channel Mirroring</h1>
-        <p class="lead">Uses webhooks to clone messages from one channel to another</p>
-    </div>
-</div>
 
 <div class="dropdown">
     <button class="btn btn-secondary dropdown-toggle" type="button" data-toggle="dropdown" id="dropdownAddChannel" aria-haspopup="true" aria-expanded="false">

@@ -233,7 +233,7 @@ namespace Database.Data
             List<MessageLogsMessageRow> messages = GetMessages(guildId, channelId).OrderBy(x => x.Timestamp).ToList();
             List<MessageLogsMessageRow> messagesToRemove = new List<MessageLogsMessageRow>();
 
-            messagesToRemove.AddRange(messages.Take(messages.Count - 100));
+            messagesToRemove.AddRange(messages.Take(messages.Count - 50));
 
             DeleteMessages(guildId, channelId, messagesToRemove.Select(x => x.MessageId).ToArray());
         }

@@ -33,15 +33,15 @@ namespace UtiliSite
             services.AddRazorPages(options =>
             {
                 options.Conventions.AddPageRoute("/dashboard", "dashboard/{guild?}");
-                options.Conventions.AddPageRoute("/dashboard/core", "dashboard/{guild?}/core");
                 options.Conventions.AddPageRoute("/dashboard/autopurge", "dashboard/{guild?}/autopurge");
-                options.Conventions.AddPageRoute("/dashboard/voicelink", "dashboard/{guild?}/voicelink");
-                options.Conventions.AddPageRoute("/dashboard/voiceroles", "dashboard/{guild?}/voiceroles");
-                options.Conventions.AddPageRoute("/dashboard/messagefilter", "dashboard/{guild?}/messagefilter");
-                options.Conventions.AddPageRoute("/dashboard/roles", "dashboard/{guild?}/roles");
+                options.Conventions.AddPageRoute("/dashboard/core", "dashboard/{guild?}/core");
                 options.Conventions.AddPageRoute("/dashboard/channelmirroring", "dashboard/{guild?}/channelmirroring");
                 options.Conventions.AddPageRoute("/dashboard/inactiverole", "dashboard/{guild?}/inactiverole");
+                options.Conventions.AddPageRoute("/dashboard/messagefilter", "dashboard/{guild?}/messagefilter");
                 options.Conventions.AddPageRoute("/dashboard/messagelogs", "dashboard/{guild?}/messagelogs");
+                options.Conventions.AddPageRoute("/dashboard/roles", "dashboard/{guild?}/roles");
+                options.Conventions.AddPageRoute("/dashboard/voicelink", "dashboard/{guild?}/voicelink");
+                options.Conventions.AddPageRoute("/dashboard/voiceroles", "dashboard/{guild?}/voiceroles");
             });
 
             services.AddAuthentication().AddCookie();
