@@ -36,7 +36,6 @@
                     <!option value="0" @InactiveRoleModel.GetIsRoleSelected(0, row.RoleId)>None</!option>
                     @foreach (RestRole role in guild.Roles.Where(x => !x.IsEveryone).OrderBy(x => -x.Position))
                     {
-                        Console.WriteLine($"{role.Id} {row.RoleId} {InactiveRoleModel.GetIsRoleSelected(role.Id, row.RoleId)}");
                         <!option value="@role.Id" @InactiveRoleModel.GetIsRoleSelected(role.Id, row.RoleId)>@role.Name</!option>
                     }
                 </select>

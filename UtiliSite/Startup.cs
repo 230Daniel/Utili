@@ -41,6 +41,7 @@ namespace UtiliSite
                 options.Conventions.AddPageRoute("/dashboard/roles", "dashboard/{guild?}/roles");
                 options.Conventions.AddPageRoute("/dashboard/channelmirroring", "dashboard/{guild?}/channelmirroring");
                 options.Conventions.AddPageRoute("/dashboard/inactiverole", "dashboard/{guild?}/inactiverole");
+                options.Conventions.AddPageRoute("/dashboard/messagelogs", "dashboard/{guild?}/messagelogs");
             });
 
             services.AddAuthentication().AddCookie();

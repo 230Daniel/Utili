@@ -205,7 +205,7 @@ img.user-icon {
 }
 
 #navbar{
-    transition: background-color 1s;
+    transition: background-color 500ms;
 }
 
 .notification {
