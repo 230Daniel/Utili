@@ -60,6 +60,11 @@ namespace UtiliSite
                     options.SaveTokens = true;
                     options.ClaimActions.MapAll();
                 });
+
+            services.AddResponseCompression(options =>
+            {
+                options.EnableForHttps = true;
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -71,12 +76,12 @@ namespace UtiliSite
             }
             else
             {
-                //app.UseExceptionHandler("/Error"); TODO: Enable safe error page
-                app.UseDeveloperExceptionPage();
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+                app.UseExceptionHandler("/Error");
+                // TODO: The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
 
+            app.UseResponseCompression();
             app.UseForwardedHeaders(new ForwardedHeadersOptions
             {
                 ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
@@ -84,7 +89,7 @@ namespace UtiliSite
 
             app.UseHttpsRedirection();
             app.UseStaticFiles();
-
+            
             app.UseRouting();
 
             app.UseAuthentication();
