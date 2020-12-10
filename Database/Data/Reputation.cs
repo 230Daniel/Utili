@@ -121,8 +121,8 @@ namespace Database.Data
             {
                 matchedRows.Add(new ReputationUserRow(
                     reader.GetUInt64(0),
-                    reader.GetUInt64(0),
-                    reader.GetInt64(1)));
+                    reader.GetUInt64(1),
+                    reader.GetInt64(2)));
             }
 
             reader.Close();

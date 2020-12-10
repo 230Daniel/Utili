@@ -130,8 +130,9 @@ namespace Database.Data
             {
                 matchedRows.Add(new RolesPersistantRolesRow(
                     reader.GetInt64(0),
-                    reader.GetUInt64(0),
-                    reader.GetString(2)));
+                    reader.GetUInt64(1),
+                    reader.GetUInt64(2),
+                    reader.GetString(3)));
             }
 
             reader.Close();
@@ -266,10 +267,11 @@ namespace Database.Data
             Id = 0;
         }
 
-        public RolesPersistantRolesRow(long id, ulong guildId, string roles)
+        public RolesPersistantRolesRow(long id, ulong guildId, ulong userId, string roles)
         {
             Id = id;
             GuildId = guildId;
+            UserId = userId;
 
             Roles = new List<ulong>();
 
