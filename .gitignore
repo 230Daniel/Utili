@@ -342,3 +342,7 @@ healthchecksdb
 # Files with passwords and that
 Config.json
 DatabaseCredentials.json
+
+# Log files
+Errors/
+Errors

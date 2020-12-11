@@ -1,7 +1,9 @@
 ﻿@page
+@using System.Diagnostics
 @model ErrorModel
 @{
     ViewData["Title"] = "Error";
+    string requestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier;
 }
 <style>
     body {
@@ -9,15 +11,13 @@
     }
 </style>
 
-<h1 class="text-danger">Error.</h1>
+<h1 class="text-danger" style="font-size: 120px;">:(</h1>
 <h2 class="text-danger">An error occurred while processing your request.</h2>
 
 <p style="margin-top: 16px; margin-bottom: 16px;">
-    Please report this error <a href="https://discord.gg/WsxqABZ" target="_blank">here</a> quoting the request ID below.
+    Please report this error <a href="https://discord.gg/WsxqABZ" target="_blank">here</a> quoting the request ID <code>@requestId</code>.
 </p>
-@if (Model.ShowRequestId)
-{
-    <p>
-        <strong>Request ID:</strong> <code>@Model.RequestId</code>
-    </p>
-}
+
+<button class="btn" style="padding: 0;" onclick="history.back(2);">
+    Return to site
+</button>
