@@ -234,7 +234,7 @@ namespace UtiliSite
             if (string.IsNullOrEmpty(url)) return "https://cdn.discordapp.com/embed/avatars/0.png";
 
             url = url.Remove(url.Length - 4);
-            url += ".png?size=1024";
+            url += ".png?size=256";
             return url;
         }
 

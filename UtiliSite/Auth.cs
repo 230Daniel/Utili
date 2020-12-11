@@ -27,14 +27,7 @@ namespace UtiliSite
 
             ulong userId = ulong.Parse(httpContext.User.Claims.First(x => x.Type == "id").Value);
             string token = httpContext.GetTokenAsync("Discord", "access_token").GetAwaiter().GetResult();
-
             DiscordRestClient client = GetClient(userId, token);
-
-            if (client == null)
-            {
-                httpContext.ChallengeAsync("Discord", authProperties).GetAwaiter().GetResult();
-                return new AuthDetails(false);
-            }
 
             AuthDetails auth = new AuthDetails(true, client, client.CurrentUser);
 
@@ -88,6 +81,19 @@ namespace UtiliSite
             }
 
             return auth;
+        }
+
+        public static AuthDetails GetOptionalGlobalAuthDetails(HttpContext httpContext)
+        {
+            if (!httpContext.User.Identity.IsAuthenticated)
+            {
+                return new AuthDetails(false);
+            }
+
+            ulong userId = ulong.Parse(httpContext.User.Claims.First(x => x.Type == "id").Value);
+            string token = httpContext.GetTokenAsync("Discord", "access_token").GetAwaiter().GetResult();
+            DiscordRestClient client = GetClient(userId, token);
+            return new AuthDetails(true, client, client.CurrentUser);
         }
     }
 

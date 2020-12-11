@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace UtiliSite.Pages
 {
-    public class LogOutModel : PageModel
+    public class SignOutModel : PageModel
     {
         public async Task<IActionResult> OnGet()
         {
