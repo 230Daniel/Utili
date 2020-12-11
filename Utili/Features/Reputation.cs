@@ -6,6 +6,7 @@ using Discord;
 using Discord.Commands;
 using Utili.Commands;
 using static Utili.MessageSender;
+using static Utili.Program;
 
 namespace Utili.Features
 {
@@ -126,6 +127,39 @@ namespace Utili.Features
         {
             Database.Data.Reputation.SetUserReputation(Context.Guild.Id, user.Id, amount);
             await SendSuccessAsync(Context.Channel, "Reputation set", $"Set {user.Mention}'s reputation to {amount}");
+        }
+
+        [Command("AddEmote"), Permission(Perm.ManageGuild), Cooldown(2)]
+        public async Task AddEmote(string emoteString, int value = 0)
+        {
+            IEmote emote = Helper.GetEmote(emoteString);
+            ReputationRow row = Database.Data.Reputation.GetRow(Context.Guild.Id);
+
+            if (row.Emotes.Any(x => x.Item1 == emote))
+            {
+                await SendFailureAsync(Context.Channel, "Error",
+                    "That emote is already added");
+                return;
+            }
+
+            try
+            {
+                await Context.Message.AddReactionAsync(emote);
+            }
+            catch
+            {
+                await SendFailureAsync(Context.Channel, "Error",
+                    $"An emote was not found matching {emoteString}");
+                return;
+            }
+
+            await Context.Message.RemoveReactionAsync(emote, _client.CurrentUser);
+
+            row.Emotes.Add((emote, value));
+            Database.Data.Reputation.SaveRow(row);
+
+            await SendSuccessAsync(Context.Channel, "Emote added", 
+                $"The {emote} emote was added successfully with value {value}\nYou can change its value or remove it on the dashboard");
         }
     }
 }

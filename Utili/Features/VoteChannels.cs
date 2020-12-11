@@ -231,5 +231,7 @@ namespace Utili.Features
             await SendInfoAsync(Context.Channel, "Emotes",
                 $"There are {row.Emotes.Count} emotes for {channel.Mention}\n\n{content}");
         }
+
+        // TODO: Consider aliases, or "emotes add, emotes remove, emotes list"
     }
 }

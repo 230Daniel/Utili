@@ -214,8 +214,8 @@ namespace Database.Data
             {
                 foreach (string emoteString in emotes.Split(","))
                 {
-                    int value = int.Parse(emoteString.Split("/").Last());
-                    if (Emote.TryParse(emoteString.Split("/").First(), out Emote emote))
+                    int value = int.Parse(emoteString.Split("///").Last());
+                    if (Emote.TryParse(emoteString.Split("///").First(), out Emote emote))
                     {
                         row.Emotes.Add((emote, value));
                     }

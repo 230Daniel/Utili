@@ -42,6 +42,7 @@ namespace UtiliSite
                 options.Conventions.AddPageRoute("/dashboard/inactiverole", "dashboard/{guild?}/inactiverole");
                 options.Conventions.AddPageRoute("/dashboard/messagefilter", "dashboard/{guild?}/messagefilter");
                 options.Conventions.AddPageRoute("/dashboard/messagelogs", "dashboard/{guild?}/messagelogs");
+                options.Conventions.AddPageRoute("/dashboard/reputation", "dashboard/{guild?}/reputation");
                 options.Conventions.AddPageRoute("/dashboard/roles", "dashboard/{guild?}/roles");
                 options.Conventions.AddPageRoute("/dashboard/voicelink", "dashboard/{guild?}/voicelink");
                 options.Conventions.AddPageRoute("/dashboard/voiceroles", "dashboard/{guild?}/voiceroles");
@@ -87,6 +88,8 @@ namespace UtiliSite
                 app.UseHsts();
             }
 
+            app.UseMiddleware<ErrorLoggingMiddleware>();
+
             app.UseResponseCompression();
             app.UseForwardedHeaders(new ForwardedHeadersOptions
             {
@@ -114,12 +117,6 @@ namespace UtiliSite
             {
                 endpoints.MapRazorPages();
             });
-
-            app.UseExceptionHandler(builder => builder.Run(async context =>
-            {
-                var exception = context.Features.Get<IExceptionHandlerFeature>().Error;
-                Console.WriteLine("error");
-            }));
 
             // Initialise the database without using cache.
             Database.Database.Initialise(false);

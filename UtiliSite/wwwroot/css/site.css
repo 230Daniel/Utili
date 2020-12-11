@@ -160,7 +160,7 @@ img.user-icon {
 .list-group-item {
     border-bottom-style: initial;
     border-top-style: initial;
-    
+    padding: 0.5rem 1.25rem;
 }
 .list-group-item.active {
     border-left-width: 2px;
