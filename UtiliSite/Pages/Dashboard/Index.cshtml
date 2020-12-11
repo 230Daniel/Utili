@@ -15,7 +15,7 @@
         @foreach (RestUserGuild guild in ViewData["guilds"] as IEnumerable)
         {
             <div class="col-sm">
-                <a href="@RedirectHelper.AddToUrl(ViewContext, guild.Id.ToString())">
+                <a href="@RedirectHelper.AddToUrl(ViewContext, $"{guild.Id}/core")">
                     <div class="card" style="width: 9rem;">
                         <img src="@DiscordModule.GetGuildIconUrl(guild)" class="card-img-top" alt="...">
                         <div class="card-body">

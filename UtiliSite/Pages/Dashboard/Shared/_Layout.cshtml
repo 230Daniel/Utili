@@ -90,6 +90,7 @@
                 <a href="@RedirectHelper.ChangeLastPage(ViewContext, "roles")" class="list-group-item list-group-item-action bg-dark @SidebarHelper.GetIsActive(ViewContext, "roles")">Roles</a>
                 <a href="@RedirectHelper.ChangeLastPage(ViewContext, "voicelink")" class="list-group-item list-group-item-action bg-dark @SidebarHelper.GetIsActive(ViewContext, "voicelink")">Voice Link</a>
                 <a href="@RedirectHelper.ChangeLastPage(ViewContext, "voiceroles")" class="list-group-item list-group-item-action bg-dark @SidebarHelper.GetIsActive(ViewContext, "voiceroles")">Voice Roles</a>
+                <a href="@RedirectHelper.ChangeLastPage(ViewContext, "votechannels")" class="list-group-item list-group-item-action bg-dark @SidebarHelper.GetIsActive(ViewContext, "votechannels")">Vote Channels</a>
             </div>
         </div>
         <div style="margin-top: 3vh; margin-left: 3vh; margin-right: 3vh; margin-bottom: 3vh; ">
@@ -102,14 +103,14 @@
                         string detailed = ViewData["detailed"].ToString();
                         if (!string.IsNullOrEmpty(detailed))
                         {
-                            detailed = $"<p>{detailed.Replace("\n", $"</p><p>")}</p>";
+                            detailed = $"<p>{detailed.Replace("\n", "</p><p>")}</p>";
                             <h2 class="info-hover text-light" data-toggle="tooltip" data-placement="right" data-html="true" title="@Html.Raw(detailed)">ⓘ</h2>
                         }
 
                     }
                 </div>
 
-                <p class="lead">@ViewData["subheading"]</p>
+                <p class="lead">@Html.Raw(ViewData["subheading"].ToString().Replace("\n", "</p><p class='lead lead-sm'>"))</p>
 
             </div>
 

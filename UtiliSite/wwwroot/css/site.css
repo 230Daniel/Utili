@@ -130,6 +130,12 @@ img.user-icon {
 }
 .lead {
     color: #e9ecef;
+    font-size: 1.5rem;
+}
+.lead-sm {
+    font-size: 1.2rem;
+    color: #b6b8bb;
+    margin-bottom: 6px;
 }
 .bg-dark {
     background-color: #292c2f !important;

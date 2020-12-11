@@ -45,6 +45,7 @@ namespace UtiliSite
                 options.Conventions.AddPageRoute("/dashboard/roles", "dashboard/{guild?}/roles");
                 options.Conventions.AddPageRoute("/dashboard/voicelink", "dashboard/{guild?}/voicelink");
                 options.Conventions.AddPageRoute("/dashboard/voiceroles", "dashboard/{guild?}/voiceroles");
+                options.Conventions.AddPageRoute("/dashboard/votechannels", "dashboard/{guild?}/votechannels");
             });
 
             services.AddAuthentication().AddCookie();
