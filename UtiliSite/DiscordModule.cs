@@ -217,17 +217,6 @@ namespace UtiliSite
                 .ModifyAsync(x => x.Nickname = nickname);
         }
 
-
-        public static string SanitiseIconUrl(string url)
-        {
-            if (url == null)
-            {
-                url = "https://cdn.discordapp.com/attachments/591310067979255808/763519555447291915/GreySquare.png";
-            }
-
-            return url;
-        }
-
         public static string GetGuildIconUrl(RestGuild guild)
         {
             string url = guild.IconUrl;

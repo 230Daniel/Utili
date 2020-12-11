@@ -275,3 +275,9 @@ body {
     margin: 6px;
     text-align: left;
 }
+
+.navbar-brand {
+    padding-top: 0;
+    padding-bottom: 0;
+    height: 32px;
+}

@@ -35,7 +35,10 @@
 
         <div class="container" id="main-nav">
 
-            <a class="navbar-brand" asp-area="" asp-page="/Index">Utili</a>
+            <a class="navbar-brand" asp-area="" asp-page="/Index">
+                <img src="https://file.utili.xyz/UtiliDark.png" width="30" height="30" alt="" class="d-inline-block align-top">
+                Utili
+            </a>
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                     aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
@@ -52,7 +55,7 @@
                 </div>
 
                 <div class="navbar-nav flex-grow-1" style="justify-content: flex-end;">
-                    <img src="@(user.GetAvatarUrl())" class="user-icon" alt="User Icon">
+                    <img src="@(user.GetAvatarUrl(size: 32))" class="user-icon" alt="User Icon">
                     <div class="dropdown noverticalpadding">
                         <a class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" id="userDropdown" aria-haspopup="true" aria-expanded="false" href="#">
                             @(user.Username)
