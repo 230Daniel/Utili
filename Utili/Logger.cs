@@ -31,7 +31,7 @@ namespace Utili
             string output = Buffer.ToString();
             Buffer.Clear();
 
-            File.AppendAllText($"{DateTime.Now:yyyy-MM-dd}.txt", output);
+            File.AppendAllText($"Logs/{DateTime.Now:yyyy-MM-dd}.txt", output);
         }
 
         public void Log(string module, string message, LogSeverity severity = LogSeverity.Dbug)

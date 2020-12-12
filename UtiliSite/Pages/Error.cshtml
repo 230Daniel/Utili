@@ -2,7 +2,7 @@
 @using System.Diagnostics
 @model ErrorModel
 @{
-    ViewData["Title"] = "Error";
+    ViewData["Title"] = "Error - ";
     string requestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier;
 }
 <style>

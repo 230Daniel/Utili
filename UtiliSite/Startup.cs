@@ -40,6 +40,7 @@ namespace UtiliSite
                 options.Conventions.AddPageRoute("/dashboard/core", "dashboard/{guild?}/core");
                 options.Conventions.AddPageRoute("/dashboard/channelmirroring", "dashboard/{guild?}/channelmirroring");
                 options.Conventions.AddPageRoute("/dashboard/inactiverole", "dashboard/{guild?}/inactiverole");
+                options.Conventions.AddPageRoute("/dashboard/joinmessage", "dashboard/{guild?}/joinmessage");
                 options.Conventions.AddPageRoute("/dashboard/messagefilter", "dashboard/{guild?}/messagefilter");
                 options.Conventions.AddPageRoute("/dashboard/messagelogs", "dashboard/{guild?}/messagelogs");
                 options.Conventions.AddPageRoute("/dashboard/reputation", "dashboard/{guild?}/reputation");

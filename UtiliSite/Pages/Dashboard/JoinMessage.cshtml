@@ -1,0 +1,136 @@
+﻿@page "{guild?}/joinmessage"
+@using Database.Data
+@using Discord.Rest
+@model UtiliSite.Pages.Dashboard.JoinMessageModel
+@{
+    if (ViewData["guild"] == null) { return; }
+
+    Layout = "Shared/_Layout.cshtml";
+    ViewData["Title"] = "Join Message - Utili Dashboard";
+
+    ViewData["heading"] = "Join Message";
+    ViewData["subheading"] = "Send a message when a user joins the server\njoinmessage preview";
+    ViewData["detailed"] = "Use \"\n\" to add a new line.\nUse %user% to @mention the user\nUse \"user\" as an image url to use the user's icon url.";
+
+    JoinMessageRow row = (JoinMessageRow)ViewData["row"];
+    RestGuild guild = (RestGuild)ViewData["guild"];
+    List<RestTextChannel> channels = (List<RestTextChannel>)ViewData["channels"];
+}
+
+<div class="pb-2">
+    <div class="card card-settings">
+        <form method="post">
+
+            <input type="text" class="form-control card-emphasis" style="" value="Settings" readonly>
+
+            <div class="input-group flex-nowrap">
+
+                <div class="input-group-prepend ">
+                    <span class="input-group-text">Enable</span>
+                </div>
+                <div class="input-group-text">
+                    <input type="checkbox" name="enabled" class="form-control checkbox" @VoiceLinkModel.GetIsChecked(row.Enabled)>
+                </div>
+
+            </div>
+
+            <div class="input-group flex-nowrap">
+
+                <div class="input-group-prepend">
+                    <span class="input-group-text">Mode</span>
+                </div>
+
+                <select class="custom-select card-component" name="direct">
+                    <!option value="false" @JoinMessageModel.GetIsBoolSelected(false, row.Direct)>Send in channel</!option>
+                    <!option value="true" @JoinMessageModel.GetIsBoolSelected(true, row.Direct)>Send in dm</!option>
+                </select>
+            </div>
+
+            <div class="input-group flex-nowrap">
+
+                <div class="input-group-prepend">
+                    <span class="input-group-text">Channel</span>
+                </div>
+
+                <select class="custom-select card-component" name="channel">
+                    <!option value="0" @JoinMessageModel.GetIsIdSelected(0, row.ChannelId)>None</!option>
+                    @foreach (RestTextChannel channel in channels.OrderBy(x => -x.Position))
+                    {
+                        <!option value="@channel.Id" @JoinMessageModel.GetIsIdSelected(channel.Id, row.ChannelId)>@channel.Name</!option>
+                    }
+                </select>
+            </div>
+
+            <div class="input-group flex-nowrap">
+                <div class="input-group-prepend">
+                    <span class="input-group-text">Title</span>
+                </div>
+                <input type="text" name="title" class="form-control card-component" value="@row.Title.Value">
+            </div>
+
+            <div class="input-group flex-nowrap">
+                <div class="input-group-prepend">
+                    <span class="input-group-text">Content</span>
+                </div>
+                <input type="text" name="content" class="form-control card-component" value="@row.Content.Value">
+            </div>
+
+            <div class="input-group flex-nowrap">
+                <div class="input-group-prepend">
+                    <span class="input-group-text">Footer</span>
+                </div>
+                <input type="text" name="footer" class="form-control card-component" value="@row.Footer.Value">
+            </div>
+
+            <div class="input-group flex-nowrap">
+                <div class="input-group-prepend">
+                    <span class="input-group-text">Plain Text</span>
+                </div>
+                <input type="text" name="text" class="form-control card-component" value="@row.Text.Value">
+            </div>
+
+            <div class="input-group flex-nowrap">
+                <div class="input-group-prepend">
+                    <span class="input-group-text">Image URL</span>
+                </div>
+                <input type="text" name="image" class="form-control card-component" value="@row.Image.Value">
+            </div>
+
+            <div class="input-group flex-nowrap">
+                <div class="input-group-prepend">
+                    <span class="input-group-text">Thumbnail URL</span>
+                </div>
+                <input type="text" name="thumbnail" class="form-control card-component" value="@row.Thumbnail.Value">
+            </div>
+
+            <div class="input-group flex-nowrap">
+                <div class="input-group-prepend">
+                    <span class="input-group-text">Icon URL</span>
+                </div>
+                <input type="text" name="icon" class="form-control card-component" value="@row.Icon.Value">
+            </div>
+
+            <div class="input-group flex-nowrap">
+                <div class="input-group-prepend">
+                    <span class="input-group-text">Colour (RGB)</span>
+                </div>
+                <input type="text" name="colour" class="form-control card-component" value="@row.Colour.RawValue">
+            </div>
+
+            <div class="input-group flex-nowrap">
+                <div class="input-group-prepend card-emphasis">
+                    <span class="input-group-text card-emphasis"></span>
+                </div>
+                <div class="input-group-prepend card-emphasis">
+                    <span class="input-group-text card-emphasis"></span>
+                </div>
+
+                <button type="submit" class="btn btn-save btn-width card-emphasis">Save</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="~/lib/jquery/dist/jquery.js"></script>
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="~/js/dashboard/submit.js" asp-append-version="true"></script>
