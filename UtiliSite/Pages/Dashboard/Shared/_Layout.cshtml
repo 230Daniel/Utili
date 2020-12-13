@@ -72,7 +72,7 @@
 
     </nav>
     <div class="d-flex bg-dark" id="wrapper">
-        <div class="border-right" id="sidebar-wrapper">
+        <div class="border-right dynamic-height">
             <div class="card" style="width:30vh; height:30vh; background-color: #292c2f; border: 0;">
                 <img src="@DiscordModule.GetGuildIconUrl(guild)" class="guild-icon card-img-top" alt="Server Icon">
                 <div class="card-body" style="padding-top:1vh;">
@@ -94,7 +94,7 @@
                 <a href="@RedirectHelper.ChangeLastPage(ViewContext, "votechannels")" class="list-group-item list-group-item-action bg-dark @SidebarHelper.GetIsActive(ViewContext, "votechannels")">Vote Channels</a>
             </div>
         </div>
-        <div style="margin-top: 3vh; margin-left: 3vh; margin-right: 3vh; margin-bottom: 3vh; ">
+        <div class="dynamic-height scroll-always" style="width:calc(100vw - 30vh); padding: 3vh;">
             
             <div class="jumbotron jumbotron-fluid">
 
@@ -105,6 +105,7 @@
                         if (!string.IsNullOrEmpty(detailed))
                         {
                             detailed = $"<p>{detailed.Replace("\n", "</p><p>")}</p>";
+                            detailed = detailed.Replace("~newline~", "\n");
                             <h2 class="info-hover text-light" data-toggle="tooltip" data-placement="right" data-html="true" title="@Html.Raw(detailed)">ⓘ</h2>
                         }
 

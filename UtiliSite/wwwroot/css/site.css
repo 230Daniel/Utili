@@ -93,9 +93,9 @@ body {
     transition: all 0.3s;
 }
 
-#sidebar-wrapper {
-    height: inherit;
-    min-height: calc(100vh - 57px);
+.dynamic-height {
+    overflow-y: scroll;
+    overflow-x: hidden;
 }
 
 img.guild-icon {
@@ -160,7 +160,7 @@ img.user-icon {
 .list-group-item {
     border-bottom-style: initial;
     border-top-style: initial;
-    padding: 0.5rem 1.25rem;
+    padding: 0.75rem 1.25rem;
 }
 .list-group-item.active {
     border-left-width: 2px;
@@ -234,6 +234,9 @@ img.user-icon {
 
 body {
     margin-bottom: 0;
+    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: hidden;
 }
 
 .scrollable {
@@ -246,8 +249,15 @@ body {
 
 *::-webkit-scrollbar {
     -webkit-appearance: none;
+    width: 0;
+}
+
+*:hover::-webkit-scrollbar {
     width: 5px;
-    background-color: white;
+}
+
+.scroll-always::-webkit-scrollbar {
+    width: 5px !important;
 }
 
 *::-webkit-scrollbar-thumb {
