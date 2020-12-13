@@ -21,7 +21,7 @@
     <script src="https://kit.fontawesome.com/4c685c9379.js" crossorigin="anonymous"></script>
 </head>
 <body onload="onLoad()">
-    <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light border-bottom box-shadow " id="navbar" style="background-color: #e9ecef;">
+    <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light" id="navbar" style="background-color: #e9ecef;">
         <div class="container" id="success" hidden>
             <span class="notification text-light">Changes saved</span>
         </div>
@@ -72,7 +72,7 @@
 
     </nav>
     <div class="d-flex bg-dark" id="wrapper">
-        <div class="border-right dynamic-height">
+        <div class="dynamic-height scroll-dark">
             <div class="card" style="width:30vh; height:30vh; background-color: #292c2f; border: 0;">
                 <img src="@DiscordModule.GetGuildIconUrl(guild)" class="guild-icon card-img-top" alt="Server Icon">
                 <div class="card-body" style="padding-top:1vh;">
@@ -80,21 +80,21 @@
                 </div>
             </div>
             <div class="list-group list-group-flush">
-                <a href="@RedirectHelper.ChangeLastPage(ViewContext, "core")" class="list-group-item list-group-item-action bg-dark @SidebarHelper.GetIsActive(ViewContext, "core")">Core</a>
-                <a href="@RedirectHelper.ChangeLastPage(ViewContext, "autopurge")" class="list-group-item list-group-item-action bg-dark @SidebarHelper.GetIsActive(ViewContext, "autopurge")">Autopurge</a>
-                <a href="@RedirectHelper.ChangeLastPage(ViewContext, "channelmirroring")" class="list-group-item list-group-item-action bg-dark @SidebarHelper.GetIsActive(ViewContext, "channelmirroring")">Channel Mirroring</a>
-                <a href="@RedirectHelper.ChangeLastPage(ViewContext, "inactiverole")" class="list-group-item list-group-item-action bg-dark @SidebarHelper.GetIsActive(ViewContext, "inactiverole")">Inactive Role</a>
-                <a href="@RedirectHelper.ChangeLastPage(ViewContext, "joinmessage")" class="list-group-item list-group-item-action bg-dark @SidebarHelper.GetIsActive(ViewContext, "joinmessage")">Join Message</a>
-                <a href="@RedirectHelper.ChangeLastPage(ViewContext, "messagefilter")" class="list-group-item list-group-item-action bg-dark @SidebarHelper.GetIsActive(ViewContext, "messagefilter")">Message Filter</a>
-                <a href="@RedirectHelper.ChangeLastPage(ViewContext, "messagelogs")" class="list-group-item list-group-item-action bg-dark @SidebarHelper.GetIsActive(ViewContext, "messagelogs")">Message Logs</a>
-                <a href="@RedirectHelper.ChangeLastPage(ViewContext, "reputation")" class="list-group-item list-group-item-action bg-dark @SidebarHelper.GetIsActive(ViewContext, "reputation")">Reputation</a>
-                <a href="@RedirectHelper.ChangeLastPage(ViewContext, "roles")" class="list-group-item list-group-item-action bg-dark @SidebarHelper.GetIsActive(ViewContext, "roles")">Roles</a>
-                <a href="@RedirectHelper.ChangeLastPage(ViewContext, "voicelink")" class="list-group-item list-group-item-action bg-dark @SidebarHelper.GetIsActive(ViewContext, "voicelink")">Voice Link</a>
-                <a href="@RedirectHelper.ChangeLastPage(ViewContext, "voiceroles")" class="list-group-item list-group-item-action bg-dark @SidebarHelper.GetIsActive(ViewContext, "voiceroles")">Voice Roles</a>
-                <a href="@RedirectHelper.ChangeLastPage(ViewContext, "votechannels")" class="list-group-item list-group-item-action bg-dark @SidebarHelper.GetIsActive(ViewContext, "votechannels")">Vote Channels</a>
+                <a href="@RedirectHelper.ChangeLastPage(ViewContext, "core")" class="list-group-item list-group-item-action @SidebarHelper.GetIsActive(ViewContext, "core")">Core</a>
+                <a href="@RedirectHelper.ChangeLastPage(ViewContext, "autopurge")" class="list-group-item list-group-item-action @SidebarHelper.GetIsActive(ViewContext, "autopurge")">Autopurge</a>
+                <a href="@RedirectHelper.ChangeLastPage(ViewContext, "channelmirroring")" class="list-group-item list-group-item-action @SidebarHelper.GetIsActive(ViewContext, "channelmirroring")">Channel Mirroring</a>
+                <a href="@RedirectHelper.ChangeLastPage(ViewContext, "inactiverole")" class="list-group-item list-group-item-action @SidebarHelper.GetIsActive(ViewContext, "inactiverole")">Inactive Role</a>
+                <a href="@RedirectHelper.ChangeLastPage(ViewContext, "joinmessage")" class="list-group-item list-group-item-action @SidebarHelper.GetIsActive(ViewContext, "joinmessage")">Join Message</a>
+                <a href="@RedirectHelper.ChangeLastPage(ViewContext, "messagefilter")" class="list-group-item list-group-item-action @SidebarHelper.GetIsActive(ViewContext, "messagefilter")">Message Filter</a>
+                <a href="@RedirectHelper.ChangeLastPage(ViewContext, "messagelogs")" class="list-group-item list-group-item-action @SidebarHelper.GetIsActive(ViewContext, "messagelogs")">Message Logs</a>
+                <a href="@RedirectHelper.ChangeLastPage(ViewContext, "reputation")" class="list-group-item list-group-item-action @SidebarHelper.GetIsActive(ViewContext, "reputation")">Reputation</a>
+                <a href="@RedirectHelper.ChangeLastPage(ViewContext, "roles")" class="list-group-item list-group-item-action @SidebarHelper.GetIsActive(ViewContext, "roles")">Roles</a>
+                <a href="@RedirectHelper.ChangeLastPage(ViewContext, "voicelink")" class="list-group-item list-group-item-action @SidebarHelper.GetIsActive(ViewContext, "voicelink")">Voice Link</a>
+                <a href="@RedirectHelper.ChangeLastPage(ViewContext, "voiceroles")" class="list-group-item list-group-item-action @SidebarHelper.GetIsActive(ViewContext, "voiceroles")">Voice Roles</a>
+                <a href="@RedirectHelper.ChangeLastPage(ViewContext, "votechannels")" class="list-group-item list-group-item-action @SidebarHelper.GetIsActive(ViewContext, "votechannels")">Vote Channels</a>
             </div>
         </div>
-        <div class="dynamic-height scroll-always" style="width:calc(100vw - 30vh); padding: 3vh;">
+        <div class="dynamic-height scroll-always scroll-dark" style="width:calc(100vw - 30vh); padding: 3vh;">
             
             <div class="jumbotron jumbotron-fluid">
 
@@ -105,7 +105,7 @@
                         if (!string.IsNullOrEmpty(detailed))
                         {
                             detailed = $"<p>{detailed.Replace("\n", "</p><p>")}</p>";
-                            detailed = detailed.Replace("~newline~", "\n");
+                            detailed = detailed.Replace("~newline~", "\\n");
                             <h2 class="info-hover text-light" data-toggle="tooltip" data-placement="right" data-html="true" title="@Html.Raw(detailed)">ⓘ</h2>
                         }
 

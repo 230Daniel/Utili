@@ -10,10 +10,9 @@
 
     ViewData["heading"] = "Join Message";
     ViewData["subheading"] = "Send a message when a user joins the server\njoinmessage preview";
-    ViewData["detailed"] = "Use '~newline~' to add a new line.\nUse '%user%' to @mention the user\nUse 'user' as an image url to use the user's icon url.";
+    ViewData["detailed"] = "Use ~newline~ to add a new line.\nUse %user% to @mention the user\nUse user as an image url to use the user's icon url.";
 
     JoinMessageRow row = (JoinMessageRow)ViewData["row"];
-    RestGuild guild = (RestGuild)ViewData["guild"];
     List<RestTextChannel> channels = (List<RestTextChannel>)ViewData["channels"];
 }
 
