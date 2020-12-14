@@ -9,7 +9,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"]Utili</title>
+    <title>@ViewData["Title"]</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" />
 </head>
@@ -19,7 +19,7 @@
             <div class="container" id="main-nav">
 
                 <a class="navbar-brand" asp-area="" asp-page="/Index">
-                    <img src="https://file.utili.xyz/UtiliDark.png" width="30" height="30" alt="" class="d-inline-block align-top">
+                    <img src="https://file.utili.xyz/UtiliSmall.png" width="30" height="30" alt="" class="d-inline-block align-top">
                     Utili
                 </a>
                 <button class="navbar-toggler" type="button" data-toggle="collapse" data-target=".navbar-collapse" aria-controls="navbarSupportedContent"
@@ -35,6 +35,9 @@
                         <div class="nav-item">
                             <a class="nav-link text-dark" href="@Url.Content("~/dashboard")">Dashboard</a>
                         </div>
+                        <div class="nav-item">
+                            <a class="nav-link text-dark" href="@Url.Content("~/premium")">Premium</a>
+                        </div>
                     </div>
 
                     @if (SidebarHelper.GetIsActive(ViewContext, "error") != "active")
@@ -44,7 +47,7 @@
                             {
                                 <img src="@(auth.User.GetAvatarUrl(size: 32))" class="user-icon" alt="User Icon">
                                 <div class="dropdown noverticalpadding">
-                                    <a class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" id="userDropdown" aria-haspopup="true" aria-expanded="false" href="#">
+                                    <a class="nav-link text-dark dropdown-toggle" data-toggle="dropdown" role="button" id="userDropdown" aria-haspopup="true" aria-expanded="false" href="#">
                                         @(auth.User.Username)
                                     </a>
                                     <div class="dropdown-menu dropdown-menu-right" aria-labelledby="userDropdown">
