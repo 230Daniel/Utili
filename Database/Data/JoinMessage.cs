@@ -165,6 +165,7 @@ namespace Database.Data
             Footer = EString.Empty;
             Content = EString.Empty;
             Text = EString.Empty;
+            Image = EString.Empty;
             Thumbnail = EString.Empty;
             Icon = EString.Empty;
             Colour = new Color(67, 181, 129);

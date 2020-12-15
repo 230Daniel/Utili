@@ -26,15 +26,15 @@
 
             <div class="input-group flex-nowrap">
                 <span class="input-group-prepend input-group-text card-component-2">Enable</span>
-                <div class="input-group-text">
-                    <input type="checkbox" name="enabled" class="form-control checkbox card-component-1" @VoiceLinkModel.GetIsChecked(row.Enabled)>
+                <div class="input-group-text card-component-1">
+                    <input type="checkbox" name="enabled" class="form-control checkbox" @VoiceLinkModel.GetIsChecked(row.Enabled)>
                 </div>
 
             </div>
             <div class="input-group flex-nowrap">
                 <span class="input-group-prepend input-group-text card-component-2">Delete Channels</span>
-                <div class="input-group-text">
-                    <input type="checkbox" name="deleteChannels" class="form-control checkbox card-component-1" @VoiceLinkModel.GetIsChecked(row.DeleteChannels)>
+                <div class="input-group-text card-component-1">
+                    <input type="checkbox" name="deleteChannels" class="form-control checkbox" @VoiceLinkModel.GetIsChecked(row.DeleteChannels)>
                 </div>
             </div>
             <div class="input-group flex-nowrap">
