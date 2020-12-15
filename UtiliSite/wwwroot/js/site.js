@@ -1,14 +1,14 @@
 ﻿
 function onLoad() {
-    sizeDynamicHeight();
+    sizeElements();
     $(".info-hover").tooltip();
 }
 
 $(window).resize(function() {
-    sizeDynamicHeight();
+    sizeElements();
 });
 
-function sizeDynamicHeight() {
+function sizeElements() {
     var vh = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
     var navHeight = $("#navbar").outerHeight();
 

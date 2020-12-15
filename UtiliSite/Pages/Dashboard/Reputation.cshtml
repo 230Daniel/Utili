@@ -22,16 +22,16 @@
     {
         <div class="pb-4">
             <div class="col-md-12">
-                <div class="card-settings">
+                <div class="card-container-3">
                     <form method="post">
 
                         <input type="hidden" name="emote" value="@emote.Item1.ToString()" />
 
                         <div class="input-group flex-nowrap">
 
-                            <input type="text" class="form-control card-emphasis" style="" value="@emote.Item1.Name" readonly>
+                            <input type="text" class="form-control card-strong card-component-3 card-heading" value="@emote.Item1.Name" readonly>
 
-                            <button type="submit" name="noajax" asp-page-handler="Remove" class="btn btn-remove card-emphasis">
+                            <button type="submit" name="noajax" asp-page-handler="Remove" class="btn card-button-x card-strong">
                                 <svg width="38px" height="38px" viewBox="0 0 16 16" class="bi bi-x" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                                     <path fill-rule="evenodd" d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z" />
                                 </svg>
@@ -40,23 +40,13 @@
                         </div>
 
                         <div class="input-group flex-nowrap">
-
-                            <div class="input-group-prepend">
-                                <span class="input-group-text">Value</span>
-                            </div>
-
-                            <input type="text" name="value" class="form-control card-component" value="@emote.Item2">
-
+                            <span class="input-group-prepend input-group-text card-component-1">Value</span>
+                            <input type="text" name="value" class="form-control card-component-2" value="@emote.Item2">
                         </div>
 
                         <div class="input-group flex-nowrap">
-                            <div class="input-group-prepend card-emphasis">
-                                <span class="input-group-text card-emphasis"></span>
-                            </div>
-                            <div class="input-group-prepend card-emphasis">
-                                <span class="input-group-text card-emphasis"></span>
-                            </div>
-                            <button type="submit" class="btn btn-save btn-width card-emphasis">Save</button>
+                            <span class="input-group-prepend input-group-text card-component-2 card-strong"></span>
+                            <button type="submit" class="btn  card-component-1 card-button card-strong">Save</button>
                         </div>
                     </form>
                 </div>

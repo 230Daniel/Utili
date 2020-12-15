@@ -40,30 +40,23 @@
     string channelName = channels.First(x => x.Id == row.ChannelId).Name;
     <div class="pb-4">
         <div class="col-md-12">
-            <div class="card card-settings">
+            <div class="card-container-3">
                 <form method="post">
 
                     <input type="hidden" name="channel" value="@row.ChannelId" />
 
                     <div class="input-group flex-nowrap">
-
-                        <input type="text" class="form-control card-emphasis" style="" value="@channelName" readonly>
-
-                        <button type="submit" name="noajax" asp-page-handler="Remove" class="btn btn-remove card-emphasis">
+                        <input type="text" class="form-control card-strong card-component-3 card-heading" value="@channelName" readonly>
+                        <button type="submit" name="noajax" asp-page-handler="Remove" class="btn card-button-x card-strong">
                             <svg width="38px" height="38px" viewBox="0 0 16 16" class="bi bi-x" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                                 <path fill-rule="evenodd" d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z" />
                             </svg>
                         </button>
-
                     </div>
 
                     <div class="input-group flex-nowrap">
-
-                        <div class="input-group-prepend">
-                            <span class="input-group-text">Mode</span>
-                        </div>
-
-                        <select class="custom-select card-component" name="mode">
+                        <span class="input-group-prepend input-group-text card-component-1">Mode</span>
+                        <select class="custom-select card-component-2" name="mode">
                             <!option value="0" @MessageFilterModel.GetIsSelected(0, row)>All Messages</!option>
                             <!option value="1" @MessageFilterModel.GetIsSelected(1, row)>Images</!option>
                             <!option value="2" @MessageFilterModel.GetIsSelected(2, row)>Videos</!option>
@@ -77,21 +70,13 @@
                     </div>
 
                     <div class="input-group flex-nowrap" @MessageFilterModel.GetIsComplexHidden(row)>
-                        <div class="input-group-prepend">
-                            <span class="input-group-text">RegEx</span>
-                        </div>
-                        <input type="text" name="complex" class="form-control card-component" value="@row.Complex.Value">
+                        <span class="input-group-prepend input-group-text card-component-1">RegEx</span>
+                        <input type="text" name="complex" class="form-control card-component-2" value="@row.Complex.Value">
                     </div>
 
                     <div class="input-group flex-nowrap">
-                        <div class="input-group-prepend card-emphasis">
-                            <span class="input-group-text card-emphasis"></span>
-                        </div>
-                        <div class="input-group-prepend card-emphasis">
-                            <span class="input-group-text card-emphasis"></span>
-                        </div>
-
-                        <button type="submit" class="btn btn-save btn-width card-emphasis">Save</button>
+                        <span class="input-group-prepend input-group-text card-component-2 card-strong"></span>
+                        <button type="submit" class="btn card-button card-button-x card-component-1 card-strong">Save</button>
                     </div>
                 </form>
             </div>

@@ -17,114 +17,80 @@
 }
 
 <div class="pb-2">
-    <div class="card card-settings">
+    <div class="card-container-7">
         <form method="post">
 
-            <input type="text" class="form-control card-emphasis" style="" value="Settings" readonly>
+            <input type="text" class="form-control card-strong card-component-7 card-heading" value="Settings" readonly>
 
             <div class="input-group flex-nowrap">
-
-                <div class="input-group-prepend ">
-                    <span class="input-group-text">Enable</span>
-                </div>
+                <span class="input-group-prepend card-component-2 input-group-text">Enabled</span>
                 <div class="input-group-text">
-                    <input type="checkbox" name="enabled" class="form-control checkbox" @VoiceLinkModel.GetIsChecked(row.Enabled)>
+                    <input type="checkbox" name="enabled" class="form-control card-component-5 checkbox" @VoiceLinkModel.GetIsChecked(row.Enabled)>
                 </div>
-
             </div>
 
             <div class="input-group flex-nowrap">
-
-                <div class="input-group-prepend">
-                    <span class="input-group-text">Mode</span>
-                </div>
-
-                <select class="custom-select card-component" name="direct">
+                <span class="input-group-prepend input-group-text card-component-2">Mode</span>
+                <select class="custom-select card-component-5" name="direct">
                     <!option value="false" @JoinMessageModel.GetIsBoolSelected(false, row.Direct)>Send in channel</!option>
                     <!option value="true" @JoinMessageModel.GetIsBoolSelected(true, row.Direct)>Send in dm</!option>
                 </select>
             </div>
 
             <div class="input-group flex-nowrap">
-
-                <div class="input-group-prepend">
-                    <span class="input-group-text">Channel</span>
-                </div>
-
-                <select class="custom-select card-component" name="channel">
-                    <!option value="0" @JoinMessageModel.GetIsIdSelected(0, row.ChannelId)>None</!option>
-                    @foreach (RestTextChannel channel in channels.OrderBy(x => -x.Position))
-                    {
-                        <!option value="@channel.Id" @JoinMessageModel.GetIsIdSelected(channel.Id, row.ChannelId)>@channel.Name</!option>
-                    }
+                <span class="input-group-prepend input-group-text card-component-2">Channel</span>
+                <select class="custom-select card-component-5" name="channel">
+                <!option value="0" @JoinMessageModel.GetIsIdSelected(0, row.ChannelId)>None</!option>
+                @foreach (RestTextChannel channel in channels.OrderBy(x => -x.Position))
+                {
+                    <!option value="@channel.Id" @JoinMessageModel.GetIsIdSelected(channel.Id, row.ChannelId)>@channel.Name</!option>
+                }
                 </select>
             </div>
 
             <div class="input-group flex-nowrap">
-                <div class="input-group-prepend">
-                    <span class="input-group-text">Title</span>
-                </div>
-                <input type="text" name="title" class="form-control card-component" value="@row.Title.Value">
+                <span class="input-group-prepend input-group-text card-component-2">Title</span>
+                <input type="text" name="title" class="form-control card-component-5" value="@row.Title.Value">
             </div>
 
             <div class="input-group flex-nowrap">
-                <div class="input-group-prepend">
-                    <span class="input-group-text">Content</span>
-                </div>
-                <input type="text" name="content" class="form-control card-component" value="@row.Content.Value">
+                <span class="input-group-prepend input-group-text card-component-2">Content</span>
+                <input type="text" name="content" class="form-control card-component-5" value="@row.Content.Value">
             </div>
 
             <div class="input-group flex-nowrap">
-                <div class="input-group-prepend">
-                    <span class="input-group-text">Footer</span>
-                </div>
-                <input type="text" name="footer" class="form-control card-component" value="@row.Footer.Value">
+                <span class="input-group-prepend input-group-text card-component-2">Footer</span>
+                <input type="text" name="footer" class="form-control card-component-5" value="@row.Footer.Value">
             </div>
 
             <div class="input-group flex-nowrap">
-                <div class="input-group-prepend">
-                    <span class="input-group-text">Plain Text</span>
-                </div>
-                <input type="text" name="text" class="form-control card-component" value="@row.Text.Value">
+                <span class="input-group-prepend input-group-text card-component-2">Plain Text</span>
+                <input type="text" name="text" class="form-control card-component-5" value="@row.Text.Value">
             </div>
 
             <div class="input-group flex-nowrap">
-                <div class="input-group-prepend">
-                    <span class="input-group-text">Image URL</span>
-                </div>
-                <input type="text" name="image" class="form-control card-component" value="@row.Image.Value">
+                <span class="input-group-prepend input-group-text card-component-2">Image URL</span>
+                <input type="text" name="image" class="form-control card-component-5" value="@row.Image.Value">
             </div>
 
             <div class="input-group flex-nowrap">
-                <div class="input-group-prepend">
-                    <span class="input-group-text">Thumbnail URL</span>
-                </div>
-                <input type="text" name="thumbnail" class="form-control card-component" value="@row.Thumbnail.Value">
+                <span class="input-group-prepend input-group-text card-component-2">Thumbnail URL</span>
+                <input type="text" name="thumbnail" class="form-control card-component-5" value="@row.Thumbnail.Value">
             </div>
 
             <div class="input-group flex-nowrap">
-                <div class="input-group-prepend">
-                    <span class="input-group-text">Icon URL</span>
-                </div>
-                <input type="text" name="icon" class="form-control card-component" value="@row.Icon.Value">
+                <span class="input-group-prepend input-group-text card-component-2">Icon URL</span>
+                <input type="text" name="icon" class="form-control card-component-5" value="@row.Icon.Value">
             </div>
 
             <div class="input-group flex-nowrap">
-                <div class="input-group-prepend">
-                    <span class="input-group-text">Colour (RGB)</span>
-                </div>
-                <input type="text" name="colour" class="form-control card-component" value="@row.Colour.RawValue">
+                <span class="input-group-prepend input-group-text card-component-2">Colour (RGB)</span>
+                <input type="text" name="colour" class="form-control card-component-5" value="@row.Colour.RawValue">
             </div>
 
             <div class="input-group flex-nowrap">
-                <div class="input-group-prepend card-emphasis">
-                    <span class="input-group-text card-emphasis"></span>
-                </div>
-                <div class="input-group-prepend card-emphasis">
-                    <span class="input-group-text card-emphasis"></span>
-                </div>
-
-                <button type="submit" class="btn btn-save btn-width card-emphasis">Save</button>
+                <span class="input-group-prepend input-group-text card-component-6 card-strong card-component-4"></span>
+                <button type="submit" class="btn card-button card-component-1 card-strong">Save</button>
             </div>
         </form>
     </div>
