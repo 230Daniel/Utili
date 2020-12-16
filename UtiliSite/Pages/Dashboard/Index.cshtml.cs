@@ -11,6 +11,7 @@ namespace UtiliSite.Pages.Dashboard
             if (HttpContext.Request.RouteValues.TryGetValue("guild", out _))
             {
                 Response.Redirect(RedirectHelper.AddToUrl(HttpContext.Request.Path, "core"));
+                ViewData["guilds"] = new List<RestGuild>(); // avoid null ref exception on page
                 return;
             }
 

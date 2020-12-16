@@ -52,7 +52,7 @@ namespace UtiliSite
                                                $"&redirect_uri=https%3A%2F%2F{httpContext.Request.Host.Value}%2Freturn";
 
                             ReturnModel.SaveRedirect(userId,
-                                $"https://{httpContext.Request.Host.Value}/dashboard/{guildId}");
+                                $"https://{httpContext.Request.Host.Value}/dashboard/{guildId}/core");
 
                             httpContext.Response.Redirect(inviteUrl);
                             auth.Authenticated = false;

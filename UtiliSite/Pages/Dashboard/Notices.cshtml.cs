@@ -36,7 +36,7 @@ namespace UtiliSite.Pages.Dashboard
             NoticesRow row = Notices.GetRow(auth.Guild.Id, channelId);
 
             row.Enabled = HttpContext.Request.Form["enabled"] == "on";
-
+            row.Delay = TimeSpan.Parse(HttpContext.Request.Form["delay"]);
             row.Title = EString.FromDecoded(HttpContext.Request.Form["title"]);
             row.Footer = EString.FromDecoded(HttpContext.Request.Form["footer"]);
             row.Content = EString.FromDecoded(HttpContext.Request.Form["content"]);
