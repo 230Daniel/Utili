@@ -1,7 +1,12 @@
 ﻿
 function onLoad() {
+
     sizeElements();
     $(".info-hover").tooltip();
+
+    $("div[href]").click(function(e){
+        window.location.href = this.getAttribute("href");
+    });
 }
 
 $(window).resize(function() {

@@ -120,6 +120,10 @@ img.user-icon {
     margin-bottom: 4px;
 }
 
+.cursor-pointer {
+    cursor: pointer !important;
+}
+
 /* Dashboard cards
 -------------------------------------------------- */
 
