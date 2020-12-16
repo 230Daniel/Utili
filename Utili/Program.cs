@@ -35,6 +35,8 @@ namespace Utili
 
         private static async Task Main()
         {
+            _config = Config.Load();
+
             _logger = new Logger
             {
                 LogSeverity = LogSeverity.Dbug
@@ -42,9 +44,17 @@ namespace Utili
             _logger.Initialise();
             _logger.LogEmpty(true);
 
-            _logger.Log("Main", "Downloading database cache", LogSeverity.Info);
-            Database.Database.Initialise(true);
-            _logger.Log("Main", "Database cache downloaded", LogSeverity.Info);
+            if (_config.CacheDatabase)
+            {
+                _logger.Log("Main", "Cacheing database...", LogSeverity.Info);
+                Database.Database.Initialise(true);
+                _logger.Log("Main", "Database cached", LogSeverity.Info);
+            }
+            else
+            {
+                _logger.Log("Main", "Not cacheing database", LogSeverity.Info);
+                Database.Database.Initialise(false);
+            }
 
             try
             {

@@ -6,6 +6,7 @@ namespace Utili
     internal class Config
     {
         public string Token { get; set; } = "";
+        public bool CacheDatabase { get; set; } = true;
         public int LowerShardId { get; set; } = 0;
         public int UpperShardId { get; set; } = 0;
         public string Domain { get; set; } = "";
