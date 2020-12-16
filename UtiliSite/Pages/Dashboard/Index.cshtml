@@ -3,7 +3,7 @@
 @using Discord.Rest
 @model UtiliSite.Pages.Dashboard.IndexModel
 @{
-    
+    ViewData["Title"] = "Dashboard - Utili";
 }
 
 <div class="text-center text-white">
@@ -13,8 +13,8 @@
     <div class="row justify-content-center">
         @foreach (RestUserGuild guild in ViewData["guilds"] as IEnumerable)
         {
-            <div class="pb-4">
-                <div class="col-md-12">
+            <div>
+                <div class="col-md-12" style="padding-bottom: 30px;">
                     <div class="card-container-2 cursor-pointer" href="@RedirectHelper.AddToUrl(ViewContext, $"{guild.Id}/core")">
                         <img src="@DiscordModule.GetGuildIconUrl(guild)" alt="@guild.Name" style="width: 200px; height: 200px; background: #202225">
                         <p class="form-control card-strong card-component-2 text-center" style="display: flex; justify-content: center; align-items: center; margin: 0;">@guild.Name</p>
