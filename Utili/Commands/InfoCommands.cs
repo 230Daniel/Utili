@@ -41,10 +41,8 @@ namespace Utili.Commands
         }
 
         [Command("Ping"), Alias("Lag")]
-        public async Task Ping([Remainder] string categoriesString = "discord database")
+        public async Task Ping()
         {
-            List<string> categories = categoriesString.ToLower().Split(" ").ToList();
-
             int largestLatency = 0;
             DiscordSocketClient shard = GetShardForGuild(Context.Guild);
 
@@ -58,10 +56,22 @@ namespace Utili.Commands
             if (database > largestLatency) largestLatency = database;
             double databaseQueries = Math.Round(_dbPingTest.QueriesPerSecond, 2);
 
+            double cpu = 0;
+            double memory = 0;
+            if (_pingTest.Memory != null)
+            {
+                cpu = _pingTest.CpuPercentage;
+                memory = Math.Round(_pingTest.Memory.UsedGigabytes / _pingTest.Memory.TotalGigabytes * 100);
+            }
+            
             PingStatus status = PingStatus.Excellent;
             if (largestLatency > 50) status = PingStatus.Normal;
             if (largestLatency > 250) status = PingStatus.Poor;
             if (largestLatency > 1000) status = PingStatus.Critical;
+
+            if(status < PingStatus.Normal && cpu > 25) status = PingStatus.Normal;
+            if(status < PingStatus.Poor && cpu > 50) status = PingStatus.Poor;
+            if(status < PingStatus.Critical && cpu > 90 || memory > 95) status = PingStatus.Critical;
 
             Color color = status switch
             {
@@ -77,10 +87,9 @@ namespace Utili.Commands
                 Color = color
             };
 
-            if (categories.Contains("discord")) embed.AddField("Discord", $"Gateway: {gateway}ms\nRest: {rest}ms", true);
-            if (categories.Contains("database")) embed.AddField("Database", $"Latency: {database}ms\nQueries: {databaseQueries}/s", true);
-            if (categories.Contains("guilds")) embed.AddField("Guilds", $"Cluster: {_client.Guilds.Count}\nShard: {shard.Guilds.Count}", true);
-            if (categories.Contains("users")) embed.AddField("Users", $"Total: {_client.Guilds.Sum(x => x.MemberCount)}\nDownloaded: {_client.Guilds.Sum(x => x.DownloadedMemberCount)}", true);
+            embed.AddField("Discord", $"Api: {gateway}ms\nRest: {rest}ms", true);
+            embed.AddField("Database", $"Latency: {database}ms\nQueries: {databaseQueries}/s", true);
+            embed.AddField("System", $"CPU: {cpu}%\nMem: {memory}%", true);
 
             await SendEmbedAsync(Context.Channel, embed.Build());
         }

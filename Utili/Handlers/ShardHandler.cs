@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using System.Timers;
+using Database.Data;
 using Discord;
 using Discord.WebSocket;
 using static Utili.Program;
@@ -27,6 +28,11 @@ namespace Utili.Handlers
                     _shardStatsUpdater = new Timer(10000);
                     _shardStatsUpdater.Elapsed += Sharding.Update;
                     _shardStatsUpdater.Start();
+
+                    _downloadNewRequiredUsersTimer?.Dispose();
+                    _downloadNewRequiredUsersTimer = new Timer(60000);
+                    _downloadNewRequiredUsersTimer.Elapsed += DownloadNewRequiredUsersTimer_Elapsed;
+                    _downloadNewRequiredUsersTimer.Start();
                 }
 
                 await DownloadRequiredUsersAsync(shard);
@@ -69,6 +75,35 @@ namespace Utili.Handlers
                     _logger.ReportError(logMessage.Source, logMessage.Exception, Helper.ConvertToLocalLogSeverity(logMessage.Severity));
                 }
             }
+        }
+
+        private static Timer _downloadNewRequiredUsersTimer;
+        private static void DownloadNewRequiredUsersTimer_Elapsed(object sender, ElapsedEventArgs e)
+        {
+            _ = DownloadNewRequiredUsersAsync();
+        }
+
+        private static bool _downloadingNewRequiredUsers = false;
+        private static async Task DownloadNewRequiredUsersAsync()
+        {
+            if(_downloadingNewRequiredUsers) return;
+            _downloadingNewRequiredUsers = true;
+            try
+            {
+                List<MiscRow> rows = Misc.GetRows(null, "RequiresUserDownload");
+                foreach(MiscRow row in rows)
+                {
+                    if(_client.Guilds.Any(x => x.Id == row.GuildId))
+                    {
+                        Misc.DeleteRow(row);
+                        SocketGuild guild = _client.GetGuild(row.GuildId);
+                        if (!guild.HasAllMembers) await guild.DownloadUsersAsync();
+                        await Task.Delay(5000);
+                    }
+                }
+            }
+            catch { }
+            _downloadingNewRequiredUsers = false;
         }
     }
 }

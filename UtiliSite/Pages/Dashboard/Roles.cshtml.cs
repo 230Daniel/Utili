@@ -34,8 +34,15 @@ namespace UtiliSite.Pages.Dashboard
             bool rolePersist = HttpContext.Request.Form["rolePersist"] == "on";
 
             RolesRow row = Roles.GetRow(auth.Guild.Id);
+            bool requireDownload = !row.RolePersist && rolePersist;
             row.RolePersist = rolePersist;
             Roles.SaveRow(row);
+
+            if (requireDownload)
+            {
+                MiscRow miscRow = new MiscRow(auth.Guild.Id, "RequiresUserDownload", "");
+                Misc.SaveRow(miscRow);
+            }
 
             HttpContext.Response.StatusCode = 200;
         }
