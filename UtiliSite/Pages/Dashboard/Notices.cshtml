@@ -9,8 +9,8 @@
     ViewData["Title"] = "Notices - Utili Dashboard";
 
     ViewData["heading"] = "Notices";
-    ViewData["subheading"] = "";
-    ViewData["detailed"] = "Use ~newline~ to add a new line.";
+    ViewData["subheading"] = "Keeps a message at the bottom of a channel";
+    ViewData["detailed"] = "Use ~newline~ to add a new line.\nThe delay determines how long to wait until the notice is re-sent.";
 
     List<NoticesRow> rows = (List<NoticesRow>) ViewData["rows"];
     List<RestTextChannel> channels = (List<RestTextChannel>)ViewData["channels"];

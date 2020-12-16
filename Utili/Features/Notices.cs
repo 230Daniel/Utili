@@ -94,7 +94,7 @@ namespace Utili.Features
             await sent.PinAsync();
         }
 
-        private static (string, Embed) GetNotice(NoticesRow row)
+        public static (string, Embed) GetNotice(NoticesRow row)
         {
             string iconUrl = row.Icon.Value;
             string thumbnailUrl = row.Thumbnail.Value;
@@ -138,6 +138,21 @@ namespace Utili.Features
             {
                 return false;
             }
+        }
+    }
+
+    [Group("Notice"), Alias("Notices")]
+    public class NoticeCommands : ModuleBase<SocketCommandContext>
+    {
+        [Command("Preview")]
+        public async Task Preview(ITextChannel channel = null)
+        {
+            if (channel == null) channel = Context.Channel as ITextChannel;
+
+            NoticesRow row = Database.Data.Notices.GetRow(Context.Guild.Id, channel.Id);
+            (string, Embed) notice = Notices.GetNotice(row);
+            
+            RestUserMessage sent = await MessageSender.SendEmbedAsync(Context.Channel, notice.Item2, notice.Item1);
         }
     }
 }

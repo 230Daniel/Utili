@@ -10,8 +10,6 @@ namespace Utili.Features
     {
         public static async Task UserJoined(SocketGuildUser user)
         {
-            // TODO: Test rolepersist, I think it's not working
-
             SocketGuild guild = user.Guild;
 
             RolesRow row = Database.Data.Roles.GetRow(guild.Id);
@@ -36,8 +34,12 @@ namespace Utili.Features
                     SocketRole role = guild.GetRole(roleId);
                     if (role != null && BotPermissions.CanManageRole(role))
                     {
-                        await user.AddRoleAsync(role);
-                        await Task.Delay(1000);
+                        try
+                        {
+                            await user.AddRoleAsync(role);
+                            await Task.Delay(1000);
+                        }
+                        catch { }
                     }
                 }
 
@@ -63,7 +65,7 @@ namespace Utili.Features
                 {
                     GuildId = user.Guild.Id,
                     UserId = user.Id,
-                    Roles = user.Roles.Select(x => x.Id).ToList()
+                    Roles = user.Roles.Where(x => !x.IsEveryone).Select(x => x.Id).ToList()
                 };
 
                 Database.Data.Roles.SavePersistRow(persistRow);

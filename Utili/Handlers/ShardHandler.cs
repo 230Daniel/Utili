@@ -27,12 +27,9 @@ namespace Utili.Handlers
                     _shardStatsUpdater = new Timer(10000);
                     _shardStatsUpdater.Elapsed += Sharding.Update;
                     _shardStatsUpdater.Start();
-
-                    StartDownloadTimer();
                 }
 
-                await DownloadRequiredUsersAsync(shard); 
-                // TODO: Ensure all relevant guilds are downloaded before continuing
+                await DownloadRequiredUsersAsync(shard);
 
                 await shard.SetGameAsync($"{_config.Domain} | .help");
 
@@ -40,44 +37,19 @@ namespace Utili.Handlers
             });
         }
 
-        private static Timer _downloadTimer;
-        private static void StartDownloadTimer()
+        private static async Task DownloadRequiredUsersAsync(DiscordSocketClient shard)
         {
-            _downloadTimer?.Dispose();
+            List<ulong> guildIds = new List<ulong>();
+            List<SocketGuild> guilds = shard.Guilds.ToList();
+            guilds = guilds.Where(x => x.DownloadedMemberCount < x.MemberCount).ToList();
 
-            _downloadTimer = new Timer(60000);
-            _downloadTimer.Elapsed += DownloadTimer_Elapsed;
-            _downloadTimer.Start();
-        }
+            // Role persist enabled
+            guildIds.AddRange(Database.Data.Roles.GetRows().Where(x => x.RolePersist).Select(x => x.GuildId));
 
-        private static void DownloadTimer_Elapsed(object sender, ElapsedEventArgs e)
-        {
-            _ = DownloadRequiredUsersAsync();
-        }
+            guilds = guilds.Where(x => guildIds.Contains(x.Id)).ToList();
+            await shard.DownloadUsersAsync(guilds);
 
-        public static async Task DownloadRequiredUsersAsync(DiscordSocketClient specificShard = null)
-        {
-            try
-            {
-                List<ulong> guildIds = new List<ulong>();
-                List<SocketGuild> guilds = new List<SocketGuild>();
-                if (specificShard != null) guilds = specificShard.Guilds.ToList();
-                else
-                {
-                    foreach (DiscordSocketClient shard in _client.Shards.Where(x => _readyShardIds.Contains(x.ShardId)))
-                    {
-                        guilds.AddRange(shard.Guilds);
-                    }
-                }
-                guilds = guilds.Where(x => x.DownloadedMemberCount < x.MemberCount).ToList();
-
-                // Role persist enabled
-                guildIds.AddRange(Database.Data.Roles.GetRows().Where(x => x.RolePersist).Select(x => x.GuildId));
-
-                guilds = guilds.Where(x => guildIds.Contains(x.Id)).ToList();
-                await _client.DownloadUsersAsync(guilds);
-            }
-            catch { }
+            _logger.Log($"Shard {shard.ShardId}", $"{guilds.Count(x => x.HasAllMembers)}/{guilds.Count} required guild user downloads completed", LogSeverity.Info);
         }
 
         public static async Task Log(LogMessage logMessage)
