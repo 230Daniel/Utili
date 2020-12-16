@@ -7,22 +7,19 @@
 }
 
 <div class="text-center text-white">
-    <h1 class="display-4">Server Select</h1>
-    <p>Select one of your servers to configure it</p>
+    <h1 class="display-4">Utili Dashboard</h1>
+    <p style="margin-bottom: 3vh;">Select a server to manage</p>
 
-    <div class="row">
-
+    <div class="row justify-content-center">
         @foreach (RestUserGuild guild in ViewData["guilds"] as IEnumerable)
         {
-            <div class="col-sm">
-                <a href="@RedirectHelper.AddToUrl(ViewContext, $"{guild.Id}/core")">
-                    <div class="card" style="width: 9rem;">
-                        <img src="@DiscordModule.GetGuildIconUrl(guild)" class="card-img-top" alt="...">
-                        <div class="card-body">
-                            <p class="card-text">@guild.Name</p>
-                        </div>
+            <div class="pb-4">
+                <div class="col-md-12">
+                    <div class="card-container-2 cursor-pointer" href="@RedirectHelper.AddToUrl(ViewContext, $"{guild.Id}/core")">
+                        <img src="@DiscordModule.GetGuildIconUrl(guild)" alt="@guild.Name" style="width: 200px; height: 200px; background: #202225">
+                        <p class="form-control card-strong card-component-2 text-center" style="display: flex; justify-content: center; align-items: center;">@guild.Name</p>
                     </div>
-                </a>
+                </div>
             </div>
         }
     </div>

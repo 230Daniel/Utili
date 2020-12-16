@@ -62,10 +62,9 @@ html {
 
 body {
     /* Margin bottom by footer height */
-    margin-bottom: 60px;
     min-height: 100vh;
     background-color: #292c2f !important;
-    overflow-x: scroll;
+    overflow: hidden;
 }
 
 .footer {
@@ -381,11 +380,6 @@ img.user-icon {
     padding-bottom: 20px;
 }
 
-body {
-    margin-bottom: 0;
-    overflow: visible;
-}
-
 .scrollable {
     height: auto;
     max-height: 200px;
@@ -456,4 +450,8 @@ body {
     padding-top: 0;
     padding-bottom: 0;
     height: 32px;
+}
+
+.container {
+    max-width: 75vw;
 }

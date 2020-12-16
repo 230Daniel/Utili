@@ -4,7 +4,7 @@ function onLoad() {
     sizeElements();
     $(".info-hover").tooltip();
 
-    $("div[href]").click(function(e){
+    $("div[href]").click(function(){
         window.location.href = this.getAttribute("href");
     });
 }
