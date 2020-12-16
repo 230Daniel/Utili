@@ -62,6 +62,12 @@ namespace Database.Data
             return matchedRows;
         }
 
+        public static NoticesRow GetRow(ulong guildId, ulong channelId)
+        {
+            List<NoticesRow> rows = GetRows(guildId, channelId);
+            return rows.Count > 0 ? rows.First() : new NoticesRow(guildId, channelId);
+        }
+
         public static void SaveRow(NoticesRow row)
         {
             MySqlCommand command;
@@ -209,9 +215,27 @@ namespace Database.Data
         public EString Icon { get; set; }
         public Color Colour { get; set; }
 
-        public NoticesRow()
+        private NoticesRow()
         {
             New = true;
+        }
+
+        public NoticesRow(ulong guildId, ulong channelId)
+        {
+            New = true;
+            GuildId = guildId;
+            ChannelId = channelId;
+            MessageId = 0;
+            Enabled = false;
+            Delay = TimeSpan.FromMinutes(5);
+            Title = EString.Empty;
+            Footer = EString.Empty;
+            Content = EString.Empty;
+            Text = EString.Empty;
+            Image = EString.Empty;
+            Thumbnail = EString.Empty;
+            Icon = EString.Empty;
+            Colour = new Color(67, 181, 129);
         }
 
         public static NoticesRow FromDatabase(ulong guildId, ulong channelId, ulong messageId, bool enabled, string delay, string title, string footer, string content, string text, string image, string thumbnail, string icon, uint colour)

@@ -96,7 +96,11 @@ body {
 
 .dynamic-height {
     overflow-y: scroll;
-    overflow-x: visible;
+    overflow-x: hidden;
+}
+
+.scroll-x {
+    overflow-x: scroll !important;
 }
 
 img.guild-icon {
@@ -375,7 +379,7 @@ img.user-icon {
 
 body {
     margin-bottom: 0;
-    overflow: hidden;
+    overflow: visible;
 }
 
 .scrollable {

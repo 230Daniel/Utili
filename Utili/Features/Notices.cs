@@ -29,9 +29,7 @@ namespace Utili.Features
 
         public static async Task MessageReceived(SocketCommandContext context, SocketMessage partialMessage)
         {
-            List<NoticesRow> rows = Database.Data.Notices.GetRows(context.Guild.Id, context.Channel.Id);
-            if(rows.Count == 0) return;
-            NoticesRow row = rows.First();
+            NoticesRow row = Database.Data.Notices.GetRow(context.Guild.Id, context.Channel.Id);
             if (!row.Enabled) return;
 
             lock (_requiredUpdates)

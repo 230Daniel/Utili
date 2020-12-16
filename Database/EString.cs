@@ -42,12 +42,16 @@ namespace Database
         
         private static string Encode(string input)
         {
+            if(input == null) return null;
+
             byte[] bytes = Encoding.UTF8.GetBytes(input);
             return Convert.ToBase64String(bytes);
         }
 
         private static string Decode(string input)
         {
+            if(input == null) return null;
+
             byte[] bytes = Convert.FromBase64String(input);
             return Encoding.UTF8.GetString(bytes);
         }
