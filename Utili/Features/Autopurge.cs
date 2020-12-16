@@ -124,12 +124,10 @@ namespace Utili.Features
 
             messages.RemoveAll(x => x.CreatedAt.UtcDateTime > earliestTime);
             messages.RemoveAll(x => x.CreatedAt.UtcDateTime < latestTime);
+            messages.RemoveAll(x => x.IsPinned);
 
-            if (mode == 1)
-            {
-                // Mode = 1 so only delete bot messages
-                messages.RemoveAll(x => !x.Author.IsBot);
-            }
+            // Only delete bot messages
+            if (mode == 1) messages.RemoveAll(x => !x.Author.IsBot);
 
             await channel.DeleteMessagesAsync(messages);
 
