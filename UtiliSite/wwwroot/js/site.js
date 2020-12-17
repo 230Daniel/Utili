@@ -34,8 +34,10 @@ function sizeElements() {
 
     if (window.mobileAndTabletCheck()) {
         $(".info-hover").attr("hidden", "");
+        $("#sidebarToggler").removeAttr("hidden", "");
     } else {
         $(".info-hover").removeAttr("hidden", "");
+        $("#sidebarToggler").attr("hidden", "");
     }
 }
 

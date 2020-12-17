@@ -110,6 +110,7 @@ img.user-icon {
 
 .cursor-pointer {
     cursor: pointer !important;
+    user-select: none;
 }
 
 /* Dashboard cards
@@ -452,6 +453,30 @@ img.user-icon {
     max-width: 75vw;
 }
 
-.sidebar-collapse {
+#sidebar {
     max-width: 30vh;
+}
+
+.right-angle-top-left {
+    position: absolute;
+    margin: 30px;
+    width: 0;
+    border-right: 50px solid transparent;
+    border-top: 50px solid #c2c5c5;
+    margin: 0;
+    background: none;
+    border-bottom: 0;
+    border-left: 0;
+    padding: 0;
+    outline: 0 !important;
+}
+
+.server-list-text {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0;
+    user-select: none;
+    overflow: hidden;
+    white-space: nowrap
 }

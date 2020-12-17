@@ -31,13 +31,8 @@
         <div class="container" id="error-failure" hidden>
             <span class="notification text-light">Something went wrong</span>
         </div>
-        
 
         <div class="container" id="main-nav">
-
-            <button class="navbar-toggler" type="button" aria-label="Toggle sidebar" onclick="toggleSidebar()">
-                <span class="navbar-toggler-icon"></span>
-            </button>
 
             <a class="navbar-brand" asp-area="" asp-page="/Index">
                 <img src="https://file.utili.xyz/UtiliSmall.png" width="30" height="30" alt="" class="d-inline-block align-top">
@@ -79,9 +74,9 @@
     </nav>
     <div class="d-flex bg-dark" id="wrapper">
         <div class="dynamic-height scroll-dark sidebar-collapse show" id="sidebar">
-            <div class="card" style="width:30vh; height:30vh; background-color: #292c2f; border: 0;">
+            <div class="card" style="width: 30vh; height: 30vh; background-color: #292c2f; border: 0;">
                 <img src="@DiscordModule.GetGuildIconUrl(guild)" class="guild-icon card-img-top" alt="Server Icon">
-                <div class="card-body" style="padding-top:1vh;">
+                <div class="card-body" style="padding-top: 1vh;">
                     <p class="card-text text-light text-center">@(guild.Name)</p>
                 </div>
             </div>
@@ -101,8 +96,8 @@
                 <div href="@RedirectHelper.ChangeLastPage(ViewContext, "votechannels")" class="cursor-pointer list-group-item list-group-item-action @SidebarHelper.GetIsActive(ViewContext, "votechannels")">Vote Channels</div>
             </div>
         </div>
-        <div class="dynamic-height scroll-always scroll-dark scroll-x" style="width:calc(100vw - 30vh); padding: 3vh;" id="main">
-            
+        <div class="dynamic-height scroll-always scroll-dark scroll-x" style="width: calc(100vw - 30vh); padding: 3vh;" id="main">
+
             <div class="jumbotron jumbotron-fluid">
 
                 <div>
@@ -127,7 +122,7 @@
 
         </div>
 
-
+        <button class="right-angle-top-left" onclick="toggleSidebar()" id="sidebarToggler" hidden></button>
     </div>
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
