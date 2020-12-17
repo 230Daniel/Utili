@@ -81,7 +81,9 @@ namespace UtiliSite
         {
             if (env.IsDevelopment())
             {
-                app.UseDeveloperExceptionPage();
+                //app.UseDeveloperExceptionPage();
+                app.UseExceptionHandler("/Error");
+                app.UseHsts();
             }
             else
             {
