@@ -35,8 +35,7 @@
 
         <div class="container" id="main-nav">
 
-            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target=".sidebar-collapse" aria-controls="navbarSupportedContent"
-                    aria-expanded="true" aria-label="Toggle sidebar">
+            <button class="navbar-toggler" type="button" aria-label="Toggle sidebar" onclick="toggleSidebar()">
                 <span class="navbar-toggler-icon"></span>
             </button>
 
@@ -79,7 +78,7 @@
         </div>
     </nav>
     <div class="d-flex bg-dark" id="wrapper">
-        <div class="dynamic-height scroll-dark sidebar-collapse show">
+        <div class="dynamic-height scroll-dark sidebar-collapse show" id="sidebar">
             <div class="card" style="width:30vh; height:30vh; background-color: #292c2f; border: 0;">
                 <img src="@DiscordModule.GetGuildIconUrl(guild)" class="guild-icon card-img-top" alt="Server Icon">
                 <div class="card-body" style="padding-top:1vh;">
@@ -102,7 +101,7 @@
                 <div href="@RedirectHelper.ChangeLastPage(ViewContext, "votechannels")" class="cursor-pointer list-group-item list-group-item-action @SidebarHelper.GetIsActive(ViewContext, "votechannels")">Vote Channels</div>
             </div>
         </div>
-        <div class="dynamic-height scroll-always scroll-dark scroll-x" style="width:calc(100vw - 30vh); padding: 3vh;">
+        <div class="dynamic-height scroll-always scroll-dark scroll-x" style="width:calc(100vw - 30vh); padding: 3vh;" id="main">
             
             <div class="jumbotron jumbotron-fluid">
 
