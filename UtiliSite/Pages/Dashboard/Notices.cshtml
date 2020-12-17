@@ -38,8 +38,8 @@
     @foreach (NoticesRow row in rows)
     {
         string channelName = channels.First(x => x.Id == row.ChannelId).Name;
-        <div class="pb-4">
-            <div class="col-md-12">
+        <div>
+            <div class="col-md-12" style="padding-bottom: 30px;">
                 <div class="card-container-7">
                     <form method="post">
 
