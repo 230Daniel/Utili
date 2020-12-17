@@ -43,20 +43,11 @@ namespace UtiliSite.Pages.Dashboard
 
             MessageFilterRow row = MessageFilter.GetRows(auth.Guild.Id, channelId).First();
 
-            int before = row.Mode;
-
             row.Mode = mode;
             row.Complex = EString.FromDecoded(complex);
             MessageFilter.SaveRow(row);
 
-            if ((before == 8 || mode == 8) && before != mode)
-            {
-                HttpContext.Response.StatusCode = 201;
-            }
-            else
-            {
-                HttpContext.Response.StatusCode = 200;
-            }
+            HttpContext.Response.StatusCode = 200;
         }
 
         public void OnPostAdd()

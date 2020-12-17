@@ -7,6 +7,16 @@ function onLoad() {
     $("div[href]").click(function(){
         window.location.href = this.getAttribute("href");
     });
+
+    $("select[hideshowcomplex]").on("change", function() {
+        var complex = this.parentNode.parentNode.childNodes[7];
+        if(this.value === "8"){
+            complex.removeAttribute("hidden");
+        }
+        else{
+            complex.setAttribute("hidden", "");
+        }
+    });
 }
 
 $(window).resize(function() {
