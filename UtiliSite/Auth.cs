@@ -1,10 +1,13 @@
-﻿using System.Linq;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Discord.Rest;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using UtiliSite.Pages;
 using static UtiliSite.DiscordModule;
+using Database.Data;
 
 namespace UtiliSite
 {
@@ -35,7 +38,7 @@ namespace UtiliSite
                 return new AuthDetails(false);
             }
 
-            AuthDetails auth = new AuthDetails(true, client, client.CurrentUser);
+            AuthDetails auth = new AuthDetails(true, client, client.CurrentUser, httpContext);
 
             if (httpContext.Request.RouteValues.TryGetValue("guild", out object guildValue))
             {
@@ -100,7 +103,7 @@ namespace UtiliSite
             string token = httpContext.GetTokenAsync("Discord", "access_token").GetAwaiter().GetResult();
             DiscordRestClient client = await GetClientAsync(userId, token);
 
-            return client == null ? new AuthDetails(false) : new AuthDetails(true, client, client.CurrentUser);
+            return client == null ? new AuthDetails(false) : new AuthDetails(true, client, client.CurrentUser, httpContext);
         }
     }
 
@@ -110,12 +113,23 @@ namespace UtiliSite
         public DiscordRestClient Client { get; set; }
         public RestSelfUser User { get; set; }
         public RestGuild Guild { get; set; }
+        public UserRow UserInfo { get; set; }
 
-        public AuthDetails(bool authenticated, DiscordRestClient client, RestSelfUser user)
+        private static List<string> _usedSessionIds = new List<string>();
+
+        public AuthDetails(bool authenticated, DiscordRestClient client, RestSelfUser user, HttpContext httpContext)
         {
             Authenticated = authenticated;
             Client = client;
             User = user;
+
+            UserRow userRow = Users.GetRow(user.Id);
+            DateTime previousVisit = userRow.LastVisit;
+            userRow.Email = user.Email;
+            userRow.LastVisit = DateTime.UtcNow;
+            Users.SaveRow(userRow);
+
+            if (previousVisit < DateTime.UtcNow - TimeSpan.FromHours(1)) Users.AddNewVisit(user.Id);
         }
 
         public AuthDetails(bool authenticated)
