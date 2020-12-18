@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text.RegularExpressions;
@@ -46,15 +47,17 @@ namespace Utili.Features
             {
                 await context.Message.DeleteAsync();
 
-                string deletionReason = $"Only messages {allowedTypes} are allowed in <#{context.Channel.Id}>";
+                if (!context.User.IsBot)
+                {
+                    string deletionReason = $"Only messages {allowedTypes} are allowed in <#{context.Channel.Id}>";
 
-                RestUserMessage sentMessage = await SendFailureAsync(context.Channel, "Message deleted", deletionReason, supportLink: false);
+                    RestUserMessage sentMessage = await SendFailureAsync(context.Channel, "Message deleted", deletionReason, supportLink: false);
 
-                await Task.Delay(5000);
+                    await Task.Delay(5000);
 
-                await sentMessage.DeleteAsync();
+                    await sentMessage.DeleteAsync();
+                }
             }
-
         }
 
         private static bool DoesMessageObeyRule(SocketCommandContext context, MessageFilterRow row, out string allowedTypes)
@@ -150,18 +153,25 @@ namespace Utili.Features
                 return true;
             }
 
-            Regex youtubeRegex = new Regex(@"^(http(s)??\:\/\/)?(www\.)?((youtube\.com\/watch\?v=)|(youtu.be\/))([a-zA-Z0-9\-_])+$");
+            Regex youtubeRegex = new Regex(@"youtu(?:\.be|be\.com)/(?:.*v(?:/|=)|(?:.*/)?)([a-zA-Z0-9-_]+)");
             foreach (string word in context.Message.Content.Split(' ', '\n'))
             {
-                if (youtubeRegex.IsMatch(word))
+                Match youtubeMatch = youtubeRegex.Match(word);
+                if (youtubeMatch.Success)
                 {
+                    string id = youtubeMatch.Groups[1].Value;
+
                     try
                     {
-                        WebRequest request = WebRequest.Create(word);
-                        request.Timeout = 2000;
-                        request.GetResponse();
+                        HttpWebRequest request =
+                            (HttpWebRequest) WebRequest.Create($"https://img.youtube.com/vi/{id}/mqdefault.jpg");
+                        HttpWebResponse response = (HttpWebResponse) request.GetResponse();
+                        Stream stream = response.GetResponseStream();
+                        System.Drawing.Image thumbnail = System.Drawing.Image.FromStream(stream);
+                        stream.Close();
 
-                        return true;
+                        // If the video doesn't exist then the thumbnail is a default 120x90 image.
+                        if(thumbnail.Width != 120 && thumbnail.Width != 90) return true;
                     }
                     catch { }
                 }

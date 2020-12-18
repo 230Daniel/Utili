@@ -48,7 +48,7 @@ namespace Utili.Features
             await context.Message.AddReactionsAsync(emotes.ToArray());
         }
 
-        public static bool DoesMessageObeyRule(SocketCommandContext context, VoteChannelsRow row)
+        private static bool DoesMessageObeyRule(SocketCommandContext context, VoteChannelsRow row)
         {
             return row.Mode switch
             {
