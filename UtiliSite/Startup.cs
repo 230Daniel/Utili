@@ -12,7 +12,6 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Joonasw.AspNetCore.SecurityHeaders;
 
 namespace UtiliSite
 {
@@ -29,6 +28,12 @@ namespace UtiliSite
         public void ConfigureServices(IServiceCollection services)
         {
             Main.InitialiseAsync().GetAwaiter().GetResult();
+
+            services.AddHsts(options =>
+            {
+                options.MaxAge = TimeSpan.FromDays(30);
+                options.IncludeSubDomains = false;
+            });
 
             services.AddRouting(options =>
             {
@@ -84,19 +89,19 @@ namespace UtiliSite
             if (env.IsDevelopment()) app.UseDeveloperExceptionPage();
             else
             {
+                app.UseHsts();
                 app.UseExceptionHandler("/Error");
-                app.UseHsts(new HstsOptions
-                {
-                    Duration = TimeSpan.FromDays(30),
-                    IncludeSubDomains = false,
-                    Preload = false
-                });
             }
             app.UseMiddleware<ErrorLoggingMiddleware>();
 
+            app.Use(async (context, next) =>
+            {
+                context.Response.Headers.Add("X-Frame-Options", "DENY");
+                context.Response.Headers.Add("X-Xss-Protection", "1; mode=block");
+                context.Response.Headers.Add("X-Content-Type-Options", "nosniff");
+                await next();
+            });
             
-            
-
             app.UseResponseCompression();
             app.UseForwardedHeaders(new ForwardedHeadersOptions
             {
@@ -123,14 +128,6 @@ namespace UtiliSite
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapRazorPages();
-            });
-
-            app.Use(async (context, next) =>
-            {
-                context.Response.Headers.Add("X-Frame-Options", "DENY");
-                context.Response.Headers.Add("X-Xss-Protection", "1; mode=block");
-                context.Response.Headers.Add("X-Content-Type-Options", "nosniff");
-                await next();
             });
         }
     }
