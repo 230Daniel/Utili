@@ -65,8 +65,9 @@ namespace Database.Data
             }
             else
             {
-                command = Sql.GetCommand("UPDATE Users SET Email = @Email, LastVisit = @LastVisit",
+                command = Sql.GetCommand("UPDATE Users SET Email = @Email, LastVisit = @LastVisit WHERE UserId = @UserId;",
                     new [] {
+                        ("UserId", row.UserId.ToString()),
                         ("Email", row.Email), 
                         ("LastVisit", Sql.ToSqlDateTime(row.LastVisit))});
 
