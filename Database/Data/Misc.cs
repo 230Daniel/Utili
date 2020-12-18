@@ -117,7 +117,7 @@ namespace Database.Data
 
         public static string GetPrefix(ulong guildId)
         {
-            string prefix = ".";
+            string prefix = "b.";
 
             List<MiscRow> rows = GetRows(guildId, "Prefix");
             if (rows.Count > 0) prefix = rows.First().Value.Value;
@@ -129,9 +129,9 @@ namespace Database.Data
         {
             MiscRow row = GetRow(guildId, "Prefix");
 
-            if(prefix == "." && row == null) return;
+            if(prefix == "b." && row == null) return;
 
-            if (prefix == ".")
+            if (prefix == "b.")
             {
                 DeleteRow(row);
                 return;

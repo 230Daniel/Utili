@@ -37,7 +37,7 @@ namespace Utili.Handlers
 
                 await DownloadRequiredUsersAsync(shard);
 
-                await shard.SetGameAsync($"{_config.Domain} | .help");
+                await shard.SetGameAsync($"{_config.Domain} | b.help");
 
                 _readyShardIds.Add(shard.ShardId);
             });
