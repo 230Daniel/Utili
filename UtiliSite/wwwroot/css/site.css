@@ -5,6 +5,8 @@ a.navbar-brand {
     white-space: normal;
     text-align: center;
     word-break: break-all;
+    align-items: center;
+    display: flex;
 }
 
 /* Provide sufficient contrast against white background */
@@ -89,15 +91,6 @@ body {
 
 .scroll-x {
     overflow-x: scroll !important;
-}
-
-img.guild-icon {
-    height: 20vh;
-    width: 20vh;
-    border-radius: 50% !important;
-    margin: auto;
-    margin-top: 3vh;
-    margin-bottom: 0vh;
 }
 
 img.user-icon {
@@ -454,7 +447,9 @@ img.user-icon {
 }
 
 #sidebar {
-    max-width: 30vh;
+    width: 225px;
+    min-width: 225px;
+    max-width: 225px;
 }
 
 .right-angle-top-left {
@@ -479,4 +474,59 @@ img.user-icon {
     user-select: none;
     overflow: hidden;
     white-space: nowrap
+}
+
+img.guild-icon {
+    height: 150px;
+    width: 150px;
+    border-radius: 50% !important;
+    margin-top: 3vh;
+    margin-bottom: 0;
+    margin-right: 37.5px;
+    margin-left: 37.5px;
+}
+
+#serverCard {
+    width: 225px;
+    height: 225px;
+    background-color: #292c2f;
+    border: 0;
+}
+
+.nav-item {
+    white-space: nowrap !important;
+}
+
+.navbar-brand {
+    white-space: nowrap !important;
+}
+
+.table {
+    color: #adb5bd;
+    border-bottom-style: hidden;
+}
+
+tr {
+    border-bottom-style: hidden;
+}
+
+tr a {
+    color: #03bfd6;
+}
+
+.accordion-header {
+    user-select: none;
+    cursor: pointer;
+    font-weight: 300;
+}
+.accordion {
+    margin-bottom: 25px;
+    margin-top: 10px;
+}
+
+#signoutDropdown {
+    padding-top: .5rem;
+    padding-bottom: 0.5rem;
+    background-color: #e9ecef;
+    border: 0;
 }

@@ -35,7 +35,7 @@
         <div class="container" id="main-nav">
 
             <a class="navbar-brand" asp-area="" asp-page="/Index">
-                <img src="https://file.utili.xyz/UtiliSmall.png" width="30" height="30" alt="" class="d-inline-block align-top">
+                <img src="https://file.utili.xyz/UtiliSmall.png" width="32" height="32" alt="Logo" class="d-inline-block align-top">
                 Utili
             </a>
 
@@ -45,7 +45,6 @@
             </button>
 
             <div class="navbar-collapse collapse d-sm-inline-flex">
-
                 <div class="navbar-nav flex-grow-1" style="justify-content: flex-start;">
                     <div class="nav-item">
                         <a class="nav-link text-dark" href="@Url.Content("~/commands")">Commands</a>
@@ -59,13 +58,13 @@
                 </div>
 
                 <div class="navbar-nav flex-grow-1" style="justify-content: flex-end;">
-                    <img src="@(user.GetAvatarUrl(size: 32))" class="user-icon" alt="User Icon">
                     <div class="dropdown noverticalpadding">
-                        <a class="nav-link text-dark dropdown-toggle" data-toggle="dropdown" role="button" id="userDropdown" aria-haspopup="true" aria-expanded="false" href="#">
+                        <a class="nav-link text-dark dropdown-toggle noverticalpadding" style="align-items: center; display: flex;" data-toggle="dropdown" role="button" id="userDropdown" aria-haspopup="true" aria-expanded="false" href="#">
+                            <img src="@(user.GetAvatarUrl(size: 32))" class="user-icon" alt="User Icon" style="margin-right: 8px;">
                             @(user.Username)
                         </a>
-                        <div class="dropdown-menu dropdown-menu-right" aria-labelledby="userDropdown">
-                            <a class="dropdown-item" asp-area="" asp-page="/signout">Sign out</a>
+                        <div class="dropdown-menu dropdown-menu-right noverticalpadding" style="border: 0;" aria-labelledby="userDropdown">
+                            <a class="dropdown-item" id="signoutDropdown" asp-area="" asp-page="/signout">Sign out</a>
                         </div>
                     </div>
                 </div>
@@ -74,7 +73,7 @@
     </nav>
     <div class="d-flex bg-dark" id="wrapper">
         <div class="dynamic-height scroll-dark sidebar-collapse show" id="sidebar">
-            <div class="card" style="width: 30vh; height: 30vh; background-color: #292c2f; border: 0;">
+            <div class="card" id="serverCard">
                 <img src="@DiscordModule.GetGuildIconUrl(guild)" class="guild-icon card-img-top" alt="Server Icon">
                 <div class="card-body" style="padding-top: 1vh;">
                     <p class="card-text text-light text-center">@(guild.Name)</p>

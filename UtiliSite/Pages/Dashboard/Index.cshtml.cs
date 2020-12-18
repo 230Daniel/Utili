@@ -17,8 +17,8 @@ namespace UtiliSite.Pages.Dashboard
 
             AuthDetails auth = Auth.GetAuthDetails(HttpContext, HttpContext.Request.Path);
             if(!auth.Authenticated) return;
+            ViewData["auth"] = auth;
 
-            ViewData["avatarUrl"] = auth.Client.CurrentUser.GetAvatarUrl();
             ViewData["guilds"] = DiscordModule.GetManageableGuilds(auth.Client);
         }
     }
