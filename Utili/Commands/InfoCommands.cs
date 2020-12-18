@@ -25,7 +25,7 @@ namespace Utili.Commands
                 $"[Website](https://{_config.Domain})\n",
                 $"[Dashboard](https://{_config.Domain}/dashboard)\n",
                 $"[Get Premium](https://{_config.Domain}/premium)\n",
-                "[Support & Requests Server](https://discord.gg/hCYWk9x)");
+                "[Support & Requests Server](https://discord.gg/wGTrDhCaEH)");
 
             await SendInfoAsync(Context.Channel, "Utili v2 Beta", about);
         }
