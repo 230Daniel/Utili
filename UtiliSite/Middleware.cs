@@ -26,7 +26,7 @@ namespace UtiliSite
             catch (Exception exception)
             {
                 string requestId = Activity.Current?.Id ?? context.TraceIdentifier;
-                SaveErrorMessage(requestId, exception.Message);
+                SaveErrorMessage(requestId, exception.GetType().ToString());
 
                 if (!Directory.Exists("Errors")) Directory.CreateDirectory("Errors");
                 string errorReportFilename = $"Errors/{requestId}.txt";
@@ -45,7 +45,7 @@ namespace UtiliSite
         }
 
         private static Dictionary<string, string> _errors = new Dictionary<string, string>();
-        public static void SaveErrorMessage(string requestId, string error)
+        private static void SaveErrorMessage(string requestId, string error)
         {
             _errors.TryAdd(requestId, error);
         }

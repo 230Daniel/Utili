@@ -57,7 +57,7 @@
                                     <img src="@(auth.User.GetAvatarUrl(size: 32))" class="user-icon" alt="User Icon" style="margin-right: 8px;">
                                     @(auth.User.Username)
                                 </a>
-                                <div class="dropdown-menu dropdown-menu-right noverticalpadding" style="border: 0;" aria-labelledby="userDropdown">
+                                <div class="dropdown-menu dropdown-menu-left noverticalpadding" style="border: 0;" aria-labelledby="userDropdown">
                                     <a class="dropdown-item" id="signoutDropdown" asp-area="" asp-page="/signout">Sign out</a>
                                 </div>
                             </div>

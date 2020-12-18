@@ -63,7 +63,7 @@
                             <img src="@(user.GetAvatarUrl(size: 32))" class="user-icon" alt="User Icon" style="margin-right: 8px;">
                             @(user.Username)
                         </a>
-                        <div class="dropdown-menu dropdown-menu-right noverticalpadding" style="border: 0;" aria-labelledby="userDropdown">
+                        <div class="dropdown-menu dropdown-menu-left noverticalpadding" style="border: 0;" aria-labelledby="userDropdown">
                             <a class="dropdown-item" id="signoutDropdown" asp-area="" asp-page="/signout">Sign out</a>
                         </div>
                     </div>
@@ -75,7 +75,7 @@
         <div class="dynamic-height scroll-dark sidebar-collapse show" id="sidebar">
             <div class="card" id="serverCard">
                 <img src="@DiscordModule.GetGuildIconUrl(guild)" class="guild-icon card-img-top" alt="Server Icon">
-                <div class="card-body" style="padding-top: 1vh;">
+                <div class="card-body" style="padding-top: 25px; padding-bottom: 20px;">
                     <p class="card-text text-light text-center">@(guild.Name)</p>
                 </div>
             </div>
