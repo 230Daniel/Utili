@@ -1,13 +1,5 @@
-﻿
-function onLoad(dashboard) {
-    sizeElements();
+﻿function onLoad() {
     hideElements();
-
-    if (dashboard) {
-        var scrollpos = sessionStorage.getItem("sidebarpos");
-        if (scrollpos) document.querySelector("#sidebar").scrollTop = scrollpos;
-    }
-    sessionStorage.removeItem("sidebarpos");
 
     $(".info-hover").tooltip();
 
@@ -24,6 +16,8 @@ function onLoad(dashboard) {
             complex.setAttribute("hidden", "");
         }
     });
+
+    sessionStorage.removeItem("sidebarpos");
 }
 
 $(window).resize(function() {
@@ -57,6 +51,13 @@ function hideElements() {
         $("#sidebarToggler").attr("hidden", "");
         toggleSidebar(true);
     }
+}
+
+function scrollSidebar() {
+    var scrollpos = sessionStorage.getItem("sidebarpos");
+    var sidebar = document.querySelector("#sidebar");
+    if(sidebar && scrollpos) sidebar.scrollTo(0, scrollpos);
+    sessionStorage.removeItem("sidebarpos");
 }
 
 function toggleSidebar(onlyShow) {

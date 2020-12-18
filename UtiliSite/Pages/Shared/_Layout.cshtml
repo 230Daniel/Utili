@@ -21,7 +21,7 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" />
 </head>
-<body onload="onLoad(false)">
+<body onload="onLoad()">
 <header>
     <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light" id="navbar" style="background-color: #e9ecef;">
         <div class="container" id="main-nav">
@@ -75,15 +75,19 @@
         </nav>
     </header>
 
-    <div class="scroll-always scroll-dark dynamic-height">
-        <div class="container" style="margin-top: 3vh;">
-            <main role="main" class="pb-3">
-                @RenderBody()
-            </main>
-        </div>
+<div class="scroll-always scroll-dark dynamic-height">
+    <div class="container" style="margin-top: 3vh;">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
     </div>
+</div>
+    
+<script type="text/javascript" >
+    sizeElements();
+</script>
 
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
 
