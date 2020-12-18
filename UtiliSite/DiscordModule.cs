@@ -165,7 +165,7 @@ namespace UtiliSite
 
             try
             {
-                List<RestVoiceChannel> channels = (await guild.GetVoiceChannelsAsync()).OrderBy(x => x.Position).ToList();
+                List<RestVoiceChannel> channels = (await guild.GetVoiceChannelsAsync()).ToList();
                 _cachedVoiceChannels.Add(guild.Id, channels);
                 return channels.OrderBy(x => x.Position).ToList();
             }

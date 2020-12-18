@@ -41,7 +41,7 @@
                 <span class="input-group-prepend input-group-text card-component-2">Channel</span>
                 <select class="custom-select card-component-5" name="channel">
                 <!option value="0" @JoinMessageModel.GetIsIdSelected(0, row.ChannelId)>None</!option>
-                @foreach (RestTextChannel channel in channels.OrderBy(x => -x.Position))
+                @foreach (RestTextChannel channel in channels)
                 {
                     <!option value="@channel.Id" @JoinMessageModel.GetIsIdSelected(channel.Id, row.ChannelId)>@channel.Name</!option>
                 }
@@ -95,7 +95,3 @@
         </form>
     </div>
 </div>
-
-<script src="~/lib/jquery/dist/jquery.js"></script>
-<script src="~/lib/jquery/dist/jquery.min.js"></script>
-<script src="~/js/dashboard/submit.js" asp-append-version="true"></script>
