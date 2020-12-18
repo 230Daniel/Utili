@@ -113,7 +113,6 @@ namespace UtiliSite
         public DiscordRestClient Client { get; set; }
         public RestSelfUser User { get; set; }
         public RestGuild Guild { get; set; }
-        public UserRow UserInfo { get; set; }
 
         private static List<string> _usedSessionIds = new List<string>();
 
@@ -123,13 +122,16 @@ namespace UtiliSite
             Client = client;
             User = user;
 
-            UserRow userRow = Users.GetRow(user.Id);
-            DateTime previousVisit = userRow.LastVisit;
-            userRow.Email = user.Email;
-            userRow.LastVisit = DateTime.UtcNow;
-            Users.SaveRow(userRow);
+            _ = Task.Run(() =>
+            {
+                UserRow userRow = Users.GetRow(user.Id);
+                DateTime previousVisit = userRow.LastVisit;
+                userRow.Email = user.Email;
+                userRow.LastVisit = DateTime.UtcNow;
+                Users.SaveRow(userRow);
 
-            if (previousVisit < DateTime.UtcNow - TimeSpan.FromHours(1)) Users.AddNewVisit(user.Id);
+                if (previousVisit < DateTime.UtcNow - TimeSpan.FromHours(1)) Users.AddNewVisit(user.Id);
+            });
         }
 
         public AuthDetails(bool authenticated)
