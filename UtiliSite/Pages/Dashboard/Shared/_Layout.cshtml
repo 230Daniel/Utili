@@ -136,7 +136,6 @@
         $("body").css("opacity", "1");
 
         window.onbeforeunload = function(e) {
-            console.log("unload");
             sessionStorage.setItem("sidebarpos", document.querySelector("#sidebar").scrollTop);
         };
     </script>

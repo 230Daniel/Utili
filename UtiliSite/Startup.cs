@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Joonasw.AspNetCore.SecurityHeaders;
 
 namespace UtiliSite
 {
@@ -80,17 +81,21 @@ namespace UtiliSite
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            if (env.IsDevelopment())
-            {
-                app.UseDeveloperExceptionPage();
-            }
+            if (env.IsDevelopment()) app.UseDeveloperExceptionPage();
             else
             {
                 app.UseExceptionHandler("/Error");
-                app.UseHsts();
+                app.UseHsts(new HstsOptions
+                {
+                    Duration = TimeSpan.FromDays(30),
+                    IncludeSubDomains = false,
+                    Preload = false
+                });
             }
-
             app.UseMiddleware<ErrorLoggingMiddleware>();
+
+            
+            
 
             app.UseResponseCompression();
             app.UseForwardedHeaders(new ForwardedHeadersOptions
@@ -118,6 +123,14 @@ namespace UtiliSite
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapRazorPages();
+            });
+
+            app.Use(async (context, next) =>
+            {
+                context.Response.Headers.Add("X-Frame-Options", "DENY");
+                context.Response.Headers.Add("X-Xss-Protection", "1; mode=block");
+                context.Response.Headers.Add("X-Content-Type-Options", "nosniff");
+                await next();
             });
         }
     }
