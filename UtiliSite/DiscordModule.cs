@@ -234,7 +234,7 @@ namespace UtiliSite
             {
                 Items.RemoveAll(x => x.Expiry < DateTime.Now);
 
-                List<DiscordCacheItem> matches = Items.Where(x => x.Key == key).ToList();
+                List<DiscordCacheItem> matches = Items.Where(x => x.Key.ToString() == key.ToString()).ToList();
 
                 if (Items.Count == 0)
                 {
