@@ -1,4 +1,5 @@
 ﻿function onLoad() {
+    sizeElements();
     hideElements();
 
     $(".info-hover").tooltip();
