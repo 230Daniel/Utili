@@ -1,8 +1,13 @@
 ﻿
-function onLoad() {
-
+function onLoad(dashboard) {
     sizeElements();
     hideElements();
+
+    if (dashboard) {
+        var scrollpos = sessionStorage.getItem("sidebarpos");
+        if (scrollpos) document.querySelector("#sidebar").scrollTop = scrollpos;
+    }
+    sessionStorage.removeItem("sidebarpos");
 
     $(".info-hover").tooltip();
 

@@ -20,7 +20,7 @@
         <link rel="stylesheet" href="~/css/site.css" />
         <script src="https://kit.fontawesome.com/4c685c9379.js" crossorigin="anonymous"></script>
     </head>
-    <body onload="onLoad()">
+    <body onload="onLoad(true)">
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light" id="navbar" style="background-color: #e9ecef;">
             <div class="container" id="success" hidden>
                 <span class="notification text-light">Changes saved</span>
@@ -129,6 +129,12 @@
         <script src="~/js/site.js" asp-append-version="true"></script>
         <script src="~/js/dashboard/submit.js" asp-append-version="true"></script>
         <script src="~/js/dashboard/notification.js" asp-append-version="true"></script>
+
+        <script type="text/javascript">
+            window.onbeforeunload = function(e) { 
+                sessionStorage.setItem("sidebarpos", document.querySelector("#sidebar").scrollTop);
+            };
+        </script>
 
         @RenderSection("Scripts", required: false)
 
