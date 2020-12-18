@@ -21,10 +21,10 @@ namespace UtiliSite.Pages.Dashboard
             List<VoiceRolesRow> rows = VoiceRoles.GetRows(auth.Guild.Id);
 
             List<RestVoiceChannel> addedChannels =
-                voiceChannels.Where(x => rows.Select(y => y.ChannelId).Contains(x.Id)).ToList();
+                voiceChannels.Where(x => rows.Any(y => y.ChannelId == x.Id)).OrderBy(x => x.Position).ToList();
 
             List<RestVoiceChannel> nonAddedChannels =
-                voiceChannels.Where(x => !addedChannels.Select(y => y.Id).Contains(x.Id)).ToList();
+                voiceChannels.Where(x => rows.All(y => y.ChannelId != x.Id)).OrderBy(x => x.Position).ToList();
 
             ViewData["addedChannels"] = addedChannels;
             ViewData["nonAddedChannels"] = nonAddedChannels;

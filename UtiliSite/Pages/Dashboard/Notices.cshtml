@@ -14,7 +14,7 @@
 
     List<NoticesRow> rows = (List<NoticesRow>) ViewData["rows"];
     List<RestTextChannel> channels = (List<RestTextChannel>)ViewData["channels"];
-    List<RestTextChannel> nonNoticeChannels = channels.Where(x => rows.All(y => y.ChannelId != x.Id)).ToList();
+    List<RestTextChannel> nonNoticeChannels = channels.Where(x => rows.All(y => y.ChannelId != x.Id)).OrderBy(x => x.Position).ToList();
 }
 
 <div class="dropdown">

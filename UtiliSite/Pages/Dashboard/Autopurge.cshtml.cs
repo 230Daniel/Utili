@@ -24,7 +24,7 @@ namespace UtiliSite.Pages.Dashboard
             List<RestTextChannel> channels = await DiscordModule.GetTextChannelsAsync(auth.Guild);
             ViewData["channels"] = channels;
 
-            List<RestTextChannel> nonAutopurgeChannels = channels.Where(x => autopurgeRows.Count(y => y.ChannelId == x.Id) == 0).ToList();
+            List<RestTextChannel> nonAutopurgeChannels = channels.Where(x => autopurgeRows.All(y => y.ChannelId != x.Id)).OrderBy(x => x.Position).ToList();
             ViewData["nonAutopurgeChannels"] = nonAutopurgeChannels;
 
             

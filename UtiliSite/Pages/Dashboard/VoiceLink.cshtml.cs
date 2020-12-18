@@ -21,8 +21,8 @@ namespace UtiliSite.Pages.Dashboard
             VoiceLinkRow row = VoiceLink.GetMetaRow(auth.Guild.Id);
 
             List<RestVoiceChannel> voiceChannels = await DiscordModule.GetVoiceChannelsAsync(auth.Guild);
-            List<RestVoiceChannel> excludedChannels = voiceChannels.Where(x => row.ExcludedChannels.Contains(x.Id)).ToList();
-            List<RestVoiceChannel> nonExcludedChannels = voiceChannels.Where(x => !row.ExcludedChannels.Contains(x.Id)).ToList();
+            List<RestVoiceChannel> excludedChannels = voiceChannels.Where(x => row.ExcludedChannels.Contains(x.Id)).OrderBy(x => x.Position).ToList();
+            List<RestVoiceChannel> nonExcludedChannels = voiceChannels.Where(x => !row.ExcludedChannels.Contains(x.Id)).OrderBy(x => x.Position).ToList();
 
             ViewData["excludedChannels"] = excludedChannels;
             ViewData["nonExcludedChannels"] = nonExcludedChannels;

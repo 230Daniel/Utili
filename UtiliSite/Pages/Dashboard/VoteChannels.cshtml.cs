@@ -25,7 +25,7 @@ namespace UtiliSite.Pages.Dashboard
             List<RestTextChannel> channels = await DiscordModule.GetTextChannelsAsync(auth.Guild);
             ViewData["channels"] = channels;
 
-            List<RestTextChannel> nonVoteChannels = channels.Where(x => rows.All(y => y.ChannelId != x.Id)).ToList();
+            List<RestTextChannel> nonVoteChannels = channels.Where(x => rows.All(y => y.ChannelId != x.Id)).OrderBy(x => x.Position).ToList();
             ViewData["nonVoteChannels"] = nonVoteChannels;
         }
 

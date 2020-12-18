@@ -23,7 +23,7 @@
     MessageLogsRow row = (MessageLogsRow)ViewData["row"];
     List<RestTextChannel> channels = (List<RestTextChannel>)ViewData["channels"];
     List<RestTextChannel> excludedChannels = channels.Where(x => row.ExcludedChannels.Contains(x.Id)).ToList();
-    List<RestTextChannel> nonExcludedChannels = channels.Where(x => !row.ExcludedChannels.Contains(x.Id)).ToList();
+    List<RestTextChannel> nonExcludedChannels = channels.Where(x => !row.ExcludedChannels.Contains(x.Id)).OrderBy(x => x.Position).ToList();
 }
 
 <div>

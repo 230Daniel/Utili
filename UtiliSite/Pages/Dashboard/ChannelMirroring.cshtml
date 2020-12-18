@@ -22,7 +22,7 @@
     </button>
     <div class="dropdown-menu dropdown-200-content noverticalpadding" aria-labelledby="dropdownAddChannel">
 
-        @foreach (RestTextChannel channel in channels.Where(x => rows.All(y => y.FromChannelId != x.Id)))
+        @foreach (RestTextChannel channel in channels.Where(x => rows.All(y => y.FromChannelId != x.Id)).OrderBy(x => x.Position))
         {
             <form method="post" name="noajax">
                 <input type="hidden" name="channelId" value="@channel.Id" />

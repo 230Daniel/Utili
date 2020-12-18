@@ -24,7 +24,7 @@ namespace UtiliSite.Pages.Dashboard
             List<RestTextChannel> channels = await DiscordModule.GetTextChannelsAsync(auth.Guild);
             ViewData["channels"] = channels;
 
-            List<RestTextChannel> nonMessageFilterChannels = channels.Where(x => messageFilterRows.Count(y => y.ChannelId == x.Id) == 0).ToList();
+            List<RestTextChannel> nonMessageFilterChannels = channels.Where(x => messageFilterRows.All(y => y.ChannelId != x.Id)).OrderBy(x => x.Position).ToList();
             ViewData["nonMessageFilterChannels"] = nonMessageFilterChannels;
         }
 
