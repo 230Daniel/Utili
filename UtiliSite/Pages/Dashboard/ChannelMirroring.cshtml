@@ -59,7 +59,7 @@
                         <div class="input-group flex-nowrap">
                             <span class="input-group-prepend input-group-text card-component-1">Mirror to</span>
                             <select class="custom-select card-component-2" name="toChannel">
-                                @foreach (RestTextChannel channel in channels.Where(x => x.Id != fromChannel.Id))
+                                @foreach (RestTextChannel channel in channels.Where(x => x.Id != fromChannel.Id).OrderBy(x => x.Position))
                                 {
                                     string selected = row.ToChannelId == channel.Id ? "selected" : "";
 
