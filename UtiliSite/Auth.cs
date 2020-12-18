@@ -125,10 +125,13 @@ namespace UtiliSite
                 UserRow userRow = Users.GetRow(user.Id);
                 DateTime previousVisit = userRow.LastVisit;
                 userRow.Email = user.Email;
-                userRow.LastVisit = DateTime.UtcNow;
-                Users.SaveRow(userRow);
-
-                if (previousVisit < DateTime.UtcNow - TimeSpan.FromHours(1)) Users.AddNewVisit(user.Id);
+                
+                if (previousVisit < DateTime.UtcNow - TimeSpan.FromMinutes(30))
+                {
+                    userRow.LastVisit = DateTime.UtcNow;
+                    Users.SaveRow(userRow);
+                    Users.AddNewVisit(user.Id);
+                }
             });
         }
 
