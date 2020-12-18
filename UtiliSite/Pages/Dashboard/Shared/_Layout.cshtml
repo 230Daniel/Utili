@@ -20,7 +20,7 @@
         <link rel="stylesheet" href="~/css/site.css" />
         <script src="https://kit.fontawesome.com/4c685c9379.js" crossorigin="anonymous"></script>
     </head>
-    <body onload="onLoad()" >
+    <body onload="onLoad()" style="opacity: 0;">
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light" id="navbar" style="background-color: #e9ecef;">
             <div class="container" id="success" hidden>
                 <span class="notification text-light">Changes saved</span>
@@ -133,6 +133,7 @@
     <script type="text/javascript" >
         sizeElements();
         scrollSidebar();
+        $("body").css("opacity", "1");
 
         window.onbeforeunload = function(e) {
             console.log("unload");
