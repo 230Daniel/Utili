@@ -44,7 +44,7 @@
         Give role on join...
     </button>
     <div class="dropdown-menu scrollable noverticalpadding" aria-labelledby="dropdownExcludeChannel">
-        @foreach (RestRole role in nonjoinRoles.OrderBy(x => -x.Position))
+        @foreach (RestRole role in nonjoinRoles.Where(x => !x.IsEveryone).OrderBy(x => -x.Position))
         {
             <form method="post" name="noajax">
                 <input type="hidden" name="role" value="@role.Id" />
@@ -54,7 +54,7 @@
     </div>
 </div>
 
-@foreach (RestRole role in joinRoles)
+@foreach (RestRole role in joinRoles.Where(x => !x.IsEveryone).OrderBy(x => -x.Position))
 {
     <form method="post">
 

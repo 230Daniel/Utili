@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc.RazorPages;
+﻿using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
 
 namespace UtiliSite.Pages
@@ -12,7 +13,7 @@ namespace UtiliSite.Pages
             _logger = logger;
         }
 
-        public void OnGet()
+        public async Task OnGet()
         {
         }
     }

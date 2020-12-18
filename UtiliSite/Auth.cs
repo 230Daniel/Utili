@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using System.Threading.Tasks;
 using Discord.Rest;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
@@ -9,7 +10,7 @@ namespace UtiliSite
 {
     public static class Auth
     {
-        public static AuthDetails GetAuthDetails(HttpContext httpContext, string redirectUrl, string unauthorisedGuildUrl = "/dashboard")
+        public static async Task<AuthDetails> GetAuthDetailsAsync(HttpContext httpContext, string redirectUrl, string unauthorisedGuildUrl = "/dashboard")
         {
             AuthenticationProperties authProperties = new AuthenticationProperties
             {
@@ -26,7 +27,7 @@ namespace UtiliSite
 
             ulong userId = ulong.Parse(httpContext.User.Claims.First(x => x.Type == "id").Value);
             string token = httpContext.GetTokenAsync("Discord", "access_token").GetAwaiter().GetResult();
-            DiscordRestClient client = GetClient(userId, token);
+            DiscordRestClient client = await GetClientAsync(userId, token);
 
             if (client == null)
             {
@@ -42,7 +43,7 @@ namespace UtiliSite
                 {
                     if (guildId > 0)
                     {
-                        RestGuild guild = GetGuildAsync(guildId).GetAwaiter().GetResult();
+                        RestGuild guild = await GetGuildAsync(guildId);
 
                         if (guild == null)
                         {
@@ -59,7 +60,7 @@ namespace UtiliSite
                             return auth;
                         }
 
-                        if (IsGuildManageable(client.CurrentUser.Id, guild.Id))
+                        if (await IsGuildManageableAsync(client.CurrentUser.Id, guild.Id))
                         {
                             auth.Guild = guild;
                         }
@@ -88,7 +89,7 @@ namespace UtiliSite
             return auth;
         }
 
-        public static AuthDetails GetOptionalGlobalAuthDetails(HttpContext httpContext)
+        public static async Task<AuthDetails> GetOptionalGlobalAuthDetailsAsync(HttpContext httpContext)
         {
             if (!httpContext.User.Identity.IsAuthenticated)
             {
@@ -97,7 +98,7 @@ namespace UtiliSite
 
             ulong userId = ulong.Parse(httpContext.User.Claims.First(x => x.Type == "id").Value);
             string token = httpContext.GetTokenAsync("Discord", "access_token").GetAwaiter().GetResult();
-            DiscordRestClient client = GetClient(userId, token);
+            DiscordRestClient client = await GetClientAsync(userId, token);
 
             return client == null ? new AuthDetails(false) : new AuthDetails(true, client, client.CurrentUser);
         }

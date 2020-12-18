@@ -9,7 +9,7 @@ namespace UtiliSite.Pages
 {
     public class PremiumModel : PageModel
     {
-        public void OnGet()
+        public async Task OnGet()
         {
         }
     }

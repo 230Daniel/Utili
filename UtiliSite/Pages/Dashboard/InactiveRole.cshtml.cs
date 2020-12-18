@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 using Database.Data;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
@@ -7,9 +8,9 @@ namespace UtiliSite.Pages.Dashboard
 {
     public class InactiveRoleModel : PageModel
     {
-        public void OnGet()
+        public async Task OnGet()
         {
-            AuthDetails auth = Auth.GetAuthDetails(HttpContext, HttpContext.Request.Path);
+            AuthDetails auth = await Auth.GetAuthDetailsAsync(HttpContext, HttpContext.Request.Path);
             if(!auth.Authenticated) return;
             ViewData["user"] = auth.User;
             ViewData["guild"] = auth.Guild;
@@ -20,9 +21,9 @@ namespace UtiliSite.Pages.Dashboard
             ViewData["row"] = row;
         }
 
-        public void OnPost()
+        public async Task OnPost()
         {
-            AuthDetails auth = Auth.GetAuthDetails(HttpContext, HttpContext.Request.Path);
+            AuthDetails auth = await Auth.GetAuthDetailsAsync(HttpContext, HttpContext.Request.Path);
 
             if (!auth.Authenticated)
             {

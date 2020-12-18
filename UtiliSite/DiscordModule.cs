@@ -14,15 +14,20 @@ namespace UtiliSite
 
         private static DiscordRestClient _client;
 
+        private static DiscordCache _cachedClients = new DiscordCache(600);
+        private static DiscordCache _cachedGuildLists = new DiscordCache(7.5);
+        private static DiscordCache _cachedGuildUsers = new DiscordCache(60);
+        private static DiscordCache _cachedGuilds = new DiscordCache(120);
+        private static DiscordCache _cachedTextChannels = new DiscordCache(15);
+        private static DiscordCache _cachedVoiceChannels = new DiscordCache(15);
+
         public static void Initialise()
         {
             _client = new DiscordRestClient();
             _client.LoginAsync(TokenType.Bot, _config.DiscordToken).GetAwaiter().GetResult();
         }
 
-
-        private static DiscordCache _cachedClients = new DiscordCache(600);
-        public static DiscordRestClient GetClient(ulong userId, string token = null)
+        public static async Task<DiscordRestClient> GetClientAsync(ulong userId, string token = null)
         {
             DiscordRestClient client;
 
@@ -41,7 +46,7 @@ namespace UtiliSite
                 }
 
                 client = new DiscordRestClient();
-                client.LoginAsync(TokenType.Bearer, token).GetAwaiter().GetResult();
+                await client.LoginAsync(TokenType.Bearer, token);
 
                 _cachedClients.Add(userId, client);
             }
@@ -53,9 +58,7 @@ namespace UtiliSite
             return client;
         }
 
-
-        private static DiscordCache _cachedGuildLists = new DiscordCache(7.5);
-        public static List<RestUserGuild> GetManageableGuilds(DiscordRestClient client)
+        public static async Task<List<RestUserGuild>> GetManageableGuildsAsync(DiscordRestClient client)
         {
             List<RestUserGuild> guilds;
 
@@ -65,14 +68,12 @@ namespace UtiliSite
                 return guilds;
             }
 
-            guilds = client.GetGuildSummariesAsync().FlattenAsync().GetAwaiter().GetResult().Where(x => x.Permissions.ManageGuild).ToList();
+            guilds = (await client.GetGuildSummariesAsync().FlattenAsync()).Where(x => x.Permissions.ManageGuild).ToList();
             _cachedGuildLists.Add(client.CurrentUser.Id, guilds);
             return guilds;
         }
 
-
-        private static DiscordCache _cachedGuildUsers = new DiscordCache(60);
-        public static RestGuildUser GetGuildUser(ulong userId, ulong guildId)
+        private static async Task<RestGuildUser> GetGuildUserAsync(ulong userId, ulong guildId)
         {
             if (_cachedGuildUsers.TryGet($"{guildId}/{userId}", out object guildUserObj))
             {
@@ -98,13 +99,18 @@ namespace UtiliSite
             }
         }
 
-        public static bool IsGuildManageable(ulong userId, ulong guildId)
+        public static async Task<bool> IsGuildManageableAsync(ulong userId, ulong guildId)
         {
-            RestGuildUser user = GetGuildUser(userId, guildId);
+            RestGuildUser user = await GetGuildUserAsync(userId, guildId);
             return user.GuildPermissions.ManageGuild;
         }
 
-        private static DiscordCache _cachedGuilds = new DiscordCache(60);
+        public static async Task<string> GetBotNicknameAsync(ulong guildId)
+        {
+            string nickname = (await GetGuildUserAsync(_client.CurrentUser.Id, guildId)).Nickname;
+            return string.IsNullOrEmpty(nickname) ? _client.CurrentUser.Username : nickname;
+        }
+
         public static async Task<RestGuild> GetGuildAsync(ulong guildId)
         {
             if (_cachedGuilds.TryGet(guildId, out object guildObj))
@@ -131,36 +137,6 @@ namespace UtiliSite
             }
         }
 
-
-        private static DiscordCache _cachedChannelNames = new DiscordCache(30);
-        public static async Task<string> GetChannelNameAsync(RestGuild guild, ulong channelId)
-        {
-            if (_cachedChannelNames.TryGet(channelId, out object channelNameObj))
-            {
-                if (channelNameObj == null)
-                {
-                    _cachedChannelNames.Remove(channelId);
-                }
-                else
-                {
-                    return (string) channelNameObj;
-                }
-            }
-
-            try
-            {
-                RestTextChannel channel = await guild.GetTextChannelAsync(channelId);
-                _cachedChannelNames.Add(channelId, channel.Name);
-                return channel.Name;
-            }
-            catch
-            {
-                return null;
-            }
-        }
-
-
-        private static DiscordCache _cachedTextChannels = new DiscordCache(15);
         public static async Task<List<RestTextChannel>> GetTextChannelsAsync(RestGuild guild)
         {
             if (_cachedTextChannels.TryGet(guild.Id, out object channelsObj))
@@ -170,9 +146,9 @@ namespace UtiliSite
 
             try
             {
-                List<RestTextChannel> channels = (await guild.GetTextChannelsAsync()).OrderBy(x => x.Position).ToList();
+                List<RestTextChannel> channels = (await guild.GetTextChannelsAsync()).ToList();
                 _cachedTextChannels.Add(guild.Id, channels);
-                return channels;
+                return channels.OrderBy(x => x.Position).ToList();
             }
             catch
             {
@@ -180,7 +156,6 @@ namespace UtiliSite
             }
         }
 
-        private static DiscordCache _cachedVoiceChannels = new DiscordCache(15);
         public static async Task<List<RestVoiceChannel>> GetVoiceChannelsAsync(RestGuild guild)
         {
             if (_cachedVoiceChannels.TryGet(guild.Id, out object channelsObj))
@@ -192,7 +167,7 @@ namespace UtiliSite
             {
                 List<RestVoiceChannel> channels = (await guild.GetVoiceChannelsAsync()).OrderBy(x => x.Position).ToList();
                 _cachedVoiceChannels.Add(guild.Id, channels);
-                return channels;
+                return channels.OrderBy(x => x.Position).ToList();
             }
             catch
             {
@@ -200,21 +175,10 @@ namespace UtiliSite
             }
         }
 
-        public static string GetNickname(RestGuild guild)
+        public static async Task SetNicknameAsync(ulong guildId, string nickname)
         {
-            string nickname = guild.GetUserAsync(_client.CurrentUser.Id).GetAwaiter().GetResult().Nickname;
-
-            if (string.IsNullOrEmpty(nickname))
-            {
-                nickname = _client.CurrentUser.Username;
-            }
-
-            return nickname;
-        }
-        public static void SetNickname(RestGuild guild, string nickname)
-        {
-            _ = guild.GetUserAsync(_client.CurrentUser.Id).GetAwaiter().GetResult()
-                .ModifyAsync(x => x.Nickname = nickname);
+            RestGuildUser user = await GetGuildUserAsync(_client.CurrentUser.Id, guildId);
+            await user.ModifyAsync(x => x.Nickname = nickname);
         }
 
         public static string GetGuildIconUrl(RestGuild guild)

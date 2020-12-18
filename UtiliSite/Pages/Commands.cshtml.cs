@@ -1,10 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc.RazorPages;
+﻿using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace UtiliSite.Pages
 {
     public class CommandsModel : PageModel
     {
-        public void OnGet()
+        public async Task OnGet()
         {
 
         }

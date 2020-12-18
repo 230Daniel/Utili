@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 using Database.Data;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Database;
@@ -8,21 +9,21 @@ namespace UtiliSite.Pages.Dashboard
 {
     public class JoinMessageModel : PageModel
     {
-        public void OnGet()
+        public async Task OnGet()
         {
-            AuthDetails auth = Auth.GetAuthDetails(HttpContext, HttpContext.Request.Path);
+            AuthDetails auth = await Auth.GetAuthDetailsAsync(HttpContext, HttpContext.Request.Path);
             if(!auth.Authenticated) return;
 
             ViewData["user"] = auth.User;
             ViewData["guild"] = auth.Guild;
             ViewData["premium"] = Database.Premium.IsPremium(auth.Guild.Id);
             ViewData["row"] = JoinMessage.GetRow(auth.Guild.Id);
-            ViewData["channels"] = DiscordModule.GetTextChannelsAsync(auth.Guild).GetAwaiter().GetResult();
+            ViewData["channels"] = await DiscordModule.GetTextChannelsAsync(auth.Guild);
         }
 
-        public void OnPost()
+        public async Task OnPost()
         {
-            AuthDetails auth = Auth.GetAuthDetails(HttpContext, HttpContext.Request.Path);
+            AuthDetails auth = await Auth.GetAuthDetailsAsync(HttpContext, HttpContext.Request.Path);
 
             if (!auth.Authenticated)
             {

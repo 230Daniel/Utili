@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Database.Data;
 using Discord.Rest;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -9,9 +10,9 @@ namespace UtiliSite.Pages.Dashboard
 {
     public class ChannelMirroringModel : PageModel
     {
-        public void OnGet()
+        public async Task OnGet()
         {
-            AuthDetails auth = Auth.GetAuthDetails(HttpContext, HttpContext.Request.Path);
+            AuthDetails auth = await Auth.GetAuthDetailsAsync(HttpContext, HttpContext.Request.Path);
             if(!auth.Authenticated) return;
             ViewData["user"] = auth.User;
             ViewData["guild"] = auth.Guild;
@@ -20,13 +21,13 @@ namespace UtiliSite.Pages.Dashboard
             List<ChannelMirroringRow> rows = ChannelMirroring.GetRows(auth.Guild.Id);
             ViewData["rows"] = rows;
 
-            List<RestTextChannel> channels = DiscordModule.GetTextChannelsAsync(auth.Guild).GetAwaiter().GetResult();
+            List<RestTextChannel> channels = await DiscordModule.GetTextChannelsAsync(auth.Guild);
             ViewData["channels"] = channels;
         }
 
-        public void OnPost()
+        public async Task OnPost()
         {
-            AuthDetails auth = Auth.GetAuthDetails(HttpContext, HttpContext.Request.Path);
+            AuthDetails auth = await Auth.GetAuthDetailsAsync(HttpContext, HttpContext.Request.Path);
 
             if (!auth.Authenticated)
             {
@@ -52,9 +53,9 @@ namespace UtiliSite.Pages.Dashboard
             HttpContext.Response.StatusCode = 200;
         }
 
-        public void OnPostAdd()
+        public async Task OnPostAdd()
         {
-            AuthDetails auth = Auth.GetAuthDetails(HttpContext, HttpContext.Request.Path);
+            AuthDetails auth = await Auth.GetAuthDetailsAsync(HttpContext, HttpContext.Request.Path);
 
             if (!auth.Authenticated)
             {
@@ -72,9 +73,9 @@ namespace UtiliSite.Pages.Dashboard
             HttpContext.Response.Redirect(HttpContext.Request.Path);
         }
 
-        public void OnPostRemove()
+        public async Task OnPostRemove()
         {
-            AuthDetails auth = Auth.GetAuthDetails(HttpContext, HttpContext.Request.Path);
+            AuthDetails auth = await Auth.GetAuthDetailsAsync(HttpContext, HttpContext.Request.Path);
 
             if (!auth.Authenticated)
             {

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Database;
 using Database.Data;
 using Discord.Rest;
@@ -9,9 +10,9 @@ namespace UtiliSite.Pages.Dashboard
 {
     public class VoiceLinkModel : PageModel
     {
-        public void OnGet()
+        public async Task OnGet()
         {
-            AuthDetails auth = Auth.GetAuthDetails(HttpContext, HttpContext.Request.Path);
+            AuthDetails auth = await Auth.GetAuthDetailsAsync(HttpContext, HttpContext.Request.Path);
             if(!auth.Authenticated) return;
             ViewData["user"] = auth.User;
             ViewData["guild"] = auth.Guild;
@@ -19,7 +20,7 @@ namespace UtiliSite.Pages.Dashboard
 
             VoiceLinkRow row = VoiceLink.GetMetaRow(auth.Guild.Id);
 
-            List<RestVoiceChannel> voiceChannels = DiscordModule.GetVoiceChannelsAsync(auth.Guild).GetAwaiter().GetResult();
+            List<RestVoiceChannel> voiceChannels = await DiscordModule.GetVoiceChannelsAsync(auth.Guild);
             List<RestVoiceChannel> excludedChannels = voiceChannels.Where(x => row.ExcludedChannels.Contains(x.Id)).ToList();
             List<RestVoiceChannel> nonExcludedChannels = voiceChannels.Where(x => !row.ExcludedChannels.Contains(x.Id)).ToList();
 
@@ -28,9 +29,9 @@ namespace UtiliSite.Pages.Dashboard
             ViewData["row"] = row;
         }
 
-        public void OnPost()
+        public async Task OnPost()
         {
-            AuthDetails auth = Auth.GetAuthDetails(HttpContext, HttpContext.Request.Path);
+            AuthDetails auth = await Auth.GetAuthDetailsAsync(HttpContext, HttpContext.Request.Path);
 
             if (!auth.Authenticated)
             {
@@ -51,9 +52,9 @@ namespace UtiliSite.Pages.Dashboard
             HttpContext.Response.StatusCode = 200;
         }
 
-        public void OnPostExclude()
+        public async Task OnPostExclude()
         {
-            AuthDetails auth = Auth.GetAuthDetails(HttpContext, HttpContext.Request.Path);
+            AuthDetails auth = await Auth.GetAuthDetailsAsync(HttpContext, HttpContext.Request.Path);
 
             if (!auth.Authenticated)
             {
@@ -74,9 +75,9 @@ namespace UtiliSite.Pages.Dashboard
             HttpContext.Response.Redirect(HttpContext.Request.Path);
         }
 
-        public void OnPostRemove()
+        public async Task OnPostRemove()
         {
-            AuthDetails auth = Auth.GetAuthDetails(HttpContext, HttpContext.Request.Path);
+            AuthDetails auth = await Auth.GetAuthDetailsAsync(HttpContext, HttpContext.Request.Path);
 
             if (!auth.Authenticated)
             {

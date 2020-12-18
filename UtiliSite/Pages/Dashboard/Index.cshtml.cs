@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Discord.Rest;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
@@ -6,7 +7,7 @@ namespace UtiliSite.Pages.Dashboard
 {
     public class IndexModel : PageModel
     {
-        public void OnGet()
+        public async Task OnGet()
         {
             ViewData["guilds"] = new List<RestGuild>(); // avoid null ref exception on page
 
@@ -16,11 +17,11 @@ namespace UtiliSite.Pages.Dashboard
                 return;
             }
 
-            AuthDetails auth = Auth.GetAuthDetails(HttpContext, HttpContext.Request.Path);
+            AuthDetails auth = await Auth.GetAuthDetailsAsync(HttpContext, HttpContext.Request.Path);
             if(!auth.Authenticated) return;
             ViewData["auth"] = auth;
 
-            ViewData["guilds"] = DiscordModule.GetManageableGuilds(auth.Client);
+            ViewData["guilds"] = await DiscordModule.GetManageableGuildsAsync(auth.Client);
         }
     }
 }

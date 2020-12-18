@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using Database.Data;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
@@ -5,21 +6,21 @@ namespace UtiliSite.Pages.Dashboard
 {
     public class CoreModel : PageModel
     {
-        public void OnGet()
+        public async Task OnGet()
         {
-            AuthDetails auth = Auth.GetAuthDetails(HttpContext, HttpContext.Request.Path);
+            AuthDetails auth = await Auth.GetAuthDetailsAsync(HttpContext, HttpContext.Request.Path);
             if(!auth.Authenticated) return;
             ViewData["user"] = auth.User;
             ViewData["guild"] = auth.Guild;
             ViewData["premium"] = Database.Premium.IsPremium(auth.Guild.Id);
 
             ViewData["prefix"] = Misc.GetPrefix(auth.Guild.Id);
-            ViewData["nickname"] = DiscordModule.GetNickname(auth.Guild);
+            ViewData["nickname"] = await DiscordModule.GetBotNicknameAsync(auth.Guild.Id);
         }
 
-        public void OnPost()
+        public async Task OnPost()
         {
-            AuthDetails auth = Auth.GetAuthDetails(HttpContext, HttpContext.Request.Path);
+            AuthDetails auth = await Auth.GetAuthDetailsAsync(HttpContext, HttpContext.Request.Path);
 
             if (!auth.Authenticated)
             {
@@ -37,7 +38,7 @@ namespace UtiliSite.Pages.Dashboard
 
             if (nickname != (string) ViewData["nickname"])
             {
-                DiscordModule.SetNickname(auth.Guild, nickname);
+                await DiscordModule.SetNicknameAsync(auth.Guild.Id, nickname);
             }
 
             HttpContext.Response.StatusCode = 200;

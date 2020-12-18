@@ -1,4 +1,5 @@
 using System.Linq;
+using System.Threading.Tasks;
 using Database.Data;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
@@ -6,9 +7,9 @@ namespace UtiliSite.Pages.Dashboard
 {
     public class RolesModel : PageModel
     {
-        public void OnGet()
+        public async Task OnGet()
         {
-            AuthDetails auth = Auth.GetAuthDetails(HttpContext, HttpContext.Request.Path);
+            AuthDetails auth = await Auth.GetAuthDetailsAsync(HttpContext, HttpContext.Request.Path);
             if(!auth.Authenticated) return;
             ViewData["user"] = auth.User;
             ViewData["guild"] = auth.Guild;
@@ -21,9 +22,9 @@ namespace UtiliSite.Pages.Dashboard
             ViewData["row"] = row;
         }
 
-        public void OnPost()
+        public async Task OnPost()
         {
-            AuthDetails auth = Auth.GetAuthDetails(HttpContext, HttpContext.Request.Path);
+            AuthDetails auth = await Auth.GetAuthDetailsAsync(HttpContext, HttpContext.Request.Path);
 
             if (!auth.Authenticated)
             {
@@ -47,9 +48,9 @@ namespace UtiliSite.Pages.Dashboard
             HttpContext.Response.StatusCode = 200;
         }
 
-        public void OnPostAddJoinRole()
+        public async Task OnPostAddJoinRole()
         {
-            AuthDetails auth = Auth.GetAuthDetails(HttpContext, HttpContext.Request.Path);
+            AuthDetails auth = await Auth.GetAuthDetailsAsync(HttpContext, HttpContext.Request.Path);
 
             if (!auth.Authenticated)
             {
@@ -67,9 +68,9 @@ namespace UtiliSite.Pages.Dashboard
             HttpContext.Response.Redirect(HttpContext.Request.Path);
         }
 
-        public void OnPostRemoveJoinRole()
+        public async Task OnPostRemoveJoinRole()
         {
-            AuthDetails auth = Auth.GetAuthDetails(HttpContext, HttpContext.Request.Path);
+            AuthDetails auth = await Auth.GetAuthDetailsAsync(HttpContext, HttpContext.Request.Path);
 
             if (!auth.Authenticated)
             {

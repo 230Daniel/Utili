@@ -4,7 +4,7 @@
     AuthDetails auth;
     if (ViewData["auth"] == null)
     {
-        auth = Auth.GetOptionalGlobalAuthDetails(HttpContextAccessor.HttpContext);
+        auth = await Auth.GetOptionalGlobalAuthDetailsAsync(HttpContextAccessor.HttpContext);
     }
     else
     {

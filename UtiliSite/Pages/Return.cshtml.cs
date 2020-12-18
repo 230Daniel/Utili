@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
@@ -6,7 +7,7 @@ namespace UtiliSite.Pages
 {
     public class ReturnModel : PageModel
     {
-        public void OnGet()
+        public async Task OnGet()
         {
             if (HttpContext.Request.Query.ContainsKey("error"))
             {
@@ -14,7 +15,7 @@ namespace UtiliSite.Pages
                 return;
             }
 
-            AuthDetails auth = Auth.GetAuthDetails(HttpContext, HttpContext.Request.Path);
+            AuthDetails auth = await Auth.GetAuthDetailsAsync(HttpContext, HttpContext.Request.Path);
             if(!auth.Authenticated) return;
 
             string url = GetRedirect(auth.User.Id, HttpContext);
