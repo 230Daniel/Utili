@@ -72,8 +72,7 @@ namespace Database.Data
         {
             MySqlCommand command;
 
-            if (row.New) 
-            // The row is a new entry so should be inserted into the database
+            if (row.New)
             {
                 command = Sql.GetCommand(
                     $"INSERT INTO Notices (GuildId, ChannelId, MessageId, Enabled, Delay, Title, Footer, Content, Text, Image, Thumbnail, Icon, Colour) VALUES (@GuildId, @ChannelId, @MessageId, {Sql.ToSqlBool(row.Enabled)}, @Delay, @Title, @Footer, @Content, @Text, @Image, @Thumbnail, @Icon, @Colour);",
@@ -101,7 +100,6 @@ namespace Database.Data
                 if(Cache.Initialised) Cache.Notices.Rows.Add(row);
             }
             else
-            // The row already exists and should be updated
             {
                 command = Sql.GetCommand($"UPDATE Notices SET MessageId = @MessageId, Enabled = {Sql.ToSqlBool(row.Enabled)}, Delay = @Delay, Title = @Title, Footer = @Footer, Content = @Content, Text = @Text, Image = @Image, Thumbnail = @Thumbnail, Icon = @Icon, Colour = @Colour WHERE GuildId = @GuildId AND ChannelId = @ChannelId;",
                     new [] 
@@ -131,8 +129,7 @@ namespace Database.Data
         {
             MySqlCommand command;
 
-            if (row.New) 
-            // The row is a new entry so should be inserted into the database
+            if (row.New)
             {
                 command = Sql.GetCommand(
                     $"INSERT INTO Notices (GuildId, ChannelId, MessageId, Enabled, Delay, Title, Footer, Content, Text, Image, Thumbnail, Icon, Colour) VALUES (@GuildId, @ChannelId, @MessageId, {Sql.ToSqlBool(row.Enabled)}, @Delay, @Title, @Footer, @Content, @Text, @Image, @Thumbnail, @Icon, @Colour);",
@@ -160,7 +157,6 @@ namespace Database.Data
                 if(Cache.Initialised) Cache.Notices.Rows.Add(row);
             }
             else
-            // The row already exists and should be updated
             {
                 command = Sql.GetCommand($"UPDATE Notices SET MessageId = @MessageId WHERE GuildId = @GuildId AND ChannelId = @ChannelId;",
                     new [] 

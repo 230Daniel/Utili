@@ -98,8 +98,7 @@ namespace Database.Data
         {
             MySqlCommand command;
 
-            if (row.New) 
-            // The row is a new entry so should be inserted into the database
+            if (row.New)
             {
                 command = Sql.GetCommand($"INSERT INTO InactiveRole (GuildId, RoleId, ImmuneRoleId, Threshold, Inverse, DefaultLastAction, LastUpdate) VALUES (@GuildId, @RoleId, @ImmuneRoleId, @Threshold, {Sql.ToSqlBool(row.Inverse)}, @DefaultLastAction, @LastUpdate);",
                     new [] {("GuildId", row.GuildId.ToString()), 
@@ -117,7 +116,6 @@ namespace Database.Data
                 if(Cache.Initialised) Cache.InactiveRole.Rows.Add(row);
             }
             else
-            // The row already exists and should be updated
             {
                 // Not updating DefaultLastAction is intentional
                 command = Sql.GetCommand($"UPDATE InactiveRole SET RoleId = @RoleId, ImmuneRoleId = @ImmuneRoleId, Threshold = @Threshold, Inverse = {Sql.ToSqlBool(row.Inverse)}, LastUpdate = @LastUpdate WHERE GuildId = @GuildId;",
@@ -139,8 +137,7 @@ namespace Database.Data
         {
             MySqlCommand command;
 
-            if (row.New) 
-            // The row is a new entry so should be inserted into the database
+            if (row.New)
             {
                 // If the if statement is true then something has gone horribly wrong, but it will work anyway.
                 command = Sql.GetCommand($"INSERT INTO InactiveRole (GuildId, RoleId, ImmuneRoleId, Threshold, Inverse, DefaultLastAction, LastUpdate) VALUES (@GuildId, @RoleId, @ImmuneRoleId, @Threshold, {Sql.ToSqlBool(row.Inverse)}, @DefaultLastAction, @LastUpdate);",
@@ -159,7 +156,6 @@ namespace Database.Data
                 if(Cache.Initialised) Cache.InactiveRole.Rows.Add(row);
             }
             else
-            // The row already exists and should be updated
             {
                 command = Sql.GetCommand("UPDATE InactiveRole SET LastUpdate = @LastUpdate WHERE GuildId = @GuildId;",
                     new [] {

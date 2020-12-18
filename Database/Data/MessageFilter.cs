@@ -55,8 +55,7 @@ namespace Database.Data
         {
             MySqlCommand command;
 
-            if (row.New) 
-            // The row is a new entry so should be inserted into the database
+            if (row.New)
             {
                 command = Sql.GetCommand("INSERT INTO MessageFilter (GuildId, ChannelId, Mode, Complex) VALUES (@GuildId, @ChannelId, @Mode, @Complex);",
                     new [] {("GuildId", row.GuildId.ToString()), 
@@ -73,7 +72,6 @@ namespace Database.Data
                 if(Cache.Initialised) Cache.MessageFilter.Rows.Add(row);
             }
             else
-            // The row already exists and should be updated
             {
                 command = Sql.GetCommand("UPDATE MessageFilter SET Mode = @Mode, Complex = @Complex WHERE GuildId = @GuildId AND ChannelId = @ChannelId;",
                     new [] {

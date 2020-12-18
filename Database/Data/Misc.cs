@@ -67,8 +67,7 @@ namespace Database.Data
         {
             MySqlCommand command;
 
-            if (row.New) 
-            // The row is a new entry so should be inserted into the database
+            if (row.New)
             {
                 command = Sql.GetCommand("INSERT INTO Misc (GuildId, Type, Value) VALUES (@GuildId, @Type, @Value);",
                     new[]
@@ -85,7 +84,6 @@ namespace Database.Data
                 if(Cache.Initialised) Cache.Misc.Rows.Add(row);
             }
             else
-            // The row already exists and should be updated
             {
                 command = Sql.GetCommand("UPDATE Misc SET Value = @Value WHERE GuildId = @GuildId AND Type = @Type;",
                     new[]

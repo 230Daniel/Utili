@@ -114,8 +114,6 @@ namespace UtiliSite
         public RestSelfUser User { get; set; }
         public RestGuild Guild { get; set; }
 
-        private static List<string> _usedSessionIds = new List<string>();
-
         public AuthDetails(bool authenticated, DiscordRestClient client, RestSelfUser user, HttpContext httpContext)
         {
             Authenticated = authenticated;

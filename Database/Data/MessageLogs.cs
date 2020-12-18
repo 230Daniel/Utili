@@ -55,8 +55,7 @@ namespace Database.Data
         {
             MySqlCommand command;
 
-            if (row.New) 
-            // The row is a new entry so should be inserted into the database
+            if (row.New)
             {
                 command = Sql.GetCommand("INSERT INTO MessageLogs (GuildId, DeletedChannelId, EditedChannelId, ExcludedChannels) VALUES (@GuildId, @DeletedChannelId, @EditedChannelId, @ExcludedChannels);",
                     new [] { ("GuildId", row.GuildId.ToString()), 
@@ -72,7 +71,6 @@ namespace Database.Data
                 if(Cache.Initialised) Cache.MessageLogs.Rows.Add(row);
             }
             else
-            // The row already exists and should be updated
             {
                 command = Sql.GetCommand("UPDATE MessageLogs SET DeletedChannelId = @DeletedChannelId, EditedChannelId = @EditedChannelId, ExcludedChannels = @ExcludedChannels WHERE GuildId = @GuildId;",
                     new [] {
@@ -176,8 +174,7 @@ namespace Database.Data
         {
             MySqlCommand command;
 
-            if (row.New) 
-            // The row is a new entry so should be inserted into the database
+            if (row.New)
             {
                 command = Sql.GetCommand("INSERT INTO MessageLogsMessages (GuildId, ChannelId, MessageId, UserId, Timestamp, Content) VALUES (@GuildId, @ChannelId, @MessageId, @UserId, @Timestamp, @Content);",
                     new [] { ("GuildId", row.GuildId.ToString()), 
@@ -193,7 +190,6 @@ namespace Database.Data
                 row.New = false;
             }
             else
-            // The row already exists and should be updated
             {
                 command = Sql.GetCommand("UPDATE MessageLogsMessages SET GuildId = @GuildId, ChannelId = @ChannelId, MessageId = @MessageId, UserId = @UserId, Timestamp = @Timestamp, Content = @Content WHERE GuildId = @GuildId AND ChannelId = @ChannelId AND MessageId = @MessageId",
                     new [] {

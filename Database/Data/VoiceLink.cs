@@ -57,8 +57,7 @@ namespace Database.Data
         {
             MySqlCommand command;
 
-            if (row.New) 
-            // The row is a new entry so should be inserted into the database
+            if (row.New)
             {
                 command = Sql.GetCommand($"INSERT INTO VoiceLink (GuildId, Enabled, DeleteChannels, Prefix, ExcludedChannels) VALUES (@GuildId, {Sql.ToSqlBool(row.Enabled)}, {Sql.ToSqlBool(row.DeleteChannels)}, @Prefix, @ExcludedChannels );",
                     new [] {("GuildId", row.GuildId.ToString()), 
@@ -72,8 +71,7 @@ namespace Database.Data
                 
                 if(Cache.Initialised) Cache.VoiceLink.Rows.Add(row);
             }
-            else 
-            // The row already exists and should be updated
+            else
             {
                 command = Sql.GetCommand($"UPDATE VoiceLink SET Enabled = {Sql.ToSqlBool(row.Enabled)}, DeleteChannels = {Sql.ToSqlBool(row.DeleteChannels)}, Prefix = @Prefix, ExcludedChannels = @ExcludedChannels WHERE GuildId = @GuildId;",
                     new [] {
@@ -147,8 +145,7 @@ namespace Database.Data
         {
             MySqlCommand command;
 
-            if (row.New) 
-            // The row is a new entry so should be inserted into the database
+            if (row.New)
             {
                 command = Sql.GetCommand("INSERT INTO VoiceLinkChannels (GuildId, TextChannelId, VoiceChannelId) VALUES (@GuildId, @TextChannelId, @VoiceChannelId);",
                     new [] { ("GuildId", row.GuildId.ToString()), 
@@ -162,7 +159,6 @@ namespace Database.Data
                 if(Cache.Initialised) Cache.VoiceLink.Channels.Add(row);
             }
             else
-            // The row already exists and should be updated
             {
                 command = Sql.GetCommand("UPDATE VoiceLinkChannels SET GuildId = @GuildId, TextChannelId = @TextChannelId, VoiceChannelId = @VoiceChannelId WHERE @GuildId = @GuildId AND VoiceChannelId = @VoiceChannelId",
                     new [] {

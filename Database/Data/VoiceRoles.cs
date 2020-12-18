@@ -54,8 +54,7 @@ namespace Database.Data
         {
             MySqlCommand command;
 
-            if (row.New) 
-            // The row is a new entry so should be inserted into the database
+            if (row.New)
             {
                 command = Sql.GetCommand("INSERT INTO VoiceRoles (GuildId, ChannelId, RoleId) VALUES (@GuildId, @ChannelId, @RoleId);",
                     new [] { ("GuildId", row.GuildId.ToString()), 
@@ -69,7 +68,6 @@ namespace Database.Data
                 if(Cache.Initialised) Cache.VoiceRoles.Rows.Add(row);
             }
             else
-            // The row already exists and should be updated
             {
                 command = Sql.GetCommand("UPDATE VoiceRoles SET RoleId = @RoleId WHERE GuildId = @GuildId AND ChannelId = @ChannelId;",
                     new [] {

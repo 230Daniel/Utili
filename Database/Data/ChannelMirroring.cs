@@ -55,8 +55,7 @@ namespace Database.Data
         {
             MySqlCommand command;
 
-            if (row.New) 
-            // The row is a new entry so should be inserted into the database
+            if (row.New)
             {
                 command = Sql.GetCommand("INSERT INTO ChannelMirroring (GuildId, FromChannelId, ToChannelId, WebhookId) VALUES (@GuildId, @FromChannelId, @ToChannelId, @WebhookId);",
                     new [] {("GuildId", row.GuildId.ToString()), 
@@ -72,7 +71,6 @@ namespace Database.Data
                 if(Cache.Initialised) Cache.ChannelMirroring.Rows.Add(row);
             }
             else
-            // The row already exists and should be updated
             {
                 command = Sql.GetCommand("UPDATE ChannelMirroring SET ToChannelId = @ToChannelId, WebhookId = @WebhookId WHERE GuildId = @GuildId AND FromChannelId = @FromChannelId;",
                     new [] {
@@ -92,8 +90,7 @@ namespace Database.Data
         {
             MySqlCommand command;
 
-            if (row.New) 
-            // The row is a new entry so should be inserted into the database
+            if (row.New)
             {
                 command = Sql.GetCommand("INSERT INTO ChannelMirroring (GuildId, FromChannelId, ToChannelId, WebhookId) VALUES (@GuildId, @FromChannelId, @ToChannelId, @WebhookId);",
                     new [] {("GuildId", row.GuildId.ToString()), 
@@ -109,7 +106,6 @@ namespace Database.Data
                 if(Cache.Initialised) Cache.ChannelMirroring.Rows.Add(row);
             }
             else
-            // The row already exists and should be updated
             {
                 command = Sql.GetCommand("UPDATE ChannelMirroring SET WebhookId = @WebhookId WHERE GuildId = @GuildId AND FromChannelId = @FromChannelId;",
                     new [] {

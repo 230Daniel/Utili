@@ -53,8 +53,7 @@ namespace Database.Data
         {
             MySqlCommand command;
 
-            if (row.New) 
-            // The row is a new entry so should be inserted into the database
+            if (row.New)
             {
                 command = Sql.GetCommand($"INSERT INTO Roles (GuildId, RolePersist, JoinRoles) VALUES (@GuildId, {Sql.ToSqlBool(row.RolePersist)}, @JoinRoles);",
                     new [] {
@@ -70,7 +69,6 @@ namespace Database.Data
                 if(Cache.Initialised) Cache.Roles.Rows.Add(row);
             }
             else
-            // The row already exists and should be updated
             {
                 command = Sql.GetCommand($"UPDATE Roles SET RolePersist = {Sql.ToSqlBool(row.RolePersist)}, JoinRoles = @JoinRoles WHERE GuildId = @GuildId;",
                     new [] {
@@ -144,8 +142,7 @@ namespace Database.Data
         {
             MySqlCommand command;
 
-            if (row.Id == 0) 
-            // The row is a new entry so should be inserted into the database
+            if (row.Id == 0)
             {
                 command = Sql.GetCommand("INSERT INTO RolesPersistantRoles (GuildId, UserId, Roles) VALUES (@GuildId, @UserId, @Roles);",
                     new [] {
@@ -160,7 +157,6 @@ namespace Database.Data
                 row.Id = GetPersistRows(row.GuildId, row.UserId).First().Id;
             }
             else
-            // The row already exists and should be updated
             {
                 command = Sql.GetCommand("UPDATE RolesPersistantRoles SET GuildId = @GuildId, UserId = @UserId, Roles = @Roles WHERE Id = @Id;",
                     new [] {("Id", row.Id.ToString()),
