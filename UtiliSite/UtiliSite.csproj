@@ -10,7 +10,7 @@
 
   <ItemGroup>
     <PackageReference Include="AspNet.Security.OAuth.Discord" Version="5.0.0" />
-    <PackageReference Include="Discord.Net" Version="2.3.0-dev-20201214.8" />
+    <PackageReference Include="Discord.Net" Version="2.3.0-dev-20201217.2" />
     <PackageReference Include="Joonasw.AspNetCore.SecurityHeaders" Version="3.0.0" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="5.0.1" />
     <PackageReference Include="Microsoft.NETCore.Targets" Version="5.0.0" PrivateAssets="all" />
