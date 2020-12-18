@@ -51,10 +51,10 @@
 </div>
 
 <div class="dropdown belowcards">
-    <button class="btn btn-secondary dropdown-toggle" type="button" data-toggle="dropdown" id="dropdownAddChannel" aria-haspopup="true" aria-expanded="false">
+    <button class="btn btn-secondary dropdown-toggle dropdown-200" type="button" data-toggle="dropdown" id="dropdownAddChannel" aria-haspopup="true" aria-expanded="false">
         Exclude channel...
     </button>
-    <div class="dropdown-menu scrollable noverticalpadding" aria-labelledby="dropdownExcludeChannel">
+    <div class="dropdown-menu dropdown-200-content noverticalpadding" aria-labelledby="dropdownExcludeChannel">
         @foreach (RestVoiceChannel channel in nonExcludedChannels)
         {
             <form method="post" name="noajax">

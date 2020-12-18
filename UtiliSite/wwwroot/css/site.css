@@ -363,12 +363,22 @@ img.user-icon {
     padding-bottom: 30px;
 }
 
-.scrollable {
+.dropdown-200-content {
+    width: 200px;
     height: auto;
     max-height: 200px;
     overflow-x: hidden;
-    border: 0;
     margin: 0;
+    border: 1px solid black;
+    border-top: 0;
+}
+
+.dropdown-200 {
+    width: 200px;
+    padding-left: 0.75rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 *::-webkit-scrollbar {
@@ -386,7 +396,7 @@ img.user-icon {
     height: 5px !important;
 }
 
-.scrollable::-webkit-scrollbar {
+.dropdown-200-content::-webkit-scrollbar {
     width: 5px !important;
     background-color: white;
 }
@@ -529,4 +539,9 @@ tr a {
     padding-bottom: 0.5rem;
     background-color: #e9ecef;
     border: 0;
+}
+
+.caret.caret-up {
+    border-top-width: 0;
+    border-bottom: 4px solid #fff;
 }
