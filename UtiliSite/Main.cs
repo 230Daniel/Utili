@@ -1,4 +1,5 @@
-﻿using Database;
+﻿using System.Threading.Tasks;
+using Database;
 
 namespace UtiliSite
 {
@@ -6,12 +7,14 @@ namespace UtiliSite
     {
         public static Config _config;
 
-        public static void Initialise()
+        public static async Task InitialiseAsync()
         {
             _config = new Config();
             _config.Load();
 
-            DiscordModule.Initialise();
+            Database.Database.Initialise(false);
+
+            await DiscordModule.InitialiseAsync();
         }
     }
 }

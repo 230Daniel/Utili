@@ -1,5 +1,6 @@
 using System;
 using System.Globalization;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
@@ -21,12 +22,12 @@ namespace UtiliSite
             Configuration = configuration;
         }
 
-        public IConfiguration Configuration { get; }
+        private IConfiguration Configuration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            Main.Initialise();
+            Main.InitialiseAsync().GetAwaiter().GetResult();
 
             services.AddRouting(options =>
             {
@@ -118,9 +119,6 @@ namespace UtiliSite
             {
                 endpoints.MapRazorPages();
             });
-
-            // Initialise the database without using cache.
-            Database.Database.Initialise(false);
         }
     }
 }

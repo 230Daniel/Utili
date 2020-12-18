@@ -10,8 +10,6 @@ namespace UtiliSite
 {
     public static class DiscordModule
     {
-        // TODO: Make asyncronous
-
         private static DiscordRestClient _client;
 
         private static DiscordCache _cachedClients = new DiscordCache(600);
@@ -21,10 +19,10 @@ namespace UtiliSite
         private static DiscordCache _cachedTextChannels = new DiscordCache(15);
         private static DiscordCache _cachedVoiceChannels = new DiscordCache(15);
 
-        public static void Initialise()
+        public static async Task InitialiseAsync()
         {
             _client = new DiscordRestClient();
-            _client.LoginAsync(TokenType.Bot, _config.DiscordToken).GetAwaiter().GetResult();
+            await _client.LoginAsync(TokenType.Bot, _config.DiscordToken);
         }
 
         public static async Task<DiscordRestClient> GetClientAsync(ulong userId, string token = null)
@@ -204,8 +202,8 @@ namespace UtiliSite
 
     internal class DiscordCache
     {
-        public TimeSpan Timeout { get; }
-        public List<DiscordCacheItem> Items { get; }
+        private TimeSpan Timeout { get; }
+        private List<DiscordCacheItem> Items { get; }
 
         public DiscordCache(double timeoutSeconds)
         {
