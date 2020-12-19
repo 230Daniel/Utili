@@ -50,6 +50,7 @@ namespace UtiliSite
                 options.Conventions.AddPageRoute("/dashboard/joinmessage", "dashboard/{guild?}/joinmessage");
                 options.Conventions.AddPageRoute("/dashboard/messagefilter", "dashboard/{guild?}/messagefilter");
                 options.Conventions.AddPageRoute("/dashboard/messagelogs", "dashboard/{guild?}/messagelogs");
+                options.Conventions.AddPageRoute("/dashboard/messagepinning", "dashboard/{guild?}/messagepinning");
                 options.Conventions.AddPageRoute("/dashboard/notices", "dashboard/{guild?}/notices");
                 options.Conventions.AddPageRoute("/dashboard/reputation", "dashboard/{guild?}/reputation");
                 options.Conventions.AddPageRoute("/dashboard/roles", "dashboard/{guild?}/roles");

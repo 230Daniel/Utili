@@ -20,6 +20,7 @@ namespace Database
         public static JoinMessageTable JoinMessage { get; set; } = new JoinMessageTable();
         public static MessageFilterTable MessageFilter { get; set; } = new MessageFilterTable();
         public static MessageLogsTable MessageLogs { get; set; } = new MessageLogsTable();
+        public static MessagePinningTable MessagePinning { get; set; } = new MessagePinningTable();
         public static MiscTable Misc { get; set; } = new MiscTable();
         public static NoticesTable Notices { get; set; } = new NoticesTable();
         public static ReputationTable Reputation { get; set; } = new ReputationTable();
