@@ -38,6 +38,11 @@ namespace UtiliSite.Pages.Dashboard
             ulong deletedChannelId = ulong.Parse(HttpContext.Request.Form["deletedChannel"]);
             ulong editedChannelId = ulong.Parse(HttpContext.Request.Form["editedChannel"]);
 
+            MessageLogsRow row = MessageLogs.GetRow(auth.Guild.Id);
+            row.DeletedChannelId = deletedChannelId;
+            row.EditedChannelId = editedChannelId;
+            MessageLogs.SaveRow(row);
+
             HttpContext.Response.StatusCode = 200;
         }
 

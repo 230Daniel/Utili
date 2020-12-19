@@ -56,21 +56,18 @@ namespace Utili.Features
             {
                 Misc.DeleteRow(miscRow);
                 NoticesRow row = Database.Data.Notices.GetRow(miscRow.GuildId, ulong.Parse(miscRow.Value.Value));
-                if (row.Enabled)
+                lock (_requiredUpdates)
                 {
-                    lock (_requiredUpdates)
+                    if (_requiredUpdates.Any(x => x.Item1.ChannelId == row.ChannelId))
                     {
-                        if (_requiredUpdates.Any(x => x.Item1.ChannelId == row.ChannelId))
-                        {
-                            (NoticesRow, DateTime) update = _requiredUpdates.First(x => x.Item1.ChannelId == row.ChannelId);
-                            update.Item2 = DateTime.MinValue;
-                            _requiredUpdates.RemoveAll(x => x.Item1.ChannelId == row.ChannelId);
-                            _requiredUpdates.Add(update);
-                        }
-                        else
-                        {
-                            _requiredUpdates.Add((row, DateTime.MinValue));
-                        }
+                        (NoticesRow, DateTime) update = _requiredUpdates.First(x => x.Item1.ChannelId == row.ChannelId);
+                        update.Item2 = DateTime.MinValue;
+                        _requiredUpdates.RemoveAll(x => x.Item1.ChannelId == row.ChannelId);
+                        _requiredUpdates.Add(update);
+                    }
+                    else
+                    {
+                        _requiredUpdates.Add((row, DateTime.MinValue));
                     }
                 }
             }
@@ -111,12 +108,15 @@ namespace Utili.Features
             }
             catch {}
 
-            (string, Embed) notice = GetNotice(row);
-            RestUserMessage sent = await MessageSender.SendEmbedAsync(channel, notice.Item2, notice.Item1);
-            row.MessageId = sent.Id;
-            Database.Data.Notices.SaveMessageId(row);
+            if (row.Enabled)
+            {
+                (string, Embed) notice = GetNotice(row);
+                RestUserMessage sent = await MessageSender.SendEmbedAsync(channel, notice.Item2, notice.Item1);
+                row.MessageId = sent.Id;
+                Database.Data.Notices.SaveMessageId(row);
 
-            await sent.PinAsync();
+                await sent.PinAsync();
+            }
         }
 
         public static (string, Embed) GetNotice(NoticesRow row)
@@ -136,10 +136,10 @@ namespace Utili.Features
                     Name = row.Title.Value,
                     IconUrl = iconUrl
                 },
-                Description = row.Content.Value,
+                Description = row.Content.Value.Replace(@"\n", "\n"),
                 Footer = new EmbedFooterBuilder
                 {
-                    Text = row.Footer.Value
+                    Text = row.Footer.Value.Replace(@"\n", "\n")
                 },
                 ThumbnailUrl = thumbnailUrl,
                 ImageUrl = imageUrl,

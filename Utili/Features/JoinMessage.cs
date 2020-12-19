@@ -60,10 +60,10 @@ namespace Utili.Features
                     Name = row.Title.Value.Replace("%user%", user.ToString()),
                     IconUrl = iconUrl
                 },
-                Description = row.Content.Value.Replace("%user%", user.Mention),
+                Description = row.Content.Value.Replace(@"\n", "\n").Replace("%user%", user.Mention),
                 Footer = new EmbedFooterBuilder
                 {
-                    Text = row.Footer.Value.Replace("%user%", user.ToString())
+                    Text = row.Footer.Value.Replace(@"\n", "\n").Replace("%user%", user.ToString())
                 },
                 ThumbnailUrl = thumbnailUrl,
                 ImageUrl = imageUrl,
