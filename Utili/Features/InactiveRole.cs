@@ -40,7 +40,14 @@ namespace Utili.Features
 
         private static void Timer_Elapsed(object sender, ElapsedEventArgs e)
         {
-            UpdateGuildsAsync().GetAwaiter().GetResult();
+            try
+            {
+                UpdateGuildsAsync().GetAwaiter().GetResult();
+            }
+            catch(Exception er)
+            {
+                _logger.ReportError("InactiveRole", er, LogSeverity.Warn);
+            }
         }
 
         private static async Task UpdateGuildsAsync()

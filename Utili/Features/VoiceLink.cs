@@ -78,14 +78,14 @@ namespace Utili.Features
             VoiceLinkChannelRow channelRow = Database.Data.VoiceLink.GetChannelRow(guild.Id, voiceChannel.Id);
             VoiceLinkRow metaRow = Database.Data.VoiceLink.GetMetaRow(guild.Id);
 
-            SocketTextChannel textChannel = null;
+            ITextChannel textChannel = null;
             try
             {
                 textChannel = guild.GetTextChannel(channelRow.TextChannelId);
             }
             catch {}
 
-            if (connectedUsers.Count == 0 && textChannel != null && metaRow.DeleteChannels)
+            if (connectedUsers.Count(x => !x.IsBot) == 0 && textChannel != null && metaRow.DeleteChannels)
             {
                 await textChannel.DeleteAsync();
                 channelRow.TextChannelId = 0;
@@ -93,7 +93,7 @@ namespace Utili.Features
                 return;
             }
 
-            if (connectedUsers.Count == 0 && metaRow.DeleteChannels)
+            if (connectedUsers.Count(x => !x.IsBot) == 0 && metaRow.DeleteChannels)
             {
                 return;
             }
@@ -115,9 +115,7 @@ namespace Utili.Features
 
                 Database.Data.VoiceLink.SaveChannelRow(channelRow);
 
-                await Task.Delay(500);
-
-                textChannel = guild.GetTextChannel(channelRow.TextChannelId);
+                textChannel = restTextChannel;
             }
 
             foreach(Overwrite existingOverwrite in textChannel.PermissionOverwrites)

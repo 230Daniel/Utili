@@ -219,7 +219,7 @@ namespace Database.Data
                     }
                     else
                     {
-                        row.Emotes.Add((new Emoji(emoteString), value));
+                        row.Emotes.Add((new Emoji(emoteString.Split("///").First()), value));
                     }
                 }
             }

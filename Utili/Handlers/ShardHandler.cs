@@ -13,7 +13,7 @@ namespace Utili.Handlers
     {
         private static List<int> _readyShardIds = new List<int>();
 
-        public static async Task ShardConnected(DiscordSocketClient shard)
+        public static async Task ShardReady(DiscordSocketClient shard)
         {
             _ = Task.Run(async () =>
             {

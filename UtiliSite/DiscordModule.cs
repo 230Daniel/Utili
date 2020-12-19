@@ -100,7 +100,7 @@ namespace UtiliSite
         public static async Task<bool> IsGuildManageableAsync(ulong userId, ulong guildId)
         {
             RestGuildUser user = await GetGuildUserAsync(userId, guildId);
-            return user.GuildPermissions.ManageGuild;
+            return user?.GuildPermissions.ManageGuild ?? false;
         }
 
         public static async Task<string> GetBotNicknameAsync(ulong guildId)
