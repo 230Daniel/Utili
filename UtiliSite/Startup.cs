@@ -89,7 +89,7 @@ namespace UtiliSite
             if (env.IsDevelopment()) app.UseDeveloperExceptionPage();
             else
             {
-                app.UseHsts();
+                app.UseHsts(); // TODO: Figure out why this isn't working properly
                 app.UseExceptionHandler("/Error");
             }
             app.UseMiddleware<ErrorLoggingMiddleware>();
