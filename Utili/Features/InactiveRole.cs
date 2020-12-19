@@ -75,6 +75,8 @@ namespace Utili.Features
         {
             SocketRole inactiveRole = guild.GetRole(row.RoleId);
 
+            if(inactiveRole == null) return;
+
             if (!BotPermissions.CanManageRole(inactiveRole))
             {
                 return;

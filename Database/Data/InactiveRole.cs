@@ -105,8 +105,8 @@ namespace Database.Data
                         ("RoleId", row.RoleId.ToString()),
                         ("ImmuneRoleId", row.ImmuneRoleId.ToString()),
                         ("Threshold", row.Threshold.ToString()),
-                        ("DefaultLastAction", Sql.ToSqlDateTime(row.DefaultLastAction)),
-                        ("LastUpdate", Sql.ToSqlDateTime(row.LastUpdate))});
+                        ("DefaultLastAction", Sql.ToSqlDateTime(DateTime.UtcNow)),
+                        ("LastUpdate", Sql.ToSqlDateTime(DateTime.UtcNow - TimeSpan.FromMinutes(5)))});
 
                 command.ExecuteNonQuery();
                 command.Connection.Close();
@@ -220,8 +220,8 @@ namespace Database.Data
             {
                 matchedRows.Add(new InactiveRoleUserRow(
                     reader.GetUInt64(0),
-                    reader.GetUInt64(0),
-                    reader.GetDateTime(1)));
+                    reader.GetUInt64(1),
+                    reader.GetDateTime(2)));
             }
 
             reader.Close();
