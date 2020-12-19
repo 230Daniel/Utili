@@ -50,7 +50,7 @@ namespace Utili.Handlers
             guilds = guilds.Where(x => x.DownloadedMemberCount < x.MemberCount).ToList();
 
             // Role persist enabled
-            guildIds.AddRange(Database.Data.Roles.GetRows().Where(x => x.RolePersist).Select(x => x.GuildId));
+            guildIds.AddRange(Roles.GetRows().Where(x => x.RolePersist).Select(x => x.GuildId));
 
             guilds = guilds.Where(x => guildIds.Contains(x.Id)).ToList();
             await shard.DownloadUsersAsync(guilds);

@@ -137,7 +137,7 @@ namespace Database.Data
 
         public static VoiceLinkChannelRow GetChannelRow(ulong guildId, ulong voiceChannelId)
         {
-            List<VoiceLinkChannelRow> rows = GetChannelRows(guildId);
+            List<VoiceLinkChannelRow> rows = GetChannelRows(guildId, voiceChannelId);
             return rows.Count > 0 ? rows.First() : new VoiceLinkChannelRow(guildId, voiceChannelId);
         }
 
@@ -265,8 +265,8 @@ namespace Database.Data
         public VoiceLinkChannelRow(ulong guildId, ulong voiceChannelId)
         {
             New = true;
-            GuildId = GuildId;
-            VoiceChannelId = VoiceChannelId;
+            GuildId = guildId;
+            VoiceChannelId = voiceChannelId;
         }
 
         public static VoiceLinkChannelRow FromDatabase(ulong guildId, ulong textChannelId, ulong voiceChannelId)

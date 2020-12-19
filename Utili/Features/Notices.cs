@@ -51,13 +51,38 @@ namespace Utili.Features
 
         private static void Timer_Elapsed(object sender, ElapsedEventArgs e)
         {
+            List<MiscRow> fromDashboard = Misc.GetRows(type: "RequiresNoticeUpdate");
+            foreach (MiscRow miscRow in fromDashboard)
+            {
+                Misc.DeleteRow(miscRow);
+                NoticesRow row = Database.Data.Notices.GetRow(miscRow.GuildId, ulong.Parse(miscRow.Value.Value));
+                if (row.Enabled)
+                {
+                    lock (_requiredUpdates)
+                    {
+                        if (_requiredUpdates.Any(x => x.Item1.ChannelId == row.ChannelId))
+                        {
+                            (NoticesRow, DateTime) update = _requiredUpdates.First(x => x.Item1.ChannelId == row.ChannelId);
+                            update.Item2 = DateTime.MinValue;
+                            _requiredUpdates.RemoveAll(x => x.Item1.ChannelId == row.ChannelId);
+                            _requiredUpdates.Add(update);
+                        }
+                        else
+                        {
+                            _requiredUpdates.Add((row, DateTime.MinValue));
+                        }
+                    }
+                }
+            }
+            
+
             UpdateNoticesAsync().GetAwaiter().GetResult();
         }
 
         private static async Task UpdateNoticesAsync()
         {
             List<(NoticesRow, DateTime)> updates = new List<(NoticesRow, DateTime)>();
-
+            
             lock (_requiredUpdates)
             {
                 updates.AddRange(_requiredUpdates.Where(x => x.Item2 <= DateTime.UtcNow));

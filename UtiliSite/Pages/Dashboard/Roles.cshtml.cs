@@ -39,10 +39,11 @@ namespace UtiliSite.Pages.Dashboard
             row.RolePersist = rolePersist;
             Roles.SaveRow(row);
 
+
             if (requireDownload)
             {
                 MiscRow miscRow = new MiscRow(auth.Guild.Id, "RequiresUserDownload", "");
-                Misc.SaveRow(miscRow);
+                try { Misc.SaveRow(miscRow); } catch{}
             }
 
             HttpContext.Response.StatusCode = 200;

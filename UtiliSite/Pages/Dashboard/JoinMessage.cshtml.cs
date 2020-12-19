@@ -43,7 +43,7 @@ namespace UtiliSite.Pages.Dashboard
             row.Image = EString.FromDecoded(HttpContext.Request.Form["image"]);
             row.Thumbnail = EString.FromDecoded(HttpContext.Request.Form["thumbnail"]);
             row.Icon = EString.FromDecoded(HttpContext.Request.Form["icon"]);
-            row.Colour = new Discord.Color(uint.Parse(HttpContext.Request.Form["colour"]));
+            row.Colour = new Discord.Color(uint.Parse(HttpContext.Request.Form["colour"].ToString().Replace("#", ""), System.Globalization.NumberStyles.HexNumber));
 
             JoinMessage.SaveRow(row);
 

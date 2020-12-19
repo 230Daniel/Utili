@@ -70,8 +70,8 @@ namespace Utili.Features
                 rows.AddRange(selectedNonPremiumRows);
             }
 
-            // Remove rows in mode 3 (disabled)
-            rows.RemoveAll(x => x.Mode == 3);
+            // Remove rows in mode 2 (disabled)
+            rows.RemoveAll(x => x.Mode == 2);
 
             List<Task> tasks = new List<Task>();
 
@@ -108,6 +108,7 @@ namespace Utili.Features
         private static async Task PurgeChannelAsync(SocketGuildChannel guildChannel, TimeSpan timespan, int mode, int messageCap)
         {
             await Task.Delay(1);
+            if(mode == 2) return; // jic above method is wrong
 
             SocketTextChannel channel = guildChannel as SocketTextChannel;
 

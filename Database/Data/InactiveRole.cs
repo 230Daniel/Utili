@@ -182,19 +182,21 @@ namespace Database.Data
             command.Connection.Close();
         }
 
-        public static void UpdateUser(ulong guildId, ulong userId)
+        public static void UpdateUser(ulong guildId, ulong userId, DateTime? lastAction = null)
         {
+            if (lastAction == null) lastAction = DateTime.UtcNow;
+
             MySqlCommand command = Sql.GetCommand("UPDATE InactiveRoleUsers SET LastAction = @LastAction WHERE GuildId = @GuildId AND UserId = @UserId",
                 new [] {("GuildId", guildId.ToString()), 
                     ("UserId", userId.ToString()),
-                    ("LastAction", Sql.ToSqlDateTime(DateTime.UtcNow))});
+                    ("LastAction", Sql.ToSqlDateTime(lastAction.Value))});
 
             if (command.ExecuteNonQuery() == 0)
             {
                 command = Sql.GetCommand("INSERT INTO InactiveRoleUsers (GuildId, UserId, LastAction) VALUES (@GuildId, @UserId, @LastAction)",
                     new [] {("GuildId", guildId.ToString()), 
                         ("UserId", userId.ToString()),
-                        ("LastAction", Sql.ToSqlDateTime(DateTime.UtcNow))});
+                        ("LastAction", Sql.ToSqlDateTime(lastAction.Value))});
 
                 command.ExecuteNonQuery();
             }
