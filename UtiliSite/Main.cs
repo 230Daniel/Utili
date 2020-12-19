@@ -9,11 +9,9 @@ namespace UtiliSite
 
         public static async Task InitialiseAsync()
         {
-            _config = new Config();
-            _config.Load();
-
+            _config = Config.Load();
+            PaymentsController.Initialise();
             Database.Database.Initialise(false);
-
             await DiscordModule.InitialiseAsync();
         }
     }

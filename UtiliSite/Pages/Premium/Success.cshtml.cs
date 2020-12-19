@@ -5,11 +5,11 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace UtiliSite.Pages
+namespace UtiliSite.Pages.Premium
 {
-    public class PremiumModel : PageModel
+    public class SuccessModel : PageModel
     {
-        public async Task OnGet()
+        public void OnGet()
         {
         }
     }
