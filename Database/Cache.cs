@@ -23,6 +23,7 @@ namespace Database
         public static MessagePinningTable MessagePinning { get; set; } = new MessagePinningTable();
         public static MiscTable Misc { get; set; } = new MiscTable();
         public static NoticesTable Notices { get; set; } = new NoticesTable();
+        public static PremiumTable Premium { get; set; } = new PremiumTable();
         public static ReputationTable Reputation { get; set; } = new ReputationTable();
         public static RolesTable Roles { get; set; } = new RolesTable();
         public static VoiceLinkTable VoiceLink { get; set; } = new VoiceLinkTable();
@@ -57,6 +58,7 @@ namespace Database
             MessageLogs.Rows = Data.MessageLogs.GetRows(ignoreCache: true);
             Misc.Rows = Data.Misc.GetRows(ignoreCache: true);
             Notices.Rows = Data.Notices.GetRows(ignoreCache: true);
+            Premium.Rows = Data.Premium.GetRows(ignoreCache: true);
             Reputation.Rows = Data.Reputation.GetRows(ignoreCache: true);
             Roles.Rows = Data.Roles.GetRows(ignoreCache: true);
             VoiceLink.Rows = Data.VoiceLink.GetMetaRows(ignoreCache: true);
