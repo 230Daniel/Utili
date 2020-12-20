@@ -11,11 +11,12 @@ namespace Database
 
     internal static class Cache
     {
-        public static bool Initialised;
+        public static bool Initialised { get; private set; }
         private static Timer Timer { get; set; }
 
         public static AutopurgeTable Autopurge { get; set; } = new AutopurgeTable();
         public static ChannelMirroringTable ChannelMirroring { get; set; } = new ChannelMirroringTable();
+        public static CoreTable Core { get; set; } = new CoreTable();
         public static InactiveRoleTable InactiveRole { get; set; } = new InactiveRoleTable();
         public static JoinMessageTable JoinMessage { get; set; } = new JoinMessageTable();
         public static MessageFilterTable MessageFilter { get; set; } = new MessageFilterTable();
@@ -29,8 +30,7 @@ namespace Database
         public static VoiceRolesTable VoiceRoles { get; set; } = new VoiceRolesTable();
         public static VoteChannelsTable VoteChannels { get; set; } = new VoteChannelsTable();
         
-        public static void Initialise() 
-        // Start the automatic cache downloads
+        public static void Initialise()
         {
             DownloadTables();
 
@@ -42,7 +42,6 @@ namespace Database
         }
 
         private static void Timer_Elapsed(object sender, ElapsedEventArgs e)
-        // At regular intervals, call the download tables method.
         {
             DownloadTables();
         }
@@ -51,6 +50,7 @@ namespace Database
         {
             Autopurge.Rows = Data.Autopurge.GetRows(ignoreCache: true);
             ChannelMirroring.Rows = Data.ChannelMirroring.GetRows(ignoreCache: true);
+            Core.Rows = Data.Core.GetRows(ignoreCache: true);
             InactiveRole.Rows = Data.InactiveRole.GetRows(ignoreCache: true);
             JoinMessage.Rows = Data.JoinMessage.GetRows(ignoreCache: true);
             MessageFilter.Rows = Data.MessageFilter.GetRows(ignoreCache: true);

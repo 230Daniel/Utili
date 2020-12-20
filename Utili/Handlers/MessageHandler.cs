@@ -1,13 +1,18 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-
+using Database.Data;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using static Utili.Program;
 using static Utili.MessageSender;
-using Utili.Features;
+using ChannelMirroring = Utili.Features.ChannelMirroring;
+using InactiveRole = Utili.Features.InactiveRole;
+using MessageFilter = Utili.Features.MessageFilter;
+using MessageLogs = Utili.Features.MessageLogs;
+using Notices = Utili.Features.Notices;
+using VoteChannels = Utili.Features.VoteChannels;
 
 namespace Utili.Handlers
 {
@@ -31,11 +36,14 @@ namespace Utili.Handlers
 
                 if (!context.User.IsBot && !string.IsNullOrEmpty(context.Message.Content))
                 {
-                    string prefix = Database.Data.Misc.GetPrefix(guild.Id);
+                    CoreRow row = Core.GetRow(context.Guild.Id);
+                    bool excluded = row.ExcludedChannels.Contains(context.Channel.Id);
+                    if (!row.EnableCommands) excluded = !excluded;
 
                     int argPos = 0;
-                    if (context.Message.HasStringPrefix(prefix, ref argPos) ||
-                        context.Message.HasMentionPrefix(_client.CurrentUser, ref argPos))
+                    if (context.Message.HasStringPrefix(row.Prefix.Value, ref argPos) ||
+                        context.Message.HasMentionPrefix(_client.CurrentUser, ref argPos) &&
+                        !excluded)
                     {
                         IResult result = await _commands.ExecuteAsync(context, argPos, null);
 

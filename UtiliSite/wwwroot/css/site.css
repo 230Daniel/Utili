@@ -370,7 +370,6 @@ img.user-icon {
     overflow-x: hidden;
     margin: 0;
     border: 1px solid black;
-    border-top: 0;
 }
 
 .dropdown-200 {

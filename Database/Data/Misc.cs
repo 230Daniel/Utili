@@ -114,37 +114,6 @@ namespace Database.Data
             command.ExecuteNonQuery();
             command.Connection.Close();
         }
-
-        public static string GetPrefix(ulong guildId)
-        {
-            string prefix = "b.";
-
-            List<MiscRow> rows = GetRows(guildId, "Prefix");
-            if (rows.Count > 0) prefix = rows.First().Value.Value;
-
-            return prefix;
-        }
-
-        public static void SetPrefix(ulong guildId, string prefix)
-        {
-            MiscRow row = GetRow(guildId, "Prefix");
-
-            if(prefix == "b." && row == null) return;
-
-            if (prefix == "b.")
-            {
-                DeleteRow(row);
-                return;
-            }
-
-            if (row == null)
-            {
-                row = new MiscRow(guildId, "Prefix", prefix);
-            }
-
-            row.Value = EString.FromDecoded(prefix);
-            SaveRow(row);
-        }
     }
 
     public class MiscTable
