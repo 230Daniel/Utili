@@ -85,12 +85,12 @@ body {
 }
 
 .dynamic-height {
-    overflow-y: scroll;
+    overflow-y: auto;
     overflow-x: hidden;
 }
 
 .scroll-x {
-    overflow-x: scroll !important;
+    overflow-x: auto !important;
 }
 
 img.user-icon {
@@ -392,8 +392,8 @@ img.user-icon {
 }
 
 .scroll-always::-webkit-scrollbar {
-    width: 5px !important;
-    height: 5px !important;
+    width: 15px !important;
+    height: 15px !important;
 }
 
 .dropdown-200-content::-webkit-scrollbar {
@@ -474,6 +474,7 @@ img.user-icon {
     border-left: 0;
     padding: 0;
     outline: 0 !important;
+    opacity: 0.5;
 }
 
 .server-list-text {
@@ -490,7 +491,7 @@ img.guild-icon {
     height: 150px;
     width: 150px;
     border-radius: 50% !important;
-    margin-top: 3vh;
+    margin-top: 23px;
     margin-bottom: 0;
     margin-right: 37.5px;
     margin-left: 37.5px;
