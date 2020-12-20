@@ -8,6 +8,7 @@ namespace Database
         public string DiscordClientId { get; set; }
         public string DiscordClientSecret { get; set; }
         public string DiscordToken { get; set; }
+        public string DefaultPrefix { get; set; }
 
         public void Load()
         {
@@ -19,6 +20,7 @@ namespace Database
                 DiscordClientId = config.DiscordClientId;
                 DiscordClientSecret = config.DiscordClientSecret;
                 DiscordToken = config.DiscordToken;
+                DefaultPrefix = config.DefaultPrefix;
             }
             catch (FileNotFoundException)
             {

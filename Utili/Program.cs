@@ -47,13 +47,13 @@ namespace Utili
             if (_config.CacheDatabase)
             {
                 _logger.Log("Main", "Cacheing database...", LogSeverity.Info);
-                Database.Database.Initialise(true);
+                Database.Database.Initialise(true, _config.DefaultPrefix);
                 _logger.Log("Main", "Database cached", LogSeverity.Info);
             }
             else
             {
                 _logger.Log("Main", "Not cacheing database", LogSeverity.Info);
-                Database.Database.Initialise(false);
+                Database.Database.Initialise(false, _config.DefaultPrefix);
             }
 
             try
@@ -63,6 +63,7 @@ namespace Utili
             catch(Exception e)
             {
                 _logger.ReportError("Main", e);
+                Console.WriteLine(e.StackTrace);
             }
 
             // TODO: Auto-restart or Pterodactyl equivalent
@@ -81,7 +82,7 @@ namespace Utili
             _client = new DiscordShardedClient(shardIds, new DiscordSocketConfig 
             {
                 TotalShards = _totalShards,
-                MessageCacheSize = 0,
+                MessageCacheSize = 10,
                 ExclusiveBulkDelete = true,
                 LogLevel = Discord.LogSeverity.Info,
                 AlwaysDownloadUsers = false,
@@ -103,12 +104,12 @@ namespace Utili
             _commands.AddTypeReader(typeof(IUser), new UserTypeReader());
             await _commands.AddModulesAsync(Assembly.GetEntryAssembly(), null);
 
+            if(!_config.Production) _logger.Log("MainAsync", "Utili is not in production mode", LogSeverity.Warn);
             _logger.Log("MainAsync", $"Running {_config.UpperShardId - (_config.LowerShardId - 1)} shards of Utili with {_totalShards} total shards", LogSeverity.Info);
             _logger.Log("MainAsync", $"Shard IDs: {_config.LowerShardId} - {_config.UpperShardId}", LogSeverity.Info);
             _logger.LogEmpty();
 
             _client.Log += ShardHandler.Log;
-            //_client.ShardConnected += ShardHandler.ShardConnected;
             _client.ShardReady += ShardHandler.ShardReady;
 
             _client.MessageReceived += MessageHandler.MessageReceived;

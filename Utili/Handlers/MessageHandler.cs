@@ -41,9 +41,8 @@ namespace Utili.Handlers
                     if (!row.EnableCommands) excluded = !excluded;
 
                     int argPos = 0;
-                    if (context.Message.HasStringPrefix(row.Prefix.Value, ref argPos) ||
-                        context.Message.HasMentionPrefix(_client.CurrentUser, ref argPos) &&
-                        !excluded)
+                    if (!excluded && (context.Message.HasStringPrefix(row.Prefix.Value, ref argPos) ||
+                        context.Message.HasMentionPrefix(_client.CurrentUser, ref argPos)))
                     {
                         IResult result = await _commands.ExecuteAsync(context, argPos, null);
 

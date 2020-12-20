@@ -17,9 +17,21 @@ namespace UtiliSite
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        public Startup(IConfiguration configuration, IWebHostEnvironment env)
         {
-            Configuration = configuration;
+            if (env.IsProduction())
+            {
+                IConfigurationBuilder configurationBuilder = new ConfigurationBuilder()
+                    .SetBasePath(env.ContentRootPath)
+                    .AddJsonFile("appsettings.json")
+                    .AddEnvironmentVariables();
+
+                Configuration = configurationBuilder.Build();
+            }
+            else
+            {
+                Configuration = configuration;
+            }
         }
 
         private IConfiguration Configuration { get; }

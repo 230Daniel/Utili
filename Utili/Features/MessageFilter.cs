@@ -217,8 +217,15 @@ namespace Utili.Features
             {
                 try
                 {
-                    if(Uri.TryCreate(word, UriKind.Absolute, out Uri uriResult) 
-                                  && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps)) return true;
+                    if (Uri.TryCreate(word, UriKind.Absolute, out Uri uriResult)
+                        && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps))
+                    {
+                        using(MyClient client = new MyClient()) {
+                            client.HeadOnly = true;
+                            client.DownloadString(word);
+                        }
+                        return true;
+                    }
                 }
                 catch { }
             }
@@ -238,6 +245,21 @@ namespace Utili.Features
             {
                 return false;
             }
+        }
+    }
+
+    // https://stackoverflow.com/a/924682/11089240
+    internal class MyClient : WebClient
+    {
+        public bool HeadOnly { get; set; }
+        protected override WebRequest GetWebRequest(Uri address)
+        {
+            WebRequest req = base.GetWebRequest(address);
+            if (HeadOnly && req.Method == "GET")
+            {
+                req.Method = "HEAD";
+            }
+            return req;
         }
     }
 }

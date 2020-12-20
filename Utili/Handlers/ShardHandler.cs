@@ -21,14 +21,17 @@ namespace Utili.Handlers
 
                 if (_client.Shards.All(x => x.ConnectionState == ConnectionState.Connected))
                 {
-                    Database.Sharding.UpdateShardStats(_client.Shards.Count,
-                        _client.Shards.OrderBy(x => x.ShardId).First().ShardId, _client.Guilds.Count);
+                    if (_config.Production)
+                    {
+                        Database.Sharding.UpdateShardStats(_client.Shards.Count,
+                            _client.Shards.OrderBy(x => x.ShardId).First().ShardId, _client.Guilds.Count);
 
-                    _shardStatsUpdater?.Dispose();
-                    _shardStatsUpdater = new Timer(10000);
-                    _shardStatsUpdater.Elapsed += Sharding.Update;
-                    _shardStatsUpdater.Start();
-
+                        _shardStatsUpdater?.Dispose();
+                        _shardStatsUpdater = new Timer(10000);
+                        _shardStatsUpdater.Elapsed += Sharding.Update;
+                        _shardStatsUpdater.Start();
+                    }
+                    
                     _downloadNewRequiredUsersTimer?.Dispose();
                     _downloadNewRequiredUsersTimer = new Timer(60000);
                     _downloadNewRequiredUsersTimer.Elapsed += DownloadNewRequiredUsersTimer_Elapsed;
@@ -37,7 +40,7 @@ namespace Utili.Handlers
 
                 await DownloadRequiredUsersAsync(shard);
 
-                await shard.SetGameAsync($"{_config.Domain} | b.help");
+                await shard.SetGameAsync($"{_config.Domain} | {_config.DefaultPrefix}help");
 
                 _readyShardIds.Add(shard.ShardId);
             });

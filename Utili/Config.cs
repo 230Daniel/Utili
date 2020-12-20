@@ -6,6 +6,7 @@ namespace Utili
     internal class Config
     {
         public string Token { get; set; } = "";
+        public bool Production { get; set; } = true;
         public bool CacheDatabase { get; set; } = true;
         public int LowerShardId { get; set; } = 0;
         public int UpperShardId { get; set; } = 0;
@@ -15,6 +16,7 @@ namespace Utili
         public ulong SystemGuildId { get; set; } = 0;
         public ulong SystemChannelId { get; set; } = 0;
         public ulong StatusChannelId { get; set; } = 0;
+        public string DefaultPrefix { get; set; } = ".";
 
         public static Config Load()
         {

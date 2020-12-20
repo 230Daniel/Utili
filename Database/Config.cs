@@ -3,13 +3,14 @@ using System.Text.Json;
 
 namespace Database
 {
-    class Config
+    public class Config
     {
         public string Server { get; set; } = "";
         public int Port { get; set; }
         public string Database { get; set; } = "";
         public string Username { get; set; } = "";
         public string Password { get; set; } = "";
+        public string DefaultPrefix { get; set; } = "";
 
         public void Load()
         {

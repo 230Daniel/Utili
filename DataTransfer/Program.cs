@@ -8,7 +8,7 @@ namespace DataTransfer
         static void Main(string[] args)
         {
             V1Data.SetConnectionString(Menu.GetString("v1 connection"));
-            Database.Database.Initialise(false);
+            Database.Database.Initialise(false, "");
 
             while (true)
             {
