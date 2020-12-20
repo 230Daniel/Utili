@@ -42,7 +42,7 @@ namespace UtiliSite
                 // {CHECKOUT_SESSION_ID} is a string literal; do not change it!
                 // the actual Session ID is returned in the query parameter when your customer
                 // is redirected to the success page.
-                SuccessUrl = $"https://{HttpContext.Request.Host}/premium/success?session_id={{CHECKOUT_SESSION_ID}}",
+                SuccessUrl = $"https://{HttpContext.Request.Host}/premium/success",
                 CancelUrl = $"https://{HttpContext.Request.Host}/premium",
                 PaymentMethodTypes = new List<string>
                 {
@@ -58,7 +58,8 @@ namespace UtiliSite
                         Quantity = 1,
                     },
                 },
-                Customer = auth.UserRow.CustomerId
+                Customer = auth.UserRow.CustomerId,
+                AllowPromotionCodes = true
             };
             SessionService service = new SessionService(_stripeClient);
             try
@@ -82,17 +83,11 @@ namespace UtiliSite
             }
         }
 
-        [HttpGet("checkout-session")]
-        public async Task<IActionResult> CheckoutSession(string sessionId)
-        {
-            SessionService service = new SessionService(_stripeClient);
-            Session session = await service.GetAsync(sessionId);
-            return Ok(session);
-        }
-
         [HttpPost("customer-portal")]
         public async Task<IActionResult> CustomerPortal([FromBody] CustomerPortalRequest req)
         {
+            await CreateCustomerIfRequiredAsync(HttpContext);
+
             AuthDetails auth = await Auth.GetAuthDetailsAsync(HttpContext, HttpContext.Request.Path);
             if (!auth.Authenticated)
             {

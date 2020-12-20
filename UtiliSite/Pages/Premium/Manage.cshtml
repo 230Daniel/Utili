@@ -1,0 +1,11 @@
+﻿@page
+@model UtiliSite.Pages.Premium.ManageModel
+@{
+    Layout = "Shared/_Layout.cshtml";
+}
+
+<div class="text-white">
+    <p>You have @ViewData["slots"] slots.</p>
+</div>
+
+<button onclick="billingPortal()">Manage Subscriptions</button>

@@ -1,7 +1,7 @@
 ﻿
 var stripe = window.Stripe("pk_test_51Hcvk4B8DUEVWcSDhAutXkeJErW0lmmZvTahVkIxQij2cNun9JXuh3FfIt2QXlOQVO519maTYUn8V0tcT4fnuvMH000mz5kD2V");
 
-function redirectToCheckout(price) {
+function checkout(price) {
 
     var createCheckoutSession = function(priceId) {
         return fetch("/create-checkout-session", {
@@ -26,7 +26,7 @@ function redirectToCheckout(price) {
     });
 }
 
-function redirectToBillingPortal() {
+function billingPortal() {
     fetch('/customer-portal', {
             method: 'POST',
             headers: {

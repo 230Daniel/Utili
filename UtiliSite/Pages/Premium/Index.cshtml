@@ -4,5 +4,12 @@
     Layout = "Shared/_Layout.cshtml";
 }
 
-<button onclick="redirectToCheckout('price_1I0FHsB8DUEVWcSDtDwUZdCa')">Subscribe 1 server</button>
-<button onclick="redirectToCheckout('price_1I0QTMB8DUEVWcSDGE67NIam')">Subscribe 3 servers</button>
+<div class="text-white">
+    <p>
+        <a href="@RedirectHelper.AddToUrl(ViewContext, "manage")">Manage premium servers</a>
+    </p>
+</div>
+
+<button onclick="checkout('price_1I0FHsB8DUEVWcSDtDwUZdCa')">Subscribe (1 slot) £1.50</button>
+<button onclick="checkout('price_1I0QTMB8DUEVWcSDGE67NIam')">Subscribe (3 slots) £5.00</button>
+<button onclick="billingPortal()">Manage Subscriptions</button>

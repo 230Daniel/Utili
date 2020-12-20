@@ -7,7 +7,7 @@ using MySql.Data.MySqlClient;
 
 namespace Database.Data
 {
-    public class Subscriptions
+    public static class Subscriptions
     {
         public static List<SubscriptionsRow> GetRows(string subscriptionId = null, ulong? userId = null)
         {
@@ -48,6 +48,25 @@ namespace Database.Data
         {
             List<SubscriptionsRow> rows = GetRows(subscriptionId);
             return rows.Count > 0 ? rows.First() : new SubscriptionsRow(subscriptionId);
+        }
+
+        public static int GetSubscriptionCount(ulong userId)
+        {
+            MySqlDataReader reader =Sql.GetCommand("SELECT SUM(Slots) FROM Subscriptions WHERE UserId = @UserId AND EndsAt >= @Now;", 
+                new []
+                {
+                    ("UserId", userId.ToString()),
+                    ("Now", Sql.ToSqlDateTime(DateTime.UtcNow))
+                }).ExecuteReader();
+
+            int slots = 0;
+            while (reader.Read())
+            {
+                slots += reader.GetInt32(0);
+            }
+            reader.Close();
+
+            return slots;
         }
 
         public static void SaveRow(SubscriptionsRow row)
