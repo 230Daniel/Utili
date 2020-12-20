@@ -29,7 +29,7 @@ $("form").submit(function(e) {
 
 
 $("form button[type=submit]").click(function() {
-    $("button[type=submit]", $(this).parents("form")).removeAttr("clicked");
+    $("[clicked]").removeAttr("clicked");
     $(this).attr("clicked", "true");
 });
 

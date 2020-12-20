@@ -89,11 +89,11 @@ namespace Utili.Features
                     return IsAttachment(context);
 
                 case 6: // URLs
-                    allowedTypes = "with urls";
+                    allowedTypes = "with valid urls";
                     return IsUrl(context);
 
                 case 7: // URLs or Media
-                    allowedTypes = "with images, videos or urls";
+                    allowedTypes = "with images, videos or valid urls";
                     return IsImage(context) || IsVideo(context) || IsUrl(context);
 
                 case 8: // RegEx
@@ -222,7 +222,7 @@ namespace Utili.Features
                     {
                         using(MyClient client = new MyClient()) {
                             client.HeadOnly = true;
-                            client.DownloadString(word);
+                            string content = client.DownloadString(word);
                         }
                         return true;
                     }
