@@ -28,6 +28,7 @@ namespace UtiliSite
         public async Task<IActionResult> CreateCheckoutSession([FromBody] CreateCheckoutSessionRequest req)
         {
             await CreateCustomerIfRequiredAsync(HttpContext);
+
             AuthDetails auth = await Auth.GetAuthDetailsAsync(HttpContext, HttpContext.Request.Path);
             if (!auth.Authenticated)
             {
@@ -132,21 +133,13 @@ namespace UtiliSite
         public async Task<IActionResult> Webhook()
         {
             string json = await new StreamReader(HttpContext.Request.Body).ReadToEndAsync();
-            Event stripeEvent;
-            try
-            {
-                stripeEvent = EventUtility.ConstructEvent(
-                    json,
-                    Request.Headers["Stripe-Signature"],
-                    _config.StripeWebhookSecret
-                );
-                Console.WriteLine($"Webhook notification with type: {stripeEvent.Type} found for {stripeEvent.Id}");
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine($"Something failed {e}");
-                return BadRequest();
-            }
+            Event stripeEvent = EventUtility.ConstructEvent(
+                json,
+                Request.Headers["Stripe-Signature"],
+                _config.StripeWebhookSecret
+            );
+
+            // Webhooks are retried once an hour for up to 3 days or until a 200 status code is returned.
 
             switch (stripeEvent.Type) {
                 case "invoice.paid":
@@ -180,19 +173,6 @@ namespace UtiliSite
             }
 
             return Ok();
-        }
-
-        public static async Task SetSlotCountAsync(string productId, int slots)
-        {
-            ProductUpdateOptions options = new ProductUpdateOptions
-            {
-                Metadata = new Dictionary<string, string>
-                {
-                    { "slots", slots.ToString() }
-                }
-            };
-            ProductService service = new ProductService(_stripeClient);
-            await service.UpdateAsync(productId, options);
         }
     }
 

@@ -1,37 +1,8 @@
 ﻿@page
 @model UtiliSite.Pages.Premium.IndexModel
 @{
+    Layout = "Shared/_Layout.cshtml";
 }
 
-<button id="checkout">Subscribe</button>
-
-<script type="text/javascript">
-    var stripe = window.Stripe("@(ViewData["stripepk"])");
-
-    var createCheckoutSession = function(priceId) {
-        return fetch("/create-checkout-session", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                priceId: priceId
-            })
-        }).then(function(result) {
-            return result.json();
-        });
-    };
-
-    document
-        .getElementById("checkout")
-        .addEventListener("click", function(evt) {
-            createCheckoutSession("price_1I0FHsB8DUEVWcSDtDwUZdCa").then(function(data) {
-                // Call Stripe.js method to redirect to the new Checkout page
-                stripe
-                    .redirectToCheckout({
-                        sessionId: data.sessionId
-                    })
-                    .then(handleResult);
-            });
-        });
-</script>
+<button onclick="redirectToCheckout('price_1I0FHsB8DUEVWcSDtDwUZdCa')">Subscribe 1 server</button>
+<button onclick="redirectToCheckout('price_1I0QTMB8DUEVWcSDGE67NIam')">Subscribe 3 servers</button>

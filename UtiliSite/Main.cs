@@ -14,8 +14,6 @@ namespace UtiliSite
             PaymentsController.Initialise();
             Database.Database.Initialise(false);
             await DiscordModule.InitialiseAsync();
-
-            await PaymentsController.SetSlotCountAsync("prod_IbSCa2rWH5F9F0", 1);
         }
     }
 }

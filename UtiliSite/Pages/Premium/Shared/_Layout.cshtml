@@ -1,14 +1,18 @@
-﻿@using Discord.Rest;
-@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor;
+﻿@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor;
 @{
     AuthDetails auth;
     if (ViewData["auth"] == null)
     {
-        auth = await Auth.GetOptionalGlobalAuthDetailsAsync(HttpContextAccessor.HttpContext);
+        auth = await Auth.GetAuthDetailsAsync(HttpContextAccessor.HttpContext, HttpContextAccessor.HttpContext.Request.Path);
     }
     else
     {
         auth = (AuthDetails) ViewData["auth"];
+    }
+    if (!auth.Authenticated)
+    {
+        IgnoreBody();
+        return;
     }
 }
 
@@ -20,6 +24,7 @@
     <title>@ViewData["Title"]</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" />
+    <script src="https://js.stripe.com/v3/" type="text/javascript"></script>
 </head>
 <body onload="onLoad()">
 <header>
@@ -86,6 +91,8 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/js/stripe.js" asp-append-version="true"></script>
+    <script src="https://js.stripe.com/v3/" type="text/javascript"></script>
 
     @RenderSection("Scripts", required: false)
 
