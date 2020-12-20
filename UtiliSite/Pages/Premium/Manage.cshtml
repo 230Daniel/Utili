@@ -1,11 +1,14 @@
 ﻿@page
+@using Database.Data; 
 @model UtiliSite.Pages.Premium.ManageModel
 @{
     Layout = "Shared/_Layout.cshtml";
+
+    List<PremiumRow> rows = (List<PremiumRow>) ViewData["rows"];
 }
 
 <div class="text-white">
-    <p>You have @ViewData["slots"] slots.</p>
+    <p>You have @rows.Count premium server slots.</p>
 </div>
 
 <button onclick="billingPortal()">Manage Subscriptions</button>

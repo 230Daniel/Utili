@@ -16,7 +16,7 @@ namespace UtiliSite.Pages.Premium
             ViewData["auth"] = auth;
             if (!auth.Authenticated) return;
 
-
+            ViewData["rows"] = Database.Data.Premium.GetUserRows(auth.User.Id);
         }
     }
 }

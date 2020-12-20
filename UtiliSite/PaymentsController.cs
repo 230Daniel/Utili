@@ -37,11 +37,6 @@ namespace UtiliSite
 
             SessionCreateOptions options = new SessionCreateOptions
             {
-                // See https://stripe.com/docs/api/checkout/sessions/create
-                // for additional parameters to pass.
-                // {CHECKOUT_SESSION_ID} is a string literal; do not change it!
-                // the actual Session ID is returned in the query parameter when your customer
-                // is redirected to the success page.
                 SuccessUrl = $"https://{HttpContext.Request.Host}/premium/success",
                 CancelUrl = $"https://{HttpContext.Request.Host}/premium",
                 PaymentMethodTypes = new List<string>
@@ -134,6 +129,8 @@ namespace UtiliSite
                 _config.StripeWebhookSecret
             );
 
+            Console.WriteLine($"{DateTime.Now} Stripe Webhook: {stripeEvent.Type}");
+
             // Webhooks are retried once an hour for up to 3 days or until a 200 status code is returned.
 
             switch (stripeEvent.Type) {
@@ -143,7 +140,6 @@ namespace UtiliSite
                     string jsonInvoice = stripeEvent.Data.Object.ToString();
                     jsonInvoice = jsonInvoice.Substring(jsonInvoice.IndexOf('{'));
                     Invoice invoice = Invoice.FromJson(jsonInvoice);
-                    Console.WriteLine(jsonInvoice);
 
                     SubscriptionsRow row = Subscriptions.GetRow(invoice.SubscriptionId);
                     if (row.New)
