@@ -113,6 +113,7 @@ namespace UtiliSite
         public DiscordRestClient Client { get; set; }
         public RestSelfUser User { get; set; }
         public RestGuild Guild { get; set; }
+        public UserRow UserRow { get; set; }
 
         public AuthDetails(bool authenticated, DiscordRestClient client, RestSelfUser user, HttpContext httpContext)
         {
@@ -120,19 +121,16 @@ namespace UtiliSite
             Client = client;
             User = user;
 
-            _ = Task.Run(() =>
-            {
-                UserRow userRow = Users.GetRow(user.Id);
-                DateTime previousVisit = userRow.LastVisit;
-                userRow.Email = user.Email;
+            UserRow = Users.GetRow(user.Id);
+            DateTime previousVisit = UserRow.LastVisit;
+            UserRow.Email = user.Email;
                 
-                if (previousVisit < DateTime.UtcNow - TimeSpan.FromMinutes(30))
-                {
-                    userRow.LastVisit = DateTime.UtcNow;
-                    Users.SaveRow(userRow);
-                    Users.AddNewVisit(user.Id);
-                }
-            });
+            if (previousVisit < DateTime.UtcNow - TimeSpan.FromMinutes(30))
+            {
+                UserRow.LastVisit = DateTime.UtcNow;
+                Users.SaveRow(UserRow);
+                Users.AddNewVisit(user.Id);
+            }
         }
 
         public AuthDetails(bool authenticated)

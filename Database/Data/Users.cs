@@ -30,7 +30,8 @@ namespace Database.Data
                     reader.GetUInt64(0),
                     reader.GetString(1),
                     reader.GetDateTime(2),
-                    reader.GetInt32(3)));
+                    reader.GetInt32(3),
+                    reader.IsDBNull(4) ? null : reader.GetString(4)));
             }
 
             reader.Close();
@@ -50,12 +51,13 @@ namespace Database.Data
 
             if (row.New)
             {
-                command = Sql.GetCommand("INSERT INTO Users (UserId, Email, LastVisit, Visits) VALUES (@UserId, @Email, @LastVisit, @Visits);",
+                command = Sql.GetCommand("INSERT INTO Users (UserId, Email, LastVisit, Visits, CustomerId) VALUES (@UserId, @Email, @LastVisit, @Visits, @CustomerId);",
                     new [] {
                         ("UserId", row.UserId.ToString()),
                         ("Email", row.Email), 
                         ("LastVisit", Sql.ToSqlDateTime(row.LastVisit)),
-                        ("Visits", row.Visits.ToString())
+                        ("Visits", row.Visits.ToString()),
+                        ("CustomerId", row.CustomerId)
                     });
 
                 command.ExecuteNonQuery();
@@ -65,11 +67,13 @@ namespace Database.Data
             }
             else
             {
-                command = Sql.GetCommand("UPDATE Users SET Email = @Email, LastVisit = @LastVisit WHERE UserId = @UserId;",
+                command = Sql.GetCommand("UPDATE Users SET Email = @Email, LastVisit = @LastVisit, CustomerId = @CustomerId WHERE UserId = @UserId;",
                     new [] {
                         ("UserId", row.UserId.ToString()),
                         ("Email", row.Email), 
-                        ("LastVisit", Sql.ToSqlDateTime(row.LastVisit))});
+                        ("LastVisit", Sql.ToSqlDateTime(row.LastVisit)),
+                        ("CustomerId", row.CustomerId)
+                    });
 
                 command.ExecuteNonQuery();
                 command.Connection.Close();
@@ -94,6 +98,7 @@ namespace Database.Data
         public string Email { get; set; }
         public DateTime LastVisit { get; set; }
         public int Visits { get; set; }
+        public string CustomerId { get; set; }
 
         private UserRow()
         {
@@ -104,9 +109,10 @@ namespace Database.Data
             New = true;
             UserId = userId;
             LastVisit = DateTime.MinValue;
+            CustomerId = null;
         }
 
-        public static UserRow FromDatabase(ulong userId, string email, DateTime lastVisit, int visits)
+        public static UserRow FromDatabase(ulong userId, string email, DateTime lastVisit, int visits, string customerId)
         {
             return new UserRow
             {
@@ -114,7 +120,8 @@ namespace Database.Data
                 UserId = userId,
                 Email = email,
                 LastVisit = lastVisit,
-                Visits = visits
+                Visits = visits,
+                CustomerId = customerId
             };
         }
     }

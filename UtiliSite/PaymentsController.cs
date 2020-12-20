@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -11,6 +12,7 @@ using Newtonsoft.Json;
 using static UtiliSite.Main;
 using Stripe;
 using Stripe.Checkout;
+using Database.Data;
 
 namespace UtiliSite
 {
@@ -26,6 +28,13 @@ namespace UtiliSite
         [HttpPost("create-checkout-session")]
         public async Task<IActionResult> CreateCheckoutSession([FromBody] CreateCheckoutSessionRequest req)
         {
+            await CreateCustomerIfRequiredAsync(HttpContext);
+            AuthDetails auth = await Auth.GetAuthDetailsAsync(HttpContext, HttpContext.Request.Path);
+            if (!auth.Authenticated)
+            {
+                return Forbid();
+            }
+
             SessionCreateOptions options = new SessionCreateOptions
             {
                 // See https://stripe.com/docs/api/checkout/sessions/create
@@ -49,6 +58,7 @@ namespace UtiliSite
                         Quantity = 1,
                     },
                 },
+                Customer = auth.UserRow.CustomerId
             };
             SessionService service = new SessionService(_stripeClient);
             try
@@ -83,25 +93,40 @@ namespace UtiliSite
         [HttpPost("customer-portal")]
         public async Task<IActionResult> CustomerPortal([FromBody] CustomerPortalRequest req)
         {
-            // For demonstration purposes, we're using the Checkout session to retrieve the customer ID.
-            // Typically this is stored alongside the authenticated user in your database.
-            string checkoutSessionId = req.SessionId;
-            SessionService checkoutService = new SessionService(_stripeClient);
-            Session checkoutSession = await checkoutService.GetAsync(checkoutSessionId);
-
-            // This is the URL to which your customer will return after
-            // they are done managing billing in the Customer Portal.
-            string returnUrl = $"https://{HttpContext.Request.Host}/premium";
+            AuthDetails auth = await Auth.GetAuthDetailsAsync(HttpContext, HttpContext.Request.Path);
+            if (!auth.Authenticated)
+            {
+                return Forbid();
+            }
 
             Stripe.BillingPortal.SessionCreateOptions options = new Stripe.BillingPortal.SessionCreateOptions
             {
-                Customer = checkoutSession.CustomerId,
-                ReturnUrl = returnUrl,
+                Customer = auth.UserRow.CustomerId,
+                ReturnUrl = $"https://{HttpContext.Request.Host}/premium"
             };
+
             Stripe.BillingPortal.SessionService service = new Stripe.BillingPortal.SessionService(_stripeClient);
             Stripe.BillingPortal.Session session = await service.CreateAsync(options);
-
             return Ok(session);
+        }
+
+        public async Task CreateCustomerIfRequiredAsync(HttpContext httpContext)
+        {
+            AuthDetails auth = await Auth.GetAuthDetailsAsync(httpContext, null);
+            if (!auth.Authenticated) return;
+            if (!string.IsNullOrEmpty(auth.UserRow.CustomerId)) return;
+
+            CustomerCreateOptions options = new CustomerCreateOptions
+            {
+                Description = $"User Id: {auth.User.Id}",
+                Email = auth.User.Email
+            };
+
+            CustomerService service = new CustomerService(_stripeClient);
+            Customer customer = await service.CreateAsync(options);
+
+            auth.UserRow.CustomerId = customer.Id;
+            Users.SaveRow(auth.UserRow);
         }
 
         [HttpPost("stripe-webhook")]
@@ -124,15 +149,20 @@ namespace UtiliSite
                 return BadRequest();
             }
 
+            Console.WriteLine(System.Text.Json.JsonSerializer.Serialize(stripeEvent, new JsonSerializerOptions { WriteIndented = true } ));
+
             switch (stripeEvent.Type) {
+
                 case "checkout.session.completed":
                     // Payment is successful and the subscription is created.
                     // You should provision the subscription.
+
                     break;
                 case "invoice.paid":
                     // Continue to provision the subscription as payments continue to be made.
                     // Store the status in your database and check when a user accesses your service.
                     // This approach helps you avoid hitting rate limits.
+
                     break;
                 case "invoice.payment_failed":
                     // The payment failed or the customer does not have a valid payment method.
@@ -195,6 +225,14 @@ namespace UtiliSite
     {
         [JsonProperty("sessionId")]
         public string SessionId { get; set; }
+    }
+
+    public class InvoiceObject
+    {
+        [JsonProperty("customer")]
+        public string CustomerId { get; set; }
+
+
     }
 
     #endregion
