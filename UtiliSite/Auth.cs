@@ -13,11 +13,11 @@ namespace UtiliSite
 {
     public static class Auth
     {
-        public static async Task<AuthDetails> GetAuthDetailsAsync(HttpContext httpContext, string redirectUrl, string unauthorisedGuildUrl = "/dashboard")
+        public static async Task<AuthDetails> GetAuthDetailsAsync(HttpContext httpContext)
         {
             AuthenticationProperties authProperties = new AuthenticationProperties
             {
-                RedirectUri = redirectUrl,
+                RedirectUri = httpContext.Request.Path,
                 AllowRefresh = true,
                 IsPersistent = true
             };
@@ -70,21 +70,21 @@ namespace UtiliSite
                         else
                         {
                             auth.Authenticated = false;
-                            httpContext.Response.Redirect(unauthorisedGuildUrl);
+                            httpContext.Response.Redirect("/dashboard");
                             return auth;
                         }
                     }
                     else
                     {
                         auth.Authenticated = false;
-                        httpContext.Response.Redirect(unauthorisedGuildUrl);
+                        httpContext.Response.Redirect("/dashboard");
                         return auth;
                     }
                 }
                 else
                 {
                     auth.Authenticated = false;
-                    httpContext.Response.Redirect(unauthorisedGuildUrl);
+                    httpContext.Response.Redirect("/dashboard");
                     return auth;
                 }
             }

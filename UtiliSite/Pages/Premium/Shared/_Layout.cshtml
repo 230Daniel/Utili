@@ -3,7 +3,7 @@
     AuthDetails auth;
     if (ViewData["auth"] == null)
     {
-        auth = await Auth.GetAuthDetailsAsync(HttpContextAccessor.HttpContext, HttpContextAccessor.HttpContext.Request.Path);
+        auth = await Auth.GetAuthDetailsAsync(HttpContextAccessor.HttpContext);
     }
     else
     {

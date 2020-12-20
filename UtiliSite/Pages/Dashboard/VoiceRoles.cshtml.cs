@@ -11,7 +11,7 @@ namespace UtiliSite.Pages.Dashboard
     {
         public async Task OnGet()
         {
-            AuthDetails auth = await Auth.GetAuthDetailsAsync(HttpContext, HttpContext.Request.Path);
+            AuthDetails auth = await Auth.GetAuthDetailsAsync(HttpContext);
             if(!auth.Authenticated) return;
             ViewData["user"] = auth.User;
             ViewData["guild"] = auth.Guild;
@@ -33,7 +33,7 @@ namespace UtiliSite.Pages.Dashboard
 
         public async Task OnPost()
         {
-            AuthDetails auth = await Auth.GetAuthDetailsAsync(HttpContext, HttpContext.Request.Path);
+            AuthDetails auth = await Auth.GetAuthDetailsAsync(HttpContext);
 
             if (!auth.Authenticated)
             {
@@ -53,7 +53,7 @@ namespace UtiliSite.Pages.Dashboard
 
         public async Task OnPostAdd()
         {
-            AuthDetails auth = await Auth.GetAuthDetailsAsync(HttpContext, HttpContext.Request.Path);
+            AuthDetails auth = await Auth.GetAuthDetailsAsync(HttpContext);
 
             if (!auth.Authenticated)
             {
@@ -78,7 +78,7 @@ namespace UtiliSite.Pages.Dashboard
 
         public async Task OnPostRemove()
         {
-            AuthDetails auth = await Auth.GetAuthDetailsAsync(HttpContext, HttpContext.Request.Path);
+            AuthDetails auth = await Auth.GetAuthDetailsAsync(HttpContext);
 
             if (!auth.Authenticated)
             {

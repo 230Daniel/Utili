@@ -11,7 +11,7 @@ namespace UtiliSite.Pages.Premium
     {
         public async Task OnGet()
         {
-            AuthDetails auth = await Auth.GetAuthDetailsAsync(HttpContext, HttpContext.Request.Path);
+            AuthDetails auth = await Auth.GetAuthDetailsAsync(HttpContext);
             ViewData["auth"] = auth;
             if (!auth.Authenticated)
             {

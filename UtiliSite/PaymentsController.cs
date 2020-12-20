@@ -29,7 +29,7 @@ namespace UtiliSite
         {
             await CreateCustomerIfRequiredAsync(HttpContext);
 
-            AuthDetails auth = await Auth.GetAuthDetailsAsync(HttpContext, HttpContext.Request.Path);
+            AuthDetails auth = await Auth.GetAuthDetailsAsync(HttpContext);
             if (!auth.Authenticated)
             {
                 return Forbid();
@@ -88,7 +88,7 @@ namespace UtiliSite
         {
             await CreateCustomerIfRequiredAsync(HttpContext);
 
-            AuthDetails auth = await Auth.GetAuthDetailsAsync(HttpContext, HttpContext.Request.Path);
+            AuthDetails auth = await Auth.GetAuthDetailsAsync(HttpContext);
             if (!auth.Authenticated)
             {
                 return Forbid();
@@ -107,7 +107,7 @@ namespace UtiliSite
 
         public async Task CreateCustomerIfRequiredAsync(HttpContext httpContext)
         {
-            AuthDetails auth = await Auth.GetAuthDetailsAsync(httpContext, null);
+            AuthDetails auth = await Auth.GetAuthDetailsAsync(httpContext);
             if (!auth.Authenticated) return;
             if (!string.IsNullOrEmpty(auth.UserRow.CustomerId)) return;
 
