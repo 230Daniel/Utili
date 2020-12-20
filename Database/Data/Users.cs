@@ -9,7 +9,7 @@ namespace Database.Data
 {
     public class Users
     {
-        public static List<UserRow> GetRows(ulong? userId = null)
+        public static List<UserRow> GetRows(ulong? userId = null, string customerId = null)
         {
             List<UserRow> matchedRows = new List<UserRow>();
 
@@ -20,6 +20,12 @@ namespace Database.Data
             {
                 command += " AND UserId = @UserId";
                 values.Add(("UserId", userId.Value.ToString()));
+            }
+
+            if (!string.IsNullOrEmpty(customerId))
+            {
+                command += " AND CustomerId = @CustomerId";
+                values.Add(("CustomerId", customerId));
             }
 
             MySqlDataReader reader = Sql.GetCommand(command, values.ToArray()).ExecuteReader();
@@ -43,6 +49,12 @@ namespace Database.Data
         {
             List<UserRow> rows = GetRows(userId);
             return rows.Count > 0 ? rows.First() : new UserRow(userId);
+        }
+
+        public static UserRow GetRow(string customerId)
+        {
+            List<UserRow> rows = GetRows(customerId: customerId);
+            return rows.Count > 0 ? rows.First() : null;
         }
 
         public static void SaveRow(UserRow row)

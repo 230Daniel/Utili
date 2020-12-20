@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -149,32 +148,51 @@ namespace UtiliSite
                 return BadRequest();
             }
 
-            Console.WriteLine(System.Text.Json.JsonSerializer.Serialize(stripeEvent, new JsonSerializerOptions { WriteIndented = true } ));
-
             switch (stripeEvent.Type) {
-
-                case "checkout.session.completed":
-                    // Payment is successful and the subscription is created.
-                    // You should provision the subscription.
-
-                    break;
                 case "invoice.paid":
-                    // Continue to provision the subscription as payments continue to be made.
-                    // Store the status in your database and check when a user accesses your service.
-                    // This approach helps you avoid hitting rate limits.
+                    // Triggers on first payment and following payments
 
-                    break;
-                case "invoice.payment_failed":
-                    // The payment failed or the customer does not have a valid payment method.
-                    // The subscription becomes past_due. Notify your customer and send them to the
-                    // customer portal to update their payment information.
-                    break;
-                default:
-                    // Unhandled event type
+                    string jsonInvoice = stripeEvent.Data.Object.ToString();
+                    jsonInvoice = jsonInvoice.Substring(jsonInvoice.IndexOf('{'));
+                    Invoice invoice = Invoice.FromJson(jsonInvoice);
+                    Console.WriteLine(jsonInvoice);
+
+                    SubscriptionsRow row = Subscriptions.GetRow(invoice.SubscriptionId);
+                    if (row.New)
+                    {
+                        ProductService service = new ProductService();
+                        Product product = await service.GetAsync(invoice.Lines.Data.First().Plan.ProductId);
+
+                        UserRow user = Users.GetRow(invoice.CustomerId);
+                        row.Slots = int.Parse(product.Metadata["slots"]);
+                        row.UserId = user.UserId;
+                        row.EndsAt = DateTime.UtcNow.AddDays(30).AddHours(6);
+
+                        Subscriptions.SaveRow(row);
+                    }
+                    else
+                    {
+                        row.EndsAt = DateTime.UtcNow.AddDays(30).AddHours(6);
+                        Subscriptions.SaveRow(row);
+                    }
+
                     break;
             }
 
             return Ok();
+        }
+
+        public static async Task SetSlotCountAsync(string productId, int slots)
+        {
+            ProductUpdateOptions options = new ProductUpdateOptions
+            {
+                Metadata = new Dictionary<string, string>
+                {
+                    { "slots", slots.ToString() }
+                }
+            };
+            ProductService service = new ProductService(_stripeClient);
+            await service.UpdateAsync(productId, options);
         }
     }
 
@@ -232,7 +250,8 @@ namespace UtiliSite
         [JsonProperty("customer")]
         public string CustomerId { get; set; }
 
-
+        [JsonProperty("subscription")]
+        public string SubscriptionId { get; set; }
     }
 
     #endregion
