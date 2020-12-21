@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -119,6 +120,58 @@ namespace UtiliSite
             Users.SaveRow(auth.UserRow);
         }
 
+        public static async Task<(string, bool)> GetCustomerCurrencyAsync(string customerId, HttpContext httpContext)
+        {
+            if (!string.IsNullOrEmpty(customerId))
+            {
+                CustomerService service = new CustomerService(_stripeClient);
+                Customer customer = await service.GetAsync(customerId);
+                if(!string.IsNullOrEmpty(customer.Currency)) return (customer.Currency, true);
+            }
+
+            return (await GetCustomerCurrencyByIpAsync(httpContext), false);
+        }
+
+        private static async Task<string> GetCustomerCurrencyByIpAsync(HttpContext httpContext)
+        {
+            string[] gbp = {
+                "GB", "IM", "JE", "GG"
+            };
+            string[] eur = {
+                "AX", "EU", "AD", "AT", "BE", "CY", "EE", "FI", "FR", "TF", "DE", "GR", "GP", "IE", "IT", "LV", "LT",
+                "LU", "MT", "GF", "MQ", "YT", "MC", "ME", "NL", "PT", "RE", "BL", "MF", "PM", "SM", "SK", "SI", "ES",
+                "VA"
+            };
+            string[] usd = {
+                "US", "AS", "IO", "VG", "BQ", "EC", "SV", "GU", "HT", "MH", "FM", "MP", "PW", "PA", "PR", "TL", "TC", 
+                "VI", "UM"
+            };
+
+            HttpClient client = new HttpClient();
+            string response = await client.GetStringAsync($"https://ipinfo.io/{GetIpAddress(httpContext)}");
+            string country = JsonConvert.DeserializeObject<IpResponse>(response).Country;
+
+            if (gbp.Contains(country)) return "gbp";
+            if (eur.Contains(country)) return "eur";
+            return "usd";
+        }
+
+        private static string GetIpAddress(HttpContext context)
+        {
+            string ipAddress = (string) context.Request.RouteValues.GetValueOrDefault("HTTP_X_FORWARDED_FOR");
+
+            if (!string.IsNullOrEmpty(ipAddress))
+            {
+                string[] addresses = ipAddress.Split(',');
+                if (addresses.Length != 0)
+                {
+                    return addresses[0];
+                }
+            }
+
+            return (string) context.Request.RouteValues.GetValueOrDefault("REMOTE_ADDR");
+        }
+
         [HttpPost("stripe-webhook")]
         public async Task<IActionResult> Webhook()
         {
@@ -223,6 +276,12 @@ namespace UtiliSite
 
         [JsonProperty("subscription")]
         public string SubscriptionId { get; set; }
+    }
+
+    public class IpResponse
+    {
+        [JsonProperty("country")]
+        public string Country { get; set; }
     }
 
     #endregion

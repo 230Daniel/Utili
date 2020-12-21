@@ -9,9 +9,15 @@ namespace UtiliSite.Pages.Premium
 {
     public class IndexModel : PageModel
     {
-        public void OnGet()
+        public async Task OnGet()
         {
-            ViewData["stripepk"] = Main._config.StripePublicKey;
+            AuthDetails auth = await Auth.GetAuthDetailsAsync(HttpContext);
+            ViewData["auth"] = auth;
+            if(!auth.Authenticated) return;
+
+            (string, bool) currency = await PaymentsController.GetCustomerCurrencyAsync(auth.UserRow.CustomerId, HttpContext);
+            ViewData["currency"] = currency.Item1;
+            ViewData["forceCurrency"] = currency.Item2;
         }
     }
 }
