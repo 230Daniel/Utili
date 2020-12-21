@@ -545,3 +545,8 @@ tr a {
     border-top-width: 0;
     border-bottom: 4px solid #fff;
 }
+
+.input-group:hover > *:not(.card-strong) {
+    background-color: #f5f5f5;
+}
+
