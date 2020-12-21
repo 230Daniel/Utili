@@ -20,7 +20,7 @@ function checkout(slots, currency) {
 
         case 5:
             if (currency === "gbp") price = "price_1I0bcOB8DUEVWcSDgqZAKvV1";
-            if (currency === "usd") price = "price_1I0beaB8DUEVWcSDhsBWJoVx";
+            if (currency === "usd") price = "price_1I0cR7B8DUEVWcSDnikkbgGr";
             if (currency === "eur") price = "price_1I0beqB8DUEVWcSDJaeyovfY";
             break;
     }
