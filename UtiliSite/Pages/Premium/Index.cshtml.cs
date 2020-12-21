@@ -18,6 +18,7 @@ namespace UtiliSite.Pages.Premium
             (string, bool) currency = await PaymentsController.GetCustomerCurrencyAsync(auth.UserRow.CustomerId, HttpContext);
             ViewData["currency"] = currency.Item1;
             ViewData["forceCurrency"] = currency.Item2;
+            ViewData["showCurrency"] = true;
         }
     }
 }

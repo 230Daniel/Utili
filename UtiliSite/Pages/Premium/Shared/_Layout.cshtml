@@ -56,26 +56,49 @@
 
                 @if (SidebarHelper.GetIsActive(ViewContext, "error") != "active")
                 {
-                    <div class="navbar-nav flex-grow-1" style="justify-content: flex-end;">
-                        @if (auth.User != null)
-                        {
-                            <div class="dropdown noverticalpadding">
-                                <a class="nav-link text-dark dropdown-toggle noverticalpadding" style="align-items: center; display: flex;" data-toggle="dropdown" role="button" id="userDropdown" aria-haspopup="true" aria-expanded="false" href="#">
-                                    <img src="@(auth.User.GetAvatarUrl(size: 32))" class="user-icon" alt="User Icon" style="margin-right: 8px;">
-                                    @(auth.User.Username)
-                                </a>
-                                <div class="dropdown-menu dropdown-menu-left noverticalpadding" style="border: 0;" aria-labelledby="userDropdown">
-                                    <a class="dropdown-item" id="signoutDropdown" asp-area="" asp-page="/signout">Sign out</a>
-                                </div>
-                            </div>
-                        }
-                        else
-                        {
-                            <form>
-                                <a class="nav-link text-dark" asp-area="" asp-page="/signin">Sign in</a>
-                            </form>
-                        }
+            <div class="navbar-nav flex-grow-1" style="justify-content: flex-end;">
+                @if (ViewData["showCurrency"] != null && (bool)ViewData["showCurrency"])
+                {
+                    string currency = (string)ViewData["currency"];
+                    bool forceCurrency = (bool)ViewData["forceCurrency"];
+
+                    if (forceCurrency)
+                    {
+                        <div class="nav-item">
+                            <a class="nav-link text-dark" style="align-items: center; display: flex;" href onclick="alert('Once you have made a purchase your currency can not be changed.')">
+                                @currency.ToUpper()
+                            </a>
+                        </div>
+                    }
+                    else
+                    {
+                        <select class="custom-select select-currency" id="currencySelect" onchange="changeCurrency()" @(forceCurrency ? "disabled" : "")>
+                            <!option value="gbp" @(currency == "gbp" ? "selected" : "")>GBP</!option>
+                            <!option value="usd" @(currency == "usd" ? "selected" : "")>USD</!option>
+                            <!option value="eur" @(currency == "eur" ? "selected" : "")>EUR</!option>
+                        </select>
+                    }
+                }
+
+                @if (auth.User != null)
+                {
+                    <div class="dropdown noverticalpadding">
+                        <a class="nav-link text-dark dropdown-toggle noverticalpadding" style="align-items: center; display: flex;" data-toggle="dropdown" role="button" id="userDropdown" aria-haspopup="true" aria-expanded="false" href="#">
+                            <img src="@(auth.User.GetAvatarUrl(size: 32))" class="user-icon" alt="User Icon" style="margin-right: 8px;">
+                            @(auth.User.Username)
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-left noverticalpadding" style="border: 0;" aria-labelledby="userDropdown">
+                            <a class="dropdown-item" id="signoutDropdown" asp-area="" asp-page="/signout">Sign out</a>
+                        </div>
                     </div>
+                }
+                else
+                {
+                    <form>
+                        <a class="nav-link text-dark" asp-area="" asp-page="/signin">Sign in</a>
+                    </form>
+                }
+            </div>
                 }
                 </div>
             </div>

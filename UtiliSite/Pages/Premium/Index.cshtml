@@ -2,8 +2,6 @@
 @model UtiliSite.Pages.Premium.IndexModel
 @{
     Layout = "Shared/_Layout.cshtml";
-    string currency = (string) ViewData["currency"];
-    bool forceCurrency = (bool) ViewData["forceCurrency"];
 }
 
 <div class="text-white">
@@ -13,14 +11,6 @@
 </div>
 
 <button onclick="billingPortal()">Manage Subscriptions</button>
-
-<div style="float: right;">
-    <select class="custom-select select-currency" id="currencySelect" onchange="changeCurrency()" @(forceCurrency ? "disabled" : "")>
-        <!option value="gbp" @(currency == "gbp" ? "selected" : "")>GBP</!option>
-        <!option value="usd" @(currency == "usd" ? "selected" : "")>USD</!option>
-        <!option value="eur" @(currency == "eur" ? "selected" : "")>EUR</!option>
-    </select>
-</div>
 
 <div class="plan-container" align="center" vertical-align="top">
     <div class="plan">
@@ -103,10 +93,11 @@
 
 <style>
     .select-currency {
-        border-radius: 5px !important;
-        border: 2px solid #43B581 !important;
+        border: 0;
         background-color: inherit !important;
-        color: #43B581;
+        color: black;
+        width: 75px;
+        cursor: pointer;
     }
 
     .select-currency option {
@@ -115,7 +106,6 @@
 
     .custom-select:disabled {
         color: #6c757d;
-        border: 2px solid #6c757d !important;
     }
 
     .select-currency :after {
