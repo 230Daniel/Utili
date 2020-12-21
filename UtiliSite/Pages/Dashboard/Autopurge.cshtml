@@ -13,8 +13,8 @@
     ViewData["heading"] = "Autopurge";
     ViewData["subheading"] = "Automatically delete messages";
 
-    if (premium) { ViewData["detailed"] = "Every channel is purged once per 10 seconds.\nMessages are deleted when they're older than the timespan you set, or when they are 500 messages up in the channel."; }
-    else { ViewData["detailed"] = "One channel is purged every 30 seconds.\nMessages are deleted when they're older than the timespan you set, or when they are 100 messages up in the channel.\nGet premium to upgrade this feature."; }
+    if (premium) { ViewData["detailed"] = "Every channel is purged once per 10 seconds.\nMessages are deleted when they're older than the timespan you set, or when they're 500 messages up in the channel."; }
+    else { ViewData["detailed"] = "One channel is purged every 30 seconds.\nMessages are deleted when they're older than the timespan you set, or when they're 100 messages up in the channel.\nGet premium to upgrade this feature."; }
 
     List<AutopurgeRow> rows = (List<AutopurgeRow>) ViewData["autopurgeRows"];
     List<RestTextChannel> channels = (List<RestTextChannel>) ViewData["channels"];
