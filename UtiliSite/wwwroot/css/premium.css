@@ -80,6 +80,10 @@
     height: 100%;
 }
 
+.plan-highlighted .plan-content {
+    padding-top: 40px;
+}
+
 .plan-title {
     font-size: 30px;
     color: white;
@@ -97,6 +101,10 @@
     margin-bottom: -10px;
 }
 
+.plan-highlighted .plan-price {
+    margin-top: 25px;
+}
+
 .plan-price-small {
     color: lightgray;
     font-size: 20px;
@@ -104,9 +112,14 @@
 
 .plan-price-per {
     margin-top: 48px;
+    margin-bottom: 0;
     font-size: 16px;
     text-align: center;
     color: gray;
+}
+
+.plan-highlighted .plan-price-per {
+    margin-top: 38px;
 }
 
 .plan-order-button {

@@ -13,6 +13,7 @@ using static UtiliSite.Main;
 using Stripe;
 using Stripe.Checkout;
 using Database.Data;
+using System.Web;
 
 namespace UtiliSite
 {
@@ -120,7 +121,7 @@ namespace UtiliSite
             Users.SaveRow(auth.UserRow);
         }
 
-        public static async Task<(string, bool)> GetCustomerCurrencyAsync(string customerId, HttpContext httpContext)
+        public static async Task<(string, bool)> GetCustomerCurrencyAsync(string customerId, HttpRequest request)
         {
             if (!string.IsNullOrEmpty(customerId))
             {
@@ -129,10 +130,10 @@ namespace UtiliSite
                 if(!string.IsNullOrEmpty(customer.Currency)) return (customer.Currency, true);
             }
 
-            return (await GetCustomerCurrencyByIpAsync(httpContext), false);
+            return (await GetCustomerCurrencyByIpAsync(request), false);
         }
 
-        private static async Task<string> GetCustomerCurrencyByIpAsync(HttpContext httpContext)
+        private static async Task<string> GetCustomerCurrencyByIpAsync(HttpRequest request)
         {
             string[] gbp = {
                 "GB", "IM", "JE", "GG"
@@ -148,28 +149,13 @@ namespace UtiliSite
             };
 
             HttpClient client = new HttpClient();
-            string response = await client.GetStringAsync($"https://ipinfo.io/{GetIpAddress(httpContext)}");
+
+            string response = await client.GetStringAsync($"https://ipinfo.io/{request.HttpContext.Connection.RemoteIpAddress}/json");
             string country = JsonConvert.DeserializeObject<IpResponse>(response).Country;
 
             if (gbp.Contains(country)) return "gbp";
             if (eur.Contains(country)) return "eur";
             return "usd";
-        }
-
-        private static string GetIpAddress(HttpContext context)
-        {
-            string ipAddress = (string) context.Request.RouteValues.GetValueOrDefault("HTTP_X_FORWARDED_FOR");
-
-            if (!string.IsNullOrEmpty(ipAddress))
-            {
-                string[] addresses = ipAddress.Split(',');
-                if (addresses.Length != 0)
-                {
-                    return addresses[0];
-                }
-            }
-
-            return (string) context.Request.RouteValues.GetValueOrDefault("REMOTE_ADDR");
         }
 
         [HttpPost("stripe-webhook")]
