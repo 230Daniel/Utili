@@ -425,6 +425,11 @@ img.user-icon {
     padding-bottom: 0;
 }
 
+.noverticalmargin {
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
 .belowcards {
     padding-top: 30px;
 }
@@ -516,12 +521,13 @@ img.guild-icon {
     border-bottom-style: hidden;
 }
 
-tr {
-    border-bottom-style: hidden;
+.a-blue {
+    color: #03bfd6;
 }
 
-tr a {
-    color: #03bfd6;
+.a-blue:hover {
+    color: #038ed6;
+    text-decoration: none;
 }
 
 .accordion-header {
@@ -544,4 +550,36 @@ tr a {
 .caret.caret-up {
     border-top-width: 0;
     border-bottom: 4px solid #fff;
+}
+
+.divider {
+    position: relative;
+    display: flex;
+    -webkit-box-align: center;
+    align-items: center;
+    overflow: hidden;
+    height: 20px;
+    margin-top: 40px;
+    margin-bottom: 40px;
+}
+
+.divider div {
+    width: 100%;
+    height: 1px;
+    border: none;
+    background-color: dimgray;
+}
+
+.divider span {
+    position: absolute;
+    left: 50%;
+    -webkit-transform: translateX(-50%);
+    -ms-transform: translateX(-50%);
+    transform: translateX(-50%);
+    padding: 0 8px;
+    white-space: nowrap;
+    background-color: #292c2f;
+    color: dimgray;
+    font-size: 12px;
+    user-select: none;
 }

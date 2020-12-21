@@ -24,9 +24,11 @@
     <title>@ViewData["Title"]</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" />
+    <link rel="stylesheet" href="~/css/premium.css" />
     <script src="https://js.stripe.com/v3/" type="text/javascript"></script>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/stripe.js" asp-append-version="true"></script>
 </head>
 <body onload="onLoad()">
 <header>
@@ -65,19 +67,17 @@
                     if (forceCurrency)
                     {
                         <div class="nav-item">
-                            <a class="nav-link text-dark" style="align-items: center; display: flex;" href onclick="alert('Once you have made a purchase your currency can not be changed.')">
+                            <a class="nav-link text-dark" style="align-items: center; display: flex;" href onclick="alert('Once you\'ve made a purchase your currency can\'t be changed.')">
                                 @currency.ToUpper()
                             </a>
                         </div>
                     }
-                    else
-                    {
-                        <select class="custom-select select-currency" id="currencySelect" onchange="changeCurrency()" @(forceCurrency ? "disabled" : "")>
-                            <!option value="gbp" @(currency == "gbp" ? "selected" : "")>GBP</!option>
-                            <!option value="usd" @(currency == "usd" ? "selected" : "")>USD</!option>
-                            <!option value="eur" @(currency == "eur" ? "selected" : "")>EUR</!option>
-                        </select>
-                    }
+                    
+                    <select class="custom-select select-currency" id="currencySelect" onchange="changeCurrency()" @(forceCurrency ? "hidden" : "")>
+                        <!option value="gbp" @(currency == "gbp" ? "selected" : "")>GBP</!option>
+                        <!option value="usd" @(currency == "usd" ? "selected" : "")>USD</!option>
+                        <!option value="eur" @(currency == "eur" ? "selected" : "")>EUR</!option>
+                    </select>
                 }
 
                 @if (auth.User != null)
@@ -105,7 +105,7 @@
         </nav>
     </header>
 
-    <div class="scroll-always scroll-dark dynamic-height">
+    <div class="scroll-always scroll-dark dynamic-height scroll-x">
         <div class="container" style="margin-top: 3vh;">
             <main role="main" class="pb-3">
                 @RenderBody()
@@ -114,7 +114,6 @@
     </div>
 
     <script src="~/js/site.js" asp-append-version="true"></script>
-    <script src="~/js/stripe.js" asp-append-version="true"></script>
 
 @RenderSection("Scripts", required: false)
 

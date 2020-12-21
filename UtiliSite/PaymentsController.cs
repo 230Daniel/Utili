@@ -55,7 +55,7 @@ namespace UtiliSite
                     },
                 },
                 Customer = auth.UserRow.CustomerId,
-                AllowPromotionCodes = true
+                AllowPromotionCodes = false
             };
             SessionService service = new SessionService(_stripeClient);
             try

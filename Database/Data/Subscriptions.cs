@@ -50,7 +50,7 @@ namespace Database.Data
             return rows.Count > 0 ? rows.First() : new SubscriptionsRow(subscriptionId);
         }
 
-        public static int GetSubscriptionCount(ulong userId)
+        public static int GetSlotCount(ulong userId)
         {
             MySqlDataReader reader =Sql.GetCommand("SELECT SUM(Slots) FROM Subscriptions WHERE UserId = @UserId AND EndsAt >= @Now;", 
                 new []

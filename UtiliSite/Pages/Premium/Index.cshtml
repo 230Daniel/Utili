@@ -2,21 +2,58 @@
 @model UtiliSite.Pages.Premium.IndexModel
 @{
     Layout = "Shared/_Layout.cshtml";
+    if (ViewData["subscriptions"] == null)
+    {
+        return;
+    }
+    int subscriptions = (int) ViewData["subscriptions"];
+    int slots = (int) ViewData["slots"];
+
+    ViewData["Title"] = "Utili Premium";
 }
 
-<div class="text-white">
+<div class="text-center text-white">
+    <h1 class="display-4">Premium</h1>
+    <p style="margin-bottom: 40px;">Help cover operating costs and get some sweet benefits in return</p>
+</div>
+
+<p class="text-white noverticalmargin">You'll get...</p>
+<div class="premium-benefits">
     <p>
-        <a href="@RedirectHelper.AddToUrl(ViewContext, "manage")">Manage premium servers</a>
+        • This cool thing
+    </p>
+    <p>
+        • This super duper cool thing!
+    </p>
+    <p>
+        • Nothing is cooler than this thing.
+    </p>
+    <p>
+        • ARE YOU CONVINCED YET?!!
     </p>
 </div>
 
-<button onclick="billingPortal()">Manage Subscriptions</button>
+@if (subscriptions > 0)
+{
+    <div class="divider">
+        <div></div>
+        <span>Active Subscriptions</span>
+    </div>
+
+    <p class="text-white noverticalmargin">You have @subscriptions active @(subscriptions > 1 ? "subscriptions" : "subscription") with a total of @slots premium server @(slots > 1 ? "slots" : "slot"). </p>
+    <a class="a-blue" href="@RedirectHelper.AddToUrl(ViewContext, "manage")">Configure ➔</a>
+}
+
+<div class="divider">
+    <div></div>
+    <span>Premium Plans</span>
+</div>
 
 <div class="plan-container" align="center" vertical-align="top">
     <div class="plan">
         <div class="plan-content">
             <p class="plan-title">1 Server</p>
-            <p class="plan-description">One Utili Premium slot for a server of your choosing</p>
+            <p class="plan-description">One Utili Premium slot for a server of your choice</p>
             <p class="plan-price" id="price-1">£1.50</p>
             <p class="plan-price-small">per month</p>
             <p class="plan-price-per" id="price-1-per">£1.50 / server</p>
@@ -30,7 +67,7 @@
         <div class="plan-content">
             <p class="plan-highlighted-text">Popular</p>
             <p class="plan-title">3 Servers</p>
-            <p class="plan-description">Three Utili Premium slots for servers of your choosing</p>
+            <p class="plan-description">Three Utili Premium slots for servers of your choice</p>
             <p class="plan-price" id="price-3">£3.75</p>
             <p class="plan-price-small">per month</p>
             <p class="plan-price-per" id="price-3-per">£1.25 / server</p>
@@ -43,7 +80,7 @@
     <div class="plan">
         <div class="plan-content">
             <p class="plan-title">5 Servers</p>
-            <p class="plan-description">Five Utili Premium slots for servers of your choosing</p>
+            <p class="plan-description">Five Utili Premium slots for servers of your choice</p>
             <p class="plan-price" id="price-5">£5.00</p>
             <p class="plan-price-small">per month</p>
             <p class="plan-price-per" id="price-5-per">£1.00 / server</p>
@@ -52,164 +89,8 @@
             </div>
         </div>
     </div>
-
 </div>
 
 <script type="text/javascript">
-    function changeCurrency() {
-
-        switch ($("#currencySelect").val()) {
-        case "gbp":
-            $("#price-1").html("£1.50");
-            $("#price-1-per").html("£1.50 / server");
-            $("#price-3").html("£3.75");
-            $("#price-3-per").html("£1.25 / server");
-            $("#price-5").html("£5.00");
-            $("#price-5-per").html("£1.00 / server");
-            break;
-
-        case "usd":
-            $("#price-1").html("$2.00");
-            $("#price-1-per").html("$2.00 / server");
-            $("#price-3").html("$5.00");
-            $("#price-3-per").html("$1.67 / server");
-            $("#price-5").html("$7.00");
-            $("#price-5-per").html("$1.40 / server");
-            break;
-
-        case "eur":
-            $("#price-1").html("€1.75");
-            $("#price-1-per").html("€1.75 / server");
-            $("#price-3").html("€4.25");
-            $("#price-3-per").html("€1.42 / server");
-            $("#price-5").html("€5.50");
-            $("#price-5-per").html("€1.10 / server");
-            break;
-        }
-    }
-
     changeCurrency();
 </script>
-
-<style>
-    .select-currency {
-        border: 0;
-        background-color: inherit !important;
-        color: black;
-        width: 75px;
-        cursor: pointer;
-    }
-
-    .select-currency option {
-        color: black;
-    }
-
-    .custom-select:disabled {
-        color: #6c757d;
-    }
-
-    .select-currency :after {
-        color: #43B581;
-    }
-
-    .plan-container {
-        margin-top: 100px;
-    }
-
-    .plan {
-        background-color: #202225;
-        border-radius: 5px !important;
-        min-width: 300px;
-        min-height: 400px;
-        width: 300px;
-        height: 400px;
-        margin-top: 30px;
-        margin-bottom: 30px;
-        margin-left: 22px;
-        margin-right: 22px;
-        border: 5px solid dimgray;
-        position: relative;
-        display: inline-block;
-        vertical-align: top;
-    }
-
-    .plan-highlighted {
-        margin-top: 0;
-        margin-bottom: 0;
-        border-color: #43B581;
-    }
-
-    .plan-highlighted-text {
-        position: absolute;
-        top: 0;
-        border-bottom-left-radius: 5px !important;
-        border-bottom-right-radius: 5px !important;
-        background-color: #43B581;
-        color: white;
-        font-size: 12px;
-        margin-left: 70px;
-        margin-right: 70px;
-        width: 75px;
-        line-height: 16px;
-        padding-bottom: 4px;
-        margin-top: -1px;
-    }
-
-    .plan-content {
-        padding-top: 20px;
-        padding-bottom: 15px;
-        padding-left: 35px;
-        padding-right: 35px;
-        text-align: center;
-        height: 100%;
-    }
-
-    .plan-title {
-        font-size: 30px;
-        color: white;
-    }
-
-    .plan-description {
-        font-size: 15px;
-        color: lightgray;
-    }
-
-    .plan-price {
-        color: #43B581;
-        font-size: 50px;
-        margin-top:35px;
-        margin-bottom: -10px;
-    }
-
-    .plan-price-small {
-        color: lightgray;
-        font-size: 20px;
-    }
-
-    .plan-price-per {
-        margin-top: 48px;
-        font-size: 16px;
-        text-align: center;
-        color: gray;
-    }
-
-    .plan-order-button {
-        position: absolute;
-        bottom: 0;
-        width: calc(100% - 70px);
-        height: 40px;
-        line-height: 36px;
-        margin-bottom: 20px;
-        background-color: black;
-        border-radius: 5px !important;
-        border: 2px solid black;
-        color: white;
-        text-align: center;
-        user-select: none;
-        cursor: pointer;
-    }
-
-    .plan-order-button:hover {
-        border: 2px solid #43B581;
-    }
-</style>

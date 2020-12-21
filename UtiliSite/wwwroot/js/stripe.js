@@ -63,3 +63,35 @@ function billingPortal() {
             console.error('Error:', error);
         });
 }
+
+function changeCurrency() {
+
+    switch ($("#currencySelect").val()) {
+    case "gbp":
+        $("#price-1").html("£1.50");
+        $("#price-1-per").html("£1.50 / server");
+        $("#price-3").html("£3.75");
+        $("#price-3-per").html("£1.25 / server");
+        $("#price-5").html("£5.00");
+        $("#price-5-per").html("£1.00 / server");
+        break;
+
+    case "usd":
+        $("#price-1").html("$2.00");
+        $("#price-1-per").html("$2.00 / server");
+        $("#price-3").html("$5.00");
+        $("#price-3-per").html("$1.67 / server");
+        $("#price-5").html("$7.00");
+        $("#price-5-per").html("$1.40 / server");
+        break;
+
+    case "eur":
+        $("#price-1").html("€1.75");
+        $("#price-1-per").html("€1.75 / server");
+        $("#price-3").html("€4.25");
+        $("#price-3-per").html("€1.42 / server");
+        $("#price-5").html("€5.50");
+        $("#price-5-per").html("€1.10 / server");
+        break;
+    }
+}

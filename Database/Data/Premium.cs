@@ -56,7 +56,7 @@ namespace Database.Data
         public static List<PremiumRow> GetUserRows(ulong userId)
         {
             List<PremiumRow> rows = GetRows(userId).OrderBy(x => x.SlotId).ToList();
-            int amount = Subscriptions.GetSubscriptionCount(userId);
+            int amount = Subscriptions.GetSlotCount(userId);
 
             rows = rows.Take(amount).ToList();
             while (rows.Count < amount)
