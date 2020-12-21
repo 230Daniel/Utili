@@ -10,6 +10,182 @@
     </p>
 </div>
 
-<button onclick="checkout('price_1I0FHsB8DUEVWcSDtDwUZdCa')">Subscribe (1 slot) £1.50</button>
-<button onclick="checkout('price_1I0QTMB8DUEVWcSDGE67NIam')">Subscribe (3 slots) £5.00</button>
 <button onclick="billingPortal()">Manage Subscriptions</button>
+
+<div style="float: right;">
+    <select class="custom-select select-currency" id="currencySelect" onchange="changeCurrency()">
+        <option value="gbp">GBP</option>
+        <option value="usd" selected>USD</option>
+        <option value="eur">EUR</option>
+    </select>
+</div>
+
+<div class="plan-container">
+    <div class="plan">
+        <div class="plan-content">
+            <p class="plan-title">1 Server</p>
+            <p class="plan-description">One Utili Premium slot for a server of your choosing</p>
+            <p class="plan-price" id="price-1">£1.50</p>
+            <p class="plan-price-small">per month</p>
+            <p class="plan-price-per" id="price-1-per">£1.50 / server</p>
+            <div class="plan-order-button" id="order-1" onclick="checkout(1, $('#currencySelect').val())">
+                Subscribe
+            </div>
+        </div>
+    </div>
+
+    <div class="plan plan-highlighted">
+        <div class="plan-content">
+            <p class="plan-title">3 Servers</p>
+            <p class="plan-description">Three Utili Premium slots for servers of your choosing</p>
+            <p class="plan-price" id="price-3">£3.75</p>
+            <p class="plan-price-small">per month</p>
+            <p class="plan-price-per" id="price-3-per">£1.25 / server</p>
+            <div class="plan-order-button" id="order-3" onclick="checkout(3, $('#currencySelect').val())">
+                Subscribe
+            </div>
+        </div>
+    </div>
+
+    <div class="plan">
+        <div class="plan-content">
+            <p class="plan-title">5 Servers</p>
+            <p class="plan-description">Five Utili Premium slots for servers of your choosing</p>
+            <p class="plan-price" id="price-5">£5.00</p>
+            <p class="plan-price-small">per month</p>
+            <p class="plan-price-per" id="price-5-per">£1.00 / server</p>
+            <div class="plan-order-button" onclick="checkout(5, $('#currencySelect').val())">
+                Subscribe
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script type="text/javascript">
+    function changeCurrency() {
+
+        switch ($("#currencySelect").val()) {
+        case "gbp":
+            $("#price-1").html("£1.50");
+            $("#price-1-per").html("£1.50 / server");
+            $("#price-3").html("£3.75");
+            $("#price-3-per").html("£1.25 / server");
+            $("#price-5").html("£5.00");
+            $("#price-5-per").html("£1.00 / server");
+            break;
+
+        case "usd":
+            $("#price-1").html("$2.00");
+            $("#price-1-per").html("$2.00 / server");
+            $("#price-3").html("$5.00");
+            $("#price-3-per").html("$1.67 / server");
+            $("#price-5").html("$6.75");
+            $("#price-5-per").html("$1.35 / server");
+            break;
+
+        case "eur":
+            $("#price-1").html("€1.75");
+            $("#price-1-per").html("€1.75 / server");
+            $("#price-3").html("€4.25");
+            $("#price-3-per").html("€1.42 / server");
+            $("#price-5").html("€5.50");
+            $("#price-5-per").html("€1.10 / server");
+            break;
+        }
+    }
+</script>
+
+<style>
+    .select-currency {
+        border-radius: 5px !important;
+        border: 2px solid #43B581 !important;
+        background-color: inherit;
+        color: #43B581;
+    }
+
+    .select-currency :after {
+        color: #43B581;
+    }
+
+    .plan-container {
+        display: flex;
+        justify-content: center;
+        margin-top: 100px;
+    }
+
+    .plan {
+        background-color: #202225;
+        border-radius: 5px !important;
+        min-width: 300px;
+        min-height: 400px;
+        width: 300px;
+        height: 400px;
+        margin-top: 30px;
+        margin-left: 22px;
+        margin-right: 22px;
+        border: 5px solid dimgray;
+        position: relative;
+    }
+
+    .plan-highlighted {
+        margin-top: 0;
+        border-color: #43B581;
+    }
+
+    .plan-content {
+        padding-top: 20px;
+        padding-bottom: 15px;
+        padding-left: 35px;
+        padding-right: 35px;
+        text-align: center;
+        height: 100%;
+    }
+
+    .plan-title {
+        font-size: 30px;
+        color: white;
+    }
+
+    .plan-description {
+        font-size: 15px;
+        color: lightgray;
+    }
+
+    .plan-price {
+        color: #43B581;
+        font-size: 50px;
+        margin-top:35px;
+        margin-bottom: -10px;
+    }
+
+    .plan-price-small {
+        color: lightgray;
+        font-size: 20px;
+    }
+
+    .plan-price-per {
+        margin-top: 48px;
+        font-size: 16px;
+        text-align: center;
+        color: gray;
+    }
+
+    .plan-order-button {
+        position: absolute;
+        bottom: 0;
+        width: calc(100% - 70px);
+        height: 40px;
+        line-height: 36px;
+        margin-bottom: 20px;
+        background-color: black;
+        border-radius: 5px !important;
+        border: 2px solid black;
+        color: white;
+        text-align: center;
+    }
+
+    .plan-order-button:hover {
+        border: 2px solid #43B581;
+    }
+</style>
