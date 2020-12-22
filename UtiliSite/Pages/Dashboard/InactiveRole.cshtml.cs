@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Database.Data;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -36,6 +37,15 @@ namespace UtiliSite.Pages.Dashboard
             bool inverse = bool.Parse(HttpContext.Request.Form["inverse"]);
 
             InactiveRoleRow row = await InactiveRole.GetRowAsync(auth.Guild.Id);
+
+            if(!auth.Guild.Roles.Any(x => x.Id == row.RoleId))
+            {
+                // Inactivity data is not recorded if the role id is invalid.
+                // Set the DefaultLastAction to now to assume that all users
+                // were active when the data started to be recorded.
+                row.DefaultLastAction = DateTime.UtcNow;
+            }
+
             row.RoleId = inactiveRoleId;
             row.ImmuneRoleId = immuneRoleId;
             row.Threshold = threshold;
