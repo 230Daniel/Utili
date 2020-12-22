@@ -19,4 +19,16 @@
     <ProjectReference Include="..\Database\Database.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Update="Pages\Privacy - Copy %282%29.cshtml.cs">
+      <DependentUpon>Privacy.cshtml.cs</DependentUpon>
+    </Compile>
+    <Compile Update="Pages\Privacy - Copy - Copy.cshtml.cs">
+      <DependentUpon>Privacy - Copy.cshtml.cs</DependentUpon>
+    </Compile>
+    <Compile Update="Pages\Privacy - Copy.cshtml.cs">
+      <DependentUpon>Privacy.cshtml.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
 </Project>
