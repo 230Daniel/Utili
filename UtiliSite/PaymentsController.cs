@@ -6,14 +6,10 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.AspNetCore.Mvc.Controllers;
 using Newtonsoft.Json;
-using static UtiliSite.Main;
 using Stripe;
 using Stripe.Checkout;
 using Database.Data;
-using System.Web;
 
 namespace UtiliSite
 {
@@ -22,8 +18,8 @@ namespace UtiliSite
         private static IStripeClient _stripeClient;
         public static void Initialise()
         {
-            StripeConfiguration.ApiKey = _config.StripePrivateKey;
-            _stripeClient = new StripeClient(_config.StripePrivateKey);
+            StripeConfiguration.ApiKey = Main.Config.StripePrivateKey;
+            _stripeClient = new StripeClient(Main.Config.StripePrivateKey);
         }
 
         [HttpPost("create-checkout-session")]
@@ -118,7 +114,7 @@ namespace UtiliSite
             Customer customer = await service.CreateAsync(options);
 
             auth.UserRow.CustomerId = customer.Id;
-            Users.SaveRow(auth.UserRow);
+            await Users.SaveRowAsync(auth.UserRow);
         }
 
         public static async Task<(string, bool)> GetCustomerCurrencyAsync(string customerId, HttpRequest request)
@@ -155,6 +151,7 @@ namespace UtiliSite
 
             if (gbp.Contains(country)) return "gbp";
             if (eur.Contains(country)) return "eur";
+            if (usd.Contains(country)) return "usd";
             return "usd";
         }
 
@@ -165,7 +162,7 @@ namespace UtiliSite
             Event stripeEvent = EventUtility.ConstructEvent(
                 json,
                 Request.Headers["Stripe-Signature"],
-                _config.StripeWebhookSecret
+                Main.Config.StripeWebhookSecret
             );
 
             Console.WriteLine($"{DateTime.Now} Stripe Webhook: {stripeEvent.Type}");
@@ -180,23 +177,23 @@ namespace UtiliSite
                     jsonInvoice = jsonInvoice.Substring(jsonInvoice.IndexOf('{'));
                     Invoice invoice = Invoice.FromJson(jsonInvoice);
 
-                    SubscriptionsRow row = Subscriptions.GetRow(invoice.SubscriptionId);
+                    SubscriptionsRow row = await Subscriptions.GetRowAsync(invoice.SubscriptionId);
                     if (row.New)
                     {
                         ProductService service = new ProductService();
                         Product product = await service.GetAsync(invoice.Lines.Data.First().Plan.ProductId);
 
-                        UserRow user = Users.GetRow(invoice.CustomerId);
+                        UserRow user = await Users.GetRowAsync(invoice.CustomerId);
                         row.Slots = int.Parse(product.Metadata["slots"]);
                         row.UserId = user.UserId;
                         row.EndsAt = DateTime.UtcNow.AddDays(30).AddHours(6);
 
-                        Subscriptions.SaveRow(row);
+                        await Subscriptions.SaveRowAsync(row);
                     }
                     else
                     {
                         row.EndsAt = DateTime.UtcNow.AddDays(30).AddHours(6);
-                        Subscriptions.SaveRow(row);
+                        await Subscriptions.SaveRowAsync(row);
                     }
 
                     break;

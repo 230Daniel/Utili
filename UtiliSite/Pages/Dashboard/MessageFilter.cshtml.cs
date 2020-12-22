@@ -16,9 +16,9 @@ namespace UtiliSite.Pages.Dashboard
             if(!auth.Authenticated) return;
             ViewData["user"] = auth.User;
             ViewData["guild"] = auth.Guild;
-            ViewData["premium"] = Database.Data.Premium.IsGuildPremium(auth.Guild.Id);
+            ViewData["premium"] = await Database.Data.Premium.IsGuildPremiumAsync(auth.Guild.Id);
 
-            List<MessageFilterRow> messageFilterRows = MessageFilter.GetRows(auth.Guild.Id);
+            List<MessageFilterRow> messageFilterRows = await MessageFilter.GetRowsAsync(auth.Guild.Id);
             ViewData["messageFilterRows"] = messageFilterRows;
 
             List<RestTextChannel> channels = await DiscordModule.GetTextChannelsAsync(auth.Guild);
@@ -42,11 +42,10 @@ namespace UtiliSite.Pages.Dashboard
             int mode = int.Parse(HttpContext.Request.Form["mode"]);
             string complex = HttpContext.Request.Form["complex"].ToString();
 
-            MessageFilterRow row = MessageFilter.GetRows(auth.Guild.Id, channelId).First();
-
+            MessageFilterRow row = await MessageFilter.GetRowAsync(auth.Guild.Id, channelId);
             row.Mode = mode;
             row.Complex = EString.FromDecoded(complex);
-            MessageFilter.SaveRow(row);
+            await MessageFilter.SaveRowAsync(row);
 
             HttpContext.Response.StatusCode = 200;
         }
@@ -62,17 +61,9 @@ namespace UtiliSite.Pages.Dashboard
             }
 
             ulong channelId = ulong.Parse(HttpContext.Request.Form["channel"]);
-            RestTextChannel channel = auth.Guild.GetTextChannelAsync(channelId).GetAwaiter().GetResult();
+            MessageFilterRow row = await MessageFilter.GetRowAsync(auth.Guild.Id, channelId);
+            await MessageFilter.SaveRowAsync(row);
 
-            MessageFilterRow newRow = new MessageFilterRow
-            {
-                GuildId = auth.Guild.Id,
-                ChannelId = channel.Id,
-                Mode = 0,
-                Complex = EString.FromDecoded("")
-            };
-
-            MessageFilter.SaveRow(newRow);
             HttpContext.Response.StatusCode = 200;
             HttpContext.Response.Redirect(HttpContext.Request.Path);
         }
@@ -89,9 +80,8 @@ namespace UtiliSite.Pages.Dashboard
 
             ulong channelId = ulong.Parse(HttpContext.Request.Form["channel"]);
 
-            MessageFilterRow deleteRow = MessageFilter.GetRows(auth.Guild.Id, channelId).First();
-
-            MessageFilter.DeleteRow(deleteRow);
+            MessageFilterRow row = await MessageFilter.GetRowAsync(auth.Guild.Id, channelId);
+            await MessageFilter.DeleteRowAsync(row);
 
             HttpContext.Response.StatusCode = 200;
             HttpContext.Response.Redirect(HttpContext.Request.Path);

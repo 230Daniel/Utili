@@ -1,9 +1,7 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Database.Data;
-using Discord;
 using Discord.Rest;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
@@ -17,9 +15,9 @@ namespace UtiliSite.Pages.Dashboard
             if(!auth.Authenticated) return;
             ViewData["user"] = auth.User;
             ViewData["guild"] = auth.Guild;
-            ViewData["premium"] = Database.Data.Premium.IsGuildPremium(auth.Guild.Id);
+            ViewData["premium"] = await Database.Data.Premium.IsGuildPremiumAsync(auth.Guild.Id);
 
-            List<VoteChannelsRow> rows = VoteChannels.GetRows(auth.Guild.Id);
+            List<VoteChannelsRow> rows = await VoteChannels.GetRowsAsync(auth.Guild.Id);
             ViewData["rows"] = rows;
 
             List<RestTextChannel> channels = await DiscordModule.GetTextChannelsAsync(auth.Guild);
@@ -42,9 +40,9 @@ namespace UtiliSite.Pages.Dashboard
             ulong channelId = ulong.Parse(HttpContext.Request.Form["channel"]);
             int mode = int.Parse(HttpContext.Request.Form["mode"]);
 
-            VoteChannelsRow row = VoteChannels.GetRows(auth.Guild.Id, channelId).First();
+            VoteChannelsRow row = await VoteChannels.GetRowAsync(auth.Guild.Id, channelId);
             row.Mode = mode;
-            VoteChannels.SaveRow(row);
+            await VoteChannels.SaveRowAsync(row);
 
             HttpContext.Response.StatusCode = 200;
         }
@@ -60,16 +58,8 @@ namespace UtiliSite.Pages.Dashboard
             }
 
             ulong channelId = ulong.Parse(HttpContext.Request.Form["channel"]);
-            RestTextChannel channel = auth.Guild.GetTextChannelAsync(channelId).GetAwaiter().GetResult();
-
-            VoteChannelsRow newRow = new VoteChannelsRow
-            {
-                GuildId = auth.Guild.Id,
-                ChannelId = channel.Id,
-                Mode = 0,
-                Emotes = new List<IEmote>()
-            };
-            VoteChannels.SaveRow(newRow);
+            VoteChannelsRow newRow = await VoteChannels.GetRowAsync(auth.Guild.Id, channelId);
+            await VoteChannels.SaveRowAsync(newRow);
 
             HttpContext.Response.StatusCode = 200;
             HttpContext.Response.Redirect(HttpContext.Request.Path);
@@ -87,8 +77,8 @@ namespace UtiliSite.Pages.Dashboard
 
             ulong channelId = ulong.Parse(HttpContext.Request.Form["channel"]);
 
-            VoteChannelsRow row = VoteChannels.GetRows(auth.Guild.Id, channelId).First();
-            VoteChannels.DeleteRow(row);
+            VoteChannelsRow row = await VoteChannels.GetRowAsync(auth.Guild.Id, channelId);
+            await VoteChannels.DeleteRowAsync(row);
 
             HttpContext.Response.StatusCode = 200;
             HttpContext.Response.Redirect(HttpContext.Request.Path);

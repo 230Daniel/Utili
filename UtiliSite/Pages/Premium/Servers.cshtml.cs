@@ -1,8 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Database.Data;
 
@@ -16,9 +12,9 @@ namespace UtiliSite.Pages.Premium
             ViewData["auth"] = auth;
             if (!auth.Authenticated) return;
 
-            ViewData["rows"] = Database.Data.Premium.GetUserRows(auth.User.Id);
+            ViewData["rows"] = await Database.Data.Premium.GetUserRowsAsync(auth.User.Id);
             ViewData["guilds"] = await DiscordModule.GetMutualGuildsAsync(auth.Client);
-            ViewData["subscriptions"] = Subscriptions.GetRows(userId: auth.User.Id).Count;
+            ViewData["subscriptions"] = (await Subscriptions.GetRowsAsync(userId: auth.User.Id)).Count;
         }
 
         public async Task OnPost()
@@ -34,7 +30,7 @@ namespace UtiliSite.Pages.Premium
             int slotId = int.Parse(HttpContext.Request.Form["slot"]);
             ulong guildId = ulong.Parse(HttpContext.Request.Form["guild"]);
 
-            PremiumRow row = Database.Data.Premium.GetUserRow(auth.User.Id, slotId);
+            PremiumRow row = await Database.Data.Premium.GetUserRowAsync(auth.User.Id, slotId);
             if (row == null)
             {
                 HttpContext.Response.StatusCode = 403;
@@ -42,7 +38,7 @@ namespace UtiliSite.Pages.Premium
             }
 
             row.GuildId = guildId;
-            Database.Data.Premium.SaveRow(row);
+            await Database.Data.Premium.SaveRowAsync(row);
 
             HttpContext.Response.StatusCode = 200;
         }

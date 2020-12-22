@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Timers;
-using Database;
 using Database.Data;
 using Discord;
 using Discord.WebSocket;
@@ -49,7 +48,7 @@ namespace Utili.Features
             // TODO: Make premium be 5 channels per 10 seconds or something, because someone is purging a rediculous 70 channels!
             List<AutopurgeRow> rows = await Database.Data.Autopurge.GetRowsAsync();
             List<ulong> allGuildIds = _client.Guilds.Select(x => x.Id).ToList();
-            List<ulong> premiumGuildIds = Premium.GetRows().Select(x => x.GuildId).Distinct().ToList();
+            List<ulong> premiumGuildIds = (await Premium.GetRowsAsync()).Select(x => x.GuildId).Distinct().ToList();
 
             // Get only rows handled by this cluster
             rows.RemoveAll(x => !allGuildIds.Contains(x.GuildId));

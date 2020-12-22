@@ -34,9 +34,9 @@ namespace Utili.Features
                 Content = EString.FromDecoded(context.Message.Content)
             };
 
-            Database.Data.MessageLogs.SaveMessage(message);
-            Database.Data.MessageLogs.DeleteOldMessages(context.Guild.Id, context.Channel.Id,
-                Premium.IsGuildPremium(context.Guild.Id));
+            await Database.Data.MessageLogs.SaveMessageAsync(message);
+            await Database.Data.MessageLogs.DeleteOldMessagesAsync(context.Guild.Id, context.Channel.Id,
+                await Premium.IsGuildPremiumAsync(context.Guild.Id));
         }
 
         public static async Task MessageEdited(SocketCommandContext context)

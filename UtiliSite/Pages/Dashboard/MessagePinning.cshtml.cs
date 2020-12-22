@@ -1,5 +1,4 @@
 using System.Threading.Tasks;
-using Database;
 using Database.Data;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
@@ -13,7 +12,7 @@ namespace UtiliSite.Pages.Dashboard
             if(!auth.Authenticated) return;
             ViewData["user"] = auth.User;
             ViewData["guild"] = auth.Guild;
-            ViewData["premium"] = Database.Data.Premium.IsGuildPremium(auth.Guild.Id);
+            ViewData["premium"] = await Database.Data.Premium.IsGuildPremiumAsync(auth.Guild.Id);
 
             MessagePinningRow row = await MessagePinning.GetRowAsync(auth.Guild.Id);
 

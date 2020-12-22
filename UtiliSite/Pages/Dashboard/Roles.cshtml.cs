@@ -13,7 +13,7 @@ namespace UtiliSite.Pages.Dashboard
             if(!auth.Authenticated) return;
             ViewData["user"] = auth.User;
             ViewData["guild"] = auth.Guild;
-            ViewData["premium"] = Database.Data.Premium.IsGuildPremium(auth.Guild.Id);
+            ViewData["premium"] = await Database.Data.Premium.IsGuildPremiumAsync(auth.Guild.Id);
 
             RolesRow row = await Roles.GetRowAsync(auth.Guild.Id);
 

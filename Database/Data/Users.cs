@@ -8,8 +8,8 @@ namespace Database.Data
 {
     public static class Users
     {
-        public static async Task<List<UserRow>> GetRowsAsync(ulong? userId = null)
-        public static List<UserRow> GetRows(ulong? userId = null, string customerId = null)
+        
+        public static async Task<List<UserRow>> GetRowsAsync(ulong? userId = null, string customerId = null)
         {
             List<UserRow> matchedRows = new List<UserRow>();
 
@@ -28,7 +28,7 @@ namespace Database.Data
                 values.Add(("CustomerId", customerId));
             }
 
-            MySqlDataReader reader = Sql.GetCommand(command, values.ToArray()).ExecuteReader();
+            MySqlDataReader reader = await Sql.ExecuteReaderAsync(command, values.ToArray());
 
             while (reader.Read())
             {
@@ -51,42 +51,32 @@ namespace Database.Data
             return rows.Count > 0 ? rows.First() : new UserRow(userId);
         }
 
-        public static UserRow GetRow(string customerId)
+        public static async Task<UserRow> GetRowAsync(string customerId)
         {
-            List<UserRow> rows = GetRows(customerId: customerId);
+            List<UserRow> rows = await GetRowsAsync(customerId: customerId);
             return rows.Count > 0 ? rows.First() : null;
         }
 
-        public static void SaveRow(UserRow row)
+        public static async Task SaveRowAsync(UserRow row)
         {
             if (row.New)
             {
-                command = Sql.GetCommand("INSERT INTO Users (UserId, Email, LastVisit, Visits, CustomerId) VALUES (@UserId, @Email, @LastVisit, @Visits, @CustomerId);",
-                    new [] {
-                        ("UserId", row.UserId.ToString()),
-                        ("Email", row.Email), 
-                        ("LastVisit", Sql.ToSqlDateTime(row.LastVisit)),
-                        ("Visits", row.Visits.ToString()),
-                        ("CustomerId", row.CustomerId)
-                    });
-
-                command.ExecuteNonQuery();
-                command.Connection.Close();
+                await Sql.ExecuteAsync("INSERT INTO Users (UserId, Email, LastVisit, Visits, CustomerId) VALUES (@UserId, @Email, @LastVisit, @Visits, @CustomerId);",
+                    ("UserId", row.UserId),
+                    ("Email", row.Email), 
+                    ("LastVisit", row.LastVisit),
+                    ("Visits", row.Visits),
+                    ("CustomerId", row.CustomerId));
 
                 row.New = false;
             }
             else
             {
-                command = Sql.GetCommand("UPDATE Users SET Email = @Email, LastVisit = @LastVisit, CustomerId = @CustomerId WHERE UserId = @UserId;",
-                    new [] {
-                        ("UserId", row.UserId.ToString()),
-                        ("Email", row.Email), 
-                        ("LastVisit", Sql.ToSqlDateTime(row.LastVisit)),
-                        ("CustomerId", row.CustomerId)
-                    });
-
-                command.ExecuteNonQuery();
-                command.Connection.Close();
+                await Sql.ExecuteAsync("UPDATE Users SET Email = @Email, LastVisit = @LastVisit, CustomerId = @CustomerId WHERE UserId = @UserId;",
+                    ("UserId", row.UserId.ToString()),
+                    ("Email", row.Email), 
+                    ("LastVisit", row.LastVisit),
+                    ("CustomerId", row.CustomerId));
             }
         }
 

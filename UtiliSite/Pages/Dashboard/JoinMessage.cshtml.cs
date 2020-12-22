@@ -1,5 +1,3 @@
-using System;
-using System.Linq;
 using System.Threading.Tasks;
 using Database.Data;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -16,8 +14,8 @@ namespace UtiliSite.Pages.Dashboard
 
             ViewData["user"] = auth.User;
             ViewData["guild"] = auth.Guild;
-            ViewData["premium"] = Database.Data.Premium.IsGuildPremium(auth.Guild.Id);
-            ViewData["row"] = JoinMessage.GetRow(auth.Guild.Id);
+            ViewData["premium"] = await Database.Data.Premium.IsGuildPremiumAsync(auth.Guild.Id);
+            ViewData["row"] = await JoinMessage.GetRowAsync(auth.Guild.Id);
             ViewData["channels"] = await DiscordModule.GetTextChannelsAsync(auth.Guild);
         }
 
@@ -31,7 +29,7 @@ namespace UtiliSite.Pages.Dashboard
                 return;
             }
 
-            JoinMessageRow row = JoinMessage.GetRow(auth.Guild.Id);
+            JoinMessageRow row = await JoinMessage.GetRowAsync(auth.Guild.Id);
 
             row.Enabled = HttpContext.Request.Form["enabled"] == "on";
             row.Direct = bool.Parse(HttpContext.Request.Form["direct"]);
@@ -45,7 +43,7 @@ namespace UtiliSite.Pages.Dashboard
             row.Icon = EString.FromDecoded(HttpContext.Request.Form["icon"]);
             row.Colour = new Discord.Color(uint.Parse(HttpContext.Request.Form["colour"].ToString().Replace("#", ""), System.Globalization.NumberStyles.HexNumber));
 
-            JoinMessage.SaveRow(row);
+            await JoinMessage.SaveRowAsync(row);
 
             HttpContext.Response.StatusCode = 200;
         }

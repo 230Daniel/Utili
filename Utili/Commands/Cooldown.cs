@@ -41,7 +41,7 @@ namespace Utili.Commands
             SocketCommandContext context = moduleBase.Context;
             
             double delay = FreeCooldown;
-            if (Database.Data.Premium.IsGuildPremium(context.Guild.Id)) delay = PremiumCooldown;
+            if (Database.Data.Premium.IsGuildPremiumAsync(context.Guild.Id).GetAwaiter().GetResult()) delay = PremiumCooldown;
 
             CooldownItem cooldownItem = GetCooldown(context.Guild.Id, context.User.Id, command);
 

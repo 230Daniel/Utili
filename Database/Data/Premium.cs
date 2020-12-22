@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using MySql.Data.MySqlClient;
 
@@ -9,7 +7,7 @@ namespace Database.Data
 {
     public static class Premium
     {
-        public static List<PremiumRow> GetRows(ulong? userId = null, ulong? guildId = null, int? slotId = null, bool ignoreCache = false)
+        public static async Task<List<PremiumRow>> GetRowsAsync(ulong? userId = null, ulong? guildId = null, int? slotId = null, bool ignoreCache = false)
         {
             List<PremiumRow> matchedRows = new List<PremiumRow>();
 
@@ -24,7 +22,7 @@ namespace Database.Data
             else
             {
                 string command = "SELECT * FROM Premium WHERE TRUE";
-                List<(string, string)> values = new List<(string, string)>();
+                List<(string, object)> values = new List<(string, object)>();
 
                 if (userId.HasValue)
                 {
@@ -44,7 +42,7 @@ namespace Database.Data
                     values.Add(("SlotId", slotId.Value.ToString()));
                 }
 
-                MySqlDataReader reader = Sql.GetCommand(command, values.ToArray()).ExecuteReader();
+                MySqlDataReader reader = await Sql.ExecuteReaderAsync(command, values.ToArray());
 
                 while (reader.Read())
                 {
@@ -60,80 +58,68 @@ namespace Database.Data
             return matchedRows;
         }
 
-        public static List<PremiumRow> GetUserRows(ulong userId)
+        public static async Task<List<PremiumRow>> GetUserRowsAsync(ulong userId)
         {
-            List<PremiumRow> rows = GetRows(userId).OrderBy(x => x.SlotId).ToList();
-            int amount = Subscriptions.GetSlotCount(userId);
+            List<PremiumRow> rows = (await GetRowsAsync(userId)).OrderBy(x => x.SlotId).ToList();
+            int amount = await Subscriptions.GetSlotCountAsync(userId);
 
             rows = rows.Take(amount).ToList();
             while (rows.Count < amount)
             {
                 PremiumRow row = new PremiumRow(userId, 0);
-                SaveRow(row);
+                await SaveRowAsync(row);
                 rows.Add(row);
             }
 
             return rows;
         }
 
-        public static PremiumRow GetUserRow(ulong userId, int slotId)
+        public static async Task<PremiumRow> GetUserRowAsync(ulong userId, int slotId)
         {
-            List<PremiumRow> rows = GetRows(userId, slotId: slotId);
+            List<PremiumRow> rows = await GetRowsAsync(userId, slotId: slotId);
             return rows.Count > 0 ? rows.First() : null;
         }
 
-        public static bool IsGuildPremium(ulong guildId)
+        public static async Task<bool> IsGuildPremiumAsync(ulong guildId)
         {
-            List<PremiumRow> rows = GetRows(guildId: guildId);
+            List<PremiumRow> rows = await GetRowsAsync(guildId: guildId);
             return rows.Count > 0;
         }
 
-        public static void SaveRow(PremiumRow row)
+        public static async Task SaveRowAsync(PremiumRow row)
         {
-            MySqlCommand command;
-
             if (row.New)
             {
-                command = Sql.GetCommand("INSERT INTO Premium (UserId, GuildId) VALUES (@UserId, @GuildId);",
-                    new [] { ("UserId", row.UserId.ToString()),
-                        ("GuildId", row.GuildId.ToString())});
-
-                command.ExecuteNonQuery();
-                command.Connection.Close();
+                await Sql.ExecuteAsync(
+                    "INSERT INTO Premium (UserId, GuildId) VALUES (@UserId, @GuildId);",
+                    ("UserId", row.UserId),
+                    ("GuildId", row.GuildId));
 
                 row.New = false;
-                row.SlotId = GetRows(row.UserId, row.GuildId).First().SlotId;
+                row.SlotId = (await GetRowsAsync(row.UserId, row.GuildId)).OrderBy(x => x.SlotId).Last().SlotId;
+                // TODO: Ensure this is always accurately setting the value
 
                 if(Cache.Initialised) Cache.Premium.Rows.Add(row);
             }
             else
             {
-                command = Sql.GetCommand("UPDATE Premium SET GuildId = @GuildId, UserId = @UserId WHERE SlotId = @SlotId",
-                    new [] { ("UserId", row.UserId.ToString()),
-                        ("GuildId", row.GuildId.ToString()),
-                        ("SlotId", row.SlotId.ToString())
-                    });
-
-                command.ExecuteNonQuery();
-                command.Connection.Close();
+                await Sql.ExecuteAsync(
+                    "UPDATE Premium SET GuildId = @GuildId, UserId = @UserId WHERE SlotId = @SlotId",
+                    ("UserId", row.UserId),
+                    ("GuildId", row.GuildId),
+                    ("SlotId", row.SlotId));
 
                 if(Cache.Initialised) Cache.Premium.Rows[Cache.Premium.Rows.FindIndex(x => x.SlotId == row.SlotId)] = row;
             }
         }
 
-        public static void DeleteRow(PremiumRow row)
+        public static async Task DeleteRowAsync(PremiumRow row)
         {
-            if(row == null) return;
-
             if(Cache.Initialised) Cache.Premium.Rows.RemoveAll(x => x.SlotId == row.SlotId);
 
-            string commandText = "DELETE FROM Premium WHERE SlotId = @SlotId;";
-            MySqlCommand command = Sql.GetCommand(commandText, 
-                new[] {
-                ("SlotId", row.SlotId.ToString())});
-
-            command.ExecuteNonQuery();
-            command.Connection.Close();
+            await Sql.ExecuteAsync(
+                "DELETE FROM Premium WHERE SlotId = @SlotId;",
+                ("SlotId", row.SlotId));
         }
     }
 

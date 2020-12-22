@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using System.Threading.Tasks;
 using Database.Data;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -17,8 +16,8 @@ namespace UtiliSite.Pages.Dashboard
 
             ViewData["user"] = auth.User;
             ViewData["guild"] = auth.Guild;
-            ViewData["premium"] = Database.Data.Premium.IsGuildPremium(auth.Guild.Id);
-            ViewData["rows"] = Notices.GetRows(auth.Guild.Id);
+            ViewData["premium"] = await Database.Data.Premium.IsGuildPremiumAsync(auth.Guild.Id);
+            ViewData["rows"] = await Notices.GetRowsAsync(auth.Guild.Id);
             ViewData["channels"] = await DiscordModule.GetTextChannelsAsync(auth.Guild);
         }
 
@@ -34,7 +33,7 @@ namespace UtiliSite.Pages.Dashboard
 
             ulong channelId = ulong.Parse(HttpContext.Request.Form["channel"]);
 
-            NoticesRow row = Notices.GetRow(auth.Guild.Id, channelId);
+            NoticesRow row = await Notices.GetRowAsync(auth.Guild.Id, channelId);
 
             row.Enabled = HttpContext.Request.Form["enabled"] == "on";
             row.Delay = TimeSpan.Parse(HttpContext.Request.Form["delay"]);
@@ -47,10 +46,10 @@ namespace UtiliSite.Pages.Dashboard
             row.Icon = EString.FromDecoded(HttpContext.Request.Form["icon"]);
             row.Colour = new Discord.Color(uint.Parse(HttpContext.Request.Form["colour"].ToString().Replace("#", ""), System.Globalization.NumberStyles.HexNumber));
 
-            Notices.SaveRow(row);
+            await Notices.SaveRowAsync(row);
 
             MiscRow miscRow = new MiscRow(auth.Guild.Id, "RequiresNoticeUpdate", row.ChannelId.ToString());
-            try { Misc.SaveRow(miscRow); } catch { }
+            try { await Misc.SaveRowAsync(miscRow); } catch { }
 
             HttpContext.Response.StatusCode = 200;
         }
@@ -68,9 +67,9 @@ namespace UtiliSite.Pages.Dashboard
             ulong channelId = ulong.Parse(HttpContext.Request.Form["channel"]);
             RestTextChannel channel = auth.Guild.GetTextChannelAsync(channelId).GetAwaiter().GetResult();
 
-            NoticesRow newRow = new NoticesRow(auth.Guild.Id, channel.Id);
+            NoticesRow row = new NoticesRow(auth.Guild.Id, channel.Id);
 
-            Notices.SaveRow(newRow);
+            await Notices.SaveRowAsync(row);
             HttpContext.Response.StatusCode = 200;
             HttpContext.Response.Redirect(HttpContext.Request.Path);
         }
@@ -86,8 +85,8 @@ namespace UtiliSite.Pages.Dashboard
             }
 
             ulong channelId = ulong.Parse(HttpContext.Request.Form["channel"]);
-            NoticesRow deleteRow = Notices.GetRow(auth.Guild.Id, channelId);
-            Notices.DeleteRow(deleteRow);
+            NoticesRow row = await Notices.GetRowAsync(auth.Guild.Id, channelId);
+            await Notices.DeleteRowAsync(row);
 
             HttpContext.Response.StatusCode = 200;
             HttpContext.Response.Redirect(HttpContext.Request.Path);

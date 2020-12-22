@@ -1,6 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
-using Database;
+﻿using System.Threading.Tasks;
 
 namespace UtiliSite
 {
@@ -10,9 +8,9 @@ namespace UtiliSite
 
         public static async Task InitialiseAsync()
         {
-            _config = Config.Load();
+            Config = Config.Load();
             PaymentsController.Initialise();
-            Database.Database.Initialise(false);
+            await Database.Database.InitialiseAsync(false, Main.Config.DefaultPrefix);
             await DiscordModule.InitialiseAsync();
         }
     }

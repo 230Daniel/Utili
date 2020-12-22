@@ -14,7 +14,7 @@ namespace UtiliSite.Pages.Dashboard
             if(!auth.Authenticated) return;
             ViewData["user"] = auth.User;
             ViewData["guild"] = auth.Guild;
-            ViewData["premium"] = Database.Data.Premium.IsGuildPremium(auth.Guild.Id);
+            ViewData["premium"] = Database.Data.Premium.IsGuildPremiumAsync(auth.Guild.Id);
 
             List<ChannelMirroringRow> rows = await ChannelMirroring.GetRowsAsync(auth.Guild.Id);
             ViewData["rows"] = rows;

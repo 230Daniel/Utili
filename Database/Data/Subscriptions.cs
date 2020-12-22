@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using MySql.Data.MySqlClient;
 
@@ -9,12 +8,12 @@ namespace Database.Data
 {
     public static class Subscriptions
     {
-        public static List<SubscriptionsRow> GetRows(string subscriptionId = null, ulong? userId = null)
+        public static async Task<List<SubscriptionsRow>> GetRowsAsync(string subscriptionId = null, ulong? userId = null)
         {
             List<SubscriptionsRow> matchedRows = new List<SubscriptionsRow>();
 
             string command = "SELECT * FROM Subscriptions WHERE TRUE";
-            List<(string, string)> values = new List<(string, string)>();
+            List<(string, object)> values = new List<(string, object)>();
 
             if (!string.IsNullOrEmpty(subscriptionId))
             {
@@ -25,10 +24,10 @@ namespace Database.Data
             if (userId.HasValue)
             {
                 command += " AND UserId = @UserId";
-                values.Add(("UserId", userId.Value.ToString()));
+                values.Add(("UserId", userId.Value));
             }
 
-            MySqlDataReader reader = Sql.GetCommand(command, values.ToArray()).ExecuteReader();
+            MySqlDataReader reader = await Sql.ExecuteReaderAsync(command, values.ToArray());
 
             while (reader.Read())
             {
@@ -44,80 +43,56 @@ namespace Database.Data
             return matchedRows;
         }
 
-        public static SubscriptionsRow GetRow(string subscriptionId)
+        public static async Task<SubscriptionsRow> GetRowAsync(string subscriptionId)
         {
-            List<SubscriptionsRow> rows = GetRows(subscriptionId);
+            List<SubscriptionsRow> rows = await GetRowsAsync(subscriptionId);
             return rows.Count > 0 ? rows.First() : new SubscriptionsRow(subscriptionId);
         }
 
-        public static int GetSlotCount(ulong userId)
+        public static async Task<int> GetSlotCountAsync(ulong userId)
         {
-            MySqlDataReader reader =Sql.GetCommand("SELECT SUM(Slots) FROM Subscriptions WHERE UserId = @UserId AND EndsAt >= @Now;", 
-                new []
-                {
-                    ("UserId", userId.ToString()),
-                    ("Now", Sql.ToSqlDateTime(DateTime.UtcNow))
-                }).ExecuteReader();
+            MySqlDataReader reader = await Sql.ExecuteReaderAsync(
+                "SELECT SUM(Slots) FROM Subscriptions WHERE UserId = @UserId AND EndsAt >= @Now;",
+                ("UserId", userId),
+                ("Now", DateTime.UtcNow));
 
-            int slots = 0;
-            while (reader.Read())
-            {
-                slots += reader.GetInt32(0);
-            }
+            reader.Read();
+            int slots = reader.GetInt32(0);
+
             reader.Close();
-
             return slots;
         }
 
-        public static void SaveRow(SubscriptionsRow row)
+        public static async Task SaveRowAsync(SubscriptionsRow row)
         {
-            MySqlCommand command;
-
             if (row.New)
             {
-                command = Sql.GetCommand("INSERT INTO Subscriptions (SubscriptionId, UserId, EndsAt, Slots) VALUES (@SubscriptionId, @UserId, @EndsAt, @Slots);",
-                    new []
-                    {
-                        ("SubscriptionId", row.SubscriptionId),
-                        ("UserId", row.UserId.ToString()),
-                        ("EndsAt", Sql.ToSqlDateTime(row.EndsAt)),
-                        ("Slots", row.Slots.ToString())
-                    });
-
-                command.ExecuteNonQuery();
-                command.Connection.Close();
+                await Sql.ExecuteAsync("INSERT INTO Subscriptions (SubscriptionId, UserId, EndsAt, Slots) VALUES (@SubscriptionId, @UserId, @EndsAt, @Slots);",
+                    ("SubscriptionId", row.SubscriptionId),
+                    ("UserId", row.UserId),
+                    ("EndsAt", row.EndsAt),
+                    ("Slots", row.Slots));
 
                 row.New = false;
             }
             else
             {
-                command = Sql.GetCommand(
+                await Sql.ExecuteAsync(
                     "UPDATE Subscriptions SET UserId = @UserId, EndsAt = @EndsAt, Slots = @Slots WHERE SubscriptionId = @SubscriptionId;",
-                    new[]
-                    {
-                        ("SubscriptionId", row.SubscriptionId),
-                        ("UserId", row.UserId.ToString()),
-                        ("EndsAt", Sql.ToSqlDateTime(row.EndsAt)),
-                        ("Slots", row.Slots.ToString())
-                    });
-
-                command.ExecuteNonQuery();
-                command.Connection.Close();
+                    ("SubscriptionId", row.SubscriptionId),
+                    ("UserId", row.UserId.ToString()),
+                    ("EndsAt", row.EndsAt),
+                    ("Slots", row.Slots.ToString()));
             }
         }
 
-        public static void DeleteRow(SubscriptionsRow row)
+        public static async Task DeleteRowAsync(SubscriptionsRow row)
         {
             if(row == null) return;
 
-            string commandText = "DELETE FROM Subscriptions WHERE SubscriptionId = @SubscriptionId;";
-            MySqlCommand command = Sql.GetCommand(commandText, 
-                new[] {
-                    ("SubscriptionId", row.SubscriptionId)
-                });
-
-            command.ExecuteNonQuery();
-            command.Connection.Close();
+            await Sql.ExecuteAsync(
+                "DELETE FROM Subscriptions WHERE SubscriptionId = @SubscriptionId;",
+                ("SubscriptionId", row.SubscriptionId));
         }
     }
 

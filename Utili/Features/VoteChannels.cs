@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Database;
 using Database.Data;
 using Discord;
 using Discord.Commands;
@@ -36,7 +35,7 @@ namespace Utili.Features
 
             List<IEmote> emotes = row.Emotes;
 
-            if (Premium.IsGuildPremium(context.Guild.Id))
+            if (await Premium.IsGuildPremiumAsync(context.Guild.Id))
             {
                 emotes = emotes.Take(5).ToList();
             }
@@ -109,7 +108,7 @@ namespace Utili.Features
             VoteChannelsRow row = rows.First();
 
             int limit = 2;
-            if (Premium.IsGuildPremium(Context.Guild.Id)) limit = 5;
+            if (await Premium.IsGuildPremiumAsync(Context.Guild.Id)) limit = 5;
 
             if(row.Emotes.Count >= limit)
             {

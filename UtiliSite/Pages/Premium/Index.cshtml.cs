@@ -1,8 +1,6 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Database.Data;
 
@@ -21,7 +19,7 @@ namespace UtiliSite.Pages.Premium
             ViewData["forceCurrency"] = currency.Item2;
             ViewData["showCurrency"] = true;
 
-            List<SubscriptionsRow> subscriptions = Subscriptions.GetRows(userId: auth.User.Id);
+            List<SubscriptionsRow> subscriptions = await Subscriptions.GetRowsAsync(userId: auth.User.Id);
             ViewData["subscriptions"] = subscriptions.Count;
             ViewData["slots"] = subscriptions.Sum(x => x.Slots);
         }
