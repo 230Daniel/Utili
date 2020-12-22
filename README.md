@@ -48,3 +48,4 @@ Please fork this repository, make your changes, and create a pull request which 
 }
  ```
  > Note: The running environment for the website is in the same location as the `wwwroot` folder.
+  - Change your debugging target from ISS Express to UtiliSite
