@@ -16,7 +16,7 @@ namespace UtiliSite.Pages.Dashboard
             if(!auth.Authenticated) return;
             ViewData["user"] = auth.User;
             ViewData["guild"] = auth.Guild;
-            ViewData["premium"] = Database.Premium.IsPremium(auth.Guild.Id);
+            ViewData["premium"] = Database.Data.Premium.IsGuildPremium(auth.Guild.Id);
 
             List<MessageFilterRow> messageFilterRows = MessageFilter.GetRows(auth.Guild.Id);
             ViewData["messageFilterRows"] = messageFilterRows;

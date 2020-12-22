@@ -49,7 +49,7 @@ namespace Utili.Features
             // TODO: Make premium be 5 channels per 10 seconds or something, because someone is purging a rediculous 70 channels!
             List<AutopurgeRow> rows = Database.Data.Autopurge.GetRows();
             List<ulong> allGuildIds = _client.Guilds.Select(x => x.Id).ToList();
-            List<ulong> premiumGuildIds = Premium.GetPremiumGuilds();
+            List<ulong> premiumGuildIds = Premium.GetRows().Select(x => x.GuildId).Distinct().ToList();
 
             // Get only rows handled by this cluster
             rows.RemoveAll(x => !allGuildIds.Contains(x.GuildId));
@@ -81,7 +81,7 @@ namespace Utili.Features
                 try
                 {
                     int messageCap = 100;
-                    if (Premium.IsPremium(row.GuildId))
+                    if (premiumGuildIds.Contains(row.GuildId))
                     {
                         messageCap = 500;
                     }

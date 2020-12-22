@@ -16,7 +16,7 @@ namespace UtiliSite.Pages.Dashboard
 
             ViewData["user"] = auth.User;
             ViewData["guild"] = auth.Guild;
-            ViewData["premium"] = Database.Premium.IsPremium(auth.Guild.Id);
+            ViewData["premium"] = Database.Data.Premium.IsGuildPremium(auth.Guild.Id);
             ViewData["row"] = JoinMessage.GetRow(auth.Guild.Id);
             ViewData["channels"] = await DiscordModule.GetTextChannelsAsync(auth.Guild);
         }

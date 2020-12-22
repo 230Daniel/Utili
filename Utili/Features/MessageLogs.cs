@@ -36,7 +36,7 @@ namespace Utili.Features
 
             Database.Data.MessageLogs.SaveMessage(message);
             Database.Data.MessageLogs.DeleteOldMessages(context.Guild.Id, context.Channel.Id,
-                Premium.IsPremium(context.Guild.Id));
+                Premium.IsGuildPremium(context.Guild.Id));
         }
 
         public static async Task MessageEdited(SocketCommandContext context)

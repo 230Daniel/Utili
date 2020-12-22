@@ -1,19 +1,11 @@
 ﻿@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor;
 @{
-    AuthDetails auth;
     if (ViewData["auth"] == null)
-    {
-        auth = await Auth.GetAuthDetailsAsync(HttpContextAccessor.HttpContext);
-    }
-    else
-    {
-        auth = (AuthDetails) ViewData["auth"];
-    }
-    if (!auth.Authenticated)
     {
         IgnoreBody();
         return;
     }
+    AuthDetails auth = (AuthDetails) ViewData["auth"];
 }
 
 <!DOCTYPE html>
@@ -32,7 +24,17 @@
 </head>
 <body onload="onLoad()">
 <header>
-    <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light" id="navbar" style="background-color: #e9ecef;">
+    <nav class="navbar navbar-expand-sm navbar-light" id="navbar" style="background-color: #e9ecef;">
+        <div class="container" id="success" hidden>
+            <span class="notification text-light">Changes saved</span>
+        </div>
+        <div class="container" id="error-too-fast" hidden>
+            <span class="notification text-light">You're doing that too fast</span>
+        </div>
+        <div class="container" id="error-failure" hidden>
+            <span class="notification text-light">Something went wrong</span>
+        </div>
+
         <div class="container" id="main-nav">
             <a class="navbar-brand" asp-area="" asp-page="/Index">
                 <img src="https://file.utili.xyz/UtiliSmall.png" width="33" height="33" alt="Logo" class="d-inline-block align-top">
@@ -58,51 +60,42 @@
 
                 @if (SidebarHelper.GetIsActive(ViewContext, "error") != "active")
                 {
-            <div class="navbar-nav flex-grow-1" style="justify-content: flex-end;">
-                @if (ViewData["showCurrency"] != null && (bool)ViewData["showCurrency"])
-                {
-                    string currency = (string)ViewData["currency"];
-                    bool forceCurrency = (bool)ViewData["forceCurrency"];
+                    <div class="navbar-nav flex-grow-1" style="justify-content: flex-end;">
+                        @if (ViewData["showCurrency"] != null && (bool) ViewData["showCurrency"])
+                        {
+                            string currency = (string) ViewData["currency"];
+                            bool forceCurrency = (bool) ViewData["forceCurrency"];
 
-                    if (forceCurrency)
-                    {
-                        <div class="nav-item">
-                            <a class="nav-link text-dark" style="align-items: center; display: flex;" href onclick="alert('Once you\'ve made a purchase your currency can\'t be changed.')">
-                                @currency.ToUpper()
+                            if (forceCurrency)
+                            {
+                                <div class="nav-item">
+                                    <a class="nav-link text-dark" style="align-items: center; display: flex;" href onclick="alert('Once you\'ve made a purchase your currency can\'t be changed.')">
+                                        @currency.ToUpper()
+                                    </a>
+                                </div>
+                            }
+
+                            <select class="custom-select select-currency" id="currencySelect" onchange="changeCurrency()" @(forceCurrency ? "hidden" : "")>
+                                <!option value="gbp" @(currency == "gbp" ? "selected" : "")>GBP</!option>
+                                <!option value="usd" @(currency == "usd" ? "selected" : "")>USD</!option>
+                                <!option value="eur" @(currency == "eur" ? "selected" : "")>EUR</!option>
+                            </select>
+                        }
+
+                        <div class="dropdown noverticalpadding">
+                            <a class="nav-link text-dark dropdown-toggle noverticalpadding" style="align-items: center; display: flex;" data-toggle="dropdown" role="button" id="userDropdown" aria-haspopup="true" aria-expanded="false" href="#">
+                                <img src="@(auth.User.GetAvatarUrl(size: 32))" class="user-icon" alt="User Icon" style="margin-right: 8px;">
+                                @(auth.User.Username)
                             </a>
-                        </div>
-                    }
-                    
-                    <select class="custom-select select-currency" id="currencySelect" onchange="changeCurrency()" @(forceCurrency ? "hidden" : "")>
-                        <!option value="gbp" @(currency == "gbp" ? "selected" : "")>GBP</!option>
-                        <!option value="usd" @(currency == "usd" ? "selected" : "")>USD</!option>
-                        <!option value="eur" @(currency == "eur" ? "selected" : "")>EUR</!option>
-                    </select>
-                }
-
-                @if (auth.User != null)
-                {
-                    <div class="dropdown noverticalpadding">
-                        <a class="nav-link text-dark dropdown-toggle noverticalpadding" style="align-items: center; display: flex;" data-toggle="dropdown" role="button" id="userDropdown" aria-haspopup="true" aria-expanded="false" href="#">
-                            <img src="@(auth.User.GetAvatarUrl(size: 32))" class="user-icon" alt="User Icon" style="margin-right: 8px;">
-                            @(auth.User.Username)
-                        </a>
-                        <div class="dropdown-menu dropdown-menu-left noverticalpadding" style="border: 0;" aria-labelledby="userDropdown">
-                            <a class="dropdown-item" id="signoutDropdown" asp-area="" asp-page="/signout">Sign out</a>
+                            <div class="dropdown-menu dropdown-menu-left noverticalpadding" style="border: 0;" aria-labelledby="userDropdown">
+                                <a class="dropdown-item" id="signoutDropdown" asp-area="" asp-page="/signout">Sign out</a>
+                            </div>
                         </div>
                     </div>
                 }
-                else
-                {
-                    <form>
-                        <a class="nav-link text-dark" asp-area="" asp-page="/signin">Sign in</a>
-                    </form>
-                }
             </div>
-                }
-                </div>
-            </div>
-        </nav>
+        </div>
+    </nav>
     </header>
 
     <div class="scroll-always scroll-dark dynamic-height scroll-x">
@@ -114,8 +107,10 @@
     </div>
 
     <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/js/dashboard/submit.js" asp-append-version="true"></script>
+    <script src="~/js/dashboard/notification.js" asp-append-version="true"></script>
 
-@RenderSection("Scripts", required: false)
+    @RenderSection("Scripts", required: false)
 
     </body>
 </html>

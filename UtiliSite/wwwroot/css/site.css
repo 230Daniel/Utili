@@ -523,6 +523,7 @@ img.guild-icon {
 
 .a-blue {
     color: #03bfd6;
+    cursor: pointer;
 }
 
 .a-blue:hover {

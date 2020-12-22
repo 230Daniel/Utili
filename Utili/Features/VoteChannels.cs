@@ -36,7 +36,7 @@ namespace Utili.Features
 
             List<IEmote> emotes = row.Emotes;
 
-            if (Premium.IsPremium(context.Guild.Id))
+            if (Premium.IsGuildPremium(context.Guild.Id))
             {
                 emotes = emotes.Take(5).ToList();
             }
@@ -109,7 +109,7 @@ namespace Utili.Features
             VoteChannelsRow row = rows.First();
 
             int limit = 2;
-            if (Premium.IsPremium(Context.Guild.Id)) limit = 5;
+            if (Premium.IsGuildPremium(Context.Guild.Id)) limit = 5;
 
             if(row.Emotes.Count >= limit)
             {

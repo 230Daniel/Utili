@@ -12,7 +12,7 @@ namespace UtiliSite.Pages.Dashboard
             if(!auth.Authenticated) return;
             ViewData["user"] = auth.User;
             ViewData["guild"] = auth.Guild;
-            ViewData["premium"] = Database.Premium.IsPremium(auth.Guild.Id);
+            ViewData["premium"] = Database.Data.Premium.IsGuildPremium(auth.Guild.Id);
 
             ViewData["prefix"] = Misc.GetPrefix(auth.Guild.Id);
             ViewData["nickname"] = await DiscordModule.GetBotNicknameAsync(auth.Guild.Id);

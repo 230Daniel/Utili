@@ -1,0 +1,76 @@
+﻿@page
+@using Database.Data;
+@using Discord.Rest
+@using System.Collections
+@model UtiliSite.Pages.Premium.ManageModel
+@{
+    Layout = "Shared/_Layout.cshtml";
+    ViewData["Title"] = "Servers - Utili Premium";
+
+    if (ViewData["auth"] == null)
+    {
+        return;
+    }
+
+    int subscriptions = (int)ViewData["subscriptions"];
+    List<PremiumRow> rows = (List<PremiumRow>)ViewData["rows"];
+    int slot = 0;
+}
+
+<div class="text-center text-white">
+    <h1 class="display-4">Premium Servers</h1>
+    <p style="margin-bottom: 40px;">Select a server for each of your premium slots</p>
+</div>
+
+<div class="divider">
+    <div></div>
+    <span>Active Subscriptions</span>
+</div>
+
+<p class="text-white">You have @subscriptions active @(subscriptions > 1 ? "subscriptions" : "subscription") with a total of @rows.Count premium server @(rows.Count > 1 ? "slots" : "slot"). </p>
+<span class="a-blue" onclick="billingPortal()">Manage @(subscriptions > 1 ? "subscriptions" : "subscription") ➔</span>
+
+<div class="divider">
+    <div></div>
+    <span>Server Slots</span>
+</div>
+
+<div class="row" style="display: flex; justify-content: center;">
+    @foreach (PremiumRow row in rows)
+    {
+        slot++;
+        <div>
+            <div class="col-md-12" style="padding-bottom: 30px;">
+                <div class="card-container-3">
+                    <form method="post">
+
+                        <input type="hidden" name="slot" value="@row.SlotId" />
+
+                        <div class="input-group flex-nowrap">
+
+                            <input type="text" class="form-control card-strong card-component-3 card-heading" value="Slot @slot" readonly>
+                        </div>
+
+                        <div class="input-group flex-nowrap">
+                            <span class="input-group-prepend input-group-text card-component-1">Server</span>
+                            <select class="custom-select card-component-2" name="guild">
+                                <!option value="0" @(row.GuildId == 0 ? "selected": "")>None</!option>
+                                @foreach (RestUserGuild guild in ViewData["guilds"] as IEnumerable)
+                                {
+                                    <!option value="@guild.Id" @(row.GuildId == guild.Id ? "selected": "")>
+                                        @guild.Name
+                                    </!option>
+                                }
+                            </select>
+                        </div>
+
+                        <div class="input-group flex-nowrap">
+                            <span class="input-group-prepend input-group-text card-component-2 card-strong"></span>
+                            <button type="submit" class="btn  card-component-1 card-button card-strong">Save</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    }
+</div>

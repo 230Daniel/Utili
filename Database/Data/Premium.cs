@@ -9,7 +9,7 @@ namespace Database.Data
 {
     public static class Premium
     {
-        public static List<PremiumRow> GetRows(ulong? userId = null, ulong? guildId = null, bool ignoreCache = false)
+        public static List<PremiumRow> GetRows(ulong? userId = null, ulong? guildId = null, int? slotId = null, bool ignoreCache = false)
         {
             List<PremiumRow> matchedRows = new List<PremiumRow>();
 
@@ -19,6 +19,7 @@ namespace Database.Data
 
                 if (userId.HasValue) matchedRows.RemoveAll(x => x.UserId != userId.Value);
                 if (guildId.HasValue) matchedRows.RemoveAll(x => x.GuildId != guildId.Value);
+                if (slotId.HasValue) matchedRows.RemoveAll(x => x.SlotId != slotId.Value);
             }
             else
             {
@@ -35,6 +36,12 @@ namespace Database.Data
                 {
                     command += " AND GuildId = @GuildId";
                     values.Add(("GuildId", guildId.Value.ToString()));
+                }
+
+                if (slotId.HasValue)
+                {
+                    command += " AND SlotId = @SlotId";
+                    values.Add(("SlotId", slotId.Value.ToString()));
                 }
 
                 MySqlDataReader reader = Sql.GetCommand(command, values.ToArray()).ExecuteReader();
@@ -67,6 +74,18 @@ namespace Database.Data
             }
 
             return rows;
+        }
+
+        public static PremiumRow GetUserRow(ulong userId, int slotId)
+        {
+            List<PremiumRow> rows = GetRows(userId, slotId: slotId);
+            return rows.Count > 0 ? rows.First() : null;
+        }
+
+        public static bool IsGuildPremium(ulong guildId)
+        {
+            List<PremiumRow> rows = GetRows(guildId: guildId);
+            return rows.Count > 0;
         }
 
         public static void SaveRow(PremiumRow row)
