@@ -10,7 +10,6 @@ using Microsoft.CodeAnalysis.Scripting;
 using Utili.Commands;
 using static Utili.Program;
 using static Utili.MessageSender;
-using Utili.Features;
 
 namespace Utili.Features
 {

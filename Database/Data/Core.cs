@@ -101,7 +101,7 @@ namespace Database.Data
         {
             New = true;
             GuildId = guildId;
-            Prefix = EString.FromDecoded(Database._config.DefaultPrefix);
+            Prefix = EString.FromDecoded(Database.Config.DefaultPrefix);
             EnableCommands = true;
             ExcludedChannels = new List<ulong>();
         }

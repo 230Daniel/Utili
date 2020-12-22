@@ -53,8 +53,6 @@ namespace Database.Data
 
         public static async Task SaveRowAsync(MessageLogsRow row)
         {
-            MySqlCommand command;
-
             if (row.New)
             {
                 await Sql.ExecuteAsync(

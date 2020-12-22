@@ -6,8 +6,6 @@ using Discord.WebSocket;
 using static Utili.Program;
 using static Utili.MessageSender;
 using static Utili.Helper;
-using System.Linq;
-using System.Collections.Generic;
 
 namespace Utili.Commands
 {
@@ -73,6 +71,7 @@ namespace Utili.Commands
             if(status < PingStatus.Poor && cpu > 50) status = PingStatus.Poor;
             if(status < PingStatus.Critical && cpu > 90 || memory > 95) status = PingStatus.Critical;
 
+#pragma warning disable 8509
             Color color = status switch
             {
                 PingStatus.Excellent => new Color(67, 181, 129),
@@ -80,6 +79,7 @@ namespace Utili.Commands
                 PingStatus.Poor => new Color(181, 107, 67),
                 PingStatus.Critical => new Color(181, 67, 67)
             };
+#pragma warning restore 8509
 
             EmbedBuilder embed = new EmbedBuilder
             {

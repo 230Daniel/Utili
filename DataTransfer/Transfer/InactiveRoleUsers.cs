@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Database.Data;
 
@@ -9,10 +8,9 @@ namespace DataTransfer.Transfer
 {
     internal class InactiveRoleUsers
     {
-        public static async Task Transfer(ulong? guildId = null)
+        public static async Task TransferAsync(ulong? guildId = null)
         {
             List<V1Data> v1Datas = V1Data.GetDataList(guildId.ToString(), ignoreCache: true, table: "Utili_InactiveTimers");
-            List<InactiveRoleUserRow> processed = new List<InactiveRoleUserRow>();
 
             foreach (V1Data v1 in v1Datas)
             {

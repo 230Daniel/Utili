@@ -1,13 +1,10 @@
 using System;
 using System.Globalization;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.Headers;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -17,6 +14,7 @@ namespace UtiliSite
 {
     public class Startup
     {
+        // ReSharper disable once UnusedParameter.Local
         public Startup(IConfiguration configuration, IWebHostEnvironment env)
         {
             if (env.IsProduction())
@@ -26,17 +24,11 @@ namespace UtiliSite
                     .AddJsonFile("appsettings.json")
                     .AddEnvironmentVariables();
 
-                Configuration = configurationBuilder.Build();
-            }
-            else
-            {
-                Configuration = configuration;
+                configurationBuilder.Build();
             }
 
             Main.InitialiseAsync().GetAwaiter().GetResult();
         }
-
-        private IConfiguration Configuration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
@@ -79,8 +71,8 @@ namespace UtiliSite
                 })
                 .AddDiscord(options =>
                 {
-                    options.ClientId = Main._config.DiscordClientId;
-                    options.ClientSecret = Main._config.DiscordClientSecret;
+                    options.ClientId = Main.Config.DiscordClientId;
+                    options.ClientSecret = Main.Config.DiscordClientSecret;
                     options.AccessDeniedPath = "/";
                     options.Scope.Add("email");
                     options.Scope.Add("guilds");

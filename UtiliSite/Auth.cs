@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Discord.Rest;
@@ -38,7 +37,7 @@ namespace UtiliSite
                 return new AuthDetails(false);
             }
 
-            AuthDetails auth = new AuthDetails(true, client, client.CurrentUser, httpContext);
+            AuthDetails auth = new AuthDetails(true, client, client.CurrentUser);
 
             if (httpContext.Request.RouteValues.TryGetValue("guild", out object guildValue))
             {
@@ -51,7 +50,7 @@ namespace UtiliSite
                         if (guild == null)
                         {
                             string inviteUrl = "https://discord.com/api/oauth2/authorize?permissions=8&scope=bot&response_type=code" +
-                                               $"&client_id={Main._config.DiscordClientId}" +
+                                               $"&client_id={Main.Config.DiscordClientId}" +
                                                $"&guild_id={guildId}" +
                                                $"&redirect_uri=https%3A%2F%2F{httpContext.Request.Host.Value}%2Freturn";
 
@@ -103,7 +102,7 @@ namespace UtiliSite
             string token = httpContext.GetTokenAsync("Discord", "access_token").GetAwaiter().GetResult();
             DiscordRestClient client = await GetClientAsync(userId, token);
 
-            return client == null ? new AuthDetails(false) : new AuthDetails(true, client, client.CurrentUser, httpContext);
+            return client == null ? new AuthDetails(false) : new AuthDetails(true, client, client.CurrentUser);
         }
     }
 
@@ -114,7 +113,7 @@ namespace UtiliSite
         public RestSelfUser User { get; set; }
         public RestGuild Guild { get; set; }
 
-        public AuthDetails(bool authenticated, DiscordRestClient client, RestSelfUser user, HttpContext httpContext)
+        public AuthDetails(bool authenticated, DiscordRestClient client, RestSelfUser user)
         {
             Authenticated = authenticated;
             Client = client;

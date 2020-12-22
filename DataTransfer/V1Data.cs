@@ -1,15 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
-using System.Net.Mail;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
-using Database.Data;
 using Discord.Commands;
 using MySql.Data.MySqlClient;
-using ECCurve = Org.BouncyCastle.Math.EC.ECCurve;
 
 namespace DataTransfer
 {
@@ -51,8 +47,6 @@ namespace DataTransfer
 
         public static void SaveData(string guildId, string type, string value = "", bool ignoreCache = false, bool cacheOnly = false, string table = "Utili")
         {
-            V1Data v1Data = new V1Data(guildId, type, value);
-
             if (!ignoreCache)
             {
                 try { Cache.Add(new V1Data(guildId, type, value)); } catch { }
@@ -63,8 +57,6 @@ namespace DataTransfer
 
         public static List<V1Data> GetData(string guildId = null, string type = null, string value = null, bool ignoreCache = false, string table = "Utili")
         {
-            V1Data v1Data = new V1Data(guildId, type, value);
-
             return GetDataList(guildId, type, value, ignoreCache, table);
         }
 
@@ -74,8 +66,6 @@ namespace DataTransfer
             {
                 if (!ignoreCache)
                 {
-                    V1Data v1Data = new V1Data(guildId, type, value);
-
                     if (guildId != null && type != null && value != null) return Cache.First(x => x.GuildId == guildId && x.Type == type && x.Value == value);
                     if (type != null && value != null) return Cache.First(x => x.Type == type && x.Value == value);
                     if (guildId != null && value != null) return Cache.First(x => x.GuildId == guildId && x.Value == value);

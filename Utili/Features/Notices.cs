@@ -180,7 +180,7 @@ namespace Utili.Features
             NoticesRow row = await Database.Data.Notices.GetRowAsync(Context.Guild.Id, channel.Id);
             (string, Embed) notice = Notices.GetNotice(row);
             
-            RestUserMessage sent = await MessageSender.SendEmbedAsync(Context.Channel, notice.Item2, notice.Item1);
+            await MessageSender.SendEmbedAsync(Context.Channel, notice.Item2, notice.Item1);
         }
     }
 }

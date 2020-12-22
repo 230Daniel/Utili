@@ -5,7 +5,6 @@ using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using static Utili.MessageSender;
-using static Utili.Program;
 
 namespace Utili.Features
 {

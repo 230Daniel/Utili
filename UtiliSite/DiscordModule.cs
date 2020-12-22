@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Rest;
-using static UtiliSite.Main;
 
 namespace UtiliSite
 {
@@ -22,7 +21,7 @@ namespace UtiliSite
         public static async Task InitialiseAsync()
         {
             _client = new DiscordRestClient();
-            await _client.LoginAsync(TokenType.Bot, _config.DiscordToken);
+            await _client.LoginAsync(TokenType.Bot, Main.Config.DiscordToken);
         }
 
         public static async Task<DiscordRestClient> GetClientAsync(ulong userId, string token = null)

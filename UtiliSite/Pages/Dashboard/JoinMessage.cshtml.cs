@@ -1,5 +1,3 @@
-using System;
-using System.Linq;
 using System.Threading.Tasks;
 using Database.Data;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -16,7 +14,7 @@ namespace UtiliSite.Pages.Dashboard
 
             ViewData["user"] = auth.User;
             ViewData["guild"] = auth.Guild;
-            ViewData["premium"] = Database.Premium.IsPremium(auth.Guild.Id);
+            ViewData["premium"] = Premium.IsPremium(auth.Guild.Id);
             ViewData["row"] = await JoinMessage.GetRowAsync(auth.Guild.Id);
             ViewData["channels"] = await DiscordModule.GetTextChannelsAsync(auth.Guild);
         }

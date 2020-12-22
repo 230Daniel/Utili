@@ -222,7 +222,7 @@ namespace Utili.Features
             }
 
             string content = sb.ToString().TrimEnd('\r', '\n');
-            return await Program._haste.PasteAsync(content, "txt");
+            return await _haste.PasteAsync(content, "txt");
         }
     }
 }

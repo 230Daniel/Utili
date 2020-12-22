@@ -1,9 +1,7 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Database.Data;
-using Discord;
 using Discord.Rest;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
@@ -52,7 +50,6 @@ namespace UtiliSite.Pages.Dashboard
         public async Task OnPostAdd()
         {
             AuthDetails auth = await Auth.GetAuthDetailsAsync(HttpContext, HttpContext.Request.Path);
-
             if (!auth.Authenticated)
             {
                 HttpContext.Response.StatusCode = 403;
@@ -60,8 +57,6 @@ namespace UtiliSite.Pages.Dashboard
             }
 
             ulong channelId = ulong.Parse(HttpContext.Request.Form["channel"]);
-            RestTextChannel channel = auth.Guild.GetTextChannelAsync(channelId).GetAwaiter().GetResult();
-
             VoteChannelsRow newRow = new VoteChannelsRow(auth.Guild.Id, channelId);
             await VoteChannels.SaveRowAsync(newRow);
 

@@ -86,7 +86,7 @@ namespace Utili.Handlers
             _ = DownloadNewRequiredUsersAsync();
         }
 
-        private static bool _downloadingNewRequiredUsers = false;
+        private static bool _downloadingNewRequiredUsers;
         private static async Task DownloadNewRequiredUsersAsync()
         {
             if(_downloadingNewRequiredUsers) return;

@@ -222,7 +222,7 @@ namespace Utili.Features
                     {
                         using(MyClient client = new MyClient()) {
                             client.HeadOnly = true;
-                            string content = client.DownloadString(word);
+                            client.DownloadString(word);
                         }
                         return true;
                     }

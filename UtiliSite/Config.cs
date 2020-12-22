@@ -1,7 +1,7 @@
 ﻿using System.IO;
 using System.Text.Json;
 
-namespace Database
+namespace UtiliSite
 {
     internal class Config
     {

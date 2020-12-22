@@ -1,18 +1,17 @@
 ﻿using System.Threading.Tasks;
-using Database;
 
 namespace UtiliSite
 {
     internal static class Main
     {
-        public static Config _config;
+        public static Config Config;
 
         public static async Task InitialiseAsync()
         {
-            _config = new Config();
-            _config.Load();
+            Config = new Config();
+            Config.Load();
 
-            await Database.Database.InitialiseAsync(false, _config.DefaultPrefix);
+            await Database.Database.InitialiseAsync(false, Config.DefaultPrefix);
 
             await DiscordModule.InitialiseAsync();
         }

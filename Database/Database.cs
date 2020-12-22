@@ -4,15 +4,15 @@ namespace Database
 {
     public static class Database
     {
-        public static Config _config { get; set; }
+        internal static Config Config { get; private set; }
 
         public static async Task InitialiseAsync(bool useCache, string defaultPrefix)
         {
-            _config = new Config();
-            _config.Load();
-            _config.DefaultPrefix = defaultPrefix;
+            Config = new Config();
+            Config.Load();
+            Config.DefaultPrefix = defaultPrefix;
 
-            Sql.SetCredentials(_config.Server, _config.Port, _config.Database, _config.Username, _config.Password);
+            Sql.SetCredentials(Config.Server, Config.Port, Config.Database, Config.Username, Config.Password);
             await Sql.PingAsync();
 
             if (useCache)

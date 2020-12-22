@@ -1,19 +1,21 @@
 ﻿using System.Net.Http;
-using System.Text.Json;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 namespace Database
 {
     public class Haste
     {
-        private string BaseUrl { get; set; }
+        private string BaseUrl { get; }
 
         public async Task<string> PasteAsync(string content, string format)
         {
             HttpContent httpContent = new StringContent(content);
             HttpClient httpClient = new HttpClient();
+
             HttpResponseMessage httpResponse = await httpClient.PostAsync($"{BaseUrl}/documents", httpContent);
-            string key = JsonSerializer.Deserialize<PasteResponse>(await httpResponse.Content.ReadAsStringAsync()).key;
+            string json = await httpResponse.Content.ReadAsStringAsync();
+            string key = JsonConvert.DeserializeObject<PasteResponse>(json).Key;
             return $"{BaseUrl}/{key}.{format}";
         }
 
@@ -22,11 +24,10 @@ namespace Database
             BaseUrl = baseUrl;
         }
 
-        // ReSharper disable once ClassNeverInstantiated.Local
         private class PasteResponse
         {
-            // ReSharper disable once InconsistentNaming
-            public string key { get; set; }
+            [JsonProperty("key")]
+            public string Key { get; set; }
         }
     }
 }

@@ -135,7 +135,7 @@ namespace Utili.Features
             IEmote emote = Helper.GetEmote(emoteString);
             ReputationRow row = await Database.Data.Reputation.GetRowAsync(Context.Guild.Id);
 
-            if (row.Emotes.Any(x => x.Item1 == emote))
+            if (row.Emotes.Any(x => Equals(x.Item1, emote)))
             {
                 await SendFailureAsync(Context.Channel, "Error",
                     "That emote is already added");

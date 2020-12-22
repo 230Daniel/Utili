@@ -1,5 +1,4 @@
-﻿@using Discord.Rest;
-@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor;
+﻿@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor;
 @{
     AuthDetails auth;
     if (ViewData["auth"] == null)
@@ -23,7 +22,7 @@
 </head>
 <body onload="onLoad()">
 <header>
-    <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light" id="navbar" style="background-color: #e9ecef;">
+    <nav class="navbar navbar-expand-sm navbar-light" id="navbar" style="background-color: #e9ecef;">
         <div class="container" id="main-nav">
             <a class="navbar-brand" asp-area="" asp-page="/Index">
                 <img src="https://file.utili.xyz/UtiliSmall.png" width="33" height="33" alt="Logo" class="d-inline-block align-top">

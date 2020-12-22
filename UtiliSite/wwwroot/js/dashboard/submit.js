@@ -15,6 +15,7 @@ $("form").submit(function(e) {
                 return false;
             }
             successNotification();
+            return false;
         },
         error: function(xhr) {
             if (xhr.status === 429) {
