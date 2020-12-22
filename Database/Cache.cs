@@ -25,6 +25,7 @@ namespace Database
         public static MessagePinningTable MessagePinning { get; set; } = new MessagePinningTable();
         public static MiscTable Misc { get; set; } = new MiscTable();
         public static NoticesTable Notices { get; set; } = new NoticesTable();
+        public static PremiumTable Premium { get; set; } = new PremiumTable();
         public static ReputationTable Reputation { get; set; } = new ReputationTable();
         public static RolesTable Roles { get; set; } = new RolesTable();
         public static VoiceLinkTable VoiceLink { get; set; } = new VoiceLinkTable();

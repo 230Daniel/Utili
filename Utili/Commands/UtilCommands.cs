@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Database;
+using Database.Data;
 using Discord;
 using Discord.Commands;
 using Discord.Rest;
@@ -104,7 +105,7 @@ namespace Utili.Commands
                 content = "For premium servers, you can delete up to 1000 messages at once\n";
             }
 
-            else if (!Premium.IsPremium(Context.Guild.Id) && count > 100)
+            else if (!Premium.IsGuildPremium(Context.Guild.Id) && count > 100)
             {
                 count = 100;
                 content = "For non-premium servers, you can delete up to 100 messages at once\n";

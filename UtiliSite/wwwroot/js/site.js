@@ -28,11 +28,19 @@ $(window).resize(function() {
 
 function sizeElements() {
     var vh = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
+    var vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
+    var mobile = window.mobileAndTabletCheck();
     var navHeight = $("#navbar").outerHeight();
 
     var elements = document.getElementsByClassName("dynamic-height");
     for(var i = 0; i < elements.length; i++) {
         elements[i].style.height = vh - navHeight + "px";
+    }
+
+    if (mobile || vw <= 675) {
+        $(".container").css("max-width", "100vw");
+    } else {
+        $(".container").css("max-width", "75vw");
     }
 }
 

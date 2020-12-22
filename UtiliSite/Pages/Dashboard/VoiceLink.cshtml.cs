@@ -12,13 +12,13 @@ namespace UtiliSite.Pages.Dashboard
     {
         public async Task OnGet()
         {
-            AuthDetails auth = await Auth.GetAuthDetailsAsync(HttpContext, HttpContext.Request.Path);
+            AuthDetails auth = await Auth.GetAuthDetailsAsync(HttpContext);
             if(!auth.Authenticated) return;
             ViewData["user"] = auth.User;
             ViewData["guild"] = auth.Guild;
-            ViewData["premium"] = Premium.IsPremium(auth.Guild.Id);
+            ViewData["premium"] = Database.Data.Premium.IsGuildPremium(auth.Guild.Id);
 
-            VoiceLinkRow row = await VoiceLink.GetMetaRowAsync(auth.Guild.Id);
+            VoiceLinkRow row = VoiceLink.GetMetaRow(auth.Guild.Id);
 
             List<RestVoiceChannel> voiceChannels = await DiscordModule.GetVoiceChannelsAsync(auth.Guild);
             List<RestVoiceChannel> excludedChannels = voiceChannels.Where(x => row.ExcludedChannels.Contains(x.Id)).OrderBy(x => x.Position).ToList();
@@ -31,7 +31,7 @@ namespace UtiliSite.Pages.Dashboard
 
         public async Task OnPost()
         {
-            AuthDetails auth = await Auth.GetAuthDetailsAsync(HttpContext, HttpContext.Request.Path);
+            AuthDetails auth = await Auth.GetAuthDetailsAsync(HttpContext);
 
             if (!auth.Authenticated)
             {
@@ -43,18 +43,18 @@ namespace UtiliSite.Pages.Dashboard
             bool deleteChannels = HttpContext.Request.Form["deleteChannels"] == "on";
             string prefix = HttpContext.Request.Form["prefix"].ToString();
 
-            VoiceLinkRow row = await VoiceLink.GetMetaRowAsync(auth.Guild.Id);
+            VoiceLinkRow row = VoiceLink.GetMetaRow(auth.Guild.Id);
             row.Enabled = enabled;
             row.DeleteChannels = deleteChannels;
             row.Prefix = EString.FromDecoded(prefix);
-            await VoiceLink.SaveMetaRowAsync(row);
+            VoiceLink.SaveMetaRow(row);
 
             HttpContext.Response.StatusCode = 200;
         }
 
         public async Task OnPostExclude()
         {
-            AuthDetails auth = await Auth.GetAuthDetailsAsync(HttpContext, HttpContext.Request.Path);
+            AuthDetails auth = await Auth.GetAuthDetailsAsync(HttpContext);
 
             if (!auth.Authenticated)
             {
@@ -64,12 +64,12 @@ namespace UtiliSite.Pages.Dashboard
 
             ulong channelId = ulong.Parse(HttpContext.Request.Form["channel"]);
 
-            VoiceLinkRow metaRow = await VoiceLink.GetMetaRowAsync(auth.Guild.Id);
+            VoiceLinkRow metaRow = VoiceLink.GetMetaRow(auth.Guild.Id);
             if (!metaRow.ExcludedChannels.Contains(channelId))
             {
                 metaRow.ExcludedChannels.Add(channelId);
             }
-            await VoiceLink.SaveMetaRowAsync(metaRow);
+            VoiceLink.SaveMetaRow(metaRow);
 
             HttpContext.Response.StatusCode = 200;
             HttpContext.Response.Redirect(HttpContext.Request.Path);
@@ -77,7 +77,7 @@ namespace UtiliSite.Pages.Dashboard
 
         public async Task OnPostRemove()
         {
-            AuthDetails auth = await Auth.GetAuthDetailsAsync(HttpContext, HttpContext.Request.Path);
+            AuthDetails auth = await Auth.GetAuthDetailsAsync(HttpContext);
 
             if (!auth.Authenticated)
             {
@@ -87,9 +87,9 @@ namespace UtiliSite.Pages.Dashboard
 
             ulong channelId = ulong.Parse(HttpContext.Request.Form["channel"]);
 
-            VoiceLinkRow metaRow = await VoiceLink.GetMetaRowAsync(auth.Guild.Id);
+            VoiceLinkRow metaRow = VoiceLink.GetMetaRow(auth.Guild.Id);
             metaRow.ExcludedChannels.RemoveAll(x => x == channelId);
-            await VoiceLink.SaveMetaRowAsync(metaRow);
+            VoiceLink.SaveMetaRow(metaRow);
 
             HttpContext.Response.StatusCode = 200;
             HttpContext.Response.Redirect(HttpContext.Request.Path);

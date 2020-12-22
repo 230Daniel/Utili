@@ -2,6 +2,7 @@
 @model UtiliSite.Pages.CommandsModel
 @{
     ViewData["Title"] = "Commands - Utili";
+    string idHelp = "class=\"a-blue\" href=\"https://support.discord.com/hc/en-us/articles/206346498\" target=\"_blank\"";
 }
 
 <div class="text-center text-white">
@@ -49,15 +50,15 @@
                 <td>Delete an amount of messages from the channel, starting from the bottom</td>
             </tr>
             <tr>
-                <td>prune [before/after] [<a href="https://support.discord.com/hc/en-us/articles/206346498" target="_blank">message id</a>]</td>
+                <td>prune [before/after] [<a @Html.Raw(idHelp)>message id</a>]</td>
                 <td>Delete messages before or after a specific message</td>
             </tr>
             <tr>
-                <td>prune [amount] [before/after] [<a href="https://support.discord.com/hc/en-us/articles/206346498" target="_blank">message id</a>]</td>
+                <td>prune [amount] [before/after] [<a @Html.Raw(idHelp)>message id</a>]</td>
                 <td>Delete an amount of messages before or after a specific message</td>
             </tr>
             <tr>
-                <td>react [<a href="https://support.discord.com/hc/en-us/articles/206346498" target="_blank">message id</a>] [emoji]</td>
+                <td>react [<a @Html.Raw(idHelp)>message id</a>] [emoji]</td>
                 <td>Make the bot add a reaction to a message</td>
             </tr>
             </tbody>

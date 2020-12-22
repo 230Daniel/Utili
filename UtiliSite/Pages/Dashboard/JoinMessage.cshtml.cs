@@ -1,3 +1,5 @@
+using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Database.Data;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -9,19 +11,19 @@ namespace UtiliSite.Pages.Dashboard
     {
         public async Task OnGet()
         {
-            AuthDetails auth = await Auth.GetAuthDetailsAsync(HttpContext, HttpContext.Request.Path);
+            AuthDetails auth = await Auth.GetAuthDetailsAsync(HttpContext);
             if(!auth.Authenticated) return;
 
             ViewData["user"] = auth.User;
             ViewData["guild"] = auth.Guild;
-            ViewData["premium"] = Premium.IsPremium(auth.Guild.Id);
-            ViewData["row"] = await JoinMessage.GetRowAsync(auth.Guild.Id);
+            ViewData["premium"] = Database.Data.Premium.IsGuildPremium(auth.Guild.Id);
+            ViewData["row"] = JoinMessage.GetRow(auth.Guild.Id);
             ViewData["channels"] = await DiscordModule.GetTextChannelsAsync(auth.Guild);
         }
 
         public async Task OnPost()
         {
-            AuthDetails auth = await Auth.GetAuthDetailsAsync(HttpContext, HttpContext.Request.Path);
+            AuthDetails auth = await Auth.GetAuthDetailsAsync(HttpContext);
 
             if (!auth.Authenticated)
             {
@@ -29,7 +31,7 @@ namespace UtiliSite.Pages.Dashboard
                 return;
             }
 
-            JoinMessageRow row = await JoinMessage.GetRowAsync(auth.Guild.Id);
+            JoinMessageRow row = JoinMessage.GetRow(auth.Guild.Id);
 
             row.Enabled = HttpContext.Request.Form["enabled"] == "on";
             row.Direct = bool.Parse(HttpContext.Request.Form["direct"]);
@@ -43,7 +45,7 @@ namespace UtiliSite.Pages.Dashboard
             row.Icon = EString.FromDecoded(HttpContext.Request.Form["icon"]);
             row.Colour = new Discord.Color(uint.Parse(HttpContext.Request.Form["colour"].ToString().Replace("#", ""), System.Globalization.NumberStyles.HexNumber));
 
-            await JoinMessage.SaveRowAsync(row);
+            JoinMessage.SaveRow(row);
 
             HttpContext.Response.StatusCode = 200;
         }

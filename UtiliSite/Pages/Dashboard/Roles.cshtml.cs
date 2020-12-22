@@ -9,11 +9,11 @@ namespace UtiliSite.Pages.Dashboard
     {
         public async Task OnGet()
         {
-            AuthDetails auth = await Auth.GetAuthDetailsAsync(HttpContext, HttpContext.Request.Path);
+            AuthDetails auth = await Auth.GetAuthDetailsAsync(HttpContext);
             if(!auth.Authenticated) return;
             ViewData["user"] = auth.User;
             ViewData["guild"] = auth.Guild;
-            ViewData["premium"] = Database.Premium.IsPremium(auth.Guild.Id);
+            ViewData["premium"] = Database.Data.Premium.IsGuildPremium(auth.Guild.Id);
 
             RolesRow row = await Roles.GetRowAsync(auth.Guild.Id);
 
@@ -24,7 +24,7 @@ namespace UtiliSite.Pages.Dashboard
 
         public async Task OnPost()
         {
-            AuthDetails auth = await Auth.GetAuthDetailsAsync(HttpContext, HttpContext.Request.Path);
+            AuthDetails auth = await Auth.GetAuthDetailsAsync(HttpContext);
 
             if (!auth.Authenticated)
             {
@@ -51,7 +51,7 @@ namespace UtiliSite.Pages.Dashboard
 
         public async Task OnPostAddJoinRole()
         {
-            AuthDetails auth = await Auth.GetAuthDetailsAsync(HttpContext, HttpContext.Request.Path);
+            AuthDetails auth = await Auth.GetAuthDetailsAsync(HttpContext);
 
             if (!auth.Authenticated)
             {
@@ -71,7 +71,7 @@ namespace UtiliSite.Pages.Dashboard
 
         public async Task OnPostRemoveJoinRole()
         {
-            AuthDetails auth = await Auth.GetAuthDetailsAsync(HttpContext, HttpContext.Request.Path);
+            AuthDetails auth = await Auth.GetAuthDetailsAsync(HttpContext);
 
             if (!auth.Authenticated)
             {

@@ -9,6 +9,7 @@ namespace Database.Data
     public static class Users
     {
         public static async Task<List<UserRow>> GetRowsAsync(ulong? userId = null)
+        public static List<UserRow> GetRows(ulong? userId = null, string customerId = null)
         {
             List<UserRow> matchedRows = new List<UserRow>();
 
@@ -21,7 +22,13 @@ namespace Database.Data
                 values.Add(("UserId", userId.Value));
             }
 
-            MySqlDataReader reader = await Sql.ExecuteReaderAsync(command, values.ToArray());
+            if (!string.IsNullOrEmpty(customerId))
+            {
+                command += " AND CustomerId = @CustomerId";
+                values.Add(("CustomerId", customerId));
+            }
+
+            MySqlDataReader reader = Sql.GetCommand(command, values.ToArray()).ExecuteReader();
 
             while (reader.Read())
             {
@@ -29,7 +36,8 @@ namespace Database.Data
                     reader.GetUInt64(0),
                     reader.GetString(1),
                     reader.GetDateTime(2),
-                    reader.GetInt32(3)));
+                    reader.GetInt32(3),
+                    reader.IsDBNull(4) ? null : reader.GetString(4)));
             }
 
             reader.Close();
@@ -43,26 +51,42 @@ namespace Database.Data
             return rows.Count > 0 ? rows.First() : new UserRow(userId);
         }
 
-        public static async Task SaveRowAsync(UserRow row)
+        public static UserRow GetRow(string customerId)
+        {
+            List<UserRow> rows = GetRows(customerId: customerId);
+            return rows.Count > 0 ? rows.First() : null;
+        }
+
+        public static void SaveRow(UserRow row)
         {
             if (row.New)
             {
-                await Sql.ExecuteAsync(
-                    "INSERT INTO Users (UserId, Email, LastVisit, Visits) VALUES (@UserId, @Email, @LastVisit, @Visits);",
-                    ("UserId", row.UserId),
-                    ("Email", row.Email), 
-                    ("LastVisit", row.LastVisit),
-                    ("Visits", row.Visits));
+                command = Sql.GetCommand("INSERT INTO Users (UserId, Email, LastVisit, Visits, CustomerId) VALUES (@UserId, @Email, @LastVisit, @Visits, @CustomerId);",
+                    new [] {
+                        ("UserId", row.UserId.ToString()),
+                        ("Email", row.Email), 
+                        ("LastVisit", Sql.ToSqlDateTime(row.LastVisit)),
+                        ("Visits", row.Visits.ToString()),
+                        ("CustomerId", row.CustomerId)
+                    });
+
+                command.ExecuteNonQuery();
+                command.Connection.Close();
 
                 row.New = false;
             }
             else
             {
-                await Sql.ExecuteAsync(
-                    "UPDATE Users SET Email = @Email, LastVisit = @LastVisit WHERE UserId = @UserId;",
-                    ("UserId", row.UserId),
-                    ("Email", row.Email), 
-                    ("LastVisit", row.LastVisit));
+                command = Sql.GetCommand("UPDATE Users SET Email = @Email, LastVisit = @LastVisit, CustomerId = @CustomerId WHERE UserId = @UserId;",
+                    new [] {
+                        ("UserId", row.UserId.ToString()),
+                        ("Email", row.Email), 
+                        ("LastVisit", Sql.ToSqlDateTime(row.LastVisit)),
+                        ("CustomerId", row.CustomerId)
+                    });
+
+                command.ExecuteNonQuery();
+                command.Connection.Close();
             }
         }
 
@@ -80,6 +104,7 @@ namespace Database.Data
         public string Email { get; set; }
         public DateTime LastVisit { get; set; }
         public int Visits { get; set; }
+        public string CustomerId { get; set; }
 
         private UserRow()
         {
@@ -90,9 +115,10 @@ namespace Database.Data
             New = true;
             UserId = userId;
             LastVisit = DateTime.MinValue;
+            CustomerId = null;
         }
 
-        public static UserRow FromDatabase(ulong userId, string email, DateTime lastVisit, int visits)
+        public static UserRow FromDatabase(ulong userId, string email, DateTime lastVisit, int visits, string customerId)
         {
             return new UserRow
             {
@@ -100,7 +126,8 @@ namespace Database.Data
                 UserId = userId,
                 Email = email,
                 LastVisit = lastVisit,
-                Visits = visits
+                Visits = visits,
+                CustomerId = customerId
             };
         }
     }

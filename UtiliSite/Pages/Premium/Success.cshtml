@@ -1,0 +1,13 @@
+﻿@page
+@model UtiliSite.Pages.Premium.SuccessModel
+@{
+    Layout = "Shared/_Layout.cshtml";
+}
+
+<div class="text-center text-white">
+    <h1 class="display-4">Utili Premium</h1>
+    <p>Thank you for your purchase!</p>
+</div>
+
+<a href="@RedirectHelper.ChangeLastPage(ViewContext, "manage")">Manage premium servers</a>
+

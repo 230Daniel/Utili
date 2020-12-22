@@ -17,7 +17,7 @@ namespace UtiliSite.Pages.Dashboard
                 return;
             }
 
-            AuthDetails auth = await Auth.GetAuthDetailsAsync(HttpContext, HttpContext.Request.Path);
+            AuthDetails auth = await Auth.GetAuthDetailsAsync(HttpContext);
             if(!auth.Authenticated) return;
             ViewData["auth"] = auth;
 

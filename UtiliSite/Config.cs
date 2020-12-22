@@ -10,25 +10,24 @@ namespace UtiliSite
         public string DiscordToken { get; set; }
         public string DefaultPrefix { get; set; }
 
-        public void Load()
+        public string StripePrivateKey { get; set; }
+        public string StripePublicKey { get; set; }
+        public string StripeWebhookSecret { get; set; }
+        
+        public static Config Load()
         {
             try
             {
                 string json = File.ReadAllText("Config.json");
-                Config config = JsonSerializer.Deserialize<Config>(json);
-
-                DiscordClientId = config.DiscordClientId;
-                DiscordClientSecret = config.DiscordClientSecret;
-                DiscordToken = config.DiscordToken;
-                DefaultPrefix = config.DefaultPrefix;
+                return JsonSerializer.Deserialize<Config>(json);
             }
             catch (FileNotFoundException)
             {
-                string json = JsonSerializer.Serialize(this, new JsonSerializerOptions{WriteIndented = true});
-
+                string json = JsonSerializer.Serialize(new Config(), new JsonSerializerOptions{WriteIndented = true});
                 File.WriteAllText("Config.json", json);
             }
-            catch { }
+
+            return new Config();
         }
     }
 }

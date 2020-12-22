@@ -13,6 +13,7 @@ namespace UtiliSite
 
         private static DiscordCache _cachedClients = new DiscordCache(600);
         private static DiscordCache _cachedGuildLists = new DiscordCache(15);
+        private static DiscordCache _cachedBotGuildLists = new DiscordCache(60);
         private static DiscordCache _cachedGuildUsers = new DiscordCache(15);
         private static DiscordCache _cachedGuilds = new DiscordCache(120);
         private static DiscordCache _cachedTextChannels = new DiscordCache(15);
@@ -55,7 +56,7 @@ namespace UtiliSite
             return client;
         }
 
-        public static async Task<List<RestUserGuild>> GetManageableGuildsAsync(DiscordRestClient client)
+        public static async Task<List<RestUserGuild>> GetGuildsAsync(DiscordRestClient client)
         {
             List<RestUserGuild> guilds;
 
@@ -65,9 +66,37 @@ namespace UtiliSite
                 return guilds;
             }
 
-            guilds = (await client.GetGuildSummariesAsync().FlattenAsync()).Where(x => x.Permissions.ManageGuild).ToList();
+            guilds = (await client.GetGuildSummariesAsync().FlattenAsync()).ToList();
             _cachedGuildLists.Add(client.CurrentUser.Id, guilds);
             return guilds;
+        }
+
+        public static async Task<List<RestUserGuild>> GetManageableGuildsAsync(DiscordRestClient client)
+        {
+            List<RestUserGuild> guilds = await GetGuildsAsync(client);
+            return guilds.Where(x => x.Permissions.ManageGuild).ToList();
+        }
+
+        public static async Task<List<RestUserGuild>> GetBotGuildsAsync()
+        {
+            List<RestUserGuild> guilds;
+            
+            if (_cachedBotGuildLists.TryGet(_client.CurrentUser.Id, out object cacheResult))
+            {
+                guilds = cacheResult as List<RestUserGuild>;
+                return guilds;
+            }
+
+            guilds = (await _client.GetGuildSummariesAsync().FlattenAsync()).ToList();
+            _cachedBotGuildLists.Add(_client.CurrentUser.Id, guilds);
+            return guilds;
+        }
+
+        public static async Task<List<RestUserGuild>> GetMutualGuildsAsync(DiscordRestClient client)
+        {
+            List<RestUserGuild> userGuilds = await GetGuildsAsync(client);
+            List<RestUserGuild> botGuids = await GetBotGuildsAsync();
+            return botGuids.Where(x => userGuilds.Any(y => y.Id == x.Id)).ToList();
         }
 
         private static async Task<RestGuildUser> GetGuildUserAsync(ulong userId, ulong guildId)

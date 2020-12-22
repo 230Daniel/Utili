@@ -12,11 +12,11 @@ namespace UtiliSite
 {
     public static class Auth
     {
-        public static async Task<AuthDetails> GetAuthDetailsAsync(HttpContext httpContext, string redirectUrl, string unauthorisedGuildUrl = "/dashboard")
+        public static async Task<AuthDetails> GetAuthDetailsAsync(HttpContext httpContext)
         {
             AuthenticationProperties authProperties = new AuthenticationProperties
             {
-                RedirectUri = redirectUrl,
+                RedirectUri = httpContext.Request.Path,
                 AllowRefresh = true,
                 IsPersistent = true
             };
@@ -69,21 +69,21 @@ namespace UtiliSite
                         else
                         {
                             auth.Authenticated = false;
-                            httpContext.Response.Redirect(unauthorisedGuildUrl);
+                            httpContext.Response.Redirect("/dashboard");
                             return auth;
                         }
                     }
                     else
                     {
                         auth.Authenticated = false;
-                        httpContext.Response.Redirect(unauthorisedGuildUrl);
+                        httpContext.Response.Redirect("/dashboard");
                         return auth;
                     }
                 }
                 else
                 {
                     auth.Authenticated = false;
-                    httpContext.Response.Redirect(unauthorisedGuildUrl);
+                    httpContext.Response.Redirect("/dashboard");
                     return auth;
                 }
             }
@@ -112,6 +112,7 @@ namespace UtiliSite
         public DiscordRestClient Client { get; set; }
         public RestSelfUser User { get; set; }
         public RestGuild Guild { get; set; }
+        public UserRow UserRow { get; set; }
 
         public AuthDetails(bool authenticated, DiscordRestClient client, RestSelfUser user)
         {
@@ -119,19 +120,16 @@ namespace UtiliSite
             Client = client;
             User = user;
 
-            _ = Task.Run(async () =>
-            {
-                UserRow userRow = await Users.GetRowAsync(user.Id);
-                DateTime previousVisit = userRow.LastVisit;
-                userRow.Email = user.Email;
+            UserRow = Users.GetRow(user.Id);
+            DateTime previousVisit = UserRow.LastVisit;
+            UserRow.Email = user.Email;
                 
-                if (previousVisit < DateTime.UtcNow - TimeSpan.FromMinutes(30))
-                {
-                    userRow.LastVisit = DateTime.UtcNow;
-                    await Users.SaveRowAsync(userRow);
-                    await Users.AddNewVisitAsync(user.Id);
-                }
-            });
+            if (previousVisit < DateTime.UtcNow - TimeSpan.FromMinutes(30))
+            {
+                UserRow.LastVisit = DateTime.UtcNow;
+                Users.SaveRow(UserRow);
+                Users.AddNewVisit(user.Id);
+            }
         }
 
         public AuthDetails(bool authenticated)
