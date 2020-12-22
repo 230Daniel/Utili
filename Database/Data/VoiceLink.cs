@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using MySql.Data.MySqlClient;
 
 namespace Database.Data
@@ -8,7 +9,7 @@ namespace Database.Data
     {
         #region Meta Rows
 
-        public static List<VoiceLinkRow> GetMetaRows(ulong? guildId = null, bool ignoreCache = false)
+        public static async Task<List<VoiceLinkRow>> GetMetaRowsAsync(ulong? guildId = null, bool ignoreCache = false)
         {
             List<VoiceLinkRow> matchedRows = new List<VoiceLinkRow>();
 
@@ -21,15 +22,15 @@ namespace Database.Data
             else
             {
                 string command = "SELECT * FROM VoiceLink WHERE TRUE";
-                List<(string, string)> values = new List<(string, string)>();
+                List<(string, object)> values = new List<(string, object)>();
 
                 if (guildId.HasValue)
                 {
                     command += " AND GuildId = @GuildId";
-                    values.Add(("GuildId", guildId.Value.ToString()));
+                    values.Add(("GuildId", guildId.Value));
                 }
 
-                MySqlDataReader reader = Sql.GetCommand(command, values.ToArray()).ExecuteReader();
+                MySqlDataReader reader = await Sql.ExecuteReaderAsync(command, values.ToArray());
 
                 while (reader.Read())
                 {
@@ -47,41 +48,36 @@ namespace Database.Data
             return matchedRows;
         }
 
-        public static VoiceLinkRow GetMetaRow(ulong guildId)
+        public static async Task<VoiceLinkRow> GetMetaRowAsync(ulong guildId)
         {
-            List<VoiceLinkRow> rows = GetMetaRows(guildId);
+            List<VoiceLinkRow> rows = await GetMetaRowsAsync(guildId);
             return rows.Count > 0 ? rows.First() : new VoiceLinkRow(guildId);
         }
 
-        public static void SaveMetaRow(VoiceLinkRow row)
+        public static async Task SaveMetaRowAsync(VoiceLinkRow row)
         {
-            MySqlCommand command;
-
             if (row.New)
             {
-                command = Sql.GetCommand($"INSERT INTO VoiceLink (GuildId, Enabled, DeleteChannels, Prefix, ExcludedChannels) VALUES (@GuildId, {Sql.ToSqlBool(row.Enabled)}, {Sql.ToSqlBool(row.DeleteChannels)}, @Prefix, @ExcludedChannels );",
-                    new [] {("GuildId", row.GuildId.ToString()), 
-                        ("Prefix", row.Prefix.EncodedValue),
-                        ("ExcludedChannels", row.GetExcludedChannelsString())
-                    });
+                await Sql.ExecuteAsync(
+                    "INSERT INTO VoiceLink (GuildId, Enabled, DeleteChannels, Prefix, ExcludedChannels) VALUES (@GuildId, @Enabled, @DeleteChannels, @Prefix, @ExcludedChannels );",
+                    ("GuildId", row.GuildId),
+                    ("Enabled", row.Enabled),
+                    ("DeleteChannels", row.DeleteChannels),
+                    ("Prefix", row.Prefix.EncodedValue),
+                    ("ExcludedChannels", row.GetExcludedChannelsString()));
 
-                command.ExecuteNonQuery();
-                command.Connection.Close();
                 row.New = false;
-                
                 if(Cache.Initialised) Cache.VoiceLink.Rows.Add(row);
             }
             else
             {
-                command = Sql.GetCommand($"UPDATE VoiceLink SET Enabled = {Sql.ToSqlBool(row.Enabled)}, DeleteChannels = {Sql.ToSqlBool(row.DeleteChannels)}, Prefix = @Prefix, ExcludedChannels = @ExcludedChannels WHERE GuildId = @GuildId;",
-                    new [] {
-                        ("GuildId", row.GuildId.ToString()), 
-                        ("Prefix", row.Prefix.EncodedValue),
-                        ("ExcludedChannels", row.GetExcludedChannelsString())
-                    });
-
-                command.ExecuteNonQuery();
-                command.Connection.Close();
+                await Sql.ExecuteAsync(
+                    "UPDATE VoiceLink SET Enabled = @Enabled, DeleteChannels = @DeleteChannels, Prefix = @Prefix, ExcludedChannels = @ExcludedChannels WHERE GuildId = @GuildId;",
+                    ("GuildId", row.GuildId),
+                    ("Enabled", row.Enabled),
+                    ("DeleteChannels", row.DeleteChannels),
+                    ("Prefix", row.Prefix.EncodedValue),
+                    ("ExcludedChannels", row.GetExcludedChannelsString()));
 
                 if(Cache.Initialised) Cache.VoiceLink.Rows[Cache.VoiceLink.Rows.FindIndex(x => x.GuildId == row.GuildId)] = row;
             }
@@ -91,7 +87,7 @@ namespace Database.Data
 
         #region Channel Rows
 
-        public static List<VoiceLinkChannelRow> GetChannelRows(ulong? guildId = null, ulong? voiceChannelId = null, bool ignoreCache = false)
+        public static async Task<List<VoiceLinkChannelRow>> GetChannelRowsAsync(ulong? guildId = null, ulong? voiceChannelId = null, bool ignoreCache = false)
         {
             List<VoiceLinkChannelRow> matchedRows = new List<VoiceLinkChannelRow>();
 
@@ -105,21 +101,21 @@ namespace Database.Data
             else
             {
                 string command = "SELECT * FROM VoiceLinkChannels WHERE TRUE";
-                List<(string, string)> values = new List<(string, string)>();
+                List<(string, object)> values = new List<(string, object)>();
 
                 if (guildId.HasValue)
                 {
                     command += " AND GuildId = @GuildId";
-                    values.Add(("GuildId", guildId.Value.ToString()));
+                    values.Add(("GuildId", guildId.Value));
                 }
 
                 if (voiceChannelId.HasValue)
                 {
                     command += " AND VoiceChannelId = @VoiceChannelId";
-                    values.Add(("VoiceChannelId", voiceChannelId.Value.ToString()));
+                    values.Add(("VoiceChannelId", voiceChannelId.Value));
                 }
 
-                MySqlDataReader reader = Sql.GetCommand(command, values.ToArray()).ExecuteReader();
+                MySqlDataReader reader = await Sql.ExecuteReaderAsync(command, values.ToArray());
 
                 while (reader.Read())
                 {
@@ -135,39 +131,32 @@ namespace Database.Data
             return matchedRows;
         }
 
-        public static VoiceLinkChannelRow GetChannelRow(ulong guildId, ulong voiceChannelId)
+        public static async Task<VoiceLinkChannelRow> GetChannelRowAsync(ulong guildId, ulong voiceChannelId)
         {
-            List<VoiceLinkChannelRow> rows = GetChannelRows(guildId, voiceChannelId);
+            List<VoiceLinkChannelRow> rows = await GetChannelRowsAsync(guildId, voiceChannelId);
             return rows.Count > 0 ? rows.First() : new VoiceLinkChannelRow(guildId, voiceChannelId);
         }
 
-        public static void SaveChannelRow(VoiceLinkChannelRow row)
+        public static async Task SaveChannelRowAsync(VoiceLinkChannelRow row)
         {
-            MySqlCommand command;
-
             if (row.New)
             {
-                command = Sql.GetCommand("INSERT INTO VoiceLinkChannels (GuildId, TextChannelId, VoiceChannelId) VALUES (@GuildId, @TextChannelId, @VoiceChannelId);",
-                    new [] { ("GuildId", row.GuildId.ToString()), 
-                        ("TextChannelId", row.TextChannelId.ToString()),
-                        ("VoiceChannelId", row.VoiceChannelId.ToString())});
+                await Sql.ExecuteAsync(
+                    "INSERT INTO VoiceLinkChannels (GuildId, TextChannelId, VoiceChannelId) VALUES (@GuildId, @TextChannelId, @VoiceChannelId);",
+                    ("GuildId", row.GuildId), 
+                    ("TextChannelId", row.TextChannelId),
+                    ("VoiceChannelId", row.VoiceChannelId));
 
-                command.ExecuteNonQuery();
-                command.Connection.Close();
                 row.New = false;
-                
                 if(Cache.Initialised) Cache.VoiceLink.Channels.Add(row);
             }
             else
             {
-                command = Sql.GetCommand("UPDATE VoiceLinkChannels SET GuildId = @GuildId, TextChannelId = @TextChannelId, VoiceChannelId = @VoiceChannelId WHERE @GuildId = @GuildId AND VoiceChannelId = @VoiceChannelId",
-                    new [] {
-                        ("GuildId", row.GuildId.ToString()), 
-                        ("TextChannelId", row.TextChannelId.ToString()),
-                        ("VoiceChannelId", row.VoiceChannelId.ToString())});
-
-                command.ExecuteNonQuery();
-                command.Connection.Close();
+                await Sql.ExecuteAsync(
+                    "UPDATE VoiceLinkChannels SET GuildId = @GuildId, TextChannelId = @TextChannelId, VoiceChannelId = @VoiceChannelId WHERE @GuildId = @GuildId AND VoiceChannelId = @VoiceChannelId",
+                    ("GuildId", row.GuildId), 
+                    ("TextChannelId", row.TextChannelId),
+                    ("VoiceChannelId", row.VoiceChannelId));
 
                 if(Cache.Initialised) Cache.VoiceLink.Channels[Cache.VoiceLink.Channels.FindIndex(x => x.GuildId == row.GuildId && x.VoiceChannelId == row.VoiceChannelId)] = row;
             }

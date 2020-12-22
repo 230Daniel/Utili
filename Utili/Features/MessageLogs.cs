@@ -20,7 +20,7 @@ namespace Utili.Features
         {
             if (context.User.IsBot || context.Channel is SocketDMChannel) return;
 
-            MessageLogsRow row = Database.Data.MessageLogs.GetRow(context.Guild.Id);
+            MessageLogsRow row = await Database.Data.MessageLogs.GetRowAsync(context.Guild.Id);
 
             if ((row.DeletedChannelId == 0 && row.EditedChannelId == 0) || row.ExcludedChannels.Contains(context.Channel.Id)) return;
 
@@ -34,22 +34,21 @@ namespace Utili.Features
                 Content = EString.FromDecoded(context.Message.Content)
             };
 
-            Database.Data.MessageLogs.SaveMessage(message);
-            Database.Data.MessageLogs.DeleteOldMessages(context.Guild.Id, context.Channel.Id,
-                Premium.IsPremium(context.Guild.Id));
+            await Database.Data.MessageLogs.SaveMessageAsync(message);
+            await Database.Data.MessageLogs.DeleteOldMessagesAsync(context.Guild.Id, context.Channel.Id, Premium.IsPremium(context.Guild.Id));
         }
 
         public static async Task MessageEdited(SocketCommandContext context)
         {
-            MessageLogsRow row = Database.Data.MessageLogs.GetRow(context.Guild.Id);
+            MessageLogsRow row = await Database.Data.MessageLogs.GetRowAsync(context.Guild.Id);
             if ((row.DeletedChannelId == 0 && row.EditedChannelId == 0) || row.ExcludedChannels.Contains(context.Channel.Id)) return;
 
-            MessageLogsMessageRow message = Database.Data.MessageLogs.GetMessage(context.Guild.Id, context.Channel.Id, context.Message.Id);
+            MessageLogsMessageRow message = await Database.Data.MessageLogs.GetMessageAsync(context.Guild.Id, context.Channel.Id, context.Message.Id);
             if (message == null) return;
             Embed embed = await GetEditedEmbedAsync(message, context);
 
             message.Content = EString.FromDecoded(context.Message.Content);
-            Database.Data.MessageLogs.SaveMessage(message);
+            await Database.Data.MessageLogs.SaveMessageAsync(message);
 
             SocketTextChannel channel = context.Guild.GetTextChannel(row.EditedChannelId);
             if(channel == null) return;
@@ -58,14 +57,14 @@ namespace Utili.Features
 
         public static async Task MessageDeleted(SocketGuild guild, SocketTextChannel channel, ulong messageId)
         {
-            MessageLogsRow row = Database.Data.MessageLogs.GetRow(guild.Id);
+            MessageLogsRow row = await Database.Data.MessageLogs.GetRowAsync(guild.Id);
             if ((row.DeletedChannelId == 0 && row.EditedChannelId == 0) || row.ExcludedChannels.Contains(channel.Id)) return;
 
-            MessageLogsMessageRow message = Database.Data.MessageLogs.GetMessage(guild.Id, channel.Id, messageId);
+            MessageLogsMessageRow message = await Database.Data.MessageLogs.GetMessageAsync(guild.Id, channel.Id, messageId);
             if(message == null) return;
             Embed embed = await GetDeletedEmbedAsync(channel, message);
 
-            Database.Data.MessageLogs.DeleteMessages(guild.Id, channel.Id, new[] { messageId });
+            await Database.Data.MessageLogs.DeleteMessagesAsync(guild.Id, channel.Id, new[] { messageId });
 
             SocketTextChannel logChannel = guild.GetTextChannel(row.DeletedChannelId);
             if(logChannel == null) return;
@@ -74,15 +73,15 @@ namespace Utili.Features
 
         public static async Task MessagesBulkDeleted(SocketGuild guild, SocketTextChannel channel, List<ulong> messageIds)
         {
-            MessageLogsRow row = Database.Data.MessageLogs.GetRow(guild.Id);
+            MessageLogsRow row = await Database.Data.MessageLogs.GetRowAsync(guild.Id);
             if ((row.DeletedChannelId == 0 && row.EditedChannelId == 0) || row.ExcludedChannels.Contains(channel.Id)) return;
 
             List<MessageLogsMessageRow> messages =
-                Database.Data.MessageLogs.GetMessages(guild.Id, channel.Id, messageIds.ToArray());
+                await Database.Data.MessageLogs.GetMessagesAsync(guild.Id, channel.Id, messageIds.ToArray());
 
             Embed embed = await GetBulkDeletedEmbedAsync(channel, messages, messageIds.Count);
 
-            Database.Data.MessageLogs.DeleteMessages(guild.Id, channel.Id, messageIds.ToArray());
+            await Database.Data.MessageLogs.DeleteMessagesAsync(guild.Id, channel.Id, messageIds.ToArray());
 
             SocketTextChannel logChannel = guild.GetTextChannel(row.DeletedChannelId);
             if(logChannel == null) return;

@@ -1,4 +1,5 @@
-﻿using System.Timers;
+﻿using System.Threading.Tasks;
+using System.Timers;
 using Database.Data;
 
 namespace Database
@@ -32,8 +33,9 @@ namespace Database
         
         public static void Initialise()
         {
-            DownloadTables();
+            DownloadTables().GetAwaiter().GetResult();
 
+            Timer?.Dispose();
             Timer = new Timer(30000);
             Timer.Elapsed += Timer_Elapsed;
             Timer.Start();
@@ -43,26 +45,26 @@ namespace Database
 
         private static void Timer_Elapsed(object sender, ElapsedEventArgs e)
         {
-            DownloadTables();
+            _ = DownloadTables();
         }
 
-        private static void DownloadTables()
+        private static async Task DownloadTables()
         {
-            Autopurge.Rows = Data.Autopurge.GetRows(ignoreCache: true);
-            ChannelMirroring.Rows = Data.ChannelMirroring.GetRows(ignoreCache: true);
-            Core.Rows = Data.Core.GetRows(ignoreCache: true);
-            InactiveRole.Rows = Data.InactiveRole.GetRows(ignoreCache: true);
-            JoinMessage.Rows = Data.JoinMessage.GetRows(ignoreCache: true);
-            MessageFilter.Rows = Data.MessageFilter.GetRows(ignoreCache: true);
-            MessageLogs.Rows = Data.MessageLogs.GetRows(ignoreCache: true);
-            Misc.Rows = Data.Misc.GetRows(ignoreCache: true);
-            Notices.Rows = Data.Notices.GetRows(ignoreCache: true);
-            Reputation.Rows = Data.Reputation.GetRows(ignoreCache: true);
-            Roles.Rows = Data.Roles.GetRows(ignoreCache: true);
-            VoiceLink.Rows = Data.VoiceLink.GetMetaRows(ignoreCache: true);
-            VoiceLink.Channels = Data.VoiceLink.GetChannelRows(ignoreCache: true);
-            VoiceRoles.Rows = Data.VoiceRoles.GetRows(ignoreCache: true);
-            VoteChannels.Rows = Data.VoteChannels.GetRows(ignoreCache: true);
+            Autopurge.Rows = await Data.Autopurge.GetRowsAsync(ignoreCache: true);
+            ChannelMirroring.Rows = await Data.ChannelMirroring.GetRowsAsync(ignoreCache: true);
+            Core.Rows = await Data.Core.GetRowsAsync(ignoreCache: true);
+            InactiveRole.Rows = await Data.InactiveRole.GetRowsAsync(ignoreCache: true);
+            JoinMessage.Rows = await Data.JoinMessage.GetRowsAsync(ignoreCache: true);
+            MessageFilter.Rows = await Data.MessageFilter.GetRowsAsync(ignoreCache: true);
+            MessageLogs.Rows = await Data.MessageLogs.GetRowsAsync(ignoreCache: true);
+            Misc.Rows = await Data.Misc.GetRowsAsync(ignoreCache: true);
+            Notices.Rows = await Data.Notices.GetRowsAsync(ignoreCache: true);
+            Reputation.Rows = await Data.Reputation.GetRowsAsync(ignoreCache: true);
+            Roles.Rows = await Data.Roles.GetRowsAsync(ignoreCache: true);
+            VoiceLink.Rows = await Data.VoiceLink.GetMetaRowsAsync(ignoreCache: true);
+            VoiceLink.Channels = await Data.VoiceLink.GetChannelRowsAsync(ignoreCache: true);
+            VoiceRoles.Rows = await Data.VoiceRoles.GetRowsAsync(ignoreCache: true);
+            VoteChannels.Rows = await Data.VoteChannels.GetRowsAsync(ignoreCache: true);
         }
     }
 }

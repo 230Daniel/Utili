@@ -1,14 +1,14 @@
 ﻿using System;
+using System.Threading.Tasks;
 using MySql.Data.MySqlClient;
-using static Database.Sql;
 
 namespace Database
 {
     public static class Sharding
     {
-        public static int GetTotalShards()
+        public static async Task<int> GetTotalShardsAsync()
         {
-            MySqlDataReader reader = GetCommand("SELECT * FROM Sharding WHERE Id = 1;").ExecuteReader();
+            MySqlDataReader reader = await Sql.ExecuteReaderAsync("SELECT * FROM Sharding WHERE Id = 1;");
 
             reader.Read();
             int result = reader.GetInt32(1);
@@ -17,52 +17,34 @@ namespace Database
             return result;
         }
 
-        public static void UpdateShardStats(int shards, int lowerShardId, int guilds)
+        public static async Task UpdateShardStatsAsync(int shards, int lowerShardId, int guilds)
         {
-            MySqlCommand command = GetCommand(
+            int affected = await Sql.ExecuteAsync(
                 "UPDATE Sharding SET Heartbeat = @Heartbeat, Guilds = @Guilds WHERE Shards = @Shards AND LowerShardId = @LowerShardId",
-                new[]
-                {
-                    ("Heartbeat", ToSqlDateTime(DateTime.UtcNow)),
-                    ("Guilds", guilds.ToString()),
-                    ("Shards", shards.ToString()),
-                    ("LowerShardId", lowerShardId.ToString())
-                });
+                ("Heartbeat", DateTime.UtcNow),
+                ("Guilds", guilds),
+                ("Shards", shards),
+                ("LowerShardId", lowerShardId));
 
-            int modifiedRows = command.ExecuteNonQuery();
-            command.Connection.Close();
-
-            if (modifiedRows == 0)
+            if (affected == 0)
             {
-                command = GetCommand(
+                await Sql.ExecuteAsync(
                     "INSERT INTO Sharding(Shards, LowerShardId, Heartbeat, Guilds) VALUES(@Shards, @LowerShardId, @Heartbeat, @Guilds)",
-                    new[]
-                    {
-                        ("Heartbeat", ToSqlDateTime(DateTime.UtcNow)),
-                        ("Guilds", guilds.ToString()),
-                        ("Shards", shards.ToString()),
-                        ("LowerShardId", lowerShardId.ToString())
-                    });
-
-                command.ExecuteNonQuery();
-                command.Connection.Close();
+                    ("Heartbeat", DateTime.UtcNow),
+                    ("Guilds", guilds),
+                    ("Shards", shards),
+                    ("LowerShardId", lowerShardId));
             }
         }
 
-        public static int GetGuildCount()
+        public static async Task<int> GetGuildCountAsync()
         {
-            MySqlDataReader reader = GetCommand("SELECT Guilds FROM Sharding WHERE Heartbeat > @MinimumHeartbeat AND Guilds IS NOT NULL",
-                new[]
-                {
-                    ("MinimumHeartbeat", ToSqlDateTime(DateTime.UtcNow - TimeSpan.FromSeconds(30)))
-                }).ExecuteReader();
+            MySqlDataReader reader = await Sql.ExecuteReaderAsync(
+                "SELECT SUM(Guilds) FROM Sharding WHERE Heartbeat > @MinimumHeartbeat AND Guilds IS NOT NULL",
+                ("MinimumHeartbeat", DateTime.UtcNow - TimeSpan.FromSeconds(30)));
 
-            int guilds = 0;
-            while (reader.Read())
-            {
-                guilds += reader.GetInt32(0);
-            }
-
+            reader.Read();
+            int guilds = reader.GetInt32(0);
             reader.Close();
 
             return guilds;

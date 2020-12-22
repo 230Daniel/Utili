@@ -7,22 +7,22 @@ using MySql.Data.MySqlClient;
 
 namespace Database.Data
 {
-    public class Users
+    public static class Users
     {
-        public static List<UserRow> GetRows(ulong? userId = null)
+        public static async Task<List<UserRow>> GetRowsAsync(ulong? userId = null)
         {
             List<UserRow> matchedRows = new List<UserRow>();
 
             string command = "SELECT * FROM Users WHERE TRUE";
-            List<(string, string)> values = new List<(string, string)>();
+            List<(string, object)> values = new List<(string, object)>();
 
             if (userId.HasValue)
             {
                 command += " AND UserId = @UserId";
-                values.Add(("UserId", userId.Value.ToString()));
+                values.Add(("UserId", userId.Value));
             }
 
-            MySqlDataReader reader = Sql.GetCommand(command, values.ToArray()).ExecuteReader();
+            MySqlDataReader reader = await Sql.ExecuteReaderAsync(command, values.ToArray());
 
             while (reader.Read())
             {
@@ -38,52 +38,39 @@ namespace Database.Data
             return matchedRows;
         }
 
-        public static UserRow GetRow(ulong userId)
+        public static async Task<UserRow> GetRowAsync(ulong userId)
         {
-            List<UserRow> rows = GetRows(userId);
+            List<UserRow> rows = await GetRowsAsync(userId);
             return rows.Count > 0 ? rows.First() : new UserRow(userId);
         }
 
-        public static void SaveRow(UserRow row)
+        public static async Task SaveRowAsync(UserRow row)
         {
-            MySqlCommand command;
-
             if (row.New)
             {
-                command = Sql.GetCommand("INSERT INTO Users (UserId, Email, LastVisit, Visits) VALUES (@UserId, @Email, @LastVisit, @Visits);",
-                    new [] {
-                        ("UserId", row.UserId.ToString()),
-                        ("Email", row.Email), 
-                        ("LastVisit", Sql.ToSqlDateTime(row.LastVisit)),
-                        ("Visits", row.Visits.ToString())
-                    });
-
-                command.ExecuteNonQuery();
-                command.Connection.Close();
+                await Sql.ExecuteAsync(
+                    "INSERT INTO Users (UserId, Email, LastVisit, Visits) VALUES (@UserId, @Email, @LastVisit, @Visits);",
+                    ("UserId", row.UserId),
+                    ("Email", row.Email), 
+                    ("LastVisit", row.LastVisit),
+                    ("Visits", row.Visits));
 
                 row.New = false;
             }
             else
             {
-                command = Sql.GetCommand("UPDATE Users SET Email = @Email, LastVisit = @LastVisit WHERE UserId = @UserId;",
-                    new [] {
-                        ("UserId", row.UserId.ToString()),
-                        ("Email", row.Email), 
-                        ("LastVisit", Sql.ToSqlDateTime(row.LastVisit))});
-
-                command.ExecuteNonQuery();
-                command.Connection.Close();
+                await Sql.ExecuteAsync(
+                    "UPDATE Users SET Email = @Email, LastVisit = @LastVisit WHERE UserId = @UserId;",
+                    ("UserId", row.UserId),
+                    ("Email", row.Email), 
+                    ("LastVisit", row.LastVisit));
             }
         }
 
-        public static void AddNewVisit(ulong userId)
+        public static async Task AddNewVisitAsync(ulong userId)
         {
-            MySqlCommand command = Sql.GetCommand("UPDATE Users SET Visits = Visits + 1 WHERE UserId = @UserId;",
-                new [] {
-                    ("UserId", userId.ToString())});
-
-            command.ExecuteNonQuery();
-            command.Connection.Close();
+            await Sql.ExecuteAsync("UPDATE Users SET Visits = Visits + 1 WHERE UserId = @UserId;",
+                ("UserId", userId));
         }
     }
 

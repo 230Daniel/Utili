@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Discord;
 using MySql.Data.MySqlClient;
 
@@ -8,7 +9,7 @@ namespace Database.Data
 {
     public static class Notices
     {
-        public static List<NoticesRow> GetRows(ulong? guildId = null, ulong? channelId = null, bool ignoreCache = false)
+        public static async Task<List<NoticesRow>> GetRowsAsync(ulong? guildId = null, ulong? channelId = null, bool ignoreCache = false)
         {
             List<NoticesRow> matchedRows = new List<NoticesRow>();
 
@@ -22,21 +23,21 @@ namespace Database.Data
             else
             {
                 string command = "SELECT * FROM Notices WHERE TRUE";
-                List<(string, string)> values = new List<(string, string)>();
+                List<(string, object)> values = new List<(string, object)>();
 
                 if (guildId.HasValue)
                 {
                     command += " AND GuildId = @GuildId";
-                    values.Add(("GuildId", guildId.Value.ToString()));
+                    values.Add(("GuildId", guildId.Value));
                 }
 
                 if (channelId.HasValue)
                 {
                     command += " AND ChannelId = @ChannelId";
-                    values.Add(("ChannelId", channelId.Value.ToString()));
+                    values.Add(("ChannelId", channelId.Value));
                 }
 
-                MySqlDataReader reader = Sql.GetCommand(command, values.ToArray()).ExecuteReader();
+                MySqlDataReader reader = await Sql.ExecuteReaderAsync(command, values.ToArray());
 
                 while (reader.Read())
                 {
@@ -62,130 +63,83 @@ namespace Database.Data
             return matchedRows;
         }
 
-        public static NoticesRow GetRow(ulong guildId, ulong channelId)
+        public static async Task<NoticesRow> GetRowAsync(ulong guildId, ulong channelId)
         {
-            List<NoticesRow> rows = GetRows(guildId, channelId);
+            List<NoticesRow> rows = await GetRowsAsync(guildId, channelId);
             return rows.Count > 0 ? rows.First() : new NoticesRow(guildId, channelId);
         }
 
-        public static void SaveRow(NoticesRow row)
+        public static async Task SaveRowAsync(NoticesRow row)
         {
-            MySqlCommand command;
-
             if (row.New)
             {
-                command = Sql.GetCommand(
-                    $"INSERT INTO Notices (GuildId, ChannelId, MessageId, Enabled, Delay, Title, Footer, Content, Text, Image, Thumbnail, Icon, Colour) VALUES (@GuildId, @ChannelId, @MessageId, {Sql.ToSqlBool(row.Enabled)}, @Delay, @Title, @Footer, @Content, @Text, @Image, @Thumbnail, @Icon, @Colour);",
-                    new[]
-                    {
-                        ("GuildId", row.GuildId.ToString()),
-                        ("ChannelId", row.ChannelId.ToString()),
-                        ("MessageId", row.MessageId.ToString()),
-                        ("Delay", row.Delay.ToString()),
-                        ("Title", row.Title.EncodedValue),
-                        ("Footer", row.Footer.EncodedValue),
-                        ("Content", row.Content.EncodedValue),
-                        ("Text", row.Text.EncodedValue),
-                        ("Image", row.Image.EncodedValue),
-                        ("Thumbnail", row.Thumbnail.EncodedValue),
-                        ("Icon", row.Icon.EncodedValue),
-                        ("Colour", row.Colour.RawValue.ToString())
-                    });
-
-                command.ExecuteNonQuery();
-                command.Connection.Close();
+                await Sql.ExecuteAsync(
+                    "INSERT INTO Notices (GuildId, ChannelId, MessageId, Enabled, Delay, Title, Footer, Content, Text, Image, Thumbnail, Icon, Colour) VALUES (@GuildId, @ChannelId, @MessageId, @Enabled, @Delay, @Title, @Footer, @Content, @Text, @Image, @Thumbnail, @Icon, @Colour);",
+                    ("GuildId", row.GuildId),
+                    ("ChannelId", row.ChannelId),
+                    ("MessageId", row.MessageId),
+                    ("Enabled", row.Enabled),
+                    ("Delay", row.Delay),
+                    ("Title", row.Title.EncodedValue),
+                    ("Footer", row.Footer.EncodedValue),
+                    ("Content", row.Content.EncodedValue),
+                    ("Text", row.Text.EncodedValue),
+                    ("Image", row.Image.EncodedValue),
+                    ("Thumbnail", row.Thumbnail.EncodedValue),
+                    ("Icon", row.Icon.EncodedValue),
+                    ("Colour", row.Colour.RawValue));
 
                 row.New = false;
-
                 if(Cache.Initialised) Cache.Notices.Rows.Add(row);
             }
             else
             {
-                command = Sql.GetCommand($"UPDATE Notices SET MessageId = @MessageId, Enabled = {Sql.ToSqlBool(row.Enabled)}, Delay = @Delay, Title = @Title, Footer = @Footer, Content = @Content, Text = @Text, Image = @Image, Thumbnail = @Thumbnail, Icon = @Icon, Colour = @Colour WHERE GuildId = @GuildId AND ChannelId = @ChannelId;",
-                    new [] 
-                    {
-                        ("GuildId", row.GuildId.ToString()),
-                        ("ChannelId", row.ChannelId.ToString()),
-                        ("MessageId", row.MessageId.ToString()),
-                        ("Delay", row.Delay.ToString()),
-                        ("Title", row.Title.EncodedValue),
-                        ("Footer", row.Footer.EncodedValue),
-                        ("Content", row.Content.EncodedValue),
-                        ("Text", row.Text.EncodedValue),
-                        ("Image", row.Image.EncodedValue),
-                        ("Thumbnail", row.Thumbnail.EncodedValue),
-                        ("Icon", row.Icon.EncodedValue),
-                        ("Colour", row.Colour.RawValue.ToString())
-                    });
-
-                command.ExecuteNonQuery();
-                command.Connection.Close();
+                await Sql.ExecuteAsync(
+                    "UPDATE Notices SET MessageId = @MessageId, Enabled = @Enabled, Delay = @Delay, Title = @Title, Footer = @Footer, Content = @Content, Text = @Text, Image = @Image, Thumbnail = @Thumbnail, Icon = @Icon, Colour = @Colour WHERE GuildId = @GuildId AND ChannelId = @ChannelId;",
+                    ("GuildId", row.GuildId),
+                    ("ChannelId", row.ChannelId),
+                    ("MessageId", row.MessageId),
+                    ("Enabled", row.Enabled),
+                    ("Delay", row.Delay),
+                    ("Title", row.Title.EncodedValue),
+                    ("Footer", row.Footer.EncodedValue),
+                    ("Content", row.Content.EncodedValue),
+                    ("Text", row.Text.EncodedValue),
+                    ("Image", row.Image.EncodedValue),
+                    ("Thumbnail", row.Thumbnail.EncodedValue),
+                    ("Icon", row.Icon.EncodedValue),
+                    ("Colour", row.Colour.RawValue));
 
                 if(Cache.Initialised) Cache.Notices.Rows[Cache.Notices.Rows.FindIndex(x => x.GuildId == row.GuildId && x.ChannelId == row.ChannelId)] = row;
             }
         }
 
-        public static void SaveMessageId(NoticesRow row)
+        public static async Task SaveMessageIdAsync(NoticesRow row)
         {
-            MySqlCommand command;
-
             if (row.New)
             {
-                command = Sql.GetCommand(
-                    $"INSERT INTO Notices (GuildId, ChannelId, MessageId, Enabled, Delay, Title, Footer, Content, Text, Image, Thumbnail, Icon, Colour) VALUES (@GuildId, @ChannelId, @MessageId, {Sql.ToSqlBool(row.Enabled)}, @Delay, @Title, @Footer, @Content, @Text, @Image, @Thumbnail, @Icon, @Colour);",
-                    new[]
-                    {
-                        ("GuildId", row.GuildId.ToString()),
-                        ("ChannelId", row.ChannelId.ToString()),
-                        ("MessageId", row.MessageId.ToString()),
-                        ("Delay", row.Delay.ToString()),
-                        ("Title", row.Title.EncodedValue),
-                        ("Footer", row.Footer.EncodedValue),
-                        ("Content", row.Content.EncodedValue),
-                        ("Text", row.Text.EncodedValue),
-                        ("Image", row.Image.EncodedValue),
-                        ("Thumbnail", row.Thumbnail.EncodedValue),
-                        ("Icon", row.Icon.EncodedValue),
-                        ("Colour", row.Colour.RawValue.ToString())
-                    });
-
-                command.ExecuteNonQuery();
-                command.Connection.Close();
-
-                row.New = false;
-
-                if(Cache.Initialised) Cache.Notices.Rows.Add(row);
+                await SaveRowAsync(row);
             }
             else
             {
-                command = Sql.GetCommand($"UPDATE Notices SET MessageId = @MessageId WHERE GuildId = @GuildId AND ChannelId = @ChannelId;",
-                    new [] 
-                    {
-                        ("GuildId", row.GuildId.ToString()),
-                        ("ChannelId", row.ChannelId.ToString()),
-                        ("MessageId", row.MessageId.ToString())
-                    });
-
-                command.ExecuteNonQuery();
-                command.Connection.Close();
+                await Sql.ExecuteAsync(
+                    "UPDATE Notices SET MessageId = @MessageId WHERE GuildId = @GuildId AND ChannelId = @ChannelId;",
+                    ("GuildId", row.GuildId),
+                    ("ChannelId", row.ChannelId),
+                    ("MessageId", row.MessageId));
 
                 if(Cache.Initialised) Cache.Notices.Rows[Cache.Notices.Rows.FindIndex(x => x.GuildId == row.GuildId && x.ChannelId == row.ChannelId)] = row;
             }
         }
 
-        public static void DeleteRow(NoticesRow row)
+        public static async Task DeleteRowAsync(NoticesRow row)
         {
-            if(row == null) return;
-
             if(Cache.Initialised) Cache.Notices.Rows.RemoveAll(x => x.GuildId == row.GuildId && x.ChannelId == row.ChannelId);
 
-            string commandText = "DELETE FROM Notices WHERE GuildId = @GuildId AND ChannelId = @ChannelId";
-            MySqlCommand command = Sql.GetCommand(commandText, 
-                new[] {
-                    ("GuildId", row.GuildId.ToString()),
-                    ("ChannelId", row.ChannelId.ToString())});
-            command.ExecuteNonQuery();
-            command.Connection.Close();
+            await Sql.ExecuteAsync(
+                "DELETE FROM Notices WHERE GuildId = @GuildId AND ChannelId = @ChannelId",
+                ("GuildId", row.GuildId),
+                ("ChannelId", row.ChannelId));
         }
     }
 

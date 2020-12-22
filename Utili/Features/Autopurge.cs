@@ -47,7 +47,7 @@ namespace Utili.Features
         private static async Task PurgeChannelsAsync(bool premiumOnly)
         {
             // TODO: Make premium be 5 channels per 10 seconds or something, because someone is purging a rediculous 70 channels!
-            List<AutopurgeRow> rows = Database.Data.Autopurge.GetRows();
+            List<AutopurgeRow> rows = await Database.Data.Autopurge.GetRowsAsync();
             List<ulong> allGuildIds = _client.Guilds.Select(x => x.Id).ToList();
             List<ulong> premiumGuildIds = Premium.GetPremiumGuilds();
 

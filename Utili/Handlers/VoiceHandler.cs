@@ -14,14 +14,14 @@ namespace Utili.Handlers
 
         private static async Task VoiceLinkHandler(SocketUser user, SocketVoiceState before, SocketVoiceState after)
         {
-            _ = Task.Run(() =>
+            _ = Task.Run(async () =>
             {
                 if(user.IsBot) return;
 
                 if (Helper.RequiresUpdate(before, after))
                 {
-                    if(before.VoiceChannel != null) VoiceLink.RequestUpdate(before.VoiceChannel);
-                    if(after.VoiceChannel != null) VoiceLink.RequestUpdate(after.VoiceChannel);
+                    if(before.VoiceChannel != null) await VoiceLink.RequestUpdateAsync(before.VoiceChannel);
+                    if(after.VoiceChannel != null) await VoiceLink.RequestUpdateAsync(after.VoiceChannel);
 
                     VoiceRoles.RequestUpdate(user as SocketGuildUser, before, after);
                 }

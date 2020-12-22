@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using MySql.Data.MySqlClient;
 
 namespace Database.Data
@@ -9,28 +10,27 @@ namespace Database.Data
     {
         private static readonly TimeSpan GapBetweenUpdates = TimeSpan.FromMinutes(60); 
 
-        public static List<InactiveRoleRow> GetRows(ulong? guildId = null, bool ignoreCache = false)
+        public static async Task<List<InactiveRoleRow>> GetRowsAsync(ulong? guildId = null, bool ignoreCache = false)
         {
             List<InactiveRoleRow> matchedRows = new List<InactiveRoleRow>();
 
             if (Cache.Initialised && !ignoreCache)
             {
                 matchedRows.AddRange(Cache.InactiveRole.Rows);
-
                 if (guildId.HasValue) matchedRows.RemoveAll(x => x.GuildId != guildId.Value);
             }
             else
             {
                 string command = "SELECT * FROM InactiveRole WHERE TRUE";
-                List<(string, string)> values = new List<(string, string)>();
+                List<(string, object)> values = new List<(string, object)>();
 
                 if (guildId.HasValue)
                 {
                     command += " AND GuildId = @GuildId";
-                    values.Add(("GuildId", guildId.Value.ToString()));
+                    values.Add(("GuildId", guildId.Value));
                 }
 
-                MySqlDataReader reader = Sql.GetCommand(command, values.ToArray()).ExecuteReader();
+                MySqlDataReader reader = await Sql.ExecuteReaderAsync(command, values.ToArray());
 
                 while (reader.Read())
                 {
@@ -50,25 +50,24 @@ namespace Database.Data
             return matchedRows;
         }
 
-        public static List<InactiveRoleRow> GetUpdateRequiredRows(bool ignoreCache = false)
+        public static async Task<List<InactiveRoleRow>> GetUpdateRequiredRowsAsync(bool ignoreCache = false)
         {
             List<InactiveRoleRow> matchedRows = new List<InactiveRoleRow>();
 
             if (Cache.Initialised && !ignoreCache)
             {
                 matchedRows.AddRange(Cache.InactiveRole.Rows);
-
                 matchedRows.RemoveAll(x => DateTime.UtcNow - x.LastUpdate < GapBetweenUpdates);
             }
             else
             {
                 string command = "SELECT * FROM InactiveRole WHERE LastUpdate < @LastUpdate";
-                List<(string, string)> values = new List<(string, string)>
+                List<(string, object)> values = new List<(string, object)>
                 {
-                    ("LastUpdate", Sql.ToSqlDateTime(DateTime.UtcNow - GapBetweenUpdates))
+                    ("LastUpdate", DateTime.UtcNow - GapBetweenUpdates)
                 };
 
-                MySqlDataReader reader = Sql.GetCommand(command, values.ToArray()).ExecuteReader();
+                MySqlDataReader reader = await Sql.ExecuteReaderAsync(command, values.ToArray());
 
                 while (reader.Read())
                 {
@@ -88,133 +87,106 @@ namespace Database.Data
             return matchedRows;
         }
 
-        public static InactiveRoleRow GetRow(ulong guildId)
+        public static async Task<InactiveRoleRow> GetRowAsync(ulong guildId)
         {
-            List<InactiveRoleRow> rows = GetRows(guildId);
+            List<InactiveRoleRow> rows = await GetRowsAsync(guildId);
             return rows.Count > 0 ? rows.First() : new InactiveRoleRow(guildId);
         }
 
-        public static void SaveRow(InactiveRoleRow row)
+        public static async Task SaveRowAsync(InactiveRoleRow row)
         {
-            MySqlCommand command;
-
             if (row.New)
             {
-                command = Sql.GetCommand($"INSERT INTO InactiveRole (GuildId, RoleId, ImmuneRoleId, Threshold, Inverse, DefaultLastAction, LastUpdate) VALUES (@GuildId, @RoleId, @ImmuneRoleId, @Threshold, {Sql.ToSqlBool(row.Inverse)}, @DefaultLastAction, @LastUpdate);",
-                    new [] {("GuildId", row.GuildId.ToString()), 
-                        ("RoleId", row.RoleId.ToString()),
-                        ("ImmuneRoleId", row.ImmuneRoleId.ToString()),
-                        ("Threshold", row.Threshold.ToString()),
-                        ("DefaultLastAction", Sql.ToSqlDateTime(DateTime.UtcNow)),
-                        ("LastUpdate", Sql.ToSqlDateTime(DateTime.UtcNow - TimeSpan.FromMinutes(5)))});
-
-                command.ExecuteNonQuery();
-                command.Connection.Close();
+                await Sql.ExecuteAsync(
+                    "INSERT INTO InactiveRole (GuildId, RoleId, ImmuneRoleId, Threshold, Inverse, DefaultLastAction, LastUpdate) VALUES (@GuildId, @RoleId, @ImmuneRoleId, @Threshold, @Inverse, @DefaultLastAction, @LastUpdate);",
+                    ("GuildId", row.GuildId), 
+                    ("RoleId", row.RoleId),
+                    ("ImmuneRoleId", row.ImmuneRoleId),
+                    ("Threshold", row.Threshold),
+                    ("Inverse", row.Inverse),
+                    ("DefaultLastAction", DateTime.UtcNow),
+                    ("LastUpdate", DateTime.UtcNow - TimeSpan.FromMinutes(5)));
 
                 row.New = false;
-
                 if(Cache.Initialised) Cache.InactiveRole.Rows.Add(row);
             }
             else
             {
                 // Not updating DefaultLastAction is intentional
-                command = Sql.GetCommand($"UPDATE InactiveRole SET RoleId = @RoleId, ImmuneRoleId = @ImmuneRoleId, Threshold = @Threshold, Inverse = {Sql.ToSqlBool(row.Inverse)}, LastUpdate = @LastUpdate WHERE GuildId = @GuildId;",
-                    new [] {
-                        ("GuildId", row.GuildId.ToString()), 
-                        ("RoleId", row.RoleId.ToString()),
-                        ("ImmuneRoleId", row.ImmuneRoleId.ToString()),
-                        ("Threshold", row.Threshold.ToString()),
-                        ("LastUpdate", Sql.ToSqlDateTime(row.LastUpdate))});
+                // TODO: If they're setting it from no role to a role we should reset DefaultLastAction to UTC Now.
+                // Alternatively, always record activity data once a role has been set even if it's not there still.
 
-                command.ExecuteNonQuery();
-                command.Connection.Close();
+                await Sql.ExecuteAsync(
+                    "UPDATE InactiveRole SET RoleId = @RoleId, ImmuneRoleId = @ImmuneRoleId, Threshold = @Threshold, Inverse = @Inverse, LastUpdate = @LastUpdate WHERE GuildId = @GuildId;",
+                    ("GuildId", row.GuildId), 
+                    ("RoleId", row.RoleId),
+                    ("ImmuneRoleId", row.ImmuneRoleId),
+                    ("Threshold", row.Threshold),
+                    ("Inverse", row.Inverse),
+                    ("LastUpdate", row.LastUpdate));
 
                 if(Cache.Initialised) Cache.InactiveRole.Rows[Cache.InactiveRole.Rows.FindIndex(x => x.GuildId == row.GuildId)] = row;
             }
         }
 
-        public static void SaveLastUpdate(InactiveRoleRow row)
+        public static async Task SaveLastUpdateAsync(InactiveRoleRow row)
         {
-            MySqlCommand command;
-
             if (row.New)
             {
-                // If the if statement is true then something has gone horribly wrong, but it will work anyway.
-                command = Sql.GetCommand($"INSERT INTO InactiveRole (GuildId, RoleId, ImmuneRoleId, Threshold, Inverse, DefaultLastAction, LastUpdate) VALUES (@GuildId, @RoleId, @ImmuneRoleId, @Threshold, {Sql.ToSqlBool(row.Inverse)}, @DefaultLastAction, @LastUpdate);",
-                    new [] {("GuildId", row.GuildId.ToString()), 
-                        ("RoleId", row.RoleId.ToString()),
-                        ("ImmuneRoleId", row.ImmuneRoleId.ToString()),
-                        ("Threshold", row.Threshold.ToString()),
-                        ("DefaultLastAction", Sql.ToSqlDateTime(row.DefaultLastAction)),
-                        ("LastUpdate", Sql.ToSqlDateTime(row.LastUpdate))});
-
-                command.ExecuteNonQuery();
-                command.Connection.Close();
-
-                row.New = false;
-
-                if(Cache.Initialised) Cache.InactiveRole.Rows.Add(row);
+                // Something has gone horifically wrong if a row doesn't exist for a server being updated
+                await SaveRowAsync(row);
             }
             else
             {
-                command = Sql.GetCommand("UPDATE InactiveRole SET LastUpdate = @LastUpdate WHERE GuildId = @GuildId;",
-                    new [] {
-                        ("GuildId", row.GuildId.ToString()), 
-                        ("LastUpdate", Sql.ToSqlDateTime(row.LastUpdate))});
-
-                command.ExecuteNonQuery();
-                command.Connection.Close();
+                await Sql.ExecuteAsync(
+                    "UPDATE InactiveRole SET LastUpdate = @LastUpdate WHERE GuildId = @GuildId;",
+                    ("GuildId", row.GuildId), 
+                    ("LastUpdate", row.LastUpdate));
 
                 if(Cache.Initialised) Cache.InactiveRole.Rows[Cache.InactiveRole.Rows.FindIndex(x => x.GuildId == row.GuildId)].LastUpdate = row.LastUpdate;
             }
         }
 
-        public static void DeleteRow(InactiveRoleRow row)
+        public static async Task DeleteRowAsync(InactiveRoleRow row)
         {
-            if(row == null) return;
-
             if(Cache.Initialised) Cache.InactiveRole.Rows.RemoveAll(x => x.GuildId == row.GuildId);
 
-            string commandText = "DELETE FROM InactiveRole WHERE GuildId = @GuildId";
-            MySqlCommand command = Sql.GetCommand(commandText, 
-                new[] {("GuildId", row.GuildId.ToString())});
-            command.ExecuteNonQuery();
-            command.Connection.Close();
+            await Sql.ExecuteAsync(
+                "DELETE FROM InactiveRole WHERE GuildId = @GuildId", 
+                ("GuildId", row.GuildId));
         }
 
-        public static void UpdateUser(ulong guildId, ulong userId, DateTime? lastAction = null)
+        public static async Task UpdateUserAsync(ulong guildId, ulong userId, DateTime? lastAction = null)
         {
             if (lastAction == null) lastAction = DateTime.UtcNow;
 
-            MySqlCommand command = Sql.GetCommand("UPDATE InactiveRoleUsers SET LastAction = @LastAction WHERE GuildId = @GuildId AND UserId = @UserId",
-                new [] {("GuildId", guildId.ToString()), 
-                    ("UserId", userId.ToString()),
-                    ("LastAction", Sql.ToSqlDateTime(lastAction.Value))});
+            int affected = await Sql.ExecuteAsync(
+                "UPDATE InactiveRoleUsers SET LastAction = @LastAction WHERE GuildId = @GuildId AND UserId = @UserId",
+                ("GuildId", guildId), 
+                ("UserId", userId),
+                ("LastAction", lastAction.Value));
 
-            if (command.ExecuteNonQuery() == 0)
+            if (affected == 0)
             {
-                command = Sql.GetCommand("INSERT INTO InactiveRoleUsers (GuildId, UserId, LastAction) VALUES (@GuildId, @UserId, @LastAction)",
-                    new [] {("GuildId", guildId.ToString()), 
-                        ("UserId", userId.ToString()),
-                        ("LastAction", Sql.ToSqlDateTime(lastAction.Value))});
-
-                command.ExecuteNonQuery();
+                await Sql.ExecuteAsync(
+                    "INSERT INTO InactiveRoleUsers (GuildId, UserId, LastAction) VALUES (@GuildId, @UserId, @LastAction)",
+                    ("GuildId", guildId), 
+                    ("UserId", userId),
+                    ("LastAction", lastAction.Value));
             }
-            
-            command.Connection.Close();
         }
 
-        public static List<InactiveRoleUserRow> GetUsers(ulong guildId)
+        public static async Task<List<InactiveRoleUserRow>> GetUsersAsync(ulong guildId)
         {
             List<InactiveRoleUserRow> matchedRows = new List<InactiveRoleUserRow>();
 
             string command = "SELECT * FROM InactiveRoleUsers WHERE GuildId = @GuildId";
-            List<(string, string)> values = new List<(string, string)>
+            List<(string, object)> values = new List<(string, object)>
             {
-                ("GuildId", guildId.ToString())
+                ("GuildId", guildId)
             };
 
-            MySqlDataReader reader = Sql.GetCommand(command, values.ToArray()).ExecuteReader();
+            MySqlDataReader reader = await Sql.ExecuteReaderAsync(command, values.ToArray());
 
             while (reader.Read())
             {
@@ -225,7 +197,6 @@ namespace Database.Data
             }
 
             reader.Close();
-
             return matchedRows;
         }
     }

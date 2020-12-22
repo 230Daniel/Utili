@@ -18,7 +18,7 @@ namespace UtiliSite.Pages.Dashboard
             ViewData["guild"] = auth.Guild;
             ViewData["premium"] = Database.Premium.IsPremium(auth.Guild.Id);
 
-            VoiceLinkRow row = VoiceLink.GetMetaRow(auth.Guild.Id);
+            VoiceLinkRow row = await VoiceLink.GetMetaRowAsync(auth.Guild.Id);
 
             List<RestVoiceChannel> voiceChannels = await DiscordModule.GetVoiceChannelsAsync(auth.Guild);
             List<RestVoiceChannel> excludedChannels = voiceChannels.Where(x => row.ExcludedChannels.Contains(x.Id)).OrderBy(x => x.Position).ToList();
@@ -43,11 +43,11 @@ namespace UtiliSite.Pages.Dashboard
             bool deleteChannels = HttpContext.Request.Form["deleteChannels"] == "on";
             string prefix = HttpContext.Request.Form["prefix"].ToString();
 
-            VoiceLinkRow row = VoiceLink.GetMetaRow(auth.Guild.Id);
+            VoiceLinkRow row = await VoiceLink.GetMetaRowAsync(auth.Guild.Id);
             row.Enabled = enabled;
             row.DeleteChannels = deleteChannels;
             row.Prefix = EString.FromDecoded(prefix);
-            VoiceLink.SaveMetaRow(row);
+            await VoiceLink.SaveMetaRowAsync(row);
 
             HttpContext.Response.StatusCode = 200;
         }
@@ -64,12 +64,12 @@ namespace UtiliSite.Pages.Dashboard
 
             ulong channelId = ulong.Parse(HttpContext.Request.Form["channel"]);
 
-            VoiceLinkRow metaRow = VoiceLink.GetMetaRow(auth.Guild.Id);
+            VoiceLinkRow metaRow = await VoiceLink.GetMetaRowAsync(auth.Guild.Id);
             if (!metaRow.ExcludedChannels.Contains(channelId))
             {
                 metaRow.ExcludedChannels.Add(channelId);
             }
-            VoiceLink.SaveMetaRow(metaRow);
+            await VoiceLink.SaveMetaRowAsync(metaRow);
 
             HttpContext.Response.StatusCode = 200;
             HttpContext.Response.Redirect(HttpContext.Request.Path);
@@ -87,9 +87,9 @@ namespace UtiliSite.Pages.Dashboard
 
             ulong channelId = ulong.Parse(HttpContext.Request.Form["channel"]);
 
-            VoiceLinkRow metaRow = VoiceLink.GetMetaRow(auth.Guild.Id);
+            VoiceLinkRow metaRow = await VoiceLink.GetMetaRowAsync(auth.Guild.Id);
             metaRow.ExcludedChannels.RemoveAll(x => x == channelId);
-            VoiceLink.SaveMetaRow(metaRow);
+            await VoiceLink.SaveMetaRowAsync(metaRow);
 
             HttpContext.Response.StatusCode = 200;
             HttpContext.Response.Redirect(HttpContext.Request.Path);

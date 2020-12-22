@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
 using MySql.Data.MySqlClient;
+using Timer = System.Timers.Timer;
 
 namespace Database
 {
@@ -19,7 +21,7 @@ namespace Database
             _timer?.Dispose();
             _lastTest = DateTime.Now;
 
-            _timer = new Timer(35000);
+            _timer = new Timer(5000);
             _timer.Elapsed += Timer_Elapsed;
             _timer.Start();
         }
@@ -31,16 +33,7 @@ namespace Database
 
         private async Task TestAsync()
         {
-            Stopwatch stopwatch = new Stopwatch();
-            stopwatch.Start();
-
-            MySqlCommand command = Sql.GetCommand("UPDATE Test SET Text = '' WHERE FALSE;");
-            command.ExecuteNonQuery();
-            stopwatch.Stop();
-
-            await command.Connection.CloseAsync();
-
-            NetworkLatency = (int)stopwatch.ElapsedMilliseconds;
+            NetworkLatency = await Sql.PingAsync();
 
             QueriesPerSecond = Sql.Queries / (DateTime.Now - _lastTest).TotalSeconds;
             Sql.Queries = 0;

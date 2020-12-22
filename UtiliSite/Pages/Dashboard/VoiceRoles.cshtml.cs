@@ -18,7 +18,7 @@ namespace UtiliSite.Pages.Dashboard
             ViewData["premium"] = Database.Premium.IsPremium(auth.Guild.Id);
 
             List<RestVoiceChannel> voiceChannels = await DiscordModule.GetVoiceChannelsAsync(auth.Guild);
-            List<VoiceRolesRow> rows = VoiceRoles.GetRows(auth.Guild.Id);
+            List<VoiceRolesRow> rows = await VoiceRoles.GetRowsAsync(auth.Guild.Id);
 
             List<RestVoiceChannel> addedChannels =
                 voiceChannels.Where(x => rows.Any(y => y.ChannelId == x.Id)).OrderBy(x => x.Position).ToList();
@@ -44,9 +44,9 @@ namespace UtiliSite.Pages.Dashboard
             ulong channelId = ulong.Parse(HttpContext.Request.Form["channel"]);
             ulong roleId = ulong.Parse(HttpContext.Request.Form["role"]);
 
-            VoiceRolesRow row = VoiceRoles.GetRows(auth.Guild.Id, channelId).First();
+            VoiceRolesRow row = await VoiceRoles.GetRowAsync(auth.Guild.Id, channelId);
             row.RoleId = roleId;
-            VoiceRoles.SaveRow(row);
+            await VoiceRoles.SaveRowAsync(row);
 
             HttpContext.Response.StatusCode = 200;
         }
@@ -63,14 +63,8 @@ namespace UtiliSite.Pages.Dashboard
 
             ulong channelId = ulong.Parse(HttpContext.Request.Form["channel"]);
 
-            VoiceRolesRow row = new VoiceRolesRow
-            {
-                GuildId = auth.Guild.Id,
-                ChannelId = channelId,
-                RoleId = 0
-            };
-
-            VoiceRoles.SaveRow(row);
+            VoiceRolesRow row = await VoiceRoles.GetRowAsync(auth.Guild.Id, channelId);
+            await VoiceRoles.SaveRowAsync(row);
 
             HttpContext.Response.StatusCode = 200;
             HttpContext.Response.Redirect(HttpContext.Request.Path);
@@ -88,8 +82,8 @@ namespace UtiliSite.Pages.Dashboard
 
             ulong channelId = ulong.Parse(HttpContext.Request.Form["channel"]);
 
-            VoiceRolesRow row = VoiceRoles.GetRows(auth.Guild.Id, channelId).First();
-            VoiceRoles.DeleteRow(row);
+            VoiceRolesRow row = await VoiceRoles.GetRowAsync(auth.Guild.Id, channelId);
+            await VoiceRoles.DeleteRowAsync(row);
 
             HttpContext.Response.StatusCode = 200;
             HttpContext.Response.Redirect(HttpContext.Request.Path);

@@ -12,7 +12,7 @@ namespace UtiliSite
             _config = new Config();
             _config.Load();
 
-            Database.Database.Initialise(false, _config.DefaultPrefix);
+            await Database.Database.InitialiseAsync(false, _config.DefaultPrefix);
 
             await DiscordModule.InitialiseAsync();
         }

@@ -16,7 +16,7 @@ namespace UtiliSite.Pages.Dashboard
             ViewData["guild"] = auth.Guild;
             ViewData["premium"] = Database.Premium.IsPremium(auth.Guild.Id);
 
-            InactiveRoleRow row = InactiveRole.GetRow(auth.Guild.Id);
+            InactiveRoleRow row = await InactiveRole.GetRowAsync(auth.Guild.Id);
 
             ViewData["row"] = row;
         }
@@ -36,12 +36,12 @@ namespace UtiliSite.Pages.Dashboard
             TimeSpan threshold = TimeSpan.Parse(HttpContext.Request.Form["threshold"]);
             bool inverse = bool.Parse(HttpContext.Request.Form["inverse"]);
 
-            InactiveRoleRow row = InactiveRole.GetRow(auth.Guild.Id);
+            InactiveRoleRow row = await InactiveRole.GetRowAsync(auth.Guild.Id);
             row.RoleId = inactiveRoleId;
             row.ImmuneRoleId = immuneRoleId;
             row.Threshold = threshold;
             row.Inverse = inverse;
-            InactiveRole.SaveRow(row);
+            await InactiveRole.SaveRowAsync(row);
 
             HttpContext.Response.StatusCode = 200;
         }

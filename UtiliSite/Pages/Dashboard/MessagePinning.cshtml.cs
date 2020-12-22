@@ -18,7 +18,7 @@ namespace UtiliSite.Pages.Dashboard
             ViewData["guild"] = auth.Guild;
             ViewData["premium"] = Premium.IsPremium(auth.Guild.Id);
 
-            MessagePinningRow row = MessagePinning.GetRow(auth.Guild.Id);
+            MessagePinningRow row = await MessagePinning.GetRowAsync(auth.Guild.Id);
 
             ViewData["channels"] = await DiscordModule.GetTextChannelsAsync(auth.Guild);
             ViewData["row"] = row;
@@ -37,10 +37,10 @@ namespace UtiliSite.Pages.Dashboard
             ulong pinChannelId = ulong.Parse(HttpContext.Request.Form["pinChannel"]);
             bool pin = HttpContext.Request.Form["pin"] == "on";
 
-            MessagePinningRow row = MessagePinning.GetRow(auth.Guild.Id);
+            MessagePinningRow row = await MessagePinning.GetRowAsync(auth.Guild.Id);
             row.Pin = pin;
             row.PinChannelId = pinChannelId;
-            MessagePinning.SaveRow(row);
+            await MessagePinning.SaveRowAsync(row);
 
             HttpContext.Response.StatusCode = 200;
         }

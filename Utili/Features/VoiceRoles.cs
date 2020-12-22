@@ -69,7 +69,8 @@ namespace Utili.Features
 
             if(!Helper.RequiresUpdate(request.Before, request.After)) return;
 
-            List<VoiceRolesRow> rows = Database.Data.VoiceRoles.GetRows(guild.Id);
+            List<VoiceRolesRow> rows = await Database.Data.VoiceRoles.GetRowsAsync(guild.Id);
+            rows = rows.Where(x => guild.Roles.Any(y => y.Id == x.RoleId)).ToList();
 
             SocketRole beforeRole = guild.EveryoneRole;
             SocketRole afterRole = guild.EveryoneRole;

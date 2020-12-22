@@ -15,7 +15,7 @@ namespace UtiliSite.Pages.Dashboard
             ViewData["guild"] = auth.Guild;
             ViewData["premium"] = Database.Premium.IsPremium(auth.Guild.Id);
 
-            RolesRow row = Roles.GetRow(auth.Guild.Id);
+            RolesRow row = await Roles.GetRowAsync(auth.Guild.Id);
 
             ViewData["joinRoles"] = auth.Guild.Roles.Where(x => row.JoinRoles.Contains(x.Id)).ToList();
             ViewData["nonJoinRoles"] = auth.Guild.Roles.Where(x => !row.JoinRoles.Contains(x.Id)).ToList();
@@ -34,16 +34,16 @@ namespace UtiliSite.Pages.Dashboard
 
             bool rolePersist = HttpContext.Request.Form["rolePersist"] == "on";
 
-            RolesRow row = Roles.GetRow(auth.Guild.Id);
+            RolesRow row = await Roles.GetRowAsync(auth.Guild.Id);
             bool requireDownload = !row.RolePersist && rolePersist;
             row.RolePersist = rolePersist;
-            Roles.SaveRow(row);
+            await Roles.SaveRowAsync(row);
 
 
             if (requireDownload)
             {
                 MiscRow miscRow = new MiscRow(auth.Guild.Id, "RequiresUserDownload", "");
-                try { Misc.SaveRow(miscRow); } catch{}
+                try { await Misc.SaveRowAsync(miscRow); } catch{}
             }
 
             HttpContext.Response.StatusCode = 200;
@@ -61,9 +61,9 @@ namespace UtiliSite.Pages.Dashboard
 
             ulong roleId = ulong.Parse(HttpContext.Request.Form["role"]);
 
-            RolesRow row = Roles.GetRow(auth.Guild.Id);
+            RolesRow row = await Roles.GetRowAsync(auth.Guild.Id);
             if (!row.JoinRoles.Contains(roleId)) row.JoinRoles.Add(roleId);
-            Roles.SaveRow(row);
+            await Roles.SaveRowAsync(row);
 
             HttpContext.Response.StatusCode = 200;
             HttpContext.Response.Redirect(HttpContext.Request.Path);
@@ -81,9 +81,9 @@ namespace UtiliSite.Pages.Dashboard
 
             ulong roleId = ulong.Parse(HttpContext.Request.Form["role"]);
 
-            RolesRow row = Roles.GetRow(auth.Guild.Id);
+            RolesRow row = await Roles.GetRowAsync(auth.Guild.Id);
             if (row.JoinRoles.Contains(roleId)) row.JoinRoles.Remove(roleId);
-            Roles.SaveRow(row);
+            await Roles.SaveRowAsync(row);
 
             HttpContext.Response.StatusCode = 200;
             HttpContext.Response.Redirect(HttpContext.Request.Path);

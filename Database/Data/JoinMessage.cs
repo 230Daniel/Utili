@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Discord;
 using MySql.Data.MySqlClient;
 
@@ -7,7 +8,7 @@ namespace Database.Data
 {
     public static class JoinMessage
     {
-        public static List<JoinMessageRow> GetRows(ulong? guildId = null, bool ignoreCache = false)
+        public static async Task<List<JoinMessageRow>> GetRowsAsync(ulong? guildId = null, bool ignoreCache = false)
         {
             List<JoinMessageRow> matchedRows = new List<JoinMessageRow>();
 
@@ -20,15 +21,15 @@ namespace Database.Data
             else
             {
                 string command = "SELECT * FROM JoinMessage WHERE TRUE";
-                List<(string, string)> values = new List<(string, string)>();
+                List<(string, object)> values = new List<(string, object)>();
 
                 if (guildId.HasValue)
                 {
                     command += " AND GuildId = @GuildId";
-                    values.Add(("GuildId", guildId.Value.ToString()));
+                    values.Add(("GuildId", guildId.Value));
                 }
 
-                MySqlDataReader reader = Sql.GetCommand(command, values.ToArray()).ExecuteReader();
+                MySqlDataReader reader = await Sql.ExecuteReaderAsync(command, values.ToArray());
 
                 while (reader.Read())
                 {
@@ -53,76 +54,62 @@ namespace Database.Data
             return matchedRows;
         }
 
-        public static JoinMessageRow GetRow(ulong guildId)
+        public static async Task<JoinMessageRow> GetRowAsync(ulong guildId)
         {
-            List<JoinMessageRow> rows = GetRows(guildId);
+            List<JoinMessageRow> rows = await GetRowsAsync(guildId);
             return rows.Count > 0 ? rows.First() : new JoinMessageRow(guildId);
         }
 
-        public static void SaveRow(JoinMessageRow row)
+        public static async Task SaveRowAsync(JoinMessageRow row)
         {
-            MySqlCommand command;
-
             if (row.New)
             {
-                command = Sql.GetCommand(
-                    $"INSERT INTO JoinMessage (GuildId, Enabled, Direct, ChannelId, Title, Footer, Content, Text, Image, Thumbnail, Icon, Colour) VALUES (@GuildId, {Sql.ToSqlBool(row.Enabled)}, {Sql.ToSqlBool(row.Direct)}, @ChannelId, @Title, @Footer, @Content, @Text, @Image, @Thumbnail, @Icon, @Colour);",
-                    new[]
-                    {
-                        ("GuildId", row.GuildId.ToString()),
-                        ("ChannelId", row.ChannelId.ToString()),
-                        ("Title", row.Title.EncodedValue),
-                        ("Footer", row.Footer.EncodedValue),
-                        ("Content", row.Content.EncodedValue),
-                        ("Text", row.Text.EncodedValue),
-                        ("Image", row.Image.EncodedValue),
-                        ("Thumbnail", row.Thumbnail.EncodedValue),
-                        ("Icon", row.Icon.EncodedValue),
-                        ("Colour", row.Colour.RawValue.ToString())
-                    });
-
-                command.ExecuteNonQuery();
-                command.Connection.Close();
+                await Sql.ExecuteAsync(
+                    "INSERT INTO JoinMessage (GuildId, Enabled, Direct, ChannelId, Title, Footer, Content, Text, Image, Thumbnail, Icon, Colour) VALUES (@GuildId, @Enabled, @Direct, @ChannelId, @Title, @Footer, @Content, @Text, @Image, @Thumbnail, @Icon, @Colour);",
+                    ("GuildId", row.GuildId),
+                    ("Enabled", row.Enabled),
+                    ("Direct", row.Direct),
+                    ("ChannelId", row.ChannelId),
+                    ("Title", row.Title.EncodedValue),
+                    ("Footer", row.Footer.EncodedValue),
+                    ("Content", row.Content.EncodedValue),
+                    ("Text", row.Text.EncodedValue),
+                    ("Image", row.Image.EncodedValue),
+                    ("Thumbnail", row.Thumbnail.EncodedValue),
+                    ("Icon", row.Icon.EncodedValue),
+                    ("Colour", row.Colour.RawValue));
 
                 row.New = false;
-
                 if(Cache.Initialised) Cache.JoinMessage.Rows.Add(row);
             }
             else
             {
-                command = Sql.GetCommand($"UPDATE JoinMessage SET Enabled = {Sql.ToSqlBool(row.Enabled)}, Direct = {Sql.ToSqlBool(row.Direct)}, ChannelId = @ChannelId, Title = @Title, Footer = @Footer, Content = @Content, Text = @Text, Image = @Image, Thumbnail = @Thumbnail, Icon = @Icon, Colour = @Colour WHERE GuildId = @GuildId;",
-                    new [] 
-                    {
-                        ("GuildId", row.GuildId.ToString()),
-                        ("ChannelId", row.ChannelId.ToString()),
-                        ("Title", row.Title.EncodedValue),
-                        ("Footer", row.Footer.EncodedValue),
-                        ("Content", row.Content.EncodedValue),
-                        ("Text", row.Text.EncodedValue),
-                        ("Image", row.Image.EncodedValue),
-                        ("Thumbnail", row.Thumbnail.EncodedValue),
-                        ("Icon", row.Icon.EncodedValue),
-                        ("Colour", row.Colour.RawValue.ToString())
-                    });
-
-                command.ExecuteNonQuery();
-                command.Connection.Close();
+                await Sql.ExecuteAsync(
+                    "UPDATE JoinMessage SET Enabled = @Enabled, Direct = @Direct, ChannelId = @ChannelId, Title = @Title, Footer = @Footer, Content = @Content, Text = @Text, Image = @Image, Thumbnail = @Thumbnail, Icon = @Icon, Colour = @Colour WHERE GuildId = @GuildId;",
+                    ("GuildId", row.GuildId),
+                    ("Enabled", row.Enabled),
+                    ("Direct", row.Direct),
+                    ("ChannelId", row.ChannelId),
+                    ("Title", row.Title.EncodedValue),
+                    ("Footer", row.Footer.EncodedValue),
+                    ("Content", row.Content.EncodedValue),
+                    ("Text", row.Text.EncodedValue),
+                    ("Image", row.Image.EncodedValue),
+                    ("Thumbnail", row.Thumbnail.EncodedValue),
+                    ("Icon", row.Icon.EncodedValue),
+                    ("Colour", row.Colour.RawValue));
 
                 if(Cache.Initialised) Cache.JoinMessage.Rows[Cache.JoinMessage.Rows.FindIndex(x => x.GuildId == row.GuildId)] = row;
             }
         }
 
-        public static void DeleteRow(JoinMessageRow row)
+        public static async Task DeleteRowAsync(JoinMessageRow row)
         {
-            if(row == null) return;
-
             if(Cache.Initialised) Cache.JoinMessage.Rows.RemoveAll(x => x.GuildId == row.GuildId);
 
-            string commandText = "DELETE FROM JoinMessage WHERE GuildId = @GuildId";
-            MySqlCommand command = Sql.GetCommand(commandText, 
-                new[] {("GuildId", row.GuildId.ToString())});
-            command.ExecuteNonQuery();
-            command.Connection.Close();
+            await Sql.ExecuteAsync(
+                "DELETE FROM JoinMessage WHERE GuildId = @GuildId", 
+                ("GuildId", row.GuildId));
         }
     }
 

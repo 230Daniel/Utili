@@ -17,11 +17,11 @@ namespace Utili.Features
             IUser user = message.Author;
             if(user.Id == reactor.Id || user.IsBot || reactor.IsBot) return;
 
-            ReputationRow row = Database.Data.Reputation.GetRow(guild.Id);
+            ReputationRow row = await Database.Data.Reputation.GetRowAsync(guild.Id);
             if (!row.Emotes.Any(x => x.Item1.Equals(emote))) return;
             int change = row.Emotes.First(x => Equals(x.Item1, emote)).Item2;
 
-            Database.Data.Reputation.AlterUserReputation(guild.Id, user.Id, change);
+            await Database.Data.Reputation.AlterUserReputationAsync(guild.Id, user.Id, change);
         }
 
         public static async Task ReactionRemoved(IGuild guild, IUserMessage message, IUser reactor, IEmote emote)
@@ -29,12 +29,12 @@ namespace Utili.Features
             IUser user = message.Author;
             if(user.Id == reactor.Id) return;
 
-            ReputationRow row = Database.Data.Reputation.GetRow(guild.Id);
+            ReputationRow row = await Database.Data.Reputation.GetRowAsync(guild.Id);
             if (!row.Emotes.Any(x => x.Item1.Equals(emote))) return;
             int change = row.Emotes.First(x => Equals(x.Item1, emote)).Item2;
             change *= -1;
 
-            Database.Data.Reputation.AlterUserReputation(guild.Id, user.Id, change);
+            await Database.Data.Reputation.AlterUserReputationAsync(guild.Id, user.Id, change);
         }
     }
 
@@ -46,7 +46,7 @@ namespace Utili.Features
         {
             if (user == null) user = Context.User;
 
-            ReputationUserRow row = Database.Data.Reputation.GetUserRow(Context.Guild.Id, user.Id);
+            ReputationUserRow row = await Database.Data.Reputation.GetUserRowAsync(Context.Guild.Id, user.Id);
 
             Color colour;
             if (row.Reputation == 0) colour = new Color(195, 195, 195);
@@ -59,7 +59,7 @@ namespace Utili.Features
         [Command("Leaderboard"), Alias("Top"), Cooldown(10)]
         public async Task Leaderboard()
         {
-            List<ReputationUserRow> rows = Database.Data.Reputation.GetUserRows(Context.Guild.Id);
+            List<ReputationUserRow> rows = await Database.Data.Reputation.GetUserRowsAsync(Context.Guild.Id);
             rows = rows.OrderByDescending(x => x.Reputation).ToList();
 
             List<IGuildUser> users = Context.Guild.Users.Select(x => x as IGuildUser).ToList();
@@ -85,7 +85,7 @@ namespace Utili.Features
         [Command("InverseLeaderboard"), Alias("Bottom"), Cooldown(10)]
         public async Task InvserseLeaderboard()
         {
-            List<ReputationUserRow> rows = Database.Data.Reputation.GetUserRows(Context.Guild.Id);
+            List<ReputationUserRow> rows = await Database.Data.Reputation.GetUserRowsAsync(Context.Guild.Id);
             rows = rows.OrderBy(x => x.Reputation).ToList();
 
             List<IGuildUser> users = Context.Guild.Users.Select(x => x as IGuildUser).ToList();
@@ -111,21 +111,21 @@ namespace Utili.Features
         [Command("Give"), Permission(Perm.ManageGuild), Cooldown(2)]
         public async Task Give(IUser user, ulong change)
         {
-            Database.Data.Reputation.AlterUserReputation(Context.Guild.Id, user.Id, (long)change);
+            await Database.Data.Reputation.AlterUserReputationAsync(Context.Guild.Id, user.Id, (long)change);
             await SendSuccessAsync(Context.Channel, "Reputation given", $"Gave {change} reputation to {user.Mention}");
         }
 
         [Command("Take"), Permission(Perm.ManageGuild), Cooldown(2)]
         public async Task Take(IUser user, ulong change)
         {
-            Database.Data.Reputation.AlterUserReputation(Context.Guild.Id, user.Id, -(long)change);
+            await Database.Data.Reputation.AlterUserReputationAsync(Context.Guild.Id, user.Id, -(long)change);
             await SendSuccessAsync(Context.Channel, "Reputation taken", $"Took {change} reputation from {user.Mention}");
         }
 
         [Command("Set"), Permission(Perm.ManageGuild), Cooldown(2)]
         public async Task Take(IUser user, long amount)
         {
-            Database.Data.Reputation.SetUserReputation(Context.Guild.Id, user.Id, amount);
+            await Database.Data.Reputation.SetUserReputationAsync(Context.Guild.Id, user.Id, amount);
             await SendSuccessAsync(Context.Channel, "Reputation set", $"Set {user.Mention}'s reputation to {amount}");
         }
 
@@ -133,7 +133,7 @@ namespace Utili.Features
         public async Task AddEmote(string emoteString, int value = 0)
         {
             IEmote emote = Helper.GetEmote(emoteString);
-            ReputationRow row = Database.Data.Reputation.GetRow(Context.Guild.Id);
+            ReputationRow row = await Database.Data.Reputation.GetRowAsync(Context.Guild.Id);
 
             if (row.Emotes.Any(x => x.Item1 == emote))
             {
@@ -156,7 +156,7 @@ namespace Utili.Features
             await Context.Message.RemoveReactionAsync(emote, _client.CurrentUser);
 
             row.Emotes.Add((emote, value));
-            Database.Data.Reputation.SaveRow(row);
+            await Database.Data.Reputation.SaveRowAsync(row);
 
             await SendSuccessAsync(Context.Channel, "Emote added", 
                 $"The {emote} emote was added successfully with value {value}\nYou can change its value or remove it on the dashboard");

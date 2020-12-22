@@ -18,7 +18,7 @@ namespace UtiliSite.Pages.Dashboard
             ViewData["guild"] = auth.Guild;
             ViewData["premium"] = Database.Premium.IsPremium(auth.Guild.Id);
 
-            MessageLogsRow row = MessageLogs.GetRow(auth.Guild.Id);
+            MessageLogsRow row = await MessageLogs.GetRowAsync(auth.Guild.Id);
             ViewData["row"] = row;
 
             List<RestTextChannel> channels = await DiscordModule.GetTextChannelsAsync(auth.Guild);
@@ -38,10 +38,10 @@ namespace UtiliSite.Pages.Dashboard
             ulong deletedChannelId = ulong.Parse(HttpContext.Request.Form["deletedChannel"]);
             ulong editedChannelId = ulong.Parse(HttpContext.Request.Form["editedChannel"]);
 
-            MessageLogsRow row = MessageLogs.GetRow(auth.Guild.Id);
+            MessageLogsRow row = await MessageLogs.GetRowAsync(auth.Guild.Id);
             row.DeletedChannelId = deletedChannelId;
             row.EditedChannelId = editedChannelId;
-            MessageLogs.SaveRow(row);
+            await MessageLogs.SaveRowAsync(row);
 
             HttpContext.Response.StatusCode = 200;
         }
@@ -58,9 +58,9 @@ namespace UtiliSite.Pages.Dashboard
 
             ulong channelId = ulong.Parse(HttpContext.Request.Form["channel"]);
 
-            MessageLogsRow row = MessageLogs.GetRow(auth.Guild.Id);
+            MessageLogsRow row = await MessageLogs.GetRowAsync(auth.Guild.Id);
             if (!row.ExcludedChannels.Contains(channelId)) row.ExcludedChannels.Add(channelId);
-            MessageLogs.SaveRow(row);
+            await MessageLogs.SaveRowAsync(row);
 
             HttpContext.Response.StatusCode = 200;
             HttpContext.Response.Redirect(HttpContext.Request.Path);
@@ -78,9 +78,9 @@ namespace UtiliSite.Pages.Dashboard
 
             ulong channelId = ulong.Parse(HttpContext.Request.Form["channel"]);
 
-            MessageLogsRow row = MessageLogs.GetRow(auth.Guild.Id);
+            MessageLogsRow row = await MessageLogs.GetRowAsync(auth.Guild.Id);
             if (row.ExcludedChannels.Contains(channelId)) row.ExcludedChannels.Remove(channelId);
-            MessageLogs.SaveRow(row);
+            await MessageLogs.SaveRowAsync(row);
 
             HttpContext.Response.StatusCode = 200;
             HttpContext.Response.Redirect(HttpContext.Request.Path);

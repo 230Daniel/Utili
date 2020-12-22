@@ -18,7 +18,7 @@ namespace UtiliSite.Pages.Dashboard
             ViewData["guild"] = auth.Guild;
             ViewData["premium"] = Database.Premium.IsPremium(auth.Guild.Id);
 
-            CoreRow row = Core.GetRow(auth.Guild.Id);
+            CoreRow row = await Core.GetRowAsync(auth.Guild.Id);
             ViewData["row"] = row;
             ViewData["nickname"] = await DiscordModule.GetBotNicknameAsync(auth.Guild.Id);
 
@@ -37,10 +37,10 @@ namespace UtiliSite.Pages.Dashboard
                 return;
             }
 
-            CoreRow row = Core.GetRow(auth.Guild.Id);
+            CoreRow row = await Core.GetRowAsync(auth.Guild.Id);
             row.Prefix = EString.FromDecoded(HttpContext.Request.Form["prefix"]);
             row.EnableCommands = HttpContext.Request.Form["enableCommands"] == "on";
-            Core.SaveRow(row);
+            await Core.SaveRowAsync(row);
 
             string nickname = HttpContext.Request.Form["nickname"];
             if (nickname != (string) ViewData["nickname"])
@@ -63,12 +63,12 @@ namespace UtiliSite.Pages.Dashboard
 
             ulong channelId = ulong.Parse(HttpContext.Request.Form["channel"]);
 
-            CoreRow row = Core.GetRow(auth.Guild.Id);
+            CoreRow row = await Core.GetRowAsync(auth.Guild.Id);
             if (!row.ExcludedChannels.Contains(channelId))
             {
                 row.ExcludedChannels.Add(channelId);
             }
-            Core.SaveRow(row);
+            await Core.SaveRowAsync(row);
 
             HttpContext.Response.StatusCode = 200;
             HttpContext.Response.Redirect(HttpContext.Request.Path);
@@ -86,9 +86,9 @@ namespace UtiliSite.Pages.Dashboard
 
             ulong channelId = ulong.Parse(HttpContext.Request.Form["channel"]);
 
-            CoreRow row = Core.GetRow(auth.Guild.Id);
+            CoreRow row = await Core.GetRowAsync(auth.Guild.Id);
             row.ExcludedChannels.RemoveAll(x => x == channelId);
-            Core.SaveRow(row);
+            await Core.SaveRowAsync(row);
 
             HttpContext.Response.StatusCode = 200;
             HttpContext.Response.Redirect(HttpContext.Request.Path);

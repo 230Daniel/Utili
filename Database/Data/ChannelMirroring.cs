@@ -1,12 +1,13 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using MySql.Data.MySqlClient;
 
 namespace Database.Data
 {
     public static class ChannelMirroring
     {
-        public static List<ChannelMirroringRow> GetRows(ulong? guildId = null, ulong? fromChannelId = null, bool ignoreCache = false)
+        public static async Task<List<ChannelMirroringRow>> GetRowsAsync(ulong? guildId = null, ulong? fromChannelId = null, bool ignoreCache = false)
         {
             List<ChannelMirroringRow> matchedRows = new List<ChannelMirroringRow>();
 
@@ -20,21 +21,21 @@ namespace Database.Data
             else
             {
                 string command = "SELECT * FROM ChannelMirroring WHERE TRUE";
-                List<(string, string)> values = new List<(string, string)>();
+                List<(string, object)> values = new List<(string, object)>();
 
                 if (guildId.HasValue)
                 {
                     command += " AND GuildId = @GuildId";
-                    values.Add(("GuildId", guildId.Value.ToString()));
+                    values.Add(("GuildId", guildId.Value));
                 }
 
                 if (fromChannelId.HasValue)
                 {
                     command += " AND FromChannelId = @FromChannelId";
-                    values.Add(("FromChannelId", fromChannelId.Value.ToString()));
+                    values.Add(("FromChannelId", fromChannelId.Value));
                 }
 
-                MySqlDataReader reader = Sql.GetCommand(command, values.ToArray()).ExecuteReader();
+                MySqlDataReader reader = await Sql.ExecuteReaderAsync(command, values.ToArray());
 
                 while (reader.Read())
                 {
@@ -51,20 +52,21 @@ namespace Database.Data
             return matchedRows;
         }
 
-        public static void SaveRow(ChannelMirroringRow row)
+        public static async Task<ChannelMirroringRow> GetRowAsync(ulong guildId, ulong fromChannelId)
         {
-            MySqlCommand command;
+            List<ChannelMirroringRow> rows = await GetRowsAsync(guildId, fromChannelId);
+            return rows.Count > 0 ? rows.First() : new ChannelMirroringRow(guildId, fromChannelId);
+        }
 
+        public static async Task SaveRowAsync(ChannelMirroringRow row)
+        {
             if (row.New)
             {
-                command = Sql.GetCommand("INSERT INTO ChannelMirroring (GuildId, FromChannelId, ToChannelId, WebhookId) VALUES (@GuildId, @FromChannelId, @ToChannelId, @WebhookId);",
-                    new [] {("GuildId", row.GuildId.ToString()), 
-                        ("FromChannelId", row.FromChannelId.ToString()),
-                        ("ToChannelId", row.ToChannelId.ToString()),
-                        ("WebhookId", row.WebhookId.ToString())});
-
-                command.ExecuteNonQuery();
-                command.Connection.Close();
+                await Sql.ExecuteAsync("INSERT INTO ChannelMirroring (GuildId, FromChannelId, ToChannelId, WebhookId) VALUES (@GuildId, @FromChannelId, @ToChannelId, @WebhookId);",
+                    ("GuildId", row.GuildId), 
+                    ("FromChannelId", row.FromChannelId),
+                    ("ToChannelId", row.ToChannelId),
+                    ("WebhookId", row.WebhookId));
 
                 row.New = false;
 
@@ -72,68 +74,40 @@ namespace Database.Data
             }
             else
             {
-                command = Sql.GetCommand("UPDATE ChannelMirroring SET ToChannelId = @ToChannelId, WebhookId = @WebhookId WHERE GuildId = @GuildId AND FromChannelId = @FromChannelId;",
-                    new [] {
-                        ("GuildId", row.GuildId.ToString()), 
-                        ("FromChannelId", row.FromChannelId.ToString()),
-                        ("ToChannelId", row.ToChannelId.ToString()),
-                        ("WebhookId", row.WebhookId.ToString())});
-
-                command.ExecuteNonQuery();
-                command.Connection.Close();
+                await Sql.ExecuteAsync("UPDATE ChannelMirroring SET ToChannelId = @ToChannelId, WebhookId = @WebhookId WHERE GuildId = @GuildId AND FromChannelId = @FromChannelId;",
+                    ("GuildId", row.GuildId), 
+                        ("FromChannelId", row.FromChannelId),
+                        ("ToChannelId", row.ToChannelId),
+                        ("WebhookId", row.WebhookId));
 
                 if(Cache.Initialised) Cache.ChannelMirroring.Rows[Cache.ChannelMirroring.Rows.FindIndex(x => x.GuildId == row.GuildId && x.FromChannelId == row.FromChannelId)] = row;
             }
         }
 
-        public static void SaveWebhookId(ChannelMirroringRow row)
+        public static async Task SaveWebhookIdAsync(ChannelMirroringRow row)
         {
-            MySqlCommand command;
-
             if (row.New)
             {
-                command = Sql.GetCommand("INSERT INTO ChannelMirroring (GuildId, FromChannelId, ToChannelId, WebhookId) VALUES (@GuildId, @FromChannelId, @ToChannelId, @WebhookId);",
-                    new [] {("GuildId", row.GuildId.ToString()), 
-                        ("FromChannelId", row.FromChannelId.ToString()),
-                        ("ToChannelId", row.ToChannelId.ToString()),
-                        ("WebhookId", row.WebhookId.ToString())});
-
-                command.ExecuteNonQuery();
-                command.Connection.Close();
-
-                row.New = false;
-
-                if(Cache.Initialised) Cache.ChannelMirroring.Rows.Add(row);
+                await SaveRowAsync(row);
             }
             else
             {
-                command = Sql.GetCommand("UPDATE ChannelMirroring SET WebhookId = @WebhookId WHERE GuildId = @GuildId AND FromChannelId = @FromChannelId;",
-                    new [] {
-                        ("GuildId", row.GuildId.ToString()), 
-                        ("FromChannelId", row.FromChannelId.ToString()),
-                        ("WebhookId", row.WebhookId.ToString())});
-
-                command.ExecuteNonQuery();
-                command.Connection.Close();
+                await Sql.ExecuteAsync("UPDATE ChannelMirroring SET WebhookId = @WebhookId WHERE GuildId = @GuildId AND FromChannelId = @FromChannelId;",
+                    ("GuildId", row.GuildId), 
+                    ("FromChannelId", row.FromChannelId),
+                    ("WebhookId", row.WebhookId));
 
                 if(Cache.Initialised) Cache.ChannelMirroring.Rows[Cache.ChannelMirroring.Rows.FindIndex(x => x.GuildId == row.GuildId && x.FromChannelId == row.FromChannelId)] = row;
             }
         }
 
-        public static void DeleteRow(ChannelMirroringRow row)
+        public static async Task DeleteRowAsync(ChannelMirroringRow row)
         {
-            if(row == null) return;
-
             if(Cache.Initialised) Cache.ChannelMirroring.Rows.RemoveAll(x => x.GuildId == row.GuildId && x.FromChannelId == row.FromChannelId);
 
-            string commandText = "DELETE FROM ChannelMirroring WHERE GuildId = @GuildId AND FromChannelId = @FromChannelId";
-            MySqlCommand command = Sql.GetCommand(commandText, 
-                new[] {
-                    ("GuildId", row.GuildId.ToString()),
-                    ("FromChannelId", row.FromChannelId.ToString())});
-
-            command.ExecuteNonQuery();
-            command.Connection.Close();
+            await Sql.ExecuteAsync("DELETE FROM ChannelMirroring WHERE GuildId = @GuildId AND FromChannelId = @FromChannelId",
+                ("GuildId", row.GuildId),
+                ("FromChannelId", row.FromChannelId));
         }
     }
 

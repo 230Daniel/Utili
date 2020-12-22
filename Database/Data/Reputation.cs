@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Discord;
 using MySql.Data.MySqlClient;
 
@@ -7,7 +8,7 @@ namespace Database.Data
 {
     public static class Reputation
     {
-        public static List<ReputationRow> GetRows(ulong? guildId = null, bool ignoreCache = false)
+        public static async Task<List<ReputationRow>> GetRowsAsync(ulong? guildId = null, bool ignoreCache = false)
         {
             List<ReputationRow> matchedRows = new List<ReputationRow>();
 
@@ -20,15 +21,15 @@ namespace Database.Data
             else
             {
                 string command = "SELECT * FROM Reputation WHERE TRUE";
-                List<(string, string)> values = new List<(string, string)>();
+                List<(string, object)> values = new List<(string, object)>();
 
                 if (guildId.HasValue)
                 {
                     command += " AND GuildId = @GuildId";
-                    values.Add(("GuildId", guildId.Value.ToString()));
+                    values.Add(("GuildId", guildId.Value));
                 }
 
-                MySqlDataReader reader = Sql.GetCommand(command, values.ToArray()).ExecuteReader();
+                MySqlDataReader reader = await Sql.ExecuteReaderAsync(command, values.ToArray());
 
                 while (reader.Read())
                 {
@@ -43,77 +44,63 @@ namespace Database.Data
             return matchedRows;
         }
 
-        public static ReputationRow GetRow(ulong guildId)
+        public static async Task<ReputationRow> GetRowAsync(ulong guildId)
         {
-            List<ReputationRow> rows = GetRows(guildId);
+            List<ReputationRow> rows = await GetRowsAsync(guildId);
             return rows.Count > 0 ? rows.First() : new ReputationRow(guildId);
         }
 
-        public static void SaveRow(ReputationRow row)
+        public static async Task SaveRowAsync(ReputationRow row)
         {
-            MySqlCommand command;
-
             if (row.New)
             {
-                command = Sql.GetCommand("INSERT INTO Reputation (GuildId, Emotes) VALUES (@GuildId, @Emotes);",
-                    new [] {("GuildId", row.GuildId.ToString()), 
-                        ("Emotes", row.GetEmotesString())});
-
-                command.ExecuteNonQuery();
-                command.Connection.Close();
+                await Sql.ExecuteAsync(
+                    "INSERT INTO Reputation (GuildId, Emotes) VALUES (@GuildId, @Emotes);",
+                    ("GuildId", row.GuildId), 
+                    ("Emotes", row.GetEmotesString()));
 
                 row.New = false;
-
                 if(Cache.Initialised) Cache.Reputation.Rows.Add(row);
             }
             else
             {
-                command = Sql.GetCommand("UPDATE Reputation SET Emotes = @Emotes WHERE GuildId = @GuildId;",
-                    new [] {
-                        ("GuildId", row.GuildId.ToString()), 
-                        ("Emotes", row.GetEmotesString())
-                    });
-
-                command.ExecuteNonQuery();
-                command.Connection.Close();
+                await Sql.ExecuteAsync(
+                    "UPDATE Reputation SET Emotes = @Emotes WHERE GuildId = @GuildId;",
+                    ("GuildId", row.GuildId), 
+                    ("Emotes", row.GetEmotesString()));
 
                 if(Cache.Initialised) Cache.Reputation.Rows[Cache.Reputation.Rows.FindIndex(x => x.GuildId == row.GuildId)] = row;
             }
         }
 
-        public static void DeleteRow(ReputationRow row)
+        public static async Task DeleteRowAsync(ReputationRow row)
         {
-            if(row == null) return;
-
             if(Cache.Initialised) Cache.Reputation.Rows.RemoveAll(x => x.GuildId == row.GuildId);
 
-            string commandText = "DELETE FROM Reputation WHERE GuildId = @GuildId";
-            MySqlCommand command = Sql.GetCommand(commandText, 
-                new[] {("GuildId", row.GuildId.ToString())});
-            command.ExecuteNonQuery();
-            command.Connection.Close();
+            await Sql.ExecuteAsync("DELETE FROM Reputation WHERE GuildId = @GuildId", 
+                ("GuildId", row.GuildId));
         }
 
-        public static List<ReputationUserRow> GetUserRows(ulong? guildId = null, ulong? userId = null)
+        public static async Task<List<ReputationUserRow>> GetUserRowsAsync(ulong? guildId = null, ulong? userId = null)
         {
             List<ReputationUserRow> matchedRows = new List<ReputationUserRow>();
 
             string command = "SELECT * FROM ReputationUsers WHERE TRUE";
-            List<(string, string)> values = new List<(string, string)>();
+            List<(string, object)> values = new List<(string, object)>();
 
             if (guildId.HasValue)
             {
                 command += " AND GuildId = @GuildId";
-                values.Add(("GuildId", guildId.Value.ToString()));
+                values.Add(("GuildId", guildId.Value));
             }
 
             if (userId.HasValue)
             {
                 command += " AND UserId = @UserId";
-                values.Add(("UserId", userId.Value.ToString()));
+                values.Add(("UserId", userId.Value));
             }
 
-            MySqlDataReader reader = Sql.GetCommand(command, values.ToArray()).ExecuteReader();
+            MySqlDataReader reader = await Sql.ExecuteReaderAsync(command, values.ToArray());
 
             while (reader.Read())
             {
@@ -128,50 +115,43 @@ namespace Database.Data
             return matchedRows;
         }
 
-        public static ReputationUserRow GetUserRow(ulong guildId, ulong userId)
+        public static async Task<ReputationUserRow> GetUserRowAsync(ulong guildId, ulong userId)
         {
-            List<ReputationUserRow> rows = GetUserRows(guildId, userId);
+            List<ReputationUserRow> rows = await GetUserRowsAsync(guildId, userId);
             return rows.Count > 0 ? rows.First() : new ReputationUserRow(guildId, userId);
         }
 
-        public static void AlterUserReputation(ulong guildId, ulong userId, long reputationChange)
+        public static async Task AlterUserReputationAsync(ulong guildId, ulong userId, long reputationChange)
         {
-            MySqlCommand command = Sql.GetCommand("UPDATE ReputationUsers SET Reputation = Reputation + @ReputationChange WHERE GuildId = @GuildId AND UserId = @UserId;",
-                new [] {("GuildId", guildId.ToString()), 
-                    ("UserId", userId.ToString()),
-                    ("ReputationChange", reputationChange.ToString())});
+            int affected = await Sql.ExecuteAsync("UPDATE ReputationUsers SET Reputation = Reputation + @ReputationChange WHERE GuildId = @GuildId AND UserId = @UserId;",
+                ("GuildId", guildId), 
+                ("UserId", userId),
+                ("ReputationChange", reputationChange));
 
-            if (command.ExecuteNonQuery() == 0)
+            if (affected == 0)
             {
-                command = Sql.GetCommand("INSERT INTO ReputationUsers (GuildId, UserId, Reputation) VALUES(@GuildId, @UserId, @Reputation)",
-                    new [] {("GuildId", guildId.ToString()), 
-                        ("UserId", userId.ToString()),
-                        ("Reputation", reputationChange.ToString())});
-
-                command.ExecuteNonQuery();
+                await Sql.ExecuteAsync("INSERT INTO ReputationUsers (GuildId, UserId, Reputation) VALUES(@GuildId, @UserId, @Reputation)",
+                    ("GuildId", guildId), 
+                    ("UserId", userId),
+                    ("Reputation", reputationChange));
             }
-
-            command.Connection.Close();
         }
 
-        public static void SetUserReputation(ulong guildId, ulong userId, long reputation)
+        public static async Task SetUserReputationAsync(ulong guildId, ulong userId, long reputation)
         {
-            MySqlCommand command = Sql.GetCommand("UPDATE ReputationUsers SET Reputation = @Reputation WHERE GuildId = @GuildId AND UserId = @UserId;",
-                new [] {("GuildId", guildId.ToString()), 
-                    ("UserId", userId.ToString()),
-                    ("Reputation", reputation.ToString())});
+            int affected = await Sql.ExecuteAsync("UPDATE ReputationUsers SET Reputation = @Reputation WHERE GuildId = @GuildId AND UserId = @UserId;",
+                ("GuildId", guildId), 
+                ("UserId", userId),
+                ("Reputation", reputation));
 
-            if (command.ExecuteNonQuery() == 0)
+            if (affected == 0)
             {
-                command = Sql.GetCommand("INSERT INTO ReputationUsers (GuildId, UserId, Reputation) VALUES(@GuildId, @UserId, @Reputation)",
-                    new [] {("GuildId", guildId.ToString()), 
-                        ("UserId", userId.ToString()),
-                        ("Reputation", reputation.ToString())});
-
-                command.ExecuteNonQuery();
+                await Sql.ExecuteAsync(
+                    "INSERT INTO ReputationUsers (GuildId, UserId, Reputation) VALUES(@GuildId, @UserId, @Reputation)",
+                    ("GuildId", guildId), 
+                    ("UserId", userId),
+                    ("Reputation", reputation));
             }
-
-            command.Connection.Close();
         }
     }
 

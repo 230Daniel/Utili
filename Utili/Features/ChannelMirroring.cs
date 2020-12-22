@@ -18,8 +18,7 @@ namespace Utili.Features
         {
             if(context.User.IsWebhook) return;
 
-            List<ChannelMirroringRow> rows =
-                Database.Data.ChannelMirroring.GetRows(context.Guild.Id, context.Channel.Id);
+            List<ChannelMirroringRow> rows = await Database.Data.ChannelMirroring.GetRowsAsync(context.Guild.Id, context.Channel.Id);
             if(rows.Count == 0) return;
             ChannelMirroringRow row = rows.First();
 
@@ -38,7 +37,7 @@ namespace Utili.Features
                 avatar.Close();
 
                 row.WebhookId = webhook.Id;
-                Database.Data.ChannelMirroring.SaveWebhookId(row);
+                await Database.Data.ChannelMirroring.SaveWebhookIdAsync(row);
             }
 
             string username = $"{context.User} in #{context.Channel}";

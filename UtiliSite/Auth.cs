@@ -120,17 +120,17 @@ namespace UtiliSite
             Client = client;
             User = user;
 
-            _ = Task.Run(() =>
+            _ = Task.Run(async () =>
             {
-                UserRow userRow = Users.GetRow(user.Id);
+                UserRow userRow = await Users.GetRowAsync(user.Id);
                 DateTime previousVisit = userRow.LastVisit;
                 userRow.Email = user.Email;
                 
                 if (previousVisit < DateTime.UtcNow - TimeSpan.FromMinutes(30))
                 {
                     userRow.LastVisit = DateTime.UtcNow;
-                    Users.SaveRow(userRow);
-                    Users.AddNewVisit(user.Id);
+                    await Users.SaveRowAsync(userRow);
+                    await Users.AddNewVisitAsync(user.Id);
                 }
             });
         }

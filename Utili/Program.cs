@@ -47,13 +47,13 @@ namespace Utili
             if (_config.CacheDatabase)
             {
                 _logger.Log("Main", "Cacheing database...", LogSeverity.Info);
-                Database.Database.Initialise(true, _config.DefaultPrefix);
+                await Database.Database.InitialiseAsync(true, _config.DefaultPrefix);
                 _logger.Log("Main", "Database cached", LogSeverity.Info);
             }
             else
             {
                 _logger.Log("Main", "Not cacheing database", LogSeverity.Info);
-                Database.Database.Initialise(false, _config.DefaultPrefix);
+                await Database.Database.InitialiseAsync(false, _config.DefaultPrefix);
             }
 
             try
@@ -77,7 +77,7 @@ namespace Utili
             _haste = new Haste(_config.HasteServer);
 
             int[] shardIds = Enumerable.Range(_config.LowerShardId, _config.UpperShardId - (_config.LowerShardId - 1)).ToArray();
-            _totalShards = Database.Sharding.GetTotalShards();
+            _totalShards = await Database.Sharding.GetTotalShardsAsync();
 
             _client = new DiscordShardedClient(shardIds, new DiscordSocketConfig 
             {

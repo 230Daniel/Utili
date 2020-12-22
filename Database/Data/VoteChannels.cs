@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Discord;
 using MySql.Data.MySqlClient;
 
@@ -7,7 +8,7 @@ namespace Database.Data
 {
     public static class VoteChannels
     {
-        public static List<VoteChannelsRow> GetRows(ulong? guildId = null, ulong? channelId = null, bool ignoreCache = false)
+        public static async Task<List<VoteChannelsRow>> GetRowsAsync(ulong? guildId = null, ulong? channelId = null, bool ignoreCache = false)
         {
             List<VoteChannelsRow> matchedRows = new List<VoteChannelsRow>();
 
@@ -21,21 +22,21 @@ namespace Database.Data
             else
             {
                 string command = "SELECT * FROM VoteChannels WHERE TRUE";
-                List<(string, string)> values = new List<(string, string)>();
+                List<(string, object)> values = new List<(string, object)>();
 
                 if (guildId.HasValue)
                 {
                     command += " AND GuildId = @GuildId";
-                    values.Add(("GuildId", guildId.Value.ToString()));
+                    values.Add(("GuildId", guildId.Value));
                 }
 
                 if (channelId.HasValue)
                 {
                     command += " AND ChannelId = @ChannelId";
-                    values.Add(("ChannelId", channelId.Value.ToString()));
+                    values.Add(("ChannelId", channelId.Value));
                 }
 
-                MySqlDataReader reader = Sql.GetCommand(command, values.ToArray()).ExecuteReader();
+                MySqlDataReader reader = await Sql.ExecuteReaderAsync(command, values.ToArray());
 
                 while (reader.Read())
                 {
@@ -52,54 +53,45 @@ namespace Database.Data
             return matchedRows;
         }
 
-        public static void SaveRow(VoteChannelsRow row)
+        public static async Task<VoteChannelsRow> GetRowAsync(ulong guildId, ulong channelId)
         {
-            MySqlCommand command;
+            var rows = await GetRowsAsync(guildId, channelId);
+            return rows.Count > 0 ? rows.First() : new VoteChannelsRow(guildId, channelId);
+        }
 
+        public static async Task SaveRowAsync(VoteChannelsRow row)
+        {
             if (row.New)
             {
-                command = Sql.GetCommand("INSERT INTO VoteChannels (GuildId, ChannelId, Mode, Emotes) VALUES (@GuildId, @ChannelId, @Mode, @Emotes);",
-                    new [] {("GuildId", row.GuildId.ToString()), 
-                        ("ChannelId", row.ChannelId.ToString()),
-                        ("Mode", row.Mode.ToString()),
-                        ("Emotes", row.GetEmotesString())});
-
-                command.ExecuteNonQuery();
-                command.Connection.Close();
+                await Sql.ExecuteAsync(
+                    "INSERT INTO VoteChannels (GuildId, ChannelId, Mode, Emotes) VALUES (@GuildId, @ChannelId, @Mode, @Emotes);",
+                    ("GuildId", row.GuildId), 
+                    ("ChannelId", row.ChannelId),
+                    ("Mode", row.Mode),
+                    ("Emotes", row.GetEmotesString()));
 
                 row.New = false;
-
                 if(Cache.Initialised) Cache.VoteChannels.Rows.Add(row);
             }
             else
             {
-                command = Sql.GetCommand("UPDATE VoteChannels SET Mode = @Mode, Emotes = @Emotes WHERE GuildId = @GuildId AND ChannelId = @ChannelId;",
-                    new [] {
-                        ("GuildId", row.GuildId.ToString()), 
-                        ("ChannelId", row.ChannelId.ToString()),
-                        ("Mode", row.Mode.ToString()),
-                        ("Emotes", row.GetEmotesString())});
-
-                command.ExecuteNonQuery();
-                command.Connection.Close();
+                await Sql.ExecuteAsync("UPDATE VoteChannels SET Mode = @Mode, Emotes = @Emotes WHERE GuildId = @GuildId AND ChannelId = @ChannelId;",
+                    ("GuildId", row.GuildId), 
+                        ("ChannelId", row.ChannelId),
+                        ("Mode", row.Mode),
+                        ("Emotes", row.GetEmotesString()));
 
                 if(Cache.Initialised) Cache.VoteChannels.Rows[Cache.VoteChannels.Rows.FindIndex(x => x.GuildId == row.GuildId && x.ChannelId == row.ChannelId)] = row;
             }
         }
 
-        public static void DeleteRow(VoteChannelsRow row)
+        public static async Task DeleteRowAsync(VoteChannelsRow row)
         {
-            if(row == null) return;
-
             if(Cache.Initialised) Cache.VoteChannels.Rows.RemoveAll(x => x.GuildId == row.GuildId && x.ChannelId == row.ChannelId);
 
-            string commandText = "DELETE FROM VoteChannels WHERE GuildId = @GuildId AND ChannelId = @ChannelId";
-            MySqlCommand command = Sql.GetCommand(commandText, 
-                new[] {
-                    ("GuildId", row.GuildId.ToString()),
-                    ("ChannelId", row.ChannelId.ToString())});
-            command.ExecuteNonQuery();
-            command.Connection.Close();
+            await Sql.ExecuteAsync("DELETE FROM VoteChannels WHERE GuildId = @GuildId AND ChannelId = @ChannelId",
+                ("GuildId", row.GuildId),
+                ("ChannelId", row.ChannelId));
         }
     }
 
@@ -116,9 +108,18 @@ namespace Database.Data
         public int Mode { get; set; }
         public List<IEmote> Emotes { get; set; }
 
-        public VoteChannelsRow()
+        private VoteChannelsRow()
+        {
+
+        }
+
+        public VoteChannelsRow(ulong guildId, ulong channelId)
         {
             New = true;
+            GuildId = guildId;
+            ChannelId = channelId;
+            Mode = 0;
+            Emotes = new List<IEmote>();
         }
 
         public static VoteChannelsRow FromDatabase(ulong guildId, ulong channelId, int mode, string emotes)

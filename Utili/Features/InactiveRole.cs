@@ -16,11 +16,11 @@ namespace Utili.Features
 
         public static async Task UpdateUserAsync(SocketGuild guild, SocketGuildUser user)
         {
-            InactiveRoleRow row = Database.Data.InactiveRole.GetRow(guild.Id);
+            InactiveRoleRow row = await Database.Data.InactiveRole.GetRowAsync(guild.Id);
 
             if(guild.Roles.Any(x => x.Id == row.RoleId))
             {
-                Database.Data.InactiveRole.UpdateUser(guild.Id, user.Id);
+                await Database.Data.InactiveRole.UpdateUserAsync(guild.Id, user.Id);
 
                 if (user.Roles.Any(x => x.Id == row.RoleId))
                 {
@@ -52,13 +52,13 @@ namespace Utili.Features
 
         private static async Task UpdateGuildsAsync()
         {
-            List<InactiveRoleRow> guildsRequiringUpdate = Database.Data.InactiveRole.GetUpdateRequiredRows().Take(5).ToList();
+            List<InactiveRoleRow> guildsRequiringUpdate = (await Database.Data.InactiveRole.GetUpdateRequiredRowsAsync()).Take(5).ToList();
 
-            guildsRequiringUpdate.ForEach(x =>
+            foreach (InactiveRoleRow row in guildsRequiringUpdate)
             {
-                x.LastUpdate = DateTime.UtcNow;
-                Database.Data.InactiveRole.SaveLastUpdate(x);
-            });
+                row.LastUpdate = DateTime.UtcNow;
+                await Database.Data.InactiveRole.SaveLastUpdateAsync(row);
+            }
 
             List<Task> tasks = new List<Task>();
 
@@ -84,7 +84,7 @@ namespace Utili.Features
 
             List<IGuildUser> users = (await guild.GetUsersAsync().FlattenAsync()).ToList();
             IGuildUser bot = users.First(x => x.Id == _client.CurrentUser.Id);
-            List<InactiveRoleUserRow> userRows = Database.Data.InactiveRole.GetUsers(guild.Id);
+            List<InactiveRoleUserRow> userRows = await Database.Data.InactiveRole.GetUsersAsync(guild.Id);
 
             foreach (IGuildUser user in users.Where(x => !x.IsBot).OrderBy(x => x.Id))
             {

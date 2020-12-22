@@ -12,7 +12,7 @@ namespace Utili.Features
         {
             SocketGuild guild = user.Guild;
 
-            RolesRow row = Database.Data.Roles.GetRow(guild.Id);
+            RolesRow row = await Database.Data.Roles.GetRowAsync(guild.Id);
 
             foreach (ulong roleId in row.JoinRoles)
             {
@@ -26,7 +26,7 @@ namespace Utili.Features
 
             if (row.RolePersist)
             {
-                List<RolesPersistantRolesRow> persistRows = Database.Data.Roles.GetPersistRows(guild.Id, user.Id);
+                List<RolesPersistantRolesRow> persistRows = await Database.Data.Roles.GetPersistRowsAsync(guild.Id, user.Id);
                 List<ulong> roleIds = persistRows.SelectMany(x => x.Roles).Distinct().ToList();
 
                 foreach (ulong roleId in roleIds)
@@ -47,7 +47,7 @@ namespace Utili.Features
                 {
                     foreach (RolesPersistantRolesRow persistRow in persistRows)
                     {
-                        Database.Data.Roles.DeletePersistRow(persistRow);
+                        await Database.Data.Roles.DeletePersistRowAsync(persistRow);
                     }
                 }
             }
@@ -57,7 +57,7 @@ namespace Utili.Features
         {
             SocketGuild guild = user.Guild;
 
-            RolesRow row = Database.Data.Roles.GetRow(guild.Id);
+            RolesRow row = await Database.Data.Roles.GetRowAsync(guild.Id);
 
             if (row.RolePersist)
             {
@@ -68,7 +68,7 @@ namespace Utili.Features
                     Roles = user.Roles.Where(x => !x.IsEveryone).Select(x => x.Id).ToList()
                 };
 
-                Database.Data.Roles.SavePersistRow(persistRow);
+                await Database.Data.Roles.SavePersistRowAsync(persistRow);
             }
         }
     }

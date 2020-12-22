@@ -20,7 +20,7 @@ namespace Utili.Features
                 return;
             }
 
-            List<VoteChannelsRow> rows = Database.Data.VoteChannels.GetRows(context.Guild.Id, context.Channel.Id);
+            List<VoteChannelsRow> rows = await Database.Data.VoteChannels.GetRowsAsync(context.Guild.Id, context.Channel.Id);
 
             if (rows.Count == 0)
             {
@@ -98,7 +98,7 @@ namespace Utili.Features
                 return;
             }
 
-            List<VoteChannelsRow> rows = Database.Data.VoteChannels.GetRows(Context.Guild.Id, channel.Id);
+            List<VoteChannelsRow> rows = await Database.Data.VoteChannels.GetRowsAsync(Context.Guild.Id, channel.Id);
             if (rows.Count == 0)
             {
                 await SendFailureAsync(Context.Channel, "Error",
@@ -141,7 +141,7 @@ namespace Utili.Features
             await Context.Message.RemoveReactionAsync(emote, _client.CurrentUser);
 
             row.Emotes.Add(emote);
-            Database.Data.VoteChannels.SaveRow(row);
+            await Database.Data.VoteChannels.SaveRowAsync(row);
 
             await SendSuccessAsync(Context.Channel, "Emote added", 
                 $"The {emote} emote was added successfully");
@@ -158,7 +158,7 @@ namespace Utili.Features
         {
             if(channel == null) channel = Context.Channel as ITextChannel;
 
-            List<VoteChannelsRow> rows = Database.Data.VoteChannels.GetRows(Context.Guild.Id, channel.Id);
+            List<VoteChannelsRow> rows = await Database.Data.VoteChannels.GetRowsAsync(Context.Guild.Id, channel.Id);
             if (rows.Count == 0)
             {
                 await SendFailureAsync(Context.Channel, "Error",
@@ -195,7 +195,7 @@ namespace Utili.Features
             }
 
             row.Emotes.Remove(emote);
-            Database.Data.VoteChannels.SaveRow(row);
+            await Database.Data.VoteChannels.SaveRowAsync(row);
 
             await SendSuccessAsync(Context.Channel, "Emote removed", 
                 $"The {emote} emote was removed successfully");
@@ -212,7 +212,7 @@ namespace Utili.Features
         {
             if (channel == null) channel = Context.Channel as ITextChannel;
 
-            List<VoteChannelsRow> rows = Database.Data.VoteChannels.GetRows(Context.Guild.Id, channel.Id);
+            List<VoteChannelsRow> rows = await Database.Data.VoteChannels.GetRowsAsync(Context.Guild.Id, channel.Id);
             if (rows.Count == 0)
             {
                 await SendFailureAsync(Context.Channel, "Error",

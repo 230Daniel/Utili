@@ -18,7 +18,7 @@ namespace UtiliSite.Pages.Dashboard
             ViewData["guild"] = auth.Guild;
             ViewData["premium"] = Database.Premium.IsPremium(auth.Guild.Id);
 
-            List<ChannelMirroringRow> rows = ChannelMirroring.GetRows(auth.Guild.Id);
+            List<ChannelMirroringRow> rows = await ChannelMirroring.GetRowsAsync(auth.Guild.Id);
             ViewData["rows"] = rows;
 
             List<RestTextChannel> channels = await DiscordModule.GetTextChannelsAsync(auth.Guild);
@@ -28,7 +28,6 @@ namespace UtiliSite.Pages.Dashboard
         public async Task OnPost()
         {
             AuthDetails auth = await Auth.GetAuthDetailsAsync(HttpContext, HttpContext.Request.Path);
-
             if (!auth.Authenticated)
             {
                 HttpContext.Response.StatusCode = 403;
@@ -38,17 +37,9 @@ namespace UtiliSite.Pages.Dashboard
             ulong fromChannelId = ulong.Parse(HttpContext.Request.Form["fromChannel"]);
             ulong toChannelId = ulong.Parse(HttpContext.Request.Form["toChannel"]);
 
-            ChannelMirroringRow row = ChannelMirroring.GetRows(auth.Guild.Id, fromChannelId).First();
-
-            if (row.FromChannelId == toChannelId)
-            {
-                HttpContext.Response.StatusCode = 400;
-                return;
-            }
-
+            ChannelMirroringRow row = await ChannelMirroring.GetRowAsync(auth.Guild.Id, fromChannelId);
             row.ToChannelId = toChannelId;
-
-            ChannelMirroring.SaveRow(row);
+            await ChannelMirroring.SaveRowAsync(row);
 
             HttpContext.Response.StatusCode = 200;
         }
@@ -56,7 +47,6 @@ namespace UtiliSite.Pages.Dashboard
         public async Task OnPostAdd()
         {
             AuthDetails auth = await Auth.GetAuthDetailsAsync(HttpContext, HttpContext.Request.Path);
-
             if (!auth.Authenticated)
             {
                 HttpContext.Response.StatusCode = 403;
@@ -64,11 +54,9 @@ namespace UtiliSite.Pages.Dashboard
             }
 
             ulong channelId = ulong.Parse(HttpContext.Request.Form["channelId"]);
-            RestTextChannel channel = auth.Guild.GetTextChannelAsync(channelId).GetAwaiter().GetResult();
+            ChannelMirroringRow row = await ChannelMirroring.GetRowAsync(auth.Guild.Id, channelId);
 
-            ChannelMirroringRow newRow = new ChannelMirroringRow(auth.Guild.Id, channelId);
-
-            ChannelMirroring.SaveRow(newRow);
+            await ChannelMirroring.SaveRowAsync(row);
             HttpContext.Response.StatusCode = 200;
             HttpContext.Response.Redirect(HttpContext.Request.Path);
         }
@@ -76,7 +64,6 @@ namespace UtiliSite.Pages.Dashboard
         public async Task OnPostRemove()
         {
             AuthDetails auth = await Auth.GetAuthDetailsAsync(HttpContext, HttpContext.Request.Path);
-
             if (!auth.Authenticated)
             {
                 HttpContext.Response.StatusCode = 403;
@@ -84,10 +71,8 @@ namespace UtiliSite.Pages.Dashboard
             }
 
             ulong fromChannelId = ulong.Parse(HttpContext.Request.Form["fromChannel"]);
-
-            ChannelMirroringRow deleteRow = ChannelMirroring.GetRows(auth.Guild.Id, fromChannelId).First();
-
-            ChannelMirroring.DeleteRow(deleteRow);
+            ChannelMirroringRow row = await ChannelMirroring.GetRowAsync(auth.Guild.Id, fromChannelId);
+            await ChannelMirroring.DeleteRowAsync(row);
 
             HttpContext.Response.StatusCode = 200;
             HttpContext.Response.Redirect(HttpContext.Request.Path);

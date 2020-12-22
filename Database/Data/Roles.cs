@@ -1,12 +1,13 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using MySql.Data.MySqlClient;
 
 namespace Database.Data
 {
     public static class Roles
     {
-        public static List<RolesRow> GetRows(ulong? guildId = null, bool ignoreCache = false)
+        public static async Task<List<RolesRow>> GetRowsAsync(ulong? guildId = null, bool ignoreCache = false)
         {
             List<RolesRow> matchedRows = new List<RolesRow>();
 
@@ -19,15 +20,15 @@ namespace Database.Data
             else
             {
                 string command = "SELECT * FROM Roles WHERE TRUE";
-                List<(string, string)> values = new List<(string, string)>();
+                List<(string, object)> values = new List<(string, object)>();
 
                 if (guildId.HasValue)
                 {
                     command += " AND GuildId = @GuildId";
-                    values.Add(("GuildId", guildId.Value.ToString()));
+                    values.Add(("GuildId", guildId.Value));
                 }
 
-                MySqlDataReader reader = Sql.GetCommand(command, values.ToArray()).ExecuteReader();
+                MySqlDataReader reader = await Sql.ExecuteReaderAsync(command, values.ToArray());
 
                 while (reader.Read())
                 {
@@ -43,86 +44,73 @@ namespace Database.Data
             return matchedRows;
         }
 
-        public static RolesRow GetRow(ulong guildId)
+        public static async Task<RolesRow> GetRowAsync(ulong guildId)
         {
-            List<RolesRow> rows = GetRows(guildId);
+            List<RolesRow> rows = await GetRowsAsync(guildId);
             return rows.Count > 0 ? rows.First() : new RolesRow(guildId);
         }
 
-        public static void SaveRow(RolesRow row)
+        public static async Task SaveRowAsync(RolesRow row)
         {
-            MySqlCommand command;
-
             if (row.New)
             {
-                command = Sql.GetCommand($"INSERT INTO Roles (GuildId, RolePersist, JoinRoles) VALUES (@GuildId, {Sql.ToSqlBool(row.RolePersist)}, @JoinRoles);",
-                    new [] {
-                        ("GuildId", row.GuildId.ToString()),
-                        ("JoinRoles", row.GetJoinRolesString())
-                    });
-
-                command.ExecuteNonQuery();
-                command.Connection.Close();
+                await Sql.ExecuteAsync(
+                    "INSERT INTO Roles (GuildId, RolePersist, JoinRoles) VALUES (@GuildId, @RolePersist, @JoinRoles);",
+                    ("GuildId", row.GuildId),
+                    ("RolePersist", row.RolePersist),
+                    ("JoinRoles", row.GetJoinRolesString()));
 
                 row.New = false;
-
                 if(Cache.Initialised) Cache.Roles.Rows.Add(row);
             }
             else
             {
-                command = Sql.GetCommand($"UPDATE Roles SET RolePersist = {Sql.ToSqlBool(row.RolePersist)}, JoinRoles = @JoinRoles WHERE GuildId = @GuildId;",
-                    new [] {
-                        ("GuildId", row.GuildId.ToString()), 
-                        ("JoinRoles", row.GetJoinRolesString())
-                    });
-
-                command.ExecuteNonQuery();
-                command.Connection.Close();
+                await Sql.ExecuteAsync(
+                    "UPDATE Roles SET RolePersist = @RolePersist, JoinRoles = @JoinRoles WHERE GuildId = @GuildId;",
+                    ("GuildId", row.GuildId), 
+                    ("RolePersist", row.RolePersist),
+                    ("JoinRoles", row.GetJoinRolesString()));
 
                 if(Cache.Initialised) Cache.Roles.Rows[Cache.Roles.Rows.FindIndex(x => x.GuildId == row.GuildId)] = row;
             }
         }
 
-        public static void DeleteRow(RolesRow row)
+        public static async Task DeleteRowAsync(RolesRow row)
         {
-            if(row == null) return;
-
             if(Cache.Initialised) Cache.Roles.Rows.RemoveAll(x => x.GuildId == row.GuildId);
 
-            string commandText = "DELETE FROM Roles WHERE GuildId = @GuildId";
-            MySqlCommand command = Sql.GetCommand(commandText, 
-                new[] {("GuildId", row.GuildId.ToString())});
-            command.ExecuteNonQuery();
-            command.Connection.Close();
+            await Sql.ExecuteAsync(
+                "DELETE FROM Roles WHERE GuildId = @GuildId", 
+                ("GuildId", row.GuildId));
         }
 
 
-        public static List<RolesPersistantRolesRow> GetPersistRows(ulong? guildId = null, ulong? userId = null, long? id = null)
+        public static async Task<List<RolesPersistantRolesRow>> GetPersistRowsAsync(ulong? guildId = null, ulong? userId = null, long? id = null)
         {
             List<RolesPersistantRolesRow> matchedRows = new List<RolesPersistantRolesRow>();
 
             string command = "SELECT * FROM RolesPersistantRoles WHERE TRUE";
-            List<(string, string)> values = new List<(string, string)>();
+            List<(string, object)> values = new List<(string, object)>();
 
             if (guildId.HasValue)
             {
                 command += " AND GuildId = @GuildId";
-                values.Add(("GuildId", guildId.Value.ToString()));
+                values.Add(("GuildId", guildId.Value));
             }
 
             if (userId.HasValue)
             {
                 command += " AND UserId = @UserId";
-                values.Add(("UserId", userId.Value.ToString()));
+                values.Add(("UserId", userId.Value));
             }
 
             if (id.HasValue)
             {
                 command += " AND Id = @Id";
-                values.Add(("Id", id.Value.ToString()));
+                values.Add(("Id", id.Value));
             }
 
-            MySqlDataReader reader = Sql.GetCommand(command, values.ToArray()).ExecuteReader();
+            MySqlDataReader reader = await Sql.ExecuteReaderAsync(command, values.ToArray());
 
             while (reader.Read())
             {
@@ -138,46 +126,34 @@ namespace Database.Data
             return matchedRows;
         }
 
-        public static void SavePersistRow(RolesPersistantRolesRow row)
+        public static async Task SavePersistRowAsync(RolesPersistantRolesRow row)
         {
-            MySqlCommand command;
-
             if (row.Id == 0)
             {
-                command = Sql.GetCommand("INSERT INTO RolesPersistantRoles (GuildId, UserId, Roles) VALUES (@GuildId, @UserId, @Roles);",
-                    new [] {
-                        ("GuildId", row.GuildId.ToString()),
-                        ("UserId", row.UserId.ToString()),
-                        ("Roles", row.GetRolesString())
-                    });
+                await Sql.ExecuteAsync(
+                    "INSERT INTO RolesPersistantRoles (GuildId, UserId, Roles) VALUES (@GuildId, @UserId, @Roles);",
+                    ("GuildId", row.GuildId),
+                    ("UserId", row.UserId),
+                    ("Roles", row.GetRolesString()));
 
-                command.ExecuteNonQuery();
-                command.Connection.Close();
-
-                row.Id = GetPersistRows(row.GuildId, row.UserId).First().Id;
+                row.Id = (await GetPersistRowsAsync(row.GuildId, row.UserId)).First().Id;
             }
             else
             {
-                command = Sql.GetCommand("UPDATE RolesPersistantRoles SET GuildId = @GuildId, UserId = @UserId, Roles = @Roles WHERE Id = @Id;",
-                    new [] {("Id", row.Id.ToString()),
-                        ("GuildId", row.GuildId.ToString()), 
-                        ("UserId", row.UserId.ToString()),
-                        ("Roles", row.GetRolesString())
-                    });
-
-                command.ExecuteNonQuery();
-                command.Connection.Close();
+                await Sql.ExecuteAsync(
+                    "UPDATE RolesPersistantRoles SET GuildId = @GuildId, UserId = @UserId, Roles = @Roles WHERE Id = @Id;",
+                    ("Id", row.Id),
+                    ("GuildId", row.GuildId), 
+                    ("UserId", row.UserId),
+                    ("Roles", row.GetRolesString()));
             }
         }
 
-        public static void DeletePersistRow(RolesPersistantRolesRow row)
+        public static async Task DeletePersistRowAsync(RolesPersistantRolesRow row)
         {
-            if(row == null) return;
-
-            string commandText = "DELETE FROM RolesPersistantRoles WHERE Id = @Id";
-            MySqlCommand command = Sql.GetCommand(commandText, new[] {("Id", row.Id.ToString())});
-            command.ExecuteNonQuery();
-            command.Connection.Close();
+            await Sql.ExecuteAsync(
+                "DELETE FROM RolesPersistantRoles WHERE Id = @Id", 
+                ("Id", row.Id));
         }
     }
 

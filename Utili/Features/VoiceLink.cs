@@ -23,9 +23,9 @@ namespace Utili.Features
             _timer.Start();
         }
 
-        public static void RequestUpdate(SocketVoiceChannel channel)
+        public static async Task RequestUpdateAsync(SocketVoiceChannel channel)
         {
-            VoiceLinkRow metaRow = Database.Data.VoiceLink.GetMetaRow(channel.Guild.Id);
+            VoiceLinkRow metaRow = await Database.Data.VoiceLink.GetMetaRowAsync(channel.Guild.Id);
 
             if (!metaRow.Enabled || metaRow.ExcludedChannels.Contains(channel.Id)) return;
             
@@ -75,8 +75,8 @@ namespace Utili.Features
             List<SocketGuildUser> connectedUsers =
                 guild.Users.Where(x => x.VoiceChannel != null && x.VoiceChannel.Id == voiceChannel.Id).ToList();
 
-            VoiceLinkChannelRow channelRow = Database.Data.VoiceLink.GetChannelRow(guild.Id, voiceChannel.Id);
-            VoiceLinkRow metaRow = Database.Data.VoiceLink.GetMetaRow(guild.Id);
+            VoiceLinkChannelRow channelRow = await Database.Data.VoiceLink.GetChannelRowAsync(guild.Id, voiceChannel.Id);
+            VoiceLinkRow metaRow = await Database.Data.VoiceLink.GetMetaRowAsync(guild.Id);
 
             ITextChannel textChannel = null;
             try
@@ -89,7 +89,7 @@ namespace Utili.Features
             {
                 await textChannel.DeleteAsync();
                 channelRow.TextChannelId = 0;
-                Database.Data.VoiceLink.SaveChannelRow(channelRow);
+                await Database.Data.VoiceLink.SaveChannelRowAsync(channelRow);
                 return;
             }
 
@@ -113,7 +113,7 @@ namespace Utili.Features
 
                 channelRow.TextChannelId = restTextChannel.Id;
 
-                Database.Data.VoiceLink.SaveChannelRow(channelRow);
+                await Database.Data.VoiceLink.SaveChannelRowAsync(channelRow);
 
                 textChannel = restTextChannel;
             }

@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using MySql.Data.MySqlClient;
 
 namespace Database.Data
 {
     public static class Autopurge
     {
-        public static List<AutopurgeRow> GetRows(ulong? guildId = null, ulong? channelId = null, bool ignoreCache = false)
+        public static async Task<List<AutopurgeRow>> GetRowsAsync(ulong? guildId = null, ulong? channelId = null, bool ignoreCache = false)
         {
             List<AutopurgeRow> matchedRows = new List<AutopurgeRow>();
 
@@ -21,21 +22,21 @@ namespace Database.Data
             else
             {
                 string command = "SELECT * FROM Autopurge WHERE TRUE";
-                List<(string, string)> values = new List<(string, string)>();
+                List<(string, object)> values = new List<(string, object)>();
 
                 if (guildId.HasValue)
                 {
                     command += " AND GuildId = @GuildId";
-                    values.Add(("GuildId", guildId.Value.ToString()));
+                    values.Add(("GuildId", guildId.Value));
                 }
 
                 if (channelId.HasValue)
                 {
                     command += " AND ChannelId = @ChannelId";
-                    values.Add(("ChannelId", channelId.Value.ToString()));
+                    values.Add(("ChannelId", channelId.Value));
                 }
 
-                MySqlDataReader reader = Sql.GetCommand(command, values.ToArray()).ExecuteReader();
+                MySqlDataReader reader = await Sql.ExecuteReaderAsync(command, values.ToArray());
 
                 while (reader.Read())
                 {
@@ -52,20 +53,21 @@ namespace Database.Data
             return matchedRows;
         }
 
-        public static void SaveRow(AutopurgeRow row)
+        public static async Task<AutopurgeRow> GetRowAsync(ulong guildId, ulong channelId)
         {
-            MySqlCommand command;
+            List<AutopurgeRow> rows = await GetRowsAsync(guildId, channelId);
+            return rows.Count > 0 ? rows.First() : new AutopurgeRow(guildId, channelId);
+        }
 
+        public static async Task SaveRowAsync(AutopurgeRow row)
+        {
             if (row.New)
             {
-                command = Sql.GetCommand("INSERT INTO Autopurge (GuildId, ChannelId, Timespan, Mode) VALUES (@GuildId, @ChannelId, @Timespan, @Mode);",
-                    new [] {("GuildId", row.GuildId.ToString()), 
-                        ("ChannelId", row.ChannelId.ToString()),
-                        ("Timespan", row.Timespan.ToString()),
-                        ("Mode", row.Mode.ToString())});
-
-                command.ExecuteNonQuery();
-                command.Connection.Close();
+                await Sql.ExecuteAsync("INSERT INTO Autopurge (GuildId, ChannelId, Timespan, Mode) VALUES (@GuildId, @ChannelId, @Timespan, @Mode);",
+                    ("GuildId", row.GuildId), 
+                    ("ChannelId", row.ChannelId),
+                    ("Timespan", row.Timespan),
+                    ("Mode", row.Mode));
 
                 row.New = false;
 
@@ -73,34 +75,23 @@ namespace Database.Data
             }
             else
             {
-                command = Sql.GetCommand("UPDATE Autopurge SET Timespan = @Timespan, Mode = @Mode WHERE GuildId = @GuildId AND ChannelId = @ChannelId;",
-                    new [] {
-                        ("GuildId", row.GuildId.ToString()), 
-                        ("ChannelId", row.ChannelId.ToString()),
-                        ("Timespan", row.Timespan.ToString()),
-                        ("Mode", row.Mode.ToString())});
-
-                command.ExecuteNonQuery();
-                command.Connection.Close();
+                await Sql.ExecuteAsync("UPDATE Autopurge SET Timespan = @Timespan, Mode = @Mode WHERE GuildId = @GuildId AND ChannelId = @ChannelId;",
+                    ("GuildId", row.GuildId), 
+                    ("ChannelId", row.ChannelId),
+                    ("Timespan", row.Timespan),
+                    ("Mode", row.Mode));
 
                 if(Cache.Initialised) Cache.Autopurge.Rows[Cache.Autopurge.Rows.FindIndex(x => x.GuildId == row.GuildId && x.ChannelId == row.ChannelId)] = row;
             }
         }
 
-        public static void DeleteRow(AutopurgeRow row)
+        public static async Task DeleteRowAsync(AutopurgeRow row)
         {
-            if(row == null) return;
-
             if(Cache.Initialised) Cache.Autopurge.Rows.RemoveAll(x => x.GuildId == row.GuildId && x.ChannelId == row.ChannelId);
 
-            string commandText = "DELETE FROM Autopurge WHERE GuildId = @GuildId AND ChannelId = @ChannelId";
-            MySqlCommand command = Sql.GetCommand(commandText, 
-                new[] {
-                ("GuildId", row.GuildId.ToString()),
-                ("ChannelId", row.ChannelId.ToString())});
-
-            command.ExecuteNonQuery();
-            command.Connection.Close();
+            await Sql.ExecuteAsync("DELETE FROM Autopurge WHERE GuildId = @GuildId AND ChannelId = @ChannelId",
+                ("GuildId", row.GuildId),
+                ("ChannelId", row.ChannelId));
         }
     }
 
@@ -118,10 +109,20 @@ namespace Database.Data
         public int Mode { get; set; }
         // 0 = All messages
         // 1 = Bot messages
+        // 2 = Disabled
 
-        public AutopurgeRow()
+        private AutopurgeRow()
+        {
+
+        }
+
+        public AutopurgeRow(ulong guildId, ulong channelId)
         {
             New = true;
+            GuildId = guildId;
+            ChannelId = channelId;
+            Timespan = TimeSpan.FromMinutes(15);
+            Mode = 2;
         }
 
         public static AutopurgeRow FromDatabase(ulong guildId, ulong channelId, string timespan, int mode)

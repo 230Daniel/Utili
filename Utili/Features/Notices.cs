@@ -29,7 +29,7 @@ namespace Utili.Features
 
         public static async Task MessageReceived(SocketCommandContext context, SocketMessage partialMessage)
         {
-            NoticesRow row = Database.Data.Notices.GetRow(context.Guild.Id, context.Channel.Id);
+            NoticesRow row = await Database.Data.Notices.GetRowAsync(context.Guild.Id, context.Channel.Id);
             if (!row.Enabled) return;
 
             lock (_requiredUpdates)
@@ -51,29 +51,32 @@ namespace Utili.Features
 
         private static void Timer_Elapsed(object sender, ElapsedEventArgs e)
         {
-            List<MiscRow> fromDashboard = Misc.GetRows(type: "RequiresNoticeUpdate");
-            foreach (MiscRow miscRow in fromDashboard)
+            _ = Task.Run(async () =>
             {
-                Misc.DeleteRow(miscRow);
-                NoticesRow row = Database.Data.Notices.GetRow(miscRow.GuildId, ulong.Parse(miscRow.Value.Value));
-                lock (_requiredUpdates)
+                List<MiscRow> fromDashboard = await Misc.GetRowsAsync(type: "RequiresNoticeUpdate");
+                foreach (MiscRow miscRow in fromDashboard)
                 {
-                    if (_requiredUpdates.Any(x => x.Item1.ChannelId == row.ChannelId))
+                    await Misc.DeleteRowAsync(miscRow);
+                    NoticesRow row = await Database.Data.Notices.GetRowAsync(miscRow.GuildId, ulong.Parse(miscRow.Value.Value));
+                    lock (_requiredUpdates)
                     {
-                        (NoticesRow, DateTime) update = _requiredUpdates.First(x => x.Item1.ChannelId == row.ChannelId);
-                        update.Item2 = DateTime.MinValue;
-                        _requiredUpdates.RemoveAll(x => x.Item1.ChannelId == row.ChannelId);
-                        _requiredUpdates.Add(update);
-                    }
-                    else
-                    {
-                        _requiredUpdates.Add((row, DateTime.MinValue));
+                        if (_requiredUpdates.Any(x => x.Item1.ChannelId == row.ChannelId))
+                        {
+                            (NoticesRow, DateTime) update = _requiredUpdates.First(x => x.Item1.ChannelId == row.ChannelId);
+                            update.Item2 = DateTime.MinValue;
+                            _requiredUpdates.RemoveAll(x => x.Item1.ChannelId == row.ChannelId);
+                            _requiredUpdates.Add(update);
+                        }
+                        else
+                        {
+                            _requiredUpdates.Add((row, DateTime.MinValue));
+                        }
                     }
                 }
-            }
-            
 
-            UpdateNoticesAsync().GetAwaiter().GetResult();
+                await UpdateNoticesAsync();
+            });
+            
         }
 
         private static async Task UpdateNoticesAsync()
@@ -113,7 +116,7 @@ namespace Utili.Features
                 (string, Embed) notice = GetNotice(row);
                 RestUserMessage sent = await MessageSender.SendEmbedAsync(channel, notice.Item2, notice.Item1);
                 row.MessageId = sent.Id;
-                Database.Data.Notices.SaveMessageId(row);
+                await Database.Data.Notices.SaveMessageIdAsync(row);
 
                 await sent.PinAsync();
             }
@@ -174,7 +177,7 @@ namespace Utili.Features
         {
             if (channel == null) channel = Context.Channel as ITextChannel;
 
-            NoticesRow row = Database.Data.Notices.GetRow(Context.Guild.Id, channel.Id);
+            NoticesRow row = await Database.Data.Notices.GetRowAsync(Context.Guild.Id, channel.Id);
             (string, Embed) notice = Notices.GetNotice(row);
             
             RestUserMessage sent = await MessageSender.SendEmbedAsync(Context.Channel, notice.Item2, notice.Item1);

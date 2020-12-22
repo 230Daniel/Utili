@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using MySql.Data.MySqlClient;
 
 namespace Database.Data
 {
     public static class MessagePinning
     {
-        public static List<MessagePinningRow> GetRows(ulong? guildId = null, bool ignoreCache = false)
+        public static async Task<List<MessagePinningRow>> GetRowsAsync(ulong? guildId = null, bool ignoreCache = false)
         {
             List<MessagePinningRow> matchedRows = new List<MessagePinningRow>();
 
@@ -20,15 +21,15 @@ namespace Database.Data
             else
             {
                 string command = "SELECT * FROM MessagePinning WHERE TRUE";
-                List<(string, string)> values = new List<(string, string)>();
+                List<(string, object)> values = new List<(string, object)>();
 
                 if (guildId.HasValue)
                 {
                     command += " AND GuildId = @GuildId";
-                    values.Add(("GuildId", guildId.Value.ToString()));
+                    values.Add(("GuildId", guildId.Value));
                 }
 
-                MySqlDataReader reader = Sql.GetCommand(command, values.ToArray()).ExecuteReader();
+                MySqlDataReader reader = await Sql.ExecuteReaderAsync(command, values.ToArray());
 
                 while (reader.Read())
                 {
@@ -45,59 +46,46 @@ namespace Database.Data
             return matchedRows;
         }
 
-        public static MessagePinningRow GetRow(ulong guildId)
+        public static async Task<MessagePinningRow> GetRowAsync(ulong guildId)
         {
-            List<MessagePinningRow> rows = GetRows(guildId);
+            List<MessagePinningRow> rows = await GetRowsAsync(guildId);
             return rows.Count > 0 ? rows.First() : new MessagePinningRow(guildId);
         }
 
-        public static void SaveRow(MessagePinningRow row)
+        public static async Task SaveRowAsync(MessagePinningRow row)
         {
-            MySqlCommand command;
-
             if (row.New)
             {
-                command = Sql.GetCommand($"INSERT INTO MessagePinning (GuildId, PinChannelId, WebhookId, Pin) VALUES (@GuildId, @PinChannelId, @WebhookId, {Sql.ToSqlBool(row.Pin)});",
-                    new [] {("GuildId", row.GuildId.ToString()), 
-                        ("PinChannelId", row.PinChannelId.ToString()),
-                        ("WebhookId", row.WebhookId.ToString())
-                    });
-
-                command.ExecuteNonQuery();
-                command.Connection.Close();
+                await Sql.ExecuteAsync(
+                    "INSERT INTO MessagePinning (GuildId, PinChannelId, WebhookId, Pin) VALUES (@GuildId, @PinChannelId, @WebhookId, @Pin);", 
+                    ("GuildId", row.GuildId), 
+                    ("PinChannelId", row.PinChannelId),
+                    ("WebhookId", row.WebhookId),
+                    ("Pin", row.Pin));
 
                 row.New = false;
-
                 if(Cache.Initialised) Cache.MessagePinning.Rows.Add(row);
             }
             else
             {
-                command = Sql.GetCommand($"UPDATE MessagePinning SET PinChannelId = @PinChannelId, WebhookId = @WebhookId, Pin = {Sql.ToSqlBool(row.Pin)} WHERE GuildId = @GuildId;",
-                    new [] {("GuildId", row.GuildId.ToString()), 
-                        ("PinChannelId", row.PinChannelId.ToString()),
-                        ("WebhookId", row.WebhookId.ToString())
-                    });
-
-                command.ExecuteNonQuery();
-                command.Connection.Close();
+                await Sql.ExecuteAsync(
+                    "UPDATE MessagePinning SET PinChannelId = @PinChannelId, WebhookId = @WebhookId, Pin = @Pin WHERE GuildId = @GuildId;",
+                    ("GuildId", row.GuildId), 
+                    ("PinChannelId", row.PinChannelId),
+                    ("WebhookId", row.WebhookId),
+                    ("Pin", row.Pin));
 
                 if(Cache.Initialised) Cache.MessagePinning.Rows[Cache.MessagePinning.Rows.FindIndex(x => x.GuildId == row.GuildId)] = row;
             }
         }
 
-        public static void DeleteRow(MessagePinningRow row)
+        public static async Task DeleteRowAsync(MessagePinningRow row)
         {
-            if(row == null) return;
-
             if(Cache.Initialised) Cache.MessagePinning.Rows.RemoveAll(x => x.GuildId == row.GuildId);
 
-            string commandText = "DELETE FROM MessagePinning WHERE GuildId = @GuildId";
-            MySqlCommand command = Sql.GetCommand(commandText, 
-                new[] {
-                ("GuildId", row.GuildId.ToString())});
-
-            command.ExecuteNonQuery();
-            command.Connection.Close();
+            await Sql.ExecuteAsync(
+                "DELETE FROM MessagePinning WHERE GuildId = @GuildId",
+                ("GuildId", row.GuildId));
         }
     }
 

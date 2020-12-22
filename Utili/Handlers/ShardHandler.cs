@@ -23,7 +23,7 @@ namespace Utili.Handlers
                 {
                     if (_config.Production)
                     {
-                        Database.Sharding.UpdateShardStats(_client.Shards.Count,
+                        await Database.Sharding.UpdateShardStatsAsync(_client.Shards.Count,
                             _client.Shards.OrderBy(x => x.ShardId).First().ShardId, _client.Guilds.Count);
 
                         _shardStatsUpdater?.Dispose();
@@ -53,7 +53,7 @@ namespace Utili.Handlers
             guilds = guilds.Where(x => x.DownloadedMemberCount < x.MemberCount).ToList();
 
             // Role persist enabled
-            guildIds.AddRange(Roles.GetRows().Where(x => x.RolePersist).Select(x => x.GuildId));
+            guildIds.AddRange((await Roles.GetRowsAsync()).Where(x => x.RolePersist).Select(x => x.GuildId));
 
             guilds = guilds.Where(x => guildIds.Contains(x.Id)).ToList();
             await shard.DownloadUsersAsync(guilds);
@@ -93,12 +93,12 @@ namespace Utili.Handlers
             _downloadingNewRequiredUsers = true;
             try
             {
-                List<MiscRow> rows = Misc.GetRows(null, "RequiresUserDownload");
+                List<MiscRow> rows = await Misc.GetRowsAsync(null, "RequiresUserDownload");
                 foreach(MiscRow row in rows)
                 {
                     if(_client.Guilds.Any(x => x.Id == row.GuildId))
                     {
-                        Misc.DeleteRow(row);
+                        await Misc.DeleteRowAsync(row);
                         SocketGuild guild = _client.GetGuild(row.GuildId);
                         if (!guild.HasAllMembers) await guild.DownloadUsersAsync();
                         await Task.Delay(5000);

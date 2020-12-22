@@ -1,12 +1,13 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using MySql.Data.MySqlClient;
 
 namespace Database.Data
 {
     public static class Core
     {
-        public static List<CoreRow> GetRows(ulong? guildId = null, bool ignoreCache = false)
+        public static async Task<List<CoreRow>> GetRowsAsync(ulong? guildId = null, bool ignoreCache = false)
         {
             List<CoreRow> matchedRows = new List<CoreRow>();
 
@@ -19,15 +20,15 @@ namespace Database.Data
             else
             {
                 string command = "SELECT * FROM Core WHERE TRUE";
-                List<(string, string)> values = new List<(string, string)>();
+                List<(string, object)> values = new List<(string, object)>();
 
                 if (guildId.HasValue)
                 {
                     command += " AND GuildId = @GuildId";
-                    values.Add(("GuildId", guildId.Value.ToString()));
+                    values.Add(("GuildId", guildId.Value));
                 }
 
-                MySqlDataReader reader = Sql.GetCommand(command, values.ToArray()).ExecuteReader();
+                MySqlDataReader reader = await Sql.ExecuteReaderAsync(command, values.ToArray());
 
                 while (reader.Read())
                 {
@@ -44,42 +45,34 @@ namespace Database.Data
             return matchedRows;
         }
 
-        public static CoreRow GetRow(ulong guildId)
+        public static async Task<CoreRow> GetRowAsync(ulong guildId)
         {
-            List<CoreRow> rows = GetRows(guildId);
+            List<CoreRow> rows = await GetRowsAsync(guildId);
             return rows.Count > 0 ? rows.First() : new CoreRow(guildId);
         }
 
-        public static void SaveRow(CoreRow row)
+        public static async Task SaveRowAsync(CoreRow row)
         {
-            MySqlCommand command;
-
             if (row.New)
             {
-                command = Sql.GetCommand($"INSERT INTO Core (GuildId, Prefix, EnableCommands, ExcludedChannels) VALUES (@GuildId, @Prefix, {Sql.ToSqlBool(row.EnableCommands)}, @ExcludedChannels);",
-                    new [] {
-                        ("GuildId", row.GuildId.ToString()), 
-                        ("Prefix", row.Prefix.EncodedValue),
-                        ("ExcludedChannels", row.GetExcludedChannelsString())
-                    });
+                await Sql.ExecuteAsync(
+                    "INSERT INTO Core (GuildId, Prefix, EnableCommands, ExcludedChannels) VALUES (@GuildId, @Prefix, @EnableCommands, @ExcludedChannels);",
+                    ("GuildId", row.GuildId), 
+                    ("Prefix", row.Prefix.EncodedValue),
+                    ("EnableCommands", row.EnableCommands),
+                    ("ExcludedChannels", row.GetExcludedChannelsString()));
 
-                command.ExecuteNonQuery();
-                command.Connection.Close();
                 row.New = false;
-                
                 if(Cache.Initialised) Cache.Core.Rows.Add(row);
             }
             else
             {
-                command = Sql.GetCommand($"UPDATE Core SET Prefix = @Prefix, EnableCommands = {Sql.ToSqlBool(row.EnableCommands)}, ExcludedChannels = @ExcludedChannels WHERE GuildId = @GuildId;",
-                    new [] {
-                        ("GuildId", row.GuildId.ToString()), 
-                        ("Prefix", row.Prefix.EncodedValue),
-                        ("ExcludedChannels", row.GetExcludedChannelsString())
-                    });
-
-                command.ExecuteNonQuery();
-                command.Connection.Close();
+                await Sql.ExecuteAsync(
+                    "UPDATE Core SET Prefix = @Prefix, EnableCommands = @EnableCommands, ExcludedChannels = @ExcludedChannels WHERE GuildId = @GuildId;",
+                    ("GuildId", row.GuildId),
+                    ("Prefix", row.Prefix.EncodedValue),
+                    ("EnableCommands", row.EnableCommands),
+                    ("ExcludedChannels", row.GetExcludedChannelsString()));
 
                 if(Cache.Initialised) Cache.Core.Rows[Cache.Core.Rows.FindIndex(x => x.GuildId == row.GuildId)] = row;
             }

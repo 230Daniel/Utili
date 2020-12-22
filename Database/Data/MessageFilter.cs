@@ -1,12 +1,13 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using MySql.Data.MySqlClient;
 
 namespace Database.Data
 {
     public static class MessageFilter
     {
-        public static List<MessageFilterRow> GetRows(ulong? guildId = null, ulong? channelId = null, bool ignoreCache = false)
+        public static async Task<List<MessageFilterRow>> GetRowsAsync(ulong? guildId = null, ulong? channelId = null, bool ignoreCache = false)
         {
             List<MessageFilterRow> matchedRows = new List<MessageFilterRow>();
 
@@ -20,21 +21,21 @@ namespace Database.Data
             else
             {
                 string command = "SELECT * FROM MessageFilter WHERE TRUE";
-                List<(string, string)> values = new List<(string, string)>();
+                List<(string, object)> values = new List<(string, object)>();
 
                 if (guildId.HasValue)
                 {
                     command += " AND GuildId = @GuildId";
-                    values.Add(("GuildId", guildId.Value.ToString()));
+                    values.Add(("GuildId", guildId.Value));
                 }
 
                 if (channelId.HasValue)
                 {
                     command += " AND ChannelId = @ChannelId";
-                    values.Add(("ChannelId", channelId.Value.ToString()));
+                    values.Add(("ChannelId", channelId.Value));
                 }
 
-                MySqlDataReader reader = Sql.GetCommand(command, values.ToArray()).ExecuteReader();
+                MySqlDataReader reader = await Sql.ExecuteReaderAsync(command, values.ToArray());
 
                 while (reader.Read())
                 {
@@ -51,56 +52,44 @@ namespace Database.Data
             return matchedRows;
         }
 
-        public static void SaveRow(MessageFilterRow row)
+        public static async Task<MessageFilterRow> GetRowAsync(ulong guildId, ulong channelId)
         {
-            MySqlCommand command;
+            List<MessageFilterRow> rows = await GetRowsAsync(guildId, channelId);
+            return rows.Count > 0 ? rows.First() : new MessageFilterRow(guildId, channelId);
+        }
 
+        public static async Task SaveRowAsync(MessageFilterRow row)
+        {
             if (row.New)
             {
-                command = Sql.GetCommand("INSERT INTO MessageFilter (GuildId, ChannelId, Mode, Complex) VALUES (@GuildId, @ChannelId, @Mode, @Complex);",
-                    new [] {("GuildId", row.GuildId.ToString()), 
-                        ("ChannelId", row.ChannelId.ToString()),
-                        ("Mode", row.Mode.ToString()),
-                        ("Complex", row.Complex.EncodedValue)
-                    });
-
-                command.ExecuteNonQuery();
-                command.Connection.Close();
+                await Sql.ExecuteAsync("INSERT INTO MessageFilter (GuildId, ChannelId, Mode, Complex) VALUES (@GuildId, @ChannelId, @Mode, @Complex);",
+                    ("GuildId", row.GuildId), 
+                    ("ChannelId", row.ChannelId),
+                    ("Mode", row.Mode),
+                    ("Complex", row.Complex.EncodedValue));
 
                 row.New = false;
-
                 if(Cache.Initialised) Cache.MessageFilter.Rows.Add(row);
             }
             else
             {
-                command = Sql.GetCommand("UPDATE MessageFilter SET Mode = @Mode, Complex = @Complex WHERE GuildId = @GuildId AND ChannelId = @ChannelId;",
-                    new [] {
-                        ("GuildId", row.GuildId.ToString()), 
-                        ("ChannelId", row.ChannelId.ToString()),
-                        ("Mode", row.Mode.ToString()),
-                        ("Complex", row.Complex.EncodedValue)
-                    });
-
-                command.ExecuteNonQuery();
-                command.Connection.Close();
+                await Sql.ExecuteAsync("UPDATE MessageFilter SET Mode = @Mode, Complex = @Complex WHERE GuildId = @GuildId AND ChannelId = @ChannelId;",
+                    ("GuildId", row.GuildId), 
+                    ("ChannelId", row.ChannelId),
+                    ("Mode", row.Mode),
+                    ("Complex", row.Complex.EncodedValue));
 
                 if(Cache.Initialised) Cache.MessageFilter.Rows[Cache.MessageFilter.Rows.FindIndex(x => x.GuildId == row.GuildId && x.ChannelId == row.ChannelId)] = row;
             }
         }
 
-        public static void DeleteRow(MessageFilterRow row)
+        public static async Task DeleteRowAsync(MessageFilterRow row)
         {
-            if(row == null) return;
-
             if(Cache.Initialised) Cache.MessageFilter.Rows.RemoveAll(x => x.GuildId == row.GuildId && x.ChannelId == row.ChannelId);
 
-            string commandText = "DELETE FROM MessageFilter WHERE GuildId = @GuildId AND ChannelId = @ChannelId";
-            MySqlCommand command = Sql.GetCommand(commandText, 
-                new[] {
-                    ("GuildId", row.GuildId.ToString()),
-                    ("ChannelId", row.ChannelId.ToString())});
-            command.ExecuteNonQuery();
-            command.Connection.Close();
+            await Sql.ExecuteAsync("DELETE FROM MessageFilter WHERE GuildId = @GuildId AND ChannelId = @ChannelId",
+                ("GuildId", row.GuildId),
+                ("ChannelId", row.ChannelId));
         }
     }
 
@@ -115,7 +104,6 @@ namespace Database.Data
         public ulong GuildId { get; set; }
         public ulong ChannelId { get; set; }
         public int Mode { get; set; }
-
         // 0    All messages
         // 1    Images
         // 2    Videos
@@ -123,13 +111,23 @@ namespace Database.Data
         // 4    Music
         // 5    Attachments
         // 6    URLs
-        // 7    RegEx
+        // 7    URLs and Media
+        // 8    RegEx
 
         public EString Complex { get; set; }
 
-        public MessageFilterRow()
+        private MessageFilterRow()
+        {
+
+        }
+
+        public MessageFilterRow(ulong guildId, ulong channelId)
         {
             New = true;
+            GuildId = guildId;
+            ChannelId = channelId;
+            Mode = 0;
+            Complex = EString.Empty;
         }
 
         public static MessageFilterRow FromDatabase(ulong guildId, ulong channelId, int mode, string complex)

@@ -20,7 +20,7 @@ namespace Utili.Commands
 
             string about = string.Concat(
                 "By 230Daniel#1920\n",
-                $"In {Database.Sharding.GetGuildCount()} servers\n",
+                $"In {await Database.Sharding.GetGuildCountAsync()} servers\n",
                 $"Shard {shard.ShardId} ({_totalShards} total)\n",
                 $"[Website](https://{_config.Domain})\n",
                 $"[Dashboard](https://{_config.Domain}/dashboard)\n",

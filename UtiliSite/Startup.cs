@@ -32,6 +32,8 @@ namespace UtiliSite
             {
                 Configuration = configuration;
             }
+
+            Main.InitialiseAsync().GetAwaiter().GetResult();
         }
 
         private IConfiguration Configuration { get; }
@@ -39,8 +41,6 @@ namespace UtiliSite
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            Main.InitialiseAsync().GetAwaiter().GetResult();
-
             services.AddHsts(options =>
             {
                 options.MaxAge = TimeSpan.FromDays(30);

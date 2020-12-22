@@ -8,7 +8,7 @@ namespace Utili
     {
         public static void Update(object sender, ElapsedEventArgs e)
         {
-            Database.Sharding.UpdateShardStats(_client.Shards.Count, _client.Shards.OrderBy(x => x.ShardId).First().ShardId, _client.Guilds.Count);
+            _ = Database.Sharding.UpdateShardStatsAsync(_client.Shards.Count, _client.Shards.OrderBy(x => x.ShardId).First().ShardId, _client.Guilds.Count);
         }
     }
 }

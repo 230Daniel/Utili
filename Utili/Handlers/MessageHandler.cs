@@ -36,7 +36,7 @@ namespace Utili.Handlers
 
                 if (!context.User.IsBot && !string.IsNullOrEmpty(context.Message.Content))
                 {
-                    CoreRow row = Core.GetRow(context.Guild.Id);
+                    CoreRow row = await Core.GetRowAsync(context.Guild.Id);
                     bool excluded = row.ExcludedChannels.Contains(context.Channel.Id);
                     if (!row.EnableCommands) excluded = !excluded;
 

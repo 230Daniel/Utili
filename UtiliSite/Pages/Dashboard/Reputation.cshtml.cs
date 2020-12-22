@@ -19,7 +19,7 @@ namespace UtiliSite.Pages.Dashboard
             ViewData["guild"] = auth.Guild;
             ViewData["premium"] = Database.Premium.IsPremium(auth.Guild.Id);
 
-            ViewData["row"] = Reputation.GetRow(auth.Guild.Id);
+            ViewData["row"] = await Reputation.GetRowAsync(auth.Guild.Id);
         }
 
         public async Task OnPost()
@@ -32,13 +32,13 @@ namespace UtiliSite.Pages.Dashboard
                 return;
             }
 
-            ReputationRow row = Reputation.GetRow(auth.Guild.Id);
+            ReputationRow row = await Reputation.GetRowAsync(auth.Guild.Id);
             (IEmote, int) emote = row.Emotes.First(x => x.Item1.ToString() == HttpContext.Request.Form["emote"]);
             int value = int.Parse(HttpContext.Request.Form["value"]);
 
             row.Emotes.Remove(emote);
             row.Emotes.Add((emote.Item1, value));
-            Reputation.SaveRow(row);
+            await Reputation.SaveRowAsync(row);
 
             HttpContext.Response.StatusCode = 200;
         }
@@ -53,11 +53,11 @@ namespace UtiliSite.Pages.Dashboard
                 return;
             }
 
-            ReputationRow row = Reputation.GetRow(auth.Guild.Id);
+            ReputationRow row = await Reputation.GetRowAsync(auth.Guild.Id);
             (IEmote, int) emote = row.Emotes.First(x => x.Item1.ToString() == HttpContext.Request.Form["emote"]);
             row.Emotes.Remove(emote);
 
-            Reputation.SaveRow(row);
+            await Reputation.SaveRowAsync(row);
 
             HttpContext.Response.StatusCode = 200;
             HttpContext.Response.Redirect(HttpContext.Request.Path);

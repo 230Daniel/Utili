@@ -14,9 +14,11 @@ namespace Utili.Features
         public static async Task UserJoined(SocketGuildUser user)
         {
             SocketGuild guild = user.Guild;
+            JoinMessageRow row = await Database.Data.JoinMessage.GetRowAsync(guild.Id);
 
-            if (TryGetJoinMessage(guild.Id, user, out(JoinMessageRow, string, Embed) joinMessage))
+            if (row.Enabled)
             {
+                (JoinMessageRow, string, Embed) joinMessage = GetJoinMessage(row, user);
                 if (joinMessage.Item1.Direct)
                 {
                     await (await user.GetOrCreateDMChannelAsync()).SendMessageAsync(joinMessage.Item2, embed: joinMessage.Item3);
@@ -28,12 +30,9 @@ namespace Utili.Features
             }
         }
 
-        public static bool TryGetJoinMessage(ulong guildId, SocketGuildUser user, out (JoinMessageRow, string, Embed) joinMessage)
+        public static (JoinMessageRow, string, Embed) GetJoinMessage(JoinMessageRow row, SocketGuildUser user)
         {
-            joinMessage = (null, null, null);
-
-            JoinMessageRow row = Database.Data.JoinMessage.GetRow(guildId);
-            if(!row.Enabled) return false;
+            (JoinMessageRow, string, Embed) joinMessage = (null, null, null);
 
             joinMessage.Item1 = row;
             joinMessage.Item2 = row.Text.Value;
@@ -72,7 +71,7 @@ namespace Utili.Features
 
             joinMessage.Item3 = embed.Build();
 
-            return true;
+            return joinMessage;
         }
 
         private static bool IsValidImageUrl(string url)
@@ -99,15 +98,9 @@ namespace Utili.Features
         [Command("Preview")]
         public async Task Preview()
         {
-            if (JoinMessage.TryGetJoinMessage(Context.Guild.Id, Context.User as SocketGuildUser, out (JoinMessageRow, string, Embed) joinMessage))
-            {
-                await SendEmbedAsync(Context.Channel, joinMessage.Item3, joinMessage.Item2);
-            }
-            else
-            {
-                await SendFailureAsync(Context.Channel, "Error",
-                    "No join message has been configured on this server");
-            }
+            JoinMessageRow row = await Database.Data.JoinMessage.GetRowAsync(Context.Guild.Id);
+            (JoinMessageRow, string, Embed) joinMessage = JoinMessage.GetJoinMessage(row, Context.User as SocketGuildUser);
+            await SendEmbedAsync(Context.Channel, joinMessage.Item3, joinMessage.Item2);
         }
     }
 }

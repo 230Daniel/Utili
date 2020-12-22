@@ -1,12 +1,13 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using MySql.Data.MySqlClient;
 
 namespace Database.Data
 {
     public static class Misc
     {
-        public static List<MiscRow> GetRows(ulong? guildId = null, string type = null, string value = null, bool ignoreCache = false)
+        public static async Task<List<MiscRow>> GetRowsAsync(ulong? guildId = null, string type = null, string value = null, bool ignoreCache = false)
         {
             List<MiscRow> matchedRows = new List<MiscRow>();
 
@@ -21,12 +22,12 @@ namespace Database.Data
             else
             {
                 string command = "SELECT * FROM Misc WHERE TRUE";
-                List<(string, string)> values = new List<(string, string)>();
+                List<(string, object)> values = new List<(string, object)>();
 
                 if (guildId.HasValue)
                 {
                     command += " AND GuildId = @GuildId";
-                    values.Add(("GuildId", guildId.Value.ToString()));
+                    values.Add(("GuildId", guildId.Value));
                 }
 
                 if (type != null)
@@ -41,7 +42,7 @@ namespace Database.Data
                     values.Add(("Value", EString.FromDecoded(value).EncodedValue));
                 }
 
-                MySqlDataReader reader = Sql.GetCommand(command, values.ToArray()).ExecuteReader();
+                MySqlDataReader reader = await Sql.ExecuteReaderAsync(command, values.ToArray());
 
                 while (reader.Read())
                 {
@@ -57,62 +58,43 @@ namespace Database.Data
             return matchedRows;
         }
 
-        public static MiscRow GetRow(ulong? guildId = null, string type = null)
+        public static async Task<MiscRow> GetRowAsync(ulong? guildId = null, string type = null)
         {
-            List<MiscRow> rows = GetRows(guildId, type);
+            List<MiscRow> rows = await GetRowsAsync(guildId, type);
             return rows.Count == 0 ? null : rows.First();
         }
 
-        public static void SaveRow(MiscRow row)
+        public static async Task SaveRowAsync(MiscRow row)
         {
-            MySqlCommand command;
-
             if (row.New)
             {
-                command = Sql.GetCommand("INSERT INTO Misc (GuildId, Type, Value) VALUES (@GuildId, @Type, @Value);",
-                    new[]
-                    {
-                        ("GuildId", row.GuildId.ToString()),
-                        ("Type", row.Type),
-                        ("Value", row.Value.EncodedValue)});
-
-                command.ExecuteNonQuery();
-                command.Connection.Close();
+                await Sql.ExecuteAsync("INSERT INTO Misc (GuildId, Type, Value) VALUES (@GuildId, @Type, @Value);",
+                    ("GuildId", row.GuildId),
+                    ("Type", row.Type),
+                    ("Value", row.Value.EncodedValue));
 
                 row.New = false;
-
                 if(Cache.Initialised) Cache.Misc.Rows.Add(row);
             }
             else
             {
-                command = Sql.GetCommand("UPDATE Misc SET Value = @Value WHERE GuildId = @GuildId AND Type = @Type;",
-                    new[]
-                    {
-                        ("GuildId", row.GuildId.ToString()),
-                        ("Type", row.Type),
-                        ("Value", row.Value.EncodedValue)
-                    });
-
-                command.ExecuteNonQuery();
-                command.Connection.Close();
+                await Sql.ExecuteAsync("UPDATE Misc SET Value = @Value WHERE GuildId = @GuildId AND Type = @Type;",
+                    ("GuildId", row.GuildId),
+                    ("Type", row.Type),
+                    ("Value", row.Value.EncodedValue));
 
                 if(Cache.Initialised) Cache.Misc.Rows[Cache.Misc.Rows.FindIndex(x => x.GuildId == row.GuildId && x.Type == row.Type)] = row;
             }
         }
 
-        public static void DeleteRow(MiscRow row)
+        public static async Task DeleteRowAsync(MiscRow row)
         {
-            if(row == null) return;
-
             if(Cache.Initialised) Cache.Misc.Rows.RemoveAll(x => x.GuildId == row.GuildId && x.Type == row.Type);
 
-            string commandText = "DELETE FROM Misc WHERE GuildId = @GuildId AND Type = @Type";
-            MySqlCommand command = Sql.GetCommand(commandText, 
-                new[] {
-                    ("GuildId", row.GuildId.ToString()),
-                    ("Type", row.Type)});
-            command.ExecuteNonQuery();
-            command.Connection.Close();
+            await Sql.ExecuteAsync(
+                "DELETE FROM Misc WHERE GuildId = @GuildId AND Type = @Type",
+                ("GuildId", row.GuildId),
+                ("Type", row.Type));
         }
     }
 

@@ -1,34 +1,34 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using MySql.Data.MySqlClient;
 
 namespace Database.Data
 {
     public static class MessageLogs
     {
-        public static List<MessageLogsRow> GetRows(ulong? guildId = null, bool ignoreCache = false)
+        public static async Task<List<MessageLogsRow>> GetRowsAsync(ulong? guildId = null, bool ignoreCache = false)
         {
             List<MessageLogsRow> matchedRows = new List<MessageLogsRow>();
 
             if (Cache.Initialised && !ignoreCache)
             {
                 matchedRows.AddRange(Cache.MessageLogs.Rows);
-
                 if (guildId.HasValue) matchedRows.RemoveAll(x => x.GuildId != guildId.Value);
             }
             else
             {
                 string command = "SELECT * FROM MessageLogs WHERE TRUE";
-                List<(string, string)> values = new List<(string, string)>();
+                List<(string, object)> values = new List<(string, object)>();
 
                 if (guildId.HasValue)
                 {
                     command += " AND GuildId = @GuildId";
-                    values.Add(("GuildId", guildId.Value.ToString()));
+                    values.Add(("GuildId", guildId.Value));
                 }
 
-                MySqlDataReader reader = Sql.GetCommand(command, values.ToArray()).ExecuteReader();
+                MySqlDataReader reader = await Sql.ExecuteReaderAsync(command, values.ToArray());
 
                 while (reader.Read())
                 {
@@ -45,73 +45,67 @@ namespace Database.Data
             return matchedRows;
         }
 
-        public static MessageLogsRow GetRow(ulong guildId)
+        public static async Task<MessageLogsRow> GetRowAsync(ulong guildId)
         {
-            List<MessageLogsRow> rows = GetRows(guildId);
+            List<MessageLogsRow> rows = await GetRowsAsync(guildId);
             return rows.Count > 0 ? rows.First() : new MessageLogsRow(guildId);
         }
 
-        public static void SaveRow(MessageLogsRow row)
+        public static async Task SaveRowAsync(MessageLogsRow row)
         {
             MySqlCommand command;
 
             if (row.New)
             {
-                command = Sql.GetCommand("INSERT INTO MessageLogs (GuildId, DeletedChannelId, EditedChannelId, ExcludedChannels) VALUES (@GuildId, @DeletedChannelId, @EditedChannelId, @ExcludedChannels);",
-                    new [] { ("GuildId", row.GuildId.ToString()), 
-                        ("DeletedChannelId", row.DeletedChannelId.ToString()),
-                        ("EditedChannelId", row.EditedChannelId.ToString()),
-                        ("ExcludedChannels", row.GetExcludedChannelsString())
-                    });
+                await Sql.ExecuteAsync(
+                    "INSERT INTO MessageLogs (GuildId, DeletedChannelId, EditedChannelId, ExcludedChannels) VALUES (@GuildId, @DeletedChannelId, @EditedChannelId, @ExcludedChannels);",
+                    ("GuildId", row.GuildId),
+                    ("DeletedChannelId", row.DeletedChannelId),
+                    ("EditedChannelId", row.EditedChannelId),
+                    ("ExcludedChannels", row.GetExcludedChannelsString()));
 
-                command.ExecuteNonQuery();
-                command.Connection.Close();
                 row.New = false;
-                
                 if(Cache.Initialised) Cache.MessageLogs.Rows.Add(row);
             }
             else
             {
-                command = Sql.GetCommand("UPDATE MessageLogs SET DeletedChannelId = @DeletedChannelId, EditedChannelId = @EditedChannelId, ExcludedChannels = @ExcludedChannels WHERE GuildId = @GuildId;",
-                    new [] {
-                        ("GuildId", row.GuildId.ToString()), 
-                        ("DeletedChannelId", row.DeletedChannelId.ToString()),
-                        ("EditedChannelId", row.EditedChannelId.ToString()),
-                        ("ExcludedChannels", row.GetExcludedChannelsString())});
-
-                command.ExecuteNonQuery();
-                command.Connection.Close();
+                await Sql.ExecuteAsync(
+                    "UPDATE MessageLogs SET DeletedChannelId = @DeletedChannelId, EditedChannelId = @EditedChannelId, ExcludedChannels = @ExcludedChannels WHERE GuildId = @GuildId;",
+                    ("GuildId", row.GuildId), 
+                    ("DeletedChannelId", row.DeletedChannelId),
+                    ("EditedChannelId", row.EditedChannelId),
+                    ("ExcludedChannels", row.GetExcludedChannelsString()));
 
                 if(Cache.Initialised) Cache.MessageLogs.Rows[Cache.MessageLogs.Rows.FindIndex(x => x.GuildId == row.GuildId)] = row;
             }
         }
 
-        public static List<MessageLogsMessageRow> GetMessages(ulong? guildId = null, ulong? channelId = null, ulong? messageId = null)
+        public static async Task<List<MessageLogsMessageRow>> GetMessagesAsync(ulong? guildId = null, ulong? channelId = null, ulong? messageId = null)
         {
             List<MessageLogsMessageRow> matchedRows = new List<MessageLogsMessageRow>();
 
             string command = "SELECT * FROM MessageLogsMessages WHERE TRUE";
-            List<(string, string)> values = new List<(string, string)>();
+            List<(string, object)> values = new List<(string, object)>();
 
             if (guildId.HasValue)
             {
                 command += " AND GuildId = @GuildId";
-                values.Add(("GuildId", guildId.Value.ToString()));
+                values.Add(("GuildId", guildId.Value));
             }
 
             if (channelId.HasValue)
             {
                 command += " AND ChannelId = @ChannelId";
-                values.Add(("ChannelId", channelId.Value.ToString()));
+                values.Add(("ChannelId", channelId.Value));
             }
 
             if (messageId.HasValue)
             {
                 command += " AND MessageId = @MessageId";
-                values.Add(("MessageId", messageId.Value.ToString()));
+                values.Add(("MessageId", messageId.Value));
             }
 
-            MySqlDataReader reader = Sql.GetCommand(command, values.ToArray()).ExecuteReader();
+            MySqlDataReader reader = await Sql.ExecuteReaderAsync(command, values.ToArray());
 
             while (reader.Read())
             {
@@ -129,18 +123,18 @@ namespace Database.Data
             return matchedRows;
         }
 
-        public static List<MessageLogsMessageRow> GetMessages(ulong guildId, ulong channelId, ulong[] messageIds = null)
+        public static async Task<List<MessageLogsMessageRow>> GetMessagesAsync(ulong guildId, ulong channelId, ulong[] messageIds = null)
         {
             List<MessageLogsMessageRow> matchedRows = new List<MessageLogsMessageRow>();
 
             string command = $"SELECT * FROM MessageLogsMessages WHERE GuildId = @GuildId AND ChannelId = @ChannelId AND MessageId IN {Sql.ToSqlObjectArray(messageIds)}";
-            List<(string, string)> values = new List<(string, string)>
+            List<(string, object)> values = new List<(string, object)>
             {
-                ("GuildId", guildId.ToString()), 
-                ("ChannelId", channelId.ToString())
+                ("GuildId", guildId), 
+                ("ChannelId", channelId)
             };
 
-            MySqlDataReader reader = Sql.GetCommand(command, values.ToArray()).ExecuteReader();
+            MySqlDataReader reader = await Sql.ExecuteReaderAsync(command, values.ToArray());
 
             while (reader.Read())
             {
@@ -158,97 +152,69 @@ namespace Database.Data
             return matchedRows;
         }
 
-        public static MessageLogsMessageRow GetMessage(ulong guildId, ulong channelId, ulong messageId)
+        public static async Task<MessageLogsMessageRow> GetMessageAsync(ulong guildId, ulong channelId, ulong messageId)
         {
-            List<MessageLogsMessageRow> messages = GetMessages(guildId, channelId, messageId);
-
-            if (messages.Count == 0)
-            {
-                return null;
-            }
-
-            return messages.First();
+            List<MessageLogsMessageRow> messages = await GetMessagesAsync(guildId, channelId, messageId);
+            return messages.Count > 0 ? messages.First() : null;
         }
 
-        public static void SaveMessage(MessageLogsMessageRow row)
+        public static async Task SaveMessageAsync(MessageLogsMessageRow row)
         {
-            MySqlCommand command;
-
             if (row.New)
             {
-                command = Sql.GetCommand("INSERT INTO MessageLogsMessages (GuildId, ChannelId, MessageId, UserId, Timestamp, Content) VALUES (@GuildId, @ChannelId, @MessageId, @UserId, @Timestamp, @Content);",
-                    new [] { ("GuildId", row.GuildId.ToString()), 
-                        ("ChannelId", row.ChannelId.ToString()),
-                        ("MessageId", row.MessageId.ToString()),
-                        ("UserId", row.UserId.ToString()),
-                        ("Timestamp", Sql.ToSqlDateTime(row.Timestamp)),
-                        ("Content", row.Content.GetEncryptedValue(row.Ids))
-                    });
+                await Sql.ExecuteAsync("INSERT INTO MessageLogsMessages (GuildId, ChannelId, MessageId, UserId, Timestamp, Content) VALUES (@GuildId, @ChannelId, @MessageId, @UserId, @Timestamp, @Content);",
+                    ("GuildId", row.GuildId), 
+                    ("ChannelId", row.ChannelId),
+                    ("MessageId", row.MessageId),
+                    ("UserId", row.UserId),
+                    ("Timestamp", row.Timestamp),
+                    ("Content", row.Content.GetEncryptedValue(row.Ids)));
 
-                command.ExecuteNonQuery();
-                command.Connection.Close();
                 row.New = false;
             }
             else
             {
-                command = Sql.GetCommand("UPDATE MessageLogsMessages SET GuildId = @GuildId, ChannelId = @ChannelId, MessageId = @MessageId, UserId = @UserId, Timestamp = @Timestamp, Content = @Content WHERE GuildId = @GuildId AND ChannelId = @ChannelId AND MessageId = @MessageId",
-                    new [] {
-                        ("GuildId", row.GuildId.ToString()), 
-                        ("ChannelId", row.ChannelId.ToString()),
-                        ("MessageId", row.MessageId.ToString()),
-                        ("UserId", row.UserId.ToString()),
-                        ("Timestamp", Sql.ToSqlDateTime(row.Timestamp)),
-                        ("Content", row.Content.GetEncryptedValue(row.Ids))
-                    });
-
-                command.ExecuteNonQuery();
-                command.Connection.Close();
+                await Sql.ExecuteAsync("UPDATE MessageLogsMessages SET GuildId = @GuildId, ChannelId = @ChannelId, MessageId = @MessageId, UserId = @UserId, Timestamp = @Timestamp, Content = @Content WHERE GuildId = @GuildId AND ChannelId = @ChannelId AND MessageId = @MessageId",
+                    ("GuildId", row.GuildId), 
+                    ("ChannelId", row.ChannelId),
+                    ("MessageId", row.MessageId),
+                    ("UserId", row.UserId),
+                    ("Timestamp", row.Timestamp),
+                    ("Content", row.Content.GetEncryptedValue(row.Ids)));
             }
         }
 
-        public static void DeleteMessages(ulong guildId, ulong channelId, ulong[] messageIds)
+        public static async Task DeleteMessagesAsync(ulong guildId, ulong channelId, ulong[] messageIds)
         {
             if(messageIds.Length == 0) return;
-
-            MySqlCommand command =
-                Sql.GetCommand($"DELETE FROM MessageLogsMessages WHERE GuildId = @GuildId AND ChannelId = @ChannelId AND MessageId IN {Sql.ToSqlObjectArray(messageIds)};",
-                    new [] {
-                        ("GuildId", guildId.ToString()), 
-                        ("ChannelId", channelId.ToString())
-                    });
-
-            command.ExecuteNonQuery();
-
-            command.Connection.Close();
+            await Sql.ExecuteAsync(
+                $"DELETE FROM MessageLogsMessages WHERE GuildId = @GuildId AND ChannelId = @ChannelId AND MessageId IN {Sql.ToSqlObjectArray(messageIds)};",
+                ("GuildId", guildId), 
+                ("ChannelId", channelId));
         }
 
-        public static void DeleteOldMessages(ulong guildId, ulong channelId, bool premium)
+        public static async Task DeleteOldMessagesAsync(ulong guildId, ulong channelId, bool premium)
         {
             if(premium) return;
 
-            List<MessageLogsMessageRow> messages = GetMessages(guildId, channelId).OrderBy(x => x.Timestamp).ToList();
+            List<MessageLogsMessageRow> messages = (await GetMessagesAsync(guildId, channelId)).OrderBy(x => x.Timestamp).ToList();
             List<MessageLogsMessageRow> messagesToRemove = new List<MessageLogsMessageRow>();
 
             messagesToRemove.AddRange(messages.Take(messages.Count - 50));
 
-            DeleteMessages(guildId, channelId, messagesToRemove.Select(x => x.MessageId).ToArray());
+            await DeleteMessagesAsync(guildId, channelId, messagesToRemove.Select(x => x.MessageId).ToArray());
         }
 
-        public static void Delete30DayMessages()
+        public static async Task Delete30DayMessagesAsync()
         {
             // Deletes messages older than 30 days to comply with Discord's rule for storing message content
             // "The maximum we can permit bots to store encrypted message content is 30 days"
             // Called every 30 seconds from MessageLogsTable.Load
+            // TODO: Clear even if cache not running
 
-            MySqlCommand command =
-                Sql.GetCommand("DELETE FROM MessageLogsMessages WHERE Timestamp <= @MinimumTimestamp;",
-                    new []
-                    {
-                        ("MinimumTimestamp", Sql.ToSqlDateTime(DateTime.UtcNow - TimeSpan.FromDays(30)))
-                    });
-
-            command.ExecuteNonQuery();
-            command.Connection.Close();
+            await Sql.ExecuteAsync(
+                "DELETE FROM MessageLogsMessages WHERE Timestamp <= @MinimumTimestamp;",
+                ("MinimumTimestamp", DateTime.UtcNow - TimeSpan.FromDays(30)));
         }
     }
 

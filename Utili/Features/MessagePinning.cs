@@ -33,7 +33,7 @@ namespace Utili.Features
                 return;
             }
 
-            MessagePinningRow row = MessagePinning.GetRow(Context.Guild.Id);
+            MessagePinningRow row = await MessagePinning.GetRowAsync(Context.Guild.Id);
 
             if(row.Pin) try { await message.PinAsync(); } catch { }
 
@@ -69,7 +69,7 @@ namespace Utili.Features
                     avatar.Close();
 
                     row.WebhookId = webhook.Id;
-                    MessagePinning.SaveRow(row);
+                    await MessagePinning.SaveRowAsync(row);
                 }
 
                 string username = $"{message.Author} in #{channel}";

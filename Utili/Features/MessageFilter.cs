@@ -34,7 +34,7 @@ namespace Utili.Features
                 }
             }
 
-            List<MessageFilterRow> rows = Database.Data.MessageFilter.GetRows(context.Guild.Id, context.Channel.Id);
+            List<MessageFilterRow> rows = await Database.Data.MessageFilter.GetRowsAsync(context.Guild.Id, context.Channel.Id);
 
             if (rows.Count == 0)
             {
