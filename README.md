@@ -4,7 +4,7 @@ Version 2 of the Utili discord bot
 ### Contributing
 Please fork this repository, make your changes, and create a pull request which outlines your changes.
 
-### Running
+### Debugging
  - Add `https://www.myget.org/F/discord-net/api/v3/index.json` to your NuGet package sources.
  - Create a file called `DatabaseCredentials.json` in the running environment with this content:
 ```json
@@ -17,7 +17,7 @@ Please fork this repository, make your changes, and create a pull request which 
 }
 ```
 
-### Running Bot
+### Debugging Bot
  - Create a file called `Config.json` in the running environment with this content:
  ```json
  {
@@ -35,7 +35,7 @@ Please fork this repository, make your changes, and create a pull request which 
 }
  ```
  
- ### Running Website
+ ### Debugging Website
   - Create a file called `Config.json` in the running environment with this content:
  ```json
  {
