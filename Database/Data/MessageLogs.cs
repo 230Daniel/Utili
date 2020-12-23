@@ -3,11 +3,28 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using MySql.Data.MySqlClient;
+using System.Timers;
 
 namespace Database.Data
 {
     public static class MessageLogs
     {
+        private static Timer _deletionTimer;
+
+        public static void Initialise()
+        {
+            _deletionTimer?.Dispose();
+
+            _deletionTimer = new Timer(60000);
+            _deletionTimer.Elapsed += DeletionTimer_Elapsed;
+            _deletionTimer.Start();
+        }
+
+        private static void DeletionTimer_Elapsed(object sender, ElapsedEventArgs e)
+        {
+            _ = Delete30DayMessagesAsync();
+        }
+
         public static async Task<List<MessageLogsRow>> GetRowsAsync(ulong? guildId = null, bool ignoreCache = false)
         {
             List<MessageLogsRow> matchedRows = new List<MessageLogsRow>();
@@ -207,8 +224,6 @@ namespace Database.Data
         {
             // Deletes messages older than 30 days to comply with Discord's rule for storing message content
             // "The maximum we can permit bots to store encrypted message content is 30 days"
-            // Called every 30 seconds from MessageLogsTable.Load
-            // TODO: Clear even if cache not running
 
             await Sql.ExecuteAsync(
                 "DELETE FROM MessageLogsMessages WHERE Timestamp <= @MinimumTimestamp;",

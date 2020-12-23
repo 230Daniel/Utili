@@ -11,11 +11,6 @@ namespace Utili.Commands
 {
     public class InfoCommands : ModuleBase<SocketCommandContext>
     {
-        [Command("Test")] [Permission(Perm.BotOwner)]
-        public async Task Test(){
-            await Database.Data.Premium.DeleteExpiredSlotsAsync();
-        }
-
         [Command("About"), Alias("Info"), Cooldown(3)]
         public async Task About()
         {
