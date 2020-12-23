@@ -6,6 +6,11 @@
         return;
     }
     AuthDetails auth = (AuthDetails) ViewData["auth"];
+    if (!auth.Authenticated)
+    {
+        IgnoreBody();
+        return;
+    }
 }
 
 <!DOCTYPE html>

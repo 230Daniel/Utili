@@ -593,3 +593,8 @@ img.guild-icon {
     font-size: 12px;
     user-select: none;
 }
+
+.table th,
+.table td {
+    border-top: none;
+}
