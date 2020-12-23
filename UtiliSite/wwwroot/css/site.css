@@ -391,7 +391,7 @@ img.user-icon {
 }
 
 .scroll-always::-webkit-scrollbar {
-    width: 15px !important;
+    width: 0.75vw !important;
     height: 15px !important;
 }
 
