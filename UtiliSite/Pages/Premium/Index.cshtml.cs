@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -19,7 +20,7 @@ namespace UtiliSite.Pages.Premium
             ViewData["forceCurrency"] = currency.Item2;
             ViewData["showCurrency"] = true;
 
-            List<SubscriptionsRow> subscriptions = await Subscriptions.GetRowsAsync(userId: auth.User.Id);
+            List<SubscriptionsRow> subscriptions = await Subscriptions.GetRowsAsync(userId: auth.User.Id, onlyValid: true);
             ViewData["subscriptions"] = subscriptions.Count;
             ViewData["slots"] = subscriptions.Sum(x => x.Slots);
         }

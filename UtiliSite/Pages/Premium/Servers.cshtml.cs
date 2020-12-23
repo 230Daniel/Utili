@@ -14,7 +14,7 @@ namespace UtiliSite.Pages.Premium
 
             ViewData["rows"] = await Database.Data.Premium.GetUserRowsAsync(auth.User.Id);
             ViewData["guilds"] = await DiscordModule.GetMutualGuildsAsync(auth.Client);
-            ViewData["subscriptions"] = (await Subscriptions.GetRowsAsync(userId: auth.User.Id)).Count;
+            ViewData["subscriptions"] = (await Subscriptions.GetRowsAsync(userId: auth.User.Id, onlyValid: true)).Count;
         }
 
         public async Task OnPost()

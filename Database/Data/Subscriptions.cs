@@ -8,7 +8,7 @@ namespace Database.Data
 {
     public static class Subscriptions
     {
-        public static async Task<List<SubscriptionsRow>> GetRowsAsync(string subscriptionId = null, ulong? userId = null)
+        public static async Task<List<SubscriptionsRow>> GetRowsAsync(string subscriptionId = null, ulong? userId = null, bool onlyValid = false)
         {
             List<SubscriptionsRow> matchedRows = new List<SubscriptionsRow>();
 
@@ -25,6 +25,12 @@ namespace Database.Data
             {
                 command += " AND UserId = @UserId";
                 values.Add(("UserId", userId.Value));
+            }
+
+            if (onlyValid)
+            {
+                command += " AND EndsAt > @Now";
+                values.Add(("Now", DateTime.UtcNow));
             }
 
             MySqlDataReader reader = await Sql.ExecuteReaderAsync(command, values.ToArray());

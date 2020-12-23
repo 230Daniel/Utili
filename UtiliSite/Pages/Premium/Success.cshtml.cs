@@ -17,7 +17,7 @@ namespace UtiliSite.Pages.Premium
 
             await Task.Delay(2000);
 
-            List<SubscriptionsRow> subscriptions = await Subscriptions.GetRowsAsync(userId: auth.User.Id);
+            List<SubscriptionsRow> subscriptions = await Subscriptions.GetRowsAsync(userId: auth.User.Id, onlyValid: true);
             ViewData["subscriptions"] = subscriptions.Count;
             ViewData["slots"] = subscriptions.Sum(x => x.Slots);
 

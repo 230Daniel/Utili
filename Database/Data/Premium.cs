@@ -142,8 +142,7 @@ namespace Database.Data
 
         public static async Task DeleteExpiredSlotsAsync()
         {
-            List<SubscriptionsRow> subscriptions = await Subscriptions.GetRowsAsync();
-            subscriptions = subscriptions.Where(x => x.EndsAt > DateTime.UtcNow).ToList();
+            List<SubscriptionsRow> subscriptions = await Subscriptions.GetRowsAsync(onlyValid: true);
 
             List<(ulong, int)> usedSlotsRecord = new List<(ulong, int)>();
             List<PremiumRow> rows = (await GetRowsAsync()).OrderBy(x => x.SlotId).ToList();
