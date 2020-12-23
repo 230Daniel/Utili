@@ -9,11 +9,16 @@ namespace Utili
     internal class Logger
     {
         public LogSeverity LogSeverity { get; set; }
-
         private Timer Timer { get; set; }
         private StringBuilder Buffer { get; set; } = new StringBuilder();
 
-        public void Initialise()
+        public Logger(LogSeverity logSeverity)
+        {
+            LogSeverity = logSeverity;
+            Initialise();
+        }
+
+        private void Initialise()
         {
             Buffer = new StringBuilder();
 
@@ -37,9 +42,9 @@ namespace Utili
         public void Log(string module, string message, LogSeverity severity = LogSeverity.Dbug)
         {
             string time = $"{DateTime.Now.Hour:00}:{DateTime.Now.Minute:00}:{DateTime.Now.Second:00}";
-            string output = $"{time}  {severity,-4}  {module,-10}  {message}\n";
+            string output = $"{time}  {severity,-4}  {module,-10}  {message}";
 
-            LogRaw(output);
+            LogRaw(output, severity);
         }
 
         public void LogEmpty(bool fileOnly = false)
@@ -48,21 +53,22 @@ namespace Utili
             Buffer.Append('\n');
         }
 
-        private void LogRaw(string message)
+        private void LogRaw(string message, LogSeverity logSeverity)
         {
-            Console.Write(message);
+            WriteToConsole(message, logSeverity);
             Buffer.Append(message);
         }
 
         public void ReportError(string module, Exception exception, LogSeverity severity = LogSeverity.Errr)
         {
+            if (severity == LogSeverity.Crit) Log(module, $"{exception.Message}\n{exception.StackTrace}", severity);
+            else Log(module, $"{exception.Message}", severity);
+
             _ = Task.Run(() =>
             {
                 if (!Directory.Exists("Errors")) Directory.CreateDirectory("Errors");
 
                 string errorReportFilename = $"Errors/Error-{DateTime.Now.Year:0000}-{DateTime.Now.Month:00}-{DateTime.Now.Day:00} {DateTime.Now.Hour:00}-{DateTime.Now.Minute:00}-{DateTime.Now.Second:00}-{DateTime.Now.Millisecond}.txt";
-
-                Log(module, $"{exception.Message}", severity);
 
                 StreamWriter errorReport = File.CreateText(errorReportFilename);
 
@@ -103,12 +109,35 @@ namespace Utili
 
 ";
 
-            LogRaw(title);
+            LogRaw(title, LogSeverity.Title);
+        }
+
+        private static object _messageLock= new object();
+        private void WriteToConsole(string message, LogSeverity logSeverity)
+        {
+            ConsoleColor colour = logSeverity switch
+            {
+                LogSeverity.Title => ConsoleColor.Gray,
+                LogSeverity.Dbug => ConsoleColor.DarkGray,
+                LogSeverity.Info => ConsoleColor.Blue,
+                LogSeverity.Warn => ConsoleColor.DarkYellow,
+                LogSeverity.Errr => ConsoleColor.Red,
+                LogSeverity.Crit => ConsoleColor.DarkRed,
+                _ => ConsoleColor.Gray
+            };
+
+            lock (_messageLock)
+            {
+                Console.ForegroundColor = colour;
+                Console.WriteLine(message);
+                Console.ResetColor();
+            }
         }
     }
 
     public enum LogSeverity
     {
+        Title,
         Dbug,
         Info,
         Warn,

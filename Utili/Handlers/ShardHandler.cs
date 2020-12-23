@@ -58,7 +58,7 @@ namespace Utili.Handlers
             guilds = guilds.Where(x => guildIds.Contains(x.Id)).ToList();
             await shard.DownloadUsersAsync(guilds);
 
-            _logger.Log($"Shard {shard.ShardId}", $"{guilds.Count(x => x.HasAllMembers)}/{guilds.Count} required guild user downloads completed", LogSeverity.Info);
+            _logger.Log($"Shard {shard.ShardId}", $"{guilds.Count(x => x.HasAllMembers)}/{guilds.Count} required guild user downloads completed");
         }
 
         public static async Task Log(LogMessage logMessage)

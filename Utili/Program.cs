@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -35,44 +36,50 @@ namespace Utili
 
         private static async Task Main()
         {
-            _config = Config.Load();
+            List<DateTime> crashes = new List<DateTime>();
+            while (true)
+            {
+                _config = Config.Load();
+                _logger = new Logger(LogSeverity.Dbug);
+                _logger.LogEmpty(true);
 
-            _logger = new Logger
-            {
-                LogSeverity = LogSeverity.Dbug
-            };
-            _logger.Initialise();
-            _logger.LogEmpty(true);
+                Console.ForegroundColor = ConsoleColor.Blue;
+                if (crashes.Count(x => x > DateTime.Now - TimeSpan.FromMinutes(5)) >= 3)
+                {
+                    _logger.Log("Main", "Three crashes have occurred in the last 5 minutes.", LogSeverity.Warn);
+                    _logger.Log("Main", "Waiting for 10 minutes", LogSeverity.Warn);
+                    crashes.Clear();
+                    await Task.Delay(60000 * 10);
+                }
 
-            if (_config.CacheDatabase)
-            {
-                _logger.Log("Main", "Cacheing database...", LogSeverity.Info);
-                await Database.Database.InitialiseAsync(true, _config.DefaultPrefix);
-                _logger.Log("Main", "Database cached", LogSeverity.Info);
-            }
-            else
-            {
-                _logger.Log("Main", "Not cacheing database", LogSeverity.Info);
-                await Database.Database.InitialiseAsync(false, _config.DefaultPrefix);
-            }
+                if (_config.CacheDatabase)
+                {
+                    _logger.Log("Main", "Caching database...", LogSeverity.Info);
+                    await Database.Database.InitialiseAsync(true, _config.DefaultPrefix);
+                    _logger.Log("Main", "Database cached", LogSeverity.Info);
+                }
+                else
+                {
+                    _logger.Log("Main", "Database caching is disabled", LogSeverity.Info);
+                    await Database.Database.InitialiseAsync(false, _config.DefaultPrefix);
+                }
 
-            try
-            {
-                await MainAsync();
+                try
+                {
+                    await MainAsync();
+                }
+                catch(Exception e)
+                {
+                    _logger.ReportError("Main", e, LogSeverity.Crit);
+                    crashes.Add(DateTime.Now);
+                    await Task.Delay(5000);
+                }
             }
-            catch(Exception e)
-            {
-                _logger.ReportError("Main", e);
-                Console.WriteLine(e.StackTrace);
-            }
-
-            // TODO: Auto-restart or Pterodactyl equivalent
         }
 
         public static async Task MainAsync()
         {
             _logger.LogEmpty();
-
             _config = Config.Load();
             _haste = new Haste(_config.HasteServer);
 

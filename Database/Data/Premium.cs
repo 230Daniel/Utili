@@ -2,7 +2,6 @@
 using System.Linq;
 using System.Threading.Tasks;
 using MySql.Data.MySqlClient;
-using System;
 using System.Timers;
 
 namespace Database.Data
