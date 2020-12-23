@@ -40,6 +40,8 @@ namespace Database
             return parameters.Select(parameter =>
             {
                 object value = parameter.Value;
+                if(value == null) return new MySqlParameter(parameter.ParameterName, null);
+
                 Type type = value.GetType();
                 object preparedValue = value.ToString();
 
