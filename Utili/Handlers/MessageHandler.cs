@@ -48,7 +48,7 @@ namespace Utili.Handlers
 
                         if (_config.LogCommands)
                         {
-                            _logger.Log("Command", $"{context.Guild.Id} {context.User}: {context.Message.Content}");
+                            _logger.Log("Command", $"{context.User.Username}: {context.Message.Content}");
                         }
 
                         if (!result.IsSuccess)

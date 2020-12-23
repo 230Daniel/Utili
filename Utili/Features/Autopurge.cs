@@ -96,6 +96,7 @@ namespace Utili.Features
 
             List<IMessage> messages = (await channel.GetMessagesAsync(messageCap).FlattenAsync()).ToList();
             bool exceedesCap = messages.Count == messageCap;
+            if(messages.Count == 0) return;
             IMessage lastMessage = messages.Last();
 
             // These DateTimes represent the bounds for which messages should be deleted.
