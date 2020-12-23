@@ -2,25 +2,47 @@
 @using System.Diagnostics
 @model ErrorModel
 @{
-    ViewData["Title"] = "Error - Utili";
+    Layout = "";
     string requestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier;
 }
-<style>
-    body {
-        background-color: #fff !important;
-    }
-</style>
 
-<h1 class="text-danger" style="font-size: 120px;">:(</h1>
-<h2 class="text-danger">An error occurred while processing your request.</h2>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Error - Utili</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" />
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+</head>
+<body>
+    <div class="scroll-always scroll-dark dynamic-height">
+        <div class="container" style="margin-top: 23px;">
+            <main role="main" class="pb-3">
+                <style>
+                    body {
+                        background-color: #fff !important;
+                    }
+                </style>
 
-<p style="margin-top: 16px; margin-bottom: 16px;">
-    Please report this error on discord <a href="https://discord.gg/yrM4YUczVp" target="_blank">here</a> quoting the request ID <code>@requestId</code>.
-</p>
-<p style="margin-top: 16px; margin-bottom: 16px;">
-    @ErrorLoggingMiddleware.GetErrorMessage(requestId)
-</p>
+                <h1 class="text-danger" style="font-size: 120px;">:(</h1>
+                <h2 class="text-danger">An error occurred while processing your request.</h2>
 
-<button class="btn" style="padding: 0;" onclick="history.back(2);">
-    Return to site
-</button>
+                <p style="margin-top: 16px; margin-bottom: 16px;">
+                    Please report this error on discord <a href="https://discord.gg/yrM4YUczVp" target="_blank">here</a> quoting the request ID <code>@requestId</code>.
+                </p>
+                <p style="margin-top: 16px; margin-bottom: 16px;">
+                    @ErrorLoggingMiddleware.GetErrorMessage(requestId)
+                </p>
+
+                <button class="btn" style="padding: 0;" onclick="history.back(2);">
+                    Return to site
+                </button>
+            </main>
+        </div>
+    </div>
+
+</body>
+</html>
