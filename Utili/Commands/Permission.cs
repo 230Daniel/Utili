@@ -35,12 +35,11 @@ namespace Utili.Commands
         {
             SocketGuild guild = context.Guild;
             SocketGuildUser user = context.User as SocketGuildUser;
-            SocketGuildChannel channel = context.Channel as SocketGuildChannel;
 
             return perm switch
             {
                 Perm.None => true,
-                Perm.ManageMessages => user.GetPermissions(channel).ManageMessages,
+                Perm.ManageMessages => user.GuildPermissions.ManageMessages,
                 Perm.ManageGuild => user.GuildPermissions.ManageGuild,
                 Perm.Owner => guild.Owner.Id == user.Id,
                 Perm.BotStaff => false,

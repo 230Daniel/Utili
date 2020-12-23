@@ -15,11 +15,8 @@ namespace Utili.Features
 {
     public class MessagePinningCommands : ModuleBase<SocketCommandContext>
     {
-        [Command("Pin")] [Permission(Perm.ManageMessages), Cooldown(3)]
-        public async Task Pin(ulong messageId, SocketTextChannel channel = null)
+        private async Task Pin(ulong messageId, SocketTextChannel pinChannel, SocketTextChannel channel)
         {
-            if (channel == null) channel = Context.Channel as SocketTextChannel;
-
             IUserMessage message = null;
             try { message = await channel.GetMessageAsync(messageId) as IUserMessage; } catch { }
 
@@ -34,13 +31,15 @@ namespace Utili.Features
 
             if(row.Pin) try { await message.PinAsync(); } catch { }
 
-            SocketTextChannel pinChannel = null;
-            try { pinChannel = Context.Guild.GetTextChannel(row.PinChannelId); } catch { }
+            if (pinChannel == null)
+            {
+                try { pinChannel = Context.Guild.GetTextChannel(row.PinChannelId); } catch { }
+            }
 
             if (pinChannel == null && row.Pin)
             {
                 await SendSuccessAsync(Context.Channel, "Message pinned",
-                    "Set a pin channel on the dashboard if you want the message to be copied to another channel as well.");
+                    "Set a pin channel on the dashboard or specify one in the command if you want the message to be copied to another channel as well.");
             }
             else if (pinChannel == null && !row.Pin)
             {
@@ -57,7 +56,7 @@ namespace Utili.Features
                 }
 
                 RestWebhook webhook = null;
-                try { webhook = await pinChannel.GetWebhookAsync(row.WebhookId); } catch { }
+                try { webhook = await pinChannel.GetWebhookAsync(row.WebhookIds.First(x => x.Item1 == pinChannel.Id).Item2); } catch { }
 
                 if (webhook == null)
                 {
@@ -65,7 +64,11 @@ namespace Utili.Features
                     webhook = await pinChannel.CreateWebhookAsync("Utili Message Pinning", avatar);
                     avatar.Close();
 
-                    row.WebhookId = webhook.Id;
+                    if (row.WebhookIds.Any(x => x.Item1 == pinChannel.Id))
+                    {
+                        row.WebhookIds[row.WebhookIds.FindIndex(x => x.Item1 == pinChannel.Id)] = (pinChannel.Id, webhook.Id);
+                    }
+                    else row.WebhookIds.Add((pinChannel.Id, webhook.Id));
                     await MessagePinning.SaveRowAsync(row);
                 }
 
@@ -89,10 +92,16 @@ namespace Utili.Features
             }
         }
 
-        [Command("Pin")]
-        public async Task Pin(SocketTextChannel channel, ulong messageId)
+        [Command("Pin")] [Permission(Perm.ManageMessages), Cooldown(3)]
+        public async Task Pin(ulong messageId, SocketTextChannel pinChannel = null)
         {
-            await Pin(messageId, channel);
+            await Pin(messageId, pinChannel, Context.Channel as SocketTextChannel);
+        }
+
+        [Command("Pin")] [Permission(Perm.ManageMessages), Cooldown(3)]
+        public async Task Pin(SocketTextChannel channel, ulong messageId, SocketTextChannel pinChannel = null)
+        {
+            await Pin(messageId, pinChannel, channel);
         }
     }
 }

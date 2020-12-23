@@ -35,7 +35,7 @@ namespace Database.Data
                     matchedRows.Add(MessagePinningRow.FromDatabase(
                         reader.GetUInt64(0),
                         reader.GetUInt64(1),
-                        reader.GetUInt64(2),
+                        reader.GetString(2),
                         reader.GetBoolean(3)));
                 }
 
@@ -56,10 +56,10 @@ namespace Database.Data
             if (row.New)
             {
                 await Sql.ExecuteAsync(
-                    "INSERT INTO MessagePinning (GuildId, PinChannelId, WebhookId, Pin) VALUES (@GuildId, @PinChannelId, @WebhookId, @Pin);", 
-                    ("GuildId", row.GuildId), 
+                    "INSERT INTO MessagePinning (GuildId, PinChannelId, WebhookIds, Pin) VALUES (@GuildId, @PinChannelId, @WebhookIds, @Pin);", 
+                    ("GuildId", row.GuildId),
                     ("PinChannelId", row.PinChannelId),
-                    ("WebhookId", row.WebhookId),
+                    ("WebhookIds", row.GetWebhookIdsString()),
                     ("Pin", row.Pin));
 
                 row.New = false;
@@ -68,10 +68,10 @@ namespace Database.Data
             else
             {
                 await Sql.ExecuteAsync(
-                    "UPDATE MessagePinning SET PinChannelId = @PinChannelId, WebhookId = @WebhookId, Pin = @Pin WHERE GuildId = @GuildId;",
+                    "UPDATE MessagePinning SET PinChannelId = @PinChannelId, WebhookIds = @WebhookIds, Pin = @Pin WHERE GuildId = @GuildId;",
                     ("GuildId", row.GuildId), 
                     ("PinChannelId", row.PinChannelId),
-                    ("WebhookId", row.WebhookId),
+                    ("WebhookIds", row.GetWebhookIdsString()),
                     ("Pin", row.Pin));
 
                 if(Cache.Initialised) Cache.MessagePinning.Rows[Cache.MessagePinning.Rows.FindIndex(x => x.GuildId == row.GuildId)] = row;
@@ -98,7 +98,7 @@ namespace Database.Data
         public bool New { get; set; }
         public ulong GuildId { get; set; }
         public ulong PinChannelId { get; set; }
-        public ulong WebhookId { get; set; }
+        public List<(ulong, ulong)> WebhookIds { get; set; }
         public bool Pin { get; set; }
 
         private MessagePinningRow()
@@ -113,16 +113,45 @@ namespace Database.Data
             Pin = false;
         }
 
-        public static MessagePinningRow FromDatabase(ulong guildId, ulong pinChannelId, ulong webhookId, bool pin)
+        public static MessagePinningRow FromDatabase(ulong guildId, ulong pinChannelId, string webhookIds, bool pin)
         {
-            return new MessagePinningRow
+            MessagePinningRow row = new MessagePinningRow
             {
                 New = false,
                 GuildId = guildId,
                 PinChannelId = pinChannelId,
-                WebhookId = webhookId,
+                WebhookIds = new List<(ulong, ulong)>(),
                 Pin = pin
             };
+
+            webhookIds = EString.FromEncoded(webhookIds).Value;
+            if (!string.IsNullOrEmpty(webhookIds))
+            {
+                foreach (string emoteString in webhookIds.Split(","))
+                {
+                    ulong channelId = ulong.Parse(emoteString.Split("///").First());
+                    ulong webhookId = ulong.Parse(emoteString.Split("///").Last());
+                    row.WebhookIds.Add((channelId, webhookId));
+                }
+            }
+
+            return row;
+        }
+
+        public string GetWebhookIdsString()
+        {
+            string idsString = "";
+
+            for (int i = 0; i < WebhookIds.Count; i++)
+            {
+                idsString += $"{WebhookIds[i].Item1}///{WebhookIds[i].Item2}";
+                if (i != WebhookIds.Count - 1)
+                {
+                    idsString += ",";
+                }
+            }
+
+            return EString.FromDecoded(idsString).EncodedValue;
         }
     }
 }
