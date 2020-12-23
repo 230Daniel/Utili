@@ -8,7 +8,7 @@ namespace Database.Data
 {
     public static class Autopurge
     {
-        public static async Task<List<AutopurgeRow>> GetRowsAsync(ulong? guildId = null, ulong? channelId = null, bool ignoreCache = false)
+        public static async Task<List<AutopurgeRow>> GetRowsAsync(ulong? guildId = null, ulong? channelId = null, bool enabledOnly = false, bool ignoreCache = false)
         {
             List<AutopurgeRow> matchedRows = new List<AutopurgeRow>();
 
@@ -34,6 +34,12 @@ namespace Database.Data
                 {
                     command += " AND ChannelId = @ChannelId";
                     values.Add(("ChannelId", channelId.Value));
+                }
+
+                if (enabledOnly)
+                {
+                    command += " AND Mode != @Mode";
+                    values.Add(("Mode", 2));
                 }
 
                 MySqlDataReader reader = await Sql.ExecuteReaderAsync(command, values.ToArray());

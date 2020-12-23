@@ -13,78 +13,46 @@ namespace Utili.Features
     internal static class Autopurge
     {
         private static Timer _timer;
-        private static int _freeCounter;
+        private static Timer _premiumTimer;
 
         public static void Start()
         {
             _timer?.Dispose();
-
-            _timer = new Timer(10000);
+            _timer = new Timer(30000);
             _timer.Elapsed += Timer_Elapsed;
             _timer.Start();
+
+            _premiumTimer?.Dispose();
+            _premiumTimer = new Timer(10000);
+            _premiumTimer.Elapsed += PremiumTimer_Elapsed;
+            _premiumTimer.Start();
         }
 
         private static void Timer_Elapsed(object sender, ElapsedEventArgs e)
         {
-            bool premiumOnly;
-
-            _freeCounter++;
-
-            if (_freeCounter == 3)
-            {
-                premiumOnly = false;
-                _freeCounter = 0;
-            }
-            else
-            {
-                premiumOnly = true;
-            }
-
-            _ = PurgeChannelsAsync(premiumOnly);
+            _ = PurgeChannelsAsync(false);
         }
 
-        private static async Task PurgeChannelsAsync(bool premiumOnly)
+        private static void PremiumTimer_Elapsed(object sender, ElapsedEventArgs e)
         {
-            // TODO: Make premium be 5 channels per 10 seconds or something, because someone is purging a rediculous 70 channels!
-            List<AutopurgeRow> rows = await Database.Data.Autopurge.GetRowsAsync();
-            List<ulong> allGuildIds = _client.Guilds.Select(x => x.Id).ToList();
-            List<ulong> premiumGuildIds = (await Premium.GetRowsAsync()).Select(x => x.GuildId).Distinct().ToList();
+            _ = PurgeChannelsAsync(true);
+        }
 
-            // Get only rows handled by this cluster
-            rows.RemoveAll(x => !allGuildIds.Contains(x.GuildId));
-
-            if (premiumOnly)
-            {
-                // Get only premium rows
-                rows.RemoveAll(x => !premiumGuildIds.Contains(x.GuildId));
-            }
-            else
-            {
-                // If it's a free run, get a selection of non-premium channels
-                List<AutopurgeRow> selectedNonPremiumRows = GetChannelsForThisPurge(rows.Where(x => !premiumGuildIds.Contains(x.GuildId)).ToList());
-
-                // Get only premium rows
-                rows.RemoveAll(x => !premiumGuildIds.Contains(x.GuildId));
-
-                // Add the selection of non-premium channels
-                rows.AddRange(selectedNonPremiumRows);
-            }
-
-            // Remove rows in mode 2 (disabled)
-            rows.RemoveAll(x => x.Mode == 2);
+        private static async Task PurgeChannelsAsync(bool premium)
+        {
+            List<AutopurgeRow> rows;
+            if (premium) rows = await GetPremiumRowsToPurgeAsync();
+            else rows = await GetRowsToPurgeAsync();
+            _logger.Log("Autopurge", $"Purging {rows.Count} channels (premium: {premium.ToString().ToLower()})");
+            int messageCap;
+            if (premium) messageCap = 500;
+            else messageCap = 100;
 
             List<Task> tasks = new List<Task>();
-
             foreach (AutopurgeRow row in rows)
             {
                 try
                 {
-                    int messageCap = 100;
-                    if (premiumGuildIds.Contains(row.GuildId))
-                    {
-                        messageCap = 500;
-                    }
-
                     SocketGuild guild = _client.GetGuild(row.GuildId);
                     SocketTextChannel channel = guild.GetTextChannel(row.ChannelId);
 
@@ -108,10 +76,8 @@ namespace Utili.Features
         private static async Task PurgeChannelAsync(SocketGuildChannel guildChannel, TimeSpan timespan, int mode, int messageCap)
         {
             await Task.Delay(1);
-            if(mode == 2) return; // jic above method is wrong
 
             SocketTextChannel channel = guildChannel as SocketTextChannel;
-
             if(BotPermissions.IsMissingPermissions(channel, new [] { ChannelPermission.ManageMessages }, out _)) return;
 
             List<IMessage> messages = (await channel.GetMessagesAsync(messageCap).FlattenAsync()).ToList();
@@ -147,37 +113,54 @@ namespace Utili.Features
         }
 
         private static int _purgeNumber;
-        private static List<AutopurgeRow> GetChannelsForThisPurge(List<AutopurgeRow> rows)
+        private static async Task<List<AutopurgeRow>> GetRowsToPurgeAsync()
         {
-            List<AutopurgeRow> channelsForThisPurge = new List<AutopurgeRow>();
+            List<AutopurgeRow> rows = await Database.Data.Autopurge.GetRowsAsync(enabledOnly: true);
+            List<PremiumRow> premiumRows = await Premium.GetRowsAsync();
+            rows = rows.Where(x => premiumRows.All(y => y.GuildId != x.GuildId)).ToList();
 
-            List<AutopurgeRow> clonedRows = new List<AutopurgeRow>();
-            clonedRows.AddRange(rows);
-
-            foreach (AutopurgeRow row in clonedRows)
+            List<AutopurgeRow> rowsToPurge = new List<AutopurgeRow>();
+            for (int i = 0; i < 1; i++)
             {
-                if (channelsForThisPurge.All(x => x.GuildId != row.GuildId))
+                foreach (SocketGuild guild in _client.Guilds)
                 {
-                    List<AutopurgeRow> guildRows = rows.Where(x => x.GuildId == row.GuildId).OrderBy(x => x.ChannelId).ToList();
-
-                    if (_purgeNumber == 0)
+                    List<AutopurgeRow> guildRows = rows.Where(x => x.GuildId == guild.Id).OrderBy(x => x.ChannelId).ToList();
+                    if (guildRows.Count > 0)
                     {
-                        channelsForThisPurge.Add(guildRows[0]);
-                    }
-                    else
-                    {
-                        channelsForThisPurge.Add(guildRows[_purgeNumber % guildRows.Count]);
+                        AutopurgeRow row = guildRows[_purgeNumber % guildRows.Count];
+                        if(!rowsToPurge.Contains(row)) rowsToPurge.Add(row);
                     }
                 }
             }
 
             _purgeNumber++;
-            if (_purgeNumber == int.MaxValue)
+            if (_purgeNumber == int.MaxValue) _purgeNumber = 0;
+
+            return rowsToPurge;
+        }
+
+        private static int _premiumPurgeNumber;
+        private static async Task<List<AutopurgeRow>> GetPremiumRowsToPurgeAsync()
+        {
+            List<AutopurgeRow> rows = await Database.Data.Autopurge.GetRowsAsync(enabledOnly: true);
+            List<PremiumRow> premiumRows = await Premium.GetRowsAsync();
+            rows = rows.Where(x => premiumRows.Any(y => y.GuildId == x.GuildId)).ToList();
+
+            List<AutopurgeRow> rowsToPurge = new List<AutopurgeRow>();
+            for (int i = 0; i < 5; i++)
             {
-                _purgeNumber = 0;
+                foreach (SocketGuild guild in _client.Guilds)
+                {
+                    List<AutopurgeRow> guildRows = rows.Where(x => x.GuildId == guild.Id).OrderBy(x => x.ChannelId).ToList();
+                    AutopurgeRow row = guildRows[_premiumPurgeNumber % guildRows.Count];
+                    if(!rowsToPurge.Contains(row)) rowsToPurge.Add(row);
+                }
+
+                _premiumPurgeNumber++;
+                if (_premiumPurgeNumber == int.MaxValue) _premiumPurgeNumber = 0;
             }
 
-            return channelsForThisPurge;
+            return rowsToPurge;
         }
     }
 }
