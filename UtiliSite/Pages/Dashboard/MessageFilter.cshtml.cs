@@ -62,7 +62,8 @@ namespace UtiliSite.Pages.Dashboard
 
             ulong channelId = ulong.Parse(HttpContext.Request.Form["channel"]);
             MessageFilterRow row = await MessageFilter.GetRowAsync(auth.Guild.Id, channelId);
-            await MessageFilter.SaveRowAsync(row);
+            try { await MessageFilter.SaveRowAsync(row); }
+            catch { }
 
             HttpContext.Response.StatusCode = 200;
             HttpContext.Response.Redirect(HttpContext.Request.Path);

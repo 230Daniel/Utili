@@ -44,7 +44,7 @@ namespace UtiliSite.Pages.Dashboard
             HttpContext.Response.StatusCode = 200;
         }
 
-        public async Task OnPostAddExcludedChannel()
+        public async Task OnPostExclude()
         {
             AuthDetails auth = await Auth.GetAuthDetailsAsync(HttpContext);
 
@@ -58,13 +58,14 @@ namespace UtiliSite.Pages.Dashboard
 
             MessageLogsRow row = await MessageLogs.GetRowAsync(auth.Guild.Id);
             if (!row.ExcludedChannels.Contains(channelId)) row.ExcludedChannels.Add(channelId);
-            await MessageLogs.SaveRowAsync(row);
+            try { await MessageLogs.SaveRowAsync(row); }
+            catch { }
 
             HttpContext.Response.StatusCode = 200;
             HttpContext.Response.Redirect(HttpContext.Request.Path);
         }
 
-        public async Task OnPostRemoveExcludedChannel()
+        public async Task OnPostRemove()
         {
             AuthDetails auth = await Auth.GetAuthDetailsAsync(HttpContext);
 

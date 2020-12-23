@@ -63,6 +63,7 @@ namespace UtiliSite.Pages.Dashboard
 
             RolesRow row = await Roles.GetRowAsync(auth.Guild.Id);
             if (!row.JoinRoles.Contains(roleId)) row.JoinRoles.Add(roleId);
+            
             await Roles.SaveRowAsync(row);
 
             HttpContext.Response.StatusCode = 200;

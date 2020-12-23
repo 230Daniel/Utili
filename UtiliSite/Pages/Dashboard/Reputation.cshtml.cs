@@ -54,7 +54,8 @@ namespace UtiliSite.Pages.Dashboard
             (IEmote, int) emote = row.Emotes.First(x => x.Item1.ToString() == HttpContext.Request.Form["emote"]);
             row.Emotes.Remove(emote);
 
-            await Reputation.SaveRowAsync(row);
+            try { await Reputation.SaveRowAsync(row); }
+            catch { }
 
             HttpContext.Response.StatusCode = 200;
             HttpContext.Response.Redirect(HttpContext.Request.Path);

@@ -30,12 +30,26 @@ namespace Utili.Features
 
         private static void Timer_Elapsed(object sender, ElapsedEventArgs e)
         {
-            _ = PurgeChannelsAsync(false);
+            try
+            {
+                PurgeChannelsAsync(false).GetAwaiter().GetResult();
+            }
+            catch(Exception ex)
+            {
+                _logger.ReportError("Autopurge", ex);
+            }
         }
 
         private static void PremiumTimer_Elapsed(object sender, ElapsedEventArgs e)
         {
-            _ = PurgeChannelsAsync(true);
+            try
+            {
+                PurgeChannelsAsync(true).GetAwaiter().GetResult();
+            }
+            catch(Exception ex)
+            {
+                _logger.ReportError("Autopurge", ex);
+            }
         }
 
         private static async Task PurgeChannelsAsync(bool premium)
@@ -43,7 +57,7 @@ namespace Utili.Features
             List<AutopurgeRow> rows;
             if (premium) rows = await GetPremiumRowsToPurgeAsync();
             else rows = await GetRowsToPurgeAsync();
-            _logger.Log("Autopurge", $"Purging {rows.Count} channels (premium: {premium.ToString().ToLower()})");
+
             int messageCap;
             if (premium) messageCap = 500;
             else messageCap = 100;
@@ -152,8 +166,11 @@ namespace Utili.Features
                 foreach (SocketGuild guild in _client.Guilds)
                 {
                     List<AutopurgeRow> guildRows = rows.Where(x => x.GuildId == guild.Id).OrderBy(x => x.ChannelId).ToList();
-                    AutopurgeRow row = guildRows[_premiumPurgeNumber % guildRows.Count];
-                    if(!rowsToPurge.Contains(row)) rowsToPurge.Add(row);
+                    if (guildRows.Count > 0)
+                    {
+                        AutopurgeRow row = guildRows[_premiumPurgeNumber % guildRows.Count];
+                        if(!rowsToPurge.Contains(row)) rowsToPurge.Add(row);
+                    }
                 }
 
                 _premiumPurgeNumber++;

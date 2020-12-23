@@ -69,7 +69,8 @@ namespace UtiliSite.Pages.Dashboard
 
             NoticesRow row = new NoticesRow(auth.Guild.Id, channel.Id);
 
-            await Notices.SaveRowAsync(row);
+            try { await Notices.SaveRowAsync(row); }
+            catch { }
             HttpContext.Response.StatusCode = 200;
             HttpContext.Response.Redirect(HttpContext.Request.Path);
         }

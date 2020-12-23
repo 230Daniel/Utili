@@ -64,7 +64,8 @@ namespace UtiliSite.Pages.Dashboard
             ulong channelId = ulong.Parse(HttpContext.Request.Form["channel"]);
 
             VoiceRolesRow row = await VoiceRoles.GetRowAsync(auth.Guild.Id, channelId);
-            await VoiceRoles.SaveRowAsync(row);
+            try { await VoiceRoles.SaveRowAsync(row); }
+            catch { }
 
             HttpContext.Response.StatusCode = 200;
             HttpContext.Response.Redirect(HttpContext.Request.Path);

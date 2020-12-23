@@ -68,6 +68,7 @@ namespace UtiliSite.Pages.Dashboard
             {
                 row.ExcludedChannels.Add(channelId);
             }
+
             await Core.SaveRowAsync(row);
 
             HttpContext.Response.StatusCode = 200;

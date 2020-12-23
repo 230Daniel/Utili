@@ -100,21 +100,28 @@ namespace UtiliSite
 
         public async Task CreateCustomerIfRequiredAsync(HttpContext httpContext)
         {
-            AuthDetails auth = await Auth.GetAuthDetailsAsync(httpContext);
-            if (!auth.Authenticated) return;
-            if (!string.IsNullOrEmpty(auth.UserRow.CustomerId)) return;
-
-            CustomerCreateOptions options = new CustomerCreateOptions
+            try
             {
-                Description = $"User Id: {auth.User.Id}",
-                Email = auth.User.Email
-            };
+                AuthDetails auth = await Auth.GetAuthDetailsAsync(httpContext);
+                if (!auth.Authenticated) return;
+                if (!string.IsNullOrEmpty(auth.UserRow.CustomerId)) return;
 
-            CustomerService service = new CustomerService(_stripeClient);
-            Customer customer = await service.CreateAsync(options);
+                CustomerCreateOptions options = new CustomerCreateOptions
+                {
+                    Description = $"User Id: {auth.User.Id}",
+                    Email = auth.User.Email
+                };
 
-            auth.UserRow.CustomerId = customer.Id;
-            await Users.SaveRowAsync(auth.UserRow);
+                CustomerService service = new CustomerService(_stripeClient);
+                Customer customer = await service.CreateAsync(options);
+
+                auth.UserRow.CustomerId = customer.Id;
+                await Users.SaveRowAsync(auth.UserRow);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"Stripe customer correlation error - {e.Message}\n{e.StackTrace}");
+            }
         }
 
         public static async Task<(string, bool)> GetCustomerCurrencyAsync(string customerId, HttpRequest request)

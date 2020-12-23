@@ -38,7 +38,8 @@ namespace UtiliSite.Pages.Dashboard
 
             ChannelMirroringRow row = await ChannelMirroring.GetRowAsync(auth.Guild.Id, fromChannelId);
             row.ToChannelId = toChannelId;
-            await ChannelMirroring.SaveRowAsync(row);
+            try { await ChannelMirroring.SaveRowAsync(row); }
+            catch { }
 
             HttpContext.Response.StatusCode = 200;
         }
@@ -56,7 +57,9 @@ namespace UtiliSite.Pages.Dashboard
             ulong channelId = ulong.Parse(HttpContext.Request.Form["channelId"]);
             ChannelMirroringRow row = await ChannelMirroring.GetRowAsync(auth.Guild.Id, channelId);
 
-            await ChannelMirroring.SaveRowAsync(row);
+            try { await ChannelMirroring.SaveRowAsync(row); }
+            catch { }
+            
             HttpContext.Response.StatusCode = 200;
             HttpContext.Response.Redirect(HttpContext.Request.Path);
         }

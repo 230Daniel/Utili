@@ -59,7 +59,8 @@ namespace UtiliSite.Pages.Dashboard
 
             ulong channelId = ulong.Parse(HttpContext.Request.Form["channel"]);
             VoteChannelsRow newRow = await VoteChannels.GetRowAsync(auth.Guild.Id, channelId);
-            await VoteChannels.SaveRowAsync(newRow);
+            try { await VoteChannels.SaveRowAsync(newRow); }
+            catch { }
 
             HttpContext.Response.StatusCode = 200;
             HttpContext.Response.Redirect(HttpContext.Request.Path);

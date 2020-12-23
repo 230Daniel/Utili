@@ -62,7 +62,8 @@ namespace UtiliSite.Pages.Dashboard
 
             ulong channelId = ulong.Parse(HttpContext.Request.Form["channel"]);
             AutopurgeRow row = await Autopurge.GetRowAsync(auth.Guild.Id, channelId);
-            await Autopurge.SaveRowAsync(row);
+            try { await Autopurge.SaveRowAsync(row); }
+            catch { }
 
             HttpContext.Response.StatusCode = 200;
             HttpContext.Response.Redirect(HttpContext.Request.Path);
