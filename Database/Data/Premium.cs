@@ -2,11 +2,29 @@
 using System.Linq;
 using System.Threading.Tasks;
 using MySql.Data.MySqlClient;
+using System;
+using System.Timers;
 
 namespace Database.Data
 {
     public static class Premium
     {
+        private static Timer _slotExpiryTimer;
+        public static void Initialise()
+        {
+            _slotExpiryTimer?.Dispose();
+
+            _slotExpiryTimer = new Timer(60000);
+            _slotExpiryTimer.Elapsed += SlotExpiryTimer_Elapsed;
+            _slotExpiryTimer.Start();
+            _ = DeleteExpiredSlotsAsync();
+        }
+
+        private static void SlotExpiryTimer_Elapsed(object sender, ElapsedEventArgs e)
+        {
+            _ = DeleteExpiredSlotsAsync();
+        }
+
         public static async Task<List<PremiumRow>> GetRowsAsync(ulong? userId = null, ulong? guildId = null, int? slotId = null, bool ignoreCache = false)
         {
             List<PremiumRow> matchedRows = new List<PremiumRow>();
@@ -120,6 +138,36 @@ namespace Database.Data
             await Sql.ExecuteAsync(
                 "DELETE FROM Premium WHERE SlotId = @SlotId;",
                 ("SlotId", row.SlotId));
+        }
+
+        public static async Task DeleteExpiredSlotsAsync()
+        {
+            List<SubscriptionsRow> subscriptions = await Subscriptions.GetRowsAsync();
+            subscriptions = subscriptions.Where(x => x.EndsAt > DateTime.UtcNow).ToList();
+
+            List<(ulong, int)> usedSlotsRecord = new List<(ulong, int)>();
+            List<PremiumRow> rows = (await GetRowsAsync()).OrderBy(x => x.SlotId).ToList();
+            foreach(PremiumRow row in rows)
+            {
+                // usedSlots is how many slots that have been counted so far by this script.
+                // It has nothing to do with the slots which have servers assigned.
+
+                int availableSlots = subscriptions.Where(x => x.UserId == row.UserId).Sum(x => x.Slots);
+                int usedSlots = 0;
+                if (usedSlotsRecord.Any(x => x.Item1 == row.UserId))
+                    usedSlots = usedSlotsRecord.First(x => x.Item1 == row.UserId).Item2;
+                else usedSlotsRecord.Add((row.UserId, 0));
+                usedSlots++;
+
+                if(usedSlots > availableSlots)
+                {
+                    await DeleteRowAsync(row);
+                }
+                else
+                {
+                    usedSlotsRecord[usedSlotsRecord.FindIndex(x => x.Item1 == row.UserId)] = (row.UserId, usedSlots);
+                }
+            }
         }
     }
 

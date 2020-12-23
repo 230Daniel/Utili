@@ -15,10 +15,8 @@ namespace Database
             Sql.SetCredentials(Config.Server, Config.Port, Config.Database, Config.Username, Config.Password);
             await Sql.PingAsync();
 
-            if (useCache)
-            {
-                Cache.Initialise();
-            }
+            if (useCache) Cache.Initialise();
+            Data.Premium.Initialise();
         }
     }
 }

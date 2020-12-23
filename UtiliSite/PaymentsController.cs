@@ -187,13 +187,19 @@ namespace UtiliSite
                     SubscriptionsRow row = await Subscriptions.GetRowAsync(invoice.SubscriptionId);
                     if (row.New)
                     {
-                        ProductService service = new ProductService();
+                        ProductService service = new ProductService(_stripeClient);
                         Product product = await service.GetAsync(invoice.Lines.Data.First().Plan.ProductId);
+
+                        SubscriptionService subscriptionService = new SubscriptionService(_stripeClient);
+                        Subscription subscription = await subscriptionService.GetAsync(invoice.SubscriptionId);
 
                         UserRow user = await Users.GetRowAsync(invoice.CustomerId);
                         row.Slots = int.Parse(product.Metadata["slots"]);
                         row.UserId = user.UserId;
-                        row.EndsAt = DateTime.UtcNow.AddDays(30).AddHours(6);
+                        row.EndsAt = subscription.CurrentPeriodEnd.AddHours(1).AddMinutes(30);
+                        // Allow a bit of leeway if we failed to receive the webhook
+                        // Stripe TimeSpans from the API are always in UTC
+                        // Stripe webhooks are retried every hour for 3 days
 
                         await Subscriptions.SaveRowAsync(row);
                     }
