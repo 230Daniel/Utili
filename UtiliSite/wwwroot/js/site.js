@@ -32,10 +32,20 @@ function sizeElements() {
     var mobile = window.mobileAndTabletCheck();
     var navHeight = $("#navbar").outerHeight();
 
-    var elements = document.getElementsByClassName("dynamic-height");
+    var elements = document.querySelectorAll(".dynamic-height");
     for(var i = 0; i < elements.length; i++) {
+        var children = $(".dynamic-height > :not(.footer)");
+        var footers = elements[i].querySelectorAll(".footer");
+        for(var j = 0; j < footers.length; j++) {
+            var margin = vh - children.outerHeight(true) - navHeight;
+            if (margin < vh * 0.03) margin = vh * 0.03;
+            footers[i].style.marginTop = margin + "px";
+        }
+
         elements[i].style.height = vh - navHeight + "px";
     }
+
+    $(".footer").removeAttr("hidden");
 
     if (mobile || vw <= 675) {
         $(".container").css("max-width", "100vw");

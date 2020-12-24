@@ -43,7 +43,7 @@
                 @if (SidebarHelper.GetIsActive(ViewContext, "error") != "active")
                 {
                     <div class="navbar-nav flex-grow-1" style="justify-content: flex-end;">
-                        @if (auth != null && auth.User != null)
+                        @if (auth?.User != null)
                         {
                             <div class="dropdown noverticalpadding">
                                 <a class="nav-link text-dark dropdown-toggle noverticalpadding" style="align-items: center; display: flex;" data-toggle="dropdown" role="button" id="userDropdown" aria-haspopup="true" aria-expanded="false" href="#">
@@ -73,6 +73,12 @@
             <main role="main" class="pb-3">
                 @RenderBody()
             </main>
+        </div>
+        <div class="footer" hidden>
+            <div class="text-white" style="width: 75vw; margin-left: auto; margin-right: auto;">
+                <span style="float: left">© Daniel Baynton & Iemanie Suryadean 2020</span>
+                <span style="float: right"><a asp-page="terms" class="a-blue">Terms</a> • <a asp-page="privacy" class="a-blue">Privacy</a></span>
+            </div>
         </div>
     </div>
 
