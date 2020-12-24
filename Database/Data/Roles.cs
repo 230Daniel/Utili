@@ -108,11 +108,10 @@ namespace Database.Data
 
             while (reader.Read())
             {
-                matchedRows.Add(new RolesPersistantRolesRow(
-                    reader.GetInt64(0),
+                matchedRows.Add(RolesPersistantRolesRow.FromDatabase(
+                    reader.GetUInt64(0),
                     reader.GetUInt64(1),
-                    reader.GetUInt64(2),
-                    reader.GetString(3)));
+                    reader.GetString(2)));
             }
 
             reader.Close();
@@ -246,24 +245,28 @@ namespace Database.Data
             Roles = new List<ulong>();
         }
 
-        public RolesPersistantRolesRow(long id, ulong guildId, ulong userId, string roles)
+        public static RolesPersistantRolesRow FromDatabase(ulong guildId, ulong userId, string roles)
         {
-            New = false;
-            GuildId = guildId;
-            UserId = userId;
-
-            Roles = new List<ulong>();
-
+            RolesPersistantRolesRow row = new RolesPersistantRolesRow
+            {
+                New = false,
+                GuildId = guildId,
+                UserId = userId,
+                Roles = new List<ulong>()
+            };
+            
             if (!string.IsNullOrEmpty(roles))
             {
                 foreach (string role in roles.Split(","))
                 {
                     if (ulong.TryParse(role, out ulong channelId))
                     {
-                        Roles.Add(channelId);
+                        row.Roles.Add(channelId);
                     }
                 }
             }
+
+            return row;
         }
 
         public string GetRolesString()
