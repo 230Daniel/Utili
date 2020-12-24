@@ -36,7 +36,7 @@ namespace UtiliSite
             string host = viewContext.HttpContext.Request.Host.ToString();
             if (!host.EndsWith("/")) host += "/";
 
-            return host + page;
+            return "https://" + host + page;
         }
     }
 
