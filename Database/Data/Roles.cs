@@ -85,7 +85,7 @@ namespace Database.Data
         }
 
 
-        public static async Task<List<RolesPersistantRolesRow>> GetPersistRowsAsync(ulong? guildId = null, ulong? userId = null, long? id = null)
+        public static async Task<List<RolesPersistantRolesRow>> GetPersistRowsAsync(ulong? guildId = null, ulong? userId = null)
         {
             List<RolesPersistantRolesRow> matchedRows = new List<RolesPersistantRolesRow>();
 
@@ -104,12 +104,6 @@ namespace Database.Data
                 values.Add(("UserId", userId.Value));
             }
 
-            if (id.HasValue)
-            {
-                command += " AND Id = @Id";
-                values.Add(("Id", id.Value));
-            }
-
             MySqlDataReader reader = await Sql.ExecuteReaderAsync(command, values.ToArray());
 
             while (reader.Read())
@@ -126,9 +120,15 @@ namespace Database.Data
             return matchedRows;
         }
 
+        public static async Task<RolesPersistantRolesRow> GetPersistRowAsync(ulong guildId, ulong userId)
+        {
+            List<RolesPersistantRolesRow> rows = await GetPersistRowsAsync(guildId, userId);
+            return rows.Count > 0 ? rows.First() : new RolesPersistantRolesRow(guildId, userId);
+        }
+
         public static async Task SavePersistRowAsync(RolesPersistantRolesRow row)
         {
-            if (row.Id == 0)
+            if (row.New)
             {
                 await Sql.ExecuteAsync(
                     "INSERT INTO RolesPersistantRoles (GuildId, UserId, Roles) VALUES (@GuildId, @UserId, @Roles);",
@@ -136,13 +136,12 @@ namespace Database.Data
                     ("UserId", row.UserId),
                     ("Roles", row.GetRolesString()));
 
-                row.Id = (await GetPersistRowsAsync(row.GuildId, row.UserId)).First().Id;
+                row.New = false;
             }
             else
             {
                 await Sql.ExecuteAsync(
-                    "UPDATE RolesPersistantRoles SET GuildId = @GuildId, UserId = @UserId, Roles = @Roles WHERE Id = @Id;",
-                    ("Id", row.Id),
+                    "UPDATE RolesPersistantRoles SET GuildId = @GuildId, UserId = @UserId, Roles = @Roles WHERE GuildId = @GuildId AND UserId = @UserId;",
                     ("GuildId", row.GuildId), 
                     ("UserId", row.UserId),
                     ("Roles", row.GetRolesString()));
@@ -152,8 +151,9 @@ namespace Database.Data
         public static async Task DeletePersistRowAsync(RolesPersistantRolesRow row)
         {
             await Sql.ExecuteAsync(
-                "DELETE FROM RolesPersistantRoles WHERE Id = @Id", 
-                ("Id", row.Id));
+                "DELETE FROM RolesPersistantRoles WHERE GuildId = @GuildId AND UserId = @UserId;", 
+                ("GuildId", row.GuildId), 
+                ("UserId", row.UserId));
         }
     }
 
@@ -229,19 +229,26 @@ namespace Database.Data
     {
         // TODO: Refactor properly, these have to be unique as of current
 
-        public long Id { get; set; }
+        public bool New { get; set; }
         public ulong GuildId { get; set; }
         public ulong UserId { get; set; }
         public List<ulong> Roles { get; set; }
 
-        public RolesPersistantRolesRow()
+        private RolesPersistantRolesRow()
         {
-            Id = 0;
+        }
+
+        public RolesPersistantRolesRow(ulong guildId, ulong userId)
+        {
+            New = true;
+            GuildId = guildId;
+            UserId = userId;
+            Roles = new List<ulong>();
         }
 
         public RolesPersistantRolesRow(long id, ulong guildId, ulong userId, string roles)
         {
-            Id = id;
+            New = false;
             GuildId = guildId;
             UserId = userId;
 

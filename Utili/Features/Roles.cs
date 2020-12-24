@@ -26,10 +26,9 @@ namespace Utili.Features
 
             if (row.RolePersist)
             {
-                List<RolesPersistantRolesRow> persistRows = await Database.Data.Roles.GetPersistRowsAsync(guild.Id, user.Id);
-                List<ulong> roleIds = persistRows.SelectMany(x => x.Roles).Distinct().ToList();
+                RolesPersistantRolesRow persistRow = await Database.Data.Roles.GetPersistRowAsync(guild.Id, user.Id);
 
-                foreach (ulong roleId in roleIds)
+                foreach (ulong roleId in persistRow.Roles.Distinct())
                 {
                     SocketRole role = guild.GetRole(roleId);
                     if (role != null && BotPermissions.CanManageRole(role))
@@ -41,32 +40,22 @@ namespace Utili.Features
                         }
                         catch { }
                     }
+                    if(guild.Users.All(x => x.Id != user.Id)) return;
                 }
 
-                if (guild.Users.Any(x => x.Id == user.Id))
-                {
-                    foreach (RolesPersistantRolesRow persistRow in persistRows)
-                    {
-                        await Database.Data.Roles.DeletePersistRowAsync(persistRow);
-                    }
-                }
+                await Database.Data.Roles.DeletePersistRowAsync(persistRow);
             }
         }
 
         public static async Task UserLeft(SocketGuildUser user)
         {
             SocketGuild guild = user.Guild;
-
             RolesRow row = await Database.Data.Roles.GetRowAsync(guild.Id);
 
             if (row.RolePersist)
             {
-                RolesPersistantRolesRow persistRow = new RolesPersistantRolesRow
-                {
-                    GuildId = user.Guild.Id,
-                    UserId = user.Id,
-                    Roles = user.Roles.Where(x => !x.IsEveryone).Select(x => x.Id).ToList()
-                };
+                RolesPersistantRolesRow persistRow = await Database.Data.Roles.GetPersistRowAsync(guild.Id, user.Id);
+                persistRow.Roles.AddRange(user.Roles.Where(x => !x.IsEveryone).Select(x => x.Id));
 
                 await Database.Data.Roles.SavePersistRowAsync(persistRow);
             }
