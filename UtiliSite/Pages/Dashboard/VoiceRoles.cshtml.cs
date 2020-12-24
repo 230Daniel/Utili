@@ -11,29 +11,22 @@ namespace UtiliSite.Pages.Dashboard
     {
         public async Task OnGet()
         {
-            AuthDetails auth = await Auth.GetAuthDetailsAsync(HttpContext);
+            AuthDetails auth = await Auth.GetAuthDetailsAsync(this);
             if(!auth.Authenticated) return;
-            ViewData["user"] = auth.User;
-            ViewData["guild"] = auth.Guild;
-            ViewData["premium"] = await Database.Data.Premium.IsGuildPremiumAsync(auth.Guild.Id);
 
-            List<RestVoiceChannel> voiceChannels = await DiscordModule.GetVoiceChannelsAsync(auth.Guild);
             List<VoiceRolesRow> rows = await VoiceRoles.GetRowsAsync(auth.Guild.Id);
+            List<RestVoiceChannel> channels = await DiscordModule.GetVoiceChannelsAsync(auth.Guild);
+            List<RestVoiceChannel> addedChannels = channels.Where(x => rows.Any(y => y.ChannelId == x.Id)).OrderBy(x => x.Position).ToList();
+            List<RestVoiceChannel> nonAddedChannels = channels.Where(x => rows.All(y => y.ChannelId != x.Id)).OrderBy(x => x.Position).ToList();
 
-            List<RestVoiceChannel> addedChannels =
-                voiceChannels.Where(x => rows.Any(y => y.ChannelId == x.Id)).OrderBy(x => x.Position).ToList();
-
-            List<RestVoiceChannel> nonAddedChannels =
-                voiceChannels.Where(x => rows.All(y => y.ChannelId != x.Id)).OrderBy(x => x.Position).ToList();
-
+            ViewData["rows"] = rows;
             ViewData["addedChannels"] = addedChannels;
             ViewData["nonAddedChannels"] = nonAddedChannels;
-            ViewData["rows"] = rows;
         }
 
         public async Task OnPost()
         {
-            AuthDetails auth = await Auth.GetAuthDetailsAsync(HttpContext);
+            AuthDetails auth = await Auth.GetAuthDetailsAsync(this);
 
             if (!auth.Authenticated)
             {
@@ -53,7 +46,7 @@ namespace UtiliSite.Pages.Dashboard
 
         public async Task OnPostAdd()
         {
-            AuthDetails auth = await Auth.GetAuthDetailsAsync(HttpContext);
+            AuthDetails auth = await Auth.GetAuthDetailsAsync(this);
 
             if (!auth.Authenticated)
             {
@@ -73,7 +66,7 @@ namespace UtiliSite.Pages.Dashboard
 
         public async Task OnPostRemove()
         {
-            AuthDetails auth = await Auth.GetAuthDetailsAsync(HttpContext);
+            AuthDetails auth = await Auth.GetAuthDetailsAsync(this);
 
             if (!auth.Authenticated)
             {

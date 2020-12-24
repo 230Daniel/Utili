@@ -12,25 +12,21 @@ namespace UtiliSite.Pages.Dashboard
     {
         public async Task OnGet()
         {
-            AuthDetails auth = await Auth.GetAuthDetailsAsync(HttpContext);
+            AuthDetails auth = await Auth.GetAuthDetailsAsync(this);
             if(!auth.Authenticated) return;
-            ViewData["user"] = auth.User;
-            ViewData["guild"] = auth.Guild;
-            ViewData["premium"] = await Database.Data.Premium.IsGuildPremiumAsync(auth.Guild.Id);
 
             List<MessageFilterRow> messageFilterRows = await MessageFilter.GetRowsAsync(auth.Guild.Id);
-            ViewData["messageFilterRows"] = messageFilterRows;
-
             List<RestTextChannel> channels = await DiscordModule.GetTextChannelsAsync(auth.Guild);
-            ViewData["channels"] = channels;
-
             List<RestTextChannel> nonMessageFilterChannels = channels.Where(x => messageFilterRows.All(y => y.ChannelId != x.Id)).OrderBy(x => x.Position).ToList();
+
+            ViewData["messageFilterRows"] = messageFilterRows;
+            ViewData["channels"] = channels;
             ViewData["nonMessageFilterChannels"] = nonMessageFilterChannels;
         }
 
         public async Task OnPost()
         {
-            AuthDetails auth = await Auth.GetAuthDetailsAsync(HttpContext);
+            AuthDetails auth = await Auth.GetAuthDetailsAsync(this);
 
             if (!auth.Authenticated)
             {
@@ -52,7 +48,7 @@ namespace UtiliSite.Pages.Dashboard
 
         public async Task OnPostAdd()
         {
-            AuthDetails auth = await Auth.GetAuthDetailsAsync(HttpContext);
+            AuthDetails auth = await Auth.GetAuthDetailsAsync(this);
 
             if (!auth.Authenticated)
             {
@@ -71,7 +67,7 @@ namespace UtiliSite.Pages.Dashboard
 
         public async Task OnPostRemove()
         {
-            AuthDetails auth = await Auth.GetAuthDetailsAsync(HttpContext);
+            AuthDetails auth = await Auth.GetAuthDetailsAsync(this);
 
             if (!auth.Authenticated)
             {

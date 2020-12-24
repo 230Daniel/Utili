@@ -1,14 +1,6 @@
 ﻿@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor;
 @{
-    AuthDetails auth;
-    if (ViewData["auth"] == null)
-    {
-        auth = await Auth.GetOptionalGlobalAuthDetailsAsync(HttpContextAccessor.HttpContext);
-    }
-    else
-    {
-        auth = (AuthDetails) ViewData["auth"];
-    }
+    AuthDetails auth = (AuthDetails) ViewData["auth"];
 }
 
 <!DOCTYPE html>
@@ -51,7 +43,7 @@
                 @if (SidebarHelper.GetIsActive(ViewContext, "error") != "active")
                 {
                     <div class="navbar-nav flex-grow-1" style="justify-content: flex-end;">
-                        @if (auth.User != null)
+                        @if (auth != null && auth.User != null)
                         {
                             <div class="dropdown noverticalpadding">
                                 <a class="nav-link text-dark dropdown-toggle noverticalpadding" style="align-items: center; display: flex;" data-toggle="dropdown" role="button" id="userDropdown" aria-haspopup="true" aria-expanded="false" href="#">

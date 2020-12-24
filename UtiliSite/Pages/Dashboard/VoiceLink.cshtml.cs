@@ -12,26 +12,22 @@ namespace UtiliSite.Pages.Dashboard
     {
         public async Task OnGet()
         {
-            AuthDetails auth = await Auth.GetAuthDetailsAsync(HttpContext);
+            AuthDetails auth = await Auth.GetAuthDetailsAsync(this);
             if(!auth.Authenticated) return;
-            ViewData["user"] = auth.User;
-            ViewData["guild"] = auth.Guild;
-            ViewData["premium"] = await Database.Data.Premium.IsGuildPremiumAsync(auth.Guild.Id);
 
             VoiceLinkRow row = await VoiceLink.GetMetaRowAsync(auth.Guild.Id);
-
             List<RestVoiceChannel> voiceChannels = await DiscordModule.GetVoiceChannelsAsync(auth.Guild);
             List<RestVoiceChannel> excludedChannels = voiceChannels.Where(x => row.ExcludedChannels.Contains(x.Id)).OrderBy(x => x.Position).ToList();
             List<RestVoiceChannel> nonExcludedChannels = voiceChannels.Where(x => !row.ExcludedChannels.Contains(x.Id)).OrderBy(x => x.Position).ToList();
 
+            ViewData["row"] = row;
             ViewData["excludedChannels"] = excludedChannels;
             ViewData["nonExcludedChannels"] = nonExcludedChannels;
-            ViewData["row"] = row;
         }
 
         public async Task OnPost()
         {
-            AuthDetails auth = await Auth.GetAuthDetailsAsync(HttpContext);
+            AuthDetails auth = await Auth.GetAuthDetailsAsync(this);
 
             if (!auth.Authenticated)
             {
@@ -54,7 +50,7 @@ namespace UtiliSite.Pages.Dashboard
 
         public async Task OnPostExclude()
         {
-            AuthDetails auth = await Auth.GetAuthDetailsAsync(HttpContext);
+            AuthDetails auth = await Auth.GetAuthDetailsAsync(this);
 
             if (!auth.Authenticated)
             {
@@ -77,7 +73,7 @@ namespace UtiliSite.Pages.Dashboard
 
         public async Task OnPostRemove()
         {
-            AuthDetails auth = await Auth.GetAuthDetailsAsync(HttpContext);
+            AuthDetails auth = await Auth.GetAuthDetailsAsync(this);
 
             if (!auth.Authenticated)
             {

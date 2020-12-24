@@ -15,7 +15,7 @@ namespace UtiliSite.Pages
                 return;
             }
 
-            AuthDetails auth = await Auth.GetAuthDetailsAsync(HttpContext);
+            AuthDetails auth = await Auth.GetAuthDetailsAsync(this);
             if(!auth.Authenticated) return;
 
             string url = GetRedirect(auth.User.Id, HttpContext);

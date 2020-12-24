@@ -1,12 +1,7 @@
 ﻿@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor;
 @{
-    if (ViewData["auth"] == null)
-    {
-        IgnoreBody();
-        return;
-    }
     AuthDetails auth = (AuthDetails) ViewData["auth"];
-    if (!auth.Authenticated)
+    if (auth == null || !auth.Authenticated)
     {
         IgnoreBody();
         return;

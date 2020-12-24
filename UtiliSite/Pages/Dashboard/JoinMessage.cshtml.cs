@@ -1,7 +1,9 @@
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Database.Data;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Database;
+using Discord.Rest;
 
 namespace UtiliSite.Pages.Dashboard
 {
@@ -9,19 +11,19 @@ namespace UtiliSite.Pages.Dashboard
     {
         public async Task OnGet()
         {
-            AuthDetails auth = await Auth.GetAuthDetailsAsync(HttpContext);
+            AuthDetails auth = await Auth.GetAuthDetailsAsync(this);
             if(!auth.Authenticated) return;
 
-            ViewData["user"] = auth.User;
-            ViewData["guild"] = auth.Guild;
-            ViewData["premium"] = await Database.Data.Premium.IsGuildPremiumAsync(auth.Guild.Id);
-            ViewData["row"] = await JoinMessage.GetRowAsync(auth.Guild.Id);
-            ViewData["channels"] = await DiscordModule.GetTextChannelsAsync(auth.Guild);
+            JoinMessageRow row = await JoinMessage.GetRowAsync(auth.Guild.Id);
+            List<RestTextChannel> channels = await DiscordModule.GetTextChannelsAsync(auth.Guild);
+
+            ViewData["row"] = row;
+            ViewData["channels"] = channels;
         }
 
         public async Task OnPost()
         {
-            AuthDetails auth = await Auth.GetAuthDetailsAsync(HttpContext);
+            AuthDetails auth = await Auth.GetAuthDetailsAsync(this);
 
             if (!auth.Authenticated)
             {

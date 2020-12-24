@@ -25,9 +25,9 @@ namespace UtiliSite
         [HttpPost("create-checkout-session")]
         public async Task<IActionResult> CreateCheckoutSession([FromBody] CreateCheckoutSessionRequest req)
         {
-            await CreateCustomerIfRequiredAsync(HttpContext);
+            await CreateCustomerIfRequiredAsync();
 
-            AuthDetails auth = await Auth.GetAuthDetailsAsync(HttpContext);
+            AuthDetails auth = await Auth.GetAuthDetailsAsync(this);
             if (!auth.Authenticated)
             {
                 return Forbid();
@@ -77,11 +77,11 @@ namespace UtiliSite
         }
 
         [HttpPost("customer-portal")]
-        public async Task<IActionResult> CustomerPortal([FromBody] CustomerPortalRequest req)
+        public async Task<IActionResult> CustomerPortal()
         {
-            await CreateCustomerIfRequiredAsync(HttpContext);
+            await CreateCustomerIfRequiredAsync();
 
-            AuthDetails auth = await Auth.GetAuthDetailsAsync(HttpContext);
+            AuthDetails auth = await Auth.GetAuthDetailsAsync(this);
             if (!auth.Authenticated)
             {
                 return Forbid();
@@ -98,11 +98,11 @@ namespace UtiliSite
             return Ok(session);
         }
 
-        public async Task CreateCustomerIfRequiredAsync(HttpContext httpContext)
+        public async Task CreateCustomerIfRequiredAsync()
         {
             try
             {
-                AuthDetails auth = await Auth.GetAuthDetailsAsync(httpContext);
+                AuthDetails auth = await Auth.GetAuthDetailsAsync(this);
                 if (!auth.Authenticated) return;
                 if (!string.IsNullOrEmpty(auth.UserRow.CustomerId)) return;
 

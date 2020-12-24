@@ -12,24 +12,24 @@ namespace UtiliSite.Pages.Dashboard
     {
         public async Task OnGet()
         {
-            AuthDetails auth = await Auth.GetAuthDetailsAsync(HttpContext);
+            AuthDetails auth = await Auth.GetAuthDetailsAsync(this);
             if(!auth.Authenticated) return;
-            ViewData["user"] = auth.User;
-            ViewData["guild"] = auth.Guild;
-            ViewData["premium"] = await Database.Data.Premium.IsGuildPremiumAsync(auth.Guild.Id);
-
+            
             CoreRow row = await Core.GetRowAsync(auth.Guild.Id);
-            ViewData["row"] = row;
-            ViewData["nickname"] = await DiscordModule.GetBotNicknameAsync(auth.Guild.Id);
+            List<RestTextChannel> channels = await DiscordModule.GetTextChannelsAsync(auth.Guild);
+            List<RestTextChannel> excludedChannels = channels.Where(x => row.ExcludedChannels.Contains(x.Id)).OrderBy(x => x.Position).ToList();
+            List<RestTextChannel> nonExcludedChannels = channels.Where(x => !row.ExcludedChannels.Contains(x.Id)).OrderBy(x => x.Position).ToList();
+            string nickname = await DiscordModule.GetBotNicknameAsync(auth.Guild.Id);
 
-            List<RestTextChannel> textChannels = await DiscordModule.GetTextChannelsAsync(auth.Guild);
-            ViewData["excludedChannels"] =  textChannels.Where(x => row.ExcludedChannels.Contains(x.Id)).OrderBy(x => x.Position).ToList();
-            ViewData["nonExcludedChannels"] =  textChannels.Where(x => !row.ExcludedChannels.Contains(x.Id)).OrderBy(x => x.Position).ToList();
+            ViewData["row"] = row;
+            ViewData["excludedChannels"] = excludedChannels;
+            ViewData["nonExcludedChannels"] = nonExcludedChannels;
+            ViewData["nickname"] = nickname;
         }
 
         public async Task OnPost()
         {
-            AuthDetails auth = await Auth.GetAuthDetailsAsync(HttpContext);
+            AuthDetails auth = await Auth.GetAuthDetailsAsync(this);
 
             if (!auth.Authenticated)
             {
@@ -53,7 +53,7 @@ namespace UtiliSite.Pages.Dashboard
 
         public async Task OnPostExclude()
         {
-            AuthDetails auth = await Auth.GetAuthDetailsAsync(HttpContext);
+            AuthDetails auth = await Auth.GetAuthDetailsAsync(this);
 
             if (!auth.Authenticated)
             {
@@ -77,7 +77,7 @@ namespace UtiliSite.Pages.Dashboard
 
         public async Task OnPostRemove()
         {
-            AuthDetails auth = await Auth.GetAuthDetailsAsync(HttpContext);
+            AuthDetails auth = await Auth.GetAuthDetailsAsync(this);
 
             if (!auth.Authenticated)
             {

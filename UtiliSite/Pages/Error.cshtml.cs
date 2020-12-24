@@ -11,16 +11,6 @@ namespace UtiliSite.Pages
     {
         public string RequestId { get; set; }
 
-        public bool ShowRequestId => !string.IsNullOrEmpty(RequestId);
-
-        // ReSharper disable once NotAccessedField.Local
-        private readonly ILogger<ErrorModel> _logger;
-
-        public ErrorModel(ILogger<ErrorModel> logger)
-        {
-            _logger = logger;
-        }
-
         public async Task OnGet()
         {
             RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier;

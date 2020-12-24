@@ -7,12 +7,25 @@ using Microsoft.AspNetCore.Http;
 using UtiliSite.Pages;
 using static UtiliSite.DiscordModule;
 using Database.Data;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.Mvc.ViewFeatures;
 
 namespace UtiliSite
 {
     public static class Auth
     {
-        public static async Task<AuthDetails> GetAuthDetailsAsync(HttpContext httpContext)
+        public static async Task<AuthDetails> GetAuthDetailsAsync(PageModel model)
+        {
+            return await GetAuthDetailsAsync(model.HttpContext, model.ViewData);
+        }
+
+        public static async Task<AuthDetails> GetAuthDetailsAsync(Controller controller)
+        {
+            return await GetAuthDetailsAsync(controller.HttpContext, controller.ViewData);
+        }
+
+        private static async Task<AuthDetails> GetAuthDetailsAsync(HttpContext httpContext, ViewDataDictionary viewData)
         {
             AuthenticationProperties authProperties = new AuthenticationProperties
             {
@@ -38,6 +51,7 @@ namespace UtiliSite
             }
 
             AuthDetails auth = new AuthDetails(true, client, client.CurrentUser);
+            viewData["user"] = auth.User;
 
             if (httpContext.Request.RouteValues.TryGetValue("guild", out object guildValue))
             {
@@ -59,17 +73,21 @@ namespace UtiliSite
 
                             httpContext.Response.Redirect(inviteUrl);
                             auth.Authenticated = false;
+                            viewData["auth"] = auth;
                             return auth;
                         }
 
                         if (await IsGuildManageableAsync(client.CurrentUser.Id, guild.Id) || client.CurrentUser.Id == 218613903653863427)
                         {
                             auth.Guild = guild;
+                            viewData["guild"] = guild;
+                            viewData["premium"] = await Premium.IsGuildPremiumAsync(auth.Guild.Id);
                         }
                         else
                         {
                             auth.Authenticated = false;
                             httpContext.Response.Redirect("/dashboard");
+                            viewData["auth"] = auth;
                             return auth;
                         }
                     }
@@ -77,6 +95,7 @@ namespace UtiliSite
                     {
                         auth.Authenticated = false;
                         httpContext.Response.Redirect("/dashboard");
+                        viewData["auth"] = auth;
                         return auth;
                     }
                 }
@@ -84,14 +103,26 @@ namespace UtiliSite
                 {
                     auth.Authenticated = false;
                     httpContext.Response.Redirect("/dashboard");
+                    viewData["auth"] = auth;
                     return auth;
                 }
             }
 
+            viewData["auth"] = auth;
             return auth;
         }
 
-        public static async Task<AuthDetails> GetOptionalGlobalAuthDetailsAsync(HttpContext httpContext)
+        public static async Task<AuthDetails> GetOptionalAuthDetailsAsync(PageModel model)
+        {
+            return await GetOptionalAuthDetailsAsync(model.HttpContext, model.ViewData);
+        }
+
+        public static async Task<AuthDetails> GetOptionalAuthDetailsAsync(Controller controller)
+        {
+            return await GetOptionalAuthDetailsAsync(controller.HttpContext, controller.ViewData);
+        }
+
+        private static async Task<AuthDetails> GetOptionalAuthDetailsAsync(HttpContext httpContext, ViewDataDictionary viewData)
         {
             if (!httpContext.User.Identity.IsAuthenticated)
             {
@@ -102,7 +133,10 @@ namespace UtiliSite
             string token = httpContext.GetTokenAsync("Discord", "access_token").GetAwaiter().GetResult();
             DiscordRestClient client = await GetClientAsync(userId, token);
 
-            return client == null ? new AuthDetails(false) : new AuthDetails(true, client, client.CurrentUser);
+            AuthDetails auth = client == null ? new AuthDetails(false) : new AuthDetails(true, client, client.CurrentUser);
+            viewData["auth"] = auth;
+            viewData["user"] = auth.User;
+            return auth;
         }
     }
 
