@@ -12,14 +12,18 @@
 
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>@ViewData["Title"]</title>
-        <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-        <link rel="stylesheet" href="~/css/site.css" />
-        <script src="https://kit.fontawesome.com/4c685c9379.js" crossorigin="anonymous"></script>
-    </head>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/main.css" />
+    <link rel="stylesheet" href="~/css/nav.css" />
+    <link rel="stylesheet" href="~/css/scrollbar.css" />
+    <link rel="stylesheet" href="~/css/dashboard.css" />
+    <link rel="stylesheet" href="~/css/cards.css" />
+    <script src="https://kit.fontawesome.com/4c685c9379.js" crossorigin="anonymous"></script>
+</head>
     <body onload="onLoad()" style="opacity: 0;">
         <nav class="navbar navbar-expand-sm navbar-light" id="navbar" style="background-color: #e9ecef;">
             <div class="container" id="success" hidden>
@@ -72,7 +76,7 @@
             </div>
         </nav>
         <div class="d-flex bg-dark" id="wrapper">
-            <div class="dynamic-height scroll-dark sidebar-collapse show" id="sidebar">
+            <div class="dynamic-height scroll-dark show" id="sidebar">
                 <div class="card" id="serverCard">
                     <img src="@DiscordModule.GetGuildIconUrl(guild)" class="guild-icon card-img-top" alt="Server Icon">
                     <div class="card-body" style="padding-top: 15px; padding-bottom: 20px;">

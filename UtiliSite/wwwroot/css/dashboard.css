@@ -1,0 +1,109 @@
+﻿
+
+
+/* #region Sidebar*/
+
+.wrapper {
+    display: flex;
+    width: inherit;
+    margin-top: 0;
+}
+
+#sidebar {
+    width: 225px;
+    min-width: 225px;
+    max-width: 225px;
+}
+
+.right-angle-top-left {
+    position: absolute;
+    margin: 30px;
+    width: 0;
+    border-right: 50px solid transparent;
+    border-top: 50px solid #c2c5c5;
+    margin: 0;
+    background: none;
+    border-bottom: 0;
+    border-left: 0;
+    padding: 0;
+    outline: 0 !important;
+    opacity: 0.5;
+}
+
+#serverCard {
+    width: 225px;
+    height: 225px;
+    background-color: #292c2f;
+    border: 0;
+}
+
+img.guild-icon {
+    height: 150px;
+    width: 150px;
+    border-radius: 50% !important;
+    margin-top: 23px;
+    margin-bottom: 0;
+    margin-right: 37.5px;
+    margin-left: 37.5px;
+}
+
+.list-group-item:hover {
+    color: lightgray;
+}
+
+/* #endregion Sidebar */
+
+/* #region Title */
+
+.jumbotron {
+    background-color: inherit;
+    padding-left: 8px;
+}
+
+.info-hover {
+    display: inline-block;
+    padding-left: 10px;
+    user-select: none;
+}
+
+.tooltip-inner {
+    max-width: 400px;
+    width: 400px !important;
+    border-radius: 5px !important;
+}
+
+.tooltip-inner p {
+    margin: 6px;
+    text-align: left;
+}
+
+/* #endregion Title */
+
+/* #region Content */
+
+.dropdown {
+    padding-bottom: 30px;
+}
+
+.dropdown-200-content {
+    width: 200px;
+    height: auto;
+    max-height: 200px;
+    overflow-x: hidden;
+    margin: 0;
+    border: 1px solid black;
+}
+
+.dropdown-200 {
+    width: 200px;
+    padding-left: 0.75rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.belowcards {
+    padding-top: 30px;
+}
+
+/* #endregion Content */
