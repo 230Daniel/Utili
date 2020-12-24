@@ -56,7 +56,7 @@ namespace Utili
         private void LogRaw(string message, LogSeverity logSeverity)
         {
             WriteToConsole(message, logSeverity);
-            Buffer.Append(message);
+            Buffer.Append(message + "\n");
         }
 
         public void ReportError(string module, Exception exception, LogSeverity severity = LogSeverity.Errr)
@@ -106,10 +106,9 @@ namespace Utili
       ////
     //
 
-
 ";
 
-            LogRaw(title, LogSeverity.Title);
+            LogRaw(title, LogSeverity.Info);
         }
 
         private static object _messageLock= new object();
@@ -117,9 +116,8 @@ namespace Utili
         {
             ConsoleColor colour = logSeverity switch
             {
-                LogSeverity.Title => ConsoleColor.Gray,
-                LogSeverity.Dbug => ConsoleColor.DarkGray,
-                LogSeverity.Info => ConsoleColor.Blue,
+                LogSeverity.Dbug => ConsoleColor.Gray,
+                LogSeverity.Info => ConsoleColor.Gray,
                 LogSeverity.Warn => ConsoleColor.DarkYellow,
                 LogSeverity.Errr => ConsoleColor.Red,
                 LogSeverity.Crit => ConsoleColor.DarkRed,
