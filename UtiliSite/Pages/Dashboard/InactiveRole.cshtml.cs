@@ -2,30 +2,28 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Database.Data;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace UtiliSite.Pages.Dashboard
 {
     public class InactiveRoleModel : PageModel
     {
-        public async Task OnGet()
+        public async Task<ActionResult> OnGet()
         {
             AuthDetails auth = await Auth.GetAuthDetailsAsync(this);
-            if(!auth.Authenticated) return;
+            if(!auth.Authenticated) return RedirectToPage("Index");
 
             InactiveRoleRow row = await InactiveRole.GetRowAsync(auth.Guild.Id);
             ViewData["row"] = row;
+
+            return Page();
         }
 
-        public async Task OnPost()
+        public async Task<ActionResult> OnPost()
         {
             AuthDetails auth = await Auth.GetAuthDetailsAsync(this);
-
-            if (!auth.Authenticated)
-            {
-                HttpContext.Response.StatusCode = 403;
-                return;
-            }
+            if (!auth.Authenticated) return Forbid();
 
             ulong inactiveRoleId = ulong.Parse(HttpContext.Request.Form["inactiveRole"]);
             ulong immuneRoleId = ulong.Parse(HttpContext.Request.Form["immuneRole"]);
@@ -34,7 +32,7 @@ namespace UtiliSite.Pages.Dashboard
 
             InactiveRoleRow row = await InactiveRole.GetRowAsync(auth.Guild.Id);
 
-            if(!auth.Guild.Roles.Any(x => x.Id == row.RoleId))
+            if(auth.Guild.Roles.All(x => x.Id != row.RoleId))
             {
                 // Inactivity data is not recorded if the role id is invalid.
                 // Set the DefaultLastAction to now to assume that all users
@@ -48,7 +46,7 @@ namespace UtiliSite.Pages.Dashboard
             row.Inverse = inverse;
             await InactiveRole.SaveRowAsync(row);
 
-            HttpContext.Response.StatusCode = 200;
+            return new OkResult();
         }
 
         public static string GetIsRoleSelected(ulong roleOne, ulong roleTwo)

@@ -3,16 +3,17 @@ using System.Linq;
 using System.Threading.Tasks;
 using Database.Data;
 using Discord.Rest;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace UtiliSite.Pages.Dashboard
 {
     public class VoteChannelsModel : PageModel
     {
-        public async Task OnGet()
+        public async Task<ActionResult> OnGet()
         {
             AuthDetails auth = await Auth.GetAuthDetailsAsync(this);
-            if(!auth.Authenticated) return;
+            if(!auth.Authenticated) return RedirectToPage("Index");
 
             List<VoteChannelsRow> rows = await VoteChannels.GetRowsAsync(auth.Guild.Id);
             List<RestTextChannel> channels = await DiscordModule.GetTextChannelsAsync(auth.Guild);
@@ -21,17 +22,15 @@ namespace UtiliSite.Pages.Dashboard
             ViewData["rows"] = rows;
             ViewData["channels"] = channels;
             ViewData["nonVoteChannels"] = nonVoteChannels;
+
+            return Page();
         }
 
-        public async Task OnPost()
+        public async Task<ActionResult> OnPost()
         {
             AuthDetails auth = await Auth.GetAuthDetailsAsync(this);
 
-            if (!auth.Authenticated)
-            {
-                HttpContext.Response.StatusCode = 403;
-                return;
-            }
+            if (!auth.Authenticated) return Forbid();
 
             ulong channelId = ulong.Parse(HttpContext.Request.Form["channel"]);
             int mode = int.Parse(HttpContext.Request.Form["mode"]);
@@ -40,45 +39,35 @@ namespace UtiliSite.Pages.Dashboard
             row.Mode = mode;
             await VoteChannels.SaveRowAsync(row);
 
-            HttpContext.Response.StatusCode = 200;
+            return new OkResult();
         }
 
-        public async Task OnPostAdd()
+        public async Task<ActionResult> OnPostAdd()
         {
             AuthDetails auth = await Auth.GetAuthDetailsAsync(this);
 
-            if (!auth.Authenticated)
-            {
-                HttpContext.Response.StatusCode = 403;
-                return;
-            }
+            if (!auth.Authenticated) return Forbid();
 
             ulong channelId = ulong.Parse(HttpContext.Request.Form["channel"]);
             VoteChannelsRow newRow = await VoteChannels.GetRowAsync(auth.Guild.Id, channelId);
             try { await VoteChannels.SaveRowAsync(newRow); }
             catch { }
 
-            HttpContext.Response.StatusCode = 200;
-            HttpContext.Response.Redirect(HttpContext.Request.Path);
+            return new RedirectResult(Request.Path);
         }
 
-        public async Task OnPostRemove()
+        public async Task<ActionResult> OnPostRemove()
         {
             AuthDetails auth = await Auth.GetAuthDetailsAsync(this);
 
-            if (!auth.Authenticated)
-            {
-                HttpContext.Response.StatusCode = 403;
-                return;
-            }
+            if (!auth.Authenticated) return Forbid();
 
-            ulong channelId = ulong.Parse(HttpContext.Request.Form["channel"]);
+                ulong channelId = ulong.Parse(HttpContext.Request.Form["channel"]);
 
             VoteChannelsRow row = await VoteChannels.GetRowAsync(auth.Guild.Id, channelId);
             await VoteChannels.DeleteRowAsync(row);
 
-            HttpContext.Response.StatusCode = 200;
-            HttpContext.Response.Redirect(HttpContext.Request.Path);
+            return new RedirectResult(Request.Path);
         }
 
         public static string GetIsSelected(int mode, VoteChannelsRow row)

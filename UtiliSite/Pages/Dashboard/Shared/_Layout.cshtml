@@ -1,19 +1,6 @@
 ﻿@using Discord.Rest;
 @{
-    AuthDetails auth = (AuthDetails)ViewData["auth"];
-    if (auth == null || !auth.Authenticated)
-    {
-        IgnoreBody();
-        return;
-    }
-
     RestGuild guild = (RestGuild) ViewData["guild"];
-    if (guild == null)
-    {
-        IgnoreBody();
-        return;
-    }
-
     RestUser user = (RestUser) ViewData["user"];
 }
 

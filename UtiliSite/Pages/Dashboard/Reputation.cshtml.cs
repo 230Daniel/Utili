@@ -2,31 +2,29 @@ using System.Linq;
 using System.Threading.Tasks;
 using Database.Data;
 using Discord;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace UtiliSite.Pages.Dashboard
 {
     public class ReputationModel : PageModel
     {
-        public async Task OnGet()
+        public async Task<ActionResult> OnGet()
         {
             AuthDetails auth = await Auth.GetAuthDetailsAsync(this);
-            if(!auth.Authenticated) return;
+            if(!auth.Authenticated) return RedirectToPage("Index");
 
             ReputationRow row = await Reputation.GetRowAsync(auth.Guild.Id);
 
             ViewData["row"] = row;
+            return Page();
         }
 
-        public async Task OnPost()
+        public async Task<ActionResult> OnPost()
         {
             AuthDetails auth = await Auth.GetAuthDetailsAsync(this);
 
-            if (!auth.Authenticated)
-            {
-                HttpContext.Response.StatusCode = 403;
-                return;
-            }
+            if (!auth.Authenticated) return Forbid();
 
             ReputationRow row = await Reputation.GetRowAsync(auth.Guild.Id);
             (IEmote, int) emote = row.Emotes.First(x => x.Item1.ToString() == HttpContext.Request.Form["emote"]);
@@ -36,18 +34,14 @@ namespace UtiliSite.Pages.Dashboard
             row.Emotes.Add((emote.Item1, value));
             await Reputation.SaveRowAsync(row);
 
-            HttpContext.Response.StatusCode = 200;
+            return new OkResult();
         }
 
-        public async Task OnPostRemove()
+        public async Task<ActionResult> OnPostRemove()
         {
             AuthDetails auth = await Auth.GetAuthDetailsAsync(this);
 
-            if (!auth.Authenticated)
-            {
-                HttpContext.Response.StatusCode = 403;
-                return;
-            }
+            if (!auth.Authenticated) return RedirectToPage("Index");
 
             ReputationRow row = await Reputation.GetRowAsync(auth.Guild.Id);
             (IEmote, int) emote = row.Emotes.First(x => x.Item1.ToString() == HttpContext.Request.Form["emote"]);
@@ -56,8 +50,7 @@ namespace UtiliSite.Pages.Dashboard
             try { await Reputation.SaveRowAsync(row); }
             catch { }
 
-            HttpContext.Response.StatusCode = 200;
-            HttpContext.Response.Redirect(HttpContext.Request.Path);
+            return new RedirectResult(Request.Path);
         }
     }
 }

@@ -4,16 +4,17 @@ using System.Linq;
 using System.Threading.Tasks;
 using Database.Data;
 using Discord.Rest;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace UtiliSite.Pages.Dashboard
 {
     public class AutopurgeModel : PageModel
     {
-        public async Task OnGet()
+        public async Task<ActionResult> OnGet()
         {
             AuthDetails auth = await Auth.GetAuthDetailsAsync(this);
-            if(!auth.Authenticated) return;
+            if(!auth.Authenticated) return RedirectToPage("Index");
 
             List<AutopurgeRow> autopurgeRows = await Autopurge.GetRowsAsync(auth.Guild.Id);
             List<RestTextChannel> channels = await DiscordModule.GetTextChannelsAsync(auth.Guild);
@@ -22,17 +23,14 @@ namespace UtiliSite.Pages.Dashboard
             ViewData["autopurgeRows"] = autopurgeRows;
             ViewData["channels"] = channels;
             ViewData["nonAutopurgeChannels"] = nonAutopurgeChannels;
+
+            return Page();
         }
 
-        public async Task OnPost()
+        public async Task<ActionResult> OnPost()
         {
             AuthDetails auth = await Auth.GetAuthDetailsAsync(this);
-
-            if (!auth.Authenticated)
-            {
-                HttpContext.Response.StatusCode = 403;
-                return;
-            }
+            if (!auth.Authenticated) return Forbid();
 
             ulong channelId = ulong.Parse(HttpContext.Request.Form["channel"]);
             TimeSpan timespan = TimeSpan.Parse(HttpContext.Request.Form["timespan"]);
@@ -43,44 +41,32 @@ namespace UtiliSite.Pages.Dashboard
             row.Mode = mode;
             await Autopurge.SaveRowAsync(row);
 
-            HttpContext.Response.StatusCode = 200;
+            return new OkResult();
         }
 
-        public async Task OnPostAdd()
+        public async Task<ActionResult> OnPostAdd()
         {
             AuthDetails auth = await Auth.GetAuthDetailsAsync(this);
-
-            if (!auth.Authenticated)
-            {
-                HttpContext.Response.StatusCode = 403;
-                return;
-            }
+            if (!auth.Authenticated) return Forbid();
 
             ulong channelId = ulong.Parse(HttpContext.Request.Form["channel"]);
             AutopurgeRow row = await Autopurge.GetRowAsync(auth.Guild.Id, channelId);
             try { await Autopurge.SaveRowAsync(row); }
             catch { }
 
-            HttpContext.Response.StatusCode = 200;
-            HttpContext.Response.Redirect(HttpContext.Request.Path);
+            return new RedirectResult(Request.Path);
         }
 
-        public async Task OnPostRemove()
+        public async Task<ActionResult> OnPostRemove()
         {
             AuthDetails auth = await Auth.GetAuthDetailsAsync(this);
-
-            if (!auth.Authenticated)
-            {
-                HttpContext.Response.StatusCode = 403;
-                return;
-            }
+            if (!auth.Authenticated) return Forbid();
 
             ulong channelId = ulong.Parse(HttpContext.Request.Form["channel"]);
             AutopurgeRow row = await Autopurge.GetRowAsync(auth.Guild.Id, channelId);
             await Autopurge.DeleteRowAsync(row);
 
-            HttpContext.Response.StatusCode = 200;
-            HttpContext.Response.Redirect(HttpContext.Request.Path);
+            return new RedirectResult(Request.Path);
         }
 
         public static string GetIsSelected(int mode, AutopurgeRow row)

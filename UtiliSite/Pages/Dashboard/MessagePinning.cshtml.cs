@@ -2,33 +2,32 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Database.Data;
 using Discord.Rest;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace UtiliSite.Pages.Dashboard
 {
     public class MessagePinningModel : PageModel
     {
-        public async Task OnGet()
+        public async Task<ActionResult> OnGet()
         {
             AuthDetails auth = await Auth.GetAuthDetailsAsync(this);
-            if(!auth.Authenticated) return;
+            if (!auth.Authenticated) return RedirectToPage("Index");
 
             MessagePinningRow row = await MessagePinning.GetRowAsync(auth.Guild.Id);
             List<RestTextChannel> channels = await DiscordModule.GetTextChannelsAsync(auth.Guild);
 
             ViewData["row"] = row;
             ViewData["channels"] = channels;
+
+            return Page();
         }
 
-        public async Task OnPost()
+        public async Task<ActionResult> OnPost()
         {
             AuthDetails auth = await Auth.GetAuthDetailsAsync(this);
 
-            if (!auth.Authenticated)
-            {
-                HttpContext.Response.StatusCode = 403;
-                return;
-            }
+            if (!auth.Authenticated) return RedirectToPage("Index");
 
             ulong pinChannelId = ulong.Parse(HttpContext.Request.Form["pinChannel"]);
             bool pin = HttpContext.Request.Form["pin"] == "on";
@@ -38,7 +37,7 @@ namespace UtiliSite.Pages.Dashboard
             row.PinChannelId = pinChannelId;
             await MessagePinning.SaveRowAsync(row);
 
-            HttpContext.Response.StatusCode = 200;
+            return new OkResult();
         }
     }
 }

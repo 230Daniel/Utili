@@ -4,16 +4,17 @@ using System.Threading.Tasks;
 using Database;
 using Database.Data;
 using Discord.Rest;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace UtiliSite.Pages.Dashboard
 {
     public class CoreModel : PageModel
     {
-        public async Task OnGet()
+        public async Task<ActionResult> OnGet()
         {
             AuthDetails auth = await Auth.GetAuthDetailsAsync(this);
-            if(!auth.Authenticated) return;
+            if(!auth.Authenticated) return RedirectToPage("Index");
             
             CoreRow row = await Core.GetRowAsync(auth.Guild.Id);
             List<RestTextChannel> channels = await DiscordModule.GetTextChannelsAsync(auth.Guild);
@@ -25,17 +26,14 @@ namespace UtiliSite.Pages.Dashboard
             ViewData["excludedChannels"] = excludedChannels;
             ViewData["nonExcludedChannels"] = nonExcludedChannels;
             ViewData["nickname"] = nickname;
+            return Page();
         }
 
-        public async Task OnPost()
+        public async Task<ActionResult> OnPost()
         {
             AuthDetails auth = await Auth.GetAuthDetailsAsync(this);
 
-            if (!auth.Authenticated)
-            {
-                HttpContext.Response.StatusCode = 403;
-                return;
-            }
+            if (!auth.Authenticated) return Forbid();
 
             CoreRow row = await Core.GetRowAsync(auth.Guild.Id);
             row.Prefix = EString.FromDecoded(HttpContext.Request.Form["prefix"]);
@@ -48,18 +46,14 @@ namespace UtiliSite.Pages.Dashboard
                 await DiscordModule.SetNicknameAsync(auth.Guild.Id, nickname);
             }
 
-            HttpContext.Response.StatusCode = 200;
+            return new OkResult();
         }
 
-        public async Task OnPostExclude()
+        public async Task<ActionResult> OnPostExclude()
         {
             AuthDetails auth = await Auth.GetAuthDetailsAsync(this);
 
-            if (!auth.Authenticated)
-            {
-                HttpContext.Response.StatusCode = 403;
-                return;
-            }
+            if (!auth.Authenticated) return Forbid();
 
             ulong channelId = ulong.Parse(HttpContext.Request.Form["channel"]);
 
@@ -68,22 +62,16 @@ namespace UtiliSite.Pages.Dashboard
             {
                 row.ExcludedChannels.Add(channelId);
             }
-
             await Core.SaveRowAsync(row);
 
-            HttpContext.Response.StatusCode = 200;
-            HttpContext.Response.Redirect(HttpContext.Request.Path);
+            return new RedirectResult(Request.Path);
         }
 
-        public async Task OnPostRemove()
+        public async Task<ActionResult> OnPostRemove()
         {
             AuthDetails auth = await Auth.GetAuthDetailsAsync(this);
 
-            if (!auth.Authenticated)
-            {
-                HttpContext.Response.StatusCode = 403;
-                return;
-            }
+            if (!auth.Authenticated) return Forbid();
 
             ulong channelId = ulong.Parse(HttpContext.Request.Form["channel"]);
 
@@ -91,8 +79,7 @@ namespace UtiliSite.Pages.Dashboard
             row.ExcludedChannels.RemoveAll(x => x == channelId);
             await Core.SaveRowAsync(row);
 
-            HttpContext.Response.StatusCode = 200;
-            HttpContext.Response.Redirect(HttpContext.Request.Path);
+            return new RedirectResult(HttpContext.Request.Path);
         }
     }
 }

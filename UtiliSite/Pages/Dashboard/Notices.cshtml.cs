@@ -5,32 +5,31 @@ using Database.Data;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Database;
 using Discord.Rest;
+using Microsoft.AspNetCore.Mvc;
 
 namespace UtiliSite.Pages.Dashboard
 {
     public class NoticesModel : PageModel
     {
-        public async Task OnGet()
+        public async Task<ActionResult> OnGet()
         {
             AuthDetails auth = await Auth.GetAuthDetailsAsync(this);
-            if(!auth.Authenticated) return;
+            if (!auth.Authenticated) return RedirectToPage("Index");
 
             List<NoticesRow> rows = await Notices.GetRowsAsync(auth.Guild.Id);
             List<RestTextChannel> channels = await DiscordModule.GetTextChannelsAsync(auth.Guild);
 
             ViewData["rows"] = rows;
             ViewData["channels"] = channels;
+
+            return Page();
         }
 
-        public async Task OnPost()
+        public async Task<ActionResult> OnPost()
         {
             AuthDetails auth = await Auth.GetAuthDetailsAsync(this);
 
-            if (!auth.Authenticated)
-            {
-                HttpContext.Response.StatusCode = 403;
-                return;
-            }
+            if (!auth.Authenticated) return Forbid();
 
             ulong channelId = ulong.Parse(HttpContext.Request.Form["channel"]);
 
@@ -52,18 +51,14 @@ namespace UtiliSite.Pages.Dashboard
             MiscRow miscRow = new MiscRow(auth.Guild.Id, "RequiresNoticeUpdate", row.ChannelId.ToString());
             try { await Misc.SaveRowAsync(miscRow); } catch { }
 
-            HttpContext.Response.StatusCode = 200;
+            return new OkResult();
         }
 
-        public async Task OnPostAdd()
+        public async Task<ActionResult> OnPostAdd()
         {
             AuthDetails auth = await Auth.GetAuthDetailsAsync(this);
 
-            if (!auth.Authenticated)
-            {
-                HttpContext.Response.StatusCode = 403;
-                return;
-            }
+            if (!auth.Authenticated) return Forbid();
 
             ulong channelId = ulong.Parse(HttpContext.Request.Form["channel"]);
             RestTextChannel channel = auth.Guild.GetTextChannelAsync(channelId).GetAwaiter().GetResult();
@@ -72,26 +67,21 @@ namespace UtiliSite.Pages.Dashboard
 
             try { await Notices.SaveRowAsync(row); }
             catch { }
-            HttpContext.Response.StatusCode = 200;
-            HttpContext.Response.Redirect(HttpContext.Request.Path);
+
+            return new RedirectResult(Request.Path);
         }
 
-        public async Task OnPostRemove()
+        public async Task<ActionResult> OnPostRemove()
         {
             AuthDetails auth = await Auth.GetAuthDetailsAsync(this);
 
-            if (!auth.Authenticated)
-            {
-                HttpContext.Response.StatusCode = 403;
-                return;
-            }
+            if (!auth.Authenticated) return Forbid();
 
             ulong channelId = ulong.Parse(HttpContext.Request.Form["channel"]);
             NoticesRow row = await Notices.GetRowAsync(auth.Guild.Id, channelId);
             await Notices.DeleteRowAsync(row);
 
-            HttpContext.Response.StatusCode = 200;
-            HttpContext.Response.Redirect(HttpContext.Request.Path);
+            return new RedirectResult(Request.Path);
         }
 
         public static string GetIsIdSelected(ulong idOne, ulong idTwo)

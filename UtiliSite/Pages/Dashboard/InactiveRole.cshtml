@@ -3,8 +3,6 @@
 @using Discord.Rest
 @model UtiliSite.Pages.Dashboard.InactiveRoleModel
 @{
-    if (ViewData["guild"] == null) { return; }
-
     Layout = "Shared/_Layout.cshtml";
     ViewData["Title"] = "Inactive Role - Utili Dashboard";
 

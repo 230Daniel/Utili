@@ -4,32 +4,31 @@ using Database.Data;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Database;
 using Discord.Rest;
+using Microsoft.AspNetCore.Mvc;
 
 namespace UtiliSite.Pages.Dashboard
 {
     public class JoinMessageModel : PageModel
     {
-        public async Task OnGet()
+        public async Task<ActionResult> OnGet()
         {
             AuthDetails auth = await Auth.GetAuthDetailsAsync(this);
-            if(!auth.Authenticated) return;
+            if(!auth.Authenticated) return RedirectToPage("Index");
 
             JoinMessageRow row = await JoinMessage.GetRowAsync(auth.Guild.Id);
             List<RestTextChannel> channels = await DiscordModule.GetTextChannelsAsync(auth.Guild);
 
             ViewData["row"] = row;
             ViewData["channels"] = channels;
+
+            return Page();
         }
 
-        public async Task OnPost()
+        public async Task<ActionResult> OnPost()
         {
             AuthDetails auth = await Auth.GetAuthDetailsAsync(this);
-
-            if (!auth.Authenticated)
-            {
-                HttpContext.Response.StatusCode = 403;
-                return;
-            }
+            
+            if (!auth.Authenticated) return Forbid();
 
             JoinMessageRow row = await JoinMessage.GetRowAsync(auth.Guild.Id);
 
@@ -47,7 +46,7 @@ namespace UtiliSite.Pages.Dashboard
 
             await JoinMessage.SaveRowAsync(row);
 
-            HttpContext.Response.StatusCode = 200;
+            return new OkResult();
         }
 
         public static string GetIsIdSelected(ulong idOne, ulong idTwo)

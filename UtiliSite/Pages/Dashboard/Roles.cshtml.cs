@@ -3,16 +3,17 @@ using System.Linq;
 using System.Threading.Tasks;
 using Database.Data;
 using Discord.Rest;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace UtiliSite.Pages.Dashboard
 {
     public class RolesModel : PageModel
     {
-        public async Task OnGet()
+        public async Task<ActionResult> OnGet()
         {
             AuthDetails auth = await Auth.GetAuthDetailsAsync(this);
-            if(!auth.Authenticated) return;
+            if(!auth.Authenticated) return RedirectToPage("Index");
 
             RolesRow row = await Roles.GetRowAsync(auth.Guild.Id);
             List<RestRole> joinRoles = auth.Guild.Roles.Where(x => row.JoinRoles.Contains(x.Id)).ToList();
@@ -21,19 +22,16 @@ namespace UtiliSite.Pages.Dashboard
             ViewData["joinRoles"] = joinRoles;
             ViewData["nonJoinRoles"] = nonJoinRoles;
             ViewData["row"] = row;
+            return Page();
         }
 
-        public async Task OnPost()
+        public async Task<ActionResult> OnPost()
         {
             AuthDetails auth = await Auth.GetAuthDetailsAsync(this);
 
-            if (!auth.Authenticated)
-            {
-                HttpContext.Response.StatusCode = 403;
-                return;
-            }
+            if (!auth.Authenticated) return Forbid();
 
-            bool rolePersist = HttpContext.Request.Form["rolePersist"] == "on";
+                bool rolePersist = HttpContext.Request.Form["rolePersist"] == "on";
 
             RolesRow row = await Roles.GetRowAsync(auth.Guild.Id);
             bool requireDownload = !row.RolePersist && rolePersist;
@@ -47,18 +45,14 @@ namespace UtiliSite.Pages.Dashboard
                 try { await Misc.SaveRowAsync(miscRow); } catch{}
             }
 
-            HttpContext.Response.StatusCode = 200;
+            return new OkResult();
         }
 
-        public async Task OnPostAddJoinRole()
+        public async Task<ActionResult> OnPostAddJoinRole()
         {
             AuthDetails auth = await Auth.GetAuthDetailsAsync(this);
 
-            if (!auth.Authenticated)
-            {
-                HttpContext.Response.StatusCode = 403;
-                return;
-            }
+            if (!auth.Authenticated) return Forbid();
 
             ulong roleId = ulong.Parse(HttpContext.Request.Form["role"]);
 
@@ -67,19 +61,14 @@ namespace UtiliSite.Pages.Dashboard
             
             await Roles.SaveRowAsync(row);
 
-            HttpContext.Response.StatusCode = 200;
-            HttpContext.Response.Redirect(HttpContext.Request.Path);
+            return new RedirectResult(Request.Path);
         }
 
-        public async Task OnPostRemoveJoinRole()
+        public async Task<ActionResult> OnPostRemoveJoinRole()
         {
             AuthDetails auth = await Auth.GetAuthDetailsAsync(this);
 
-            if (!auth.Authenticated)
-            {
-                HttpContext.Response.StatusCode = 403;
-                return;
-            }
+            if (!auth.Authenticated) return Forbid();
 
             ulong roleId = ulong.Parse(HttpContext.Request.Form["role"]);
 
@@ -87,8 +76,7 @@ namespace UtiliSite.Pages.Dashboard
             if (row.JoinRoles.Contains(roleId)) row.JoinRoles.Remove(roleId);
             await Roles.SaveRowAsync(row);
 
-            HttpContext.Response.StatusCode = 200;
-            HttpContext.Response.Redirect(HttpContext.Request.Path);
+            return new RedirectResult(Request.Path);
         }
 
         public static string GetIsChecked(bool isChecked)

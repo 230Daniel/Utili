@@ -19,8 +19,8 @@ namespace UtiliSite.Pages.Dashboard
 
             AuthDetails auth = await Auth.GetAuthDetailsAsync(this);
             if(!auth.Authenticated) return;
-            ViewData["auth"] = auth;
 
+            ViewData["auth"] = auth;
             ViewData["guilds"] = await DiscordModule.GetManageableGuildsAsync(auth.Client);
         }
     }

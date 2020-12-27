@@ -4,16 +4,17 @@ using System.Threading.Tasks;
 using Database;
 using Database.Data;
 using Discord.Rest;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace UtiliSite.Pages.Dashboard
 {
     public class VoiceLinkModel : PageModel
     {
-        public async Task OnGet()
+        public async Task<ActionResult> OnGet()
         {
             AuthDetails auth = await Auth.GetAuthDetailsAsync(this);
-            if(!auth.Authenticated) return;
+            if(!auth.Authenticated) return RedirectToPage("Index");
 
             VoiceLinkRow row = await VoiceLink.GetMetaRowAsync(auth.Guild.Id);
             List<RestVoiceChannel> voiceChannels = await DiscordModule.GetVoiceChannelsAsync(auth.Guild);
@@ -23,19 +24,17 @@ namespace UtiliSite.Pages.Dashboard
             ViewData["row"] = row;
             ViewData["excludedChannels"] = excludedChannels;
             ViewData["nonExcludedChannels"] = nonExcludedChannels;
+
+            return Page();
         }
 
-        public async Task OnPost()
+        public async Task<ActionResult> OnPost()
         {
             AuthDetails auth = await Auth.GetAuthDetailsAsync(this);
 
-            if (!auth.Authenticated)
-            {
-                HttpContext.Response.StatusCode = 403;
-                return;
-            }
+            if (!auth.Authenticated) return Forbid();
 
-            bool enabled = HttpContext.Request.Form["enabled"] == "on";
+                bool enabled = HttpContext.Request.Form["enabled"] == "on";
             bool deleteChannels = HttpContext.Request.Form["deleteChannels"] == "on";
             string prefix = HttpContext.Request.Form["prefix"].ToString();
 
@@ -45,18 +44,14 @@ namespace UtiliSite.Pages.Dashboard
             row.Prefix = EString.FromDecoded(prefix);
             await VoiceLink.SaveMetaRowAsync(row);
 
-            HttpContext.Response.StatusCode = 200;
+            return new OkResult();
         }
 
-        public async Task OnPostExclude()
+        public async Task<ActionResult> OnPostExclude()
         {
             AuthDetails auth = await Auth.GetAuthDetailsAsync(this);
 
-            if (!auth.Authenticated)
-            {
-                HttpContext.Response.StatusCode = 403;
-                return;
-            }
+            if (!auth.Authenticated) return Forbid();
 
             ulong channelId = ulong.Parse(HttpContext.Request.Form["channel"]);
 
@@ -67,19 +62,14 @@ namespace UtiliSite.Pages.Dashboard
             }
             await VoiceLink.SaveMetaRowAsync(metaRow);
 
-            HttpContext.Response.StatusCode = 200;
-            HttpContext.Response.Redirect(HttpContext.Request.Path);
+            return new RedirectResult(Request.Path);
         }
 
-        public async Task OnPostRemove()
+        public async Task<ActionResult> OnPostRemove()
         {
             AuthDetails auth = await Auth.GetAuthDetailsAsync(this);
 
-            if (!auth.Authenticated)
-            {
-                HttpContext.Response.StatusCode = 403;
-                return;
-            }
+            if (!auth.Authenticated) return Forbid();
 
             ulong channelId = ulong.Parse(HttpContext.Request.Form["channel"]);
 
@@ -87,8 +77,7 @@ namespace UtiliSite.Pages.Dashboard
             metaRow.ExcludedChannels.RemoveAll(x => x == channelId);
             await VoiceLink.SaveMetaRowAsync(metaRow);
 
-            HttpContext.Response.StatusCode = 200;
-            HttpContext.Response.Redirect(HttpContext.Request.Path);
+            return new RedirectResult(Request.Path);
         }
 
         public static string GetIsChecked(bool isChecked)
