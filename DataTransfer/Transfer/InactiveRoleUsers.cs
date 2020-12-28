@@ -6,7 +6,7 @@ using Database.Data;
 
 namespace DataTransfer.Transfer
 {
-    internal class InactiveRoleUsers
+    internal static class InactiveRoleUsers
     {
         public static async Task TransferAsync(ulong? guildId = null)
         {
