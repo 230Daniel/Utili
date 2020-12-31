@@ -14,7 +14,7 @@ namespace Database.Data
 
             if (Cache.Initialised && !ignoreCache)
             {
-                matchedRows.AddRange(Cache.JoinMessage.Rows);
+                matchedRows.AddRange(Cache.JoinMessage);
 
                 if (guildId.HasValue) matchedRows.RemoveAll(x => x.GuildId != guildId.Value);
             }
@@ -80,7 +80,7 @@ namespace Database.Data
                     ("Colour", row.Colour.RawValue));
 
                 row.New = false;
-                if(Cache.Initialised) Cache.JoinMessage.Rows.Add(row);
+                if(Cache.Initialised) Cache.JoinMessage.Add(row);
             }
             else
             {
@@ -99,25 +99,19 @@ namespace Database.Data
                     ("Icon", row.Icon.EncodedValue),
                     ("Colour", row.Colour.RawValue));
 
-                if(Cache.Initialised) Cache.JoinMessage.Rows[Cache.JoinMessage.Rows.FindIndex(x => x.GuildId == row.GuildId)] = row;
+                if(Cache.Initialised) Cache.JoinMessage[Cache.JoinMessage.FindIndex(x => x.GuildId == row.GuildId)] = row;
             }
         }
 
         public static async Task DeleteRowAsync(JoinMessageRow row)
         {
-            if(Cache.Initialised) Cache.JoinMessage.Rows.RemoveAll(x => x.GuildId == row.GuildId);
+            if(Cache.Initialised) Cache.JoinMessage.RemoveAll(x => x.GuildId == row.GuildId);
 
             await Sql.ExecuteAsync(
                 "DELETE FROM JoinMessage WHERE GuildId = @GuildId", 
                 ("GuildId", row.GuildId));
         }
     }
-
-    public class JoinMessageTable
-    {
-        public List<JoinMessageRow> Rows { get; set; }
-    }
-
     public class JoinMessageRow : IRow
     {
         public bool New { get; set; }

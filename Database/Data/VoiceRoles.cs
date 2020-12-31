@@ -13,7 +13,7 @@ namespace Database.Data
 
             if (Cache.Initialised && !ignoreCache)
             {
-                matchedRows.AddRange(Cache.VoiceRoles.Rows);
+                matchedRows.AddRange(Cache.VoiceRoles);
 
                 if (guildId.HasValue) matchedRows.RemoveAll(x => x.GuildId != guildId.Value);
                 if (channelId.HasValue) matchedRows.RemoveAll(x => x.ChannelId != channelId.Value);
@@ -67,7 +67,7 @@ namespace Database.Data
                     ("RoleId", row.RoleId));
 
                 row.New = false;
-                if(Cache.Initialised) Cache.VoiceRoles.Rows.Add(row);
+                if(Cache.Initialised) Cache.VoiceRoles.Add(row);
             }
             else
             {
@@ -77,13 +77,13 @@ namespace Database.Data
                     ("ChannelId", row.ChannelId),
                     ("RoleId", row.RoleId));
 
-                if(Cache.Initialised) Cache.VoiceRoles.Rows[Cache.VoiceRoles.Rows.FindIndex(x => x.GuildId == row.GuildId && x.ChannelId == row.ChannelId)] = row;
+                if(Cache.Initialised) Cache.VoiceRoles[Cache.VoiceRoles.FindIndex(x => x.GuildId == row.GuildId && x.ChannelId == row.ChannelId)] = row;
             }
         }
 
         public static async Task DeleteRowAsync(VoiceRolesRow row)
         {
-            if(Cache.Initialised) Cache.VoiceRoles.Rows.RemoveAll(x => x.GuildId == row.GuildId && x.ChannelId == row.ChannelId);
+            if(Cache.Initialised) Cache.VoiceRoles.RemoveAll(x => x.GuildId == row.GuildId && x.ChannelId == row.ChannelId);
 
             await Sql.ExecuteAsync(
                 "DELETE FROM VoiceRoles WHERE GuildId = @GuildId AND ChannelId = @ChannelId",
@@ -91,12 +91,6 @@ namespace Database.Data
                 ("ChannelId", row.ChannelId));
         }
     }
-
-    public class VoiceRolesTable
-    {
-        public List<VoiceRolesRow> Rows { get; set; }
-    }
-
     public class VoiceRolesRow : IRow
     {
         public bool New { get; set; }

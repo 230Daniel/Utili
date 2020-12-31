@@ -16,7 +16,7 @@ namespace Database.Data
 
             if (Cache.Initialised && !ignoreCache)
             {
-                matchedRows.AddRange(Cache.InactiveRole.Rows);
+                matchedRows.AddRange(Cache.InactiveRole);
                 if (guildId.HasValue) matchedRows.RemoveAll(x => x.GuildId != guildId.Value);
             }
             else
@@ -56,7 +56,7 @@ namespace Database.Data
 
             if (Cache.Initialised && !ignoreCache)
             {
-                matchedRows.AddRange(Cache.InactiveRole.Rows);
+                matchedRows.AddRange(Cache.InactiveRole);
                 matchedRows.RemoveAll(x => DateTime.UtcNow - x.LastUpdate < GapBetweenUpdates);
             }
             else
@@ -108,7 +108,7 @@ namespace Database.Data
                     ("LastUpdate", DateTime.UtcNow - TimeSpan.FromMinutes(5)));
 
                 row.New = false;
-                if(Cache.Initialised) Cache.InactiveRole.Rows.Add(row);
+                if(Cache.Initialised) Cache.InactiveRole.Add(row);
             }
             else
             {
@@ -125,7 +125,7 @@ namespace Database.Data
                     ("Inverse", row.Inverse),
                     ("LastUpdate", row.LastUpdate));
 
-                if(Cache.Initialised) Cache.InactiveRole.Rows[Cache.InactiveRole.Rows.FindIndex(x => x.GuildId == row.GuildId)] = row;
+                if(Cache.Initialised) Cache.InactiveRole[Cache.InactiveRole.FindIndex(x => x.GuildId == row.GuildId)] = row;
             }
         }
 
@@ -143,13 +143,13 @@ namespace Database.Data
                     ("GuildId", row.GuildId), 
                     ("LastUpdate", row.LastUpdate));
 
-                if(Cache.Initialised) Cache.InactiveRole.Rows[Cache.InactiveRole.Rows.FindIndex(x => x.GuildId == row.GuildId)].LastUpdate = row.LastUpdate;
+                if(Cache.Initialised) Cache.InactiveRole[Cache.InactiveRole.FindIndex(x => x.GuildId == row.GuildId)].LastUpdate = row.LastUpdate;
             }
         }
 
         public static async Task DeleteRowAsync(InactiveRoleRow row)
         {
-            if(Cache.Initialised) Cache.InactiveRole.Rows.RemoveAll(x => x.GuildId == row.GuildId);
+            if(Cache.Initialised) Cache.InactiveRole.RemoveAll(x => x.GuildId == row.GuildId);
 
             await Sql.ExecuteAsync(
                 "DELETE FROM InactiveRole WHERE GuildId = @GuildId", 
@@ -207,11 +207,6 @@ namespace Database.Data
             reader.Close();
             return matchedRows;
         }
-    }
-
-    public class InactiveRoleTable
-    {
-        public List<InactiveRoleRow> Rows { get; set; }
     }
 
     public class InactiveRoleRow : IRow

@@ -13,7 +13,7 @@ namespace Database.Data
 
             if (Cache.Initialised && !ignoreCache)
             {
-                matchedRows.AddRange(Cache.ChannelMirroring.Rows);
+                matchedRows.AddRange(Cache.ChannelMirroring);
 
                 if (guildId.HasValue) matchedRows.RemoveAll(x => x.GuildId != guildId.Value);
                 if (fromChannelId.HasValue) matchedRows.RemoveAll(x => x.FromChannelId != fromChannelId.Value);
@@ -70,7 +70,7 @@ namespace Database.Data
 
                 row.New = false;
 
-                if(Cache.Initialised) Cache.ChannelMirroring.Rows.Add(row);
+                if(Cache.Initialised) Cache.ChannelMirroring.Add(row);
             }
             else
             {
@@ -80,7 +80,7 @@ namespace Database.Data
                         ("ToChannelId", row.ToChannelId),
                         ("WebhookId", row.WebhookId));
 
-                if(Cache.Initialised) Cache.ChannelMirroring.Rows[Cache.ChannelMirroring.Rows.FindIndex(x => x.GuildId == row.GuildId && x.FromChannelId == row.FromChannelId)] = row;
+                if(Cache.Initialised) Cache.ChannelMirroring[Cache.ChannelMirroring.FindIndex(x => x.GuildId == row.GuildId && x.FromChannelId == row.FromChannelId)] = row;
             }
         }
 
@@ -97,25 +97,19 @@ namespace Database.Data
                     ("FromChannelId", row.FromChannelId),
                     ("WebhookId", row.WebhookId));
 
-                if(Cache.Initialised) Cache.ChannelMirroring.Rows[Cache.ChannelMirroring.Rows.FindIndex(x => x.GuildId == row.GuildId && x.FromChannelId == row.FromChannelId)] = row;
+                if(Cache.Initialised) Cache.ChannelMirroring[Cache.ChannelMirroring.FindIndex(x => x.GuildId == row.GuildId && x.FromChannelId == row.FromChannelId)] = row;
             }
         }
 
         public static async Task DeleteRowAsync(ChannelMirroringRow row)
         {
-            if(Cache.Initialised) Cache.ChannelMirroring.Rows.RemoveAll(x => x.GuildId == row.GuildId && x.FromChannelId == row.FromChannelId);
+            if(Cache.Initialised) Cache.ChannelMirroring.RemoveAll(x => x.GuildId == row.GuildId && x.FromChannelId == row.FromChannelId);
 
             await Sql.ExecuteAsync("DELETE FROM ChannelMirroring WHERE GuildId = @GuildId AND FromChannelId = @FromChannelId",
                 ("GuildId", row.GuildId),
                 ("FromChannelId", row.FromChannelId));
         }
     }
-
-    public class ChannelMirroringTable
-    {
-        public List<ChannelMirroringRow> Rows { get; set; }
-    }
-
     public class ChannelMirroringRow : IRow
     {
         public bool New { get; set; }

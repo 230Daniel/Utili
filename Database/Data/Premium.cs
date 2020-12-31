@@ -30,7 +30,7 @@ namespace Database.Data
 
             if (Cache.Initialised && !ignoreCache)
             {
-                matchedRows.AddRange(Cache.Premium.Rows);
+                matchedRows.AddRange(Cache.Premium);
 
                 if (userId.HasValue) matchedRows.RemoveAll(x => x.UserId != userId.Value);
                 if (guildId.HasValue) matchedRows.RemoveAll(x => x.GuildId != guildId.Value);
@@ -116,7 +116,7 @@ namespace Database.Data
                 row.SlotId = (await GetRowsAsync(row.UserId, row.GuildId)).OrderBy(x => x.SlotId).Last().SlotId;
                 // TODO: Ensure this is always accurately setting the value
 
-                if(Cache.Initialised) Cache.Premium.Rows.Add(row);
+                if(Cache.Initialised) Cache.Premium.Add(row);
             }
             else
             {
@@ -126,13 +126,13 @@ namespace Database.Data
                     ("GuildId", row.GuildId),
                     ("SlotId", row.SlotId));
 
-                if(Cache.Initialised) Cache.Premium.Rows[Cache.Premium.Rows.FindIndex(x => x.SlotId == row.SlotId)] = row;
+                if(Cache.Initialised) Cache.Premium[Cache.Premium.FindIndex(x => x.SlotId == row.SlotId)] = row;
             }
         }
 
         public static async Task DeleteRowAsync(PremiumRow row)
         {
-            if(Cache.Initialised) Cache.Premium.Rows.RemoveAll(x => x.SlotId == row.SlotId);
+            if(Cache.Initialised) Cache.Premium.RemoveAll(x => x.SlotId == row.SlotId);
 
             await Sql.ExecuteAsync(
                 "DELETE FROM Premium WHERE SlotId = @SlotId;",
@@ -168,12 +168,6 @@ namespace Database.Data
             }
         }
     }
-
-    public class PremiumTable
-    {
-        public List<PremiumRow> Rows { get; set; }
-    }
-
     public class PremiumRow : IRow
     {
         public bool New { get; set; }

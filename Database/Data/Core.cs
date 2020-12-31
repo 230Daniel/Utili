@@ -13,7 +13,7 @@ namespace Database.Data
 
             if (Cache.Initialised && !ignoreCache)
             {
-                matchedRows.AddRange(Cache.Core.Rows);
+                matchedRows.AddRange(Cache.Core);
 
                 if (guildId.HasValue) matchedRows.RemoveAll(x => x.GuildId != guildId.Value);
             }
@@ -63,7 +63,7 @@ namespace Database.Data
                     ("ExcludedChannels", row.GetExcludedChannelsString()));
 
                 row.New = false;
-                if(Cache.Initialised) Cache.Core.Rows.Add(row);
+                if(Cache.Initialised) Cache.Core.Add(row);
             }
             else
             {
@@ -74,25 +74,19 @@ namespace Database.Data
                     ("EnableCommands", row.EnableCommands),
                     ("ExcludedChannels", row.GetExcludedChannelsString()));
 
-                if(Cache.Initialised) Cache.Core.Rows[Cache.Core.Rows.FindIndex(x => x.GuildId == row.GuildId)] = row;
+                if(Cache.Initialised) Cache.Core[Cache.Core.FindIndex(x => x.GuildId == row.GuildId)] = row;
             }
         }
 
         public static async Task DeleteRowAsync(CoreRow row)
         {
-            if(Cache.Initialised) Cache.Core.Rows.RemoveAll(x => x.GuildId == row.GuildId);
+            if(Cache.Initialised) Cache.Core.RemoveAll(x => x.GuildId == row.GuildId);
 
             await Sql.ExecuteAsync(
                 "DELETE FROM Core WHERE GuildId = @GuildId",
                 ("GuildId", row.GuildId));
         }
     }
-
-    public class CoreTable
-    {
-        public List<CoreRow> Rows { get; set; }
-    }
-
     public class CoreRow : IRow
     {
         public bool New { get; set; }

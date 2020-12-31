@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using System.Timers;
 using Database.Data;
 
@@ -15,26 +16,27 @@ namespace Database
         public static bool Initialised { get; private set; }
         private static Timer Timer { get; set; }
 
-        public static AutopurgeTable Autopurge { get; set; } = new AutopurgeTable();
-        public static ChannelMirroringTable ChannelMirroring { get; set; } = new ChannelMirroringTable();
-        public static CoreTable Core { get; set; } = new CoreTable();
-        public static InactiveRoleTable InactiveRole { get; set; } = new InactiveRoleTable();
-        public static JoinMessageTable JoinMessage { get; set; } = new JoinMessageTable();
-        public static MessageFilterTable MessageFilter { get; set; } = new MessageFilterTable();
-        public static MessageLogsTable MessageLogs { get; set; } = new MessageLogsTable();
-        public static MessagePinningTable MessagePinning { get; set; } = new MessagePinningTable();
-        public static MiscTable Misc { get; set; } = new MiscTable();
-        public static NoticesTable Notices { get; set; } = new NoticesTable();
-        public static PremiumTable Premium { get; set; } = new PremiumTable();
-        public static ReputationTable Reputation { get; set; } = new ReputationTable();
-        public static RolesTable Roles { get; set; } = new RolesTable();
-        public static VoiceLinkTable VoiceLink { get; set; } = new VoiceLinkTable();
-        public static VoiceRolesTable VoiceRoles { get; set; } = new VoiceRolesTable();
-        public static VoteChannelsTable VoteChannels { get; set; } = new VoteChannelsTable();
+        public static List<AutopurgeRow> Autopurge { get; set; }
+        public static List<ChannelMirroringRow> ChannelMirroring { get; set; }
+        public static List<CoreRow> Core { get; set; }
+        public static List<InactiveRoleRow> InactiveRole { get; set; }
+        public static List<JoinMessageRow> JoinMessage { get; set; }
+        public static List<MessageFilterRow> MessageFilter { get; set; }
+        public static List<MessageLogsRow> MessageLogs { get; set; }
+        public static List<MessagePinningRow> MessagePinning { get; set; }
+        public static List<MiscRow> Misc { get; set; }
+        public static List<NoticesRow> Notices { get; set; }
+        public static List<PremiumRow> Premium { get; set; }
+        public static List<ReputationRow> Reputation { get; set; }
+        public static List<RolesRow> Roles { get; set; }
+        public static List<VoiceLinkRow> VoiceLink { get; set; }
+        public static List<VoiceLinkChannelRow> VoiceLinkChannels { get; set; }
+        public static List<VoiceRolesRow> VoiceRoles { get; set; }
+        public static List<VoteChannelsRow> VoteChannels { get; set; }
         
-        public static void Initialise()
+        public static async Task InitialiseAsync()
         {
-            DownloadTables().GetAwaiter().GetResult();
+            await DownloadCacheAsync();
 
             Timer?.Dispose();
             Timer = new Timer(30000);
@@ -46,26 +48,27 @@ namespace Database
 
         private static void Timer_Elapsed(object sender, ElapsedEventArgs e)
         {
-            _ = DownloadTables();
+            _ = DownloadCacheAsync();
         }
 
-        private static async Task DownloadTables()
+        private static async Task DownloadCacheAsync()
         {
-            Autopurge.Rows = await Data.Autopurge.GetRowsAsync(ignoreCache: true);
-            ChannelMirroring.Rows = await Data.ChannelMirroring.GetRowsAsync(ignoreCache: true);
-            Core.Rows = await Data.Core.GetRowsAsync(ignoreCache: true);
-            InactiveRole.Rows = await Data.InactiveRole.GetRowsAsync(ignoreCache: true);
-            JoinMessage.Rows = await Data.JoinMessage.GetRowsAsync(ignoreCache: true);
-            MessageFilter.Rows = await Data.MessageFilter.GetRowsAsync(ignoreCache: true);
-            MessageLogs.Rows = await Data.MessageLogs.GetRowsAsync(ignoreCache: true);
-            Misc.Rows = await Data.Misc.GetRowsAsync(ignoreCache: true);
-            Notices.Rows = await Data.Notices.GetRowsAsync(ignoreCache: true);
-            Reputation.Rows = await Data.Reputation.GetRowsAsync(ignoreCache: true);
-            Roles.Rows = await Data.Roles.GetRowsAsync(ignoreCache: true);
-            VoiceLink.Rows = await Data.VoiceLink.GetRowsAsync(ignoreCache: true);
-            VoiceLink.Channels = await Data.VoiceLink.GetChannelRowsAsync(ignoreCache: true);
-            VoiceRoles.Rows = await Data.VoiceRoles.GetRowsAsync(ignoreCache: true);
-            VoteChannels.Rows = await Data.VoteChannels.GetRowsAsync(ignoreCache: true);
+            Autopurge = await Data.Autopurge.GetRowsAsync(ignoreCache: true);
+            ChannelMirroring = await Data.ChannelMirroring.GetRowsAsync(ignoreCache: true);
+            Core = await Data.Core.GetRowsAsync(ignoreCache: true);
+            InactiveRole = await Data.InactiveRole.GetRowsAsync(ignoreCache: true);
+            JoinMessage = await Data.JoinMessage.GetRowsAsync(ignoreCache: true);
+            MessageFilter = await Data.MessageFilter.GetRowsAsync(ignoreCache: true);
+            MessageLogs = await Data.MessageLogs.GetRowsAsync(ignoreCache: true);
+            Misc = await Data.Misc.GetRowsAsync(ignoreCache: true);
+            Notices = await Data.Notices.GetRowsAsync(ignoreCache: true);
+            Premium = await Data.Premium.GetRowsAsync(ignoreCache: true);
+            Reputation = await Data.Reputation.GetRowsAsync(ignoreCache: true);
+            Roles = await Data.Roles.GetRowsAsync(ignoreCache: true);
+            VoiceLink = await Data.VoiceLink.GetRowsAsync(ignoreCache: true);
+            VoiceLinkChannels = await Data.VoiceLink.GetChannelRowsAsync(ignoreCache: true);
+            VoiceRoles = await Data.VoiceRoles.GetRowsAsync(ignoreCache: true);
+            VoteChannels = await Data.VoteChannels.GetRowsAsync(ignoreCache: true);
         }
     }
 }

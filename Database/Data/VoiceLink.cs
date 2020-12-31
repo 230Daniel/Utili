@@ -13,7 +13,7 @@ namespace Database.Data
 
             if (Cache.Initialised && !ignoreCache)
             {
-                matchedRows.AddRange(Cache.VoiceLink.Rows);
+                matchedRows.AddRange(Cache.VoiceLink);
 
                 if (guildId.HasValue) matchedRows.RemoveAll(x => x.GuildId != guildId.Value);
             }
@@ -65,7 +65,7 @@ namespace Database.Data
                     ("ExcludedChannels", row.GetExcludedChannelsString()));
 
                 row.New = false;
-                if(Cache.Initialised) Cache.VoiceLink.Rows.Add(row);
+                if(Cache.Initialised) Cache.VoiceLink.Add(row);
             }
             else
             {
@@ -77,13 +77,13 @@ namespace Database.Data
                     ("Prefix", row.Prefix.EncodedValue),
                     ("ExcludedChannels", row.GetExcludedChannelsString()));
 
-                if(Cache.Initialised) Cache.VoiceLink.Rows[Cache.VoiceLink.Rows.FindIndex(x => x.GuildId == row.GuildId)] = row;
+                if(Cache.Initialised) Cache.VoiceLink[Cache.VoiceLink.FindIndex(x => x.GuildId == row.GuildId)] = row;
             }
         }
 
         public static async Task DeleteRowAsync(VoiceLinkRow row)
         {
-            if(Cache.Initialised) Cache.VoiceLink.Rows.RemoveAll(x => x.GuildId == row.GuildId);
+            if(Cache.Initialised) Cache.VoiceLink.RemoveAll(x => x.GuildId == row.GuildId);
 
             await Sql.ExecuteAsync(
                 "DELETE FROM VoiceLink WHERE GuildId = @GuildId",
@@ -96,7 +96,7 @@ namespace Database.Data
 
             if (Cache.Initialised && !ignoreCache)
             {
-                matchedRows.AddRange(Cache.VoiceLink.Channels);
+                matchedRows.AddRange(Cache.VoiceLinkChannels);
 
                 if (guildId.HasValue) matchedRows.RemoveAll(x => x.GuildId != guildId.Value);
                 if (voiceChannelId.HasValue) matchedRows.RemoveAll(x => x.VoiceChannelId != voiceChannelId.Value);
@@ -151,7 +151,7 @@ namespace Database.Data
                     ("VoiceChannelId", row.VoiceChannelId));
 
                 row.New = false;
-                if(Cache.Initialised) Cache.VoiceLink.Channels.Add(row);
+                if(Cache.Initialised) Cache.VoiceLinkChannels.Add(row);
             }
             else
             {
@@ -161,25 +161,19 @@ namespace Database.Data
                     ("TextChannelId", row.TextChannelId),
                     ("VoiceChannelId", row.VoiceChannelId));
 
-                if(Cache.Initialised) Cache.VoiceLink.Channels[Cache.VoiceLink.Channels.FindIndex(x => x.GuildId == row.GuildId && x.VoiceChannelId == row.VoiceChannelId)] = row;
+                if(Cache.Initialised) Cache.VoiceLinkChannels[Cache.VoiceLinkChannels.FindIndex(x => x.GuildId == row.GuildId && x.VoiceChannelId == row.VoiceChannelId)] = row;
             }
         }
 
         public static async Task DeleteChannelRowAsync(VoiceLinkChannelRow row)
         {
-            if(Cache.Initialised) Cache.VoiceLink.Channels.RemoveAll(x => x.GuildId == row.GuildId && x.VoiceChannelId == row.VoiceChannelId);
+            if(Cache.Initialised) Cache.VoiceLinkChannels.RemoveAll(x => x.GuildId == row.GuildId && x.VoiceChannelId == row.VoiceChannelId);
 
             await Sql.ExecuteAsync(
                 "DELETE FROM VoiceLinkChannels WHERE GuildId = @GuildId AND VoiceChannelId = @VoiceChannelId",
                 ("GuildId", row.GuildId),
                 ("VoiceChannelId", row.VoiceChannelId));
         }
-    }
-
-    public class VoiceLinkTable
-    {
-        public List<VoiceLinkRow> Rows { get; set; }
-        public List<VoiceLinkChannelRow> Channels { get; set; }
     }
 
     public class VoiceLinkRow : IRow

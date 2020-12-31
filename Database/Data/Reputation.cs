@@ -14,7 +14,7 @@ namespace Database.Data
 
             if (Cache.Initialised && !ignoreCache)
             {
-                matchedRows.AddRange(Cache.Reputation.Rows);
+                matchedRows.AddRange(Cache.Reputation);
 
                 if (guildId.HasValue) matchedRows.RemoveAll(x => x.GuildId != guildId.Value);
             }
@@ -60,7 +60,7 @@ namespace Database.Data
                     ("Emotes", row.GetEmotesString()));
 
                 row.New = false;
-                if(Cache.Initialised) Cache.Reputation.Rows.Add(row);
+                if(Cache.Initialised) Cache.Reputation.Add(row);
             }
             else
             {
@@ -69,13 +69,13 @@ namespace Database.Data
                     ("GuildId", row.GuildId), 
                     ("Emotes", row.GetEmotesString()));
 
-                if(Cache.Initialised) Cache.Reputation.Rows[Cache.Reputation.Rows.FindIndex(x => x.GuildId == row.GuildId)] = row;
+                if(Cache.Initialised) Cache.Reputation[Cache.Reputation.FindIndex(x => x.GuildId == row.GuildId)] = row;
             }
         }
 
         public static async Task DeleteRowAsync(ReputationRow row)
         {
-            if(Cache.Initialised) Cache.Reputation.Rows.RemoveAll(x => x.GuildId == row.GuildId);
+            if(Cache.Initialised) Cache.Reputation.RemoveAll(x => x.GuildId == row.GuildId);
 
             await Sql.ExecuteAsync("DELETE FROM Reputation WHERE GuildId = @GuildId", 
                 ("GuildId", row.GuildId));
@@ -162,12 +162,6 @@ namespace Database.Data
             }
         }
     }
-
-    public class ReputationTable
-    {
-        public List<ReputationRow> Rows { get; set; }
-    }
-
     public class ReputationRow : IRow
     {
         public bool New { get; set; }

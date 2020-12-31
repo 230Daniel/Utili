@@ -13,7 +13,7 @@ namespace Database.Data
 
             if (Cache.Initialised && !ignoreCache)
             {
-                matchedRows.AddRange(Cache.MessagePinning.Rows);
+                matchedRows.AddRange(Cache.MessagePinning);
 
                 if (guildId.HasValue) matchedRows.RemoveAll(x => x.GuildId != guildId.Value);
             }
@@ -63,7 +63,7 @@ namespace Database.Data
                     ("Pin", row.Pin));
 
                 row.New = false;
-                if(Cache.Initialised) Cache.MessagePinning.Rows.Add(row);
+                if(Cache.Initialised) Cache.MessagePinning.Add(row);
             }
             else
             {
@@ -74,25 +74,19 @@ namespace Database.Data
                     ("WebhookIds", row.GetWebhookIdsString()),
                     ("Pin", row.Pin));
 
-                if(Cache.Initialised) Cache.MessagePinning.Rows[Cache.MessagePinning.Rows.FindIndex(x => x.GuildId == row.GuildId)] = row;
+                if(Cache.Initialised) Cache.MessagePinning[Cache.MessagePinning.FindIndex(x => x.GuildId == row.GuildId)] = row;
             }
         }
 
         public static async Task DeleteRowAsync(MessagePinningRow row)
         {
-            if(Cache.Initialised) Cache.MessagePinning.Rows.RemoveAll(x => x.GuildId == row.GuildId);
+            if(Cache.Initialised) Cache.MessagePinning.RemoveAll(x => x.GuildId == row.GuildId);
 
             await Sql.ExecuteAsync(
                 "DELETE FROM MessagePinning WHERE GuildId = @GuildId",
                 ("GuildId", row.GuildId));
         }
     }
-
-    public class MessagePinningTable
-    {
-        public List<MessagePinningRow> Rows { get; set; }
-    }
-
     public class MessagePinningRow : IRow
     {
         public bool New { get; set; }

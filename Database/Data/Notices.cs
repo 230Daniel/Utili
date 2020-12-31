@@ -15,7 +15,7 @@ namespace Database.Data
 
             if (Cache.Initialised && !ignoreCache)
             {
-                matchedRows.AddRange(Cache.Notices.Rows);
+                matchedRows.AddRange(Cache.Notices);
 
                 if (guildId.HasValue) matchedRows.RemoveAll(x => x.GuildId != guildId.Value);
                 if (channelId.HasValue) matchedRows.RemoveAll(x => x.ChannelId != channelId.Value);
@@ -90,7 +90,7 @@ namespace Database.Data
                     ("Colour", row.Colour.RawValue));
 
                 row.New = false;
-                if(Cache.Initialised) Cache.Notices.Rows.Add(row);
+                if(Cache.Initialised) Cache.Notices.Add(row);
             }
             else
             {
@@ -110,7 +110,7 @@ namespace Database.Data
                     ("Icon", row.Icon.EncodedValue),
                     ("Colour", row.Colour.RawValue));
 
-                if(Cache.Initialised) Cache.Notices.Rows[Cache.Notices.Rows.FindIndex(x => x.GuildId == row.GuildId && x.ChannelId == row.ChannelId)] = row;
+                if(Cache.Initialised) Cache.Notices[Cache.Notices.FindIndex(x => x.GuildId == row.GuildId && x.ChannelId == row.ChannelId)] = row;
             }
         }
 
@@ -128,13 +128,13 @@ namespace Database.Data
                     ("ChannelId", row.ChannelId),
                     ("MessageId", row.MessageId));
 
-                if(Cache.Initialised) Cache.Notices.Rows[Cache.Notices.Rows.FindIndex(x => x.GuildId == row.GuildId && x.ChannelId == row.ChannelId)] = row;
+                if(Cache.Initialised) Cache.Notices[Cache.Notices.FindIndex(x => x.GuildId == row.GuildId && x.ChannelId == row.ChannelId)] = row;
             }
         }
 
         public static async Task DeleteRowAsync(NoticesRow row)
         {
-            if(Cache.Initialised) Cache.Notices.Rows.RemoveAll(x => x.GuildId == row.GuildId && x.ChannelId == row.ChannelId);
+            if(Cache.Initialised) Cache.Notices.RemoveAll(x => x.GuildId == row.GuildId && x.ChannelId == row.ChannelId);
 
             await Sql.ExecuteAsync(
                 "DELETE FROM Notices WHERE GuildId = @GuildId AND ChannelId = @ChannelId",
@@ -142,12 +142,6 @@ namespace Database.Data
                 ("ChannelId", row.ChannelId));
         }
     }
-
-    public class NoticesTable
-    {
-        public List<NoticesRow> Rows { get; set; }
-    }
-
     public class NoticesRow : IRow
     {
         public bool New { get; set; }

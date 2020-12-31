@@ -13,7 +13,7 @@ namespace Database.Data
 
             if (Cache.Initialised && !ignoreCache)
             {
-                matchedRows.AddRange(Cache.MessageFilter.Rows);
+                matchedRows.AddRange(Cache.MessageFilter);
 
                 if (guildId.HasValue) matchedRows.RemoveAll(x => x.GuildId != guildId.Value);
                 if (channelId.HasValue) matchedRows.RemoveAll(x => x.ChannelId != channelId.Value);
@@ -69,7 +69,7 @@ namespace Database.Data
                     ("Complex", row.Complex.EncodedValue));
 
                 row.New = false;
-                if(Cache.Initialised) Cache.MessageFilter.Rows.Add(row);
+                if(Cache.Initialised) Cache.MessageFilter.Add(row);
             }
             else
             {
@@ -79,25 +79,19 @@ namespace Database.Data
                     ("Mode", row.Mode),
                     ("Complex", row.Complex.EncodedValue));
 
-                if(Cache.Initialised) Cache.MessageFilter.Rows[Cache.MessageFilter.Rows.FindIndex(x => x.GuildId == row.GuildId && x.ChannelId == row.ChannelId)] = row;
+                if(Cache.Initialised) Cache.MessageFilter[Cache.MessageFilter.FindIndex(x => x.GuildId == row.GuildId && x.ChannelId == row.ChannelId)] = row;
             }
         }
 
         public static async Task DeleteRowAsync(MessageFilterRow row)
         {
-            if(Cache.Initialised) Cache.MessageFilter.Rows.RemoveAll(x => x.GuildId == row.GuildId && x.ChannelId == row.ChannelId);
+            if(Cache.Initialised) Cache.MessageFilter.RemoveAll(x => x.GuildId == row.GuildId && x.ChannelId == row.ChannelId);
 
             await Sql.ExecuteAsync("DELETE FROM MessageFilter WHERE GuildId = @GuildId AND ChannelId = @ChannelId",
                 ("GuildId", row.GuildId),
                 ("ChannelId", row.ChannelId));
         }
     }
-
-    public class MessageFilterTable
-    {
-        public List<MessageFilterRow> Rows { get; set; }
-    }
-
     public class MessageFilterRow : IRow
     {
         public bool New { get; set; }

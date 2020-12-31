@@ -31,7 +31,7 @@ namespace Database.Data
 
             if (Cache.Initialised && !ignoreCache)
             {
-                matchedRows.AddRange(Cache.MessageLogs.Rows);
+                matchedRows.AddRange(Cache.MessageLogs);
                 if (guildId.HasValue) matchedRows.RemoveAll(x => x.GuildId != guildId.Value);
             }
             else
@@ -80,7 +80,7 @@ namespace Database.Data
                     ("ExcludedChannels", row.GetExcludedChannelsString()));
 
                 row.New = false;
-                if(Cache.Initialised) Cache.MessageLogs.Rows.Add(row);
+                if(Cache.Initialised) Cache.MessageLogs.Add(row);
             }
             else
             {
@@ -91,13 +91,13 @@ namespace Database.Data
                     ("EditedChannelId", row.EditedChannelId),
                     ("ExcludedChannels", row.GetExcludedChannelsString()));
 
-                if(Cache.Initialised) Cache.MessageLogs.Rows[Cache.MessageLogs.Rows.FindIndex(x => x.GuildId == row.GuildId)] = row;
+                if(Cache.Initialised) Cache.MessageLogs[Cache.MessageLogs.FindIndex(x => x.GuildId == row.GuildId)] = row;
             }
         }
 
         public static async Task DeleteRowAsync(MessageLogsRow row)
         {
-            if(Cache.Initialised) Cache.MessageLogs.Rows.RemoveAll(x => x.GuildId == row.GuildId);
+            if(Cache.Initialised) Cache.MessageLogs.RemoveAll(x => x.GuildId == row.GuildId);
 
             await Sql.ExecuteAsync(
                 "DELETE FROM Autopurge WHERE GuildId = @GuildId",
@@ -239,12 +239,6 @@ namespace Database.Data
                 ("MinimumTimestamp", DateTime.UtcNow - TimeSpan.FromDays(30)));
         }
     }
-
-    public class MessageLogsTable
-    {
-        public List<MessageLogsRow> Rows { get; set; }
-    }
-
     public class MessageLogsRow : IRow
     {
         public bool New { get; set; }

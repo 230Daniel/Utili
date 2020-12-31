@@ -14,7 +14,7 @@ namespace Database.Data
 
             if (Cache.Initialised && !ignoreCache)
             {
-                matchedRows.AddRange(Cache.VoteChannels.Rows);
+                matchedRows.AddRange(Cache.VoteChannels);
 
                 if (guildId.HasValue) matchedRows.RemoveAll(x => x.GuildId != guildId.Value);
                 if (channelId.HasValue) matchedRows.RemoveAll(x => x.ChannelId != channelId.Value);
@@ -71,7 +71,7 @@ namespace Database.Data
                     ("Emotes", row.GetEmotesString()));
 
                 row.New = false;
-                if(Cache.Initialised) Cache.VoteChannels.Rows.Add(row);
+                if(Cache.Initialised) Cache.VoteChannels.Add(row);
             }
             else
             {
@@ -81,25 +81,19 @@ namespace Database.Data
                         ("Mode", row.Mode),
                         ("Emotes", row.GetEmotesString()));
 
-                if(Cache.Initialised) Cache.VoteChannels.Rows[Cache.VoteChannels.Rows.FindIndex(x => x.GuildId == row.GuildId && x.ChannelId == row.ChannelId)] = row;
+                if(Cache.Initialised) Cache.VoteChannels[Cache.VoteChannels.FindIndex(x => x.GuildId == row.GuildId && x.ChannelId == row.ChannelId)] = row;
             }
         }
 
         public static async Task DeleteRowAsync(VoteChannelsRow row)
         {
-            if(Cache.Initialised) Cache.VoteChannels.Rows.RemoveAll(x => x.GuildId == row.GuildId && x.ChannelId == row.ChannelId);
+            if(Cache.Initialised) Cache.VoteChannels.RemoveAll(x => x.GuildId == row.GuildId && x.ChannelId == row.ChannelId);
 
             await Sql.ExecuteAsync("DELETE FROM VoteChannels WHERE GuildId = @GuildId AND ChannelId = @ChannelId",
                 ("GuildId", row.GuildId),
                 ("ChannelId", row.ChannelId));
         }
     }
-
-    public class VoteChannelsTable
-    {
-        public List<VoteChannelsRow> Rows { get; set; }
-    }
-
     public class VoteChannelsRow : IRow
     {
         public bool New { get; set; }

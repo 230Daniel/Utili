@@ -13,7 +13,7 @@ namespace Database.Data
 
             if (Cache.Initialised && !ignoreCache)
             {
-                matchedRows.AddRange(Cache.Roles.Rows);
+                matchedRows.AddRange(Cache.Roles);
 
                 if (guildId.HasValue) matchedRows.RemoveAll(x => x.GuildId != guildId.Value);
             }
@@ -61,7 +61,7 @@ namespace Database.Data
                     ("JoinRoles", row.GetJoinRolesString()));
 
                 row.New = false;
-                if(Cache.Initialised) Cache.Roles.Rows.Add(row);
+                if(Cache.Initialised) Cache.Roles.Add(row);
             }
             else
             {
@@ -71,13 +71,13 @@ namespace Database.Data
                     ("RolePersist", row.RolePersist),
                     ("JoinRoles", row.GetJoinRolesString()));
 
-                if(Cache.Initialised) Cache.Roles.Rows[Cache.Roles.Rows.FindIndex(x => x.GuildId == row.GuildId)] = row;
+                if(Cache.Initialised) Cache.Roles[Cache.Roles.FindIndex(x => x.GuildId == row.GuildId)] = row;
             }
         }
 
         public static async Task DeleteRowAsync(RolesRow row)
         {
-            if(Cache.Initialised) Cache.Roles.Rows.RemoveAll(x => x.GuildId == row.GuildId);
+            if(Cache.Initialised) Cache.Roles.RemoveAll(x => x.GuildId == row.GuildId);
 
             await Sql.ExecuteAsync(
                 "DELETE FROM Roles WHERE GuildId = @GuildId", 
@@ -155,12 +155,6 @@ namespace Database.Data
                 ("UserId", row.UserId));
         }
     }
-
-    public class RolesTable
-    {
-        public List<RolesRow> Rows { get; set; }
-    }
-
     public class RolesRow : IRow
     {
         public bool New { get; set; }

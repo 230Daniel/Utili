@@ -13,7 +13,7 @@ namespace Database.Data
 
             if (Cache.Initialised && !ignoreCache)
             {
-                matchedRows.AddRange(Cache.Misc.Rows);
+                matchedRows.AddRange(Cache.Misc);
 
                 if (guildId.HasValue) matchedRows.RemoveAll(x => x.GuildId != guildId.Value);
                 if (type != null) matchedRows.RemoveAll(x => x.Type != type);
@@ -74,7 +74,7 @@ namespace Database.Data
                     ("Value", row.Value.EncodedValue));
 
                 row.New = false;
-                if(Cache.Initialised) Cache.Misc.Rows.Add(row);
+                if(Cache.Initialised) Cache.Misc.Add(row);
             }
             else
             {
@@ -83,13 +83,13 @@ namespace Database.Data
                     ("Type", row.Type),
                     ("Value", row.Value.EncodedValue));
 
-                if(Cache.Initialised) Cache.Misc.Rows[Cache.Misc.Rows.FindIndex(x => x.GuildId == row.GuildId && x.Type == row.Type)] = row;
+                if(Cache.Initialised) Cache.Misc[Cache.Misc.FindIndex(x => x.GuildId == row.GuildId && x.Type == row.Type)] = row;
             }
         }
 
         public static async Task DeleteRowAsync(MiscRow row)
         {
-            if(Cache.Initialised) Cache.Misc.Rows.RemoveAll(x => x.GuildId == row.GuildId && x.Type == row.Type);
+            if(Cache.Initialised) Cache.Misc.RemoveAll(x => x.GuildId == row.GuildId && x.Type == row.Type);
 
             await Sql.ExecuteAsync(
                 "DELETE FROM Misc WHERE GuildId = @GuildId AND Type = @Type",
@@ -97,12 +97,6 @@ namespace Database.Data
                 ("Type", row.Type));
         }
     }
-
-    public class MiscTable
-    {
-        public List<MiscRow> Rows { get; set; }
-    }
-
     public class MiscRow : IRow
     {
         public bool New { get; set; }

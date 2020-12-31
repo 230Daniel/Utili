@@ -14,7 +14,7 @@ namespace Database.Data
 
             if (Cache.Initialised && !ignoreCache)
             {
-                matchedRows.AddRange(Cache.Autopurge.Rows);
+                matchedRows.AddRange(Cache.Autopurge);
 
                 if (guildId.HasValue) matchedRows.RemoveAll(x => x.GuildId != guildId.Value);
                 if (channelId.HasValue) matchedRows.RemoveAll(x => x.ChannelId != channelId.Value);
@@ -77,7 +77,7 @@ namespace Database.Data
 
                 row.New = false;
 
-                if(Cache.Initialised) Cache.Autopurge.Rows.Add(row);
+                if(Cache.Initialised) Cache.Autopurge.Add(row);
             }
             else
             {
@@ -87,24 +87,19 @@ namespace Database.Data
                     ("Timespan", row.Timespan),
                     ("Mode", row.Mode));
 
-                if(Cache.Initialised) Cache.Autopurge.Rows[Cache.Autopurge.Rows.FindIndex(x => x.GuildId == row.GuildId && x.ChannelId == row.ChannelId)] = row;
+                if(Cache.Initialised) Cache.Autopurge[Cache.Autopurge.FindIndex(x => x.GuildId == row.GuildId && x.ChannelId == row.ChannelId)] = row;
             }
         }
 
         public static async Task DeleteRowAsync(AutopurgeRow row)
         {
-            if(Cache.Initialised) Cache.Autopurge.Rows.RemoveAll(x => x.GuildId == row.GuildId && x.ChannelId == row.ChannelId);
+            if(Cache.Initialised) Cache.Autopurge.RemoveAll(x => x.GuildId == row.GuildId && x.ChannelId == row.ChannelId);
 
             await Sql.ExecuteAsync(
                 "DELETE FROM Autopurge WHERE GuildId = @GuildId AND ChannelId = @ChannelId",
                 ("GuildId", row.GuildId),
                 ("ChannelId", row.ChannelId));
         }
-    }
-
-    public class AutopurgeTable
-    {
-        public List<AutopurgeRow> Rows { get; set; }
     }
 
     public class AutopurgeRow : IRow
