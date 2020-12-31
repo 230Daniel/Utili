@@ -8,18 +8,18 @@ namespace DataTransfer.Transfer
 {
     internal static class InactiveRoleUsers
     {
-        public static async Task TransferAsync(ulong? guildId = null)
+        public static async Task TransferAsync(ulong? oneGuildId = null)
         {
-            List<V1Data> v1Datas = V1Data.GetDataList(guildId.ToString(), ignoreCache: true, table: "Utili_InactiveTimers");
+            List<V1Data> v1Rows;
+            if(oneGuildId == null) v1Rows = V1Data.GetDataList(ignoreCache: true, table: "Utili_InactiveTimers");
+            else v1Rows = V1Data.GetDataList(oneGuildId.ToString(), ignoreCache: true, table: "Utili_InactiveTimers");
 
-            foreach (V1Data v1 in v1Datas)
+            foreach (V1Data v1 in v1Rows)
             {
-
                 try
                 {
                     InactiveRoleUserRow row = new InactiveRoleUserRow(ulong.Parse(v1.GuildId), ulong.Parse(v1.Type.Split("-").Last()), DateTime.Parse(v1.Value));
-                    await InactiveRole.UpdateUserAsync(row.GuildId, row.UserId, row.LastAction);
-                    Console.WriteLine($"Done {row.GuildId}-{row.UserId}");
+                    Program.RowsToSave.Add(row);
                 }
                 catch { }
             }

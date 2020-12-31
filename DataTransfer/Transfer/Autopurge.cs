@@ -26,11 +26,8 @@ namespace DataTransfer.Transfer
                     int mode = 0;
                     if (V1Data.DataExists(guildId.ToString(), $"Autopurge-Mode-{channelId}", "Bots")) mode = 1;
 
-                    
                     AutopurgeRow row = AutopurgeRow.FromDatabase(guildId, channelId, time.ToString(), mode);
-                    row.New = true;
-                    await Database.Data.Autopurge.SaveRowAsync(row);
-                    Console.WriteLine($"Done {row.GuildId}-{row.ChannelId}");
+                    Program.RowsToSave.Add(row);
                 }
                 catch { }
             }
