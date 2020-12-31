@@ -98,7 +98,7 @@ namespace Database.Data
         public List<MessageFilterRow> Rows { get; set; }
     }
 
-    public class MessageFilterRow
+    public class MessageFilterRow : IRow
     {
         public bool New { get; set; }
         public ulong GuildId { get; set; }
@@ -140,6 +140,16 @@ namespace Database.Data
                 Mode = mode,
                 Complex = EString.FromEncoded(complex)
             };
+        }
+
+        public async Task SaveAsync()
+        {
+            await MessageFilter.SaveRowAsync(this);
+        }
+
+        public async Task DeleteAsync()
+        {
+            await MessageFilter.DeleteRowAsync(this);
         }
     }
 }

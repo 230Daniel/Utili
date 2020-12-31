@@ -148,7 +148,7 @@ namespace Database.Data
         public List<NoticesRow> Rows { get; set; }
     }
 
-    public class NoticesRow
+    public class NoticesRow : IRow
     {
         public bool New { get; set; }
         public ulong GuildId { get; set; }
@@ -207,6 +207,16 @@ namespace Database.Data
                 Icon = EString.FromEncoded(icon),
                 Colour = new Color(colour)
             };
+        }
+
+        public async Task SaveAsync()
+        {
+            await Notices.SaveRowAsync(this);
+        }
+
+        public async Task DeleteAsync()
+        {
+            await Notices.DeleteRowAsync(this);
         }
     }
 }

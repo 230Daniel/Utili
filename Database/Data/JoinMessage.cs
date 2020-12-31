@@ -118,7 +118,7 @@ namespace Database.Data
         public List<JoinMessageRow> Rows { get; set; }
     }
 
-    public class JoinMessageRow
+    public class JoinMessageRow : IRow
     {
         public bool New { get; set; }
         public ulong GuildId { get; set; }
@@ -174,6 +174,16 @@ namespace Database.Data
                 Icon = EString.FromEncoded(icon),
                 Colour = new Color(colour)
             };
+        }
+
+        public async Task SaveAsync()
+        {
+            await JoinMessage.SaveRowAsync(this);
+        }
+
+        public async Task DeleteAsync()
+        {
+            await JoinMessage.DeleteRowAsync(this);
         }
     }
 }

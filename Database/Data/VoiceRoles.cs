@@ -97,7 +97,7 @@ namespace Database.Data
         public List<VoiceRolesRow> Rows { get; set; }
     }
 
-    public class VoiceRolesRow
+    public class VoiceRolesRow : IRow
     {
         public bool New { get; set; }
         public ulong GuildId { get; set; }
@@ -125,6 +125,16 @@ namespace Database.Data
                 ChannelId = channelId,
                 RoleId = roleId
             };
+        }
+
+        public async Task SaveAsync()
+        {
+            await VoiceRoles.SaveRowAsync(this);
+        }
+
+        public async Task DeleteAsync()
+        {
+            await VoiceRoles.DeleteRowAsync(this);
         }
     }
 }

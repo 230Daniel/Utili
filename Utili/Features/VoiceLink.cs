@@ -25,7 +25,7 @@ namespace Utili.Features
 
         public static async Task RequestUpdateAsync(SocketVoiceChannel channel)
         {
-            VoiceLinkRow metaRow = await Database.Data.VoiceLink.GetMetaRowAsync(channel.Guild.Id);
+            VoiceLinkRow metaRow = await Database.Data.VoiceLink.GetRowAsync(channel.Guild.Id);
 
             if (!metaRow.Enabled || metaRow.ExcludedChannels.Contains(channel.Id)) return;
             
@@ -76,7 +76,7 @@ namespace Utili.Features
                 guild.Users.Where(x => x.VoiceChannel != null && x.VoiceChannel.Id == voiceChannel.Id).ToList();
 
             VoiceLinkChannelRow channelRow = await Database.Data.VoiceLink.GetChannelRowAsync(guild.Id, voiceChannel.Id);
-            VoiceLinkRow metaRow = await Database.Data.VoiceLink.GetMetaRowAsync(guild.Id);
+            VoiceLinkRow metaRow = await Database.Data.VoiceLink.GetRowAsync(guild.Id);
 
             ITextChannel textChannel = null;
             try

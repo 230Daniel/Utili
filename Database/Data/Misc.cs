@@ -103,7 +103,7 @@ namespace Database.Data
         public List<MiscRow> Rows { get; set; }
     }
 
-    public class MiscRow
+    public class MiscRow : IRow
     {
         public bool New { get; set; }
         public ulong GuildId { get; set; }
@@ -132,6 +132,16 @@ namespace Database.Data
                 Type = type,
                 Value = EString.FromEncoded(value)
             };
+        }
+
+        public async Task SaveAsync()
+        {
+            await Misc.SaveRowAsync(this);
+        }
+
+        public async Task DeleteAsync()
+        {
+            await Misc.DeleteRowAsync(this);
         }
     }
 }

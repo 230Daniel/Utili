@@ -93,7 +93,7 @@ namespace Database.Data
         public List<MessagePinningRow> Rows { get; set; }
     }
 
-    public class MessagePinningRow
+    public class MessagePinningRow : IRow
     {
         public bool New { get; set; }
         public ulong GuildId { get; set; }
@@ -152,6 +152,16 @@ namespace Database.Data
             }
 
             return EString.FromDecoded(idsString).EncodedValue;
+        }
+
+        public async Task SaveAsync()
+        {
+            await MessagePinning.SaveRowAsync(this);
+        }
+
+        public async Task DeleteAsync()
+        {
+            await MessagePinning.DeleteRowAsync(this);
         }
     }
 }

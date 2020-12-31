@@ -161,7 +161,7 @@ namespace Database.Data
         public List<RolesRow> Rows { get; set; }
     }
 
-    public class RolesRow
+    public class RolesRow : IRow
     {
         public bool New { get; set; }
         public ulong GuildId { get; set; }
@@ -222,12 +222,20 @@ namespace Database.Data
 
             return joinRolesString;
         }
+
+        public async Task SaveAsync()
+        {
+            await Roles.SaveRowAsync(this);
+        }
+
+        public async Task DeleteAsync()
+        {
+            await Roles.DeleteRowAsync(this);
+        }
     }
 
-    public class RolesPersistantRolesRow
+    public class RolesPersistantRolesRow : IRow
     {
-        // TODO: Refactor properly, these have to be unique as of current
-
         public bool New { get; set; }
         public ulong GuildId { get; set; }
         public ulong UserId { get; set; }
@@ -284,6 +292,16 @@ namespace Database.Data
             }
 
             return rolesString;
+        }
+
+        public async Task SaveAsync()
+        {
+            await Data.Roles.SavePersistRowAsync(this);
+        }
+
+        public async Task DeleteAsync()
+        {
+            await Data.Roles.DeletePersistRowAsync(this);
         }
     }
 }

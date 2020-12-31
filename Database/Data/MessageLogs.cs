@@ -95,6 +95,15 @@ namespace Database.Data
             }
         }
 
+        public static async Task DeleteRowAsync(MessageLogsRow row)
+        {
+            if(Cache.Initialised) Cache.MessageLogs.Rows.RemoveAll(x => x.GuildId == row.GuildId);
+
+            await Sql.ExecuteAsync(
+                "DELETE FROM Autopurge WHERE GuildId = @GuildId",
+                ("GuildId", row.GuildId));
+        }
+
         public static async Task<List<MessageLogsMessageRow>> GetMessagesAsync(ulong? guildId = null, ulong? channelId = null, ulong? messageId = null)
         {
             List<MessageLogsMessageRow> matchedRows = new List<MessageLogsMessageRow>();
@@ -236,7 +245,7 @@ namespace Database.Data
         public List<MessageLogsRow> Rows { get; set; }
     }
 
-    public class MessageLogsRow
+    public class MessageLogsRow : IRow
     {
         public bool New { get; set; }
         public ulong GuildId { get; set; }
@@ -299,9 +308,19 @@ namespace Database.Data
 
             return excludedChannelsString;
         }
+
+        public async Task SaveAsync()
+        {
+            await MessageLogs.SaveRowAsync(this);
+        }
+
+        public async Task DeleteAsync()
+        {
+            await MessageLogs.DeleteRowAsync(this);
+        }
     }
 
-    public class MessageLogsMessageRow
+    public class MessageLogsMessageRow : IRow
     {
         public bool New { get; set; }
         public ulong GuildId { get; set; }
@@ -331,6 +350,16 @@ namespace Database.Data
             };
             row.Content = EString.FromEncrypted(content, row.Ids);
             return row;
+        }
+
+        public async Task SaveAsync()
+        {
+            await MessageLogs.SaveMessageAsync(this);
+        }
+
+        public async Task DeleteAsync()
+        {
+            await MessageLogs.DeleteMessagesAsync(GuildId, ChannelId, new[] { MessageId });
         }
     }
 }

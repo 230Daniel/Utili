@@ -116,7 +116,7 @@ namespace Database.Data
         public List<ChannelMirroringRow> Rows { get; set; }
     }
 
-    public class ChannelMirroringRow
+    public class ChannelMirroringRow : IRow
     {
         public bool New { get; set; }
         public ulong GuildId { get; set; }
@@ -146,6 +146,16 @@ namespace Database.Data
                 ToChannelId = toChannelId,
                 WebhookId = webhookId
             };
+        }
+
+        public async Task SaveAsync()
+        {
+            await ChannelMirroring.SaveRowAsync(this);
+        }
+
+        public async Task DeleteAsync()
+        {
+            await ChannelMirroring.DeleteRowAsync(this);
         }
     }
 }

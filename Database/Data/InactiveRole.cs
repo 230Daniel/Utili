@@ -176,6 +176,14 @@ namespace Database.Data
             }
         }
 
+        public static async Task DeleteUserRowAsync(InactiveRoleUserRow row)
+        {
+            await Sql.ExecuteAsync(
+                "DELETE FROM InactiveRoleUsers WHERE GuildId = @GuildId AND UserId = @UserId",
+                ("GuildId", row.GuildId),
+                ("UserId", row.UserId));
+        }
+
         public static async Task<List<InactiveRoleUserRow>> GetUsersAsync(ulong guildId)
         {
             List<InactiveRoleUserRow> matchedRows = new List<InactiveRoleUserRow>();
@@ -206,7 +214,7 @@ namespace Database.Data
         public List<InactiveRoleRow> Rows { get; set; }
     }
 
-    public class InactiveRoleRow
+    public class InactiveRoleRow : IRow
     {
         public bool New { get; set; }
         public ulong GuildId { get; set; }
@@ -248,10 +256,21 @@ namespace Database.Data
                 LastUpdate = lastUpdate
             };
         }
+
+        public async Task SaveAsync()
+        {
+            await InactiveRole.SaveRowAsync(this);
+        }
+
+        public async Task DeleteAsync()
+        {
+            await InactiveRole.DeleteRowAsync(this);
+        }
     }
 
-    public class InactiveRoleUserRow
+    public class InactiveRoleUserRow : IRow
     {
+        public bool New { get; set; } // does nothing
         public ulong GuildId { get; set; }
         public ulong UserId { get; set; }
         public DateTime LastAction { get; set; }
@@ -261,6 +280,16 @@ namespace Database.Data
             GuildId = guildId;
             UserId = userId;
             LastAction = lastAction;
+        }
+
+        public async Task SaveAsync()
+        {
+            await InactiveRole.UpdateUserAsync(GuildId, UserId, LastAction);
+        }
+
+        public async Task DeleteAsync()
+        {
+            await InactiveRole.DeleteUserRowAsync(this);
         }
     }
 }

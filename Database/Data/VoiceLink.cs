@@ -7,9 +7,7 @@ namespace Database.Data
 {
     public static class VoiceLink
     {
-        #region Meta Rows
-
-        public static async Task<List<VoiceLinkRow>> GetMetaRowsAsync(ulong? guildId = null, bool ignoreCache = false)
+        public static async Task<List<VoiceLinkRow>> GetRowsAsync(ulong? guildId = null, bool ignoreCache = false)
         {
             List<VoiceLinkRow> matchedRows = new List<VoiceLinkRow>();
 
@@ -48,13 +46,13 @@ namespace Database.Data
             return matchedRows;
         }
 
-        public static async Task<VoiceLinkRow> GetMetaRowAsync(ulong guildId)
+        public static async Task<VoiceLinkRow> GetRowAsync(ulong guildId)
         {
-            List<VoiceLinkRow> rows = await GetMetaRowsAsync(guildId);
+            List<VoiceLinkRow> rows = await GetRowsAsync(guildId);
             return rows.Count > 0 ? rows.First() : new VoiceLinkRow(guildId);
         }
 
-        public static async Task SaveMetaRowAsync(VoiceLinkRow row)
+        public static async Task SaveRowAsync(VoiceLinkRow row)
         {
             if (row.New)
             {
@@ -83,9 +81,14 @@ namespace Database.Data
             }
         }
 
-        #endregion
+        public static async Task DeleteRowAsync(VoiceLinkRow row)
+        {
+            if(Cache.Initialised) Cache.VoiceLink.Rows.RemoveAll(x => x.GuildId == row.GuildId);
 
-        #region Channel Rows
+            await Sql.ExecuteAsync(
+                "DELETE FROM VoiceLink WHERE GuildId = @GuildId",
+                ("GuildId", row.GuildId));
+        }
 
         public static async Task<List<VoiceLinkChannelRow>> GetChannelRowsAsync(ulong? guildId = null, ulong? voiceChannelId = null, bool ignoreCache = false)
         {
@@ -162,7 +165,15 @@ namespace Database.Data
             }
         }
 
-        #endregion
+        public static async Task DeleteChannelRowAsync(VoiceLinkChannelRow row)
+        {
+            if(Cache.Initialised) Cache.VoiceLink.Channels.RemoveAll(x => x.GuildId == row.GuildId && x.VoiceChannelId == row.VoiceChannelId);
+
+            await Sql.ExecuteAsync(
+                "DELETE FROM VoiceLinkChannels WHERE GuildId = @GuildId AND VoiceChannelId = @VoiceChannelId",
+                ("GuildId", row.GuildId),
+                ("VoiceChannelId", row.VoiceChannelId));
+        }
     }
 
     public class VoiceLinkTable
@@ -171,7 +182,7 @@ namespace Database.Data
         public List<VoiceLinkChannelRow> Channels { get; set; }
     }
 
-    public class VoiceLinkRow
+    public class VoiceLinkRow : IRow
     {
         public bool New { get; set; }
         public ulong GuildId { get; set; }
@@ -237,9 +248,19 @@ namespace Database.Data
 
             return excludedChannelsString;
         }
+
+        public async Task SaveAsync()
+        {
+            await VoiceLink.SaveRowAsync(this);
+        }
+
+        public async Task DeleteAsync()
+        {
+            await VoiceLink.DeleteRowAsync(this);
+        }
     }
 
-    public class VoiceLinkChannelRow
+    public class VoiceLinkChannelRow : IRow
     {
         public bool New { get; set; }
         public ulong GuildId { get; set; }
@@ -267,6 +288,16 @@ namespace Database.Data
                 TextChannelId = textChannelId,
                 VoiceChannelId = voiceChannelId
             };
+        }
+
+        public async Task SaveAsync()
+        {
+            await VoiceLink.SaveChannelRowAsync(this);
+        }
+
+        public async Task DeleteAsync()
+        {
+            await VoiceLink.DeleteChannelRowAsync(this);
         }
     }
 }

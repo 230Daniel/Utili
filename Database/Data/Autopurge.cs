@@ -95,7 +95,8 @@ namespace Database.Data
         {
             if(Cache.Initialised) Cache.Autopurge.Rows.RemoveAll(x => x.GuildId == row.GuildId && x.ChannelId == row.ChannelId);
 
-            await Sql.ExecuteAsync("DELETE FROM Autopurge WHERE GuildId = @GuildId AND ChannelId = @ChannelId",
+            await Sql.ExecuteAsync(
+                "DELETE FROM Autopurge WHERE GuildId = @GuildId AND ChannelId = @ChannelId",
                 ("GuildId", row.GuildId),
                 ("ChannelId", row.ChannelId));
         }
@@ -106,7 +107,7 @@ namespace Database.Data
         public List<AutopurgeRow> Rows { get; set; }
     }
 
-    public class AutopurgeRow
+    public class AutopurgeRow : IRow
     {
         public bool New { get; set; }
         public ulong GuildId { get; set; }
@@ -141,6 +142,16 @@ namespace Database.Data
                 Timespan = TimeSpan.Parse(timespan),
                 Mode = mode
             };
+        }
+
+        public async Task SaveAsync()
+        {
+            await Autopurge.SaveRowAsync(this);
+        }
+
+        public async Task DeleteAsync()
+        {
+            await Autopurge.DeleteRowAsync(this);
         }
     }
 }

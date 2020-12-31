@@ -174,7 +174,7 @@ namespace Database.Data
         public List<PremiumRow> Rows { get; set; }
     }
 
-    public class PremiumRow
+    public class PremiumRow : IRow
     {
         public bool New { get; set; }
         public int SlotId { get; set; }
@@ -202,6 +202,16 @@ namespace Database.Data
                 UserId = userId,
                 GuildId = guildId
             };
+        }
+
+        public async Task SaveAsync()
+        {
+            await Premium.SaveRowAsync(this);
+        }
+
+        public async Task DeleteAsync()
+        {
+            await Premium.DeleteRowAsync(this);
         }
     }
 }

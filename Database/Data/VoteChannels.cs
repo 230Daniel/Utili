@@ -100,7 +100,7 @@ namespace Database.Data
         public List<VoteChannelsRow> Rows { get; set; }
     }
 
-    public class VoteChannelsRow
+    public class VoteChannelsRow : IRow
     {
         public bool New { get; set; }
         public ulong GuildId { get; set; }
@@ -166,6 +166,16 @@ namespace Database.Data
             }
 
             return EString.FromDecoded(emotesString).EncodedValue;
+        }
+
+        public async Task SaveAsync()
+        {
+            await VoteChannels.SaveRowAsync(this);
+        }
+
+        public async Task DeleteAsync()
+        {
+            await VoteChannels.DeleteRowAsync(this);
         }
     }
 }

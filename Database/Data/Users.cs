@@ -85,9 +85,16 @@ namespace Database.Data
             await Sql.ExecuteAsync("UPDATE Users SET Visits = Visits + 1 WHERE UserId = @UserId;",
                 ("UserId", userId));
         }
+
+        public static async Task DeleteRowAsync(UserRow row)
+        {
+            await Sql.ExecuteAsync(
+                "DELETE FROM Users WHERE UserId = @UserId",
+                ("UserId", row.UserId));
+        }
     }
 
-    public class UserRow
+    public class UserRow : IRow
     {
         public bool New { get; set; }
         public ulong UserId { get; set; }
@@ -119,6 +126,16 @@ namespace Database.Data
                 Visits = visits,
                 CustomerId = customerId
             };
+        }
+
+        public async Task SaveAsync()
+        {
+            await Users.SaveRowAsync(this);
+        }
+
+        public async Task DeleteAsync()
+        {
+            await Users.DeleteRowAsync(this);
         }
     }
 }

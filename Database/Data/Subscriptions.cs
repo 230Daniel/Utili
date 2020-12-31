@@ -102,7 +102,7 @@ namespace Database.Data
         }
     }
 
-    public class SubscriptionsRow
+    public class SubscriptionsRow : IRow
     {
         public bool New { get; set; }
         public string SubscriptionId { get; set; }
@@ -131,6 +131,15 @@ namespace Database.Data
                 EndsAt = endsAt,
                 Slots = slots
             };
+        }
+        public async Task SaveAsync()
+        {
+            await Subscriptions.SaveRowAsync(this);
+        }
+
+        public async Task DeleteAsync()
+        {
+            await Subscriptions.DeleteRowAsync(this);
         }
     }
 }

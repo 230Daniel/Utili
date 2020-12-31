@@ -62,7 +62,7 @@ namespace Database
             Notices.Rows = await Data.Notices.GetRowsAsync(ignoreCache: true);
             Reputation.Rows = await Data.Reputation.GetRowsAsync(ignoreCache: true);
             Roles.Rows = await Data.Roles.GetRowsAsync(ignoreCache: true);
-            VoiceLink.Rows = await Data.VoiceLink.GetMetaRowsAsync(ignoreCache: true);
+            VoiceLink.Rows = await Data.VoiceLink.GetRowsAsync(ignoreCache: true);
             VoiceLink.Channels = await Data.VoiceLink.GetChannelRowsAsync(ignoreCache: true);
             VoiceRoles.Rows = await Data.VoiceRoles.GetRowsAsync(ignoreCache: true);
             VoteChannels.Rows = await Data.VoteChannels.GetRowsAsync(ignoreCache: true);

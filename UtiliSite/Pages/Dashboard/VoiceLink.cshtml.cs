@@ -16,7 +16,7 @@ namespace UtiliSite.Pages.Dashboard
             AuthDetails auth = await Auth.GetAuthDetailsAsync(this);
             if(!auth.Authenticated) return RedirectToPage("Index");
 
-            VoiceLinkRow row = await VoiceLink.GetMetaRowAsync(auth.Guild.Id);
+            VoiceLinkRow row = await VoiceLink.GetRowAsync(auth.Guild.Id);
             List<RestVoiceChannel> voiceChannels = await DiscordModule.GetVoiceChannelsAsync(auth.Guild);
             List<RestVoiceChannel> excludedChannels = voiceChannels.Where(x => row.ExcludedChannels.Contains(x.Id)).OrderBy(x => x.Position).ToList();
             List<RestVoiceChannel> nonExcludedChannels = voiceChannels.Where(x => !row.ExcludedChannels.Contains(x.Id)).OrderBy(x => x.Position).ToList();
@@ -38,11 +38,11 @@ namespace UtiliSite.Pages.Dashboard
             bool deleteChannels = HttpContext.Request.Form["deleteChannels"] == "on";
             string prefix = HttpContext.Request.Form["prefix"].ToString();
 
-            VoiceLinkRow row = await VoiceLink.GetMetaRowAsync(auth.Guild.Id);
+            VoiceLinkRow row = await VoiceLink.GetRowAsync(auth.Guild.Id);
             row.Enabled = enabled;
             row.DeleteChannels = deleteChannels;
             row.Prefix = EString.FromDecoded(prefix);
-            await VoiceLink.SaveMetaRowAsync(row);
+            await VoiceLink.SaveRowAsync(row);
 
             return new OkResult();
         }
@@ -55,12 +55,12 @@ namespace UtiliSite.Pages.Dashboard
 
             ulong channelId = ulong.Parse(HttpContext.Request.Form["channel"]);
 
-            VoiceLinkRow metaRow = await VoiceLink.GetMetaRowAsync(auth.Guild.Id);
+            VoiceLinkRow metaRow = await VoiceLink.GetRowAsync(auth.Guild.Id);
             if (!metaRow.ExcludedChannels.Contains(channelId))
             {
                 metaRow.ExcludedChannels.Add(channelId);
             }
-            await VoiceLink.SaveMetaRowAsync(metaRow);
+            await VoiceLink.SaveRowAsync(metaRow);
 
             return new RedirectResult(Request.Path);
         }
@@ -73,9 +73,9 @@ namespace UtiliSite.Pages.Dashboard
 
             ulong channelId = ulong.Parse(HttpContext.Request.Form["channel"]);
 
-            VoiceLinkRow metaRow = await VoiceLink.GetMetaRowAsync(auth.Guild.Id);
+            VoiceLinkRow metaRow = await VoiceLink.GetRowAsync(auth.Guild.Id);
             metaRow.ExcludedChannels.RemoveAll(x => x == channelId);
-            await VoiceLink.SaveMetaRowAsync(metaRow);
+            await VoiceLink.SaveRowAsync(metaRow);
 
             return new RedirectResult(Request.Path);
         }

@@ -139,6 +139,14 @@ namespace Database.Data
 
         public static async Task SetUserReputationAsync(ulong guildId, ulong userId, long reputation)
         {
+            if (reputation == 0)
+            {
+                await Sql.ExecuteAsync("DELETE FROM ReputationUsers WHERE GuildId = @GuildId AND UserId = @UserId;",
+                    ("GuildId", guildId), 
+                    ("UserId", userId));
+                return;
+            }
+
             int affected = await Sql.ExecuteAsync("UPDATE ReputationUsers SET Reputation = @Reputation WHERE GuildId = @GuildId AND UserId = @UserId;",
                 ("GuildId", guildId), 
                 ("UserId", userId),
@@ -160,7 +168,7 @@ namespace Database.Data
         public List<ReputationRow> Rows { get; set; }
     }
 
-    public class ReputationRow
+    public class ReputationRow : IRow
     {
         public bool New { get; set; }
         public ulong GuildId { get; set; }
@@ -222,10 +230,21 @@ namespace Database.Data
 
             return EString.FromDecoded(emotesString).EncodedValue;
         }
+
+        public async Task SaveAsync()
+        {
+            await Reputation.SaveRowAsync(this);
+        }
+
+        public async Task DeleteAsync()
+        {
+            await Reputation.DeleteRowAsync(this);
+        }
     }
 
-    public class ReputationUserRow
+    public class ReputationUserRow : IRow
     {
+        public bool New { get; set; } // Does nothing
         public ulong GuildId { get; set; }
         public ulong UserId { get; set; }
         public long Reputation { get; set; }
@@ -242,6 +261,17 @@ namespace Database.Data
             GuildId = guildId;
             UserId = userId;
             Reputation = reputation;
+        }
+
+        public async Task SaveAsync()
+        {
+            await Data.Reputation.SetUserReputationAsync(GuildId, UserId, Reputation);
+        }
+
+        public async Task DeleteAsync()
+        {
+            await Data.Reputation.SetUserReputationAsync(GuildId, UserId, 0);
+            // Deletes row if rep = 0.
         }
     }
 }
