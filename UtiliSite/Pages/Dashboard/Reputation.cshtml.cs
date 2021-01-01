@@ -12,7 +12,7 @@ namespace UtiliSite.Pages.Dashboard
         public async Task<ActionResult> OnGet()
         {
             AuthDetails auth = await Auth.GetAuthDetailsAsync(this);
-            if(!auth.Authenticated) return RedirectToPage("Index");
+            if(!auth.Authenticated) return auth.Action;
 
             ReputationRow row = await Reputation.GetRowAsync(auth.Guild.Id);
 
@@ -41,7 +41,7 @@ namespace UtiliSite.Pages.Dashboard
         {
             AuthDetails auth = await Auth.GetAuthDetailsAsync(this);
 
-            if (!auth.Authenticated) return RedirectToPage("Index");
+            if (!auth.Authenticated) return auth.Action;
 
             ReputationRow row = await Reputation.GetRowAsync(auth.Guild.Id);
             (IEmote, int) emote = row.Emotes.First(x => x.Item1.ToString() == HttpContext.Request.Form["emote"]);

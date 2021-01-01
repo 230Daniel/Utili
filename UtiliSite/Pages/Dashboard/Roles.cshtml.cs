@@ -13,7 +13,7 @@ namespace UtiliSite.Pages.Dashboard
         public async Task<ActionResult> OnGet()
         {
             AuthDetails auth = await Auth.GetAuthDetailsAsync(this);
-            if(!auth.Authenticated) return RedirectToPage("Index");
+            if(!auth.Authenticated) return auth.Action;
 
             RolesRow row = await Roles.GetRowAsync(auth.Guild.Id);
             List<RestRole> joinRoles = auth.Guild.Roles.Where(x => row.JoinRoles.Contains(x.Id)).ToList();

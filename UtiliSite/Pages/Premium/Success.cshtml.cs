@@ -13,7 +13,7 @@ namespace UtiliSite.Pages.Premium
         {
             AuthDetails auth = await Auth.GetAuthDetailsAsync(this);
             ViewData["auth"] = auth;
-            if(!auth.Authenticated) return Forbid();
+            if(!auth.Authenticated) return auth.Action;
 
             await Task.Delay(2000);
 

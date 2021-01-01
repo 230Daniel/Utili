@@ -10,7 +10,6 @@ using Database.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
-
 namespace UtiliSite
 {
     public static class Auth
@@ -33,11 +32,9 @@ namespace UtiliSite
                 AllowRefresh = true,
                 IsPersistent = true
             };
-
             if (!httpContext.User.Identity.IsAuthenticated)
             {
-                httpContext.ChallengeAsync("Discord", authProperties).GetAwaiter().GetResult();
-                return new AuthDetails(false);
+                return new AuthDetails(new ChallengeResult("Discord", authProperties));
             }
 
             ulong userId = ulong.Parse(httpContext.User.Claims.First(x => x.Type == "id").Value);
@@ -46,21 +43,20 @@ namespace UtiliSite
 
             if (client == null)
             {
-                httpContext.ChallengeAsync("Discord", authProperties).GetAwaiter().GetResult();
-                return new AuthDetails(false);
+                return new AuthDetails(new ChallengeResult("Discord", authProperties));
             }
 
-            AuthDetails auth = new AuthDetails(true, client, client.CurrentUser);
+            AuthDetails auth = new AuthDetails(client, client.CurrentUser);
             viewData["user"] = auth.User;
 
             if (httpContext.Request.RouteValues.TryGetValue("guild", out object guildValue))
             {
-                if (ulong.TryParse(guildValue.ToString(), out ulong guildId))
+                if (ulong.TryParse(guildValue.ToString(), out ulong guildId) && guildId > 0)
                 {
-                    if (guildId > 0)
-                    {
-                        RestGuild guild = await GetGuildAsync(guildId);
+                    RestGuild guild = await GetGuildAsync(guildId);
 
+                    if (await IsGuildManageableAsync(client.CurrentUser.Id, guildId) || client.CurrentUser.Id == 218613903653863427)
+                    {
                         if (guild == null)
                         {
                             string inviteUrl = "https://discord.com/api/oauth2/authorize?permissions=8&scope=bot&response_type=code" +
@@ -71,40 +67,21 @@ namespace UtiliSite
                             ReturnModel.SaveRedirect(userId,
                                 $"https://{httpContext.Request.Host.Value}/dashboard/{guildId}/core");
 
-                            httpContext.Response.Redirect(inviteUrl);
-                            auth.Authenticated = false;
-                            viewData["auth"] = auth;
-                            return auth;
+                            return new AuthDetails(new RedirectResult(inviteUrl));
                         }
 
-                        if (await IsGuildManageableAsync(client.CurrentUser.Id, guild.Id) || client.CurrentUser.Id == 218613903653863427)
-                        {
-                            auth.Guild = guild;
-                            viewData["guild"] = guild;
-                            viewData["premium"] = await Premium.IsGuildPremiumAsync(auth.Guild.Id);
-                        }
-                        else
-                        {
-                            auth.Authenticated = false;
-                            httpContext.Response.Redirect("/dashboard");
-                            viewData["auth"] = auth;
-                            return auth;
-                        }
+                        auth.Guild = guild;
+                        viewData["guild"] = guild;
+                        viewData["premium"] = await Premium.IsGuildPremiumAsync(auth.Guild.Id);
                     }
                     else
                     {
-                        auth.Authenticated = false;
-                        httpContext.Response.Redirect("/dashboard");
-                        viewData["auth"] = auth;
-                        return auth;
+                        return new AuthDetails(new RedirectResult($"https://{httpContext.Request.Host.Value}/dashboard"));
                     }
                 }
                 else
                 {
-                    auth.Authenticated = false;
-                    httpContext.Response.Redirect("/dashboard");
-                    viewData["auth"] = auth;
-                    return auth;
+                    return new AuthDetails(new RedirectResult($"https://{httpContext.Request.Host.Value}/dashboard"));
                 }
             }
 
@@ -126,14 +103,14 @@ namespace UtiliSite
         {
             if (!httpContext.User.Identity.IsAuthenticated)
             {
-                return new AuthDetails(false);
+                return new AuthDetails(null);
             }
 
             ulong userId = ulong.Parse(httpContext.User.Claims.First(x => x.Type == "id").Value);
             string token = httpContext.GetTokenAsync("Discord", "access_token").GetAwaiter().GetResult();
             DiscordRestClient client = await GetClientAsync(userId, token);
 
-            AuthDetails auth = client == null ? new AuthDetails(false) : new AuthDetails(true, client, client.CurrentUser);
+            AuthDetails auth = client == null ? new AuthDetails(null) : new AuthDetails(client, client.CurrentUser);
             viewData["auth"] = auth;
             viewData["user"] = auth.User;
             return auth;
@@ -143,21 +120,22 @@ namespace UtiliSite
     public class AuthDetails
     {
         public bool Authenticated { get; set; }
+        public ActionResult Action { get; set; }
         public DiscordRestClient Client { get; set; }
         public RestSelfUser User { get; set; }
         public RestGuild Guild { get; set; }
         public UserRow UserRow { get; set; }
 
-        public AuthDetails(bool authenticated, DiscordRestClient client, RestSelfUser user)
+        public AuthDetails(DiscordRestClient client, RestSelfUser user)
         {
-            Authenticated = authenticated;
+            Authenticated = true;
             Client = client;
             User = user;
 
             UserRow = Users.GetRowAsync(user.Id).GetAwaiter().GetResult();
             DateTime previousVisit = UserRow.LastVisit;
             UserRow.Email = user.Email;
-                
+            
             if (previousVisit < DateTime.UtcNow - TimeSpan.FromMinutes(30))
             {
                 UserRow.LastVisit = DateTime.UtcNow;
@@ -166,9 +144,10 @@ namespace UtiliSite
             }
         }
 
-        public AuthDetails(bool authenticated)
+        public AuthDetails(ActionResult action)
         {
-            Authenticated = authenticated;
+            Authenticated = false;
+            Action = action;
         }
     }
 }

@@ -13,7 +13,7 @@ namespace UtiliSite.Pages.Dashboard
         public async Task<ActionResult> OnGet()
         {
             AuthDetails auth = await Auth.GetAuthDetailsAsync(this);
-            if(!auth.Authenticated) return RedirectToPage("Index");
+            if(!auth.Authenticated) return auth.Action;
 
             JoinMessageRow row = await JoinMessage.GetRowAsync(auth.Guild.Id);
             List<RestTextChannel> channels = await DiscordModule.GetTextChannelsAsync(auth.Guild);

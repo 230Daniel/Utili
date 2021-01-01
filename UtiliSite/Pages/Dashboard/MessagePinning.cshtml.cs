@@ -12,7 +12,7 @@ namespace UtiliSite.Pages.Dashboard
         public async Task<ActionResult> OnGet()
         {
             AuthDetails auth = await Auth.GetAuthDetailsAsync(this);
-            if (!auth.Authenticated) return RedirectToPage("Index");
+            if (!auth.Authenticated) return auth.Action;
 
             MessagePinningRow row = await MessagePinning.GetRowAsync(auth.Guild.Id);
             List<RestTextChannel> channels = await DiscordModule.GetTextChannelsAsync(auth.Guild);
@@ -27,7 +27,7 @@ namespace UtiliSite.Pages.Dashboard
         {
             AuthDetails auth = await Auth.GetAuthDetailsAsync(this);
 
-            if (!auth.Authenticated) return RedirectToPage("Index");
+            if (!auth.Authenticated) return auth.Action;
 
             ulong pinChannelId = ulong.Parse(HttpContext.Request.Form["pinChannel"]);
             bool pin = HttpContext.Request.Form["pin"] == "on";

@@ -1,48 +1,54 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace UtiliSite.Pages
 {
     public class ReturnModel : PageModel
     {
-        public async Task OnGet()
+        public async Task<ActionResult> OnGet()
         {
             if (HttpContext.Request.Query.ContainsKey("error"))
             {
-                HttpContext.Response.Redirect($"https://{HttpContext.Request.Host}/dashboard");
-                return;
+                return new RedirectResult($"https://{HttpContext.Request.Host}");
             }
 
             AuthDetails auth = await Auth.GetAuthDetailsAsync(this);
-            if(!auth.Authenticated) return;
+            if(!auth.Authenticated) return auth.Action;
 
             string url = GetRedirect(auth.User.Id, HttpContext);
-            HttpContext.Response.Redirect(url);
+            return new RedirectResult(url);
         }
 
         private static Dictionary<ulong, string> _redirects = new Dictionary<ulong, string>();
 
-        public static string GetRedirect(ulong userId, HttpContext httpContext)
+        private static string GetRedirect(ulong userId, HttpContext httpContext)
         {
-            if (_redirects.TryGetValue(userId, out string url))
+            lock (_redirects)
             {
-                _redirects.Remove(userId);
-                return url;
+                if (_redirects.TryGetValue(userId, out string url))
+                {
+                    _redirects.Remove(userId);
+                    return url;
+                }
             }
 
-            return $"https://{httpContext.Request.Host}/dashboard";
+            return $"https://{httpContext.Request.Host}/";
         }
 
         public static void SaveRedirect(ulong userId, string url)
         {
-            if (_redirects.ContainsKey(userId))
+            lock (_redirects)
             {
-                _redirects.Remove(userId);
-            }
+                if (_redirects.ContainsKey(userId))
+                {
+                    _redirects.Remove(userId);
+                }
 
-            _redirects.Add(userId, url);
+                _redirects.Add(userId, url);
+            }
         }
     }
 }

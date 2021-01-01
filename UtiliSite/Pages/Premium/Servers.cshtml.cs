@@ -11,7 +11,7 @@ namespace UtiliSite.Pages.Premium
         {
             AuthDetails auth = await Auth.GetAuthDetailsAsync(this);
             ViewData["auth"] = auth;
-            if (!auth.Authenticated) return RedirectToPage("Index");
+            if (!auth.Authenticated) return null;
 
             ViewData["rows"] = await Database.Data.Premium.GetUserRowsAsync(auth.User.Id);
             ViewData["guilds"] = await DiscordModule.GetMutualGuildsAsync(auth.Client);

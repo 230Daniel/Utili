@@ -64,7 +64,7 @@ namespace DataTransfer
 
         private static async Task SaveRow(IRow row)
         {
-            //await Task.Delay(1);
+            await Task.Delay(1);
             try
             {
                 await row.SaveAsync();
