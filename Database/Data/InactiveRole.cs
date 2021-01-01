@@ -104,7 +104,7 @@ namespace Database.Data
                     ("ImmuneRoleId", row.ImmuneRoleId),
                     ("Threshold", row.Threshold),
                     ("Inverse", row.Inverse),
-                    ("DefaultLastAction", DateTime.UtcNow),
+                    ("DefaultLastAction", row.DefaultLastAction),
                     ("LastUpdate", DateTime.UtcNow - TimeSpan.FromMinutes(5)));
 
                 row.New = false;
@@ -112,17 +112,14 @@ namespace Database.Data
             }
             else
             {
-                // Not updating DefaultLastAction is intentional
-                // TODO: If they're setting it from no role to a role we should reset DefaultLastAction to UTC Now.
-                // Alternatively, always record activity data once a role has been set even if it's not there still.
-
                 await Sql.ExecuteAsync(
-                    "UPDATE InactiveRole SET RoleId = @RoleId, ImmuneRoleId = @ImmuneRoleId, Threshold = @Threshold, Inverse = @Inverse, LastUpdate = @LastUpdate WHERE GuildId = @GuildId;",
+                    "UPDATE InactiveRole SET RoleId = @RoleId, ImmuneRoleId = @ImmuneRoleId, Threshold = @Threshold, Inverse = @Inverse, DefaultLastAction = @DefaultLastAction, LastUpdate = @LastUpdate WHERE GuildId = @GuildId;",
                     ("GuildId", row.GuildId), 
                     ("RoleId", row.RoleId),
                     ("ImmuneRoleId", row.ImmuneRoleId),
                     ("Threshold", row.Threshold),
                     ("Inverse", row.Inverse),
+                    ("DefaultLastAction", row.DefaultLastAction),
                     ("LastUpdate", row.LastUpdate));
 
                 if(Cache.Initialised) Cache.InactiveRole[Cache.InactiveRole.FindIndex(x => x.GuildId == row.GuildId)] = row;

@@ -33,20 +33,32 @@ namespace DataTransfer
                         break;
                 }
 
-                switch (Menu.PickOption("Autopurge", "Inactive Role Users"))
+                switch (Menu.PickOption("Autopurge", "Channel Mirroring", "Core", "Inactive Role", "Inactive Role Users"))
                 {
                     case 0:
                         await Autopurge.TransferAsync(guildId);
                         break;
 
                     case 1:
+                        await ChannelMirroring.TransferAsync(guildId);
+                        break;
+
+                    case 2:
+                        await Core.TransferAsync(guildId);
+                        break;
+                        
+                    case 3:
+                        await InactiveRole.TransferAsync(guildId);
+                        break;
+
+                    case 4:
                         await InactiveRoleUsers.TransferAsync(guildId);
                         break;
                 }
 
                 Console.Clear();
                 Console.WriteLine("Inserting to v2...");
-                RowsToSave.ForEach(x => x.New = false);
+                RowsToSave.ForEach(x => x.New = true);
                 List<Task> tasks = RowsToSave.Select(SaveRow).ToList();
 
                 while (tasks.Any(x => !x.IsCompleted))
@@ -56,6 +68,7 @@ namespace DataTransfer
                 }
 
                 await Task.WhenAll(tasks);
+                Console.WriteLine($"{tasks.Count(x => x.IsCompleted)} / {tasks.Count}");
                 Console.WriteLine("Done");
 
                 Menu.Continue();
