@@ -55,21 +55,21 @@ namespace UtiliSite
                 {
                     RestGuild guild = await GetGuildAsync(guildId);
 
-                    if (await IsGuildManageableAsync(client.CurrentUser.Id, guildId) || client.CurrentUser.Id == 218613903653863427)
+                    if (guild == null && (await GetManageableGuildsAsync(client)).Any(x => x.Id == guildId))
                     {
-                        if (guild == null)
-                        {
-                            string inviteUrl = "https://discord.com/api/oauth2/authorize?permissions=8&scope=bot&response_type=code" +
-                                               $"&client_id={Main.Config.DiscordClientId}" +
-                                               $"&guild_id={guildId}" +
-                                               $"&redirect_uri=https%3A%2F%2F{httpContext.Request.Host.Value}%2Freturn";
+                        string inviteUrl = "https://discord.com/api/oauth2/authorize?permissions=8&scope=bot&response_type=code" +
+                                           $"&client_id={Main.Config.DiscordClientId}" +
+                                           $"&guild_id={guildId}" +
+                                           $"&redirect_uri=https%3A%2F%2F{httpContext.Request.Host.Value}%2Freturn";
 
-                            ReturnModel.SaveRedirect(userId,
-                                $"https://{httpContext.Request.Host.Value}/dashboard/{guildId}/core");
+                        ReturnModel.SaveRedirect(userId,
+                            $"https://{httpContext.Request.Host.Value}/dashboard/{guildId}/core");
 
-                            return new AuthDetails(new RedirectResult(inviteUrl));
-                        }
+                        return new AuthDetails(new RedirectResult(inviteUrl));
+                    }
 
+                    if (guild != null && (await IsGuildManageableAsync(client.CurrentUser.Id, guildId) || client.CurrentUser.Id == 218613903653863427))
+                    {
                         auth.Guild = guild;
                         viewData["guild"] = guild;
                         viewData["premium"] = await Premium.IsGuildPremiumAsync(auth.Guild.Id);

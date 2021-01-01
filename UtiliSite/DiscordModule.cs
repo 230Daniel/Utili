@@ -115,7 +115,7 @@ namespace UtiliSite
 
             try
             {
-                RestGuildUser guildUser = _client.GetGuildUserAsync(guildId, userId).GetAwaiter().GetResult();
+                RestGuildUser guildUser = await _client.GetGuildUserAsync(guildId, userId);
                 if(guildUser != null) _cachedGuildUsers.Add($"{guildId}/{userId}", guildUser);
                 return guildUser;
             }

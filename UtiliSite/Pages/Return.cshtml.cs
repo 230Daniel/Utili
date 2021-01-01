@@ -10,15 +10,16 @@ namespace UtiliSite.Pages
     {
         public async Task<ActionResult> OnGet()
         {
-            if (HttpContext.Request.Query.ContainsKey("error"))
-            {
-                return new RedirectResult($"https://{HttpContext.Request.Host}");
-            }
-
             AuthDetails auth = await Auth.GetAuthDetailsAsync(this);
             if(!auth.Authenticated) return auth.Action;
 
             string url = GetRedirect(auth.User.Id, HttpContext);
+
+            if (HttpContext.Request.Query.ContainsKey("error"))
+            {
+                return url.Contains("dashboard") ? new RedirectResult($"https://{HttpContext.Request.Host}/dashboard") : new RedirectResult($"https://{HttpContext.Request.Host}");
+            }
+
             return new RedirectResult(url);
         }
 

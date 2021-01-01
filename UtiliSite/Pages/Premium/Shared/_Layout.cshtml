@@ -25,7 +25,7 @@
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/stripe.js" asp-append-version="true"></script>
 </head>
-<body onload="onLoad()">
+<body onload="onLoad()" style="opacity: 0;">
 <header>
     <nav class="navbar navbar-expand-sm navbar-light" id="navbar" style="background-color: #e9ecef;">
         <div class="container" id="success" hidden>
@@ -122,6 +122,11 @@
     <script src="~/js/site.js" asp-append-version="true"></script>
     <script src="~/js/dashboard/submit.js" asp-append-version="true"></script>
     <script src="~/js/dashboard/notification.js" asp-append-version="true"></script>
+    
+    <script type="text/javascript" >
+        sizeElements();
+        $("body").css("opacity", "1");
+    </script>
 
     @RenderSection("Scripts", required: false)
 

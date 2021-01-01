@@ -14,7 +14,7 @@
     <link rel="stylesheet" href="~/css/nav.css" />
     <link rel="stylesheet" href="~/css/scrollbar.css" />
 </head>
-<body onload="onLoad()">
+<body onload="onLoad()" style="opacity: 0;">
 <header>
     <nav class="navbar navbar-expand-sm navbar-light" id="navbar" style="background-color: #e9ecef;">
         <div class="container" id="main-nav">
@@ -89,6 +89,11 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    
+    <script type="text/javascript" >
+        sizeElements();
+        $("body").css("opacity", "1");
+    </script>
 
     @RenderSection("Scripts", required: false)
 
