@@ -33,7 +33,20 @@ namespace DataTransfer
                         break;
                 }
 
-                switch (Menu.PickOption("Autopurge", "Channel Mirroring", "Core", "Inactive Role", "Inactive Role Users"))
+                int option = Menu.PickOption(
+                    "Autopurge", 
+                    "Channel Mirroring", 
+                    "Core", 
+                    "Inactive Role", 
+                    "Inactive Role Users",
+                    "Join Message",
+                    "Message Filter",
+                    "All except inactive role users");
+                
+                Console.Clear();
+                Console.WriteLine("Getting data...");
+
+                switch (option)
                 {
                     case 0:
                         await Autopurge.TransferAsync(guildId);
@@ -54,13 +67,30 @@ namespace DataTransfer
                     case 4:
                         await InactiveRoleUsers.TransferAsync(guildId);
                         break;
+
+                    case 5:
+                        await JoinMessage.TransferAsync(guildId);
+                        break;
+
+                    case 6:
+                        await MessageFilter.TransferAsync(guildId);
+                        break;
+
+                    case 7:
+                        await Autopurge.TransferAsync(guildId);
+                        await ChannelMirroring.TransferAsync(guildId);
+                        await Core.TransferAsync(guildId);
+                        await InactiveRole.TransferAsync(guildId);
+                        await JoinMessage.TransferAsync(guildId);
+                        await MessageFilter.TransferAsync(guildId);
+                        break;
                 }
 
-                Console.Clear();
-                Console.WriteLine("Inserting to v2...");
+                Console.WriteLine("Starting the transfer...");
                 RowsToSave.ForEach(x => x.New = true);
                 List<Task> tasks = RowsToSave.Select(SaveRow).ToList();
 
+                Console.WriteLine("Inserting rows...");
                 while (tasks.Any(x => !x.IsCompleted))
                 {
                     Console.WriteLine($"{tasks.Count(x => x.IsCompleted)} / {tasks.Count}");
