@@ -16,11 +16,20 @@ namespace Database
 
         public static void SetCredentials(string server, int port, string database, string username, string password)
         {
-            ConnectionString = $"Server={server};Port={port};Database={database};Uid={username};Pwd={password};";
+            MySqlConnectionStringBuilder builder = new MySqlConnectionStringBuilder
+            {
+                Server = server,
+                Port = (uint) port,
+                Database = database,
+                UserID = username,
+                Password = password,
+                MaximumPoolSize = 500
+            };
+            ConnectionString = builder.ConnectionString;
         }
 
         public static async Task<int> ExecuteAsync(string command, params (string, object)[] parameters)
-        { 
+        {
             Interlocked.Increment(ref Queries);
             MySqlParameter[] commandParameters = parameters.Select(x => new MySqlParameter(x.Item1, x.Item2)).ToArray();
             commandParameters = PrepareParameters(commandParameters);
