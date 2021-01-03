@@ -4,26 +4,50 @@ using System.Linq;
 using System.Threading.Tasks;
 using Database;
 using DataTransfer.Transfer;
+using Discord;
 using Discord.Rest;
+using Discord.WebSocket;
 
 namespace DataTransfer
 {
     internal static class Program
     {
         public static List<IRow> RowsToSave;
-        public static DiscordRestClient Client;
+        public static DiscordSocketClient Client;
 
         static async Task Main()
         {
             V1Config config = V1Config.Load();
 
+            Client = new DiscordSocketClient(new DiscordSocketConfig
+            {
+                AlwaysDownloadUsers = false,
+                ExclusiveBulkDelete = true,
+                LogLevel = LogSeverity.Critical,
+                MessageCacheSize = 100,
+                GatewayIntents = 
+                    GatewayIntents.GuildEmojis |
+                    GatewayIntents.GuildMembers |
+                    GatewayIntents.GuildMessageReactions |
+                    GatewayIntents.GuildMessages |
+                    GatewayIntents.Guilds |
+                    GatewayIntents.GuildVoiceStates |
+                    GatewayIntents.GuildWebhooks
+            });
+
+            Console.WriteLine("Starting bot...");
+            await Client.LoginAsync(TokenType.Bot, config.V1Token);
+            _ = Client.StartAsync();
+
+            Console.WriteLine("Downloading v1 cache...");
             V1Data.SetConnectionString(config.V1Connection);
             V1Data.Cache = V1Data.GetDataWhere("DataType NOT LIKE '%RolePersist-Role-%'");
 
+            Console.WriteLine("Logging in to v2...");
             await Database.Database.InitialiseAsync(false, "");
 
-            Client = new DiscordRestClient();
-            await Client.LoginAsync(Discord.TokenType.Bot, config.V1Token);
+            Console.WriteLine("Waiting for bot...");
+            while (Client.ConnectionState != ConnectionState.Connected) await Task.Delay(1000);
 
             while (true)
             {
@@ -53,6 +77,9 @@ namespace DataTransfer
                     "Notices",
                     "Roles",
                     "Roles Persist Roles",
+                    "Voice Link",
+                    "Voice Roles",
+                    "Vote Channels",
                     "All except message logs messages and inactive role users");
                 
                 Console.Clear();
@@ -109,6 +136,19 @@ namespace DataTransfer
                         break;
 
                     case 12:
+                        await VoiceLink.TransferAsync(guildId);
+                        break;
+
+                    case 13:
+                        await VoiceRoles.TransferAsync(guildId);
+                        break;
+
+                    case 14:
+                        await VoteChannels.TransferAsync(guildId);
+                        break;
+
+                    case 15:
+
                         Console.WriteLine("Autopurge...");
                         await Autopurge.TransferAsync(guildId);
 
@@ -138,6 +178,16 @@ namespace DataTransfer
 
                         Console.WriteLine("Roles Persist Roles...");
                         await RolesPersistRoles.TransferAsync(guildId);
+
+                        Console.WriteLine("Voice link...");
+                        await VoiceLink.TransferAsync(guildId);
+
+                        Console.WriteLine("Voice roles...");
+                        await VoiceRoles.TransferAsync(guildId);
+
+                        Console.WriteLine("Vote Channels...");
+                        await VoteChannels.TransferAsync(guildId);
+
                         break;
                 }
 
