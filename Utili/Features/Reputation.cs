@@ -105,7 +105,7 @@ namespace Utili.Features
                 }
             }
 
-            await SendInfoAsync(Context.Channel, $"Inverse Reputation Leaderboard", content);
+            await SendInfoAsync(Context.Channel, "Inverse Reputation Leaderboard", content);
         }
 
         [Command("Give"), Permission(Perm.ManageGuild), Cooldown(2)]
