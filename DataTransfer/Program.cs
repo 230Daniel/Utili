@@ -15,13 +15,15 @@ namespace DataTransfer
 
         static async Task Main()
         {
-            V1Data.SetConnectionString(Menu.GetString("v1 connection"));
+            V1Config config = V1Config.Load();
+
+            V1Data.SetConnectionString(config.V1Connection);
             V1Data.Cache = V1Data.GetDataWhere("DataType NOT LIKE '%RolePersist-Role-%'");
 
             await Database.Database.InitialiseAsync(false, "");
 
             Client = new DiscordRestClient();
-            await Client.LoginAsync(Discord.TokenType.Bot, Menu.GetString("token"));
+            await Client.LoginAsync(Discord.TokenType.Bot, config.V1Token);
 
             while (true)
             {
@@ -47,8 +49,11 @@ namespace DataTransfer
                     "Join Message",
                     "Message Filter",
                     "Message Logs",
+                    "Message Logs Messages",
                     "Notices",
-                    "All except inactive role users");
+                    "Roles",
+                    "Roles Persist Roles",
+                    "All except message logs messages and inactive role users");
                 
                 Console.Clear();
                 Console.WriteLine("Getting data...");
@@ -88,33 +93,51 @@ namespace DataTransfer
                         break;
                         
                     case 8:
-                        await Notices.TransferAsync(guildId);
+                        await MessageLogsMessages.TransferAsync(guildId);
                         break;
 
                     case 9:
-                        await Autopurge.TransferAsync(guildId);
-                        Console.WriteLine("Autopurge done");
-
-                        await ChannelMirroring.TransferAsync(guildId);
-                        Console.WriteLine("Channel Mirroring done");
-
-                        await Core.TransferAsync(guildId);
-                        Console.WriteLine("Core done");
-
-                        await InactiveRole.TransferAsync(guildId);
-                        Console.WriteLine("Inactive Role done");
-
-                        await JoinMessage.TransferAsync(guildId);
-                        Console.WriteLine("Join Message done");
-
-                        await MessageFilter.TransferAsync(guildId);
-                        Console.WriteLine("Message Filter done");
-
-                        await MessageLogs.TransferAsync(guildId);
-                        Console.WriteLine("Message Logs done");
-
                         await Notices.TransferAsync(guildId);
-                        Console.WriteLine("Notices done");
+                        break;
+
+                    case 10:
+                        await Roles.TransferAsync(guildId);
+                        break;
+
+                    case 11:
+                        await RolesPersistRoles.TransferAsync(guildId);
+                        break;
+
+                    case 12:
+                        Console.WriteLine("Autopurge...");
+                        await Autopurge.TransferAsync(guildId);
+
+                        Console.WriteLine("Channel Mirroring...");
+                        await ChannelMirroring.TransferAsync(guildId);
+                        
+                        Console.WriteLine("Core...");
+                        await Core.TransferAsync(guildId);
+                        
+                        Console.WriteLine("Inactive Role...");
+                        await InactiveRole.TransferAsync(guildId);
+                        
+                        Console.WriteLine("Join Message...");
+                        await JoinMessage.TransferAsync(guildId);
+                        
+                        Console.WriteLine("Message Filter...");
+                        await MessageFilter.TransferAsync(guildId);
+                        
+                        Console.WriteLine("Message Logs...");
+                        await MessageLogs.TransferAsync(guildId);
+                        
+                        Console.WriteLine("Notices...");
+                        await Notices.TransferAsync(guildId);
+
+                        Console.WriteLine("Roles...");
+                        await Roles.TransferAsync(guildId);
+
+                        Console.WriteLine("Roles Persist Roles...");
+                        await RolesPersistRoles.TransferAsync(guildId);
                         break;
                 }
 

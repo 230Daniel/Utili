@@ -165,7 +165,7 @@ namespace DataTransfer
             using MySqlCommand command = connection.CreateCommand();
             connection.Open();
 
-            string commandText = $"SELECT * FROM Utili WHERE({@where});";
+            string commandText = $"SELECT * FROM Utili WHERE {where};";
 
             command.CommandText = commandText;
             MySqlDataReader dataReader = null;
@@ -240,13 +240,14 @@ namespace DataTransfer
                 ("Timestamp", ToSqlTime(context.Message.CreatedAt.DateTime)) });
         }
 
-        public static async Task<MessageData> GetMessageAsync(ulong messageId)
+        public static async Task<List<V1MessageData>> GetMessagesAsync(ulong? guildId = null)
         {
             using MySqlConnection connection = new MySqlConnection(ConnectionString);
             using MySqlCommand command = connection.CreateCommand();
             connection.Open();
 
-            string commandText = $"SELECT * FROM Utili_MessageLogs WHERE MessageID = '{messageId}'";
+            string commandText = "SELECT * FROM Utili_MessageLogs";
+            if(guildId != null) commandText = $"SELECT * FROM Utili_MessageLogs WHERE GuildID = '{guildId}'";
 
             command.CommandText = commandText;
             MySqlDataReader dataReader = null;
@@ -259,9 +260,11 @@ namespace DataTransfer
                 Console.WriteLine(e.Message);
             }
 
+            List<V1MessageData> data = new List<V1MessageData>();
+
             while (dataReader.Read())
             {
-                MessageData data = new MessageData
+                data.Add(new V1MessageData
                 {
                     Id = dataReader.GetInt32(0),
                     GuildId = dataReader.GetString(1),
@@ -270,12 +273,10 @@ namespace DataTransfer
                     UserId = dataReader.GetString(4),
                     EncryptedContent = dataReader.GetString(5),
                     Timestmap = dataReader.GetDateTime(6)
-                };
-
-                return data;
+                });
             }
 
-            return null;
+            return data;
         }
 
         public static string ToSqlTime(DateTime time)
@@ -353,7 +354,7 @@ namespace DataTransfer
         }
     }
 
-    internal class MessageData
+    internal class V1MessageData
     {
         public int Id;
         public string GuildId;
