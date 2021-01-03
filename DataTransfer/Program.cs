@@ -4,12 +4,14 @@ using System.Linq;
 using System.Threading.Tasks;
 using Database;
 using DataTransfer.Transfer;
+using Discord.Rest;
 
 namespace DataTransfer
 {
     internal static class Program
     {
         public static List<IRow> RowsToSave;
+        public static DiscordRestClient Client;
 
         static async Task Main()
         {
@@ -17,11 +19,14 @@ namespace DataTransfer
             V1Data.Cache = V1Data.GetDataWhere("DataType NOT LIKE '%RolePersist-Role-%'");
 
             await Database.Database.InitialiseAsync(false, "");
-            RowsToSave = new List<IRow>();
+
+            Client = new DiscordRestClient();
+            await Client.LoginAsync(Discord.TokenType.Bot, Menu.GetString("token"));
 
             while (true)
             {
                 ulong? guildId = null;
+                RowsToSave = new List<IRow>();
 
                 switch (Menu.PickOption("All guilds", "One guild"))
                 {
@@ -41,6 +46,8 @@ namespace DataTransfer
                     "Inactive Role Users",
                     "Join Message",
                     "Message Filter",
+                    "Message Logs",
+                    "Notices",
                     "All except inactive role users");
                 
                 Console.Clear();
@@ -77,12 +84,37 @@ namespace DataTransfer
                         break;
 
                     case 7:
+                        await MessageLogs.TransferAsync(guildId);
+                        break;
+                        
+                    case 8:
+                        await Notices.TransferAsync(guildId);
+                        break;
+
+                    case 9:
                         await Autopurge.TransferAsync(guildId);
+                        Console.WriteLine("Autopurge done");
+
                         await ChannelMirroring.TransferAsync(guildId);
+                        Console.WriteLine("Channel Mirroring done");
+
                         await Core.TransferAsync(guildId);
+                        Console.WriteLine("Core done");
+
                         await InactiveRole.TransferAsync(guildId);
+                        Console.WriteLine("Inactive Role done");
+
                         await JoinMessage.TransferAsync(guildId);
+                        Console.WriteLine("Join Message done");
+
                         await MessageFilter.TransferAsync(guildId);
+                        Console.WriteLine("Message Filter done");
+
+                        await MessageLogs.TransferAsync(guildId);
+                        Console.WriteLine("Message Logs done");
+
+                        await Notices.TransferAsync(guildId);
+                        Console.WriteLine("Notices done");
                         break;
                 }
 

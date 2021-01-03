@@ -49,7 +49,7 @@ namespace DataTransfer
 
         public static void Continue()
         {
-            Console.WriteLine($"\nPress any key to continue...");
+            Console.WriteLine("\nPress any key to continue...");
             Console.ReadKey();
         }
     }

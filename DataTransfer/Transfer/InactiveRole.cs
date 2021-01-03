@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Database.Data;
 
@@ -22,7 +21,7 @@ namespace DataTransfer.Transfer
                     ulong roleId = ulong.Parse(v1Role.Value);
 
                     ulong immuneRoleId = 0;
-                    try { immuneRoleId = ulong.Parse(V1Data.GetFirstData(guildId.ToString(), $"InactiveRole-ImmuneRole").Value); } catch { }
+                    try { immuneRoleId = ulong.Parse(V1Data.GetFirstData(guildId.ToString(), "InactiveRole-ImmuneRole").Value); } catch { }
 
                     string mode = "Give";
                     try { mode = V1Data.GetFirstData(guildId.ToString(), "InactiveRole-Mode").Value; } catch { }
