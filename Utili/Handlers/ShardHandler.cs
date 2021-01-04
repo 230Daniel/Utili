@@ -23,6 +23,8 @@ namespace Utili.Handlers
                 {
                     if (_config.Production)
                     {
+                        Community.Initialise();
+
                         await Database.Sharding.UpdateShardStatsAsync(_client.Shards.Count,
                             _client.Shards.OrderBy(x => x.ShardId).First().ShardId, _client.Guilds.Count);
 
@@ -54,6 +56,9 @@ namespace Utili.Handlers
 
             // Role persist enabled
             guildIds.AddRange((await Roles.GetRowsAsync()).Where(x => x.RolePersist).Select(x => x.GuildId));
+
+            // Community server
+            guildIds.Add(_config.Community.GuildId);
 
             guilds = guilds.Where(x => guildIds.Contains(x.Id)).ToList();
             await shard.DownloadUsersAsync(guilds);

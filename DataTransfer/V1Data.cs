@@ -246,8 +246,8 @@ namespace DataTransfer
             using MySqlCommand command = connection.CreateCommand();
             connection.Open();
 
-            string commandText = "SELECT * FROM Utili_MessageLogs";
-            if(guildId != null) commandText = $"SELECT * FROM Utili_MessageLogs WHERE GuildID = '{guildId}'";
+            string commandText = "SELECT * FROM Utili_MessageLogs ORDER BY `ID` DESC";
+            if(guildId != null) commandText = $"SELECT * FROM Utili_MessageLogs WHERE GuildID = '{guildId}' ORDER BY `ID` DESC";
 
             command.CommandText = commandText;
             MySqlDataReader dataReader = null;

@@ -15,7 +15,7 @@ namespace Utili
         public bool LogCommands { get; set; } = false;
         public ulong SystemGuildId { get; set; } = 0;
         public ulong SystemChannelId { get; set; } = 0;
-        public ulong StatusChannelId { get; set; } = 0;
+        public CommunityConfig Community { get; set; } = new CommunityConfig();
         public string DefaultPrefix { get; set; } = ".";
 
         public static Config Load()
@@ -38,5 +38,12 @@ namespace Utili
 
             return new Config();
         }
+    }
+
+    internal class CommunityConfig
+    {
+        public ulong GuildId { get; set; } = 0;
+        public ulong UserRoleId { get; set; } = 0;
+        public ulong PremiumRoleId { get; set; } = 0;
     }
 }
