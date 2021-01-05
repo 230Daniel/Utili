@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using Database;
 using DataTransfer.Transfer;
 using Discord;
-using Discord.Rest;
 using Discord.WebSocket;
 
 namespace DataTransfer

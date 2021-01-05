@@ -3,7 +3,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using Database;
 using Database.Data;
-using Discord.Rest;
 
 namespace DataTransfer.Transfer
 {

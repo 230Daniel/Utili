@@ -2,7 +2,6 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Database.Data;
-using Discord.Rest;
 using Discord.WebSocket;
 
 namespace DataTransfer.Transfer
