@@ -16,11 +16,13 @@ namespace UtiliSite.Pages.Dashboard
             AuthDetails auth = await Auth.GetAuthDetailsAsync(this);
             if(!auth.Authenticated) return auth.Action;
 
-            List<AutopurgeRow> autopurgeRows = await Autopurge.GetRowsAsync(auth.Guild.Id);
+            List<AutopurgeRow> rows = await Autopurge.GetRowsAsync(auth.Guild.Id);
             List<RestTextChannel> channels = await DiscordModule.GetTextChannelsAsync(auth.Guild);
-            List<RestTextChannel> nonAutopurgeChannels = channels.Where(x => autopurgeRows.All(y => y.ChannelId != x.Id)).OrderBy(x => x.Position).ToList();
+            List<RestTextChannel> nonAutopurgeChannels = channels.Where(x => rows.All(y => y.ChannelId != x.Id)).OrderBy(x => x.Position).ToList();
 
-            ViewData["autopurgeRows"] = autopurgeRows;
+            rows = rows.Where(x => channels.Any(y => y.Id == x.ChannelId)).ToList();
+
+            ViewData["rows"] = rows;
             ViewData["channels"] = channels;
             ViewData["nonAutopurgeChannels"] = nonAutopurgeChannels;
 

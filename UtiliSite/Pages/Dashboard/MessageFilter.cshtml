@@ -10,7 +10,7 @@
     ViewData["subheading"] = "Only allow certain types of messages in a channel";
     ViewData["detailed"] = "Utili will delete any messages which don't match the criteria for that channel.\nA message will be sent telling the user why their message was deleted.";
 
-    List<MessageFilterRow> rows = (List<MessageFilterRow>) ViewData["messageFilterRows"];
+    List<MessageFilterRow> rows = (List<MessageFilterRow>) ViewData["rows"];
     List<RestTextChannel> channels = (List<RestTextChannel>) ViewData["channels"];
     List<RestTextChannel> nonMessageFilterChannels = (List<RestTextChannel>) ViewData["nonMessageFilterChannels"];
 }

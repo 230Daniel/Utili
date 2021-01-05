@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Database.Data;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -18,6 +19,8 @@ namespace UtiliSite.Pages.Dashboard
 
             List<NoticesRow> rows = await Notices.GetRowsAsync(auth.Guild.Id);
             List<RestTextChannel> channels = await DiscordModule.GetTextChannelsAsync(auth.Guild);
+
+            rows = rows.Where(x => channels.Any(y => y.Id == x.ChannelId)).ToList();
 
             ViewData["rows"] = rows;
             ViewData["channels"] = channels;

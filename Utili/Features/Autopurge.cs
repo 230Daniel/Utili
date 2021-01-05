@@ -139,7 +139,7 @@ namespace Utili.Features
             {
                 foreach (SocketGuild guild in _client.Guilds)
                 {
-                    List<AutopurgeRow> guildRows = rows.Where(x => x.GuildId == guild.Id).OrderBy(x => x.ChannelId).ToList();
+                    List<AutopurgeRow> guildRows = rows.Where(x => x.GuildId == guild.Id && guild.TextChannels.Any(y => y.Id == x.ChannelId)).OrderBy(x => x.ChannelId).ToList();
                     if (guildRows.Count > 0)
                     {
                         AutopurgeRow row = guildRows[_purgeNumber % guildRows.Count];
@@ -166,7 +166,7 @@ namespace Utili.Features
             {
                 foreach (SocketGuild guild in _client.Guilds)
                 {
-                    List<AutopurgeRow> guildRows = rows.Where(x => x.GuildId == guild.Id).OrderBy(x => x.ChannelId).ToList();
+                    List<AutopurgeRow> guildRows = rows.Where(x => x.GuildId == guild.Id && guild.TextChannels.Any(y => y.Id == x.ChannelId)).OrderBy(x => x.ChannelId).ToList();
                     if (guildRows.Count > 0)
                     {
                         AutopurgeRow row = guildRows[_premiumPurgeNumber % guildRows.Count];

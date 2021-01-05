@@ -16,11 +16,13 @@ namespace UtiliSite.Pages.Dashboard
             AuthDetails auth = await Auth.GetAuthDetailsAsync(this);
             if(!auth.Authenticated) return auth.Action;
 
-            List<MessageFilterRow> messageFilterRows = await MessageFilter.GetRowsAsync(auth.Guild.Id);
+            List<MessageFilterRow> rows = await MessageFilter.GetRowsAsync(auth.Guild.Id);
             List<RestTextChannel> channels = await DiscordModule.GetTextChannelsAsync(auth.Guild);
-            List<RestTextChannel> nonMessageFilterChannels = channels.Where(x => messageFilterRows.All(y => y.ChannelId != x.Id)).OrderBy(x => x.Position).ToList();
+            List<RestTextChannel> nonMessageFilterChannels = channels.Where(x => rows.All(y => y.ChannelId != x.Id)).OrderBy(x => x.Position).ToList();
 
-            ViewData["messageFilterRows"] = messageFilterRows;
+            rows = rows.Where(x => channels.Any(y => y.Id == x.ChannelId)).ToList();
+
+            ViewData["rows"] = rows;
             ViewData["channels"] = channels;
             ViewData["nonMessageFilterChannels"] = nonMessageFilterChannels;
 

@@ -14,7 +14,7 @@
     if (premium) { ViewData["detailed"] = "Five channels are purged every 10 seconds.\nMessages are deleted when they're older than the timespan you set, or when they're 500 messages up in the channel."; }
     else { ViewData["detailed"] = "One channel is purged every 30 seconds.\nMessages are deleted when they're older than the timespan you set, or when they're 100 messages up in the channel.\nPremium upgrades this feature."; }
 
-    List<AutopurgeRow> rows = (List<AutopurgeRow>) ViewData["autopurgeRows"];
+    List<AutopurgeRow> rows = (List<AutopurgeRow>) ViewData["rows"];
     List<RestTextChannel> channels = (List<RestTextChannel>) ViewData["channels"];
     List<RestTextChannel> nonAutopurgeChannels = (List<RestTextChannel>) ViewData["nonAutopurgeChannels"];
 }

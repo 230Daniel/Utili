@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Database.Data;
 using Discord.Rest;
@@ -16,6 +17,8 @@ namespace UtiliSite.Pages.Dashboard
 
             List<ChannelMirroringRow> rows = await ChannelMirroring.GetRowsAsync(auth.Guild.Id);
             List<RestTextChannel> channels = await DiscordModule.GetTextChannelsAsync(auth.Guild);
+
+            rows = rows.Where(x => channels.Any(y => y.Id == x.FromChannelId)).ToList();
 
             ViewData["rows"] = rows;
             ViewData["channels"] = channels;
