@@ -11,19 +11,21 @@ namespace Utili.Commands
 {
     public class InfoCommands : ModuleBase<SocketCommandContext>
     {
-        [Command("About"), Alias("Info"), Cooldown(3)]
+        [Command("About"), Alias("Info")]
         public async Task About()
         {
             DiscordSocketClient shard = GetShardForGuild(Context.Guild);
 
             string about = string.Concat(
-                "By 230Daniel#1920\n",
+                "Created by 230Daniel#1920\n",
                 $"In {await Database.Sharding.GetGuildCountAsync()} servers\n",
-                $"Shard {shard.ShardId} ({_totalShards} total)\n",
+                $"Shard {shard.ShardId} ({_totalShards} total)\n\n",
+
                 $"[Website](https://{_config.Domain})\n",
                 $"[Dashboard](https://{_config.Domain}/dashboard)\n",
-                $"[Get Premium](https://{_config.Domain}/premium)\n",
-                "[Support & Requests Server](https://discord.gg/wGTrDhCaEH)");
+                "[Discord Server](https://discord.gg/wGTrDhCaEH)\n",
+                $"[Contact Us](https://{_config.Domain}/contact)\n",
+                $"[Get Premium](https://{_config.Domain}/premium)\n");
 
             await SendInfoAsync(Context.Channel, "Utili v2 Beta", about);
         }
@@ -32,7 +34,7 @@ namespace Utili.Commands
         public async Task Help()
         {
             string help = string.Concat(
-                $"[List of Commands](https://{_config.Domain}/commands)\n",
+                $"[Commands](https://{_config.Domain}/commands)\n",
                 $"[Dashboard](https://{_config.Domain}/dashboard/{Context.Guild.Id}/core)\n");
 
             await SendInfoAsync(Context.Channel, "Utili", help);

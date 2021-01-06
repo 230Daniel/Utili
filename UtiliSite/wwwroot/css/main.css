@@ -75,6 +75,11 @@ body {
     cursor: pointer;
 }
 
+.spaced4 {
+    margin-left: 4px;
+    margin-right: 4px;
+}
+
 .a-blue:hover {
     color: #038ed6;
     text-decoration: none;
