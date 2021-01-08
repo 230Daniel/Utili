@@ -77,7 +77,7 @@
                         <p class="card-text text-light text-center">@(guild.Name)</p>
                     </div>
                 </div>
-                <div class="list-group list-group-flush">
+                <div class="list-group list-group-flush mobile-grow-children">
                     <div href="@RedirectHelper.ChangeLastPage(ViewContext, "core")" class="cursor-pointer list-group-item list-group-item-action @SidebarHelper.GetIsActive(ViewContext, "core")">Core</div>
                     <div href="@RedirectHelper.ChangeLastPage(ViewContext, "autopurge")" class="cursor-pointer list-group-item list-group-item-action @SidebarHelper.GetIsActive(ViewContext, "autopurge")">Autopurge</div>
                     <div href="@RedirectHelper.ChangeLastPage(ViewContext, "channelmirroring")" class="cursor-pointer list-group-item list-group-item-action @SidebarHelper.GetIsActive(ViewContext, "channelmirroring")">Channel Mirroring</div>

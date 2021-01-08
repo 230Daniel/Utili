@@ -32,6 +32,22 @@ function sizeElements() {
     var mobile = window.mobileAndTabletCheck();
     var navHeight = $("#navbar").outerHeight();
 
+    if (mobile) {
+        $(".mobile-grow").each(function(){
+            var height = $(this).height();
+            console.log($(this).height(height + 5));
+            $(this).css("display", "flex");
+            $(this).css("align-items", "center");
+        });
+
+        $(".mobile-grow-children > *").each(function(){
+            var height = $(this).height();
+            console.log($(this).height(height + 5));
+            $(this).css("display", "flex");
+            $(this).css("align-items", "center");
+        });
+    }
+
     var elements = document.querySelectorAll(".dynamic-height");
     for(var i = 0; i < elements.length; i++) {
         var children = $(".dynamic-height > :not(.footer)");

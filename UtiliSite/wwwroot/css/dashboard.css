@@ -13,6 +13,7 @@
     width: 225px;
     min-width: 225px;
     max-width: 225px;
+    background-color: #292c2f; /* #202225 */
 }
 
 .right-angle-top-left {
@@ -33,7 +34,7 @@
 #serverCard {
     width: 225px;
     height: 225px;
-    background-color: #292c2f;
+    background-color: inherit;
     border: 0;
 }
 
@@ -47,8 +48,23 @@ img.guild-icon {
     margin-left: 37.5px;
 }
 
+.list-group-item {
+    border-bottom-style: initial;
+    border-top-style: initial;
+    padding: 0.75rem 1.25rem;
+    background-color: inherit !important;
+    color: #b9b9b9;
+}
+
+.list-group-item.active {
+    color: white !important;
+    background-image: linear-gradient(to right, #4287f5, #292c2f);
+    text-indent: 8px !important;
+}
+
 .list-group-item:hover {
-    color: lightgray;
+    color: white;
+    text-indent: 8px !important;
 }
 
 /* #endregion Sidebar */

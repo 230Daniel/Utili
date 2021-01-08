@@ -182,22 +182,6 @@
     border-style: initial;
 }
 
-.list-group-item {
-    border-bottom-style: initial;
-    border-top-style: initial;
-    padding: 0.75rem 1.25rem;
-    background-color: inherit !important;
-}
-
-.list-group-item.active {
-    border-left-width: 2px;
-    border-left-style: solid;
-    border-left-color: #4287f5;
-    border-bottom-style: initial;
-    border-top-style: initial;
-    color: white !important;
-}
-
 .list-input {
     border-style: hidden;
 }
