@@ -29,9 +29,11 @@
     background-color: inherit;
 }
 
+/*
 .scroll-dark:not(.scroll-always) {
     padding-right: 5px;
 }
+*/
 
 .scroll-dark:not(.scroll-always):hover {
     padding-right: 0;

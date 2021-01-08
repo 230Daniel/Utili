@@ -59,7 +59,7 @@ img.guild-icon {
 
 .list-group-item.active {
     color: white !important;
-    background-image: linear-gradient(to right, #4287f5, #292c2f);
+    background-image: linear-gradient(to right, #4287f5, transparent);
     text-indent: 8px !important;
 }
 
