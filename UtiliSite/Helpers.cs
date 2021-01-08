@@ -52,5 +52,55 @@ namespace UtiliSite
             }
             return "";
         }
+
+        public static string GetIsSectionOpen(ViewContext viewContext, string section)
+        {
+            string path = viewContext.HttpContext.Request.Path;
+
+            string page = path.Split("/").Last().ToLower();
+
+            string[] channelSection =
+            {
+                "autopurge",
+                "channelmirroring",
+                "notices"
+            };
+
+            string[] messageSection =
+            {
+                "messagefilter",
+                "messagelogs",
+                "messagepinning"
+            };
+
+            string[] userSection =
+            {
+                "inactiverole",
+                "joinmessage",
+                "roles"
+            };
+
+            string[] voiceSection =
+            {
+                "voicelink",
+                "voiceroles"
+            };
+
+            string[] votingSection =
+            {
+                "votechannels",
+                "reputation"
+            };
+
+            return section switch
+            {
+                "channel" => channelSection.Contains(page) ? "show" : "",
+                "message" => messageSection.Contains(page) ? "show" : "",
+                "user" => userSection.Contains(page) ? "show" : "",
+                "voice" => voiceSection.Contains(page) ? "show" : "",
+                "voting" => votingSection.Contains(page) ? "show" : "",
+                _ => ""
+            };
+        }
     }
 }

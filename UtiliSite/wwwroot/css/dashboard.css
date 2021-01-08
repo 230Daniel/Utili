@@ -13,7 +13,7 @@
     width: 225px;
     min-width: 225px;
     max-width: 225px;
-    background-color: #292c2f; /* #202225 */
+    background-color: #292c2f;
 }
 
 .right-angle-top-left {
@@ -53,7 +53,8 @@ img.guild-icon {
     border-top-style: initial;
     padding: 0.75rem 1.25rem;
     background-color: inherit !important;
-    color: #b9b9b9;
+    color: #a0a0a0;
+    margin-bottom: 0;
 }
 
 .list-group-item.active {
@@ -67,6 +68,11 @@ img.guild-icon {
     text-indent: 8px !important;
 }
 
+.section-header {
+    font-size: 1.1rem;
+    color: white;
+    background-image: linear-gradient(to right, #3a3a3e, transparent);
+}
 /* #endregion Sidebar */
 
 /* #region Title */
