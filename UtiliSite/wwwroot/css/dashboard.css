@@ -16,19 +16,13 @@
     background-color: #292c2f;
 }
 
-.right-angle-top-left {
+#sidebarToggler {
     position: absolute;
-    margin: 30px;
-    width: 0;
-    border-right: 50px solid transparent;
-    border-top: 50px solid #c2c5c5;
-    margin: 0;
     background: none;
     border-bottom: 0;
     border-left: 0;
     padding: 0;
     outline: 0 !important;
-    opacity: 0.5;
 }
 
 #serverCard {
