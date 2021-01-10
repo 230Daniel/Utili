@@ -44,7 +44,7 @@ namespace Utili
             return await textChannel.SendMessageAsync(text, embed: embed);
         }
 
-        private static Embed GenerateEmbed(EmbedType embedType, string title, string content = null, string footer = null, (string, string)[] fields = null, Color? colour = null)
+        public static Embed GenerateEmbed(EmbedType embedType, string title, string content = null, string footer = null, (string, string)[] fields = null, Color? colour = null)
         {
             EmbedBuilder embed = new EmbedBuilder();
 
@@ -97,7 +97,7 @@ namespace Utili
             return embed.Build();
         }
 
-        private enum EmbedType
+        public enum EmbedType
         {
             Info,
             Success,
