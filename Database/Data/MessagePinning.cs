@@ -105,6 +105,7 @@ namespace Database.Data
             GuildId = guildId;
             PinChannelId = 0;
             Pin = false;
+            WebhookIds = new List<(ulong, ulong)>();
         }
 
         public static MessagePinningRow FromDatabase(ulong guildId, ulong pinChannelId, string webhookIds, bool pin)
