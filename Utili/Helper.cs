@@ -32,10 +32,8 @@ namespace Utili
             {
                 return emote;
             }
-            else
-            {
-                return new Emoji(emoteString);
-            }
+
+            return new Emoji(emoteString);
         }
 
         public static bool RequiresUpdate(SocketVoiceState before, SocketVoiceState after)

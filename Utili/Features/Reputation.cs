@@ -12,28 +12,34 @@ namespace Utili.Features
 {
     internal static class Reputation
     {
-        public static async Task ReactionAdded(IGuild guild, IUserMessage message, IUser reactor, IEmote emote)
+        public static async Task ReactionAdded(IGuild guild, Cacheable<IUserMessage, ulong> partialMessage, ulong reactorId, IEmote emote)
         {
-            IUser user = message.Author;
-            if(user.Id == reactor.Id || user.IsBot || reactor.IsBot) return;
-
             ReputationRow row = await Database.Data.Reputation.GetRowAsync(guild.Id);
             if (!row.Emotes.Any(x => x.Item1.Equals(emote))) return;
             int change = row.Emotes.First(x => Equals(x.Item1, emote)).Item2;
+
+            IUserMessage message = await partialMessage.GetOrDownloadAsync();
+            IUser user = message.Author;
+            IUser reactor = await _rest.GetGuildUserAsync(guild.Id, reactorId);
+
+            if(user.Id == reactorId || user.IsBot || reactor.IsBot) return;
 
             await Database.Data.Reputation.AlterUserReputationAsync(guild.Id, user.Id, change);
         }
 
-        public static async Task ReactionRemoved(IGuild guild, IUserMessage message, IUser reactor, IEmote emote)
+        public static async Task ReactionRemoved(IGuild guild, Cacheable<IUserMessage, ulong> partialMessage, ulong reactorId, IEmote emote)
         {
-            IUser user = message.Author;
-            if(user.Id == reactor.Id) return;
-
             ReputationRow row = await Database.Data.Reputation.GetRowAsync(guild.Id);
             if (!row.Emotes.Any(x => x.Item1.Equals(emote))) return;
             int change = row.Emotes.First(x => Equals(x.Item1, emote)).Item2;
-            change *= -1;
 
+            IUserMessage message = await partialMessage.GetOrDownloadAsync();
+            IUser user = message.Author;
+            IUser reactor = await _rest.GetGuildUserAsync(guild.Id, reactorId);
+
+            if(user.Id == reactorId || user.IsBot || reactor.IsBot) return;
+
+            change *= -1;
             await Database.Data.Reputation.AlterUserReputationAsync(guild.Id, user.Id, change);
         }
     }

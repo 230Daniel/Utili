@@ -1,7 +1,6 @@
 ﻿using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
-using static Utili.Program;
 using Utili.Features;
 
 namespace Utili.Handlers
@@ -13,12 +12,9 @@ namespace Utili.Handlers
             _ = Task.Run(async () =>
             {
                 IGuild guild = (channel as IGuildChannel).Guild;
-                IUserMessage message = await partialMessage.GetOrDownloadAsync();
-                IUser reactor = await _rest.GetGuildUserAsync(guild.Id, reaction.UserId);
                 IEmote emote = reaction.Emote;
                 
-
-                await Reputation.ReactionAdded(guild, message, reactor, emote);
+                await Reputation.ReactionAdded(guild, partialMessage, reaction.UserId, emote);
             });
         }
 
@@ -27,11 +23,9 @@ namespace Utili.Handlers
             _ = Task.Run(async () =>
             {
                 IGuild guild = (channel as IGuildChannel).Guild;
-                IUserMessage message = await partialMessage.GetOrDownloadAsync();
-                IUser reactor = await _rest.GetGuildUserAsync(guild.Id, reaction.UserId);
                 IEmote emote = reaction.Emote;
 
-                await Reputation.ReactionRemoved(guild, message, reactor, emote);
+                await Reputation.ReactionRemoved(guild, partialMessage, reaction.UserId, emote);
             });
         }
 
