@@ -3,7 +3,7 @@
     hideElements();
 
     $(".info-hover").tooltip();
-
+    
     $("div[href]").click(function(){
         window.location.href = this.getAttribute("href");
     });
