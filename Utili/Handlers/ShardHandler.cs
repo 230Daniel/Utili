@@ -17,35 +17,40 @@ namespace Utili.Handlers
         {
             _ = Task.Run(async () =>
             {
+                // On rare occasions, Ready is fired before Connected,
+                // causing no guilds to have their users downloaded.
+
+                await Task.Delay(1000);
+                while (shard.ConnectionState != ConnectionState.Connected) await Task.Delay(1000);
+
                 _readyShardIds.RemoveAll(x => x == shard.ShardId);
-
-                if (_client.Shards.All(x => x.ConnectionState == ConnectionState.Connected))
-                {
-                    if (_config.Production)
-                    {
-                        Community.Initialise();
-
-                        await Database.Sharding.UpdateShardStatsAsync(_client.Shards.Count,
-                            _client.Shards.OrderBy(x => x.ShardId).First().ShardId, _client.Guilds.Count);
-
-                        _shardStatsUpdater?.Dispose();
-                        _shardStatsUpdater = new Timer(10000);
-                        _shardStatsUpdater.Elapsed += Sharding.Update;
-                        _shardStatsUpdater.Start();
-                    }
-                    
-                    _downloadNewRequiredUsersTimer?.Dispose();
-                    _downloadNewRequiredUsersTimer = new Timer(60000);
-                    _downloadNewRequiredUsersTimer.Elapsed += DownloadNewRequiredUsersTimer_Elapsed;
-                    _downloadNewRequiredUsersTimer.Start();
-                }
+                if (_client.Shards.All(x => x.ConnectionState == ConnectionState.Connected)) _ = AllShardsReady();
 
                 await DownloadRequiredUsersAsync(shard);
-
                 await shard.SetGameAsync($"{_config.Domain} | {_config.DefaultPrefix}help");
-
                 _readyShardIds.Add(shard.ShardId);
             });
+        }
+
+        private static async Task AllShardsReady()
+        {
+            if (_config.Production)
+            {
+                Community.Initialise();
+
+                await Database.Sharding.UpdateShardStatsAsync(_client.Shards.Count,
+                    _client.Shards.OrderBy(x => x.ShardId).First().ShardId, _client.Guilds.Count);
+
+                _shardStatsUpdater?.Dispose();
+                _shardStatsUpdater = new Timer(10000);
+                _shardStatsUpdater.Elapsed += Sharding.Update;
+                _shardStatsUpdater.Start();
+            }
+                    
+            _downloadNewRequiredUsersTimer?.Dispose();
+            _downloadNewRequiredUsersTimer = new Timer(60000);
+            _downloadNewRequiredUsersTimer.Elapsed += DownloadNewRequiredUsersTimer_Elapsed;
+            _downloadNewRequiredUsersTimer.Start();
         }
 
         private static async Task DownloadRequiredUsersAsync(DiscordSocketClient shard)
