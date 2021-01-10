@@ -113,7 +113,7 @@ namespace Utili.Features
             if(row.Emotes.Count >= limit)
             {
                 await SendFailureAsync(Context.Channel, "Error",
-                    $"Your server can only have up to {limit} emotes per votes channel\nRemove emotes with the removeemote command");
+                    $"Your server can only have up to {limit} emotes per votes channel\nRemove emotes with the removeEmote command");
                 return;
             }
 
@@ -137,7 +137,12 @@ namespace Utili.Features
                 return;
             }
 
-            await Context.Message.RemoveReactionAsync(emote, _client.CurrentUser);
+            _ = Task.Run(async () =>
+            {
+                // Rate limit is 1 per 250ms. Stupid but what can you do?
+                await Task.Delay(500);
+                await Context.Message.RemoveReactionAsync(emote, _client.CurrentUser);
+            });
 
             row.Emotes.Add(emote);
             await Database.Data.VoteChannels.SaveRowAsync(row);
@@ -181,14 +186,14 @@ namespace Utili.Features
                     catch
                     {
                         await SendFailureAsync(Context.Channel, "Error",
-                            "That emote is not added\nIf you can't specify the emote, use its number found in the listemote command");
+                            "That emote is not added\nIf you can't specify the emote, use its number found in the listEmote command");
                         return;
                     }
                 }
                 else
                 {
                     await SendFailureAsync(Context.Channel, "Error",
-                        "That emote is not added\nIf you can't specify the emote, use its number found in the listemote command");
+                        "That emote is not added\nIf you can't specify the emote, use its number found in the listEmote command");
                     return;
                 }
             }

@@ -159,7 +159,13 @@ namespace Utili.Features
                 return;
             }
 
-            await Context.Message.RemoveReactionAsync(emote, _client.CurrentUser);
+            _ = Task.Run(async () =>
+            {
+                // Rate limit is 1 per 250ms. Stupid but what can you do?
+                await Task.Delay(500);
+                await Context.Message.RemoveReactionAsync(emote, _client.CurrentUser);
+            });
+            
 
             row.Emotes.Add((emote, value));
             await Database.Data.Reputation.SaveRowAsync(row);
