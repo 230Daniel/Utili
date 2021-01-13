@@ -59,9 +59,9 @@
 
                         </div>
 
-                        <div class="input-group flex-nowrap">
+                        <div class="input-group flex-nowrap" @Html.Raw(ContentHelper.Tooltip("dd:hh:mm:ss", "top"))>
                             <span class="input-group-prepend input-group-text card-component-1">Threshold</span>
-                            <input type="text" name="timespan" class="form-control card-component-2" value="@row.Timespan">
+                            <input type="text" name="timespan" class="form-control card-component-2" value="@row.Timespan.ToStandardString()">
                         </div>
 
                         <div class="input-group flex-nowrap">

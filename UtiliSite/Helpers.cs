@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace UtiliSite
@@ -101,6 +102,30 @@ namespace UtiliSite
                 "voting" => votingSection.Contains(page) ? "show" : "",
                 _ => ""
             };
+        }
+    }
+
+    public static class ContentHelper
+    {
+        public static string Tooltip(string text, string position = "right")
+        {
+            text = $"<p>{text.Replace("\n", "</p><p>")}</p>";
+            text = text.Replace("~newline~", "\\n");
+
+            string html = $"data-toggle=\"tooltip\" data-placement=\"{position}\" data-html=\"true\" title=\"{text}\"";
+            return html;
+        }
+
+        public static string ToStandardString(this TimeSpan span)
+        {
+            string formatted =
+                $"{(span.Duration().Days > 0 ? $"{span.Days:00}:" : string.Empty)}{span.Hours:00}:{span.Minutes:00}:{span.Seconds:00}";
+
+            if (formatted.EndsWith(", ")) formatted = formatted.Substring(0, formatted.Length - 2);
+
+            if (string.IsNullOrEmpty(formatted)) formatted = "0 seconds";
+
+            return formatted;
         }
     }
 }

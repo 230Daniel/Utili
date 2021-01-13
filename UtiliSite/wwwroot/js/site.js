@@ -2,7 +2,7 @@
     sizeElements();
     hideElements();
 
-    $(".info-hover").tooltip();
+    $("[data-toggle='tooltip']").tooltip();
     
     $("div[href]").click(function(){
         window.location.href = this.getAttribute("href");

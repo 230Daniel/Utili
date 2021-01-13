@@ -127,9 +127,7 @@
                             string detailed = ViewData["detailed"].ToString();
                             if (!string.IsNullOrEmpty(detailed))
                             {
-                                detailed = $"<p>{detailed.Replace("\n", "</p><p>")}</p>";
-                                detailed = detailed.Replace("~newline~", "\\n");
-                                <h2 class="info-hover text-light" data-toggle="tooltip" data-placement="right" data-html="true" title="@Html.Raw(detailed)">ⓘ</h2>
+                                <h2 class="info-hover text-light" @Html.Raw(ContentHelper.Tooltip(detailed))>ⓘ</h2>
                             }
 
                         }
