@@ -33,7 +33,7 @@
                 <input type="text" name="prefix" class="form-control card-component-2" value="@row.Prefix.Value">
             </div>
 
-            <div class="input-group flex-nowrap" @Html.Raw(ContentHelper.Tooltip("Switches the channel list below from a blacklist to a whitelist", "right"))>
+            <div class="input-group flex-nowrap" @Html.Raw(ContentHelper.Tooltip("Switches the channel list below from a blacklist to a whitelist"))>
                 <span class="input-group-prepend input-group-text card-component-2">Enable Commands</span>
                 <div class="input-group-text card-component-2">
                     <input type="checkbox" name="enableCommands" class="form-control checkbox" @(row.EnableCommands ? "checked" : "") )>

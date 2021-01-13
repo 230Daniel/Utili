@@ -8,7 +8,7 @@
 
     ViewData["heading"] = "Inactive Role";
     ViewData["subheading"] = "Set a role to be given to or taken from inactive users";
-    ViewData["detailed"] = "Utili checks for inactive users every 60 minutes\nA user is inactive if they haven't sent a message or joined a voice channel for the duration of the threshold you set below.\nUsers with the immune role will never be marked as inactive.";
+    ViewData["detailed"] = "If a user hasn't sent a message or joined a voice channel for the threshold, they'll be marked as inactive.\nUtili checks for inactive users every 60 minutes.";
 
     InactiveRoleRow row = (InactiveRoleRow)ViewData["row"];
     RestGuild guild = (RestGuild)ViewData["guild"];
