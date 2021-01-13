@@ -16,8 +16,6 @@ namespace Utili.Handlers
         {
             _ = Task.Run(async () =>
             {
-                if(user.IsBot) return;
-
                 if (Helper.RequiresUpdate(before, after))
                 {
                     if(before.VoiceChannel != null) await VoiceLink.RequestUpdateAsync(before.VoiceChannel);
