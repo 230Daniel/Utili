@@ -33,16 +33,16 @@
                 <input type="text" name="prefix" class="form-control card-component-2" value="@row.Prefix.Value">
             </div>
 
-            <div class="input-group flex-nowrap">
+            <div class="input-group flex-nowrap" @Html.Raw(ContentHelper.Tooltip("Switches the channel list below from a blacklist to a whitelist", "right"))>
                 <span class="input-group-prepend input-group-text card-component-2">Enable Commands</span>
                 <div class="input-group-text card-component-2">
-                    <input type="checkbox" name="enableCommands" class="form-control checkbox" onchange="updateDropdownTitle()" @(row.EnableCommands ? "checked" : "") )>
+                    <input type="checkbox" name="enableCommands" class="form-control checkbox" @(row.EnableCommands ? "checked" : "") )>
                 </div>
             </div>
 
             <div class="input-group flex-nowrap">
                 <span class="input-group-prepend input-group-text card-component-3 card-strong"></span>
-                <button type="submit" class="btn card-button card-component-1 card-strong">Save</button>
+                <button type="submit" class="btn card-button card-component-1 card-strong" onclick="updateDropdownTitle()">Save</button>
             </div>
         </form>
     </div>
