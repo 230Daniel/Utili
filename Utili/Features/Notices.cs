@@ -37,6 +37,7 @@ namespace Utili.Features
                 if (_requiredUpdates.Any(x => x.Item1.ChannelId == context.Channel.Id))
                 {
                     (NoticesRow, DateTime) update = _requiredUpdates.First(x => x.Item1.ChannelId == context.Channel.Id);
+                    if (row.Delay < TimeSpan.FromSeconds(5)) row.Delay = TimeSpan.FromSeconds(5);
                     update.Item2 = DateTime.UtcNow + row.Delay;
                     _requiredUpdates.RemoveAll(x => x.Item1.ChannelId == context.Channel.Id);
                     _requiredUpdates.Add(update);
