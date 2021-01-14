@@ -27,15 +27,15 @@
     <span>Active Subscriptions</span>
 </div>
 
-<p class="text-white">You have @subscriptions active @(subscriptions > 1 ? "subscriptions" : "subscription") with a total of @rows.Count premium server @(rows.Count > 1 ? "slots" : "slot"). </p>
-<span class="a-blue" onclick="billingPortal()">Manage @(subscriptions > 1 ? "subscriptions" : "subscription") ➔</span>
+<p class="text-white">You have @subscriptions active @(subscriptions != 1 ? "subscriptions" : "subscription") with a total of @rows.Count premium server @(rows.Count != 1 ? "slots" : "slot"). </p>
+<span class="a-blue" onclick="billingPortal()">Manage @(subscriptions != 1 ? "subscriptions" : "subscription") ➔</span>
 
 <div class="divider">
     <div></div>
     <span>Server Slots</span>
 </div>
 
-<div class="row" style="display: flex; justify-content: center;">
+<div class="row" style="display: flex;">
     @foreach (PremiumRow row in rows)
     {
         slot++;

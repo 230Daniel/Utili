@@ -62,9 +62,10 @@ namespace Database.Data
                 ("UserId", userId),
                 ("Now", DateTime.UtcNow));
 
-            reader.Read();
-            int slots = reader.GetInt32(0);
+            int slots = 0;
 
+            reader.Read();
+            try { slots = reader.GetInt32(0); } catch { }
             reader.Close();
             return slots;
         }
