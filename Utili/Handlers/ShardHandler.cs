@@ -19,9 +19,10 @@ namespace Utili.Handlers
             {
                 // On rare occasions, Ready is fired before Connected,
                 // causing no guilds to have their users downloaded.
+                // The issue has been reported to the library maintainers.
 
                 await Task.Delay(1000);
-                while (shard.ConnectionState != ConnectionState.Connected) await Task.Delay(1000);
+                while (shard.ConnectionState != ConnectionState.Connected) await Task.Delay(25);
 
                 _readyShardIds.RemoveAll(x => x == shard.ShardId);
                 if (_client.Shards.All(x => x.ConnectionState == ConnectionState.Connected)) _ = AllShardsReady();
