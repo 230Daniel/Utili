@@ -23,6 +23,8 @@ namespace UtiliSite
         {
             _client = new DiscordRestClient();
             await _client.LoginAsync(TokenType.Bot, Main.Config.DiscordToken);
+
+            // TODO: If this fails, retry instead of crashing program
         }
 
         public static async Task<DiscordRestClient> GetClientAsync(ulong userId, string token = null)
