@@ -28,7 +28,7 @@ namespace Utili.Features
             if (BotPermissions.IsMissingPermissions(channel, new[] {ChannelPermission.ManageWebhooks}, out _)) return;
 
             RestWebhook webhook = null;
-            try { webhook = await channel.GetWebhookAsync(row.WebhookId); } catch { }
+            try { webhook = await GetWebhookAsync(channel, row.WebhookId); } catch { }
 
             if (webhook == null)
             {
@@ -53,6 +53,20 @@ namespace Utili.Features
                 Stream stream = (await request.GetResponseAsync()).GetResponseStream();
                 await webhookClient.SendFileAsync(stream, attachment.Filename, "", username: username, avatarUrl: avatarUrl);
                 stream.Close();
+            }
+        }
+
+        private static List<(ulong, ulong, RestWebhook)> _cachedWebhooks = new List<(ulong, ulong, RestWebhook)>();
+        private static async Task<RestWebhook> GetWebhookAsync(SocketTextChannel channel, ulong webhookId)
+        {
+            if(_cachedWebhooks.Any(x => x.Item1 == channel.Id && x.Item2 == webhookId))
+            {
+                return _cachedWebhooks.First(x => x.Item1 == channel.Id && x.Item2 == webhookId).Item3;
+            }
+            else
+            {
+                _cachedWebhooks.Add((channel.Id, webhookId, await channel.GetWebhookAsync(webhookId)));
+                return _cachedWebhooks.First(x => x.Item1 == channel.Id && x.Item2 == webhookId).Item3;
             }
         }
     }
