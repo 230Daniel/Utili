@@ -127,7 +127,7 @@ namespace DataTransfer
                         break;
 
                     case 10:
-                        await Roles.TransferAsync(guildId);
+                        await JoinRoles.TransferAsync(guildId);
                         break;
 
                     case 11:
@@ -173,7 +173,7 @@ namespace DataTransfer
                         await Notices.TransferAsync(guildId);
 
                         Console.WriteLine("Roles...");
-                        await Roles.TransferAsync(guildId);
+                        await JoinRoles.TransferAsync(guildId);
 
                         Console.WriteLine("Roles Persist Roles...");
                         await RolesPersistRoles.TransferAsync(guildId);

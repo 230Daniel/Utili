@@ -13,7 +13,7 @@ namespace DataTransfer.Transfer
             if (oneGuildId == null) roles = V1Data.GetDataWhere("DataType LIKE '%RolePersist-Role-%'");
             else roles = V1Data.GetDataWhere($"GuildID = '{oneGuildId}' AND DataType LIKE '%RolePersist-Role-%'");
 
-            List<RolesPersistantRolesRow> rows = new List<RolesPersistantRolesRow>();
+            List<RolePersistRolesRow> rows = new List<RolePersistRolesRow>();
 
             foreach (V1Data role in roles)
             {
@@ -23,12 +23,12 @@ namespace DataTransfer.Transfer
 
                 if (rows.Any(x => x.GuildId == guildId && x.UserId == userId))
                 {
-                    RolesPersistantRolesRow row = rows.First(x => x.GuildId == guildId && x.UserId == userId);
+                    RolePersistRolesRow row = rows.First(x => x.GuildId == guildId && x.UserId == userId);
                     if (!row.Roles.Contains(roleId)) row.Roles.Add(roleId);
                 }
                 else
                 {
-                    RolesPersistantRolesRow row = new RolesPersistantRolesRow(guildId, userId);
+                    RolePersistRolesRow row = new RolePersistRolesRow(guildId, userId);
                     row.Roles.Add(roleId);
                     rows.Add(row);
                 }

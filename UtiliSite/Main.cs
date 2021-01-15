@@ -10,7 +10,7 @@ namespace UtiliSite
         {
             Config = Config.Load();
             PaymentsController.Initialise();
-            await Database.Database.InitialiseAsync(false, Main.Config.DefaultPrefix);
+            await Database.Database.InitialiseAsync(false, Config.DefaultPrefix);
             await DiscordModule.InitialiseAsync();
         }
     }

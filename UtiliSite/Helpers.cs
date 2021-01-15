@@ -78,7 +78,8 @@ namespace UtiliSite
             {
                 "inactiverole",
                 "joinmessage",
-                "roles"
+                "joinroles",
+                "rolepersist"
             };
 
             string[] voiceSection =

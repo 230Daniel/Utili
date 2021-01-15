@@ -100,7 +100,8 @@
                     <div id="userSection" class="collapse @SidebarHelper.GetIsSectionOpen(ViewContext, "user")" data-parent="#sidebarCategories">
                         <div href="@RedirectHelper.ChangeLastPage(ViewContext, "inactiverole")" class="cursor-pointer list-group-item list-group-item-action @SidebarHelper.GetIsActive(ViewContext, "inactiverole")">Inactive Role</div>
                         <div href="@RedirectHelper.ChangeLastPage(ViewContext, "joinmessage")" class="cursor-pointer list-group-item list-group-item-action @SidebarHelper.GetIsActive(ViewContext, "joinmessage")">Join Message</div>
-                        <div href="@RedirectHelper.ChangeLastPage(ViewContext, "roles")" class="cursor-pointer list-group-item list-group-item-action @SidebarHelper.GetIsActive(ViewContext, "roles")">Role Management</div>
+                        <div href="@RedirectHelper.ChangeLastPage(ViewContext, "joinroles")" class="cursor-pointer list-group-item list-group-item-action @SidebarHelper.GetIsActive(ViewContext, "joinroles")">Join Roles</div>
+                        <div href="@RedirectHelper.ChangeLastPage(ViewContext, "rolepersist")" class="cursor-pointer list-group-item list-group-item-action @SidebarHelper.GetIsActive(ViewContext, "rolepersist")">Role Persist</div>
                     </div>
 
                     <div onclick="$('#voiceSection').collapse('toggle')" class="cursor-pointer list-group-item list-group-item-action section-header">Voice Channels</div>

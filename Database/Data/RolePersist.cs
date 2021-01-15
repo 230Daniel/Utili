@@ -5,21 +5,21 @@ using MySql.Data.MySqlClient;
 
 namespace Database.Data
 {
-    public static class Roles
+    public static class RolePersist
     {
-        public static async Task<List<RolesRow>> GetRowsAsync(ulong? guildId = null, bool ignoreCache = false)
+        public static async Task<List<RolePersistRow>> GetRowsAsync(ulong? guildId = null, bool ignoreCache = false)
         {
-            List<RolesRow> matchedRows = new List<RolesRow>();
+            List<RolePersistRow> matchedRows = new List<RolePersistRow>();
 
             if (Cache.Initialised && !ignoreCache)
             {
-                matchedRows.AddRange(Cache.Roles);
+                matchedRows.AddRange(Cache.RolePersist);
 
                 if (guildId.HasValue) matchedRows.RemoveAll(x => x.GuildId != guildId.Value);
             }
             else
             {
-                string command = "SELECT * FROM Roles WHERE TRUE";
+                string command = "SELECT * FROM RolePersist WHERE TRUE";
                 List<(string, object)> values = new List<(string, object)>();
 
                 if (guildId.HasValue)
@@ -32,7 +32,7 @@ namespace Database.Data
 
                 while (reader.Read())
                 {
-                    matchedRows.Add(RolesRow.FromDatabase(
+                    matchedRows.Add(RolePersistRow.FromDatabase(
                         reader.GetUInt64(0),
                         reader.GetBoolean(1),
                         reader.GetString(2)));
@@ -44,52 +44,52 @@ namespace Database.Data
             return matchedRows;
         }
 
-        public static async Task<RolesRow> GetRowAsync(ulong guildId)
+        public static async Task<RolePersistRow> GetRowAsync(ulong guildId)
         {
-            List<RolesRow> rows = await GetRowsAsync(guildId);
-            return rows.Count > 0 ? rows.First() : new RolesRow(guildId);
+            List<RolePersistRow> rows = await GetRowsAsync(guildId);
+            return rows.Count > 0 ? rows.First() : new RolePersistRow(guildId);
         }
 
-        public static async Task SaveRowAsync(RolesRow row)
+        public static async Task SaveRowAsync(RolePersistRow row)
         {
             if (row.New)
             {
                 await Sql.ExecuteAsync(
-                    "INSERT INTO Roles (GuildId, RolePersist, JoinRoles) VALUES (@GuildId, @RolePersist, @JoinRoles);",
+                    "INSERT INTO RolePersist (GuildId, Enabled, ExcludedRoles) VALUES (@GuildId, @Enabled, @ExcludedRoles);",
                     ("GuildId", row.GuildId),
-                    ("RolePersist", row.RolePersist),
-                    ("JoinRoles", row.GetJoinRolesString()));
+                    ("Enabled", row.Enabled),
+                    ("ExcludedRoles", row.GetExcludedRolesString()));
 
                 row.New = false;
-                if(Cache.Initialised) Cache.Roles.Add(row);
+                if(Cache.Initialised) Cache.RolePersist.Add(row);
             }
             else
             {
                 await Sql.ExecuteAsync(
-                    "UPDATE Roles SET RolePersist = @RolePersist, JoinRoles = @JoinRoles WHERE GuildId = @GuildId;",
-                    ("GuildId", row.GuildId), 
-                    ("RolePersist", row.RolePersist),
-                    ("JoinRoles", row.GetJoinRolesString()));
+                    "UPDATE RolePersist SET Enabled = @Enabled, ExcludedRoles = @ExcludedRoles WHERE GuildId = @GuildId;",
+                    ("GuildId", row.GuildId),
+                    ("Enabled", row.Enabled),
+                    ("ExcludedRoles", row.GetExcludedRolesString()));
 
-                if(Cache.Initialised) Cache.Roles[Cache.Roles.FindIndex(x => x.GuildId == row.GuildId)] = row;
+                if(Cache.Initialised) Cache.RolePersist[Cache.RolePersist.FindIndex(x => x.GuildId == row.GuildId)] = row;
             }
         }
 
-        public static async Task DeleteRowAsync(RolesRow row)
+        public static async Task DeleteRowAsync(RolePersistRow row)
         {
-            if(Cache.Initialised) Cache.Roles.RemoveAll(x => x.GuildId == row.GuildId);
+            if(Cache.Initialised) Cache.RolePersist.RemoveAll(x => x.GuildId == row.GuildId);
 
             await Sql.ExecuteAsync(
-                "DELETE FROM Roles WHERE GuildId = @GuildId", 
+                "DELETE FROM RolePersist WHERE GuildId = @GuildId", 
                 ("GuildId", row.GuildId));
         }
 
 
-        public static async Task<List<RolesPersistantRolesRow>> GetPersistRowsAsync(ulong? guildId = null, ulong? userId = null)
+        public static async Task<List<RolePersistRolesRow>> GetPersistRowsAsync(ulong? guildId = null, ulong? userId = null)
         {
-            List<RolesPersistantRolesRow> matchedRows = new List<RolesPersistantRolesRow>();
+            List<RolePersistRolesRow> matchedRows = new List<RolePersistRolesRow>();
 
-            string command = "SELECT * FROM RolesPersistantRoles WHERE TRUE";
+            string command = "SELECT * FROM RolePersistRoles WHERE TRUE";
             List<(string, object)> values = new List<(string, object)>();
 
             if (guildId.HasValue)
@@ -108,7 +108,7 @@ namespace Database.Data
 
             while (reader.Read())
             {
-                matchedRows.Add(RolesPersistantRolesRow.FromDatabase(
+                matchedRows.Add(RolePersistRolesRow.FromDatabase(
                     reader.GetUInt64(0),
                     reader.GetUInt64(1),
                     reader.GetString(2)));
@@ -119,18 +119,18 @@ namespace Database.Data
             return matchedRows;
         }
 
-        public static async Task<RolesPersistantRolesRow> GetPersistRowAsync(ulong guildId, ulong userId)
+        public static async Task<RolePersistRolesRow> GetPersistRowAsync(ulong guildId, ulong userId)
         {
-            List<RolesPersistantRolesRow> rows = await GetPersistRowsAsync(guildId, userId);
-            return rows.Count > 0 ? rows.First() : new RolesPersistantRolesRow(guildId, userId);
+            List<RolePersistRolesRow> rows = await GetPersistRowsAsync(guildId, userId);
+            return rows.Count > 0 ? rows.First() : new RolePersistRolesRow(guildId, userId);
         }
 
-        public static async Task SavePersistRowAsync(RolesPersistantRolesRow row)
+        public static async Task SavePersistRowAsync(RolePersistRolesRow row)
         {
             if (row.New)
             {
                 await Sql.ExecuteAsync(
-                    "INSERT INTO RolesPersistantRoles (GuildId, UserId, Roles) VALUES (@GuildId, @UserId, @Roles);",
+                    "INSERT INTO RolePersistRoles (GuildId, UserId, Roles) VALUES (@GuildId, @UserId, @Roles);",
                     ("GuildId", row.GuildId),
                     ("UserId", row.UserId),
                     ("Roles", row.GetRolesString()));
@@ -140,59 +140,60 @@ namespace Database.Data
             else
             {
                 await Sql.ExecuteAsync(
-                    "UPDATE RolesPersistantRoles SET GuildId = @GuildId, UserId = @UserId, Roles = @Roles WHERE GuildId = @GuildId AND UserId = @UserId;",
+                    "UPDATE RolePersistRoles SET GuildId = @GuildId, UserId = @UserId, Roles = @Roles WHERE GuildId = @GuildId AND UserId = @UserId;",
                     ("GuildId", row.GuildId), 
                     ("UserId", row.UserId),
                     ("Roles", row.GetRolesString()));
             }
         }
 
-        public static async Task DeletePersistRowAsync(RolesPersistantRolesRow row)
+        public static async Task DeletePersistRowAsync(RolePersistRolesRow row)
         {
             await Sql.ExecuteAsync(
-                "DELETE FROM RolesPersistantRoles WHERE GuildId = @GuildId AND UserId = @UserId;", 
+                "DELETE FROM RolePersistRoles WHERE GuildId = @GuildId AND UserId = @UserId;", 
                 ("GuildId", row.GuildId), 
                 ("UserId", row.UserId));
         }
     }
-    public class RolesRow : IRow
+
+    public class RolePersistRow : IRow
     {
         public bool New { get; set; }
         public ulong GuildId { get; set; }
-        public bool RolePersist { get; set; }
-        public List<ulong> JoinRoles { get; set; }
+        public bool Enabled { get; set; }
+        public List<ulong> ExcludedRoles { get; set; }
 
-        private RolesRow()
+        private RolePersistRow()
         {
 
         }
 
-        public RolesRow(ulong guildId)
+        public RolePersistRow(ulong guildId)
         {
             New = true;
             GuildId = guildId;
-            RolePersist = false;
-            JoinRoles = new List<ulong>();
+            Enabled = false;
+            ExcludedRoles = new List<ulong>();
         }
 
-        public static RolesRow FromDatabase(ulong guildId, bool rolePersist, string joinRoles)
+        public static RolePersistRow FromDatabase(ulong guildId, bool enabled, string excludedRoles)
         {
-            RolesRow row = new RolesRow
+            RolePersistRow row = new RolePersistRow
             {
                 New = false,
                 GuildId = guildId,
-                RolePersist = rolePersist,
-                JoinRoles = new List<ulong>()
+                Enabled = enabled,
+                ExcludedRoles = new List<ulong>()
             };
             
 
-            if (!string.IsNullOrEmpty(joinRoles))
+            if (!string.IsNullOrEmpty(excludedRoles))
             {
-                foreach (string joinRole in joinRoles.Split(","))
+                foreach (string excludedRole in excludedRoles.Split(","))
                 {
-                    if (ulong.TryParse(joinRole, out ulong channelId))
+                    if (ulong.TryParse(excludedRole, out ulong roleId))
                     {
-                        row.JoinRoles.Add(channelId);
+                        row.ExcludedRoles.Add(roleId);
                     }
                 }
             }
@@ -200,46 +201,46 @@ namespace Database.Data
             return row;
         }
 
-        public string GetJoinRolesString()
+        public string GetExcludedRolesString()
         {
-            string joinRolesString = "";
+            string excludedRolesString = "";
 
-            for (int i = 0; i < JoinRoles.Count; i++)
+            for (int i = 0; i < ExcludedRoles.Count; i++)
             {
-                ulong joinRole = JoinRoles[i];
-                joinRolesString += joinRole.ToString();
-                if (i != JoinRoles.Count - 1)
+                ulong excludedRole = ExcludedRoles[i];
+                excludedRolesString += excludedRole.ToString();
+                if (i != ExcludedRoles.Count - 1)
                 {
-                    joinRolesString += ",";
+                    excludedRolesString += ",";
                 }
             }
 
-            return joinRolesString;
+            return excludedRolesString;
         }
 
         public async Task SaveAsync()
         {
-            await Roles.SaveRowAsync(this);
+            await RolePersist.SaveRowAsync(this);
         }
 
         public async Task DeleteAsync()
         {
-            await Roles.DeleteRowAsync(this);
+            await RolePersist.DeleteRowAsync(this);
         }
     }
 
-    public class RolesPersistantRolesRow : IRow
+    public class RolePersistRolesRow : IRow
     {
         public bool New { get; set; }
         public ulong GuildId { get; set; }
         public ulong UserId { get; set; }
         public List<ulong> Roles { get; set; }
 
-        private RolesPersistantRolesRow()
+        private RolePersistRolesRow()
         {
         }
 
-        public RolesPersistantRolesRow(ulong guildId, ulong userId)
+        public RolePersistRolesRow(ulong guildId, ulong userId)
         {
             New = true;
             GuildId = guildId;
@@ -247,9 +248,9 @@ namespace Database.Data
             Roles = new List<ulong>();
         }
 
-        public static RolesPersistantRolesRow FromDatabase(ulong guildId, ulong userId, string roles)
+        public static RolePersistRolesRow FromDatabase(ulong guildId, ulong userId, string roles)
         {
-            RolesPersistantRolesRow row = new RolesPersistantRolesRow
+            RolePersistRolesRow row = new RolePersistRolesRow
             {
                 New = false,
                 GuildId = guildId,
@@ -290,12 +291,12 @@ namespace Database.Data
 
         public async Task SaveAsync()
         {
-            await Data.Roles.SavePersistRowAsync(this);
+            await RolePersist.SavePersistRowAsync(this);
         }
 
         public async Task DeleteAsync()
         {
-            await Data.Roles.DeletePersistRowAsync(this);
+            await RolePersist.DeletePersistRowAsync(this);
         }
     }
 }

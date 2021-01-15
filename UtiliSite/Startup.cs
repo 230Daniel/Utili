@@ -52,12 +52,13 @@ namespace UtiliSite
                 options.Conventions.AddPageRoute("/dashboard/channelmirroring", "dashboard/{guild?}/channelmirroring");
                 options.Conventions.AddPageRoute("/dashboard/inactiverole", "dashboard/{guild?}/inactiverole");
                 options.Conventions.AddPageRoute("/dashboard/joinmessage", "dashboard/{guild?}/joinmessage");
+                options.Conventions.AddPageRoute("/dashboard/joinroles", "dashboard/{guild?}/joinroles");
                 options.Conventions.AddPageRoute("/dashboard/messagefilter", "dashboard/{guild?}/messagefilter");
                 options.Conventions.AddPageRoute("/dashboard/messagelogs", "dashboard/{guild?}/messagelogs");
                 options.Conventions.AddPageRoute("/dashboard/messagepinning", "dashboard/{guild?}/messagepinning");
                 options.Conventions.AddPageRoute("/dashboard/notices", "dashboard/{guild?}/notices");
                 options.Conventions.AddPageRoute("/dashboard/reputation", "dashboard/{guild?}/reputation");
-                options.Conventions.AddPageRoute("/dashboard/roles", "dashboard/{guild?}/roles");
+                options.Conventions.AddPageRoute("/dashboard/rolepersist", "dashboard/{guild?}/rolepersist");
                 options.Conventions.AddPageRoute("/dashboard/voicelink", "dashboard/{guild?}/voicelink");
                 options.Conventions.AddPageRoute("/dashboard/voiceroles", "dashboard/{guild?}/voiceroles");
                 options.Conventions.AddPageRoute("/dashboard/votechannels", "dashboard/{guild?}/votechannels");

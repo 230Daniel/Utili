@@ -1,41 +1,17 @@
 ﻿@page "{guild?}/roles"
-@using Database.Data
 @using Discord.Rest
-@model UtiliSite.Pages.Dashboard.RolesModel
+@model UtiliSite.Pages.Dashboard.JoinRolesModel
 @{
     Layout = "Shared/_Layout.cshtml";
-    ViewData["Title"] = "Roles - Utili Dashboard";
+    ViewData["Title"] = "Join Roles - Utili Dashboard";
 
-    ViewData["heading"] = "Roles";
-    ViewData["subheading"] = "Enable role persist and set roles to give to users when they join";
-    ViewData["detailed"] = "If role persist is enabled, a users roles will be recorded when they leave the server. These roles will be added back to them if they rejoin.\nJoin roles are given to any user when they join the server.";
+    ViewData["heading"] = "Join Roles";
+    ViewData["subheading"] = "These roles are given to users when they join.";
+    ViewData["detailed"] = "";
 
-    RolesRow row = (RolesRow)ViewData["row"];
     List<RestRole> joinRoles = (List<RestRole>)ViewData["joinRoles"];
-    List<RestRole> nonjoinRoles = (List<RestRole>)ViewData["nonjoinRoles"];
+    List<RestRole> nonjoinRoles = (List<RestRole>)ViewData["nonJoinRoles"];
 }
-
-
-<div>
-    <div class="card-container-3">
-        <form name="form-rolePersist" method="post">
-
-            <input type="text" class="form-control card-component-3 card-heading card-strong" value="Settings" readonly>
-
-            <div class="input-group flex-nowrap">
-                <span class="input-group-prepend input-group-text card-component-1">Role Persist</span>
-                <div class="input-group-text card-component-2">
-                    <input type="checkbox" name="rolePersist" class="form-control checkbox" @VoiceLinkModel.GetIsChecked(row.RolePersist)>
-                </div>
-            </div>
-
-            <div class="input-group flex-nowrap">
-                <span class="input-group-prepend input-group-text card-component-2 card-strong"></span>
-                <button type="submit" class="btn  card-component-1 card-button card-strong">Save</button>
-            </div>
-        </form>
-    </div>
-</div>
 
 <div class="dropdown belowcards">
     <button class="btn btn-secondary dropdown-toggle dropdown-200" type="button" data-toggle="dropdown" id="dropdownAddChannel" aria-haspopup="true" aria-expanded="false">

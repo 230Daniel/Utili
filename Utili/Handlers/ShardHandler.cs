@@ -61,7 +61,7 @@ namespace Utili.Handlers
             guilds = guilds.Where(x => x.DownloadedMemberCount < x.MemberCount).ToList();
 
             // Role persist enabled
-            guildIds.AddRange((await Roles.GetRowsAsync()).Where(x => x.RolePersist).Select(x => x.GuildId));
+            guildIds.AddRange((await RolePersist.GetRowsAsync()).Where(x => x.Enabled).Select(x => x.GuildId));
 
             // Community server
             guildIds.Add(_config.Community.GuildId);
