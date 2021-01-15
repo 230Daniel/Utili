@@ -70,12 +70,13 @@ namespace DataTransfer
                     "Inactive Role", 
                     "Inactive Role Users",
                     "Join Message",
+                    "Join Roles",
                     "Message Filter",
                     "Message Logs",
                     "Message Logs Messages",
                     "Notices",
-                    "Roles",
-                    "Roles Persist Roles",
+                    "Role Persist",
+                    "Role Persist Roles",
                     "Voice Link",
                     "Voice Roles",
                     "Vote Channels",
@@ -111,42 +112,46 @@ namespace DataTransfer
                         break;
 
                     case 6:
-                        await MessageFilter.TransferAsync(guildId);
-                        break;
-
-                    case 7:
-                        await MessageLogs.TransferAsync(guildId);
-                        break;
-                        
-                    case 8:
-                        await MessageLogsMessages.TransferAsync(guildId);
-                        break;
-
-                    case 9:
-                        await Notices.TransferAsync(guildId);
-                        break;
-
-                    case 10:
                         await JoinRoles.TransferAsync(guildId);
                         break;
 
+                    case 7:
+                        await MessageFilter.TransferAsync(guildId);
+                        break;
+
+                    case 8:
+                        await MessageLogs.TransferAsync(guildId);
+                        break;
+                        
+                    case 9:
+                        await MessageLogsMessages.TransferAsync(guildId);
+                        break;
+
+                    case 10:
+                        await Notices.TransferAsync(guildId);
+                        break;
+
                     case 11:
-                        await RolesPersistRoles.TransferAsync(guildId);
+                        await RolePersist.TransferAsync(guildId);
                         break;
 
                     case 12:
-                        await VoiceLink.TransferAsync(guildId);
+                        await RolePersistRoles.TransferAsync(guildId);
                         break;
 
                     case 13:
-                        await VoiceRoles.TransferAsync(guildId);
+                        await VoiceLink.TransferAsync(guildId);
                         break;
 
                     case 14:
-                        await VoteChannels.TransferAsync(guildId);
+                        await VoiceRoles.TransferAsync(guildId);
                         break;
 
                     case 15:
+                        await VoteChannels.TransferAsync(guildId);
+                        break;
+
+                    case 16:
 
                         Console.WriteLine("Autopurge...");
                         await Autopurge.TransferAsync(guildId);
@@ -163,6 +168,9 @@ namespace DataTransfer
                         Console.WriteLine("Join Message...");
                         await JoinMessage.TransferAsync(guildId);
                         
+                        Console.WriteLine("Join Roles...");
+                        await JoinRoles.TransferAsync(guildId);
+
                         Console.WriteLine("Message Filter...");
                         await MessageFilter.TransferAsync(guildId);
                         
@@ -172,11 +180,11 @@ namespace DataTransfer
                         Console.WriteLine("Notices...");
                         await Notices.TransferAsync(guildId);
 
-                        Console.WriteLine("Roles...");
-                        await JoinRoles.TransferAsync(guildId);
+                        Console.WriteLine("Role Persist...");
+                        await RolePersist.TransferAsync(guildId);
 
                         Console.WriteLine("Roles Persist Roles...");
-                        await RolesPersistRoles.TransferAsync(guildId);
+                        await RolePersistRoles.TransferAsync(guildId);
 
                         Console.WriteLine("Voice link...");
                         await VoiceLink.TransferAsync(guildId);

@@ -5,7 +5,7 @@ using Database.Data;
 
 namespace DataTransfer.Transfer
 {
-    internal static class RolesPersistRoles
+    internal static class RolePersistRoles
     {
         public static async Task TransferAsync(ulong? oneGuildId = null)
         {
