@@ -4,7 +4,7 @@ namespace Database
 {
     public static class Database
     {
-        internal static Config Config { get; private set; }
+        public static Config Config { get; private set; }
 
         public static async Task InitialiseAsync(bool useCache, string defaultPrefix)
         {

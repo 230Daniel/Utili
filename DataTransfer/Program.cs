@@ -44,6 +44,7 @@ namespace DataTransfer
 
             Console.WriteLine("Logging in to v2...");
             await Database.Database.InitialiseAsync(false, "");
+            Console.WriteLine($"Using v2 database {Database.Database.Config.Database}");
 
             Console.WriteLine("Waiting for bot...");
             while (Client.ConnectionState != ConnectionState.Connected) await Task.Delay(1000);
@@ -52,6 +53,17 @@ namespace DataTransfer
             {
                 ulong? guildId = null;
                 RowsToSave = new List<IRow>();
+                
+
+                if (Menu.PickOption("V1 to V2", "V2 to V2") == 1)
+                {
+                    string fromDatabase = Menu.GetString("from database");
+                    guildId = Menu.GetUlong("guild");
+
+                    await V2RowTransfer.TransferAsync(guildId.Value, fromDatabase);
+
+                    continue;
+                }
 
                 switch (Menu.PickOption("All guilds", "One guild"))
                 {

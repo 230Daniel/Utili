@@ -1,0 +1,8 @@
+Guild 447048917188870155 `Test` --> `Utili`
+
+USE Alpha;
+DELETE FROM VoteChannels WHERE GuildId = 611527825929011231;
+INSERT INTO VoteChannels
+SELECT *
+FROM Test.VoteChannels
+WHERE GuildId = 611527825929011231;
