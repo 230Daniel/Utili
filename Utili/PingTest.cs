@@ -19,7 +19,7 @@ namespace Utili
         {
             _timer?.Dispose();
 
-            _timer = new Timer(30000);
+            _timer = new Timer(15000);
             _timer.Elapsed += Timer_Elapsed;
             _timer.Start();
 
