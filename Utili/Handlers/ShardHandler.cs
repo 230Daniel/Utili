@@ -74,19 +74,21 @@ namespace Utili.Handlers
 
         public static async Task Log(LogMessage logMessage)
         {
+            string source = logMessage.Source.Replace("Shard #", "Shard ");
+
             if (logMessage.Exception == null)
             {
-                _logger.Log(logMessage.Source, logMessage.Message, Helper.ConvertToLocalLogSeverity(logMessage.Severity));
+                _logger.Log(source, logMessage.Message, Helper.ConvertToLocalLogSeverity(logMessage.Severity));
             }
             else
             {
                 if (logMessage.Exception.Message == "Server requested a reconnect")
                 {
-                    _logger.Log(logMessage.Source, "Server requested a reconnect", LogSeverity.Info);
+                    _logger.Log(source, "Server requested a reconnect", LogSeverity.Info);
                 }
                 else
                 {
-                    _logger.ReportError(logMessage.Source, logMessage.Exception, Helper.ConvertToLocalLogSeverity(logMessage.Severity));
+                    _logger.ReportError(source, logMessage.Exception, Helper.ConvertToLocalLogSeverity(logMessage.Severity));
                 }
             }
         }

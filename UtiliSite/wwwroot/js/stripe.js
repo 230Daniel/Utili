@@ -1,5 +1,5 @@
 ﻿
-var stripe = window.Stripe("pk_test_51Hcvk4B8DUEVWcSDhAutXkeJErW0lmmZvTahVkIxQij2cNun9JXuh3FfIt2QXlOQVO519maTYUn8V0tcT4fnuvMH000mz5kD2V");
+var stripe = window.Stripe("pk_live_51Hcvk4B8DUEVWcSDwjMf0bvWv4NiSZizxfj495VdwB3UvqPZCNYt30781RdZ4tG8QnylVc98ywuj7k13wAec6cCq00I21LkJCn");
 
 function checkout(slots, currency) {
 
@@ -7,21 +7,21 @@ function checkout(slots, currency) {
 
     switch (slots) {
         case 1:
-            if (currency === "gbp") price = "price_1I0bUCB8DUEVWcSDYIEsUvWA";
-            if (currency === "usd") price = "price_1I0bUeB8DUEVWcSD6ksIYGra";
-            if (currency === "eur") price = "price_1I0bWFB8DUEVWcSDut7TNTEJ";
+            if (currency === "gbp") price = "price_1I9tE0B8DUEVWcSDmXZo0tHg";
+            if (currency === "usd") price = "price_1I9tE0B8DUEVWcSDS7A4O1Yo";
+            if (currency === "eur") price = "price_1I9tE0B8DUEVWcSDt0axJ6Jy";
             break;
 
         case 3:
-            if (currency === "gbp") price = "price_1I0bb9B8DUEVWcSDduM316AQ";
-            if (currency === "usd") price = "price_1I0bcoB8DUEVWcSDuzcORFfl";
-            if (currency === "eur") price = "price_1I0bdNB8DUEVWcSDpBaFzZMm";
+            if (currency === "gbp") price = "price_1I9tFEB8DUEVWcSDeiZ30gkH";
+            if (currency === "usd") price = "price_1I9tFEB8DUEVWcSDdGJrifkV";
+            if (currency === "eur") price = "price_1I9tFEB8DUEVWcSDyTu8P9hn";
             break;
 
         case 5:
-            if (currency === "gbp") price = "price_1I0bcOB8DUEVWcSDgqZAKvV1";
-            if (currency === "usd") price = "price_1I0cR7B8DUEVWcSDnikkbgGr";
-            if (currency === "eur") price = "price_1I0beqB8DUEVWcSDJaeyovfY";
+            if (currency === "gbp") price = "price_1I9tJiB8DUEVWcSD23Zy6gBD";
+            if (currency === "usd") price = "price_1I9tJiB8DUEVWcSD7pIVqJJ3";
+            if (currency === "eur") price = "price_1I9tJiB8DUEVWcSDGKA09sOM";
             break;
     }
 

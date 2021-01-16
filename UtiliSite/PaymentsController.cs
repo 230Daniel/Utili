@@ -52,7 +52,7 @@ namespace UtiliSite
                     },
                 },
                 Customer = auth.UserRow.CustomerId,
-                AllowPromotionCodes = false
+                AllowPromotionCodes = true
             };
             SessionService service = new SessionService(_stripeClient);
             try
@@ -90,7 +90,7 @@ namespace UtiliSite
             Stripe.BillingPortal.SessionCreateOptions options = new Stripe.BillingPortal.SessionCreateOptions
             {
                 Customer = auth.UserRow.CustomerId,
-                ReturnUrl = $"https://{HttpContext.Request.Host}/premium"
+                ReturnUrl = $"https://{HttpContext.Request.Host}/premium",
             };
 
             Stripe.BillingPortal.SessionService service = new Stripe.BillingPortal.SessionService(_stripeClient);

@@ -79,6 +79,7 @@ namespace Utili.Features
                         }, out _))
                     {
                         tasks.Add(PurgeChannelAsync(channel, row.Timespan, row.Mode, messageCap));
+                        await Task.Delay(250);
                     }
                 }
                 catch { }
@@ -102,7 +103,7 @@ namespace Utili.Features
             // These DateTimes represent the bounds for which messages should be deleted.
             // DateTimes are confusing as heck and I think these are named the wrong way around but the logic works so ¯\_(ツ)_/¯
             DateTime earliestTime = DateTime.UtcNow - timespan;
-            DateTime latestTime = DateTime.UtcNow - TimeSpan.FromDays(13.9);
+            DateTime latestTime = DateTime.UtcNow - TimeSpan.FromDays(13.5);
 
             messages.RemoveAll(x => x.CreatedAt.UtcDateTime > earliestTime);
             messages.RemoveAll(x => x.CreatedAt.UtcDateTime < latestTime);
@@ -113,7 +114,7 @@ namespace Utili.Features
 
             await channel.DeleteMessagesAsync(messages);
 
-            if (exceedesCap && mode == 0 && lastMessage.CreatedAt > latestTime)
+            if (exceedesCap && mode == 0 && lastMessage.CreatedAt < latestTime)
             {
                 // We must delete excess messages
                 // Only do this if we are to delete all messages, not just bot messages
@@ -121,7 +122,8 @@ namespace Utili.Features
 
                 List<IMessage> excessMessages = (await channel.GetMessagesAsync(lastMessage.Id, Direction.Before).FlattenAsync()).ToList();
 
-                messages.RemoveAll(x => x.CreatedAt.UtcDateTime > latestTime);
+                excessMessages.RemoveAll(x => x.CreatedAt.UtcDateTime < latestTime);
+                excessMessages.RemoveAll(x => x.IsPinned);
 
                 await channel.DeleteMessagesAsync(excessMessages);
             }

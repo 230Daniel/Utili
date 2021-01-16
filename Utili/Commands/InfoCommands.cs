@@ -27,7 +27,7 @@ namespace Utili.Commands
                 $"[Contact Us](https://{_config.Domain}/contact)\n",
                 $"[Get Premium](https://{_config.Domain}/premium)\n");
 
-            await SendInfoAsync(Context.Channel, "Utili v2 Beta", about);
+            await SendInfoAsync(Context.Channel, "Utili", about);
         }
 
         [Command("Help"), Alias("Commands")]
