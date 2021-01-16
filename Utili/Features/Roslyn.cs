@@ -52,7 +52,7 @@ namespace Utili.Features
         [Command("Evaluate"), Alias("Eval", "e"), Permission(Perm.BotOwner), Cooldown(5)]
         public async Task Evaluate([Remainder] string code)
         {
-            RoslynGlobals globals = new RoslynGlobals(_client, Context);
+            RoslynGlobals globals = new RoslynGlobals(_client, Context, _config);
 
             RoslynResult result = await Roslyn.EvaluateAsync(code, globals);
 
@@ -91,11 +91,13 @@ namespace Utili.Features
         public DiscordShardedClient Client { get; }
         public DiscordRestClient Rest => Client.Rest;
         public SocketCommandContext Context { get; }
+        public Config Config { get; }
 
-        public RoslynGlobals(DiscordShardedClient client, SocketCommandContext context)
+        public RoslynGlobals(DiscordShardedClient client, SocketCommandContext context, Config config)
         {
             Client = client;
             Context = context;
+            Config = config;
         }
     }
 }

@@ -1,9 +1,9 @@
 ﻿using System.IO;
 using System.Text.Json;
-
+using BotlistStatsPoster;
 namespace Utili
 {
-    internal class Config
+    public class Config
     {
         public string Token { get; set; } = "";
         public bool Production { get; set; } = true;
@@ -17,6 +17,7 @@ namespace Utili
         public ulong SystemChannelId { get; set; } = 0;
         public CommunityConfig Community { get; set; } = new CommunityConfig();
         public string DefaultPrefix { get; set; } = ".";
+        public TokenConfiguration BotlistTokens { get; set; } = null;
 
         public static Config Load()
         {
@@ -40,7 +41,7 @@ namespace Utili
         }
     }
 
-    internal class CommunityConfig
+    public class CommunityConfig
     {
         public ulong GuildId { get; set; } = 0;
         public ulong UserRoleId { get; set; } = 0;
