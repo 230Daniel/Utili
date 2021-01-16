@@ -101,7 +101,13 @@ namespace UtiliSite
         private bool _creatingCustomer;
         public async Task CreateCustomerIfRequiredAsync()
         {
-            while (_creatingCustomer) await Task.Delay(500);
+            if (_creatingCustomer)
+            {
+                while (_creatingCustomer) await Task.Delay(500);
+                _creatingCustomer = true;
+                await Task.Delay(500);
+            }
+            
             _creatingCustomer = true;
 
             try
@@ -126,6 +132,7 @@ namespace UtiliSite
 
                 auth.UserRow.CustomerId = customer.Id;
                 await Users.SaveRowAsync(auth.UserRow);
+                await Task.Delay(500);
             }
             catch
             {
