@@ -15,7 +15,7 @@ namespace Utili
         {
             SocketGuild guild = context.Guild as SocketGuild;
 
-            if (ulong.TryParse(input.Replace("<", "").Replace("@", "").Replace("!", "").Replace(">", ""), out ulong userId))
+            if (MentionUtils.TryParseUser(input, out ulong userId))
             {
                 IUser user = guild.GetUser(userId);
                 if (user != null) return TypeReaderResult.FromSuccess(user);
@@ -25,9 +25,7 @@ namespace Utili
             }
 
             IReadOnlyCollection<IUser> users = await context.Guild.SearchUsersAsync(input, 1);
-            if (users.Count > 0) return TypeReaderResult.FromSuccess(users.First());
-
-            return TypeReaderResult.FromError(CommandError.ParseFailed, "Input could not be parsed as a user");
+            return users.Count > 0 ? TypeReaderResult.FromSuccess(users.First()) : TypeReaderResult.FromError(CommandError.ParseFailed, "Input could not be parsed as a user");
         }
     }
 }
