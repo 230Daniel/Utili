@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace UtiliSite.Pages.Premium
 {
-    public class SuccessModel : PageModel
+    public class FailureModel : PageModel
     {
         public async Task<IActionResult> OnGet()
         {
@@ -15,16 +15,9 @@ namespace UtiliSite.Pages.Premium
             ViewData["auth"] = auth;
             if(!auth.Authenticated) return auth.Action;
 
-            await Task.Delay(2000);
-
             List<SubscriptionsRow> subscriptions = await Subscriptions.GetRowsAsync(userId: auth.User.Id, onlyValid: true);
             ViewData["subscriptions"] = subscriptions.Count;
             ViewData["slots"] = subscriptions.Sum(x => x.Slots);
-
-            if (subscriptions.Count == 0)
-            {
-                return Redirect("failure");
-            }
 
             return new PageResult();
         }

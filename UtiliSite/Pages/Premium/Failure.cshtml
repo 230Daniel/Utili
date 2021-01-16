@@ -1,0 +1,32 @@
+﻿@page
+@model UtiliSite.Pages.Premium.FailureModel
+@{
+    Layout = "Shared/_Layout.cshtml";
+
+    int subscriptions = (int)ViewData["subscriptions"];
+    int slots = (int)ViewData["slots"];
+
+    ViewData["Title"] = "Error - Utili Premium";
+}
+
+<div class="text-center text-white" style="margin-bottom: 30px;">
+    <h1 class="display-4">Payment Failed</h1>
+</div>
+
+<div class="text-danger">
+    Please do not re-attempt your payment.
+</div>
+
+<div class="text-white">
+    Sorry, something went wrong while activating your subscription.
+    Please <a href="@RedirectHelper.GoToPage(ViewContext, "contact")" class="a-blue">contact us</a> so that we can resolve the problem.
+</div>
+
+<div class="divider">
+    <div></div>
+    <span>Active Subscriptions</span>
+</div>
+
+<p class="text-white">You have @subscriptions active @(subscriptions != 1 ? "subscriptions" : "subscription") with a total of @slots premium server @(slots != 1 ? "slots" : "slot"). </p>
+<a class="a-blue" href="@RedirectHelper.ChangeLastPage(ViewContext, "servers")">Select @(slots != 1 ? "servers" : "server") ➔</a> <br />
+<span class="a-blue" onclick="billingPortal()">Manage @(subscriptions != 1 ? "subscriptions" : "subscription") ➔</span>

@@ -98,19 +98,28 @@ namespace UtiliSite
             return Ok(session);
         }
 
+        private bool _creatingCustomer;
         public async Task CreateCustomerIfRequiredAsync()
         {
+            while (_creatingCustomer) await Task.Delay(500);
+            _creatingCustomer = true;
+
             try
             {
                 AuthDetails auth = await Auth.GetAuthDetailsAsync(this);
-                if (!auth.Authenticated) return;
-                if (!string.IsNullOrEmpty(auth.UserRow.CustomerId)) return;
-
-                CustomerCreateOptions options = new CustomerCreateOptions
+                if (!auth.Authenticated)
                 {
-                    Description = $"User Id: {auth.User.Id}",
-                    Email = auth.User.Email
-                };
+                    _creatingCustomer = false;
+                    return;
+                }
+
+                if (!string.IsNullOrEmpty(auth.UserRow.CustomerId))
+                {
+                    _creatingCustomer = false;
+                    return;
+                }
+
+                CustomerCreateOptions options = new CustomerCreateOptions {Description = $"User Id: {auth.User.Id}", Email = auth.User.Email};
 
                 CustomerService service = new CustomerService(_stripeClient);
                 Customer customer = await service.CreateAsync(options);
@@ -118,9 +127,10 @@ namespace UtiliSite
                 auth.UserRow.CustomerId = customer.Id;
                 await Users.SaveRowAsync(auth.UserRow);
             }
-            catch (Exception e)
+            catch
             {
-                Console.WriteLine($"Stripe customer correlation error - {e.Message}\n{e.StackTrace}");
+                _creatingCustomer = false;
+                throw;
             }
         }
 

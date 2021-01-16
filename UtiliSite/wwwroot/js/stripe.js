@@ -1,7 +1,11 @@
 ﻿
 var stripe = window.Stripe("pk_live_51Hcvk4B8DUEVWcSDwjMf0bvWv4NiSZizxfj495VdwB3UvqPZCNYt30781RdZ4tG8QnylVc98ywuj7k13wAec6cCq00I21LkJCn");
+var processing = false;
 
 function checkout(slots, currency) {
+
+    if (processing) return;
+    processing = true;
 
     var price = "";
 
@@ -49,6 +53,10 @@ function checkout(slots, currency) {
 }
 
 function billingPortal() {
+
+    if (processing) return;
+    processing = true;
+
     fetch('/customer-portal', {
             method: 'POST',
             headers: {
