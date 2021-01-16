@@ -62,15 +62,18 @@ namespace Utili.Features
             await SendInfoAsync(Context.Channel, null, $"{user.Mention}'s reputation: **{row.Reputation}**", colour: colour);
         }
 
-        [Command("Leaderboard"), Alias("Top"), Cooldown(10)]
+        [Command("Leaderboard"), Alias("Top"), Cooldown(3)]
         public async Task Leaderboard()
         {
+            if (!Context.Guild.HasAllMembers)
+            {
+                await Context.Guild.DownloadUsersAsync();
+            }
+
             List<ReputationUserRow> rows = await Database.Data.Reputation.GetUserRowsAsync(Context.Guild.Id);
             rows = rows.OrderByDescending(x => x.Reputation).ToList();
 
-            List<IGuildUser> users = Context.Guild.Users.Select(x => x as IGuildUser).ToList();
-            if(users.Count < Context.Guild.MemberCount) users = (await Context.Guild.GetUsersAsync().FlattenAsync()).ToList();
-            List<ulong> userIds = users.Select(x => x.Id).ToList();
+            List<ulong> userIds = Context.Guild.Users.Select(x => x.Id).ToList();
 
             int position = 1;
             string content = "";
@@ -78,7 +81,7 @@ namespace Utili.Features
             {
                 if (userIds.Contains(row.UserId))
                 {
-                    IGuildUser user = users.First(x => x.Id == row.UserId);
+                    IGuildUser user = Context.Guild.Users.First(x => x.Id == row.UserId);
                     content += $"{position}. {user.Mention} {row.Reputation}\n";
                     if(position == 10) break;
                     position++;
@@ -91,12 +94,15 @@ namespace Utili.Features
         [Command("InverseLeaderboard"), Alias("Bottom"), Cooldown(10)]
         public async Task InvserseLeaderboard()
         {
+            if (!Context.Guild.HasAllMembers)
+            {
+                await Context.Guild.DownloadUsersAsync();
+            }
+
             List<ReputationUserRow> rows = await Database.Data.Reputation.GetUserRowsAsync(Context.Guild.Id);
             rows = rows.OrderBy(x => x.Reputation).ToList();
 
-            List<IGuildUser> users = Context.Guild.Users.Select(x => x as IGuildUser).ToList();
-            if(users.Count < Context.Guild.MemberCount) users = (await Context.Guild.GetUsersAsync().FlattenAsync()).ToList();
-            List<ulong> userIds = users.Select(x => x.Id).ToList();
+            List<ulong> userIds = Context.Guild.Users.Select(x => x.Id).ToList();
 
             int position = rows.Count;
             string content = "";
@@ -104,7 +110,7 @@ namespace Utili.Features
             {
                 if (userIds.Contains(row.UserId))
                 {
-                    IGuildUser user = users.First(x => x.Id == row.UserId);
+                    IGuildUser user = Context.Guild.Users.First(x => x.Id == row.UserId);
                     content += $"{position}. {user.Mention} {row.Reputation}\n";
                     if(position == rows.Count - 10) break;
                     position--;

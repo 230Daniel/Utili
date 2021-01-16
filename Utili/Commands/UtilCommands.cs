@@ -201,18 +201,29 @@ namespace Utili.Commands
             }
         }
 
-
-        [Command("Paste")]
-        public async Task Paste([Remainder] string paste)
+        [Command("WhoHas"), Cooldown(3)]
+        public async Task WhoHas(SocketRole role, int page = 1)
         {
-            try
+            if (!Context.Guild.HasAllMembers)
             {
-                await SendSuccessAsync(Context.Channel, "Pasted", $"[View]({await Program._haste.PasteAsync(paste, "txt")})");
+                await Context.Guild.DownloadUsersAsync();
             }
-            catch
+
+            List<SocketGuildUser> users = Context.Guild.Users.OrderBy(x => x.Nickname ?? x.Username).Where(x => x.Roles.Any(y => y.Id == role.Id)).ToList();
+
+            int totalPages = (int) Math.Ceiling(users.Count / 50d);
+            users = users.Skip((page - 1) * 50).Take(50).ToList();
+            if ((page < 1 || page > totalPages) && totalPages != 0)
             {
-                await SendFailureAsync(Context.Channel, "Error", "Failed to upload to haste server");
+                await SendFailureAsync(Context.Channel, "Error", "Invalid page number");
+                return; 
             }
+            if (totalPages == 0) page = 0;
+
+            string output = users.Aggregate("", (current, user) => current + $"{user.Mention}\n");
+            if (output == "") output = "There are no users with those roles.";
+
+            await SendInfoAsync(Context.Channel, $"Users with @{role.Name}", output, $"Page {page} of {totalPages}");
         }
 
         [Command("B64Encode")]
