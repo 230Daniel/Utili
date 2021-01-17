@@ -181,7 +181,7 @@ namespace Utili.Commands
             if (message == null)
             {
                 await SendFailureAsync(Context.Channel, "Error",
-                    $"No message was found in <#{Context.Channel.Id}> with ID {messageId}\n[How do I get a message ID?](https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID-)");
+                    $"No message was found in <#{channel.Id}> with ID {messageId}\n[How do I get a message ID?](https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID-)");
                 return;
             }
 
@@ -198,6 +198,49 @@ namespace Utili.Commands
             {
                 await SendFailureAsync(Context.Channel, "Error",
                     $"No emoji was found matching {emojiString}\nType the emoji itself in the command");
+            }
+        }
+
+        [Command("Random"), Alias("Pick"), Cooldown(10)]
+        public async Task Random(ulong messageId = 0, [Remainder] string emojiString = "")
+        {
+            if (!Context.Guild.HasAllMembers)
+            {
+                await Context.Guild.DownloadUsersAsync();
+            }
+
+            Random random = new Random();
+
+            if (messageId == 0)
+            {
+                int index = random.Next(Context.Guild.Users.Count);
+                SocketGuildUser user = Context.Guild.Users.ElementAt(index);
+
+                await SendInfoAsync(Context.Channel, "Random user",
+                    $"{user.Mention}\nThis user was picked randomly from {Context.Guild.Users.Count} server member{(Context.Guild.Users.Count == 1 ? "" : "s")}.");
+            }
+            else
+            {
+                IMessage message = await Context.Channel.GetMessageAsync(messageId);
+
+                if (message == null)
+                {
+                    await SendFailureAsync(Context.Channel, "Error",
+                        $"No message was found in <#{Context.Channel.Id}> with ID {messageId}\n[How do I get a message ID?](https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID-)");
+                    return;
+                }
+
+                IEmote emoji = Helper.GetEmote(emojiString);
+
+                if(message.Reactions.TryGetValue(emoji, out ReactionMetadata _))
+                {
+                    List<IUser> users = (await message.GetReactionUsersAsync(emoji, 1000).FlattenAsync()).ToList();
+                    int index = random.Next(users.Count);
+                    IUser user = users.ElementAt(index);
+
+                    await SendInfoAsync(Context.Channel, "Random user",
+                        $"{user.Mention}\nThis user was picked randomly from {users.Count} user{(users.Count == 1 ? "" : "s")} that reacted to [this message]({message.GetJumpUrl()}) with {emojiString}.");
+                }
             }
         }
 
