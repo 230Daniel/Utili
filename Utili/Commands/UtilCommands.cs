@@ -202,7 +202,7 @@ namespace Utili.Commands
         }
 
         [Command("Random"), Alias("Pick"), Cooldown(10)]
-        public async Task Random(ulong messageId = 0, [Remainder] string emojiString = "")
+        public async Task Random(ITextChannel channel = null, ulong messageId = 0, [Remainder] string emojiString = "")
         {
             if (!Context.Guild.HasAllMembers)
             {
@@ -221,12 +221,14 @@ namespace Utili.Commands
             }
             else
             {
-                IMessage message = await Context.Channel.GetMessageAsync(messageId);
+                if (channel == null) channel = Context.Channel as ITextChannel;
+
+                IMessage message = await channel.GetMessageAsync(messageId);
 
                 if (message == null)
                 {
                     await SendFailureAsync(Context.Channel, "Error",
-                        $"No message was found in <#{Context.Channel.Id}> with ID {messageId}\n[How do I get a message ID?](https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID-)");
+                        $"No message was found in <#{channel.Id}> with ID {messageId}\n[How do I get a message ID?](https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID-)");
                     return;
                 }
 
@@ -242,6 +244,12 @@ namespace Utili.Commands
                         $"{user.Mention}\nThis user was picked randomly from {users.Count} user{(users.Count == 1 ? "" : "s")} that reacted to [this message]({message.GetJumpUrl()}) with {emojiString}.");
                 }
             }
+        }
+
+        [Command("Random"), Alias("Pick")]
+        public async Task Random(ulong messageId = 0, [Remainder] string emojiString = "")
+        {
+            await Random(Context.Channel as ITextChannel, messageId, emojiString);
         }
 
         [Command("WhoHas"), Cooldown(3)]
