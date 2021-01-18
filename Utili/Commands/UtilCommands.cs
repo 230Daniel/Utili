@@ -272,7 +272,7 @@ namespace Utili.Commands
             if (totalPages == 0) page = 0;
 
             string output = users.Aggregate("", (current, user) => current + $"{user.Mention}\n");
-            if (output == "") output = "There are no users with those roles.";
+            if (output == "") output = "There are no users with that role.";
 
             await SendInfoAsync(Context.Channel, $"Users with @{role.Name}", output, $"Page {page} of {totalPages}");
         }
