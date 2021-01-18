@@ -17,6 +17,7 @@ namespace Database
 
             if (useCache) await Cache.InitialiseAsync();
             Data.Premium.Initialise();
+            Data.MessageLogs.Initialise();
         }
     }
 }
