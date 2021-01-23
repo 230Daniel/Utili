@@ -173,7 +173,7 @@ namespace Utili.Features
     [Group("Notice"), Alias("Notices")]
     public class NoticeCommands : ModuleBase<SocketCommandContext>
     {
-        [Command("Preview")]
+        [Command("Preview"), Alias("Send")]
         public async Task Preview(ITextChannel channel = null)
         {
             if (channel == null) channel = Context.Channel as ITextChannel;
