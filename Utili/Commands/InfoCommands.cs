@@ -23,7 +23,7 @@ namespace Utili.Commands
 
                 $"[Website](https://{_config.Domain})\n",
                 $"[Dashboard](https://{_config.Domain}/dashboard)\n",
-                "[Discord Server](https://discord.gg/wGTrDhCaEH)\n",
+                "[Discord Server](https://discord.gg/WsxqABZ)\n",
                 $"[Contact Us](https://{_config.Domain}/contact)\n",
                 $"[Get Premium](https://{_config.Domain}/premium)\n");
 

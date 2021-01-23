@@ -22,7 +22,7 @@ namespace Utili
 
             if (!string.IsNullOrEmpty(message) && supportLink)
             {
-                message += "\n[Support Server](https://discord.gg/wGTrDhCaEH)";
+                message += "\n[Support Server](https://discord.gg/WsxqABZ)";
             }
 
             return await textChannel.SendMessageAsync(embed: GenerateEmbed(EmbedType.Failure, title, message, footer));

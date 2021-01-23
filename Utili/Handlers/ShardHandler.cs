@@ -6,6 +6,7 @@ using Database.Data;
 using Discord;
 using Discord.WebSocket;
 using static Utili.Program;
+using static Utili.MessageSender;
 
 namespace Utili.Handlers
 {
@@ -92,6 +93,18 @@ namespace Utili.Handlers
                 }
             }
         }
+
+        public static async Task JoinedGuild(SocketGuild guild)
+        {
+            _ = Task.Run(async() =>
+            {
+                await SendInfoAsync(guild.DefaultChannel, "Hi, thanks for adding me!", 
+                    $"Head to the [dashboard](https://{_config.Domain}/dashboard/{guild.Id}/core) to set up the features you want to use.\n" +
+                    $"If you require assistance, you can join the [Discord server](https://discord.gg/WsxqABZ) and we'll be happy to help you out.\n" +
+                    $"Have fun!");
+            });
+        }
+
 
         private static Timer _downloadNewRequiredUsersTimer;
         private static void DownloadNewRequiredUsersTimer_Elapsed(object sender, ElapsedEventArgs e)

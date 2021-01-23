@@ -77,7 +77,7 @@ namespace Utili
             }
         }
 
-        public static async Task MainAsync()
+        private static async Task MainAsync()
         {
             _logger.LogEmpty();
             _config = Config.Load();
@@ -119,6 +119,7 @@ namespace Utili
 
             _client.Log += ShardHandler.Log;
             _client.ShardReady += ShardHandler.ShardReady;
+            _client.JoinedGuild += ShardHandler.JoinedGuild;
 
             _client.MessageReceived += MessageHandler.MessageReceived;
             _client.MessageUpdated += MessageHandler.MessageEdited;
