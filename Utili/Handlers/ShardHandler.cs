@@ -13,8 +13,8 @@ namespace Utili.Handlers
 {
     internal static class ShardHandler
     {
-        public static List<(int, DateTime)> ReadyShardIds = new List<(int, DateTime)>();
-        
+        public static List<(int, DateTime)> ShardRegister { get; } = new List<(int, DateTime)>();
+
         public static async Task ShardReady(DiscordSocketClient shard)
         {
             _ = Task.Run(async () =>
@@ -26,12 +26,13 @@ namespace Utili.Handlers
                 await Task.Delay(1000);
                 while (shard.ConnectionState != ConnectionState.Connected) await Task.Delay(25);
                 
-                ReadyShardIds.RemoveAll(x => x.Item1 == shard.ShardId);
+                ShardRegister.RemoveAll(x => x.Item1 == shard.ShardId);
+                ShardRegister.Add((shard.ShardId, DateTime.Now));
+
                 if (_client.Shards.All(x => x.ConnectionState == ConnectionState.Connected)) _ = AllShardsReady();
 
                 await DownloadRequiredUsersAsync(shard);
                 await shard.SetGameAsync($"{_config.Domain} | {_config.DefaultPrefix}help");
-                ReadyShardIds.Add((shard.ShardId, DateTime.Now));
             });
         }
 

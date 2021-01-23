@@ -73,7 +73,7 @@ namespace Utili.Commands
             if(status < PingStatus.Poor && cpu > 50) status = PingStatus.Poor;
             if(status < PingStatus.Critical && cpu > 90 || memory > 95) status = PingStatus.Critical;
 
-            DateTime upSince = Handlers.ShardHandler.ReadyShardIds.First(x => x.Item1 == shard.ShardId).Item2;
+            DateTime upSince = Handlers.ShardHandler.ShardRegister.First(x => x.Item1 == shard.ShardId).Item2;
             TimeSpan uptime = DateTime.Now - upSince;
 
 #pragma warning disable 8509
