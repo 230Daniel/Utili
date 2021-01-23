@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
@@ -18,10 +19,9 @@ namespace Utili.Commands
 
             string about = string.Concat(
                 "Created by 230Daniel#1920\n",
-                $"In {await Database.Sharding.GetGuildCountAsync()} servers\n",
+                $"In {await Database.Sharding.GetGuildCountAsync()} servers\n\n",
                 $"Shard {shard.ShardId} ({_totalShards} total)\n\n",
 
-                $"[Website](https://{_config.Domain})\n",
                 $"[Dashboard](https://{_config.Domain}/dashboard)\n",
                 "[Discord Server](https://discord.gg/WsxqABZ)\n",
                 $"[Contact Us](https://{_config.Domain}/contact)\n",
@@ -73,6 +73,9 @@ namespace Utili.Commands
             if(status < PingStatus.Poor && cpu > 50) status = PingStatus.Poor;
             if(status < PingStatus.Critical && cpu > 90 || memory > 95) status = PingStatus.Critical;
 
+            DateTime upSince = Handlers.ShardHandler.ReadyShardIds.First(x => x.Item1 == shard.ShardId).Item2;
+            TimeSpan uptime = DateTime.Now - upSince;
+
 #pragma warning disable 8509
             Color color = status switch
             {
@@ -93,6 +96,7 @@ namespace Utili.Commands
             embed.AddField("Database", $"Latency: {database}ms\nQueries: {databaseQueries}/s", true);
             embed.AddField("System", $"CPU: {cpu}%\nMem: {memory}%", true);
 
+            embed.WithFooter($"Uptime: {uptime.ToShortString()}");
             await SendEmbedAsync(Context.Channel, embed.Build());
         }
 

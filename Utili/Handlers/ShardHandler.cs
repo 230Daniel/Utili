@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Timers;
@@ -12,8 +13,8 @@ namespace Utili.Handlers
 {
     internal static class ShardHandler
     {
-        private static List<int> _readyShardIds = new List<int>();
-
+        public static List<(int, DateTime)> ReadyShardIds = new List<(int, DateTime)>();
+        
         public static async Task ShardReady(DiscordSocketClient shard)
         {
             _ = Task.Run(async () =>
@@ -24,13 +25,13 @@ namespace Utili.Handlers
 
                 await Task.Delay(1000);
                 while (shard.ConnectionState != ConnectionState.Connected) await Task.Delay(25);
-
-                _readyShardIds.RemoveAll(x => x == shard.ShardId);
+                
+                ReadyShardIds.RemoveAll(x => x.Item1 == shard.ShardId);
                 if (_client.Shards.All(x => x.ConnectionState == ConnectionState.Connected)) _ = AllShardsReady();
 
                 await DownloadRequiredUsersAsync(shard);
                 await shard.SetGameAsync($"{_config.Domain} | {_config.DefaultPrefix}help");
-                _readyShardIds.Add(shard.ShardId);
+                ReadyShardIds.Add((shard.ShardId, DateTime.Now));
             });
         }
 
@@ -100,8 +101,8 @@ namespace Utili.Handlers
             {
                 await SendInfoAsync(guild.DefaultChannel, "Hi, thanks for adding me!", 
                     $"Head to the [dashboard](https://{_config.Domain}/dashboard/{guild.Id}/core) to set up the features you want to use.\n" +
-                    $"If you require assistance, you can join the [Discord server](https://discord.gg/WsxqABZ) and we'll be happy to help you out.\n" +
-                    $"Have fun!");
+                    "If you require assistance, you can join the [Discord server](https://discord.gg/WsxqABZ) and we'll be happy to help you out.\n" +
+                    "Have fun!");
             });
         }
 

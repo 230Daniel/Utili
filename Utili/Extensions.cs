@@ -18,5 +18,17 @@ namespace Utili
 
             return formatted;
         }
+
+        public static string ToShortString (this TimeSpan span)
+        {
+            string formatted =
+                $"{(span.Duration().Days > 0 ? $"{span.Days:00}:" : string.Empty)}{span.Hours:00}:{span.Minutes:00}:{span.Seconds:00}";
+
+            if (formatted.EndsWith(", ")) formatted = formatted.Substring(0, formatted.Length - 2);
+
+            if (string.IsNullOrEmpty(formatted)) formatted = "00:00:00";
+
+            return formatted;
+        }
     }
 }

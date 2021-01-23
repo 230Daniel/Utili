@@ -124,7 +124,7 @@ namespace UtiliSite
 
             if (formatted.EndsWith(", ")) formatted = formatted.Substring(0, formatted.Length - 2);
 
-            if (string.IsNullOrEmpty(formatted)) formatted = "0 seconds";
+            if (string.IsNullOrEmpty(formatted)) formatted = "00:00:00";
 
             return formatted;
         }
