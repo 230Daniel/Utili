@@ -41,7 +41,9 @@ namespace Database.Data
                         reader.GetString(3),
                         reader.GetBoolean(4),
                         reader.GetDateTime(5),
-                        reader.GetDateTime(6)));
+                        reader.GetDateTime(6),
+                        reader.GetBoolean(7),
+                        reader.GetString(8)));
                 }
 
                 reader.Close();
@@ -78,7 +80,9 @@ namespace Database.Data
                         reader.GetString(3),
                         reader.GetBoolean(4),
                         reader.GetDateTime(5),
-                        reader.GetDateTime(6)));
+                        reader.GetDateTime(6),
+                        reader.GetBoolean(7),
+                        reader.GetString(8)));
                 }
 
                 reader.Close();
@@ -98,14 +102,16 @@ namespace Database.Data
             if (row.New)
             {
                 await Sql.ExecuteAsync(
-                    "INSERT INTO InactiveRole (GuildId, RoleId, ImmuneRoleId, Threshold, Inverse, DefaultLastAction, LastUpdate) VALUES (@GuildId, @RoleId, @ImmuneRoleId, @Threshold, @Inverse, @DefaultLastAction, @LastUpdate);",
+                    "INSERT INTO InactiveRole (GuildId, RoleId, ImmuneRoleId, Threshold, Inverse, DefaultLastAction, LastUpdate, AutoKick, AutoKickThreshold) VALUES (@GuildId, @RoleId, @ImmuneRoleId, @Threshold, @Inverse, @DefaultLastAction, @LastUpdate, @AutoKick, @AutoKickThreshold);",
                     ("GuildId", row.GuildId), 
                     ("RoleId", row.RoleId),
                     ("ImmuneRoleId", row.ImmuneRoleId),
                     ("Threshold", row.Threshold),
                     ("Inverse", row.Inverse),
                     ("DefaultLastAction", row.DefaultLastAction),
-                    ("LastUpdate", DateTime.UtcNow - TimeSpan.FromMinutes(5)));
+                    ("LastUpdate", DateTime.UtcNow - TimeSpan.FromMinutes(5)),
+                    ("AutoKick", row.AutoKick),
+                    ("AutoKickThreshold", row.AutoKickThreshold));
 
                 row.New = false;
                 if(Cache.Initialised) Cache.InactiveRole.Add(row);
@@ -113,14 +119,16 @@ namespace Database.Data
             else
             {
                 await Sql.ExecuteAsync(
-                    "UPDATE InactiveRole SET RoleId = @RoleId, ImmuneRoleId = @ImmuneRoleId, Threshold = @Threshold, Inverse = @Inverse, DefaultLastAction = @DefaultLastAction, LastUpdate = @LastUpdate WHERE GuildId = @GuildId;",
+                    "UPDATE InactiveRole SET RoleId = @RoleId, ImmuneRoleId = @ImmuneRoleId, Threshold = @Threshold, Inverse = @Inverse, DefaultLastAction = @DefaultLastAction, LastUpdate = @LastUpdate, AutoKick = @AutoKick, AutoKickThreshold = @AutoKickThreshold WHERE GuildId = @GuildId;",
                     ("GuildId", row.GuildId), 
                     ("RoleId", row.RoleId),
                     ("ImmuneRoleId", row.ImmuneRoleId),
                     ("Threshold", row.Threshold),
                     ("Inverse", row.Inverse),
                     ("DefaultLastAction", row.DefaultLastAction),
-                    ("LastUpdate", row.LastUpdate));
+                    ("LastUpdate", DateTime.UtcNow - TimeSpan.FromMinutes(5)),
+                    ("AutoKick", row.AutoKick),
+                    ("AutoKickThreshold", row.AutoKickThreshold));
 
                 if(Cache.Initialised) Cache.InactiveRole[Cache.InactiveRole.FindIndex(x => x.GuildId == row.GuildId)] = row;
             }
@@ -130,7 +138,7 @@ namespace Database.Data
         {
             if (row.New)
             {
-                // Something has gone horifically wrong if a row doesn't exist for a server being updated
+                // Something has gone horrifically wrong if a row doesn't exist for a server being updated
                 await SaveRowAsync(row);
             }
             else
@@ -216,6 +224,8 @@ namespace Database.Data
         public bool Inverse { get; set; }
         public DateTime DefaultLastAction { get; set; }
         public DateTime LastUpdate { get; set; }
+        public bool AutoKick { get; set; }
+        public TimeSpan AutoKickThreshold { get; set; }
 
         private InactiveRoleRow()
         {
@@ -232,9 +242,11 @@ namespace Database.Data
             Inverse = false;
             DefaultLastAction = DateTime.MinValue;
             LastUpdate = DateTime.MinValue;
+            AutoKick = false;
+            AutoKickThreshold = TimeSpan.FromDays(30);
         }
 
-        public static InactiveRoleRow FromDatabase(ulong guildId, ulong roleId, ulong immuneRoleId, string threshold, bool inverse, DateTime defaultLastAction, DateTime lastUpdate)
+        public static InactiveRoleRow FromDatabase(ulong guildId, ulong roleId, ulong immuneRoleId, string threshold, bool inverse, DateTime defaultLastAction, DateTime lastUpdate, bool autoKick, string autoKickThreshold)
         {
             return new InactiveRoleRow
             {
@@ -245,7 +257,9 @@ namespace Database.Data
                 Threshold = TimeSpan.Parse(threshold),
                 Inverse = inverse,
                 DefaultLastAction = defaultLastAction,
-                LastUpdate = lastUpdate
+                LastUpdate = lastUpdate,
+                AutoKick = autoKick,
+                AutoKickThreshold = TimeSpan.Parse(autoKickThreshold)
             };
         }
 

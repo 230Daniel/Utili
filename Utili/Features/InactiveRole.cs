@@ -55,7 +55,7 @@ namespace Utili.Features
 
         private static async Task UpdateGuildsAsync()
         {
-            List<InactiveRoleRow> guildsRequiringUpdate = (await Database.Data.InactiveRole.GetUpdateRequiredRowsAsync()).Take(5).ToList();
+            List<InactiveRoleRow> guildsRequiringUpdate = (await Database.Data.InactiveRole.GetUpdateRequiredRowsAsync()).Where(x => _client.Guilds.Any(y => y.Id == x.GuildId)).Take(5).ToList();
 
             foreach (InactiveRoleRow row in guildsRequiringUpdate)
             {
@@ -84,6 +84,8 @@ namespace Utili.Features
                 return;
             }
 
+            bool premium = await Premium.IsGuildPremiumAsync(guild.Id);
+
             List<IGuildUser> users = (await guild.GetUsersAsync().FlattenAsync()).ToList();
             IGuildUser bot = users.First(x => x.Id == _client.CurrentUser.Id);
             List<InactiveRoleUserRow> userRows = await Database.Data.InactiveRole.GetUsersAsync(guild.Id);
@@ -104,9 +106,17 @@ namespace Utili.Features
                     lastAction = user.JoinedAt.Value.UtcDateTime;
 
                 DateTime minimumLastAction = DateTime.UtcNow - row.Threshold;
+                DateTime minimumKickLastAction = DateTime.UtcNow - (row.Threshold + row.AutoKickThreshold);
 
                 if (lastAction <= minimumLastAction && !user.RoleIds.Contains(row.ImmuneRoleId))
                 {
+                    if (premium && row.AutoKick && lastAction <= minimumKickLastAction)
+                    {
+                        await user.KickAsync();
+                        await Task.Delay(500);
+                        continue;
+                    }
+
                     if (!row.Inverse)
                     {
                         if (!user.RoleIds.Contains(inactiveRole.Id))

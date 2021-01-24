@@ -15,8 +15,6 @@ namespace Utili.Commands
         [Command("About"), Alias("Info")]
         public async Task About()
         {
-            DiscordSocketClient shard = GetShardForGuild(Context.Guild);
-
             string about = string.Concat(
                 "Created by 230Daniel#1920\n",
                 $"In {await Database.Sharding.GetGuildCountAsync()} servers\n\n",
@@ -95,7 +93,7 @@ namespace Utili.Commands
             embed.AddField("Database", $"Latency: {database}ms\nQueries: {databaseQueries}/s", true);
             embed.AddField("System", $"CPU: {cpu}%\nMem: {memory}%", true);
 
-            embed.WithFooter($"Uptime: {uptime.ToShortString()}");
+            embed.WithFooter($"Shard {shard.ShardId} uptime: {uptime.ToShortString()}");
             await SendEmbedAsync(Context.Channel, embed.Build());
         }
 

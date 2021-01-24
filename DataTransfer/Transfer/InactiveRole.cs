@@ -29,7 +29,7 @@ namespace DataTransfer.Transfer
                     TimeSpan timespan = TimeSpan.FromDays(30);
                     try { timespan = TimeSpan.Parse(V1Data.GetFirstData(guildId.ToString(), "InactiveRole-Timespan").Value); } catch { }
 
-                    InactiveRoleRow row = InactiveRoleRow.FromDatabase(guildId, roleId, immuneRoleId, timespan.ToString(), mode == "Take", DateTime.MinValue, DateTime.UtcNow);
+                    InactiveRoleRow row = InactiveRoleRow.FromDatabase(guildId, roleId, immuneRoleId, timespan.ToString(), mode == "Take", DateTime.MinValue, DateTime.UtcNow, false, TimeSpan.FromDays(30).ToString());
                     Program.RowsToSave.Add(row);
                 }
                 catch { }
