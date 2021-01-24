@@ -75,16 +75,32 @@ namespace Utili.Features
             SocketRole beforeRole = guild.EveryoneRole;
             SocketRole afterRole = guild.EveryoneRole;
 
-            if (request.Before.VoiceChannel != null && rows.Any(x => x.ChannelId == request.Before.VoiceChannel.Id))
+            if (request.Before.VoiceChannel != null)
             {
-                VoiceRolesRow row = rows.First(x => x.ChannelId == request.Before.VoiceChannel.Id);
-                beforeRole = guild.GetRole(row.RoleId);
+                if (rows.Any(x => x.ChannelId == request.Before.VoiceChannel.Id))
+                {
+                    VoiceRolesRow row = rows.First(x => x.ChannelId == request.Before.VoiceChannel.Id);
+                    beforeRole = guild.GetRole(row.RoleId);
+                }
+                else if (rows.Any(x => x.ChannelId == 0))
+                {
+                    VoiceRolesRow row = rows.First(x => x.ChannelId == 0);
+                    beforeRole = guild.GetRole(row.RoleId);
+                }
             }
 
-            if (request.After.VoiceChannel != null && rows.Any(x => x.ChannelId == request.After.VoiceChannel.Id))
+            if (request.After.VoiceChannel != null)
             {
-                VoiceRolesRow row = rows.First(x => x.ChannelId == request.After.VoiceChannel.Id);
-                afterRole = guild.GetRole(row.RoleId);
+                if (rows.Any(x => x.ChannelId == request.After.VoiceChannel.Id))
+                {
+                    VoiceRolesRow row = rows.First(x => x.ChannelId == request.After.VoiceChannel.Id);
+                    afterRole = guild.GetRole(row.RoleId);
+                }
+                else if (rows.Any(x => x.ChannelId == 0))
+                {
+                    VoiceRolesRow row = rows.First(x => x.ChannelId == 0);
+                    afterRole = guild.GetRole(row.RoleId);
+                }
             }
 
             if (beforeRole.Id == afterRole.Id)

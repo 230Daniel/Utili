@@ -20,7 +20,7 @@ namespace UtiliSite.Pages.Dashboard
             List<RestVoiceChannel> addedChannels = channels.Where(x => rows.Any(y => y.ChannelId == x.Id)).OrderBy(x => x.Position).ToList();
             List<RestVoiceChannel> nonAddedChannels = channels.Where(x => rows.All(y => y.ChannelId != x.Id)).OrderBy(x => x.Position).ToList();
 
-            rows = rows.Where(x => channels.Any(y => y.Id == x.ChannelId)).ToList();
+            rows = rows.Where(x => channels.Any(y => y.Id == x.ChannelId) || x.ChannelId == 0).ToList();
 
             ViewData["rows"] = rows;
             ViewData["addedChannels"] = addedChannels;
@@ -35,7 +35,7 @@ namespace UtiliSite.Pages.Dashboard
 
             if (!auth.Authenticated) return Forbid();
 
-                ulong channelId = ulong.Parse(HttpContext.Request.Form["channel"]);
+            ulong channelId = ulong.Parse(HttpContext.Request.Form["channel"]);
             ulong roleId = ulong.Parse(HttpContext.Request.Form["role"]);
 
             VoiceRolesRow row = await VoiceRoles.GetRowAsync(auth.Guild.Id, channelId);
