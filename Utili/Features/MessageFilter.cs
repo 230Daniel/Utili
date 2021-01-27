@@ -119,6 +119,8 @@ namespace Utili.Features
                 return true;
             }
 
+            if(context.Message.Embeds.Any(x => x.Image.HasValue)) return true;
+
             foreach (string word in context.Message.Content.Split(' ', '\n'))
             {
                 try
