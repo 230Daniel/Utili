@@ -120,6 +120,7 @@ namespace Utili
             _client.Log += ShardHandler.Log;
             _client.ShardReady += ShardHandler.ShardReady;
             _client.JoinedGuild += ShardHandler.JoinedGuild;
+            _client.LeftGuild += ShardHandler.LeftGuild;
 
             _client.MessageReceived += MessageHandler.MessageReceived;
             _client.MessageUpdated += MessageHandler.MessageEdited;

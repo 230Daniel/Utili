@@ -100,10 +100,27 @@ namespace Utili.Handlers
         {
             _ = Task.Run(async() =>
             {
-                await SendInfoAsync(guild.DefaultChannel, "Hi, thanks for adding me!", 
-                    $"Head to the [dashboard](https://{_config.Domain}/dashboard/{guild.Id}/core) to set up the features you want to use.\n" +
-                    "If you require assistance, you can join the [Discord server](https://discord.gg/WsxqABZ) and we'll be happy to help you out.\n\n" +
-                    "Have fun!");
+                await SendInfoAsync(guild.DefaultChannel, "Utili v2", 
+                    "Hi, thanks for adding me!\n" +
+                    $"Head to the [dashboard](https://{_config.Domain}/dashboard/{guild.Id}/core) to configure the bot.\n" +
+                    "If you need help or have any questions, you can join the [Discord server](https://discord.gg/WsxqABZ)");
+            });
+        }
+
+        public static async Task LeftGuild(SocketGuild guild)
+        {
+            _ = Task.Run(async() =>
+            {
+                DateTimeOffset? joinedAt = guild.GetUser(_client.CurrentUser.Id).JoinedAt;
+                if (joinedAt.HasValue)
+                {
+                    TimeSpan stay = DateTime.UtcNow - joinedAt.Value.UtcDateTime;
+                    _logger.Log("Left", $"Left {guild.Name} ({guild.Id}) - Stayed for {stay.ToLongString()}");
+                }
+                else
+                {
+                    _logger.Log("Left", $"Left {guild.Name} ({guild.Id}) - Stayed for unknown");
+                }
             });
         }
 
