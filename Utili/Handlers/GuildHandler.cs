@@ -18,6 +18,21 @@ namespace Utili.Handlers
             });
         }
 
+        public static async Task UserUpdated(SocketGuildUser before, SocketGuildUser after)
+        {
+            // Note to self: This method only works with cached before users!!!
+
+            _ = Task.Run(async () =>
+            {
+                if (before.IsPending.HasValue && after.IsPending.HasValue && before.IsPending.Value && !after.IsPending.Value)
+                {
+                    // Force bypass of all other delays, the user is no longer pending
+                    await JoinRoles.UserJoined(after, true);
+                }
+            });
+        }
+
+
         public static async Task UserLeft(SocketGuildUser user)
         {
             _ = Task.Run(async () =>

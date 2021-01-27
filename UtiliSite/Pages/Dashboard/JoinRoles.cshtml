@@ -1,5 +1,6 @@
 ﻿@page "{guild?}/roles"
 @using Discord.Rest
+@using Database.Data
 @model UtiliSite.Pages.Dashboard.JoinRolesModel
 @{
     Layout = "Shared/_Layout.cshtml";
@@ -9,9 +10,31 @@
     ViewData["subheading"] = "These roles are given to users when they join.";
     ViewData["detailed"] = "";
 
+    JoinRolesRow row = (JoinRolesRow) ViewData["row"];
     List<RestRole> joinRoles = (List<RestRole>)ViewData["joinRoles"];
     List<RestRole> nonjoinRoles = (List<RestRole>)ViewData["nonJoinRoles"];
 }
+
+<div>
+    <div class="card-container-3">
+        <form method="post">
+
+            <input type="text" class="form-control card-strong card-component-3 card-heading" value="Settings" readonly>
+
+            <div class="input-group flex-nowrap" @Html.Raw(ContentHelper.Tooltip("Wait for membership screening or for 10 minutes to pass if the verification level is set to High"))>
+                <span class="input-group-prepend input-group-text card-component-2">Wait for verification</span>
+                <div class="input-group-text card-component-1">
+                    <input type="checkbox" name="waitForVerification" class="form-control checkbox" @(row.WaitForVerification ? "checked" : "") )>
+                </div>
+            </div>
+
+            <div class="input-group flex-nowrap">
+                <span class="input-group-prepend input-group-text card-component-2 card-strong"></span>
+                <button type="submit" class="btn card-button card-component-1 card-strong">Save</button>
+            </div>
+        </form>
+    </div>
+</div>
 
 <div class="dropdown belowcards">
     <button class="btn btn-secondary dropdown-toggle dropdown-200" type="button" data-toggle="dropdown" id="dropdownAddChannel" aria-haspopup="true" aria-expanded="false">

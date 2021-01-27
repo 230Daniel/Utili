@@ -134,6 +134,7 @@ namespace Utili
 
             _client.UserVoiceStateUpdated += VoiceHandler.UserVoiceStateUpdated;
             _client.UserJoined += GuildHandler.UserJoined;
+            _client.GuildMemberUpdated += GuildHandler.UserUpdated;
             _client.UserLeft += GuildHandler.UserLeft;
 
             await _client.SetGameAsync("Starting up...");
@@ -148,6 +149,7 @@ namespace Utili
             VoiceRoles.Start();
             InactiveRole.Start();
             Notices.Start();
+            JoinRoles.Start();
 
             await Task.Delay(-1);
         }

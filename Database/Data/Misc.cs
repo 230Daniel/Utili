@@ -17,7 +17,7 @@ namespace Database.Data
 
                 if (guildId.HasValue) matchedRows.RemoveAll(x => x.GuildId != guildId.Value);
                 if (type != null) matchedRows.RemoveAll(x => x.Type != type);
-                if (value != null) matchedRows.RemoveAll(x => x.Value.Value != value);
+                if (value != null) matchedRows.RemoveAll(x => x.Value != value);
             }
             else
             {
@@ -71,17 +71,17 @@ namespace Database.Data
                 await Sql.ExecuteAsync("INSERT INTO Misc (GuildId, Type, Value) VALUES (@GuildId, @Type, @Value);",
                     ("GuildId", row.GuildId),
                     ("Type", row.Type),
-                    ("Value", row.Value.EncodedValue));
+                    ("Value", row.Value));
 
                 row.New = false;
                 if(Cache.Initialised) Cache.Misc.Add(row);
             }
             else
             {
-                await Sql.ExecuteAsync("UPDATE Misc SET Value = @Value WHERE GuildId = @GuildId AND Type = @Type;",
+                await Sql.ExecuteAsync("UPDATE Misc SET Type = @Type, Value = @Value WHERE GuildId = @GuildId AND Type = @Type AND Value = @Value;",
                     ("GuildId", row.GuildId),
                     ("Type", row.Type),
-                    ("Value", row.Value.EncodedValue));
+                    ("Value", row.Value));
 
                 if(Cache.Initialised) Cache.Misc[Cache.Misc.FindIndex(x => x.GuildId == row.GuildId && x.Type == row.Type)] = row;
             }
@@ -89,20 +89,21 @@ namespace Database.Data
 
         public static async Task DeleteRowAsync(MiscRow row)
         {
-            if(Cache.Initialised) Cache.Misc.RemoveAll(x => x.GuildId == row.GuildId && x.Type == row.Type);
+            if(Cache.Initialised) Cache.Misc.RemoveAll(x => x.GuildId == row.GuildId && x.Type == row.Type && x.Value == row.Value);
 
             await Sql.ExecuteAsync(
-                "DELETE FROM Misc WHERE GuildId = @GuildId AND Type = @Type",
+                "DELETE FROM Misc WHERE GuildId = @GuildId AND Type = @Type AND Value = @Value",
                 ("GuildId", row.GuildId),
                 ("Type", row.Type));
         }
     }
+
     public class MiscRow : IRow
     {
         public bool New { get; set; }
         public ulong GuildId { get; set; }
         public string Type { get; set; }
-        public EString Value { get; set; }
+        public string Value { get; set; }
 
         private MiscRow()
         {
@@ -114,7 +115,7 @@ namespace Database.Data
             New = true;
             GuildId = guildId;
             Type = type;
-            Value = EString.FromDecoded(value);
+            Value = value;
         }
 
         public static MiscRow FromDatabase(ulong guildId, string type, string value)
@@ -124,7 +125,7 @@ namespace Database.Data
                 New = false,
                 GuildId = guildId,
                 Type = type,
-                Value = EString.FromEncoded(value)
+                Value = value
             };
         }
 

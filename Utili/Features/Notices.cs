@@ -58,7 +58,7 @@ namespace Utili.Features
                 foreach (MiscRow miscRow in fromDashboard)
                 {
                     await Misc.DeleteRowAsync(miscRow);
-                    NoticesRow row = await Database.Data.Notices.GetRowAsync(miscRow.GuildId, ulong.Parse(miscRow.Value.Value));
+                    NoticesRow row = await Database.Data.Notices.GetRowAsync(miscRow.GuildId, ulong.Parse(miscRow.Value));
                     lock (_requiredUpdates)
                     {
                         if (_requiredUpdates.Any(x => x.Item1.ChannelId == row.ChannelId))

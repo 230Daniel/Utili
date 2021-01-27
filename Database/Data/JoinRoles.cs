@@ -34,7 +34,8 @@ namespace Database.Data
                 {
                     matchedRows.Add(JoinRolesRow.FromDatabase(
                         reader.GetUInt64(0),
-                        reader.GetString(1)));
+                        reader.GetBoolean(1),
+                        reader.GetString(2)));
                 }
 
                 reader.Close();
@@ -54,8 +55,9 @@ namespace Database.Data
             if (row.New)
             {
                 await Sql.ExecuteAsync(
-                    "INSERT INTO JoinRoles (GuildId, JoinRoles) VALUES (@GuildId, @JoinRoles);",
+                    "INSERT INTO JoinRoles (GuildId, WaitForVerification, JoinRoles) VALUES (@GuildId, @WaitForVerification, @JoinRoles);",
                     ("GuildId", row.GuildId),
+                    ("WaitForVerification", row.WaitForVerification),
                     ("JoinRoles", row.GetJoinRolesString()));
 
                 row.New = false;
@@ -64,8 +66,9 @@ namespace Database.Data
             else
             {
                 await Sql.ExecuteAsync(
-                    "UPDATE JoinRoles SET JoinRoles = @JoinRoles WHERE GuildId = @GuildId;",
+                    "UPDATE JoinRoles SET WaitForVerification = @WaitForVerification, JoinRoles = @JoinRoles WHERE GuildId = @GuildId;",
                     ("GuildId", row.GuildId),
+                    ("WaitForVerification", row.WaitForVerification),
                     ("JoinRoles", row.GetJoinRolesString()));
 
                 if(Cache.Initialised) Cache.JoinRoles[Cache.JoinRoles.FindIndex(x => x.GuildId == row.GuildId)] = row;
@@ -86,6 +89,7 @@ namespace Database.Data
     {
         public bool New { get; set; }
         public ulong GuildId { get; set; }
+        public bool WaitForVerification { get; set; }
         public List<ulong> JoinRoles { get; set; }
 
         private JoinRolesRow()
@@ -97,14 +101,16 @@ namespace Database.Data
         {
             New = true;
             GuildId = guildId;
+            WaitForVerification = false;
             JoinRoles = new List<ulong>();
         }
 
-        public static JoinRolesRow FromDatabase(ulong guildId, string joinRoles)
+        public static JoinRolesRow FromDatabase(ulong guildId, bool waitForVerification, string joinRoles)
         {
             JoinRolesRow row = new JoinRolesRow
             {
                 New = false,
+                WaitForVerification = waitForVerification,
                 GuildId = guildId,
                 JoinRoles = new List<ulong>()
             };

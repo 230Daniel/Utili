@@ -25,10 +25,21 @@ namespace UtiliSite.Pages.Dashboard
             return Page();
         }
 
+        public async Task<ActionResult> OnPost()
+        {
+            AuthDetails auth = await Auth.GetAuthDetailsAsync(this);
+            if (!auth.Authenticated) return Forbid();
+
+            JoinRolesRow row = await JoinRoles.GetRowAsync(auth.Guild.Id);
+            row.WaitForVerification = HttpContext.Request.Form["waitForVerification"] == "on";
+            await JoinRoles.SaveRowAsync(row);
+
+            return new OkResult();
+        }
+
         public async Task<ActionResult> OnPostAddJoinRole()
         {
             AuthDetails auth = await Auth.GetAuthDetailsAsync(this);
-
             if (!auth.Authenticated) return Forbid();
 
             ulong roleId = ulong.Parse(HttpContext.Request.Form["role"]);
@@ -44,7 +55,6 @@ namespace UtiliSite.Pages.Dashboard
         public async Task<ActionResult> OnPostRemoveJoinRole()
         {
             AuthDetails auth = await Auth.GetAuthDetailsAsync(this);
-
             if (!auth.Authenticated) return Forbid();
 
             ulong roleId = ulong.Parse(HttpContext.Request.Form["role"]);
