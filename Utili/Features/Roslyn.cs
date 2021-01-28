@@ -15,9 +15,10 @@ namespace Utili.Features
 {
     internal static class Roslyn
     {
-        public static async Task<RoslynResult> EvaluateAsync(string code, RoslynGlobals globals = null)
+        public static async Task<RoslynResult> EvaluateAsync(string code, RoslynGlobals globals)
         {
             ScriptOptions options = ScriptOptions.Default;
+
             options = options.WithImports(
                 "System",
                 "System.Collections.Generic",
@@ -38,10 +39,12 @@ namespace Utili.Features
             try
             {
                 object result = await CSharpScript.EvaluateAsync(code, options, globals);
+                GC.Collect();
                 return new RoslynResult(result);
             }
             catch(Exception e)
             {
+                GC.Collect();
                 return new RoslynResult(e);
             }
         }
