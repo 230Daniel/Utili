@@ -44,22 +44,18 @@ namespace Utili.Handlers
                     if (!excluded && (context.Message.HasStringPrefix(row.Prefix.Value, ref argPos) ||
                         context.Message.HasMentionPrefix(_client.CurrentUser, ref argPos)))
                     {
+                        bool logCommand = _config.LogCommands;
                         IResult result = await _commands.ExecuteAsync(context, argPos, null);
-
-                        if (_config.LogCommands)
-                        {
-                            _logger.Log("Command", $"{context.User.Username}: {context.Message.Content}");
-                        }
 
                         if (!result.IsSuccess)
                         {
                             string errorReason = GetCommandErrorReason(result);
 
-                            if (!string.IsNullOrEmpty(errorReason))
-                            {
-                                await SendFailureAsync(context.Channel, "Error", errorReason);
-                            }
+                            if (!string.IsNullOrEmpty(errorReason)) await SendFailureAsync(context.Channel, "Error", errorReason);
+                            else logCommand = false;
                         }
+
+                        if (logCommand) _logger.Log("Command", context.Message.Content);
                     }
                 }
 
