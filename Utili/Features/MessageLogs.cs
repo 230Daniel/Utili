@@ -45,7 +45,7 @@ namespace Utili.Features
             if ((row.DeletedChannelId == 0 && row.EditedChannelId == 0) || row.ExcludedChannels.Contains(context.Channel.Id)) return;
 
             MessageLogsMessageRow message = await Database.Data.MessageLogs.GetMessageAsync(context.Guild.Id, context.Channel.Id, context.Message.Id);
-            if (message == null) return;
+            if (message == null || message.Content.Value == context.Message.Content) return;
             Embed embed = await GetEditedEmbedAsync(message, context);
 
             message.Content = EString.FromDecoded(context.Message.Content);
