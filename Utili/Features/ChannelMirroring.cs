@@ -44,8 +44,12 @@ namespace Utili.Features
             string avatarUrl = context.User.GetAvatarUrl();
             if (string.IsNullOrEmpty(avatarUrl)) avatarUrl = context.User.GetDefaultAvatarUrl();
 
+            AllowedMentions allowedMentions = new AllowedMentions(AllowedMentionTypes.None);
             DiscordWebhookClient webhookClient = new DiscordWebhookClient(webhook);
-            if(!(string.IsNullOrEmpty(context.Message.Content) && context.Message.Embeds.Count == 0)) await webhookClient.SendMessageAsync(context.Message.Content, false, context.Message.Embeds, username, avatarUrl);
+            if (!(string.IsNullOrEmpty(context.Message.Content) && context.Message.Embeds.Count == 0))
+            {
+                await webhookClient.SendMessageAsync(context.Message.Content, false, context.Message.Embeds, username, avatarUrl, allowedMentions: allowedMentions);
+            }
 
             foreach (Attachment attachment in context.Message.Attachments)
             {

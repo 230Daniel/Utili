@@ -76,8 +76,12 @@ namespace Utili.Features
                 string avatarUrl = message.Author.GetAvatarUrl();
                 if (string.IsNullOrEmpty(avatarUrl)) avatarUrl = message.Author.GetDefaultAvatarUrl();
 
+                AllowedMentions allowedMentions = new AllowedMentions(AllowedMentionTypes.None);
                 DiscordWebhookClient webhookClient = new DiscordWebhookClient(webhook);
-                if(!(string.IsNullOrEmpty(message.Content) && message.Embeds.Count == 0)) await webhookClient.SendMessageAsync(message.Content, false, message.Embeds.Select(x => x as Embed), username, avatarUrl);
+                if (!(string.IsNullOrEmpty(message.Content) && message.Embeds.Count == 0))
+                {
+                    await webhookClient.SendMessageAsync(message.Content, false, message.Embeds.Select(x => x as Embed), username, avatarUrl, allowedMentions: allowedMentions);
+                }
 
                 foreach (IAttachment attachment in message.Attachments)
                 {
