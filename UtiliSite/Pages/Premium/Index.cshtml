@@ -2,10 +2,7 @@
 @model UtiliSite.Pages.Premium.IndexModel
 @{
     Layout = "Shared/_Layout.cshtml";
-    if (ViewData["subscriptions"] == null)
-    {
-        return;
-    }
+    if (ViewData["subscriptions"] is null) { return; }
     int subscriptions = (int)ViewData["subscriptions"];
     int slots = (int)ViewData["slots"];
 

@@ -45,14 +45,14 @@ namespace Utili.Features
             if ((row.DeletedChannelId == 0 && row.EditedChannelId == 0) || row.ExcludedChannels.Contains(context.Channel.Id)) return;
 
             MessageLogsMessageRow message = await Database.Data.MessageLogs.GetMessageAsync(context.Guild.Id, context.Channel.Id, context.Message.Id);
-            if (message == null || message.Content.Value == context.Message.Content) return;
+            if (message is null || message.Content.Value == context.Message.Content) return;
             Embed embed = await GetEditedEmbedAsync(message, context);
 
             message.Content = EString.FromDecoded(context.Message.Content);
             await Database.Data.MessageLogs.SaveMessageAsync(message);
 
             SocketTextChannel channel = context.Guild.GetTextChannel(row.EditedChannelId);
-            if(channel == null) return;
+            if(channel is null) return;
             await SendEmbedAsync(channel, embed);
         }
 
@@ -62,13 +62,13 @@ namespace Utili.Features
             if ((row.DeletedChannelId == 0 && row.EditedChannelId == 0) || row.ExcludedChannels.Contains(channel.Id)) return;
 
             MessageLogsMessageRow message = await Database.Data.MessageLogs.GetMessageAsync(guild.Id, channel.Id, messageId);
-            if(message == null) return;
+            if(message is null) return;
             Embed embed = await GetDeletedEmbedAsync(channel, message);
 
             await Database.Data.MessageLogs.DeleteMessagesAsync(guild.Id, channel.Id, new[] { messageId });
 
             SocketTextChannel logChannel = guild.GetTextChannel(row.DeletedChannelId);
-            if(logChannel == null) return;
+            if(logChannel is null) return;
             await SendEmbedAsync(logChannel, embed);
         }
 
@@ -85,7 +85,7 @@ namespace Utili.Features
             await Database.Data.MessageLogs.DeleteMessagesAsync(guild.Id, channel.Id, messageIds.ToArray());
 
             SocketTextChannel logChannel = guild.GetTextChannel(row.DeletedChannelId);
-            if(logChannel == null) return;
+            if(logChannel is null) return;
             await SendEmbedAsync(logChannel, embed);
         }
 
@@ -138,7 +138,7 @@ namespace Utili.Features
             RestUser user = await _rest.GetUserAsync(message.UserId);
             string userMention = message.UserId.ToString();
 
-            if (user != null)
+            if (user is not null)
             {
                 userMention = user.Mention;
 
@@ -213,7 +213,7 @@ namespace Utili.Features
                     cachedUsers.Add(user);
                 }
 
-                if (user == null) sb.AppendLine($"{user.Id}");
+                if (user is null) sb.AppendLine($"{user.Id}");
                 else sb.AppendLine($"{user} ({user.Id})");
                 sb.AppendLine($" at {Helper.ToUniversalDateTime(message.Timestamp)} UTC");
 

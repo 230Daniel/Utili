@@ -38,17 +38,12 @@ namespace Utili
 
         public static bool RequiresUpdate(SocketVoiceState before, SocketVoiceState after)
         {
-            if (before.VoiceChannel == null && after.VoiceChannel == null)
+            if (before.VoiceChannel is null && after.VoiceChannel is null)
             {
                 return false;
             }
 
-            if (before.VoiceChannel == null && after.VoiceChannel != null)
-            {
-                return true;
-            }
-
-            if (after.VoiceChannel == null && before.VoiceChannel != null)
+            if (before.VoiceChannel is null || after.VoiceChannel is null)
             {
                 return true;
             }

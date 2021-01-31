@@ -54,7 +54,7 @@ namespace Utili.Commands
                                 i++;
                                 ulong messageId = ulong.Parse(args[i]);
                                 beforeMessage = await Context.Channel.GetMessageAsync(messageId);
-                                if (beforeMessage == null) throw new Exception();
+                                if (beforeMessage is null) throw new Exception();
                                 break;
                             }
                             catch
@@ -69,7 +69,7 @@ namespace Utili.Commands
                                 i++;
                                 ulong messageId = ulong.Parse(args[i]);
                                 afterMessage = await Context.Channel.GetMessageAsync(messageId);
-                                if (afterMessage == null) throw new Exception();
+                                if (afterMessage is null) throw new Exception();
                                 break;
                             }
                             catch
@@ -85,7 +85,7 @@ namespace Utili.Commands
                 }
             }
 
-            if(afterMessage != null && beforeMessage != null && afterMessage.Timestamp >= beforeMessage.Timestamp)
+            if(afterMessage is not null && beforeMessage is not null && afterMessage.Timestamp >= beforeMessage.Timestamp)
             {
                 await SendFailureAsync(channel, "Error", "There are no messages between the after and before messages");
                 return;
@@ -113,12 +113,12 @@ namespace Utili.Commands
             await delay;
 
             List<IMessage> messages;
-            if(afterMessage != null) messages = (await channel.GetMessagesAsync(afterMessage.Id, Direction.After, (int)count).FlattenAsync()).ToList();
-            else if (beforeMessage != null) messages = (await channel.GetMessagesAsync(beforeMessage, Direction.Before, (int)count).FlattenAsync()).ToList();
+            if(afterMessage is not null) messages = (await channel.GetMessagesAsync(afterMessage.Id, Direction.After, (int)count).FlattenAsync()).ToList();
+            else if (beforeMessage is not null) messages = (await channel.GetMessagesAsync(beforeMessage, Direction.Before, (int)count).FlattenAsync()).ToList();
             else messages = (await channel.GetMessagesAsync((int)count).FlattenAsync()).ToList();
 
             messages = messages.OrderBy(x => x.Timestamp.UtcDateTime).ToList();
-            if (beforeMessage != null)
+            if (beforeMessage is not null)
             {
                 if (messages.Any(x => x.Id == beforeMessage.Id))
                 {
@@ -150,7 +150,7 @@ namespace Utili.Commands
         {
             IMessage message = await Context.Channel.GetMessageAsync(messageId);
 
-            if (message == null)
+            if (message is null)
             {
                 await SendFailureAsync(Context.Channel, "Error",
                     $"No message was found in <#{Context.Channel.Id}> with ID {messageId}\n[How do I get a message ID?](https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID-)");
@@ -178,7 +178,7 @@ namespace Utili.Commands
         {
             IMessage message = await channel.GetMessageAsync(messageId);
 
-            if (message == null)
+            if (message is null)
             {
                 await SendFailureAsync(Context.Channel, "Error",
                     $"No message was found in <#{channel.Id}> with ID {messageId}\n[How do I get a message ID?](https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID-)");
@@ -221,11 +221,11 @@ namespace Utili.Commands
             }
             else
             {
-                if (channel == null) channel = Context.Channel as ITextChannel;
+                channel ??= Context.Channel as ITextChannel;
 
                 IMessage message = await channel.GetMessageAsync(messageId);
 
-                if (message == null)
+                if (message is null)
                 {
                     await SendFailureAsync(Context.Channel, "Error",
                         $"No message was found in <#{channel.Id}> with ID {messageId}\n[How do I get a message ID?](https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID-)");

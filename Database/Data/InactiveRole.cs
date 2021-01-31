@@ -163,7 +163,7 @@ namespace Database.Data
 
         public static async Task UpdateUserAsync(ulong guildId, ulong userId, DateTime? lastAction = null)
         {
-            if (lastAction == null) lastAction = DateTime.UtcNow;
+            lastAction ??= DateTime.UtcNow;
 
             int affected = await Sql.ExecuteAsync(
                 "UPDATE InactiveRoleUsers SET LastAction = @LastAction WHERE GuildId = @GuildId AND UserId = @UserId",

@@ -176,7 +176,7 @@ namespace Utili.Features
         [Command("Preview"), Alias("Send")]
         public async Task Preview(ITextChannel channel = null)
         {
-            if (channel == null) channel = Context.Channel as ITextChannel;
+            channel ??= Context.Channel as ITextChannel;
 
             NoticesRow row = await Database.Data.Notices.GetRowAsync(Context.Guild.Id, channel.Id);
             (string, Embed) notice = Notices.GetNotice(row);

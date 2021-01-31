@@ -75,7 +75,7 @@ namespace Utili
                 errorReport.WriteLine($"Error report for error at time: {DateTime.Now}\n");
 
                 int errorNumber = 0;
-                while (exception != null)
+                while (exception is not null)
                 {
                     errorReport.WriteLine($"Error {errorNumber}:\n{exception.Message}\n{exception.StackTrace}\n");
                     exception = exception.InnerException;

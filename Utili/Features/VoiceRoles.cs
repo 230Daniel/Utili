@@ -75,7 +75,7 @@ namespace Utili.Features
             SocketRole beforeRole = guild.EveryoneRole;
             SocketRole afterRole = guild.EveryoneRole;
 
-            if (request.Before.VoiceChannel != null)
+            if (request.Before.VoiceChannel is not null)
             {
                 if (rows.Any(x => x.ChannelId == request.Before.VoiceChannel.Id))
                 {
@@ -89,7 +89,7 @@ namespace Utili.Features
                 }
             }
 
-            if (request.After.VoiceChannel != null)
+            if (request.After.VoiceChannel is not null)
             {
                 if (rows.Any(x => x.ChannelId == request.After.VoiceChannel.Id))
                 {

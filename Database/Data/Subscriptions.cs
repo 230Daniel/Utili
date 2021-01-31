@@ -95,7 +95,7 @@ namespace Database.Data
 
         public static async Task DeleteRowAsync(SubscriptionsRow row)
         {
-            if(row == null) return;
+            if(row is null) return;
 
             await Sql.ExecuteAsync(
                 "DELETE FROM Subscriptions WHERE SubscriptionId = @SubscriptionId;",

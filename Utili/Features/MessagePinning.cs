@@ -20,7 +20,7 @@ namespace Utili.Features
             IUserMessage message = null;
             try { message = await channel.GetMessageAsync(messageId) as IUserMessage; } catch { }
 
-            if (message == null)
+            if (message is null)
             {
                 await SendFailureAsync(Context.Channel, "Error",
                     $"No message was found in <#{Context.Channel.Id}> with ID {messageId}\n[How do I get a message ID?](https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID-)");
@@ -31,17 +31,14 @@ namespace Utili.Features
 
             if(row.Pin) try { await message.PinAsync(); } catch { }
 
-            if (pinChannel == null)
-            {
-                try { pinChannel = Context.Guild.GetTextChannel(row.PinChannelId); } catch { }
-            }
+            try { pinChannel ??= Context.Guild.GetTextChannel(row.PinChannelId); } catch { }
 
-            if (pinChannel == null && row.Pin)
+            if (pinChannel is null && row.Pin)
             {
                 await SendSuccessAsync(Context.Channel, "Message pinned",
                     "Set a pin channel on the dashboard or specify one in the command if you want the message to be copied to another channel as well.");
             }
-            else if (pinChannel == null && !row.Pin)
+            else if (pinChannel is null && !row.Pin)
             {
                 await SendFailureAsync(Context.Channel, "Error",
                     "Pinning is not enabled on this server.");
@@ -58,7 +55,7 @@ namespace Utili.Features
                 RestWebhook webhook = null;
                 try { webhook = await pinChannel.GetWebhookAsync(row.WebhookIds.First(x => x.Item1 == pinChannel.Id).Item2); } catch { }
 
-                if (webhook == null)
+                if (webhook is null)
                 {
                     FileStream avatar = File.OpenRead("Avatar.png");
                     webhook = await pinChannel.CreateWebhookAsync("Utili Message Pinning", avatar);

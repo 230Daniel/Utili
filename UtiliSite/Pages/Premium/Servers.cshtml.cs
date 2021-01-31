@@ -30,7 +30,7 @@ namespace UtiliSite.Pages.Premium
             ulong guildId = ulong.Parse(HttpContext.Request.Form["guild"]);
 
             PremiumRow row = await Database.Data.Premium.GetUserRowAsync(auth.User.Id, slotId);
-            if (row == null) return Forbid();
+            if (row is null) return Forbid();
 
             row.GuildId = guildId;
             await Database.Data.Premium.SaveRowAsync(row);

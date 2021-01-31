@@ -45,7 +45,7 @@ namespace Utili.Commands
 
             CooldownItem cooldownItem = GetCooldown(context.Guild.Id, context.User.Id, command);
 
-            if (cooldownItem != null)
+            if (cooldownItem is not null)
             {
                 double retrySeconds = Math.Round((cooldownItem.ExpiryTime - DateTime.Now).TotalSeconds, 1);
 

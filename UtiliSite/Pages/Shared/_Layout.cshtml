@@ -44,7 +44,7 @@
                 @if (SidebarHelper.GetIsActive(ViewContext, "error") != "active")
                 {
                     <div class="navbar-nav flex-grow-1" style="justify-content: flex-end;">
-                        @if (auth?.User != null)
+                        @if (auth?.User is not null)
                         {
                             <div class="dropdown noverticalpadding">
                                 <a class="nav-link text-dark dropdown-toggle noverticalpadding" style="align-items: center; display: flex;" data-toggle="dropdown" role="button" id="userDropdown" aria-haspopup="true" aria-expanded="false" href="#">

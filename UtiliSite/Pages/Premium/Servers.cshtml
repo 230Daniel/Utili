@@ -7,12 +7,9 @@
     Layout = "Shared/_Layout.cshtml";
     ViewData["Title"] = "Servers - Utili Premium";
 
-    if (ViewData["auth"] == null)
-    {
-        return;
-    }
+    if (ViewData["auth"] is null) { return; }
 
-    int subscriptions = (int)ViewData["subscriptions"];
+        int subscriptions = (int)ViewData["subscriptions"];
     List<PremiumRow> rows = (List<PremiumRow>)ViewData["rows"];
     int slot = 0;
 }

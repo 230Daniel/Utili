@@ -50,7 +50,7 @@ namespace Utili.Features
         [Command("")]
         public async Task Reputation(IUser user = null)
         {
-            if (user == null) user = Context.User;
+            user ??= Context.User;
 
             ReputationUserRow row = await Database.Data.Reputation.GetUserRowAsync(Context.Guild.Id, user.Id);
 

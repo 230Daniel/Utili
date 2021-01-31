@@ -23,14 +23,14 @@ namespace Utili.Features
             ChannelMirroringRow row = rows.First();
 
             SocketTextChannel channel = context.Guild.GetTextChannel(row.ToChannelId);
-            if(channel == null) return;
+            if(channel is null) return;
 
             if (BotPermissions.IsMissingPermissions(channel, new[] {ChannelPermission.ManageWebhooks}, out _)) return;
 
             RestWebhook webhook = null;
             try { webhook = await GetWebhookAsync(channel, row.WebhookId); } catch { }
 
-            if (webhook == null)
+            if (webhook is null)
             {
                 FileStream avatar = File.OpenRead("Avatar.png");
                 webhook = await channel.CreateWebhookAsync("Utili Mirroring", avatar);

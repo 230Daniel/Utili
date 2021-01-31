@@ -41,7 +41,7 @@ namespace UtiliSite
             string token = httpContext.GetTokenAsync("Discord", "access_token").GetAwaiter().GetResult();
             DiscordRestClient client = await GetClientAsync(userId, token);
 
-            if (client == null)
+            if (client is null)
             {
                 return new AuthDetails(new ChallengeResult("Discord", authProperties));
             }
@@ -55,7 +55,7 @@ namespace UtiliSite
                 {
                     RestGuild guild = await GetGuildAsync(guildId);
 
-                    if (guild == null && (await GetManageableGuildsAsync(client)).Any(x => x.Id == guildId))
+                    if (guild is null && (await GetManageableGuildsAsync(client)).Any(x => x.Id == guildId))
                     {
                         string inviteUrl = "https://discord.com/api/oauth2/authorize?permissions=8&scope=bot&response_type=code" +
                                            $"&client_id={Main.Config.DiscordClientId}" +
@@ -68,7 +68,7 @@ namespace UtiliSite
                         return new AuthDetails(new RedirectResult(inviteUrl));
                     }
 
-                    if (guild != null && (await IsGuildManageableAsync(client.CurrentUser.Id, guildId) || client.CurrentUser.Id == 218613903653863427))
+                    if (guild is not null && (await IsGuildManageableAsync(client.CurrentUser.Id, guildId) || client.CurrentUser.Id == 218613903653863427))
                     {
                         auth.Guild = guild;
                         viewData["guild"] = guild;
@@ -110,7 +110,7 @@ namespace UtiliSite
             string token = httpContext.GetTokenAsync("Discord", "access_token").GetAwaiter().GetResult();
             DiscordRestClient client = await GetClientAsync(userId, token);
 
-            AuthDetails auth = client == null ? new AuthDetails(null) : new AuthDetails(client, client.CurrentUser);
+            AuthDetails auth = client is null ? new AuthDetails(null) : new AuthDetails(client, client.CurrentUser);
             viewData["auth"] = auth;
             viewData["user"] = auth.User;
             return auth;

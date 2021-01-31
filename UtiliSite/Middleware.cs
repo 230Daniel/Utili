@@ -32,7 +32,7 @@ namespace UtiliSite
                 StreamWriter errorReport = File.CreateText(errorReportFilename);
                 await errorReport.WriteLineAsync($"Error report for error at time: {DateTime.Now}\n");
                 int errorNumber = 0;
-                while (exception != null)
+                while (exception is not null)
                 {
                     await errorReport.WriteLineAsync($"Error {errorNumber}:\n{exception.Message}\n{exception.StackTrace}\n");
                     exception = exception.InnerException;

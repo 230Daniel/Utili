@@ -49,8 +49,8 @@ namespace Utili.Commands
             }
             catch
             {
-                if(guild == null) await SendFailureAsync(Context.Channel, "Error", "I'm not in that server", supportLink: false);
-                else if(user == null) await SendFailureAsync(Context.Channel, "Not authorised", $"The user is not a member of {guild}", supportLink: false);
+                if(guild is null) await SendFailureAsync(Context.Channel, "Error", "I'm not in that server", supportLink: false);
+                else if(user is null) await SendFailureAsync(Context.Channel, "Not authorised", $"The user is not a member of {guild}", supportLink: false);
                 return;
             }
 

@@ -1,7 +1,7 @@
 ﻿@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor;
 @{
     AuthDetails auth = (AuthDetails) ViewData["auth"];
-    if (auth == null || !auth.Authenticated)
+    if (auth is null || !auth.Authenticated)
     {
         IgnoreBody();
         return;
@@ -65,7 +65,7 @@
                 @if (SidebarHelper.GetIsActive(ViewContext, "error") != "active")
                 {
                     <div class="navbar-nav flex-grow-1" style="justify-content: flex-end;">
-                        @if (ViewData["showCurrency"] != null && (bool) ViewData["showCurrency"])
+                        @if (ViewData["showCurrency"] is not null && (bool) ViewData["showCurrency"])
                         {
                             string currency = (string) ViewData["currency"];
                             bool forceCurrency = (bool) ViewData["forceCurrency"];

@@ -16,8 +16,8 @@ namespace Database.Data
                 matchedRows.AddRange(Cache.Misc);
 
                 if (guildId.HasValue) matchedRows.RemoveAll(x => x.GuildId != guildId.Value);
-                if (type != null) matchedRows.RemoveAll(x => x.Type != type);
-                if (value != null) matchedRows.RemoveAll(x => x.Value != value);
+                if (type is not null) matchedRows.RemoveAll(x => x.Type != type);
+                if (value is not null) matchedRows.RemoveAll(x => x.Value != value);
             }
             else
             {
@@ -30,13 +30,13 @@ namespace Database.Data
                     values.Add(("GuildId", guildId.Value));
                 }
 
-                if (type != null)
+                if (type is not null)
                 {
                     command += " AND Type = @Type";
                     values.Add(("Type", type));
                 }
 
-                if (value != null)
+                if (value is not null)
                 {
                     command += " AND Value = @Value";
                     values.Add(("Value", EString.FromDecoded(value).EncodedValue));

@@ -85,7 +85,7 @@ namespace Utili
                 embed.WithFooter(footer);
             }
 
-            if (fields != null)
+            if (fields is not null)
             {
                 foreach ((string, string) field in fields)
                 {

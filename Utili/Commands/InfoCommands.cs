@@ -55,7 +55,7 @@ namespace Utili.Commands
 
             double cpu = 0;
             double memory = 0;
-            if (_pingTest.Memory != null)
+            if (_pingTest.Memory is not null)
             {
                 cpu = _pingTest.CpuPercentage;
                 memory = Math.Round(_pingTest.Memory.UsedGigabytes / _pingTest.Memory.TotalGigabytes * 100);

@@ -87,7 +87,7 @@ namespace Utili.Features
         [Command("AddEmote"), Alias("AddEmotes", "AddEmoji", "AddEmojis")] [Permission(Perm.ManageGuild)] [Cooldown(2)]
         public async Task Add(string emoteString, ITextChannel channel = null)
         {
-            if(channel == null) channel = Context.Channel as ITextChannel;
+            channel ??= Context.Channel as ITextChannel;
 
             if (BotPermissions.IsMissingPermissions(channel,
                 new[] {ChannelPermission.AddReactions}, out string missingPermissions))
@@ -160,7 +160,7 @@ namespace Utili.Features
         [Command("RemoveEmote"), Alias("RemoveEmotes", "RemoveEmoji", "RemoveEmojis")] [Permission(Perm.ManageGuild)] [Cooldown(2)]
         public async Task Remove(string emoteString, ITextChannel channel = null)
         {
-            if(channel == null) channel = Context.Channel as ITextChannel;
+            channel ??= Context.Channel as ITextChannel;
 
             List<VoteChannelsRow> rows = await Database.Data.VoteChannels.GetRowsAsync(Context.Guild.Id, channel.Id);
             if (rows.Count == 0)
@@ -214,7 +214,7 @@ namespace Utili.Features
         [Command("ListEmote"), Alias("ListEmotes", "ListEmoji", "ListEmojis")]
         public async Task List(ITextChannel channel = null)
         {
-            if (channel == null) channel = Context.Channel as ITextChannel;
+            channel ??= Context.Channel as ITextChannel;
 
             List<VoteChannelsRow> rows = await Database.Data.VoteChannels.GetRowsAsync(Context.Guild.Id, channel.Id);
             if (rows.Count == 0)

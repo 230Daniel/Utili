@@ -18,8 +18,8 @@ namespace Utili.Handlers
             {
                 if (Helper.RequiresUpdate(before, after))
                 {
-                    if(before.VoiceChannel != null) await VoiceLink.RequestUpdateAsync(before.VoiceChannel);
-                    if(after.VoiceChannel != null) await VoiceLink.RequestUpdateAsync(after.VoiceChannel);
+                    if(before.VoiceChannel is not null) await VoiceLink.RequestUpdateAsync(before.VoiceChannel);
+                    if(after.VoiceChannel is not null) await VoiceLink.RequestUpdateAsync(after.VoiceChannel);
 
                     VoiceRoles.RequestUpdate(user as SocketGuildUser, before, after);
                 }

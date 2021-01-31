@@ -73,7 +73,7 @@ namespace Utili.Features
             }
 
             List<SocketGuildUser> connectedUsers =
-                guild.Users.Where(x => x.VoiceChannel != null && x.VoiceChannel.Id == voiceChannel.Id).ToList();
+                guild.Users.Where(x => x.VoiceChannel is not null && x.VoiceChannel.Id == voiceChannel.Id).ToList();
 
             VoiceLinkChannelRow channelRow = await Database.Data.VoiceLink.GetChannelRowAsync(guild.Id, voiceChannel.Id);
             VoiceLinkRow metaRow = await Database.Data.VoiceLink.GetRowAsync(guild.Id);
@@ -85,7 +85,7 @@ namespace Utili.Features
             }
             catch {}
 
-            if (connectedUsers.Count(x => !x.IsBot) == 0 && textChannel != null && metaRow.DeleteChannels)
+            if (connectedUsers.Count(x => !x.IsBot) == 0 && textChannel is not null && metaRow.DeleteChannels)
             {
                 await textChannel.DeleteAsync();
                 channelRow.TextChannelId = 0;
@@ -98,7 +98,7 @@ namespace Utili.Features
                 return;
             }
 
-            if (textChannel == null)
+            if (textChannel is null)
             {
                 RestTextChannel restTextChannel = await guild.CreateTextChannelAsync($"{metaRow.Prefix.Value}{voiceChannel.Name}", x =>
                 {
@@ -125,7 +125,7 @@ namespace Utili.Features
                     try
                     {
                         SocketGuildUser existingUser = guild.GetUser(existingOverwrite.TargetId);
-                        if (existingUser?.VoiceChannel == null || existingUser.VoiceChannel.Id != voiceChannel.Id)
+                        if (existingUser?.VoiceChannel is null || existingUser.VoiceChannel.Id != voiceChannel.Id)
                         {
                             await textChannel.RemovePermissionOverwriteAsync(existingUser);
                         }

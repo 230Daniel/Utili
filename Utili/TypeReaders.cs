@@ -18,10 +18,10 @@ namespace Utili
             if (MentionUtils.TryParseUser(input, out ulong userId))
             {
                 IUser user = guild.GetUser(userId);
-                if (user != null) return TypeReaderResult.FromSuccess(user);
+                if (user is not null) return TypeReaderResult.FromSuccess(user);
 
                 user = await _rest.GetGuildUserAsync(guild.Id, userId);
-                if (user != null) return TypeReaderResult.FromSuccess(user);
+                if (user is not null) return TypeReaderResult.FromSuccess(user);
             }
 
             IReadOnlyCollection<IUser> users = await context.Guild.SearchUsersAsync(input, 1);

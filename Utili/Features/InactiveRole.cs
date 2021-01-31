@@ -77,7 +77,7 @@ namespace Utili.Features
         private static async Task UpdateGuildAsync(InactiveRoleRow row, SocketGuild guild)
         {
             SocketRole inactiveRole = guild.GetRole(row.RoleId);
-            if(inactiveRole == null) return;
+            if(inactiveRole is null) return;
 
             if (!BotPermissions.CanManageRole(inactiveRole))
             {

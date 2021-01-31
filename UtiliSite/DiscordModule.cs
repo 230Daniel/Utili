@@ -105,7 +105,7 @@ namespace UtiliSite
         {
             if (_cachedGuildUsers.TryGet($"{guildId}/{userId}", out object guildUserObj))
             {
-                if (guildUserObj == null)
+                if (guildUserObj is null)
                 {
                     _cachedGuildUsers.Remove($"{guildId}/{userId}");
                 }
@@ -118,7 +118,7 @@ namespace UtiliSite
             try
             {
                 RestGuildUser guildUser = await _client.GetGuildUserAsync(guildId, userId);
-                if(guildUser != null) _cachedGuildUsers.Add($"{guildId}/{userId}", guildUser);
+                if(guildUser is not null) _cachedGuildUsers.Add($"{guildId}/{userId}", guildUser);
                 return guildUser;
             }
             catch
@@ -143,7 +143,7 @@ namespace UtiliSite
         {
             if (_cachedGuilds.TryGet(guildId, out object guildObj))
             {
-                if (guildObj == null)
+                if (guildObj is null)
                 {
                     _cachedGuilds.Remove(guildId);
                 }
@@ -156,7 +156,7 @@ namespace UtiliSite
             try
             {
                 RestGuild guild = await _client.GetGuildAsync(guildId);
-                if(guild != null) _cachedGuilds.Add(guildId, guild);
+                if(guild is not null) _cachedGuilds.Add(guildId, guild);
                 return guild;
             }
             catch

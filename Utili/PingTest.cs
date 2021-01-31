@@ -40,10 +40,9 @@ namespace Utili
             }
             catch { }
 
-            IGuild guild;
-            try { guild = _client.GetGuild(_config.SystemGuildId); }
-            catch { guild = await _rest.GetGuildAsync(_config.SystemGuildId); }
-            if(guild == null) guild = await _rest.GetGuildAsync(_config.SystemGuildId);
+            IGuild guild = null;
+            try { guild = _client.GetGuild(_config.SystemGuildId); } catch { }
+            guild ??= await _rest.GetGuildAsync(_config.SystemGuildId);
 
             ITextChannel channel = await guild.GetTextChannelAsync(_config.SystemChannelId);
 

@@ -79,7 +79,7 @@ namespace Utili.Handlers
         {
             string source = logMessage.Source.Replace("Shard #", "Shard ");
 
-            if (logMessage.Exception == null)
+            if (logMessage.Exception is null)
             {
                 _logger.Log(source, logMessage.Message, Helper.ConvertToLocalLogSeverity(logMessage.Severity));
             }
