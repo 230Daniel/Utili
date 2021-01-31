@@ -113,8 +113,7 @@ namespace Database.Data
                     ("GuildId", row.GuildId));
 
                 row.New = false;
-                row.SlotId = (await GetRowsAsync(row.UserId, row.GuildId)).OrderBy(x => x.SlotId).Last().SlotId;
-                // TODO: Ensure this is always accurately setting the value
+                row.SlotId = (await GetRowsAsync(row.UserId, row.GuildId)).Max(x => x.SlotId);
 
                 if(Cache.Initialised) Cache.Premium.Add(row);
             }

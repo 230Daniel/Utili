@@ -36,7 +36,7 @@ namespace UtiliSite
             services.AddHsts(options =>
             {
                 options.MaxAge = TimeSpan.FromDays(30);
-                options.IncludeSubDomains = false;
+                options.IncludeSubDomains = true;
             });
 
             services.AddRouting(options =>
@@ -98,7 +98,7 @@ namespace UtiliSite
             }
             else
             {
-                app.UseHsts(); // TODO: Figure out why this isn't working properly
+                app.UseHsts();
                 app.UseExceptionHandler("/Error");
             }
             app.UseMiddleware<ErrorLoggingMiddleware>();
@@ -108,6 +108,8 @@ namespace UtiliSite
                 context.Response.Headers.Add("X-Frame-Options", "DENY");
                 context.Response.Headers.Add("X-Xss-Protection", "1; mode=block");
                 context.Response.Headers.Add("X-Content-Type-Options", "nosniff");
+                context.Response.Headers.Add("Strict-Transport-Security", "max-age=2592000; includeSubDomains");
+                context.Response.Headers.Add("Referrer-Policy", "strict-origin-when-cross-origin");
                 await next();
             });
             
