@@ -7,6 +7,7 @@ using Discord;
 using Discord.Commands;
 using Discord.Rest;
 using Discord.WebSocket;
+using Utili.Handlers;
 using static Utili.MessageSender;
 
 namespace Utili.Commands
@@ -24,6 +25,12 @@ namespace Utili.Commands
                     "before [message id] - Only messages before a particular message\n" +
                     "after [message id] - Only messages after a particular message\n\n" +
                     "[How do I get a message ID?](https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID-)");
+                return;
+            }
+
+            if (BotPermissions.IsMissingPermissions(Context.Channel, new[] {ChannelPermission.ViewChannel, ChannelPermission.ReadMessageHistory, ChannelPermission.ManageMessages}, out string missingPermissions))
+            {
+                await SendFailureAsync(Context.Channel, "Error", $"I'm missing the following permissions: {missingPermissions}");
                 return;
             }
 
@@ -157,6 +164,12 @@ namespace Utili.Commands
                 return;
             }
 
+            if (BotPermissions.IsMissingPermissions(Context.Channel, new[] {ChannelPermission.ViewChannel, ChannelPermission.ReadMessageHistory, ChannelPermission.AddReactions}, out string missingPermissions))
+            {
+                await SendFailureAsync(Context.Channel, "Error", $"I'm missing the following permissions: {missingPermissions}");
+                return;
+            }
+
             IEmote emoji = Helper.GetEmote(emojiString);
 
             try
@@ -185,6 +198,12 @@ namespace Utili.Commands
                 return;
             }
 
+            if (BotPermissions.IsMissingPermissions(channel, new[] {ChannelPermission.ViewChannel, ChannelPermission.ReadMessageHistory, ChannelPermission.AddReactions}, out string missingPermissions))
+            {
+                await SendFailureAsync(Context.Channel, "Error", $"I'm missing the following permissions: {missingPermissions}");
+                return;
+            }
+
             IEmote emoji = Helper.GetEmote(emojiString);
 
             try
@@ -201,14 +220,10 @@ namespace Utili.Commands
             }
         }
 
-        [Command("Random"), Alias("Pick"), Cooldown(10)]
+        [Command("Random"), Alias("Pick")]
         public async Task Random(ITextChannel channel = null, ulong messageId = 0, [Remainder] string emojiString = "")
         {
-            if (!Context.Guild.HasAllMembers)
-            {
-                await Context.Guild.DownloadUsersAsync();
-            }
-
+            await Context.Guild.DownloadAndKeepUsersAsync(TimeSpan.FromMinutes(15));
             Random random = new Random();
 
             if (messageId == 0)
@@ -252,14 +267,10 @@ namespace Utili.Commands
             await Random(Context.Channel as ITextChannel, messageId, emojiString);
         }
 
-        [Command("WhoHas"), Cooldown(3)]
+        [Command("WhoHas")]
         public async Task WhoHas(SocketRole role, int page = 1)
         {
-            if (!Context.Guild.HasAllMembers)
-            {
-                await Context.Guild.DownloadUsersAsync();
-            }
-
+            await Context.Guild.DownloadAndKeepUsersAsync(TimeSpan.FromMinutes(15));
             List<SocketGuildUser> users = Context.Guild.Users.OrderBy(x => x.Nickname ?? x.Username).Where(x => x.Roles.Any(y => y.Id == role.Id)).ToList();
 
             int totalPages = (int) Math.Ceiling(users.Count / 50d);

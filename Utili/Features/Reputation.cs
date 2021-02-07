@@ -1,10 +1,13 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Database.Data;
 using Discord;
 using Discord.Commands;
+using Discord.WebSocket;
 using Utili.Commands;
+using Utili.Handlers;
 using static Utili.MessageSender;
 using static Utili.Program;
 
@@ -12,13 +15,20 @@ namespace Utili.Features
 {
     internal static class Reputation
     {
-        public static async Task ReactionAdded(IGuild guild, Cacheable<IUserMessage, ulong> partialMessage, ulong reactorId, IEmote emote)
+        public static async Task ReactionAdded(IGuild guild, Cacheable<IUserMessage, ulong> partialMessage, ulong reactorId, ISocketMessageChannel channel, IEmote emote)
         {
             ReputationRow row = await Database.Data.Reputation.GetRowAsync(guild.Id);
             if (!row.Emotes.Any(x => x.Item1.Equals(emote))) return;
             int change = row.Emotes.First(x => Equals(x.Item1, emote)).Item2;
 
-            IUserMessage message = await partialMessage.GetOrDownloadAsync();
+            MessageCache cache = channel.MessageCache as MessageCache;
+            IMessage message = cache.GetManual(partialMessage.Id);
+            if (message is null)
+            {
+                message = await partialMessage.DownloadAsync();
+                cache.AddManual(message);
+            }
+
             IUser user = message.Author;
             IUser reactor = await _rest.GetGuildUserAsync(guild.Id, reactorId);
 
@@ -27,13 +37,20 @@ namespace Utili.Features
             await Database.Data.Reputation.AlterUserReputationAsync(guild.Id, user.Id, change);
         }
 
-        public static async Task ReactionRemoved(IGuild guild, Cacheable<IUserMessage, ulong> partialMessage, ulong reactorId, IEmote emote)
+        public static async Task ReactionRemoved(IGuild guild, Cacheable<IUserMessage, ulong> partialMessage, ulong reactorId, ISocketMessageChannel channel, IEmote emote)
         {
             ReputationRow row = await Database.Data.Reputation.GetRowAsync(guild.Id);
             if (!row.Emotes.Any(x => x.Item1.Equals(emote))) return;
             int change = row.Emotes.First(x => Equals(x.Item1, emote)).Item2;
 
-            IUserMessage message = await partialMessage.GetOrDownloadAsync();
+            MessageCache cache = channel.MessageCache as MessageCache;
+            IMessage message = cache.GetManual(partialMessage.Id);
+            if (message is null)
+            {
+                message = await partialMessage.DownloadAsync();
+                cache.AddManual(message);
+            }
+
             IUser user = message.Author;
             IUser reactor = await _rest.GetGuildUserAsync(guild.Id, reactorId);
 
@@ -65,11 +82,7 @@ namespace Utili.Features
         [Command("Leaderboard"), Alias("Top"), Cooldown(3)]
         public async Task Leaderboard()
         {
-            if (!Context.Guild.HasAllMembers)
-            {
-                await Context.Guild.DownloadUsersAsync();
-            }
-
+            await Context.Guild.DownloadAndKeepUsersAsync(TimeSpan.FromMinutes(15));
             List<ReputationUserRow> rows = await Database.Data.Reputation.GetUserRowsAsync(Context.Guild.Id);
             rows = rows.OrderByDescending(x => x.Reputation).ToList();
 
@@ -94,11 +107,7 @@ namespace Utili.Features
         [Command("InverseLeaderboard"), Alias("Bottom"), Cooldown(10)]
         public async Task InvserseLeaderboard()
         {
-            if (!Context.Guild.HasAllMembers)
-            {
-                await Context.Guild.DownloadUsersAsync();
-            }
-
+            await Context.Guild.DownloadAndKeepUsersAsync(TimeSpan.FromMinutes(15));
             List<ReputationUserRow> rows = await Database.Data.Reputation.GetUserRowsAsync(Context.Guild.Id);
             rows = rows.OrderBy(x => x.Reputation).ToList();
 

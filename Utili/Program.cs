@@ -89,15 +89,16 @@ namespace Utili
             _client = new DiscordShardedClient(shardIds, new DiscordSocketConfig 
             {
                 TotalShards = _totalShards,
-                MessageCacheSize = 10,
+                MessageCacheSize = 5,
+                MessageCache = new MessageCache(),
                 ExclusiveBulkDelete = true,
                 LogLevel = Discord.LogSeverity.Info,
                 AlwaysDownloadUsers = false,
                 UseSystemClock = false,
                 
-                GatewayIntents =
-                    GatewayIntents.Guilds |
-                    GatewayIntents.GuildMembers |
+                GatewayIntents = 
+                    GatewayIntents.Guilds | 
+                    GatewayIntents.GuildMembers | 
                     GatewayIntents.GuildMessageReactions | 
                     GatewayIntents.GuildMessages | 
                     GatewayIntents.GuildVoiceStates

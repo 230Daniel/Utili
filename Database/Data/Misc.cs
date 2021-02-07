@@ -94,7 +94,8 @@ namespace Database.Data
             await Sql.ExecuteAsync(
                 "DELETE FROM Misc WHERE GuildId = @GuildId AND Type = @Type AND Value = @Value",
                 ("GuildId", row.GuildId),
-                ("Type", row.Type));
+                ("Type", row.Type),
+                ("Value", row.Value));
         }
     }
 

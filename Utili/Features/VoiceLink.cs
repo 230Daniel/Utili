@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Timers;
@@ -6,6 +7,7 @@ using Database.Data;
 using Discord;
 using Discord.Rest;
 using Discord.WebSocket;
+using static Utili.Program;
 
 namespace Utili.Features
 {
@@ -13,6 +15,7 @@ namespace Utili.Features
     {
         private static Timer _timer;
         private static List<SocketVoiceChannel> _channelsRequiringUpdate = new List<SocketVoiceChannel>();
+        private static bool _updating;
 
         public static void Start()
         {
@@ -26,7 +29,6 @@ namespace Utili.Features
         public static async Task RequestUpdateAsync(SocketVoiceChannel channel)
         {
             VoiceLinkRow metaRow = await Database.Data.VoiceLink.GetRowAsync(channel.Guild.Id);
-
             if (!metaRow.Enabled || metaRow.ExcludedChannels.Contains(channel.Id)) return;
             
             lock (_channelsRequiringUpdate)
@@ -42,23 +44,29 @@ namespace Utili.Features
 
         private static async Task UpdateLinkedChannelsAsync()
         {
-            List<SocketVoiceChannel> channelsToUpdate = new List<SocketVoiceChannel>();
-
-            lock (_channelsRequiringUpdate)
+            if(_updating) return;
+            _updating = true;
+            try
             {
-                foreach (SocketVoiceChannel voiceChannel in _channelsRequiringUpdate)
+                List<SocketVoiceChannel> channelsToUpdate = new List<SocketVoiceChannel>();
+
+                lock (_channelsRequiringUpdate)
                 {
-                    if (channelsToUpdate.All(x => x.Id != voiceChannel.Id))
-                    {
-                        channelsToUpdate.Add(voiceChannel);
-                    }
+                    foreach (SocketVoiceChannel voiceChannel in _channelsRequiringUpdate)
+                        if (channelsToUpdate.All(x => x.Id != voiceChannel.Id))
+                            channelsToUpdate.Add(voiceChannel);
+
+                    _channelsRequiringUpdate.Clear();
                 }
 
-                _channelsRequiringUpdate.Clear();
+                List<Task> tasks = channelsToUpdate.Select(UpdateLinkedChannelAsync).ToList();
+                await Task.WhenAll(tasks);
             }
-
-            List<Task> tasks = channelsToUpdate.Select(UpdateLinkedChannelAsync).ToList();
-            await Task.WhenAll(tasks);
+            catch (Exception e)
+            {
+                _logger.ReportError("VoiceLink", e);
+            }
+            _updating = false;
         }
 
         private static async Task UpdateLinkedChannelAsync(SocketVoiceChannel voiceChannel)
@@ -127,7 +135,8 @@ namespace Utili.Features
                         SocketGuildUser existingUser = guild.GetUser(existingOverwrite.TargetId);
                         if (existingUser?.VoiceChannel is null || existingUser.VoiceChannel.Id != voiceChannel.Id)
                         {
-                            await textChannel.RemovePermissionOverwriteAsync(existingUser);
+                            IUser user = (IUser) existingUser ?? await _rest.GetUserAsync(existingOverwrite.TargetId);
+                            await textChannel.RemovePermissionOverwriteAsync(user);
                         }
                     }
                     catch {}

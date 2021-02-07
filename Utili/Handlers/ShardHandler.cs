@@ -31,7 +31,7 @@ namespace Utili.Handlers
 
                 if (_client.Shards.All(x => x.ConnectionState == ConnectionState.Connected)) _ = AllShardsReady();
 
-                await DownloadRequiredUsersAsync(shard);
+                await CacheUsersAsync(shard);
                 await shard.SetGameAsync($"{_config.Domain} | {_config.DefaultPrefix}help");
             });
         }
@@ -51,17 +51,24 @@ namespace Utili.Handlers
                 _shardStatsUpdater.Start();
             }
                     
-            _downloadNewRequiredUsersTimer?.Dispose();
-            _downloadNewRequiredUsersTimer = new Timer(60000);
-            _downloadNewRequiredUsersTimer.Elapsed += DownloadNewRequiredUsersTimer_Elapsed;
-            _downloadNewRequiredUsersTimer.Start();
+            _userCacheTimer?.Dispose();
+            _userCacheTimer = new Timer(30000);
+            _userCacheTimer.Elapsed += UserCacheTimerElapsed;
+            _userCacheTimer.Start();
         }
 
-        private static async Task DownloadRequiredUsersAsync(DiscordSocketClient shard)
+        private static async Task CacheUsersAsync(DiscordSocketClient shard)
+        {
+            List<ulong> userCacheGuildId = await GetUserCacheGuildsAsync();
+            List<SocketGuild> guilds = shard.Guilds.Where(x => userCacheGuildId.Contains(x.Id)).ToList();
+            await shard.DownloadUsersAsync(guilds);
+
+            _logger.Log($"Shard {shard.ShardId}", $"{guilds.Count(x => x.HasAllMembers)}/{guilds.Count} required guild user downloads completed");
+        }
+
+        private static async Task<List<ulong>> GetUserCacheGuildsAsync()
         {
             List<ulong> guildIds = new List<ulong>();
-            List<SocketGuild> guilds = shard.Guilds.ToList();
-            guilds = guilds.Where(x => x.DownloadedMemberCount < x.MemberCount).ToList();
 
             // Role persist enabled
             guildIds.AddRange((await RolePersist.GetRowsAsync()).Where(x => x.Enabled).Select(x => x.GuildId));
@@ -69,10 +76,14 @@ namespace Utili.Handlers
             // Community server
             guildIds.Add(_config.Community.GuildId);
 
-            guilds = guilds.Where(x => guildIds.Contains(x.Id)).ToList();
-            await shard.DownloadUsersAsync(guilds);
+            // Servers that have used commands like random
+            lock (_guaranteedDownloads)
+            {
+                _guaranteedDownloads.RemoveAll(x => x.Item2 < DateTime.Now);
+                guildIds.AddRange(_guaranteedDownloads.Select(x => x.Item1));
+            }
 
-            _logger.Log($"Shard {shard.ShardId}", $"{guilds.Count(x => x.HasAllMembers)}/{guilds.Count} required guild user downloads completed");
+            return guildIds;
         }
 
         public static async Task Log(LogMessage logMessage)
@@ -125,23 +136,28 @@ namespace Utili.Handlers
         }
 
 
-        private static Timer _downloadNewRequiredUsersTimer;
-        private static void DownloadNewRequiredUsersTimer_Elapsed(object sender, ElapsedEventArgs e)
+        private static Timer _userCacheTimer;
+        private static bool _updatingUserCache;
+        private static List<(ulong, DateTime)> _guaranteedDownloads = new List<(ulong, DateTime)>();
+
+        private static void UserCacheTimerElapsed(object sender, ElapsedEventArgs e)
         {
-            _ = DownloadNewRequiredUsersAsync();
+            _ = UpdateCacheAsync();
         }
 
-        private static bool _downloadingNewRequiredUsers;
-        private static async Task DownloadNewRequiredUsersAsync()
+        private static async Task UpdateCacheAsync()
         {
-            if(_downloadingNewRequiredUsers) return;
-            _downloadingNewRequiredUsers = true;
+            if(_updatingUserCache) return;
+            _updatingUserCache = true;
+
             try
             {
+                // Download guild users which now require caching
+
                 List<MiscRow> rows = await Misc.GetRowsAsync(null, "RequiresUserDownload");
-                foreach(MiscRow row in rows)
+                foreach (MiscRow row in rows)
                 {
-                    if(_client.Guilds.Any(x => x.Id == row.GuildId))
+                    if (_client.Guilds.Any(x => x.Id == row.GuildId))
                     {
                         await Misc.DeleteRowAsync(row);
                         SocketGuild guild = _client.GetGuild(row.GuildId);
@@ -149,9 +165,49 @@ namespace Utili.Handlers
                         await Task.Delay(5000);
                     }
                 }
+
+                // Clear unnecessary downloads to free up memory
+
+                lock (_guaranteedDownloads)
+                {
+                    List<ulong> userCacheGuildIds = GetUserCacheGuildsAsync().GetAwaiter().GetResult();
+                    foreach (SocketGuild guild in _client.Guilds.Where(x => !userCacheGuildIds.Contains(x.Id)))
+                    {
+                        guild.ClearUserCache(x => x.VoiceChannel is null);
+                    }
+                }
             }
-            catch { }
-            _downloadingNewRequiredUsers = false;
+            catch (Exception e)
+            {
+                _logger.ReportError("Cache", e);
+            }
+
+            _updatingUserCache = false;
+        }
+
+        public static async Task DownloadAndKeepUsersAsync(this SocketGuild guild, TimeSpan? keepFor = null)
+        {
+            // Guarantees that the user cache will be downloaded for that server until keepFor is up.
+
+            DateTime keepUntil = DateTime.MaxValue;
+            if(keepFor.HasValue) keepUntil = DateTime.UtcNow + keepFor.Value;
+
+            lock (_guaranteedDownloads)
+            {
+                if (_guaranteedDownloads.Any(x => x.Item1 == guild.Id && x.Item2 > DateTime.UtcNow))
+                {
+                    if (_guaranteedDownloads.First(x => x.Item1 == guild.Id).Item2 < keepUntil)
+                    {
+                        _guaranteedDownloads.RemoveAll(x => x.Item1 == guild.Id);
+                        _guaranteedDownloads.Add((guild.Id, keepUntil));
+                    }
+                    return;
+                }
+
+                _guaranteedDownloads.RemoveAll(x => x.Item1 == guild.Id);
+                _guaranteedDownloads.Add((guild.Id, keepUntil));
+            }
+            await guild.DownloadUsersAsync();
         }
     }
 }

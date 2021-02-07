@@ -8,6 +8,7 @@ using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using Utili.Commands;
+using Utili.Handlers;
 using static Utili.Program;
 using static Utili.MessageSender;
 
@@ -160,7 +161,7 @@ namespace Utili.Features
     [Group("Inactive"), Alias("InactiveRole")]
     public class InactiveRoleCommands : ModuleBase<SocketCommandContext>
     {
-        [Command("List"), Cooldown(5)]
+        [Command("List")]
         public async Task List(int page = 1)
         {
             InactiveRoleRow row = await Database.Data.InactiveRole.GetRowAsync(Context.Guild.Id);
@@ -170,10 +171,7 @@ namespace Utili.Features
                 return; 
             }
 
-            if (!Context.Guild.HasAllMembers)
-            {
-                await Context.Guild.DownloadUsersAsync();
-            }
+            await Context.Guild.DownloadAndKeepUsersAsync(TimeSpan.FromMinutes(15));
 
             List<SocketGuildUser> users = Context.Guild.Users.Where(x => x.Roles.Any(y => y.Id == row.RoleId)).ToList();
             users = users.Where(x => x.Roles.All(y => y.Id != row.ImmuneRoleId)).ToList();
@@ -219,11 +217,7 @@ namespace Utili.Features
             }
 
             _kickingIn.Add(Context.Guild.Id);
-
-            if (!Context.Guild.HasAllMembers)
-            {
-                await Context.Guild.DownloadUsersAsync();
-            }
+            await Context.Guild.DownloadAndKeepUsersAsync(TimeSpan.FromMinutes(15));
 
             List<SocketGuildUser> users = Context.Guild.Users.Where(x => x.Roles.Any(y => y.Id == row.RoleId)).ToList();
             users = users.Where(x => x.Roles.All(y => y.Id != row.ImmuneRoleId)).ToList();
