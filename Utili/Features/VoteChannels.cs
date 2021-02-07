@@ -15,34 +15,20 @@ namespace Utili.Features
         public static async Task MessageReceived(SocketCommandContext context)
         {
             if (BotPermissions.IsMissingPermissions(context.Channel, new[] {ChannelPermission.AddReactions}, out _))
-            {
                 return;
-            }
 
             List<VoteChannelsRow> rows = await Database.Data.VoteChannels.GetRowsAsync(context.Guild.Id, context.Channel.Id);
-
-            if (rows.Count == 0)
-            {
-                return;
-            }
-
+            if (rows.Count == 0) return;
             VoteChannelsRow row = rows.First();
-
-            if (!DoesMessageObeyRule(context, row))
-            {
-                return;
-            }
-
             List<IEmote> emotes = row.Emotes;
 
+            if (!DoesMessageObeyRule(context, row))
+                return;
+
             if (await Premium.IsGuildPremiumAsync(context.Guild.Id))
-            {
                 emotes = emotes.Take(5).ToList();
-            }
             else
-            {
                 emotes = emotes.Take(2).ToList();
-            }
 
             await context.Message.AddReactionsAsync(emotes.ToArray());
         }

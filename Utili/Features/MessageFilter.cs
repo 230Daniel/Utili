@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Database.Data;
@@ -114,29 +115,14 @@ namespace Utili.Features
                 "jpg"
             };
 
-            if(context.Message.Attachments.Any(x => validAttachmentExtensions.Contains(x.Filename.Split(".").Last().ToLower())))
-            {
+            List<string> filenames = context.Message.Attachments.Select(x => x.Filename).ToList();
+            filenames.AddRange(context.Message.Content.Split(' ', '\n').Where(x => IsUrl(x) && x.Split("/").Last().Contains(".")));
+            if(filenames.Any(x => validAttachmentExtensions.Contains(x.Split(".").Last().ToLower())))
                 return true;
-            }
 
-            if(context.Message.Embeds.Any(x => x.Image.HasValue)) return true;
+            if(context.Message.Embeds.Any(x => x.Image.HasValue)) 
+                return true;
 
-            foreach (string word in context.Message.Content.Split(' ', '\n'))
-            {
-                try
-                {
-                    WebRequest request = WebRequest.Create(word);
-                    request.Timeout = 2000;
-                    WebResponse response = request.GetResponse();
-
-                    if (response.ContentType.ToLower().StartsWith("image/"))
-                    {
-                        return true;
-                    }
-                }
-                catch { }
-            }
-            
             return false;
         }
 
@@ -150,34 +136,14 @@ namespace Utili.Features
                 "gif"
             };
 
-            if(context.Message.Attachments.Any(x => validAttachmentExtensions.Contains(x.Filename.Split(".").Last().ToLower())))
-            {
+            List<string> filenames = context.Message.Attachments.Select(x => x.Filename).ToList();
+            filenames.AddRange(context.Message.Content.Split(' ', '\n').Where(x => IsUrl(x) && x.Split("/").Last().Contains(".")));
+            if(filenames.Any(x => validAttachmentExtensions.Contains(x.Split(".").Last().ToLower())))
                 return true;
-            }
 
-            Regex youtubeRegex = new Regex(@"youtu(?:\.be|be\.com)/(?:.*v(?:/|=)|(?:.*/)?)([a-zA-Z0-9-_]+)");
+            Regex youtubeRegex = new Regex(@"^((?:https?:)?\/\/)?((?:www|m)\.)?((?:youtube\.com|youtu.be))(\/(?:[\w\-]+\?v=|embed\/|v\/)?)([\w\-]+)(\S+)?$");
             foreach (string word in context.Message.Content.Split(' ', '\n'))
-            {
-                Match youtubeMatch = youtubeRegex.Match(word);
-                if (youtubeMatch.Success)
-                {
-                    string id = youtubeMatch.Groups[1].Value;
-
-                    try
-                    {
-                        HttpWebRequest request =
-                            (HttpWebRequest) WebRequest.Create($"https://img.youtube.com/vi/{id}/mqdefault.jpg");
-                        HttpWebResponse response = (HttpWebResponse) request.GetResponse();
-                        Stream stream = response.GetResponseStream();
-                        System.Drawing.Image thumbnail = System.Drawing.Image.FromStream(stream);
-                        stream.Close();
-
-                        // If the video doesn't exist then the thumbnail is a default 120x90 image.
-                        if(thumbnail.Width != 120 && thumbnail.Width != 90) return true;
-                    }
-                    catch { }
-                }
-            }
+                if(youtubeRegex.IsMatch(word)) return true;
 
             return false;
         }
@@ -192,18 +158,14 @@ namespace Utili.Features
                 "flac"
             };
 
-            if(context.Message.Attachments.Any(x => validAttachmentExtensions.Contains(x.Filename.Split(".").Last().ToLower())))
-            {
+            List<string> filenames = context.Message.Attachments.Select(x => x.Filename).ToList();
+            filenames.AddRange(context.Message.Content.Split(' ', '\n').Where(x => IsUrl(x) && x.Split("/").Last().Contains(".")));
+            if(filenames.Any(x => validAttachmentExtensions.Contains(x.Split(".").Last().ToLower())))
                 return true;
-            }
 
             foreach (string word in context.Message.Content.Split(' ', '\n'))
-            {
                 if (word.ToLower().Contains("spotify.com/") || word.ToLower().Contains("soundcloud.com/"))
-                {
                     return true;
-                }
-            }
 
             return false;
         }
@@ -216,23 +178,14 @@ namespace Utili.Features
         public static bool IsUrl(SocketCommandContext context)
         {
             foreach (string word in context.Message.Content.Split(' ', '\n'))
-            {
-                try
-                {
-                    if (Uri.TryCreate(word, UriKind.Absolute, out Uri uriResult)
-                        && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps))
-                    {
-                        using(MyClient client = new MyClient()) {
-                            client.HeadOnly = true;
-                            client.DownloadString(word);
-                        }
-                        return true;
-                    }
-                }
-                catch { }
-            }
+                if(IsUrl(word)) return true;
 
             return false;
+        }
+
+        private static bool IsUrl(string word)
+        {
+            return Uri.TryCreate(word, UriKind.Absolute, out Uri uriResult) && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps);
         }
 
         public static bool IsRegex(SocketCommandContext context, string pattern)
@@ -240,28 +193,12 @@ namespace Utili.Features
             try
             {
                 Regex regex = new Regex(pattern);
-
                 return regex.IsMatch(context.Message.Content);
             }
             catch
             {
                 return false;
             }
-        }
-    }
-
-    // https://stackoverflow.com/a/924682/11089240
-    internal class MyClient : WebClient
-    {
-        public bool HeadOnly { get; set; }
-        protected override WebRequest GetWebRequest(Uri address)
-        {
-            WebRequest req = base.GetWebRequest(address);
-            if (HeadOnly && req.Method == "GET")
-            {
-                req.Method = "HEAD";
-            }
-            return req;
         }
     }
 }
