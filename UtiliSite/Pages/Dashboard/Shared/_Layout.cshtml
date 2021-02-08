@@ -94,12 +94,18 @@
                         <div href="@RedirectHelper.ChangeLastPage(ViewContext, "messagefilter")" class="cursor-pointer list-group-item list-group-item-action @SidebarHelper.GetIsActive(ViewContext, "messagefilter")">Message Filter</div>
                         <div href="@RedirectHelper.ChangeLastPage(ViewContext, "messagelogs")" class="cursor-pointer list-group-item list-group-item-action @SidebarHelper.GetIsActive(ViewContext, "messagelogs")">Message Logs</div>
                         <div href="@RedirectHelper.ChangeLastPage(ViewContext, "messagepinning")" class="cursor-pointer list-group-item list-group-item-action @SidebarHelper.GetIsActive(ViewContext, "messagepinning")">Message Pinning</div>
+                        <div href="@RedirectHelper.ChangeLastPage(ViewContext, "votechannels")" class="cursor-pointer list-group-item list-group-item-action @SidebarHelper.GetIsActive(ViewContext, "votechannels")">Vote Channels</div>
                     </div>
 
                     <div onclick="$('#userSection').collapse('toggle')" class="cursor-pointer list-group-item list-group-item-action section-header">Users</div>
                     <div id="userSection" class="collapse @SidebarHelper.GetIsSectionOpen(ViewContext, "user")" data-parent="#sidebarCategories">
                         <div href="@RedirectHelper.ChangeLastPage(ViewContext, "inactiverole")" class="cursor-pointer list-group-item list-group-item-action @SidebarHelper.GetIsActive(ViewContext, "inactiverole")">Inactive Role</div>
                         <div href="@RedirectHelper.ChangeLastPage(ViewContext, "joinmessage")" class="cursor-pointer list-group-item list-group-item-action @SidebarHelper.GetIsActive(ViewContext, "joinmessage")">Join Message</div>
+                        <div href="@RedirectHelper.ChangeLastPage(ViewContext, "reputation")" class="cursor-pointer list-group-item list-group-item-action @SidebarHelper.GetIsActive(ViewContext, "reputation")">Reputation</div>
+                    </div>
+                    
+                    <div onclick="$('#rolesSection').collapse('toggle')" class="cursor-pointer list-group-item list-group-item-action section-header">Roles</div>
+                    <div id="rolesSection" class="collapse @SidebarHelper.GetIsSectionOpen(ViewContext, "roles")" data-parent="#sidebarCategories">
                         <div href="@RedirectHelper.ChangeLastPage(ViewContext, "joinroles")" class="cursor-pointer list-group-item list-group-item-action @SidebarHelper.GetIsActive(ViewContext, "joinroles")">Join Roles</div>
                         <div href="@RedirectHelper.ChangeLastPage(ViewContext, "rolelinking")" class="cursor-pointer list-group-item list-group-item-action @SidebarHelper.GetIsActive(ViewContext, "rolelinking")">Role Linking</div>
                         <div href="@RedirectHelper.ChangeLastPage(ViewContext, "rolepersist")" class="cursor-pointer list-group-item list-group-item-action @SidebarHelper.GetIsActive(ViewContext, "rolepersist")">Role Persist</div>
@@ -110,13 +116,6 @@
                         <div href="@RedirectHelper.ChangeLastPage(ViewContext, "voicelink")" class="cursor-pointer list-group-item list-group-item-action @SidebarHelper.GetIsActive(ViewContext, "voicelink")">Voice Link</div>
                         <div href="@RedirectHelper.ChangeLastPage(ViewContext, "voiceroles")" class="cursor-pointer list-group-item list-group-item-action @SidebarHelper.GetIsActive(ViewContext, "voiceroles")">Voice Roles</div>
                     </div>
-
-                    <div onclick="$('#votingSection').collapse('toggle')" class="cursor-pointer list-group-item list-group-item-action section-header">Voting</div>
-                    <div id="votingSection" class="collapse @SidebarHelper.GetIsSectionOpen(ViewContext, "voting")" data-parent="#sidebarCategories">
-                        <div href="@RedirectHelper.ChangeLastPage(ViewContext, "reputation")" class="cursor-pointer list-group-item list-group-item-action @SidebarHelper.GetIsActive(ViewContext, "reputation")">Reputation</div>
-                        <div href="@RedirectHelper.ChangeLastPage(ViewContext, "votechannels")" class="cursor-pointer list-group-item list-group-item-action @SidebarHelper.GetIsActive(ViewContext, "votechannels")">Vote Channels</div>
-                    </div>
-
                 </div>
             </div>
             <div class="dynamic-height scroll-always scroll-dark scroll-x" style="width: calc(100vw - 225px); padding: 23px;" id="main">

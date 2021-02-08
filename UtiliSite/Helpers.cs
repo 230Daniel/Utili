@@ -71,16 +71,22 @@ namespace UtiliSite
             {
                 "messagefilter",
                 "messagelogs",
-                "messagepinning"
+                "messagepinning",
+                "votechannels"
             };
 
             string[] userSection =
             {
                 "inactiverole",
                 "joinmessage",
+                "reputation"
+            };
+
+            string[] rolesSection =
+            {
                 "joinroles",
                 "rolelinking",
-                "rolepersist"
+                "rolepersist",
             };
 
             string[] voiceSection =
@@ -89,19 +95,13 @@ namespace UtiliSite
                 "voiceroles"
             };
 
-            string[] votingSection =
-            {
-                "votechannels",
-                "reputation"
-            };
-
             return section switch
             {
                 "channel" => channelSection.Contains(page) ? "show" : "",
                 "message" => messageSection.Contains(page) ? "show" : "",
                 "user" => userSection.Contains(page) ? "show" : "",
+                "roles" => rolesSection.Contains(page) ? "show" : "",
                 "voice" => voiceSection.Contains(page) ? "show" : "",
-                "voting" => votingSection.Contains(page) ? "show" : "",
                 _ => ""
             };
         }
