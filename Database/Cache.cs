@@ -28,6 +28,7 @@ namespace Database
         public static List<NoticesRow> Notices { get; set; }
         public static List<PremiumRow> Premium { get; set; }
         public static List<ReputationRow> Reputation { get; set; }
+        public static List<RoleLinkingRow> RoleLinking { get; set; }
         public static List<RolePersistRow> RolePersist { get; set; }
         public static List<JoinRolesRow> JoinRoles { get; set; }
         public static List<VoiceLinkRow> VoiceLink { get; set; }
@@ -65,6 +66,7 @@ namespace Database
             Notices = await Data.Notices.GetRowsAsync(ignoreCache: true);
             Premium = await Data.Premium.GetRowsAsync(ignoreCache: true);
             Reputation = await Data.Reputation.GetRowsAsync(ignoreCache: true);
+            RoleLinking = await Data.RoleLinking.GetRowsAsync(ignoreCache: true);
             RolePersist = await Data.RolePersist.GetRowsAsync(ignoreCache: true);
             JoinRoles = await Data.JoinRoles.GetRowsAsync(ignoreCache: true);
             VoiceLink = await Data.VoiceLink.GetRowsAsync(ignoreCache: true);

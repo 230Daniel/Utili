@@ -29,6 +29,8 @@ namespace Utili.Handlers
                     // Force bypass of all other delays, the user is no longer pending
                     await JoinRoles.UserJoined(after, true);
                 }
+
+                await RoleLinking.GuildUserUpdated(before, after);
             });
         }
 

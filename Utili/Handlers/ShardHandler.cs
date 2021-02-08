@@ -73,6 +73,9 @@ namespace Utili.Handlers
             // Role persist enabled
             guildIds.AddRange((await RolePersist.GetRowsAsync()).Where(x => x.Enabled).Select(x => x.GuildId));
 
+            // Role linking
+            guildIds.AddRange((await RoleLinking.GetRowsAsync()).Select(x => x.GuildId));
+
             // Community server
             guildIds.Add(_config.Community.GuildId);
 
@@ -83,7 +86,7 @@ namespace Utili.Handlers
                 guildIds.AddRange(_guaranteedDownloads.Select(x => x.Item1));
             }
 
-            return guildIds;
+            return guildIds.Distinct().ToList();
         }
 
         public static async Task Log(LogMessage logMessage)
@@ -173,7 +176,7 @@ namespace Utili.Handlers
                     List<ulong> userCacheGuildIds = GetUserCacheGuildsAsync().GetAwaiter().GetResult();
                     foreach (SocketGuild guild in _client.Guilds.Where(x => !userCacheGuildIds.Contains(x.Id)))
                     {
-                        guild.ClearUserCache(x => x.VoiceChannel is null);
+                        guild.ClearUserCache(x => x.VoiceChannel is null && (x.IsPending is null || !x.IsPending.Value));
                     }
                 }
             }

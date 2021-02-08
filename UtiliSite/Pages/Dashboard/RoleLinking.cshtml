@@ -1,0 +1,94 @@
+﻿@page "{guild?}/rolelinking"
+@using Database.Data
+@using Discord.Rest
+@model UtiliSite.Pages.Dashboard.RoleLinkingModel
+@{
+    Layout = "Shared/_Layout.cshtml";
+    ViewData["Title"] = "Role Linking - Utili Dashboard";
+
+    bool premium = (bool)ViewData["premium"];
+
+    ViewData["heading"] = "Role Linking";
+
+    if (premium) { ViewData["subheading"] = "Add/remove a role when someone is given/stripped of a role"; }
+    else { ViewData["subheading"] = "Add/remove a role when someone is given/stripped of a role\nMaximum 2 rules for non premium servers"; }
+
+    ViewData["detailed"] = "";
+
+    List<RoleLinkingRow> rows = (List<RoleLinkingRow>)ViewData["rows"];
+    RestGuild guild = (RestGuild)ViewData["guild"];
+}
+
+@for (int i = 0; i < 2; i++)
+{
+    string addremove = i == 0 ? "added" : "removed";
+    <div class="dropdown">
+        <button class="btn btn-secondary dropdown-toggle dropdown-200" type="button" data-toggle="dropdown" id="@("dropdown" + addremove)" aria-haspopup="true" aria-expanded="false" @(!premium && rows.Count >= 2 ? "disabled" : "")>
+            On role @addremove...
+        </button>
+        <div class="dropdown-menu dropdown-200-content noverticalpadding" aria-labelledby="@("dropdown" + addremove)">
+
+            @foreach (RestRole role in guild.Roles.Where(x => !x.IsEveryone).OrderBy(x => -x.Position))
+            {
+                <form method="post" name="noajax">
+                    <input type="hidden" name="role" value="@role.Id" />
+                    <button class="dropdown-item" asp-page-handler="AddRole@(i == 0 ? "Get" : "Remove")" type="submit">@role.Name</button>
+                </form>
+            }
+
+        </div>
+    </div>
+
+    <div class="row">
+        @{
+            int mode1 = i == 0 ? 0 : 2;
+            int mode2 = i == 0 ? 1 : 3;
+        }
+        @foreach (RoleLinkingRow row in rows.Where(x => x.Mode == mode1 || x.Mode == mode2).OrderBy(x => x.LinkId))
+        {
+            RestRole role = guild.Roles.First(x => x.Id == row.RoleId);
+            <div>
+                <div class="col-md-12" style="padding-bottom: 30px;">
+                    <div class="card-container-3">
+                        <form method="post">
+
+                            <input type="hidden" name="link" value="@row.LinkId" />
+
+                            <div class="input-group flex-nowrap">
+
+                                <input type="text" class="form-control card-strong card-component-3 card-heading" value="When @role.Name is @addremove" readonly>
+
+                                <button type="submit" name="noajax" asp-page-handler="Remove" class="btn card-button-x card-strong">
+                                    <svg width="38px" height="38px" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                        <path transform="translate(0.4, 0)" fill-rule="evenodd" d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z" />
+                                    </svg>
+                                </button>
+
+                            </div>
+
+                            <div class="input-group flex-nowrap">
+                                <select class="custom-select card-component-1" name="mode">
+                                    <!option value="@mode1" @(row.Mode == mode1 ? "selected" : "")>Add</!option>
+                                    <!option value="@mode2" @(row.Mode == mode2 ? "selected" : "")>Remove</!option>
+                                </select>
+                                <select class="custom-select card-component-2" name="linkedRole">
+                                    @foreach (RestRole linkableRole in guild.Roles.Where(x => !x.IsEveryone && x.Id != role.Id).OrderBy(x => -x.Position))
+                                    {
+                                        <!option value="@linkableRole.Id" @(row.LinkedRoleId == linkableRole.Id ? "selected" : "")>
+                                            @linkableRole.Name
+                                        </!option>
+                                    }
+                                </select>
+                            </div>
+
+                            <div class="input-group flex-nowrap">
+                                <span class="input-group-prepend input-group-text card-component-2 card-strong"></span>
+                                <button type="submit" class="btn  card-component-1 card-button card-strong">Save</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}

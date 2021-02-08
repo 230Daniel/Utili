@@ -79,6 +79,7 @@ namespace UtiliSite
                 "inactiverole",
                 "joinmessage",
                 "joinroles",
+                "rolelinking",
                 "rolepersist"
             };
 

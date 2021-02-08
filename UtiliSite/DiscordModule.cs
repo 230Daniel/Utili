@@ -15,7 +15,7 @@ namespace UtiliSite
         private static DiscordCache _cachedClients = new DiscordCache(600);
         private static DiscordCache _cachedGuildLists = new DiscordCache(15);
         private static DiscordCache _cachedGuildUsers = new DiscordCache(15);
-        private static DiscordCache _cachedGuilds = new DiscordCache(120);
+        private static DiscordCache _cachedGuilds = new DiscordCache(15);
         private static DiscordCache _cachedTextChannels = new DiscordCache(15);
         private static DiscordCache _cachedVoiceChannels = new DiscordCache(15);
 

@@ -58,6 +58,7 @@ namespace UtiliSite
                 options.Conventions.AddPageRoute("/dashboard/messagepinning", "dashboard/{guild?}/messagepinning");
                 options.Conventions.AddPageRoute("/dashboard/notices", "dashboard/{guild?}/notices");
                 options.Conventions.AddPageRoute("/dashboard/reputation", "dashboard/{guild?}/reputation");
+                options.Conventions.AddPageRoute("/dashboard/rolelinking", "dashboard/{guild?}/rolelinking");
                 options.Conventions.AddPageRoute("/dashboard/rolepersist", "dashboard/{guild?}/rolepersist");
                 options.Conventions.AddPageRoute("/dashboard/voicelink", "dashboard/{guild?}/voicelink");
                 options.Conventions.AddPageRoute("/dashboard/voiceroles", "dashboard/{guild?}/voiceroles");
