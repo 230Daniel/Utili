@@ -84,7 +84,6 @@ namespace Database.Data
                 ("GuildId", row.GuildId));
         }
 
-
         public static async Task<List<RolePersistRolesRow>> GetPersistRowsAsync(ulong? guildId = null, ulong? userId = null)
         {
             List<RolePersistRolesRow> matchedRows = new List<RolePersistRolesRow>();

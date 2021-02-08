@@ -52,8 +52,11 @@ namespace UtiliSite.Pages.Dashboard
 
             ulong roleId = ulong.Parse(HttpContext.Request.Form["role"]);
             RoleLinkingRow row = new RoleLinkingRow(auth.Guild.Id, roleId, 0) {Mode = 0};
-
             await RoleLinking.SaveRowAsync(row);
+
+            MiscRow miscRow = new MiscRow(auth.Guild.Id, "RequiresUserDownload", "");
+            try { await Misc.SaveRowAsync(miscRow); } catch { }
+
             return new RedirectResult(Request.Path);
         }
 
@@ -64,8 +67,11 @@ namespace UtiliSite.Pages.Dashboard
 
             ulong roleId = ulong.Parse(HttpContext.Request.Form["role"]);
             RoleLinkingRow row = new RoleLinkingRow(auth.Guild.Id, roleId, 0) {Mode = 2};
-
             await RoleLinking.SaveRowAsync(row);
+
+            MiscRow miscRow = new MiscRow(auth.Guild.Id, "RequiresUserDownload", "");
+            try { await Misc.SaveRowAsync(miscRow); } catch { }
+
             return new RedirectResult(Request.Path);
         }
 

@@ -32,8 +32,15 @@ namespace UtiliSite.Pages.Dashboard
             if (!auth.Authenticated) return Forbid();
 
             RolePersistRow row = await RolePersist.GetRowAsync(auth.Guild.Id);
+            bool previous = row.Enabled;
             row.Enabled = HttpContext.Request.Form["enable"] == "on";
             await RolePersist.SaveRowAsync(row);
+
+            if (!previous && row.Enabled)
+            {
+                MiscRow miscRow = new MiscRow(auth.Guild.Id, "RequiresUserDownload", "");
+                try { await Misc.SaveRowAsync(miscRow); } catch { }
+            }
 
             return new OkResult();
         }

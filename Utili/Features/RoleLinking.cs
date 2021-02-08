@@ -50,13 +50,21 @@ namespace Utili.Features
 
             foreach (ulong role in rolesToAdd)
             {
-                await after.AddRoleAsync(guild.GetRole(role));
-                await Task.Delay(1000);
+                try
+                {
+                    await after.AddRoleAsync(guild.GetRole(role));
+                    await Task.Delay(1000);
+                }
+                catch { }
             }
             foreach (ulong role in rolesToRemove)
             {
-                await after.RemoveRoleAsync(guild.GetRole(role));
-                await Task.Delay(1000);
+                try
+                {
+                    await after.RemoveRoleAsync(guild.GetRole(role));
+                    await Task.Delay(1000);
+                }
+                catch { }
             }
         }
     }
