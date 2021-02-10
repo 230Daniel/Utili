@@ -222,7 +222,10 @@ namespace UtiliSite
                     }
                     else
                     {
-                        row.EndsAt = DateTime.UtcNow.AddDays(30).AddHours(6);
+                        SubscriptionService subscriptionService = new SubscriptionService(_stripeClient);
+                        Subscription subscription = await subscriptionService.GetAsync(invoice.SubscriptionId);
+
+                        row.EndsAt = subscription.CurrentPeriodEnd.AddHours(1).AddMinutes(30);
                         await Subscriptions.SaveRowAsync(row);
                     }
 
