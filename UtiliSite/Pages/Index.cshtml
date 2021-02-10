@@ -5,15 +5,95 @@
     ViewData["Title"] = "Utili";
 }
 
-<div class="text-center text-white">
-    <h1 class="display-4">Utili</h1>
-    <p>A Discord bot with some useful utility features</p>
+<div id="container" style="width:100%">
+    <div id="left">
+        <img src="https://file.utili.xyz/Utili.png" style="object-fit: contain; max-width:100%; max-height:100%;" />
+    </div>
+
+    <div id="right">
+        <div class="text-white" display="block" style="margin-bottom: 55px;">
+            <h1 class="display-2">Utili</h1>
+            <span class="subheading">A Discord bot with </span>
+            <span class="subheading" style="color: orangered;" id="typing"></span> 
+            <span class="subheading" style="color: orangered;" id="caret"></span> <br/>
+            <a class="subheading a-blue" href="@RedirectHelper.AddToUrl(ViewContext, "dashboard")">Get started ➔</a>
+        </div>
+    </div>
 </div>
 
-<div class="text-white">
-    <p>
-        Hi, this is a placeholder front page. Welcome to Utili v2.0!<br>
-        Get started by going to the Dashboard tab and selecting a server.<br>
-        Please leave any feedback or bug reports on the <a href="https://discord.gg/WsxqABZ" class="a-blue">Discord server</a>.
-    </p>
-</div>
+<script>
+    var features = [];
+    var i = 0;
+    var speed = 80;
+    var text = "";
+
+    function type() {
+        if (i < text.length) {
+            $("#typing").append(text.charAt(i));
+            i++;
+            setTimeout(type, speed);
+        } else {
+            setTimeout(backspace, 500);
+        }
+    }
+
+    function backspace() {
+        if (i > 0) {
+            $("#typing").html($("#typing").html().slice(0, -1));
+            i--;
+            setTimeout(backspace, speed);
+        } else {
+            setTimeout(reset, 300);
+        }
+    }
+
+    function reset() {
+        if (features.length === 0) {
+            features = [
+                "autopurge", 
+                "channel mirroring", 
+                "sticky notices",
+                "message filtering",
+                "logging",
+                "vote channels",
+                "join messages",
+                "reputation",
+                "join roles",
+                "role linking",
+                "role persist",
+                "voice-text linking"];
+        }
+        var index = Math.floor(Math.random() * features.length);
+        text = features[index];
+        features.splice(index, 1);
+        i = 0;
+
+        type();
+    }
+</script>
+
+<style>
+    .subheading {
+        font-size: 20px;
+    }
+
+    #container {
+        float: left;
+        overflow: hidden;
+        margin-top: 20px;
+    }
+
+    #left {
+        width: 35vw;
+        height: 37vw;
+        min-height: 250px;
+    }
+
+    #right {
+        width: 35vw;
+        height: 37vw;
+        display: flex;
+        align-items: center;
+        min-height: 250px;
+    }
+</style>

@@ -19,6 +19,12 @@
     });
 
     sessionStorage.removeItem("sidebarpos");
+    
+    try {
+        reset();
+    } catch (e) {
+
+    }
 }
 
 $(window).resize(function() {
@@ -49,8 +55,12 @@ function sizeElements() {
 
     if (mobile || vw <= 675) {
         $(".container").css("max-width", "100vw");
+        $("#right").css("float", "").css("width", "100%").css("text-align", "center").css("justify-content", "center").css("display", "flex");
+        $("#left").css("float", "").css("width", "100%").css("justify-content", "center").css("display", "flex");
     } else {
         $(".container").css("max-width", "75vw");
+        $("#right").css("float", "right").css("width", "").css("text-align", "").css("justify-content", "").css("display", "");
+        $("#left").css("float", "left").css("width", "").css("justify-content", "").css("display", "");
     }
 }
 
