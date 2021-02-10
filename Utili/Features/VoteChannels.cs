@@ -61,6 +61,9 @@ namespace Utili.Features
                 // URLs or Media
                 7 => MessageFilter.IsImage(context) || MessageFilter.IsVideo(context) || MessageFilter.IsUrl(context),
 
+                // Embeds
+                8 => MessageFilter.IsEmbed(context),
+
                 // Default
                 _ => false,
             };

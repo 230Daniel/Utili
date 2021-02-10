@@ -200,5 +200,10 @@ namespace Utili.Features
                 return false;
             }
         }
+
+        public static bool IsEmbed(SocketCommandContext context)
+        {
+            return context.Message.Embeds.Count > 0;
+        }
     }
 }
