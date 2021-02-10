@@ -108,30 +108,41 @@ namespace Utili.Features
 
             IEmote emote = Helper.GetEmote(emoteString);
 
-            if (row.Emotes.Contains(emote))
+            bool triedAlternative = false;
+            while (true)
             {
-                await SendFailureAsync(Context.Channel, "Error",
-                    "That emote is already added");
-                return;
+                try
+                {
+                    await Context.Message.AddReactionAsync(emote);
+                    break;
+                }
+                catch
+                {
+                    if (!triedAlternative && Context.Guild.Emotes.Any(x => x.Name == emoteString || $":{x.Name}:" == emoteString))
+                    {
+                        triedAlternative = true;
+                        emote = Context.Guild.Emotes.First(x => x.Name == emoteString || $":{x.Name}:" == emoteString);
+                    }
+                    else
+                    {
+                        await SendFailureAsync(Context.Channel, "Error", $"An emote was not found matching {emoteString}");
+                        return;
+                    }
+                }
             }
-
-            try
-            {
-                await Context.Message.AddReactionAsync(emote);
-            }
-            catch
-            {
-                await SendFailureAsync(Context.Channel, "Error",
-                    $"An emote was not found matching {emoteString}");
-                return;
-            }
-
+            
             _ = Task.Run(async () =>
             {
                 // Rate limit is 1 per 250ms. Stupid but what can you do?
                 await Task.Delay(500);
                 await Context.Message.RemoveReactionAsync(emote, _client.CurrentUser);
             });
+
+            if (row.Emotes.Contains(emote))
+            {
+                await SendFailureAsync(Context.Channel, "Error", "That emote is already added");
+                return;
+            }
 
             row.Emotes.Add(emote);
             await Database.Data.VoteChannels.SaveRowAsync(row);
