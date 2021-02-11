@@ -102,33 +102,19 @@ namespace Utili.Features
             if(row.Emotes.Count >= limit)
             {
                 await SendFailureAsync(Context.Channel, "Error",
-                    $"Your server can only have up to {limit} emotes per votes channel\nRemove emotes with the removeEmote command");
+                    $"Your server can only have up to {limit} emojis per votes channel\nRemove emojis with the removeEmoji command");
                 return;
             }
 
-            IEmote emote = Helper.GetEmote(emoteString);
-
-            bool triedAlternative = false;
-            while (true)
+            IEmote emote = Helper.GetEmote(emoteString, Context.Guild);
+            try
             {
-                try
-                {
-                    await Context.Message.AddReactionAsync(emote);
-                    break;
-                }
-                catch
-                {
-                    if (!triedAlternative && Context.Guild.Emotes.Any(x => x.Name == emoteString || $":{x.Name}:" == emoteString))
-                    {
-                        triedAlternative = true;
-                        emote = Context.Guild.Emotes.First(x => x.Name == emoteString || $":{x.Name}:" == emoteString);
-                    }
-                    else
-                    {
-                        await SendFailureAsync(Context.Channel, "Error", $"An emote was not found matching {emoteString}");
-                        return;
-                    }
-                }
+                await Context.Message.AddReactionAsync(emote);
+            }
+            catch
+            {
+                await SendFailureAsync(Context.Channel, "Error", $"An emoji was not found matching {emoteString}");
+                return;
             }
             
             _ = Task.Run(async () =>
@@ -140,7 +126,7 @@ namespace Utili.Features
 
             if (row.Emotes.Contains(emote))
             {
-                await SendFailureAsync(Context.Channel, "Error", "That emote is already added");
+                await SendFailureAsync(Context.Channel, "Error", "That emoji is already added");
                 return;
             }
 
@@ -148,7 +134,7 @@ namespace Utili.Features
             await Database.Data.VoteChannels.SaveRowAsync(row);
 
             await SendSuccessAsync(Context.Channel, "Emote added", 
-                $"The {emote} emote was added successfully");
+                $"The {emote} emoji was added successfully");
         }
 
         [Command("AddEmote"), Alias("AddEmotes", "AddEmoji", "AddEmojis")]
@@ -171,8 +157,7 @@ namespace Utili.Features
             }
 
             VoteChannelsRow row = rows.First();
-
-            IEmote emote = Helper.GetEmote(emoteString);
+            IEmote emote = Helper.GetEmote(emoteString, Context.Guild);
 
             if (!row.Emotes.Contains(emote))
             {
@@ -186,14 +171,14 @@ namespace Utili.Features
                     catch
                     {
                         await SendFailureAsync(Context.Channel, "Error",
-                            "That emote is not added\nIf you can't specify the emote, use its number found in the listEmote command");
+                            "That emote is not added\nIf you can't specify the emoji, use its number found in the listEmoji command");
                         return;
                     }
                 }
                 else
                 {
                     await SendFailureAsync(Context.Channel, "Error",
-                        "That emote is not added\nIf you can't specify the emote, use its number found in the listEmote command");
+                        "That emote is not added\nIf you can't specify the emoji, use its number found in the listEmoji command");
                     return;
                 }
             }
@@ -201,8 +186,8 @@ namespace Utili.Features
             row.Emotes.Remove(emote);
             await Database.Data.VoteChannels.SaveRowAsync(row);
 
-            await SendSuccessAsync(Context.Channel, "Emote removed", 
-                $"The {emote} emote was removed successfully");
+            await SendSuccessAsync(Context.Channel, "Emoji removed", 
+                $"The {emote} emoji was removed successfully");
         }
 
         [Command("RemoveEmote"), Alias("RemoveEmotes", "RemoveEmoji", "RemoveEmojis")]
@@ -232,8 +217,8 @@ namespace Utili.Features
                 content += $"{i + 1}: {row.Emotes[i]}\n";
             }
 
-            await SendInfoAsync(Context.Channel, "Emotes",
-                $"There are {row.Emotes.Count} emotes for {channel.Mention}\n\n{content}");
+            await SendInfoAsync(Context.Channel, "Emojis",
+                $"There are {row.Emotes.Count} emojis for {channel.Mention}\n\n{content}");
         }
     }
 }

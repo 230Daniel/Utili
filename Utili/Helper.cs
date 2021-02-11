@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Text;
 using Discord;
 using Discord.WebSocket;
@@ -26,12 +27,12 @@ namespace Utili
             return Program._client.GetShardFor(guild);
         }
 
-        public static IEmote GetEmote(string emoteString)
+        public static IEmote GetEmote(string emoteString, SocketGuild guild)
         {
             if (Emote.TryParse(emoteString, out Emote emote))
-            {
                 return emote;
-            }
+            if (guild.Emotes.Any(x => x.Name == emoteString || $":{x.Name}:" == emoteString))
+                return guild.Emotes.First(x => x.Name == emoteString || $":{x.Name}:" == emoteString);
 
             return new Emoji(emoteString);
         }

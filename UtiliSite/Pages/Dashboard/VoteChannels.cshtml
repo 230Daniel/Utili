@@ -9,10 +9,10 @@
     bool premium = (bool) ViewData["premium"];
 
     ViewData["heading"] = "Vote Channels";
-    ViewData["subheading"] = "Add reactions to messages\nvotes addEmote [channel] [emote]\nvotes removeEmote [channel] [emote]\nvotes listEmotes [channel]";
+    ViewData["subheading"] = "Add reactions to messages\nvotes addEmoji [channel] [emoji]\nvotes removeEmoji [channel] [emoji]\nvotes listEmojis [channel]";
 
-    if (premium) { ViewData["detailed"] = "Add emotes using the commands below.\n5 emotes can be added to each message."; }
-    else { ViewData["detailed"] = "Add emotes using the commands below.\n2 emotes can be added to each message.\nGet premium to upgrade this to 5 per message."; }
+    if (premium) { ViewData["detailed"] = "Add emojis using the commands below.\n5 emojis can be added to each message."; }
+    else { ViewData["detailed"] = "Add emojis using the commands below.\n2 emojis can be added to each message.\nGet premium to upgrade this to 5 per message."; }
 
     List<VoteChannelsRow> rows = (List<VoteChannelsRow>) ViewData["rows"];
     List<RestTextChannel> channels = (List<RestTextChannel>) ViewData["channels"];
@@ -72,7 +72,7 @@
                         </div>
 
                         <div class="input-group flex-nowrap">
-                            <span class="input-group-text input-group-prepend card-strong card-component-2">@(row.Emotes.Count == 1 ? $"{row.Emotes.Count} emote" : $"{row.Emotes.Count} emotes")</span>
+                            <span class="input-group-text input-group-prepend card-strong card-component-2">@(row.Emotes.Count == 1 ? $"{row.Emotes.Count} emoji" : $"{row.Emotes.Count} emojis")</span>
                             <button type="submit" class="btn card-button card-component-1 card-strong">Save</button>
                         </div>
                     </form>

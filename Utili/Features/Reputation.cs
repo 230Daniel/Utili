@@ -150,10 +150,10 @@ namespace Utili.Features
             await SendSuccessAsync(Context.Channel, "Reputation set", $"Set {user.Mention}'s reputation to {amount}");
         }
 
-        [Command("AddEmote"), Permission(Perm.ManageGuild), Cooldown(2)]
-        public async Task AddEmote(string emoteString, int value = 0)
+        [Command("AddEmoji"), Permission(Perm.ManageGuild), Cooldown(2)]
+        public async Task AddEmoji(string emoteString, int value = 0)
         {
-            IEmote emote = Helper.GetEmote(emoteString);
+            IEmote emote = Helper.GetEmote(emoteString, Context.Guild);
             ReputationRow row = await Database.Data.Reputation.GetRowAsync(Context.Guild.Id);
 
             bool triedAlternative = false;
@@ -173,7 +173,7 @@ namespace Utili.Features
                     }
                     else
                     {
-                        await SendFailureAsync(Context.Channel, "Error", $"An emote was not found matching {emoteString}");
+                        await SendFailureAsync(Context.Channel, "Error", $"An emoji was not found matching {emoteString}");
                         return;
                     }
                 }
@@ -188,15 +188,15 @@ namespace Utili.Features
 
             if (row.Emotes.Any(x => Equals(x.Item1, emote)))
             {
-                await SendFailureAsync(Context.Channel, "Error", "That emote is already added");
+                await SendFailureAsync(Context.Channel, "Error", "That emoji is already added");
                 return;
             }
 
             row.Emotes.Add((emote, value));
             await Database.Data.Reputation.SaveRowAsync(row);
 
-            await SendSuccessAsync(Context.Channel, "Emote added", 
-                $"The {emote} emote was added successfully with value {value}\nYou can change its value or remove it on the dashboard");
+            await SendSuccessAsync(Context.Channel, "Emoji added", 
+                $"The {emote} emoji was added successfully with value {value}\nYou can change its value or remove it on the dashboard");
         }
     }
 }

@@ -170,7 +170,7 @@ namespace Utili.Commands
                 return;
             }
 
-            IEmote emoji = Helper.GetEmote(emojiString);
+            IEmote emoji = Helper.GetEmote(emojiString, Context.Guild);
 
             try
             {
@@ -204,7 +204,7 @@ namespace Utili.Commands
                 return;
             }
 
-            IEmote emoji = Helper.GetEmote(emojiString);
+            IEmote emoji = Helper.GetEmote(emojiString, Context.Guild);
 
             try
             {
@@ -247,7 +247,7 @@ namespace Utili.Commands
                     return;
                 }
 
-                IEmote emoji = Helper.GetEmote(emojiString);
+                IEmote emoji = Helper.GetEmote(emojiString, Context.Guild);
 
                 if(message.Reactions.TryGetValue(emoji, out ReactionMetadata _))
                 {
