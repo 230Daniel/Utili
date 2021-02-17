@@ -13,11 +13,6 @@
     <p>Welcome to Utili Premium</p>
 </div>
 
-<div class="divider">
-    <div></div>
-    <span>Active Subscriptions</span>
-</div>
-
 @if (subscriptions.Count > 0)
 {
     int valid = subscriptions.Count(x => x.IsValid);
