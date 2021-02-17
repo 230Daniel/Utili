@@ -29,13 +29,34 @@ namespace Utili.Commands
                 MessageSender.EmbedType.Success,
                 user?.ToString(),
                 content).ToEmbedBuilder();
-
             embed.ThumbnailUrl = user?.GetAvatarUrl() ?? user?.GetDefaultAvatarUrl();
 
             await Context.User.SendMessageAsync(embed: embed.Build());
-
             await SendSuccessAsync(Context.Channel, "User info sent", $"Information about {user} was sent in a direct message");
         }
+
+        [Command("GuildInfo")] [Permission(Perm.BotOwner)]
+        public async Task GuildInfo(ulong guildId)
+        {
+            RestGuild guild = await _rest.GetGuildAsync(guildId, true);
+            bool premium = await Premium.IsGuildPremiumAsync(guildId);
+
+            string content = $"Id: {guild?.Id}\n" +
+                             $"Owner: {guild.OwnerId}\n" +
+                             $"Members: {guild.ApproximateMemberCount}\n" +
+                             $"Created: {guild.CreatedAt.UtcDateTime} UTC\n" +
+                             $"Premium: {premium.ToString().ToLower()}";
+
+            EmbedBuilder embed = GenerateEmbed(
+                MessageSender.EmbedType.Success,
+                guild?.ToString(),
+                content).ToEmbedBuilder();
+            embed.ThumbnailUrl = guild.IconUrl;
+
+            await Context.User.SendMessageAsync(embed: embed.Build());
+            await SendSuccessAsync(Context.Channel, "Guild info sent", $"Information about {guild} was sent in a direct message");
+        }
+
 
         [Command("Authorise")] [Permission(Perm.BotOwner)]
         public async Task Authorise(ulong guildId, ulong userId)
