@@ -23,6 +23,7 @@
 
 .navbar-brand > img{
 	margin-right: 5px;
+	margin-top: 2px;
 }
 
 .nav-link{
@@ -85,6 +86,20 @@ button:focus{
 	background-color: var(--colour-dropdown-hover) !important;
 }
 
+#user-dropdown{
+	padding: 0px;
+	display: flex;
+	align-items: center; 
+	margin-right: 15px;
+}
+
+.nav-link > img{
+	width: 35px;
+	height: 35px;
+	border-radius: 17.5px;
+	margin-right: 10px;
+}
+
 /* Main */
 
 body{
@@ -121,12 +136,12 @@ h2{
 /* Scrollbars */
 
 ::-webkit-scrollbar{
-	background-color: white;
+	background-color: var(--colour-scrollbar);
 	width: 14px;
 }
 
 ::-webkit-scrollbar-thumb{
-	background-color: lightgray;
+	background-color: var(--colour-scrollbar-thumb);
 }
 
 /* Footer */

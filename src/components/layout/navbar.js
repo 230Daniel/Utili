@@ -2,6 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { Navbar, Nav } from "react-bootstrap";
 
+import User from "./user";
 import ThemeSelector from "./themeSelector";
 
 class MyNavbar extends React.Component{
@@ -21,6 +22,7 @@ class MyNavbar extends React.Component{
 								<Nav.Link to="/dashboard" as={Link}>Dashboard</Nav.Link>
 								<Nav.Link to="/premium" as={Link}>Premium</Nav.Link>
 							</Nav>
+							<User/>
 							<ThemeSelector/>
 						</Navbar.Collapse>
 					</div>

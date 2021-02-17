@@ -48,22 +48,26 @@ class ThemeSelector extends React.Component{
 	apply(){
 		switch(this.state.theme){
 			case "dark":
-				s("colour-nav", "#313131");
-				s("colour-text", "#ffffff");
-				s("colour-text-muted", "#d3d3d3");
-				s("colour-background", "#1e1e1e");
-				s("colour-shadow", "#232323");
-				s("colour-dropdown", "#121212");
-				s("colour-dropdown-hover", "#252525");
+				c("nav", "#313131");
+				c("text", "#ffffff");
+				c("text-muted", "#d3d3d3");
+				c("background", "#1e1e1e");
+				c("shadow", "#232323");
+				c("dropdown", "#121212");
+				c("dropdown-hover", "#252525");
+				c("scrollbar", "#1e1e1e");
+				c("scrollbar-thumb", "#272727");
 				break;
 			case "light":
-				s("colour-nav", "#e2e2e2");
-				s("colour-text", "#000000");
-				s("colour-text-muted", "'#d3d3d3'");
-				s("colour-background", "#eeeeee");
-				s("colour-shadow", "#d3d3d3");
-				s("colour-dropdown", "#ffffff");
-				s("colour-dropdown-hover", "#efefef");
+				c("nav", "#e2e2e2");
+				c("text", "#000000");
+				c("text-muted", "'#d3d3d3'");
+				c("background", "#eeeeee");
+				c("shadow", "#d3d3d3");
+				c("dropdown", "#ffffff");
+				c("dropdown-hover", "#efefef");
+				c("scrollbar", "#eeeeee");
+				c("scrollbar-thumb", "#ababab");
 				break;
 		}
 	}
@@ -74,8 +78,8 @@ function capitalise(s){
 	return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
-function s(variable, value){
-	document.documentElement.style.setProperty(`--${variable}`, value);
+function c(variable, value){
+	document.documentElement.style.setProperty(`--colour-${variable}`, value);
 }
 
 export default ThemeSelector;
