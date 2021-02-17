@@ -49,9 +49,9 @@
         <span>Your Subscriptions</span>
     </div>
 
-    if (canceled > 0) { <span class="text-white">You have @canceled canceled @(canceled == 1 ? "subscription" : "subscriptions")</span> }
-    if (overdue > 0) { <span class="text-danger">You have @overdue overdue @(overdue == 1 ? "subscription" : "subscriptions")</span> }
-    if (incomplete > 0) { <span class="text-danger">You have @incomplete incomplete @(incomplete == 1 ? "subscription" : "subscriptions")</span> }
+    if (canceled > 0) { <span class="text-white">You have @canceled canceled @(canceled == 1 ? "subscription" : "subscriptions")</span> <br/> }
+    if (overdue > 0) { <span class="text-danger">You have @overdue overdue @(overdue == 1 ? "subscription" : "subscriptions")</span> <br/> }
+    if (incomplete > 0) { <span class="text-danger">You have @incomplete incomplete @(incomplete == 1 ? "subscription" : "subscriptions")</span> <br/> }
     <p class="text-white">You have @valid active @(valid == 1 ? "subscription" : "subscriptions") with a total of @slots premium server @(slots == 1 ? "slot" : "slots"). </p>
     if (slots > 0) { <a class="a-blue" href="@RedirectHelper.AddToUrl(ViewContext, "servers")">Select @(slots == 1 ? "server" : "servers") ➔</a> <br /> }
     <span class="a-blue" onclick="billingPortal()">Manage Billing ➔</span>
