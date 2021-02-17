@@ -216,12 +216,14 @@ namespace UtiliSite
                         "incomplete" => SubscriptionStatus.Incomplete,
                         "incomplete_expired" => SubscriptionStatus.IncompleteExpired,
                         "trialing" => SubscriptionStatus.Trialing,
-                        _ => throw new ArgumentException(
-                            $"Unknown value for subscription {subscription.Id} status: {subscription.Status}")
+                        _ => throw new ArgumentException($"Unknown value for subscription {subscription.Id} status: {subscription.Status}")
                     };
                     await Subscriptions.SaveRowAsync(row);
 
                     break;
+
+                default:
+                    throw new ArgumentException($"Unknown Stripe event type {stripeEvent.Type}");
             }
 
             return Ok();
