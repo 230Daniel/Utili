@@ -24,6 +24,7 @@
     int canceled = subscriptions.Count(x => x.Status == SubscriptionStatus.Canceled || x.Status == SubscriptionStatus.IncompleteExpired);
     int overdue = subscriptions.Count(x => x.Status == SubscriptionStatus.PastDue);
     int incomplete = subscriptions.Count(x => x.Status == SubscriptionStatus.Incomplete);
+    int slots = subscriptions.Where(x => x.IsValid).Sum(x => x.Slots);
 
     <div class="divider">
         <div></div>
