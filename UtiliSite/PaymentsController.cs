@@ -194,40 +194,32 @@ namespace UtiliSite
             // Webhooks are retried once an hour for up to 3 days or until a 200 status code is returned.
 
             switch (stripeEvent.Type) {
-                case "invoice.paid":
-                    // Triggers on first payment and following payments
+                case "customer.subscription.updated":
+                    
+                    string jsonSubscription = stripeEvent.Data.Object.ToString();
+                    jsonSubscription = jsonSubscription.Substring(jsonSubscription.IndexOf('{'));
+                    Subscription subscription = Subscription.FromJson(jsonSubscription);
 
-                    string jsonInvoice = stripeEvent.Data.Object.ToString();
-                    jsonInvoice = jsonInvoice.Substring(jsonInvoice.IndexOf('{'));
-                    Invoice invoice = Invoice.FromJson(jsonInvoice);
+                    ProductService productService = new ProductService(_stripeClient);
+                    Product product = await productService.GetAsync(subscription.Items.Data[0].Plan.ProductId);
+                    if (!int.TryParse(product.Metadata["slots"], out int slots)) slots = 0;
 
-                    SubscriptionsRow row = await Subscriptions.GetRowAsync(invoice.SubscriptionId);
-                    if (row.New)
+                    SubscriptionsRow row = await Subscriptions.GetRowAsync(subscription.Id);
+                    row.Slots = slots;
+                    row.EndsAt = subscription.CurrentPeriodEnd.AddHours(2);
+                    row.Status = subscription.Status switch
                     {
-                        ProductService service = new ProductService(_stripeClient);
-                        Product product = await service.GetAsync(invoice.Lines.Data.First().Plan.ProductId);
-
-                        SubscriptionService subscriptionService = new SubscriptionService(_stripeClient);
-                        Subscription subscription = await subscriptionService.GetAsync(invoice.SubscriptionId);
-
-                        UserRow user = await Users.GetRowAsync(invoice.CustomerId);
-                        row.Slots = int.Parse(product.Metadata["slots"]);
-                        row.UserId = user.UserId;
-                        row.EndsAt = subscription.CurrentPeriodEnd.AddHours(1).AddMinutes(30);
-                        // Allow a bit of leeway if we failed to receive the webhook
-                        // Stripe TimeSpans from the API are always in UTC
-                        // Stripe webhooks are retried every hour for 3 days
-
-                        await Subscriptions.SaveRowAsync(row);
-                    }
-                    else
-                    {
-                        SubscriptionService subscriptionService = new SubscriptionService(_stripeClient);
-                        Subscription subscription = await subscriptionService.GetAsync(invoice.SubscriptionId);
-
-                        row.EndsAt = subscription.CurrentPeriodEnd.AddHours(1).AddMinutes(30);
-                        await Subscriptions.SaveRowAsync(row);
-                    }
+                        "active" => SubscriptionStatus.Active,
+                        "past_due" => SubscriptionStatus.PastDue,
+                        "unpaid" => SubscriptionStatus.Unpaid,
+                        "canceled" => SubscriptionStatus.Canceled,
+                        "incomplete" => SubscriptionStatus.Incomplete,
+                        "incomplete_expired" => SubscriptionStatus.IncompleteExpired,
+                        "trialing" => SubscriptionStatus.Trialing,
+                        _ => throw new ArgumentException(
+                            $"Unknown value for subscription {subscription.Id} status: {subscription.Status}")
+                    };
+                    await Subscriptions.SaveRowAsync(row);
 
                     break;
             }

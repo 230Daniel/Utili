@@ -29,8 +29,7 @@ namespace Database.Data
 
             if (onlyValid)
             {
-                command += " AND EndsAt > @Now";
-                values.Add(("Now", DateTime.UtcNow));
+                command += " AND (Status=0 OR Status=1 OR Status=6)";
             }
 
             MySqlDataReader reader = await Sql.ExecuteReaderAsync(command, values.ToArray());
@@ -41,7 +40,8 @@ namespace Database.Data
                     reader.GetString(0),
                     reader.GetUInt64(1),
                     reader.GetDateTime(2),
-                    reader.GetInt32(3)));
+                    reader.GetInt32(3),
+                    reader.GetInt32(4)));
             }
 
             reader.Close();
@@ -58,9 +58,8 @@ namespace Database.Data
         public static async Task<int> GetSlotCountAsync(ulong userId)
         {
             MySqlDataReader reader = await Sql.ExecuteReaderAsync(
-                "SELECT SUM(Slots) FROM Subscriptions WHERE UserId = @UserId AND EndsAt >= @Now;",
-                ("UserId", userId),
-                ("Now", DateTime.UtcNow));
+                "SELECT SUM(Slots) FROM Subscriptions WHERE UserId = @UserId AND (Status=0 OR Status=1 OR Status=6);",
+                ("UserId", userId));
 
             int slots = 0;
 
@@ -74,22 +73,24 @@ namespace Database.Data
         {
             if (row.New)
             {
-                await Sql.ExecuteAsync("INSERT INTO Subscriptions (SubscriptionId, UserId, EndsAt, Slots) VALUES (@SubscriptionId, @UserId, @EndsAt, @Slots);",
+                await Sql.ExecuteAsync("INSERT INTO Subscriptions (SubscriptionId, UserId, EndsAt, Slots, Status) VALUES (@SubscriptionId, @UserId, @EndsAt, @Slots, @Status);",
                     ("SubscriptionId", row.SubscriptionId),
                     ("UserId", row.UserId),
                     ("EndsAt", row.EndsAt),
-                    ("Slots", row.Slots));
+                    ("Slots", row.Slots),
+                    ("Status", (int)row.Status));
 
                 row.New = false;
             }
             else
             {
                 await Sql.ExecuteAsync(
-                    "UPDATE Subscriptions SET UserId = @UserId, EndsAt = @EndsAt, Slots = @Slots WHERE SubscriptionId = @SubscriptionId;",
+                    "UPDATE Subscriptions SET UserId = @UserId, EndsAt = @EndsAt, Slots = @Slots, Status = @Status WHERE SubscriptionId = @SubscriptionId;",
                     ("SubscriptionId", row.SubscriptionId),
                     ("UserId", row.UserId.ToString()),
                     ("EndsAt", row.EndsAt),
-                    ("Slots", row.Slots.ToString()));
+                    ("Slots", row.Slots.ToString()),
+                    ("Status", (int)row.Status));
             }
         }
 
@@ -110,6 +111,8 @@ namespace Database.Data
         public DateTime EndsAt { get; set; }
         public ulong UserId { get; set; }
         public int Slots { get; set; }
+        public SubscriptionStatus Status { get; set; }
+        public bool IsValid => Status == SubscriptionStatus.Active ||  Status == SubscriptionStatus.PastDue || Status == SubscriptionStatus.Trialing;
 
         private SubscriptionsRow()
         {
@@ -122,7 +125,7 @@ namespace Database.Data
             SubscriptionId = subscriptionId;
         }
 
-        public static SubscriptionsRow FromDatabase(string subscriptionId, ulong userId, DateTime endsAt, int slots)
+        public static SubscriptionsRow FromDatabase(string subscriptionId, ulong userId, DateTime endsAt, int slots, int status)
         {
             return new SubscriptionsRow
             {
@@ -130,9 +133,11 @@ namespace Database.Data
                 SubscriptionId = subscriptionId,
                 UserId = userId,
                 EndsAt = endsAt,
-                Slots = slots
+                Slots = slots,
+                Status = (SubscriptionStatus)status
             };
         }
+
         public async Task SaveAsync()
         {
             await Subscriptions.SaveRowAsync(this);
@@ -142,5 +147,16 @@ namespace Database.Data
         {
             await Subscriptions.DeleteRowAsync(this);
         }
+    }
+
+    public enum SubscriptionStatus
+    {
+        Active = 0,                 // Subscription is active                                           Valid
+        PastDue = 1,                // Subscription renewal was unsuccessful                            Valid
+        Unpaid = 2,                 // Not used                                                         Invalid
+        Canceled = 3,               // Subscription has been canceled                                   Invalid
+        Incomplete = 4,             // Subscription's initial payment failed                            Invalid
+        IncompleteExpired = 5,      // Subscription's initial payment has failed for 23 hours           Invalid
+        Trialing = 6                // Subscription is a trial period                                   Valid
     }
 }

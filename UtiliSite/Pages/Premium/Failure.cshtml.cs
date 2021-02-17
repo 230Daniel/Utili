@@ -15,10 +15,7 @@ namespace UtiliSite.Pages.Premium
             ViewData["auth"] = auth;
             if(!auth.Authenticated) return auth.Action;
 
-            List<SubscriptionsRow> subscriptions = await Subscriptions.GetRowsAsync(userId: auth.User.Id, onlyValid: true);
-            ViewData["subscriptions"] = subscriptions.Count;
-            ViewData["slots"] = subscriptions.Sum(x => x.Slots);
-
+            ViewData["subscriptions"] = await Subscriptions.GetRowsAsync(userId: auth.User.Id);
             return new PageResult();
         }
     }

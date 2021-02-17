@@ -17,15 +17,11 @@ namespace UtiliSite.Pages.Premium
 
             await Task.Delay(2000);
 
-            List<SubscriptionsRow> subscriptions = await Subscriptions.GetRowsAsync(userId: auth.User.Id, onlyValid: true);
-            ViewData["subscriptions"] = subscriptions.Count;
-            ViewData["slots"] = subscriptions.Sum(x => x.Slots);
+            List<SubscriptionsRow> subscriptions = await Subscriptions.GetRowsAsync(userId: auth.User.Id);
+            ViewData["subscriptions"] = subscriptions;
 
-            if (subscriptions.Count == 0)
-            {
+            if (subscriptions.Count(x => x.IsValid) == 0)
                 return Redirect("failure");
-            }
-
             return new PageResult();
         }
     }

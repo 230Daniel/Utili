@@ -1,11 +1,10 @@
 ﻿@page
+@using Database.Data
 @model UtiliSite.Pages.Premium.IndexModel
 @{
     Layout = "Shared/_Layout.cshtml";
     if (ViewData["subscriptions"] is null) { return; }
-    int subscriptions = (int)ViewData["subscriptions"];
-    int slots = (int)ViewData["slots"];
-
+    List<SubscriptionsRow> subscriptions = (List<SubscriptionsRow>)ViewData["subscriptions"];
     ViewData["Title"] = "Premium - Utili";
 }
 
@@ -37,16 +36,25 @@
 </div>
 
 
-@if (subscriptions > 0)
+@if (subscriptions.Count > 0)
 {
+    int valid = subscriptions.Count(x => x.IsValid);
+    int canceled = subscriptions.Count(x => x.Status == SubscriptionStatus.Canceled || x.Status == SubscriptionStatus.IncompleteExpired);
+    int overdue = subscriptions.Count(x => x.Status == SubscriptionStatus.PastDue);
+    int incomplete = subscriptions.Count(x => x.Status == SubscriptionStatus.Incomplete);
+    int slots = subscriptions.Where(x => x.IsValid).Sum(x => x.Slots);
+
     <div class="divider">
         <div></div>
-        <span>Active Subscriptions</span>
+        <span>Your Subscriptions</span>
     </div>
 
-    <p class="text-white">You have @subscriptions active @(subscriptions != 1 ? "subscriptions" : "subscription") with a total of @slots premium server @(slots != 1 ? "slots" : "slot"). </p>
-    <a class="a-blue" href="@RedirectHelper.AddToUrl(ViewContext, "servers")">Select @(slots != 1 ? "servers" : "server") ➔</a> <br />
-    <span class="a-blue" onclick="billingPortal()">Manage @(subscriptions != 1 ? "subscriptions" : "subscription") ➔</span>
+    if (canceled > 0) { <span class="text-white">You have @canceled canceled @(canceled == 1 ? "subscription" : "subscriptions")</span> }
+    if (overdue > 0) { <span class="text-danger">You have @overdue overdue @(overdue == 1 ? "subscription" : "subscriptions")</span> }
+    if (incomplete > 0) { <span class="text-danger">You have @incomplete incomplete @(incomplete == 1 ? "subscription" : "subscriptions")</span> }
+    <p class="text-white">You have @valid active @(valid == 1 ? "subscription" : "subscriptions") with a total of @slots premium server @(slots == 1 ? "slot" : "slots"). </p>
+    if (slots > 0) { <a class="a-blue" href="@RedirectHelper.AddToUrl(ViewContext, "servers")">Select @(slots == 1 ? "server" : "servers") ➔</a> <br /> }
+    <span class="a-blue" onclick="billingPortal()">Manage Billing ➔</span>
 }
 
 <div class="divider">

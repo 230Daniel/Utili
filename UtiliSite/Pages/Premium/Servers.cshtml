@@ -9,9 +9,8 @@
 
     if (ViewData["auth"] is null) { return; }
 
-        int subscriptions = (int)ViewData["subscriptions"];
+    List<SubscriptionsRow> subscriptions = (List<SubscriptionsRow>)ViewData["subscriptions"];
     List<PremiumRow> rows = (List<PremiumRow>)ViewData["rows"];
-    int slot = 0;
 }
 
 <div class="text-center text-white">
@@ -19,13 +18,24 @@
     <p style="margin-bottom: 40px;">Select a server for each of your premium slots</p>
 </div>
 
-<div class="divider">
-    <div></div>
-    <span>Active Subscriptions</span>
-</div>
+@if (subscriptions.Count > 0)
+{
+    int valid = subscriptions.Count(x => x.IsValid);
+    int canceled = subscriptions.Count(x => x.Status == SubscriptionStatus.Canceled || x.Status == SubscriptionStatus.IncompleteExpired);
+    int overdue = subscriptions.Count(x => x.Status == SubscriptionStatus.PastDue);
+    int incomplete = subscriptions.Count(x => x.Status == SubscriptionStatus.Incomplete);
 
-<p class="text-white">You have @subscriptions active @(subscriptions != 1 ? "subscriptions" : "subscription") with a total of @rows.Count premium server @(rows.Count != 1 ? "slots" : "slot"). </p>
-<span class="a-blue" onclick="billingPortal()">Manage @(subscriptions != 1 ? "subscriptions" : "subscription") ➔</span>
+    <div class="divider">
+        <div></div>
+        <span>Your Subscriptions</span>
+    </div>
+
+    if (canceled > 0) { <span class="text-white">You have @canceled canceled @(canceled == 1 ? "subscription" : "subscriptions")</span> }
+    if (overdue > 0) { <span class="text-danger">You have @overdue overdue @(overdue == 1 ? "subscription" : "subscriptions")</span> }
+    if (incomplete > 0) { <span class="text-danger">You have @incomplete incomplete @(incomplete == 1 ? "subscription" : "subscriptions")</span> }
+    <p class="text-white">You have @valid active @(valid == 1 ? "subscription" : "subscriptions") with a total of @slots premium server @(slots == 1 ? "slot" : "slots"). </p>
+    <span class="a-blue" onclick="billingPortal()">Manage Billing ➔</span>
+}
 
 <div class="divider">
     <div></div>
@@ -33,6 +43,9 @@
 </div>
 
 <div class="row" style="display: flex;">
+    @{
+        int slot = 0;
+    }
     @foreach (PremiumRow row in rows)
     {
         slot++;
@@ -41,7 +54,7 @@
                 <div class="card-container-3">
                     <form method="post">
 
-                        <input type="hidden" name="slot" value="@row.SlotId" />
+                        <input type="hidden" name="slot" value="@row.SlotId"/>
 
                         <div class="input-group flex-nowrap">
 
@@ -51,10 +64,10 @@
                         <div class="input-group flex-nowrap">
                             <span class="input-group-prepend input-group-text card-component-1">Server</span>
                             <select class="custom-select card-component-2" name="guild">
-                                <!option value="0" @(row.GuildId == 0 ? "selected": "")>None</!option>
+                                <!option value="0" @(row.GuildId == 0 ? "selected" : "")>None</!option>
                                 @foreach (RestUserGuild guild in ViewData["guilds"] as IEnumerable)
                                 {
-                                    <!option value="@guild.Id" @(row.GuildId == guild.Id ? "selected": "")>
+                                    <!option value="@guild.Id" @(row.GuildId == guild.Id ? "selected" : "")>
                                         @guild.Name
                                     </!option>
                                 }
