@@ -1,31 +1,36 @@
 import React from "react";
-import { withRouter } from "react-router-dom";
+import { getDetails as getAuthDetails, signIn, signOut } from "../../api/auth";
 
 class Test extends React.Component{
 	constructor(props){
 		super(props);
 		this.guildId = this.props.match.params.guildId;
 		this.state = {
-			content: undefined
+			content: undefined,
+			user: undefined
 		};
 	}
 
 	render(){
-		if(this.state.content === undefined) return null;
 		return(
 			<div>
-				{this.state.content.guildId} <br/>
-				{this.state.content.content}
 				{JSON.stringify(this.state.content)}
+				{JSON.stringify(this.state.user)}
+				<button onClick={async () => { await signIn() }}>Sign in</button>
+				<button onClick={async () => { await signOut() }}>Sign Out</button>
 			</div>	
 		);
 	}
 
 	async componentDidMount(){
-		var response = await fetch(`https://localhost:5001/dashboard/${this.guildId}/test`);
-		var json = await response.json();
-		this.setState({content: json});
+		var user = await getAuthDetails();
+		this.setState({user: user});
+		var response = await fetch(`https://localhost:5001/dashboard/${this.guildId}/test`, { mode: "cors", credentials: "include" });
+		if(response.ok){
+			var json = await response.json();
+			this.setState({content: json});
+		}
 	}
 }
 
-export default withRouter(Test);
+export default Test;

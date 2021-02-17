@@ -1,0 +1,22 @@
+.document > h1 {
+	font-size: 50px;
+	text-align: center;
+	font-weight: 100;
+	margin-top: 30px;
+}
+
+.document > h2 {
+	text-align: left !important;
+	font-weight: 350 !important;
+}
+
+.document > h3 {
+	font-size: 20px;
+	font-weight: 400;
+}
+
+.document > p {
+	font-size: 16px;
+	color: gray;
+	margin-bottom: 20px;
+}
