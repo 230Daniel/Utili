@@ -10,6 +10,7 @@ import Document from "./pages/document";
 import Dashboard_Index from "./pages/dashboard/index";
 import Dashboard_Core from "./pages/dashboard/core";
 import Dashboard_Test from "./pages/dashboard/test";
+import Error from "./pages/error";
 
 ReactDOM.render(
 	<Router>
@@ -30,8 +31,13 @@ ReactDOM.render(
 );
 
 function Return(){
-	const cookies = new Cookies();
-	var returnPath = cookies.get("return_path");
-	if(returnPath) window.location.pathname = returnPath;
-	else window.location.pathname = "";
+	if(!window.location.href.includes("error")){
+		const cookies = new Cookies();
+		var returnPath = cookies.get("return_path");
+		if(returnPath){
+			window.location.pathname = returnPath;
+			return;
+		}
+	}
+	window.location.href = `${window.location.protocol}//${window.location.host}`;
 }

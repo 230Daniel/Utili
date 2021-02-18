@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import Helmet from "react-helmet";
 
 export default function Index(props){
@@ -8,14 +8,8 @@ export default function Index(props){
 			<Helmet>
 				<title>Dashboard - Utili</title>
 			</Helmet>
-			Dashboard Index
+			<Link to="/dashboard/100/test">Dashboard Index</Link>
 			{guild_id}
 		</>
 	);
-}
-
-function load(){
-	fetch("https://localhost:5001/test/hello")
-	.then((response) => response.json())
-	.then((json) => { return json; });
 }

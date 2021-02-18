@@ -13,7 +13,7 @@ class ThemeSelector extends React.Component{
 	render(){
 		this.apply();
 		return(
-			<NavDropdown title={capitalise(this.state.theme)}>
+			<NavDropdown id="theme" title={capitalise(this.state.theme)}>
 				<NavDropdown.Item onClick={() => this.save("dark")}>Dark</NavDropdown.Item>
 				<NavDropdown.Item onClick={() => this.save("light")}>Light</NavDropdown.Item>
 			</NavDropdown>
@@ -39,7 +39,7 @@ class ThemeSelector extends React.Component{
 
 	save(theme){
 		var cookies = new Cookies();
-		cookies.set("theme", theme);
+		cookies.set("theme", theme, { path: "/" });
 		this.setState({
 			theme: theme
 		});

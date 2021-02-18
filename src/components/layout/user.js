@@ -12,7 +12,10 @@ class User extends React.Component{
 	}
 
 	render(){
-		if(!this.state.user || !this.state.user.signedIn){
+		if(!this.state.user){
+			return null;
+		}
+		if(!this.state.user.authenticated){
 			return(
 				<Nav.Link onClick={() => this.signIn()}>Sign in</Nav.Link>
 			);
@@ -30,6 +33,7 @@ class User extends React.Component{
 
 	async getDetails(){
 		var user = await getDetails();
+		console.log(user);
 		this.setState({user: user})
 	}
 
