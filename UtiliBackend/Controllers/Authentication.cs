@@ -31,7 +31,7 @@ namespace UtiliBackend.Controllers
             {
                 AllowRefresh = true,
                 IsPersistent = true,
-                RedirectUri = "http://localhost:3000/return"
+                RedirectUri = $"{Main.Config.Frontend}/return"
             };
 
             return new ChallengeResult("Discord", authProperties);

@@ -27,10 +27,10 @@ namespace UtiliBackend
         {
             services.AddCors(options =>
             {
-                options.AddPolicy(name: "allowAll",
+                options.AddPolicy("allowFrontend",
                     builder =>
                     {
-                        builder.SetIsOriginAllowed(x => x == "http://localhost:3000")
+                        builder.SetIsOriginAllowed(x => x == Main.Config.Frontend)
                                .AllowAnyMethod()
                                .AllowAnyHeader();
                     });
@@ -72,7 +72,7 @@ namespace UtiliBackend
 
             app.UseHttpsRedirection();
             app.UseRouting();
-            app.UseCors("allowAll");
+            app.UseCors("allowFrontend");
             app.UseAuthentication();
             app.UseAuthorization();
             
