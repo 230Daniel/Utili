@@ -52,22 +52,26 @@ class ThemeSelector extends React.Component{
 				c("text", "#ffffff");
 				c("text-muted", "#d3d3d3");
 				c("background", "#1e1e1e");
-				c("shadow", "#232323");
+				c("shadow", "#131313");
 				c("dropdown", "#121212");
 				c("dropdown-hover", "#252525");
 				c("scrollbar", "#1e1e1e");
 				c("scrollbar-thumb", "#272727");
+				c("card", "#272727");
+				c("card-title", "#353535");
 				break;
 			case "light":
 				c("nav", "#e2e2e2");
 				c("text", "#000000");
 				c("text-muted", "'#d3d3d3'");
 				c("background", "#eeeeee");
-				c("shadow", "#d3d3d3");
+				c("shadow", "#a3a3a3");
 				c("dropdown", "#ffffff");
 				c("dropdown-hover", "#efefef");
 				c("scrollbar", "#eeeeee");
 				c("scrollbar-thumb", "#ababab");
+				c("card", "#e2e2e2");
+				c("card-title", "#d3d3d3");
 				break;
 		}
 	}

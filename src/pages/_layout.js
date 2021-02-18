@@ -13,11 +13,9 @@ export default function Layout(props){
 		<>
 			<main>
 				<Navbar/>
-				<div className="container">
-					<CheckBackend>
-						{props.children}
-					</CheckBackend>
-				</div>
+				<CheckBackend>
+					{props.children}
+				</CheckBackend>
 			</main>
 			<footer>
 				<Footer/>
