@@ -1,6 +1,6 @@
 .fade-in{
 	opacity: 0;
-	transition: all 0.2s;
+	transition: all 0.1s !important;
 }
 
 .fade-in.visible{

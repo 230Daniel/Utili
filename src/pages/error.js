@@ -21,8 +21,7 @@ export default function Error(props){
 					<div className="error-short-description">
 						{props.shortDescription}
 					</div>
-				</div>
-				<br/>
+				</div> <br/>
 				<div className="error-long-description">
 						{props.longDescription}
 				</div>

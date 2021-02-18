@@ -5,14 +5,17 @@ import Footer from "../components/layout/footer";
 
 import Error from "../pages/error";
 import { ping as pingApi } from "../api/ping";
+import ResetPage from "../components/effects/reset";
+import Fade from "../components/effects/fade";
+
 import "../styles/layout.css";
-import { Helmet } from "react-helmet";
 
 export default function Layout(props){
 	return(
 		<>
 			<main>
 				<Navbar/>
+				<ResetPage/>
 				<CheckBackend>
 					{props.children}
 				</CheckBackend>

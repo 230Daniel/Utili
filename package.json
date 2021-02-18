@@ -14,7 +14,6 @@
     "react-helmet": "^6.1.0",
     "react-router-dom": "^5.2.0",
     "react-scripts": "4.0.2",
-    "react-visibility-sensor": "^5.1.1",
     "universal-cookie": "^4.0.4",
     "web-vitals": "^1.0.1"
   },
