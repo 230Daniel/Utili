@@ -5,28 +5,22 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.Primitives;
+using UtiliBackend.Controllers;
 
 namespace UtiliBackend.Controllers
 {
     public class Test : Controller
     {
         [HttpGet("dashboard/{guildId}/test")]
-        public ActionResult Index([Required] ulong guildId)
+        public async Task<ActionResult> Index([Required] ulong guildId)
         {
-            if (!ModelState.IsValid) return new BadRequestResult();
-            return new JsonResult(new TestObject(guildId));
-        }
-    }
+            AuthDetails auth = await Authentication.GetAuthDetailsAsync(HttpContext, guildId);
+            if (!auth.Authorised) return auth.Action;
 
-    public class TestObject
-    {
-        public ulong GuildId { get; set; }
-        public string Content { get; set; }
-
-        public TestObject(ulong guildId)
-        {
-            GuildId = guildId;
-            Content = "Hello from the other sideeee!";
+            return new JsonResult(auth.Guild.Name);
         }
     }
 }
