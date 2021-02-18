@@ -21,7 +21,7 @@ class Fade extends React.Component{
 	componentDidMount(){
 		setTimeout(() => {
 			this.setState({isVisible: true});
-		}, 200);
+		}, 100);
 	}
 }
 

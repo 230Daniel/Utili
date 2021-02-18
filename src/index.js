@@ -5,51 +5,68 @@ import Cookies from "universal-cookie";
 
 import Index from "./pages/index";
 import Layout from "./pages/_layout";
+import DashboardLayout from "./pages/dashboard/_layout";
 import Document from "./pages/document";
 
-import Dashboard_Index from "./pages/dashboard/index";
-import Dashboard_Core from "./pages/dashboard/core";
-import Dashboard_Test from "./pages/dashboard/test";
-import Error from "./pages/error";
+import DashboardIndex from "./pages/dashboard/index";
+import DashboardCore from "./pages/dashboard/core";
+import DashboardTest from "./pages/dashboard/test";
+
 import backend from "./config/backend.json";
 
 ReactDOM.render(
 	<Router>
 		<>
-			<Layout>
-				<Switch>
-					<Route exact path="/" component={Index}/>
-					<Route exact path="/dashboard/" component={Dashboard_Index}/>
-					<Route exact path="/dashboard/:guildId" component={Dashboard_Core}/>
-					<Route exact path="/dashboard/:guildId/test" component={Dashboard_Test}/>
-					<Route exact path="/return" render={() => Return()}/>
-					<Route exact path="/invite" component={Invite}/>
-					<Route exact path="/invite/:guildId" component={Invite}/>
-					<Route exact path="/:document" component={Document}/>
-				</Switch>
-			</Layout>
+			<Route path="/dashboard/*">
+				<DashboardLayout>
+					<Route exact path="/dashboard/" render={() => window.location.pathname = "dashboard"}/>
+					<Route exact path="/dashboard/:guildId" component={DashboardCore}/>
+					<Route exact path="/dashboard/:guildId/test" component={DashboardTest}/>
+				</DashboardLayout>
+			</Route>
+			<Route path="*">
+				<Layout>
+					<Switch>
+						<Route exact path="/" component={Index}/>
+						<Route exact path="/dashboard/" component={DashboardIndex}/>
+						<Route exact path="/return/" render={() => Return()}/>
+						<Route exact path="/invite/" component={Invite}/>
+						<Route exact path="/invite/:guildId" component={Invite}/>
+						<Route exact path="/:document" component={Document}/>
+					</Switch>
+				</Layout>
+			</Route>
 		</>
 	</Router>,
 	document.getElementById("root")
 );
 
 function Return(){
+	const cookies = new Cookies();
+	window.location.search = "";
 	if(!window.location.href.includes("error")){
-		const cookies = new Cookies();
 		var returnPath = cookies.get("return_path");
 		if(returnPath){
-			window.location.pathname = returnPath;
+			window.location.href = `${window.location.origin}${returnPath}`;
 			return;
 		}
 	}
-	window.location.href = `${window.location.protocol}//${window.location.host}`;
+	else{
+		var returnPath = cookies.get("return_path_error");
+		if(returnPath){
+			window.location.href = `${window.location.origin}${returnPath}`;
+			return;
+		}
+	}
+	window.location.href = `${window.location.origin}`;
 }
 
 function Invite(props){
 	var { guildId } = useParams();
 
 	const cookies = new Cookies();
-	cookies.set("return_path", window.location.pathname, { path: "/return", maxAge: 60, sameSite: "strict" } );
+	cookies.set("return_path", `/dashboard/${guildId}`, { path: "/", maxAge: 60, sameSite: "strict" } );
+	cookies.set("return_path_error", `/dashboard`, { path: "/", maxAge: 60, sameSite: "strict" } );
 
 	var url = 	"https://discord.com/api/oauth2/authorize?permissions=8&scope=bot&response_type=code" +
               	`&client_id=${backend.discord.clientId}` +

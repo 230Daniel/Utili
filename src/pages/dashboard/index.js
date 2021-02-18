@@ -5,6 +5,7 @@ import { get } from "../../api/auth";
 
 import "../../styles/dashboard-index.css";
 import Fade from "../../components/effects/fade";
+import Load from "../../components/load";
 
 class Index extends React.Component{
 	constructor(props){
@@ -27,10 +28,17 @@ class Index extends React.Component{
 
 	renderContent(){
 		if(this.state.guilds === null){
-			return null;
+			return(
+				<Fade>
+					<h1>Server Select</h1>
+					<Load/>
+				</Fade>
+				
+			)
 		}
 		return(
 			<Fade>
+				<h1>Server Select</h1>
 				<div className="guild-container">
 					<div className="guilds">
 						{this.state.guilds.map((guild, i) =>{

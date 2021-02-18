@@ -26,12 +26,7 @@ export async function get(endpoint){
 			return null;
 		case 404:
 			if(endpoint.includes("dashboard")){
-				const cookies = new Cookies();
-				cookies.set("return_path", window.location.pathname, { path: "/return", maxAge: 60, sameSite: "strict" });
-				window.location.href = "https://discord.com/api/oauth2/authorize?permissions=8&scope=bot&response_type=code" +
-                        `&client_id=${backend.discord.clientId}` +
-                        `&guild_id=${endpoint.split("/")[1]}` +
-                        `&redirect_uri=http%3A%2F%2F${window.location.host}%2Freturn`;
+				window.location.pathname = `/invite/${endpoint.split("/")[1]}`;
 			} else return result;
 			break;
 		default:
