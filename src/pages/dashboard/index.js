@@ -21,41 +21,28 @@ class Index extends React.Component{
 				<Helmet>
 					<title>Dashboard - Utili</title>
 				</Helmet>
-				{this.renderContent()}
-			</>
-		);
-	}
-
-	renderContent(){
-		if(this.state.guilds === null){
-			return(
 				<Fade>
 					<h1>Server Select</h1>
-					<Load/>
-				</Fade>
-				
-			)
-		}
-		return(
-			<Fade>
-				<h1>Server Select</h1>
-				<div className="guild-container">
-					<div className="guilds">
-						{this.state.guilds.map((guild, i) =>{
-							return(
-								<Link className="guild" to={guild.dashboardUrl} key={i}>
-									<div className="guild-icon">
-										<img width="200px" src={guild.iconUrl}/>
-									</div>
-									<div className="guild-name">
-										{guild.name}
-									</div>
-								</Link>
-							);
-						})}
-					</div>
-				</div>
-			</Fade>	
+					<Load loaded={this.state.guilds !== null}>
+						<div className="guild-container">
+							<div className="guilds">
+								{this.state.guilds?.map((guild, i) =>{
+									return(
+										<Link className="guild" to={guild.dashboardUrl} key={i}>
+											<div className="guild-icon">
+												<img width="200px" src={guild.iconUrl}/>
+											</div>
+											<div className="guild-name">
+												{guild.name}
+											</div>
+										</Link>
+									);
+								})}
+							</div>
+						</div>
+					</Load>
+				</Fade>	
+			</>
 		);
 	}
 

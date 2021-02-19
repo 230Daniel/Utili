@@ -10,7 +10,6 @@ import Document from "./pages/document";
 
 import DashboardIndex from "./pages/dashboard/index";
 import DashboardCore from "./pages/dashboard/core";
-import DashboardTest from "./pages/dashboard/test";
 
 import backend from "./config/backend.json";
 
@@ -22,7 +21,6 @@ ReactDOM.render(
 					<DashboardLayout>
 						<Route exact path="/dashboard/" render={() => window.location.pathname = "dashboard"}/>
 						<Route exact path="/dashboard/:guildId" component={DashboardCore}/>
-						<Route exact path="/dashboard/:guildId/test" component={DashboardTest}/>
 					</DashboardLayout>
 				</Route>
 				<Route path="*">

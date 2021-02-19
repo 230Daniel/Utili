@@ -24,14 +24,14 @@ class Index extends React.Component{
 				<Fade>
 					<div className="index-container">
 						<div className="left">
-							<img src="https://file.utili.xyz/Utili.png"/>
+							<img src="/Utili.svg"/>
 						</div>
 						<div className="right">
 							<div display="block">
 								<div className="title">Utili</div>
-								<span className="subtitle">A Discord bot with </span>
+								<span className="subtitle" id="newline">A Discord bot with </span>
 								<span className="subtitle text-highlight">{this.state.feature}</span> <br/>
-								<a class="subtitle a-blue" href="/dashboard">Get started ➔</a>
+								<a className="subtitle a-blue" href="/dashboard">Get started ➔</a>
 							</div>
 						</div>
 					</div>

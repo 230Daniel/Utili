@@ -8,7 +8,6 @@
 	background-color: var(--colour-nav);
 	box-shadow: 0 5px 10px var(--colour-shadow);
 	min-height: 65px !important;
-	max-height: 65px !important;
 }
 
 .navbar-brand{
@@ -157,12 +156,13 @@ h2{
 
 .footer{
 	width: 100%;
-	height: 75px;
+	height: 65px;
 	display: flex;
 	align-items: center;
 	background-color: var(--colour-nav);
 	box-shadow: 0 -5px 10px var(--colour-shadow);
 	position: absolute;
+	flex-direction: row;
 }
 
 .footer > * {
@@ -186,6 +186,21 @@ h2{
 .footer-right > a {
 	margin-left: 4px;
 	margin-right: 4px;
+}
+
+@media (max-width: 992px){
+	.footer{
+		justify-content: center;
+	}
+	.footer > .container > .footer-left{
+		float: none;
+		text-align: center;
+	}
+	
+	.footer > .container > .footer-right{
+		float: none;
+		text-align: center;
+	}
 }
 
 /* Links */

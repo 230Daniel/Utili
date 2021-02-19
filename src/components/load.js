@@ -1,13 +1,47 @@
 import React from "react";
 import Loader from "react-loader-spinner";
+import Fade from "./effects/fade";
+import Cookies from "universal-cookie";
 
 class Load extends React.Component{
+	constructor(props){
+		super(props);
+		this.state = {
+			theme: "dark"
+		}
+	}
+
 	render(){
-		return(
-			<div style={{display: "flex", justifyContent: "center", marginTop: "75px"}}>
-				<Loader type="ThreeDots" color="#ffffff" secondaryColor="#eeeeee" height={60} width={60}/>
-			</div>
-		);
+		if(!this.props.loaded){
+			return(
+				<div style={{display: "flex", justifyContent: "center", marginTop: "75px"}}>
+					<Loader type="ThreeDots" color={this.getColour()} height={60} width={60}/>
+				</div>
+			);
+		}
+		else{
+			return(
+				<Fade>
+					{this.props.children}
+				</Fade>
+			);
+		}
+	}
+
+	getColour(){
+		switch(this.state.theme){
+			case "dark":
+				return "white";
+			case "light":
+				return "black";
+		}
+	}
+
+	componentDidMount(){
+		var cookies = new Cookies();
+		var theme = cookies.get("theme");
+		if(!theme) theme = "dark";
+		this.setState({theme: theme});
 	}
 }
 
