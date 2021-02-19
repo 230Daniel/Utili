@@ -11,18 +11,11 @@ import "../../styles/layout.css";
 export default function Layout(props){
 	return(
 		<>
-			<main>
-				<Navbar/>
-				<ResetPage/>
-				<Sidebar>
-					<CheckBackend>
-						{props.children}
-					</CheckBackend>
-				</Sidebar>
-			</main>
-			<footer>
-				<Footer/>
-			</footer>
+			<Sidebar>
+				<CheckBackend>
+					{props.children}
+				</CheckBackend>
+			</Sidebar>
 		</>
 	);
 }

@@ -16,15 +16,15 @@ import backend from "./config/backend.json";
 ReactDOM.render(
 	<Router>
 		<>
-			<Switch>
-				<Route path="/dashboard/*">
-					<DashboardLayout>
-						<Route exact path="/dashboard/" render={() => window.location.pathname = "dashboard"}/>
-						<Route exact path="/dashboard/:guildId" component={DashboardCore}/>
-					</DashboardLayout>
-				</Route>
-				<Route path="*">
-					<Layout>
+			<Layout>
+				<Switch>
+					<Route path="/dashboard/*">
+						<DashboardLayout>
+							<Route exact path="/dashboard/" render={() => window.location.pathname = "dashboard"}/>
+							<Route exact path="/dashboard/:guildId" component={DashboardCore}/>
+						</DashboardLayout>
+					</Route>
+					<Route path="*">
 						<Switch>
 							<Route exact path="/" component={Index}/>
 							<Route exact path="/dashboard/" component={DashboardIndex}/>
@@ -33,9 +33,9 @@ ReactDOM.render(
 							<Route exact path="/invite/:guildId" component={Invite}/>
 							<Route exact path="/:document" component={Document}/>
 						</Switch>
-					</Layout>
-				</Route>
-			</Switch>
+					</Route>
+				</Switch>
+			</Layout>
 		</>
 	</Router>,
 	document.getElementById("root")

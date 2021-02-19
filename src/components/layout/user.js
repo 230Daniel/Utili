@@ -33,7 +33,6 @@ class User extends React.Component{
 
 	async getDetails(){
 		var user = await getDetails();
-		console.log(user);
 		this.setState({user: user})
 	}
 

@@ -14,14 +14,16 @@ class Load extends React.Component{
 	render(){
 		if(!this.props.loaded){
 			return(
-				<div style={{display: "flex", justifyContent: "center", marginTop: "75px"}}>
+				<Fade key={0}>
+					<div style={{display: "flex", justifyContent: "center", marginTop: "75px"}}>
 					<Loader type="ThreeDots" color={this.getColour()} height={60} width={60}/>
-				</div>
+					</div>
+				</Fade>
 			);
 		}
 		else{
 			return(
-				<Fade>
+				<Fade key={1}>
 					{this.props.children}
 				</Fade>
 			);

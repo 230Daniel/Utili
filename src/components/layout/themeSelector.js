@@ -24,10 +24,6 @@ class ThemeSelector extends React.Component{
 		this.load();
 	}
 
-	onUpdate(e){
-		console.log(e);
-	}
-
 	load(){
 		var cookies = new Cookies();
 		var theme = cookies.get("theme");

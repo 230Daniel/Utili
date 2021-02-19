@@ -35,7 +35,15 @@ export async function get(endpoint){
 }
 
 export async function post(endpoint, body){
-	var result = await fetch(`${backend.host}/${endpoint}`, { method: "POST", credentials: "include", body: JSON.stringify(body) });
+	var result = await fetch(`${backend.host}/${endpoint}`, { 
+		method: "POST",
+		headers: {
+			"Content-Type": "application/json",
+			"Access-Control-Allow-Credentials": "true"
+		},
+		credentials: "include", 
+		body: JSON.stringify(body)
+	 });
 	switch(result.status){
 		case 401:
 			signIn();
