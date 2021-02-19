@@ -9,13 +9,12 @@
 	background-color: var(--colour-nav);
 	box-shadow: 5px -5px 10px var(--colour-shadow);
 	min-width: 250px;
-	display: flex;
+	float: left;
 }
 
 .dashboard{
-	width: calc(100vw - 250px);
-	display: flex;
-	margin-left: 60px;
-	margin-top: 40px;
-	margin-bottom: 60px;
+	/*width: calc(100vw - 250px);*/
+	width: calc(100% + 60px);
+	padding: 60px 0px 60px 60px;
+	overflow-x: auto;
 }

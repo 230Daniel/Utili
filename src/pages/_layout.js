@@ -51,7 +51,7 @@ class CheckBackend extends React.Component{
 	}
 
 	async componentDidMount(){
-		// await this.ping();
+		await this.ping();
 	}
 
 	async ping(){
@@ -62,9 +62,10 @@ class CheckBackend extends React.Component{
 				this.setState({ok: ping});
 				setTimeout(() => {this.ping();}, 10000);
 			}
-			
+		}
+		else if (!ping){
+			this.setState({ok: ping});
+			setTimeout(() => {this.ping();}, 10000);
 		}
 	}
 }
-
-export { CheckBackend };

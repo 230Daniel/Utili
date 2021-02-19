@@ -54,6 +54,7 @@ class ThemeSelector extends React.Component{
 				c("scrollbar", "#1e1e1e");
 				c("scrollbar-thumb", "#272727");
 				c("card", "#272727");
+				c("card-hover", "#232323");
 				c("card-title", "#353535");
 				break;
 			case "light":
@@ -67,6 +68,7 @@ class ThemeSelector extends React.Component{
 				c("scrollbar", "#eeeeee");
 				c("scrollbar-thumb", "#ababab");
 				c("card", "#e2e2e2");
+				c("card-hover", "#dcdcdc");
 				c("card-title", "#d3d3d3");
 				break;
 		}

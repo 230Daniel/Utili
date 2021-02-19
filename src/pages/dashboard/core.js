@@ -4,6 +4,9 @@ import Fade from "../../components/effects/fade";
 import Load from "../../components/load";
 import { get, post } from "../../api/auth";
 
+import Card from "../../components/dashboard/card";
+import CardComponent from "../../components/dashboard/cardComponent";
+
 class Core extends React.Component{
 	constructor(props){
 		super(props);
@@ -11,6 +14,11 @@ class Core extends React.Component{
 		this.state = {
 			core: null
 		};
+		this.settings = {
+			nickname: React.createRef(),
+			prefix: React.createRef(),
+			enableCommands: React.createRef()
+		}
 	}
 
 	render(){
@@ -21,7 +29,11 @@ class Core extends React.Component{
 				</Helmet>
 				<Fade>
 					<Load loaded={this.state.core !== null}>
-						{JSON.stringify(this.state.core)}
+						<Card title="Settings" size={400} titleSize={200}>
+							<CardComponent type="text" title="Nickname" value={this.state.core?.nickname} ref={this.settings.nickname}></CardComponent>
+							<CardComponent type="text" title="Command Prefix" value={this.state.core?.prefix} ref={this.settings.prefix}></CardComponent>
+							<CardComponent type="checkbox" title="Enable Commands" value={this.state.core?.enableCommands} ref={this.settings.enableCommands}></CardComponent>
+						</Card>
 					</Load>
 				</Fade>
 			</>
@@ -30,18 +42,23 @@ class Core extends React.Component{
 	
 	async componentDidMount(){
 		var response = await get(`dashboard/${this.guildId}/core`);
-		var json = await response.json();
+		var json = await response?.json();
 		this.setState({core: json});
 	}
 
+	getInput(){
+		this.state.core = {
+			nickname: this.settings.nickname.current.getValue(),
+			prefix: this.settings.prefix.current.getValue(),
+			enableCommands: this.settings.enableCommands.current.getValue(),
+			excludedChannels: []
+		};
+	}
+
 	async save(){
-		try{
-			var response = await post(`dashboard/${this.guildId}/core`, this.state.core);
-			return response.ok;
-		}
-		catch{
-			return false;
-		}
+		this.getInput();
+		var response = await post(`dashboard/${this.guildId}/core`, this.state.core);
+		return response.ok;
 	}
 }
 

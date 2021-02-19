@@ -23,23 +23,24 @@ export async function get(endpoint){
 			signIn();
 			break;
 		case 403:
-			return null;
+			window.location.pathname = "dashboard";
+			break;
 		case 404:
 			if(endpoint.includes("dashboard")){
 				window.location.pathname = `/invite/${endpoint.split("/")[1]}`;
-			} else return result;
+			}
 			break;
 		default:
-			return result;
+			break;
 	}
+	return result;
 }
 
 export async function post(endpoint, body){
 	var result = await fetch(`${backend.host}/${endpoint}`, { 
 		method: "POST",
 		headers: {
-			"Content-Type": "application/json",
-			"Access-Control-Allow-Credentials": "true"
+			"Content-Type": "application/json"
 		},
 		credentials: "include", 
 		body: JSON.stringify(body)
@@ -49,19 +50,15 @@ export async function post(endpoint, body){
 			signIn();
 			break;
 		case 403:
-			if(endpoint.includes("dashboard")){
-				window.location.pathname = "dashboard";
-			}
+			window.location.pathname = "dashboard";
 			break;
 		case 404:
 			if(endpoint.includes("dashboard")){
-				window.location.href = "https://discord.com/api/oauth2/authorize?permissions=8&scope=bot&response_type=code" +
-                        "&client_id=790254880945602600" +
-                        `&guild_id=${endpoint.split("/")[1]}` +
-                        `&redirect_uri=https%3A%2F%2F${window.location.host}%2Freturn`;
-			} else return result;
+				window.location.pathname = `/invite/${endpoint.split("/")[1]}`;
+			}
 			break;
 		default:
-			return result;
+			break;
 	}
+	return result;
 }

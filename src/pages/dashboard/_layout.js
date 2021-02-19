@@ -21,12 +21,10 @@ class Layout extends React.Component{
 		return(
 			<>
 				<Sidebar>
-					<CheckBackend>
-						<Switch>
-							<Route exact path="/dashboard/" render={() => window.location.pathname = "dashboard"}/>
-							<Route exact path="/dashboard/:guildId" render={(props) => (<DashboardCore {...props} ref={this.body} />)}/>
-						</Switch>
-					</CheckBackend>
+					<Switch>
+						<Route exact path="/dashboard/" render={() => window.location.pathname = "dashboard"}/>
+						<Route exact path="/dashboard/:guildId" render={(props) => (<DashboardCore {...props} ref={this.body} />)}/>
+					</Switch>
 					<button onClick={() => this.save()}>save</button>
 				</Sidebar>
 			</>
