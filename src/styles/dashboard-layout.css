@@ -1,0 +1,21 @@
+.dashboard-container{
+	display: flex;
+	height: auto;
+	min-height: calc(100vh - 65px);
+	flex-direction: row;
+}
+
+.sidebar{
+	background-color: var(--colour-nav);
+	box-shadow: 5px -5px 10px var(--colour-shadow);
+	min-width: 250px;
+	display: flex;
+}
+
+.dashboard{
+	width: calc(100vw - 250px);
+	display: flex;
+	margin-left: 60px;
+	margin-top: 40px;
+	margin-bottom: 60px;
+}

@@ -6,8 +6,9 @@
 
 .navbar{
 	background-color: var(--colour-nav);
-	box-shadow: 0 5px 5px var(--colour-shadow);
-	min-height: 65px;
+	box-shadow: 0 5px 10px var(--colour-shadow);
+	min-height: 65px !important;
+	max-height: 65px !important;
 }
 
 .navbar-brand{
@@ -109,6 +110,7 @@ button:focus{
 
 body{
 	font-weight: 400;
+	color: var(--colour-text)
 }
 
 main{
@@ -159,6 +161,8 @@ h2{
 	display: flex;
 	align-items: center;
 	background-color: var(--colour-nav);
+	box-shadow: 0 -5px 10px var(--colour-shadow);
+	position: absolute;
 }
 
 .footer > * {

@@ -14,6 +14,13 @@ class Test extends React.Component{
 		return(
 			<div>
 				{JSON.stringify(this.state.content)}
+				<div style={{height: "200px", marginBottom: "20px", backgroundColor: "red", width: "200px"}}/>
+				<div style={{height: "200px", marginBottom: "20px", backgroundColor: "red", width: "200px"}}/>
+				<div style={{height: "200px", marginBottom: "20px", backgroundColor: "red", width: "200px"}}/>
+				<div style={{height: "200px", marginBottom: "20px", backgroundColor: "red", width: "200px"}}/>
+				<div style={{height: "200px", marginBottom: "20px", backgroundColor: "red", width: "200px"}}/>
+				<div style={{height: "200px", marginBottom: "20px", backgroundColor: "red", width: "200px"}}/>
+				<div style={{height: "200px", marginBottom: "20px", backgroundColor: "red", width: "200px"}}/>
 			</div>	
 		);
 	}

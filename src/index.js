@@ -17,25 +17,27 @@ import backend from "./config/backend.json";
 ReactDOM.render(
 	<Router>
 		<>
-			<Route path="/dashboard/*">
-				<DashboardLayout>
-					<Route exact path="/dashboard/" render={() => window.location.pathname = "dashboard"}/>
-					<Route exact path="/dashboard/:guildId" component={DashboardCore}/>
-					<Route exact path="/dashboard/:guildId/test" component={DashboardTest}/>
-				</DashboardLayout>
-			</Route>
-			<Route path="*">
-				<Layout>
-					<Switch>
-						<Route exact path="/" component={Index}/>
-						<Route exact path="/dashboard/" component={DashboardIndex}/>
-						<Route exact path="/return/" render={() => Return()}/>
-						<Route exact path="/invite/" component={Invite}/>
-						<Route exact path="/invite/:guildId" component={Invite}/>
-						<Route exact path="/:document" component={Document}/>
-					</Switch>
-				</Layout>
-			</Route>
+			<Switch>
+				<Route path="/dashboard/*">
+					<DashboardLayout>
+						<Route exact path="/dashboard/" render={() => window.location.pathname = "dashboard"}/>
+						<Route exact path="/dashboard/:guildId" component={DashboardCore}/>
+						<Route exact path="/dashboard/:guildId/test" component={DashboardTest}/>
+					</DashboardLayout>
+				</Route>
+				<Route path="*">
+					<Layout>
+						<Switch>
+							<Route exact path="/" component={Index}/>
+							<Route exact path="/dashboard/" component={DashboardIndex}/>
+							<Route exact path="/return/" render={() => Return()}/>
+							<Route exact path="/invite/" component={Invite}/>
+							<Route exact path="/invite/:guildId" component={Invite}/>
+							<Route exact path="/:document" component={Document}/>
+						</Switch>
+					</Layout>
+				</Route>
+			</Switch>
 		</>
 	</Router>,
 	document.getElementById("root")
