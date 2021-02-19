@@ -28,10 +28,34 @@
 }
 
 .dashboard{
-	/*width: calc(100vw - 250px);*/
-	width: calc(100% + 60px);
+	max-width: calc(100% + 60px);
 	padding: 40px 0px 60px 60px;
 	overflow-x: auto;
+}
+
+@media (max-width: 992px){ /* 992 */
+	.sidebar.collapsed{
+		min-width: 0px;
+	}
+}
+
+@media (max-width: 600px){ /* 992 */
+	.sidebar.collapsed{
+		min-width: 0px;
+	}
+
+	.sidebar{
+		min-width: 100vw;
+	}
+
+	.dashboard-container {
+		overflow-x: hidden;
+	}
+
+	.dashboard-container.collapsed > .dashboard {
+		max-width: 0px;
+		max-height: calc(100vh - 65px);
+	}
 }
 
 .saveNotification{

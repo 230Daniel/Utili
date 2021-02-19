@@ -5,9 +5,6 @@ import Sidebar from "../../components/layout/sidebar";
 import { CheckBackend } from "../_layout";
 import Navbar from "../../components/layout/navbar";
 import Footer from "../../components/layout/footer";
-
-import ResetPage from "../../components/effects/reset";
-
 import "../../styles/layout.css";
 
 import DashboardCore from "./core";
@@ -20,22 +17,23 @@ class Layout extends React.Component{
 			saveStatus: "waiting"
 		}
 		this.body = React.createRef();
+		this.sidebar = React.createRef();
 	}
 
 	render(){
 		return(
 			<>
 				<main>
-					<Navbar/>
+					<Navbar buttonLeft={true} onButtonLeftClick={() => { this.sidebar.current.toggle(); }}/>
 					<CheckBackend>
 						<div className="dashboard-container">
-							<Sidebar/>
-								<div className="dashboard">
-									<Switch>
-										<Route exact path="/dashboard/" render={() => window.location.pathname = "dashboard"}/>
-										<Route exact path="/dashboard/:guildId" render={(props) => (<DashboardCore {...props} onChanged={() => this.setState({requiresSave: true, saveStatus: "waiting"})} ref={this.body} />)}/>
-									</Switch>
-								</div>
+							<Sidebar ref={this.sidebar}/>
+							<div className="dashboard">
+								<Switch>
+									<Route exact path="/dashboard/" render={() => window.location.pathname = "dashboard"}/>
+									<Route exact path="/dashboard/:guildId" render={(props) => (<DashboardCore {...props} onChanged={() => this.setState({requiresSave: true, saveStatus: "waiting"})} ref={this.body} />)}/>
+								</Switch>
+							</div>
 							<Prompt when={this.state.requiresSave} message="You have unsaved changes, are you sure you want to leave this page?"/>
 						</div>
 					</CheckBackend>

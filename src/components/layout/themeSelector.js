@@ -39,6 +39,7 @@ class ThemeSelector extends React.Component{
 		this.setState({
 			theme: theme
 		});
+		if(this.props.onChange) this.props.onChange();
 	}
 
 	apply(){
@@ -82,6 +83,10 @@ function capitalise(s){
 
 function c(variable, value){
 	document.documentElement.style.setProperty(`--colour-${variable}`, value);
+}
+
+function s(variable, value){
+	document.documentElement.style.setProperty(`--${variable}`, value);
 }
 
 export default ThemeSelector;
