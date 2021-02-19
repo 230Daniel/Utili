@@ -1,21 +1,42 @@
 import React from "react";
+import { Switch, Route } from "react-router-dom";
 
-import Navbar from "../../components/layout/navbar";
 import Sidebar from "../../components/layout/sidebar";
-import Footer from "../../components/layout/footer";
 import { CheckBackend } from "../_layout";
-import ResetPage from "../../components/effects/reset";
 
 import "../../styles/layout.css";
 
-export default function Layout(props){
-	return(
-		<>
-			<Sidebar>
-				<CheckBackend>
-					{props.children}
-				</CheckBackend>
-			</Sidebar>
-		</>
-	);
+import DashboardCore from "./core";
+
+class Layout extends React.Component{
+	constructor(props){
+		super(props);
+		this.state = {
+			requiresSave: false
+		}
+		this.body = React.createRef();
+	}
+
+	render(){
+		return(
+			<>
+				<Sidebar>
+					<CheckBackend>
+						<Switch>
+							<Route exact path="/dashboard/" render={() => window.location.pathname = "dashboard"}/>
+							<Route exact path="/dashboard/:guildId" render={(props) => (<DashboardCore {...props} ref={this.body} />)}/>
+						</Switch>
+					</CheckBackend>
+					<button onClick={() => this.save()}>save</button>
+				</Sidebar>
+			</>
+		);
+	}
+
+	async save(){
+		var success = await this.body.current.save();
+		console.log(success);
+	}
 }
+
+export default Layout;

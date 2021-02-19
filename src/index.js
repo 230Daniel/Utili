@@ -9,7 +9,6 @@ import DashboardLayout from "./pages/dashboard/_layout";
 import Document from "./pages/document";
 
 import DashboardIndex from "./pages/dashboard/index";
-import DashboardCore from "./pages/dashboard/core";
 
 import backend from "./config/backend.json";
 
@@ -19,10 +18,7 @@ ReactDOM.render(
 			<Layout>
 				<Switch>
 					<Route path="/dashboard/*">
-						<DashboardLayout>
-							<Route exact path="/dashboard/" render={() => window.location.pathname = "dashboard"}/>
-							<Route exact path="/dashboard/:guildId" component={DashboardCore}/>
-						</DashboardLayout>
+						<DashboardLayout/>
 					</Route>
 					<Route path="*">
 						<Switch>

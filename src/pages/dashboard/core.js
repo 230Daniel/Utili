@@ -22,7 +22,6 @@ class Core extends React.Component{
 				<Fade>
 					<Load loaded={this.state.core !== null}>
 						{JSON.stringify(this.state.core)}
-						<button onClick={() => this.save()}>Save</button>
 					</Load>
 				</Fade>
 			</>
@@ -36,8 +35,13 @@ class Core extends React.Component{
 	}
 
 	async save(){
-		var response = await post(`dashboard/${this.guildId}/core`, this.state.core);
-		console.log(response.status);
+		try{
+			var response = await post(`dashboard/${this.guildId}/core`, this.state.core);
+			return response.ok;
+		}
+		catch{
+			return false;
+		}
 	}
 }
 
