@@ -15,7 +15,7 @@ class Card extends React.Component{
 	renderChildren(){
 		return React.Children.map(this.props.children, child => {
 			if (React.isValidElement(child)) {
-				return React.cloneElement(child, { titleSize: this.props.titleSize });
+				return React.cloneElement(child, { titleSize: this.props.titleSize, onChanged: this.props.onChanged });
 			}
 			return child;
 		});

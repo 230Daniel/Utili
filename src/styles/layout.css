@@ -1,5 +1,5 @@
 * {
-	transition: color .1s, background-color .1s, box-shadow .1s !important;
+	transition: color .1s, background-color .1s, box-shadow .1s, max-height 0.2s, max-width 0.2s, opacity 0.2s !important;
 }
 
 /* Navbar */

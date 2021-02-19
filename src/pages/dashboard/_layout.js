@@ -1,5 +1,5 @@
 import React from "react";
-import { Switch, Route } from "react-router-dom";
+import { Switch, Route, Prompt } from "react-router-dom";
 
 import Sidebar from "../../components/layout/sidebar";
 import { CheckBackend } from "../_layout";
@@ -12,7 +12,8 @@ class Layout extends React.Component{
 	constructor(props){
 		super(props);
 		this.state = {
-			requiresSave: false
+			requiresSave: false,
+			saveStatus: "waiting"
 		}
 		this.body = React.createRef();
 	}
@@ -23,18 +24,64 @@ class Layout extends React.Component{
 				<Sidebar>
 					<Switch>
 						<Route exact path="/dashboard/" render={() => window.location.pathname = "dashboard"}/>
-						<Route exact path="/dashboard/:guildId" render={(props) => (<DashboardCore {...props} ref={this.body} />)}/>
+						<Route exact path="/dashboard/:guildId" render={(props) => (<DashboardCore {...props} onChanged={() => this.setState({requiresSave: true, saveStatus: "waiting"})} ref={this.body} />)}/>
 					</Switch>
-					<button onClick={() => this.save()}>save</button>
+					{this.renderSaveButton()}
+					<Prompt when={this.state.requiresSave} message="You have unsaved changes, are you sure you want to leave this page?"/>
 				</Sidebar>
 			</>
 		);
 	}
 
-	async save(){
-		var success = await this.body.current.save();
-		console.log(success);
+	renderSaveButton(){
+		return(
+			<div className={`saveNotification ${this.state.requiresSave ? "visible" : ""}`}>
+				<button className={`savebutton-${this.state.saveStatus}`} onClick={async () => await this.save()}>{this.getSaveButtonContent()}</button>
+			</div>
+		);
 	}
+
+	getSaveButtonContent(){
+		switch(this.state.saveStatus){
+			case "waiting":
+				return "Save Changes";
+			case "saving":
+				return "Saving...";
+			case "saved":
+				return "Changes Saved";
+			case "error":
+				return "Error";
+		}
+	}
+
+	async save(){
+		if(this.state.saveStatus !== "waiting") return;
+		this.setState({saveStatus: "saving"});
+		var success = await this.body.current.save();
+		if(success){
+			this.setState({saveStatus: "saved"});
+			setTimeout(() => {
+				this.setState({requiresSave: false});
+			}, 500);
+		}
+		else this.setState({saveStatus: "error"});
+	}
+
+	onUnload = e => {
+		if(this.state.requiresSave){
+			e.preventDefault();
+			e.returnValue = "You have unsaved changes";
+			return "You have unsaved changes";
+		}
+	 }
+ 
+	 componentDidMount() {
+		window.addEventListener("beforeunload", this.onUnload);
+	 }
+ 
+	 componentWillUnmount() {
+		 window.removeEventListener("beforeunload", this.onUnload);
+	 }
 }
 
 export default Layout;

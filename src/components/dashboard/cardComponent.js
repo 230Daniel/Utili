@@ -43,6 +43,7 @@ class CardComponent extends React.Component{
 	updateValue(){
 		this.setState({value: this.getValue()});
 		this.value = this.state.value;
+		this.props.onChanged();
 	}
 	
 	getValue(){
