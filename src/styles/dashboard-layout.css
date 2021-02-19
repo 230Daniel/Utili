@@ -37,13 +37,14 @@
 .saveNotification{
 	width: 160px;
 	height: 75px;
-	max-height: 0;
-	position: absolute;
+	position: fixed;
+	right: 0;
 	bottom: 0;
+	margin: 20px;
 
 	padding-left: 20px;
 	padding-right: 20px;
-	border-radius: 20px 20px 0 0;
+	border-radius: 20px;
 	background-color: var(--colour-card-title);
 	opacity: 0;
 
@@ -55,7 +56,6 @@
 }
 
 .saveNotification.visible{
-	max-height: 75px;
 	opacity: 1;
 	box-shadow: 5px 5px 5px var(--colour-shadow);
 }

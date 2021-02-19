@@ -3,6 +3,10 @@ import { Switch, Route, Prompt } from "react-router-dom";
 
 import Sidebar from "../../components/layout/sidebar";
 import { CheckBackend } from "../_layout";
+import Navbar from "../../components/layout/navbar";
+import Footer from "../../components/layout/footer";
+
+import ResetPage from "../../components/effects/reset";
 
 import "../../styles/layout.css";
 
@@ -21,14 +25,25 @@ class Layout extends React.Component{
 	render(){
 		return(
 			<>
-				<Sidebar>
-					<Switch>
-						<Route exact path="/dashboard/" render={() => window.location.pathname = "dashboard"}/>
-						<Route exact path="/dashboard/:guildId" render={(props) => (<DashboardCore {...props} onChanged={() => this.setState({requiresSave: true, saveStatus: "waiting"})} ref={this.body} />)}/>
-					</Switch>
+				<main>
+					<Navbar/>
+					<CheckBackend>
+						<div className="dashboard-container">
+							<Sidebar/>
+								<div className="dashboard">
+									<Switch>
+										<Route exact path="/dashboard/" render={() => window.location.pathname = "dashboard"}/>
+										<Route exact path="/dashboard/:guildId" render={(props) => (<DashboardCore {...props} onChanged={() => this.setState({requiresSave: true, saveStatus: "waiting"})} ref={this.body} />)}/>
+									</Switch>
+								</div>
+							<Prompt when={this.state.requiresSave} message="You have unsaved changes, are you sure you want to leave this page?"/>
+						</div>
+					</CheckBackend>
+				</main>
+				<footer>
+					<Footer/>
 					{this.renderSaveButton()}
-					<Prompt when={this.state.requiresSave} message="You have unsaved changes, are you sure you want to leave this page?"/>
-				</Sidebar>
+				</footer>
 			</>
 		);
 	}

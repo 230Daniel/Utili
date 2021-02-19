@@ -69,3 +69,5 @@ class CheckBackend extends React.Component{
 		}
 	}
 }
+
+export {CheckBackend}
