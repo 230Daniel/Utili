@@ -49,6 +49,8 @@ class ThemeSelector extends React.Component{
 				c("text", "#ffffff");
 				c("text-muted", "#d3d3d3");
 				c("background", "#1e1e1e");
+				c("sidebar-category", "#1e1e1e");
+				c("sidebar-item", "#272727")
 				c("shadow", "#131313");
 				c("dropdown", "#121212");
 				c("dropdown-hover", "#252525");
@@ -63,6 +65,8 @@ class ThemeSelector extends React.Component{
 				c("text", "#000000");
 				c("text-muted", "'#d3d3d3'");
 				c("background", "#eeeeee");
+				c("sidebar-category", "#d9d9d9");
+				c("sidebar-item", "#efefef")
 				c("shadow", "#a3a3a3");
 				c("dropdown", "#ffffff");
 				c("dropdown-hover", "#efefef");

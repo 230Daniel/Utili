@@ -16,13 +16,30 @@ class Sidebar extends React.Component{
 				<div onClick={() => this.collapseSidebar()}>
 					<SidebarItem name="Core" to=""/>
 				</div>
-				<SidebarCategory title="owooo" collapseSidebar={() => this.props.collapseSidebar()}>
-					<SidebarItem name="uguu" to="uguu"/>
-					<SidebarItem name="ghhghh" to="ghhghh"/>
+				<SidebarCategory title="Channels" collapseSidebar={() => this.props.collapseSidebar()}>
+					<SidebarItem name="Autopurge" to="autopurge"/>
+					<SidebarItem name="Mirroring" to="mirroring"/>
+					<SidebarItem name="Notices" to="notices"/>
 				</SidebarCategory>
-				<SidebarCategory title="owooo" collapseSidebar={() => this.props.collapseSidebar()}>
-					<SidebarItem name="ddd" to="ddd"/>
-					<SidebarItem name="eee" to="eee"/>
+				<SidebarCategory title="Messages" collapseSidebar={() => this.props.collapseSidebar()}>
+					<SidebarItem name="Message Filter" to="messagefilter"/>
+					<SidebarItem name="Logging" to="logging"/>
+					<SidebarItem name="Message Pinning" to="messagepinning"/>
+					<SidebarItem name="Message Voting" to="voting"/>
+				</SidebarCategory>
+				<SidebarCategory title="Users" collapseSidebar={() => this.props.collapseSidebar()}>
+					<SidebarItem name="Inactive Role" to="inactiverole"/>
+					<SidebarItem name="Join Message" to="joinmessage"/>
+					<SidebarItem name="Reputation" to="reputation"/>
+				</SidebarCategory>
+				<SidebarCategory title="Roles" collapseSidebar={() => this.props.collapseSidebar()}>
+					<SidebarItem name="Join Roles" to="joinroles"/>
+					<SidebarItem name="Role Linking" to="rolelinking"/>
+					<SidebarItem name="Role Persist" to="rolepersist"/>
+				</SidebarCategory>
+				<SidebarCategory title="Voice Channels" collapseSidebar={() => this.props.collapseSidebar()}>
+					<SidebarItem name="Voice Link" to="voicelink"/>
+					<SidebarItem name="Voice Roles" to="voiceroles"/>
 				</SidebarCategory>
 			</div>
 		);

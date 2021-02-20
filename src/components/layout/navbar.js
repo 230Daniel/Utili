@@ -20,7 +20,7 @@ class MyNavbar extends React.Component{
 				<Navbar variant={this.state.background} expand="lg">
 					<div className="container">
 						{this.props.buttonLeft ? 
-						<button className="navbar-toggler" onClick={() => this.props.onButtonLeftClick()}><span class="navbar-toggler-icon"></span></button>
+						<button className="navbar-toggler" onClick={() => this.props.onButtonLeftClick()}><span className="navbar-toggler-icon"></span></button>
 						: null}
 						<Navbar.Brand to="/" as={Link}>
 						<img src="https://file.utili.xyz/UtiliSmall.png" width="40px" className="d-inline-block align-middle" alt="Utili Logo"/>

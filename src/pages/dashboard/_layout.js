@@ -5,6 +5,7 @@ import Sidebar from "../../components/layout/sidebar";
 import { CheckBackend } from "../_layout";
 import Navbar from "../../components/layout/navbar";
 import Footer from "../../components/layout/footer";
+import Error from "../error";
 import "../../styles/layout.css";
 
 import DashboardCore from "./core";
@@ -32,6 +33,7 @@ class Layout extends React.Component{
 								<Switch>
 									<Route exact path="/dashboard/" render={() => window.location.pathname = "dashboard"}/>
 									<Route exact path="/dashboard/:guildId" render={(props) => (<DashboardCore {...props} onChanged={() => this.requireSave()} ref={this.body} />)}/>
+									<Route component={NotFound}/>
 								</Switch>
 							</div>
 							<Prompt when={this.doesRequireSave()} message="You have unsaved changes, are you sure you want to leave this page?"/>
@@ -39,7 +41,7 @@ class Layout extends React.Component{
 					</CheckBackend>
 				</main>
 				<footer>
-					<Footer/>
+					
 					{this.renderSaveButton()}
 				</footer>
 			</>
@@ -133,3 +135,13 @@ class Layout extends React.Component{
 }
 
 export default Layout;
+
+function NotFound(props){
+	return(
+		<Error 
+		code="404" 
+		shortDescription="Not found" 
+		longDescription="Sorry, we couldn't find that page on our servers."
+		/>
+	);
+}
