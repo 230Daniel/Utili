@@ -21,14 +21,7 @@ namespace Utili.Features
             if (!row.Emotes.Any(x => x.Item1.Equals(emote))) return;
             int change = row.Emotes.First(x => Equals(x.Item1, emote)).Item2;
 
-            MessageCache cache = channel.MessageCache as MessageCache;
-            IMessage message = cache.GetManual(partialMessage.Id);
-            if (message is null)
-            {
-                message = await partialMessage.DownloadAsync();
-                cache.AddManual(message);
-            }
-
+            IUserMessage message = await partialMessage.GetOrDownloadAsync();
             IUser user = message.Author;
             IUser reactor = await _rest.GetGuildUserAsync(guild.Id, reactorId);
 
@@ -43,14 +36,7 @@ namespace Utili.Features
             if (!row.Emotes.Any(x => x.Item1.Equals(emote))) return;
             int change = row.Emotes.First(x => Equals(x.Item1, emote)).Item2;
 
-            MessageCache cache = channel.MessageCache as MessageCache;
-            IMessage message = cache.GetManual(partialMessage.Id);
-            if (message is null)
-            {
-                message = await partialMessage.DownloadAsync();
-                cache.AddManual(message);
-            }
-
+            IUserMessage message = await partialMessage.GetOrDownloadAsync();
             IUser user = message.Author;
             IUser reactor = await _rest.GetGuildUserAsync(guild.Id, reactorId);
 

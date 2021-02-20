@@ -89,8 +89,7 @@ namespace Utili
             _client = new DiscordShardedClient(shardIds, new DiscordSocketConfig 
             {
                 TotalShards = _totalShards,
-                MessageCacheSize = 5,
-                MessageCache = new MessageCache(),
+                MessageCacheSize = 0,
                 ExclusiveBulkDelete = true,
                 LogLevel = Discord.LogSeverity.Info,
                 AlwaysDownloadUsers = false,

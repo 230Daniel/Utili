@@ -27,12 +27,13 @@ namespace UtiliBackend
         {
             services.AddCors(options =>
             {
-                options.AddPolicy("allowFrontend",
+                options.AddPolicy("frontend",
                     builder =>
                     {
-                        builder.SetIsOriginAllowed(x => x == Main.Config.Frontend)
-                               .AllowAnyMethod()
-                               .AllowAnyHeader();
+                        builder.WithOrigins(Main.Config.Frontend)
+                            .AllowAnyMethod()
+                            .AllowAnyHeader()
+                            .AllowCredentials();
                     });
             });
 
@@ -64,15 +65,9 @@ namespace UtiliBackend
                 app.UseDeveloperExceptionPage();
             }
 
-            app.Use(async (context, next) =>
-            {
-                context.Response.Headers.Add("Access-Control-Allow-Credentials", "true");
-                await next();
-            });
-
             app.UseHttpsRedirection();
             app.UseRouting();
-            app.UseCors("allowFrontend");
+            app.UseCors("frontend");
             app.UseAuthentication();
             app.UseAuthorization();
             

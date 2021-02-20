@@ -194,7 +194,9 @@ namespace UtiliSite
             // Webhooks are retried once an hour for up to 3 days or until a 200 status code is returned.
 
             switch (stripeEvent.Type) {
-                case "customer.subscription.updated":
+                case "customer.subscription.created":
+                case "customer.subscription.updated":   // Stacking switch cases achieves the OR condition.
+                case "customer.subscription.deleted":
                     
                     string jsonSubscription = stripeEvent.Data.Object.ToString();
                     jsonSubscription = jsonSubscription.Substring(jsonSubscription.IndexOf('{'));

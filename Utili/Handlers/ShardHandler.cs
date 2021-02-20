@@ -171,14 +171,14 @@ namespace Utili.Handlers
 
                 // Clear unnecessary downloads to free up memory
 
-                lock (_guaranteedDownloads)
-                {
-                    List<ulong> userCacheGuildIds = GetUserCacheGuildsAsync().GetAwaiter().GetResult();
-                    foreach (SocketGuild guild in _client.Guilds.Where(x => !userCacheGuildIds.Contains(x.Id)))
-                    {
-                        guild.ClearUserCache(x => x.VoiceChannel is null && (x.IsPending is null || !x.IsPending.Value));
-                    }
-                }
+                //lock (_guaranteedDownloads)
+                //{
+                    //List<ulong> userCacheGuildIds = GetUserCacheGuildsAsync().GetAwaiter().GetResult();
+                    //foreach (SocketGuild guild in _client.Guilds.Where(x => !userCacheGuildIds.Contains(x.Id)))
+                    //{
+                    //    guild.ClearUserCache(x => x.VoiceChannel is null && (x.IsPending is null || !x.IsPending.Value));
+                    //}
+                //}
             }
             catch (Exception e)
             {
