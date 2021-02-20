@@ -6,22 +6,26 @@ import { get, post } from "../../api/auth";
 
 import Card from "../../components/dashboard/card";
 import CardComponent from "../../components/dashboard/cardComponent";
+import CardListComponent from "../../components/dashboard/cardListComponent";
 
 class Core extends React.Component{
 	constructor(props){
 		super(props);
 		this.guildId = this.props.match.params.guildId;
 		this.state = {
-			core: null
+			core: null,
+			textChannels: null
 		};
 		this.settings = {
 			nickname: React.createRef(),
 			prefix: React.createRef(),
-			enableCommands: React.createRef()
+			enableCommands: React.createRef(),
+			excludedChannels: React.createRef()
 		}
 	}
 
 	render(){
+		var values = this.state.textChannels?.map(x => {return {id: x.id, value: x.name}});
 		return(
 			<>
 				<Helmet>
@@ -36,6 +40,9 @@ class Core extends React.Component{
 							<CardComponent type="text" title="Command Prefix" value={this.state.core?.prefix} ref={this.settings.prefix}></CardComponent>
 							<CardComponent type="checkbox" title="Enable Commands" value={this.state.core?.enableCommands} ref={this.settings.enableCommands}></CardComponent>
 						</Card>
+						<Card title={`Excluded Channels`} size={400} onChanged={this.props.onChanged}>
+							<CardListComponent prompt="Add a channel..." values={values} selected={this.state.core?.excludedChannels} ref={this.settings.excludedChannels}></CardListComponent>
+						</Card>
 					</Load>
 				</Fade>
 			</>
@@ -44,16 +51,20 @@ class Core extends React.Component{
 	
 	async componentDidMount(){
 		var response = await get(`dashboard/${this.guildId}/core`);
-		var json = await response?.json();
-		this.setState({core: json});
+		var core = await response?.json();
+		response = await get(`discord/${this.guildId}/channels/text`);
+		var textChannels = await response?.json();
+		this.setState({core: core, textChannels: textChannels});
+		
 	}
 
 	getInput(){
+		console.log();
 		this.state.core = {
 			nickname: this.settings.nickname.current.getValue(),
 			prefix: this.settings.prefix.current.getValue(),
 			enableCommands: this.settings.enableCommands.current.getValue(),
-			excludedChannels: []
+			excludedChannels: this.settings.excludedChannels.current.getSelected()
 		};
 	}
 

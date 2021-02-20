@@ -59,6 +59,7 @@ class ThemeSelector extends React.Component{
 				c("card", "#272727");
 				c("card-hover", "#232323");
 				c("card-title", "#353535");
+				c("card-input-important", "#121212")
 				break;
 			case "light":
 				c("nav", "#e2e2e2");
@@ -75,6 +76,7 @@ class ThemeSelector extends React.Component{
 				c("card", "#f9f9f9");
 				c("card-hover", "#f3f3f3");
 				c("card-title", "#d9d9d9");
+				c("card-input-important", "#d2d2d2")
 				break;
 		}
 	}

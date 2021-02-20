@@ -4,6 +4,8 @@
 	border-radius: 20px;
 	background-color: var(--colour-card);
 	box-shadow: 5px 5px 5px var(--colour-shadow);
+	margin-bottom: 30px;
+	margin-right: 30px;
 }
 
 .dashboard-card-title{
@@ -66,4 +68,104 @@
 	width: 100%;
 	display: flex;
 	align-items: center;
+}
+
+.dashboard-card-list-component{
+	flex-direction: column;
+	overflow-y: auto;
+	height: initial;
+}
+
+.dashboard-card-list-component-search{
+	width: 100%;
+	min-height: 50px;
+	display: flex;
+	align-items: center;
+	padding-left: 20px;
+	padding-right: 20px;
+}
+
+.dashboard-card-list-component-search > input {
+	background-color: var(--colour-card-input-important);
+	border: none;
+	outline: none;
+	color: var(--colour-text);
+	width: 100%;
+	height: 30px;
+	font-size: 16px;
+	padding-left: 10px;
+	padding-right: 10px;
+	border-radius: 5px;
+}
+
+.dashboard-card-list-component-search > input::placeholder{
+	color: var(--colour-text-muted);
+}
+
+.dashboard-card-list-component-options{
+	height: 150px;
+	overflow-y: auto;
+}
+
+.dashboard-card-list-component-options.collapsed{
+	height: 0px;
+	overflow-y: hidden;
+}
+
+.dashboard-card-list-component-options::-webkit-scrollbar{
+	background-color: var(--colour-card);
+}
+
+.dashboard-card-list-component-options::-webkit-scrollbar-thumb{
+	background-color: var(--colour-background);
+}
+
+.dashboard-card-list-component-option{
+	height: 50px;
+	display: flex;
+	align-items: center;
+	padding-left: 20px;
+	padding-right: 20px;
+	font-size: 16px;
+}
+
+.dashboard-card-list-component-option:hover{
+	background-color: var(--colour-card-hover);
+}
+
+.dashboard-card-list-component-selected{
+	max-height: 50px;
+	height: 50px;
+	opacity: 1;
+	display: flex;
+	align-items: center;
+	padding-left: 20px;
+	padding-right: 20px;
+	font-size: 16px;
+}
+
+.dashboard-card-list-component-selected-remove{
+	background-color: #b55043;
+	width: 30px;
+	height: 30px;
+	border-radius: 5px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	margin-left: auto;
+	transform: scale(1);
+}
+
+.dashboard-card-list-component-selected-remove:hover{
+	transform: scale(1.1);
+}
+
+.dashboard-card-list-component-selected-remove > img {
+	filter: invert(100%) sepia(0%) saturate(7500%) hue-rotate(191deg) brightness(113%) contrast(101%);
+}
+
+.collapsed > .dashboard-card-list-component-selected{
+	max-height: 0px;
+	opacity: 0;
+	overflow: hidden;
 }

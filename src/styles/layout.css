@@ -1,11 +1,14 @@
 * {
 	transition: color .1s, 
 	background-color .1s, 
-	box-shadow .1s, 
+	box-shadow .1s,
+	transform .1s, 
 	min-width 0.2s, 
 	max-width 0.2s, 
 	width 0.2s,
 	height 0.2s, 
+	max-height 0.2s,
+	overflow 0.2s,
 	opacity 0.2s,
 	padding 0.2s,
 	!important;
