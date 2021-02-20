@@ -5,7 +5,12 @@
 	background-color: var(--colour-card);
 	box-shadow: 5px 5px 5px var(--colour-shadow);
 	margin-bottom: 30px;
-	margin-right: 30px;
+	margin-right: 30px;	
+}
+
+.dashboard-card-info-content {
+	font-size: 16px;
+	padding: 15px 20px 10px 20px;
 }
 
 .dashboard-card-title{

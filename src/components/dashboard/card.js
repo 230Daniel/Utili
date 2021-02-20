@@ -5,7 +5,7 @@ import "../../styles/card.css";
 class Card extends React.Component{
 	render(){
 		return(
-			<div className="dashboard-card" style={{width: this.props.size}}>
+			<div className={`dashboard-card`} style={{width: this.props.size}}>
 				<div className="dashboard-card-title">{this.props.title}</div>
 				{this.renderChildren()}
 			</div>

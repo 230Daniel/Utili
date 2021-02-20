@@ -7,6 +7,7 @@ import { get, post } from "../../api/auth";
 import Card from "../../components/dashboard/card";
 import CardComponent from "../../components/dashboard/cardComponent";
 import CardListComponent from "../../components/dashboard/cardListComponent";
+import Info from "../../components/dashboard/info";
 
 class Core extends React.Component{
 	constructor(props){
@@ -35,14 +36,14 @@ class Core extends React.Component{
 					<div className="dashboard-title">Utili Dashboard</div>
 					<div className="dashboard-subtitle">Select a feature to configure from the sidebar</div>
 					<Load loaded={this.state.core !== null}>
-						<Card title="Core Settings" size={400} titleSize={200} onChanged={this.props.onChanged}>
-							<CardComponent type="text" title="Nickname" value={this.state.core?.nickname} ref={this.settings.nickname}></CardComponent>
-							<CardComponent type="text" title="Command Prefix" value={this.state.core?.prefix} ref={this.settings.prefix}></CardComponent>
-							<CardComponent type="checkbox" title="Enable Commands" value={this.state.core?.enableCommands} ref={this.settings.enableCommands}></CardComponent>
-						</Card>
-						<Card title={`Excluded Channels`} size={400} onChanged={this.props.onChanged}>
-							<CardListComponent prompt="Add a channel..." values={values} selected={this.state.core?.excludedChannels} ref={this.settings.excludedChannels}></CardListComponent>
-						</Card>
+							<Card title="Core Settings" size={400} titleSize={200} onChanged={this.props.onChanged}>
+								<CardComponent type="text" title="Nickname" value={this.state.core?.nickname} ref={this.settings.nickname}></CardComponent>
+								<CardComponent type="text" title="Command Prefix" value={this.state.core?.prefix} ref={this.settings.prefix}></CardComponent>
+								<CardComponent type="checkbox" title="Enable Commands" value={this.state.core?.enableCommands} ref={this.settings.enableCommands}></CardComponent>
+							</Card>
+							<Card title={this.state.core?.enableCommands ? "Block commands in..." : "Allow commands in..."} size={400} onChanged={this.props.onChanged}>
+								<CardListComponent prompt="Add a channel..." values={values} selected={this.state.core?.excludedChannels} ref={this.settings.excludedChannels}></CardListComponent>
+							</Card>
 					</Load>
 				</Fade>
 			</>

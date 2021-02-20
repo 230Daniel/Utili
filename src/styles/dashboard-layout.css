@@ -6,7 +6,7 @@
 }
 
 .dashboard-subtitle{
-	font-size: 30px;
+	font-size: 28px;
     font-weight: 100;
 	color: var(--colour-text-muted);
 	margin-top: -30px;
@@ -138,6 +138,12 @@
 		max-height: calc(100vh - 65px);
 		padding: 0;
 	}
+}
+
+.inline{
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
 }
 
 .saveNotification{
