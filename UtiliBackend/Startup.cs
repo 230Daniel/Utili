@@ -1,5 +1,4 @@
 using System;
-using AspNet.Security.OAuth.Discord;
 using AspNetCoreRateLimit;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
