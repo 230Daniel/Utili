@@ -24,10 +24,10 @@ class Layout extends React.Component{
 		return(
 			<>
 				<main>
-					<Navbar buttonLeft={true} onButtonLeftClick={() => { this.toggleSidebar(); }}/>
+					<Navbar buttonLeft={true} onButtonLeftClick={() => this.toggleSidebar()}/>
 					<CheckBackend>
 						<div className={`dashboard-container${this.state.sidebarCollapsed ? "" : " collapsed"}`}>
-							<Sidebar ref={this.sidebar} collapsed={this.state.sidebarCollapsed}/>
+							<Sidebar ref={this.sidebar} collapsed={this.state.sidebarCollapsed} collapseSidebar={() => this.toggleSidebar(true)}/>
 							<div className="dashboard">
 								<Switch>
 									<Route exact path="/dashboard/" render={() => window.location.pathname = "dashboard"}/>
@@ -91,18 +91,19 @@ class Layout extends React.Component{
 		}
 	}
 
-	toggleSidebar(){
-		this.setState({sidebarCollapsed: !this.state.sidebarCollapsed});
+	toggleSidebar(collapse){
+		if(collapse === undefined) collapse = !this.state.sidebarCollapsed;
+		this.setState({sidebarCollapsed: collapse});
 	}
 
 	requireSave(){
-		if(this.state.saveStatus !== "waiting"){
+		if(!this.doesRequireSave()){
 			this.setState({saveStatus: "waiting"});
 		}
 	}
 
 	async save(){
-		if(this.state.saveStatus !== "waiting") return;
+		if(!this.doesRequireSave()) return;
 		this.setState({saveStatus: "saving"});
 		var success = await this.body.current.save();
 		if(success){
@@ -115,7 +116,7 @@ class Layout extends React.Component{
 	}
 
 	onUnload = e => {
-		if(this.state.saveStatus !== ""){
+		if(this.doesRequireSave()){
 			e.preventDefault();
 			e.returnValue = "You have unsaved changes";
 			return "You have unsaved changes";

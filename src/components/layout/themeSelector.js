@@ -68,9 +68,9 @@ class ThemeSelector extends React.Component{
 				c("dropdown-hover", "#efefef");
 				c("scrollbar", "#eeeeee");
 				c("scrollbar-thumb", "#ababab");
-				c("card", "#e2e2e2");
-				c("card-hover", "#dcdcdc");
-				c("card-title", "#d3d3d3");
+				c("card", "#f9f9f9");
+				c("card-hover", "#f3f3f3");
+				c("card-title", "#d9d9d9");
 				break;
 		}
 	}
