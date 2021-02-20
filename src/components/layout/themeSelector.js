@@ -35,7 +35,7 @@ class ThemeSelector extends React.Component{
 
 	save(theme){
 		var cookies = new Cookies();
-		cookies.set("theme", theme, { path: "/" });
+		cookies.set("theme", theme, { path: "/", expires: new Date("9999-01-01 00:00:00") });
 		this.setState({
 			theme: theme
 		});
