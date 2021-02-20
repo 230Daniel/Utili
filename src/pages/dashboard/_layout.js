@@ -13,8 +13,8 @@ class Layout extends React.Component{
 	constructor(props){
 		super(props);
 		this.state = {
-			requiresSave: false,
-			saveStatus: "waiting"
+			saveStatus: "hidden",
+			sidebarCollapsed: true
 		}
 		this.body = React.createRef();
 		this.sidebar = React.createRef();
@@ -24,17 +24,17 @@ class Layout extends React.Component{
 		return(
 			<>
 				<main>
-					<Navbar buttonLeft={true} onButtonLeftClick={() => { this.sidebar.current.toggle(); }}/>
+					<Navbar buttonLeft={true} onButtonLeftClick={() => { this.toggleSidebar(); }}/>
 					<CheckBackend>
-						<div className="dashboard-container">
-							<Sidebar ref={this.sidebar}/>
+						<div className={`dashboard-container${this.state.sidebarCollapsed ? "" : " collapsed"}`}>
+							<Sidebar ref={this.sidebar} collapsed={this.state.sidebarCollapsed}/>
 							<div className="dashboard">
 								<Switch>
 									<Route exact path="/dashboard/" render={() => window.location.pathname = "dashboard"}/>
-									<Route exact path="/dashboard/:guildId" render={(props) => (<DashboardCore {...props} onChanged={() => this.setState({requiresSave: true, saveStatus: "waiting"})} ref={this.body} />)}/>
+									<Route exact path="/dashboard/:guildId" render={(props) => (<DashboardCore {...props} onChanged={() => this.requireSave()} ref={this.body} />)}/>
 								</Switch>
 							</div>
-							<Prompt when={this.state.requiresSave} message="You have unsaved changes, are you sure you want to leave this page?"/>
+							<Prompt when={this.doesRequireSave()} message="You have unsaved changes, are you sure you want to leave this page?"/>
 						</div>
 					</CheckBackend>
 				</main>
@@ -46,9 +46,32 @@ class Layout extends React.Component{
 		);
 	}
 
+	doesRequireSave(){
+		switch(this.state.saveStatus){
+			case "waiting":
+			case "saving":
+			case "error":
+				return true;
+			default:
+				return false;
+		}
+	}
+
+	shouldSaveButtonBeVisible(){
+		switch(this.state.saveStatus){
+			case "waiting":
+			case "saving":
+			case "saved":
+			case "error":
+				return true;
+			default:
+				return false;
+		}
+	}
+
 	renderSaveButton(){
 		return(
-			<div className={`saveNotification ${this.state.requiresSave ? "visible" : ""}`}>
+			<div className={`saveNotification ${this.shouldSaveButtonBeVisible() ? "visible" : ""}`}>
 				<button className={`savebutton-${this.state.saveStatus}`} onClick={async () => await this.save()}>{this.getSaveButtonContent()}</button>
 			</div>
 		);
@@ -61,9 +84,20 @@ class Layout extends React.Component{
 			case "saving":
 				return "Saving...";
 			case "saved":
+			case "hidden":
 				return "Changes Saved";
 			case "error":
 				return "Error";
+		}
+	}
+
+	toggleSidebar(){
+		this.setState({sidebarCollapsed: !this.state.sidebarCollapsed});
+	}
+
+	requireSave(){
+		if(this.state.saveStatus !== "waiting"){
+			this.setState({saveStatus: "waiting"});
 		}
 	}
 
@@ -74,14 +108,14 @@ class Layout extends React.Component{
 		if(success){
 			this.setState({saveStatus: "saved"});
 			setTimeout(() => {
-				this.setState({requiresSave: false});
+				if(!this.doesRequireSave())	this.setState({saveStatus: "hidden"});
 			}, 500);
 		}
 		else this.setState({saveStatus: "error"});
 	}
 
 	onUnload = e => {
-		if(this.state.requiresSave){
+		if(this.state.saveStatus !== ""){
 			e.preventDefault();
 			e.returnValue = "You have unsaved changes";
 			return "You have unsaved changes";

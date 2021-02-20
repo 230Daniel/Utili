@@ -107,6 +107,10 @@
 	background-color: #43b581;
 }
 
+.savebutton-hidden{
+	background-color: #43b581;
+}
+
 .savebutton-error{
 	background-color: #b55043;
 }
