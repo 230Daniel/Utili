@@ -20,6 +20,7 @@ class Fade extends React.Component{
 
 	componentDidMount(){
 		setTimeout(() => {
+			console.log("fade in");
 			this.setState({isVisible: true});
 		}, 100);
 	}

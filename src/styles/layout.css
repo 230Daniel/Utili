@@ -1,8 +1,9 @@
 * {
-	transition: color .1s, 
-	background-color .1s, 
-	box-shadow .1s,
-	transform .1s, 
+	transition: 
+	color 0s, 
+	background-color 0.1s, 
+	box-shadow 0.1s,
+	transform 0.1s, 
 	min-width 0.2s, 
 	max-width 0.2s, 
 	width 0.2s,
@@ -12,6 +13,8 @@
 	opacity 0.2s,
 	padding 0.2s,
 	!important;
+	
+	transition-delay: 0 !important;
 }
 
 /* Navbar */

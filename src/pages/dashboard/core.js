@@ -36,7 +36,7 @@ class Core extends React.Component{
 					<div className="dashboard-title">Utili Dashboard</div>
 					<div className="dashboard-subtitle">Select a feature to configure from the sidebar</div>
 					<Load loaded={this.state.core !== null}>
-							<Card title="Core Settings" size={400} titleSize={200} onChanged={this.props.onChanged}>
+							<Card title="Core Settings" size={400} titleSize={200} inputSize={200} onChanged={this.props.onChanged}>
 								<CardComponent type="text" title="Nickname" value={this.state.core?.nickname} ref={this.settings.nickname}></CardComponent>
 								<CardComponent type="text" title="Command Prefix" value={this.state.core?.prefix} ref={this.settings.prefix}></CardComponent>
 								<CardComponent type="checkbox" title="Enable Commands" value={this.state.core?.enableCommands} ref={this.settings.enableCommands}></CardComponent>
@@ -60,7 +60,6 @@ class Core extends React.Component{
 	}
 
 	getInput(){
-		console.log();
 		this.state.core = {
 			nickname: this.settings.nickname.current.getValue(),
 			prefix: this.settings.prefix.current.getValue(),

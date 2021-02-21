@@ -8,7 +8,8 @@ import Footer from "../../components/layout/footer";
 import Error from "../error";
 import "../../styles/layout.css";
 
-import DashboardCore from "./core";
+import Core from "./core";
+import Autopurge from "./autopurge";
 
 class Layout extends React.Component{
 	constructor(props){
@@ -32,7 +33,8 @@ class Layout extends React.Component{
 							<div className="dashboard">
 								<Switch>
 									<Route exact path="/dashboard/" render={() => window.location.pathname = "dashboard"}/>
-									<Route exact path="/dashboard/:guildId" render={(props) => (<DashboardCore {...props} onChanged={() => this.requireSave()} ref={this.body} />)}/>
+									<Route exact path="/dashboard/:guildId" render={(props) => (<Core {...props} onChanged={() => this.requireSave()} ref={this.body} />)}/>
+									<Route exact path="/dashboard/:guildId/autopurge" render={(props) => (<Autopurge {...props} onChanged={() => this.requireSave()} ref={this.body} />)}/>
 									<Route component={NotFound}/>
 								</Switch>
 							</div>
