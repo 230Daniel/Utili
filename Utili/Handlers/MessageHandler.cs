@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Database.Data;
@@ -22,7 +23,7 @@ namespace Utili.Handlers
         {
             _ = Task.Run(async () =>
             {
-                if (partialMessage.Author.Id == _client.CurrentUser.Id && partialMessage.GetType() == typeof(SocketSystemMessage))
+                if (partialMessage.Author.Id == _client.CurrentUser.Id && partialMessage is SocketSystemMessage)
                 {
                     await partialMessage.DeleteAsync();
                     return;
@@ -60,8 +61,8 @@ namespace Utili.Handlers
                 }
 
                 // High priority
-                try { await MessageLogs.MessageReceived(context); } catch {}
-                try { await MessageFilter.MessageReceived(context); } catch {}
+                try { await MessageLogs.MessageReceived(context); } catch (Exception e) { _logger.ReportError("MsgReceived", e); }
+                try { await MessageFilter.MessageReceived(context); } catch (Exception e) { _logger.ReportError("MsgReceived", e); }
 
                 // Low priority
                 _ = VoteChannels.MessageReceived(context);
