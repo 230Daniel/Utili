@@ -74,11 +74,38 @@
 	align-items: center;
 }
 
+.dashboard-card-component-select{
+	height: 100%;
+}
+
+.dashboard-card-component-select > select{
+	height: 100%;
+	width: 100%;
+	display: flex;
+	align-items: center;
+	font-size: 16px;
+	color: var(--colour-text);
+	background-color: initial;
+	border: none;
+	outline: none;
+}
+
+.dashboard-card-component-select > select > option{
+	height: 100%;
+	width: 100%;
+	display: flex;
+	align-items: center;
+	font-size: 16px;
+	color: var(--colour-text);
+	background-color: var(--colour-dropdown);
+	border: none;
+	outline: none;
+}
+
 .dashboard-card-component-timespan > div {
 	display: flex;
 	flex-direction: row;
 	align-items: center;
-	justify-content: space-around;
 	height: 100%;
 	width: 100%;
 }

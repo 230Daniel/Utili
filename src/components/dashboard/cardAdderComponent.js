@@ -1,12 +1,12 @@
 import React from "react";
 
-class CardListComponent extends React.Component{
+class CardAdderComponent extends React.Component{
 	constructor(props){
 		super(props);
 		this.state = {
 			values: this.props.values,
 			selected: this.props.selected,
-			options: this.props.values.filter(x => !this.props.selected.includes(x.id)).map(x => x.id),
+			options: this.props.values.filter(x => !this.props.selected.includes(x)),
 			selecting: false,
 			query: ""
 		}
@@ -16,47 +16,27 @@ class CardListComponent extends React.Component{
 	render(){
 		return(
 			<div className="dashboard-card-list-component" onFocus={() => this.searchUpdated()} onBlur={() => this.searchClosed()}>
-				<div className="dashboard-card-list-component-search">
+				<div className="dashboard-card-list-component-search" style={{backgroundColor: "var(--colour-card-title)"}}>
 					<input placeholder={this.props.prompt} value={this.state.query} ref={this.search}  onInput={() => this.searchUpdated()} />
 				</div>
 				{this.renderOptions()}
-				{this.renderSelected()}
 			</div>
 		);
 	}
 
 	renderOptions(){
-		var options = this.sort(this.state.options.filter(x => this.getValue(x).includes(this.state.query)));
+		var options = this.sort(this.state.options.filter(x => x.value.includes(this.state.query)));
 		return(
 			<div className={`dashboard-card-list-component-options${this.state.selecting ? "" : " collapsed"}`}>
 				{options.map((item, i) => {
 					return(
 						<div className="dashboard-card-list-component-option" onClick={() => this.selectValue(item)} key={i}>
-							{this.getValue(item)}
+							{item.value}
 						</div>
 					);
 				})}
 			</div>
 		);
-	}
-
-	renderSelected(){
-		if(this.props.hideSelected) return;
-		var selected = this.sort(this.state.selected);
-		return(
-			<div className={this.state.selecting ? "collapsed" : ""}>
-				{selected.map((item, i) => {
-					return(
-						<div className="dashboard-card-list-component-selected" key={i}>
-							{this.getValue(item)}
-							<div className="dashboard-card-list-component-selected-remove" onClick={() => this.unselectValue(item)}>
-								<img width={20} src="/bin.svg"/>
-							</div>
-						</div>
-					);
-				})}
-			</div>
-			);
 	}
 
 	searchUpdated(){
@@ -73,10 +53,9 @@ class CardListComponent extends React.Component{
 		return this.state.values.find(x => x.id === id).value.toString();
 	}
 
-	sort(ids){
-		var values = ids.map(x => this.state.values.find(y => y.id === x));
+	sort(values){
 		values = values.sort(this.compare);
-		return values.map(x => x.id);
+		return values;
 	}
 
 	compare(a, b) {
@@ -96,6 +75,7 @@ class CardListComponent extends React.Component{
 		newOptions.splice(newOptions.indexOf(id), 1);
 		this.setState({selected: newSelected, options: newOptions});
 		this.props.onChanged();
+		this.props.onSelected(id);
 	}
 
 	unselectValue(id){
@@ -105,11 +85,8 @@ class CardListComponent extends React.Component{
 		newSelected.splice(newSelected.indexOf(id), 1);
 		this.setState({selected: newSelected, options: newOptions});
 		this.props.onChanged();
-	}
-
-	getSelected(){
-		return this.state.selected;
+		this.props.onUnselected(id);
 	}
 }
 
-export default CardListComponent;
+export default CardAdderComponent;

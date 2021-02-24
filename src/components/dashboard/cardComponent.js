@@ -36,8 +36,17 @@ class CardComponent extends React.Component{
 						<input type="checkbox" checked={this.state.value} ref={this.input} onClick={(e) => { e.stopPropagation(); }} onChange={() => this.updateValue()}/>
 					</div>
 				);
+			case "select":
+				return(
+					<select ref={this.input} onChange={() => this.updateValue()}>
+						{this.props.options.map((option, i) => {
+							return(
+								<option value={i} selected={this.state.value === i}>{option}</option>
+							);
+						})}
+					</select>
+				);
 			case "timespan":
-				console.log(this.state.value);
 				return(
 					<div ref={this.input}>
 						<input type="number" value={formatNumber(this.state.value.days)} placeholder="dd" onChange={() => this.updateValue()}/><span>:</span>
@@ -61,6 +70,7 @@ class CardComponent extends React.Component{
 	getValue(){
 		switch(this.props.type){
 			case "text":
+			case "select":
 				return this.input.current.value;
 			case "checkbox":
 				return this.input.current.checked;

@@ -6,7 +6,13 @@ class Card extends React.Component{
 	render(){
 		return(
 			<div className={`dashboard-card`} style={{width: this.props.size}}>
-				<div className="dashboard-card-title">{this.props.title}</div>
+				{this.props.title && 
+					<div className="dashboard-card-title">{this.props.title}
+					{this.props.onRemoved &&
+					<div className="dashboard-card-list-component-selected-remove" onClick={this.props.onRemoved}>
+					<img width={20} src="/bin.svg"/>
+				</div>}
+				</div>}
 				{this.renderChildren()}
 			</div>
 		);
