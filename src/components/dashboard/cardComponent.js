@@ -25,6 +25,7 @@ class CardComponent extends React.Component{
 	}
 
 	renderInput(){
+		if(this.state.value === null) return null;
 		switch(this.props.type){
 			case "text":
 				return(
@@ -38,10 +39,10 @@ class CardComponent extends React.Component{
 				);
 			case "select":
 				return(
-					<select ref={this.input} onChange={() => this.updateValue()}>
+					<select ref={this.input} onChange={() => this.updateValue()} value={this.state.value}>
 						{this.props.options.map((option, i) => {
 							return(
-								<option value={i} selected={this.state.value === i}>{option}</option>
+								<option value={i} key={i}>{option}</option>
 							);
 						})}
 					</select>
@@ -95,7 +96,6 @@ function zeroNull(value){
 }
 
 function formatNumber(value, length){
-	if(value === 0) return null;
-	//return value.toString().padStart(2, "0");
-	return value;
+	if(value === 0) return "";
+	return value.toString().padStart(2, "0");
 }

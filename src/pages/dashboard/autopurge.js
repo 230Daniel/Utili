@@ -9,7 +9,6 @@ import { get, post } from "../../api/auth";
 import Card from "../../components/dashboard/card";
 import CardComponent from "../../components/dashboard/cardComponent";
 import CardAdderComponent from "../../components/dashboard/cardAdderComponent";
-import Info from "../../components/dashboard/info";
 
 class Autopurge extends React.Component{
 	constructor(props){
@@ -35,7 +34,12 @@ class Autopurge extends React.Component{
 				</Helmet>
 				<Fade>
 					<div className="dashboard-title">Autopurge</div>
-					<div className="dashboard-subtitle">Subtitle</div>
+					<div className="dashboard-subtitle">Automatically deletes messages</div>
+					<div className="dashboard-description">
+						<p>Messages are deleted when they're older than the threshold you set.</p>
+						<p>On your server, one autopurge channel will be checked every 30 seconds. If you have more than 1 channel, they cycle around in a queue.</p>
+						<p><b>Premium:</b> Process 5 channels every 10 seconds</p>
+					</div>
 					<Load loaded={this.state.autopurge !== null}>
 						<Card onChanged={this.props.onChanged}>
 							<CardAdderComponent 
@@ -48,10 +52,8 @@ class Autopurge extends React.Component{
 						</Card>
 						<div className="inline">
 							{this.state.autopurge?.rows.map((row, i) =>{
-								var channel = this.state.textChannels.find(x => x.id == row.channelId).name;
 								return(
-									<Card title={channel} size={350} titleSize={150} inputSize={200} key={i} onChanged={this.props.onChanged} onRemoved={() => this.onChannelRemoved(row.channelId)}>
-										{console.log(row)}
+									<Card title={row.channelName} size={350} titleSize={150} inputSize={200} key={i} onChanged={this.props.onChanged} onRemoved={() => this.onChannelRemoved(row.channelId)}>
 										<CardComponent title="Threshold" type="timespan" value={Duration.fromISO(row.timespan)} ref={this.settings.channels[i].timespan}/>
 										<CardComponent title="Mode" type="select" value={row.mode} options={["All Messages", "Bot Messages", "Disabled"]} ref={this.settings.channels[i].mode}/>
 									</Card>
@@ -66,51 +68,59 @@ class Autopurge extends React.Component{
 	
 	async componentDidMount(){
 		var response = await get(`dashboard/${this.guildId}/autopurge`);
-		var autopurge = await response?.json();
+		this.state.autopurge = await response?.json();
 		response = await get(`discord/${this.guildId}/channels/text`);
-		var textChannels = await response?.json();
-		for(var i = 0; i < autopurge.rows.length; i++){
+		this.state.textChannels = await response?.json();
+		for(var i = 0; i < this.state.autopurge.rows.length; i++){
 			this.settings.channels.push({ timespan: React.createRef(), mode: React.createRef() });
+			this.state.autopurge.rows[i]["channelName"] = this.getChannelName(this.state.autopurge.rows[i].channelId);
 		}
-		this.setState({autopurge: autopurge, textChannels: textChannels});
-		
+		this.sortChannels();
+		this.setState({});
 	}
 
 	onChannelAdded(channel){
-		var autopurge = this.state.autopurge;
-		autopurge.rows.push({
+		this.settings.channels.push({ timespan: React.createRef(), mode: React.createRef() });
+		this.state.autopurge.rows.push({
 			channelId: channel.id.toString(),
 			timespan: "PT5M",
-			mode: 0
+			mode: 0,
+			channelName: this.getChannelName(channel.id)
 		});
-		this.settings.channels.push({ timespan: React.createRef(), mode: React.createRef() });
-		this.setState({autopurge: autopurge});
+		this.sortChannels();
+		this.setState({});
 	}
 
 	onChannelRemoved(id){
-		var autopurge = this.state.autopurge;
-		autopurge.rows = autopurge.rows.filter(x => x.channelId != id);
 		this.settings.channels.pop();
-		this.setState({autopurge: autopurge});
+		this.state.autopurge.rows = this.state.autopurge.rows.filter(x => x.channelId != id);
+		this.setState({});
 		this.props.onChanged();
 	}
 
 	getInput(){
 		var rows = this.state.autopurge.rows;
-		console.log(rows);
 		for(var i = 0; i < rows.length; i++){
 			var card = this.settings.channels[i];
 			rows[i].timespan = card.timespan.current.getValue();
 			rows[i].mode = card.mode.current.getValue();
 		}
 		this.state.autopurge.rows = rows;
-		this.setState({autopurge: this.state.autopurge});
+		this.setState({});
 	}
 
 	async save(){
 		this.getInput();
 		var response = await post(`dashboard/${this.guildId}/autopurge`, this.state.autopurge);
 		return response.ok;
+	}
+
+	sortChannels(){
+		this.state.autopurge.rows.sort((a, b) => (a.channelName > b.channelName) ? 1 : -1)
+	}
+
+	getChannelName(id){
+		return this.state.textChannels.find(x => x.id == id).name;
 	}
 }
 

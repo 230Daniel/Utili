@@ -13,6 +13,16 @@
 	margin-bottom: 30px;
 }
 
+.dashboard-description{
+	font-size: 14px;
+    font-weight: 300;
+	color: var(--colour-text-muted);
+	margin-top: 30px;
+	margin-bottom: 30px;
+	max-width: 600px;
+	padding-left: 20px;
+}
+
 .dashboard-container{
 	display: flex;
 	height: auto;

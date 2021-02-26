@@ -14,9 +14,10 @@ class CardAdderComponent extends React.Component{
 	}
 
 	render(){
+		this.state.options = this.props.values.filter(x => !this.props.selected.includes(x));
 		return(
 			<div className="dashboard-card-list-component" onFocus={() => this.searchUpdated()} onBlur={() => this.searchClosed()}>
-				<div className="dashboard-card-list-component-search" style={{backgroundColor: "var(--colour-card-title)"}}>
+				<div className="dashboard-card-list-component-search">
 					<input placeholder={this.props.prompt} value={this.state.query} ref={this.search}  onInput={() => this.searchUpdated()} />
 				</div>
 				{this.renderOptions()}
