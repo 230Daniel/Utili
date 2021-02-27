@@ -75,10 +75,10 @@ namespace Utili.Features
 
             SocketGuild guild = voiceChannel.Guild;
 
-            if (BotPermissions.IsMissingPermissions(voiceChannel, new[] {ChannelPermission.ManageChannels}, out _))
-            {
+            if (BotPermissions.IsMissingPermissions(voiceChannel, new[] {ChannelPermission.ViewChannel}, out _) ||
+                voiceChannel.Category is null ? BotPermissions.IsMissingPermissions(guild, new[] {GuildPermission.ManageChannels, GuildPermission.ManageRoles}, out _) :
+                BotPermissions.IsMissingPermissions(voiceChannel.Category, new[]{ChannelPermission.ManageChannels, ChannelPermission.ManageRoles}, out _))
                 return;
-            }
 
             List<SocketGuildUser> connectedUsers =
                 guild.Users.Where(x => x.VoiceChannel is not null && x.VoiceChannel.Id == voiceChannel.Id).ToList();
@@ -93,16 +93,12 @@ namespace Utili.Features
             }
             catch {}
 
-            if (connectedUsers.Count(x => !x.IsBot) == 0 && textChannel is not null && metaRow.DeleteChannels)
+            if (connectedUsers.Count(x => !x.IsBot) == 0 && metaRow.DeleteChannels)
             {
+                if(textChannel is null) return;
                 await textChannel.DeleteAsync();
                 channelRow.TextChannelId = 0;
                 await Database.Data.VoiceLink.SaveChannelRowAsync(channelRow);
-                return;
-            }
-
-            if (connectedUsers.Count(x => !x.IsBot) == 0 && metaRow.DeleteChannels)
-            {
                 return;
             }
 

@@ -49,6 +49,9 @@ namespace Utili
 
         public static bool IsMissingPermissions(IChannel channel, ChannelPermission[] requiredPermissions, out string missingPermissionsString)
         {
+            missingPermissionsString = null;
+            if(channel is null) return false;
+
             SocketGuild guild = (channel as SocketGuildChannel).Guild;
             SocketGuildUser bot = guild.GetUser(_client.CurrentUser.Id);
 
@@ -59,7 +62,6 @@ namespace Utili
 
             if (missingPermissions.Count == 0)
             {
-                missingPermissionsString = null;
                 return false;
             }
 
