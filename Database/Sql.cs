@@ -87,18 +87,16 @@ namespace Database
             return (int) sw.ElapsedMilliseconds;
         }
 
-        public static string ToSqlObjectArray<T>(T[] values)
+        public static string ToSqlObjectArray(ulong[] values)
         {
             string sqlArray = "(";
-
             for (int i = 0; i < values.Length; i++)
             {
                 sqlArray += $"{values[i]}";
-
                 if (i != values.Length - 1) sqlArray += ",";
             }
-
             sqlArray += ")";
+
             return sqlArray;
         }
     }

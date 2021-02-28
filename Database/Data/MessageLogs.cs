@@ -147,7 +147,7 @@ namespace Database.Data
             return matchedRows;
         }
 
-        public static async Task<List<MessageLogsMessageRow>> GetMessagesAsync(ulong guildId, ulong channelId, ulong[] messageIds = null)
+        public static async Task<List<MessageLogsMessageRow>> GetMessagesAsync(ulong guildId, ulong channelId, ulong[] messageIds)
         {
             List<MessageLogsMessageRow> matchedRows = new List<MessageLogsMessageRow>();
 
@@ -217,16 +217,38 @@ namespace Database.Data
                 ("ChannelId", channelId));
         }
 
+        private static async Task<int> GetStoredMessageCountAsync(ulong guildId, ulong channelId)
+        {
+            string command = "SELECT COUNT(*) FROM MessageLogsMessages WHERE GuildId = @GuildId AND ChannelId = @ChannelId";
+            List<(string, object)> values = new List<(string, object)>
+            {
+                ("GuildId", guildId), 
+                ("ChannelId", channelId)
+            };
+
+            MySqlDataReader reader = await Sql.ExecuteReaderAsync(command, values.ToArray());
+            reader.Read();
+            int count = reader.GetInt32(0);
+            reader.Close();
+            return count;
+        }
+
         public static async Task DeleteOldMessagesAsync(ulong guildId, ulong channelId, bool premium)
         {
             if(premium) return;
 
-            List<MessageLogsMessageRow> messages = (await GetMessagesAsync(guildId, channelId)).OrderBy(x => x.Timestamp).ToList();
-            List<MessageLogsMessageRow> messagesToRemove = new List<MessageLogsMessageRow>();
+            int count = await GetStoredMessageCountAsync(guildId, channelId);
+            int toDelete = count - 50;
+            if(toDelete <= 0) return;
 
-            messagesToRemove.AddRange(messages.Take(messages.Count - 50));
-
-            await DeleteMessagesAsync(guildId, channelId, messagesToRemove.Select(x => x.MessageId).ToArray());
+            // Double-nesting is used to workaround a limitation of mysql
+            await Sql.ExecuteAsync("DELETE FROM MessageLogsMessages WHERE MessageId IN " +
+                                        "(SELECT MessageId FROM (" +
+                                            $"SELECT MessageId FROM MessageLogsMessages WHERE GuildId = @GuildId AND ChannelId = @ChannelId ORDER BY `Timestamp` LIMIT {toDelete}" +
+                                        ") a" +
+                                    ")", 
+                ("GuildId", guildId), 
+                ("ChannelId", channelId));
         }
 
         public static async Task Delete30DayMessagesAsync()

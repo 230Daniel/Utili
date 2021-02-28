@@ -58,6 +58,7 @@ namespace UtiliBackend
                         if (wait >= 200)
                         {
                             _cachedClients.Remove(userId);
+                            Console.WriteLine("Trying again");
                             return await GetClientAsync(userId);
                         }
                         wait++;
