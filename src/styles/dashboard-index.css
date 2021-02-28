@@ -30,14 +30,14 @@
 	position: relative;
 	top: 0;
 	left: 0;
-	box-shadow: 10px 10px 5px var(--colour-shadow);
+	box-shadow: 10px 10px 5px var(--colour-shadow-invert);
 	transition: all 0.1s !important;
 }
 
 .guild:hover{
 	top: -8px;
 	left: -8px;
-	box-shadow: 18px 18px 5px var(--colour-shadow);
+	box-shadow: 18px 18px 5px var(--colour-shadow-invert);
 }
 
 .guild-icon{

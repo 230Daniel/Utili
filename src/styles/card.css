@@ -3,7 +3,7 @@
 	overflow: auto;
 	border-radius: 20px;
 	background-color: var(--colour-card);
-	box-shadow: 5px 5px 5px var(--colour-shadow);
+	box-shadow: 5px 5px 5px var(--colour-shadow-invert);
 	margin-bottom: 30px;
 	margin-right: 30px;	
 }

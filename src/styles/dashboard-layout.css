@@ -2,13 +2,13 @@
 	font-size: 50px !important;
 	font-weight: 100 !important;
 	margin-bottom: 30px;
-    color: var(--colour-text) !important;
+    color: var(--colour-text-invert) !important;
 }
 
 .dashboard-subtitle{
 	font-size: 28px;
     font-weight: 100;
-	color: var(--colour-text-muted);
+	color: var(--colour-text-invert-muted);
 	margin-top: -30px;
 	margin-bottom: 30px;
 }
@@ -16,7 +16,7 @@
 .dashboard-description{
 	font-size: 14px;
     font-weight: 300;
-	color: var(--colour-text-muted);
+	color: var(--colour-text-invert-muted);
 	margin-top: 30px;
 	margin-bottom: 30px;
 	max-width: 600px;
@@ -179,7 +179,7 @@
 
 .saveNotification.visible{
 	opacity: 1;
-	box-shadow: 5px 5px 5px var(--colour-shadow);
+	box-shadow: 5px 5px 5px var(--colour-shadow-invert);
 }
 
 .saveNotification > button{
@@ -187,7 +187,7 @@
 	height: 35px;
 	border-radius: 10px;
 
-	color: var(--colour-text);
+	color: var(--colour-text-invert);
 	border: none !important;
 	outline: none !important;
 	font-weight: 500;

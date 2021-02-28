@@ -137,7 +137,7 @@ h1{
 	text-align: center !important;
 	font-weight: 100 !important;
 	margin-top: 30px !important;
-	color: var(--colour-text) !important;
+	color: var(--colour-text-invert) !important;
 }
 
 h2{
@@ -145,7 +145,7 @@ h2{
 	text-align: center;
 	font-weight: 100 !important;
 	margin-top: 5px;
-	color: var(--colour-text) !important;
+	color: var(--colour-text-invert) !important;
 }
 
 .btn{
