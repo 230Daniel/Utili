@@ -112,6 +112,7 @@ namespace Database.Data
         // 0 = All messages
         // 1 = Bot messages
         // 2 = Disabled
+        // 3 = User messages
 
         private AutopurgeRow()
         {

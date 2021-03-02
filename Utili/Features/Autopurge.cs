@@ -112,6 +112,9 @@ namespace Utili.Features
             // Only delete bot messages
             if (mode == 1) messages.RemoveAll(x => !x.Author.IsBot);
 
+            // Only delete user messages
+            if (mode == 3) messages.RemoveAll(x => x.Author.IsBot);
+
             await channel.DeleteMessagesAsync(messages);
 
             if (exceedesCap && mode == 0 && lastMessage.CreatedAt < latestTime)
