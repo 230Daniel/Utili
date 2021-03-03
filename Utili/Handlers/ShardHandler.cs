@@ -29,7 +29,7 @@ namespace Utili.Handlers
                 ShardRegister.RemoveAll(x => x.Item1 == shard.ShardId);
                 ShardRegister.Add((shard.ShardId, DateTime.Now));
 
-                if (_client.Shards.All(x => x.ConnectionState == ConnectionState.Connected)) _ = AllShardsReady();
+                if (_client.Shards.All(x => ShardRegister.Any(y => y.Item1 == x.ShardId))) _ = AllShardsReady();
 
                 await CacheUsersAsync(shard);
                 await shard.SetGameAsync($"{_config.Domain} | {_config.DefaultPrefix}help");
