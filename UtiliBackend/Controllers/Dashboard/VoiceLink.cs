@@ -31,7 +31,7 @@ namespace UtiliBackend.Controllers.Dashboard
             row.Enabled = body.Enabled;
             row.DeleteChannels = body.DeleteChannels;
             row.Prefix = EString.FromDecoded(body.Prefix);
-            row.ExcludedChannels = body.ExcludedChannels;
+            row.ExcludedChannels = body.ExcludedChannels.Select(ulong.Parse).ToList();
             await row.SaveAsync();
 
             return new OkResult();
@@ -42,14 +42,14 @@ namespace UtiliBackend.Controllers.Dashboard
     {
         public bool Enabled { get; set; }
         public bool DeleteChannels { get; set; }
-        public List<ulong> ExcludedChannels { get; set; }
+        public List<string> ExcludedChannels { get; set; }
         public string Prefix { get; set; }
 
         public VoiceLinkBody(VoiceLinkRow row)
         {
             Enabled = row.Enabled;
             DeleteChannels = row.DeleteChannels;
-            ExcludedChannels = row.ExcludedChannels;
+            ExcludedChannels = row.ExcludedChannels.Select(x => x.ToString()).ToList();
             Prefix = row.Prefix.Value;
         }
 

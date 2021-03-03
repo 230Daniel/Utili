@@ -35,7 +35,7 @@ namespace UtiliBackend.Controllers.Dashboard
             CoreRow row = await Database.Data.Core.GetRowAsync(auth.Guild.Id);
             row.Prefix = EString.FromDecoded(body.Prefix);
             row.EnableCommands = body.EnableCommands;
-            row.ExcludedChannels = body.ExcludedChannels;
+            row.ExcludedChannels = body.ExcludedChannels.Select(ulong.Parse).ToList();
             await row.SaveAsync();
 
             return new OkResult();
@@ -47,14 +47,14 @@ namespace UtiliBackend.Controllers.Dashboard
         public string Nickname { get; set; }
         public string Prefix { get; set; }
         public bool EnableCommands { get; set; }
-        public List<ulong> ExcludedChannels { get; set; }
+        public List<string> ExcludedChannels { get; set; }
 
         public CoreBody(CoreRow row, string nickname)
         {
             Nickname = nickname;
             Prefix = row.Prefix.Value;
             EnableCommands = row.EnableCommands;
-            ExcludedChannels = row.ExcludedChannels;
+            ExcludedChannels = row.ExcludedChannels.Select(x => x.ToString()).ToList();
         }
 
         public CoreBody() { }

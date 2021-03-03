@@ -28,9 +28,9 @@ namespace UtiliBackend.Controllers.Dashboard
             if (!auth.Authorised) return auth.Action;
 
             MessageLogsRow row = await Database.Data.MessageLogs.GetRowAsync(auth.Guild.Id);
-            row.DeletedChannelId = body.DeletedChannelId;
-            row.EditedChannelId = body.EditedChannelId;
-            row.ExcludedChannels = body.ExcludedChannels;
+            row.DeletedChannelId = ulong.Parse(body.DeletedChannelId);
+            row.EditedChannelId = ulong.Parse(body.EditedChannelId);
+            row.ExcludedChannels = body.ExcludedChannels.Select(ulong.Parse).ToList();
             await row.SaveAsync();
 
             return new OkResult();
@@ -39,15 +39,15 @@ namespace UtiliBackend.Controllers.Dashboard
 
     public class MessageLogsBody
     {
-        public ulong DeletedChannelId { get; set; }
-        public ulong EditedChannelId { get; set; }
-        public List<ulong> ExcludedChannels { get; set; }
+        public string DeletedChannelId { get; set; }
+        public string EditedChannelId { get; set; }
+        public List<string> ExcludedChannels { get; set; }
 
         public MessageLogsBody(MessageLogsRow row)
         {
-            DeletedChannelId = row.DeletedChannelId;
-            EditedChannelId = row.EditedChannelId;
-            ExcludedChannels = row.ExcludedChannels;
+            DeletedChannelId = row.DeletedChannelId.ToString();
+            EditedChannelId = row.EditedChannelId.ToString();
+            ExcludedChannels = row.ExcludedChannels.Select(x => x.ToString()).ToList();
         }
 
         public MessageLogsBody() { }

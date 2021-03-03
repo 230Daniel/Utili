@@ -44,18 +44,18 @@ namespace UtiliBackend.Controllers
 
     public class Channel
     {
-        public ulong Id { get; set; }
+        public string Id { get; set; }
         public string Name { get; set; }
 
         public Channel(RestTextChannel channel)
         {
-            Id = channel.Id;
+            Id = channel.Id.ToString();
             Name = channel.Name;
         }
 
         public Channel(RestVoiceChannel channel)
         {
-            Id = channel.Id;
+            Id = channel.Id.ToString();
             Name = channel.Name;
         }
     }

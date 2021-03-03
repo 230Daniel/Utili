@@ -29,7 +29,7 @@ namespace UtiliBackend.Controllers.Dashboard
 
             MessagePinningRow row = await Database.Data.MessagePinning.GetRowAsync(auth.Guild.Id);
             row.Pin = body.Pin;
-            row.PinChannelId = body.PinChannelId;
+            row.PinChannelId = ulong.Parse(body.PinChannelId);
             await row.SaveAsync();
 
             return new OkResult();
@@ -39,12 +39,12 @@ namespace UtiliBackend.Controllers.Dashboard
     public class MessagePinningBody
     {
         public bool Pin { get; set; }
-        public ulong PinChannelId { get; set; }
+        public string PinChannelId { get; set; }
 
         public MessagePinningBody(MessagePinningRow row)
         {
             Pin = row.Pin;
-            PinChannelId = row.PinChannelId;
+            PinChannelId = row.PinChannelId.ToString();
         }
 
         public MessagePinningBody() { }
