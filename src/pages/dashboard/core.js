@@ -35,6 +35,18 @@ class Core extends React.Component{
 				<Fade>
 					<div className="dashboard-title">Utili Dashboard</div>
 					<div className="dashboard-subtitle">Select a feature to configure from the sidebar</div>
+					<div className="dashboard-description">
+						<p> This new dashboard is still under construction. </p>
+						<p>
+							Completed pages:
+							<ul>
+								<li>Autopurge</li>
+								<li>Logging</li>
+								<li>Message Pinning</li>
+								<li>Voice Link</li>
+							</ul>
+						</p>
+					</div>
 					<Load loaded={this.state.core !== null}>
 							<Card title="Core Settings" size={400} titleSize={200} inputSize={200} onChanged={this.props.onChanged}>
 								<CardComponent type="text" title="Nickname" value={this.state.core?.nickname} ref={this.settings.nickname}></CardComponent>

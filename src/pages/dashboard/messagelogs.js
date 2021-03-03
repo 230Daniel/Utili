@@ -15,7 +15,8 @@ class MessageLogs extends React.Component{
 		this.guildId = this.props.match.params.guildId;
 		this.state = {
 			messageLogs: null,
-			textChannels: null
+			textChannels: null,
+			premium: null
 		};
 		this.settings = {
 			deletedChannel: React.createRef(),
@@ -35,7 +36,7 @@ class MessageLogs extends React.Component{
 					<div className="dashboard-title">Message Logging</div>
 					<div className="dashboard-subtitle">Keeps a record of deleted and edited messages</div>
 					<div className="dashboard-description">
-						<p>description</p>
+						{this.renderDescription()}
 					</div>
 					<Load loaded={this.state.messageLogs !== null}>
 						<Card title="Message Logging Settings" size={400} titleSize={200} inputSize={200} onChanged={this.props.onChanged}>
@@ -50,12 +51,29 @@ class MessageLogs extends React.Component{
 			</>
 		);
 	}
+
+	renderDescription(){
+		if(this.state.premium && this.state.premium.premium){
+			return(
+				<p>On your server, messages will be stored for 30 days.<br/>The 30 day limit is required by Discord.</p>
+			);
+		} else {
+			return(
+				<div>
+					<p>On your server, up to 50 messages will be stored per channel for 30 days.<br/>The 30 day limit is required by Discord.</p>
+					<p><b>Premium:</b> Removes the 50 message per channel limit</p>
+				</div>
+			);
+		}
+	}
 	
 	async componentDidMount(){
 		var response = await get(`dashboard/${this.guildId}/messagelogs`);
 		this.state.messageLogs = await response?.json();
 		response = await get(`discord/${this.guildId}/channels/text`);
 		this.state.textChannels = await response?.json();
+		response = await get(`premium/guild/${this.guildId}`);
+		this.state.premium = await response?.json();
 
 		this.setState({});
 	}

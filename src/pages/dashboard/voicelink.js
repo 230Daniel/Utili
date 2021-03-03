@@ -35,9 +35,11 @@ class VoiceLink extends React.Component{
 				</Helmet>
 				<Fade>
 					<div className="dashboard-title">Voice Link</div>
-					<div className="dashboard-subtitle">Automatically deletes messages</div>
+					<div className="dashboard-subtitle">Creates a text channel for each voice channel</div>
 					<div className="dashboard-description">
-						<p>dd</p>
+						<p>A private text channel is created in the same category as the voice channel.<br/>
+						When people are in the voice channel, they can use the text channel.</p>
+						<p><b>Delete Channels:</b> Determines if the text channel should be deleted when the voice channel is empty</p>
 					</div>
 					<Load loaded={this.state.voiceLink !== null}>
 						<Card title="Voice Link Settings" size={400} titleSize={200} inputSize={200} onChanged={this.props.onChanged}>

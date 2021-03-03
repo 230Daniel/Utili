@@ -69,12 +69,12 @@ class Autopurge extends React.Component{
 	renderDescription(){
 		if(this.state.premium && this.state.premium.premium){
 			return(
-				<p>On your server, five autopurge channels will be checked every 10 seconds. If you have more than 5 channels, they cycle around in a queue.</p>
+				<p>On your server, five autopurge channels will be checked every 10 seconds.<br/>If you have more than 5 channels, they cycle around in a queue.</p>
 			);
 		} else {
 			return(
 				<div>
-					<p>On your server, one autopurge channel will be checked every 30 seconds. If you have more than 1 channel, they cycle around in a queue.</p>
+					<p>On your server, one autopurge channel will be checked every 30 seconds.<br/>If you have more than 1 channel, they cycle around in a queue.</p>
 					<p><b>Premium:</b> Checks 5 channels every 10 seconds</p>
 				</div>
 			);
