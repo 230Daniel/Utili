@@ -100,7 +100,7 @@ class Autopurge extends React.Component{
 	onChannelAdded(channel){
 		this.settings.channels.push({ timespan: React.createRef(), mode: React.createRef() });
 		this.state.autopurge.rows.push({
-			channelId: channel.id.toString(),
+			channelId: channel.id,
 			timespan: "PT5M",
 			mode: -1,
 			channelName: this.getChannelName(channel.id)
