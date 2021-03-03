@@ -5,6 +5,7 @@ using Database.Data;
 using Discord;
 using Discord.Commands;
 using Discord.Rest;
+using Discord.WebSocket;
 using static Utili.Program;
 using static Utili.MessageSender;
 
@@ -79,6 +80,14 @@ namespace Utili.Commands
             else if (user.GuildPermissions.Administrator) await SendSuccessAsync(Context.Channel, "Authorised", $"{user} an administrator of {guild}");
             else if (user.GuildPermissions.ManageGuild) await SendSuccessAsync(Context.Channel, "Authorised", $"{user} has the manage server permission in {guild}");
             else await SendFailureAsync(Context.Channel, "Not authorised", $"{user} does not have the manage server permission in {guild}", supportLink: false);
+        }
+
+        [Command("SimulateCrash")]
+        [Permission(Perm.BotOwner)]
+        public async Task SimulateCrash()
+        {
+            DiscordSocketClient shard = _client.GetShard(0);
+            await shard.StopAsync();
         }
     }
 }

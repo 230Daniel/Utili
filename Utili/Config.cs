@@ -16,6 +16,7 @@ namespace Utili
         public ulong SystemGuildId { get; set; } = 0;
         public ulong SystemChannelId { get; set; } = 0;
         public CommunityConfig Community { get; set; } = new CommunityConfig();
+        public ulong StatusWebhookId { get; set; } = 0;
         public string DefaultPrefix { get; set; } = ".";
         public TokenConfiguration BotlistTokens { get; set; } = null;
 

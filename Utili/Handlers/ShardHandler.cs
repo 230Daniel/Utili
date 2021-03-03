@@ -55,6 +55,8 @@ namespace Utili.Handlers
             _userCacheTimer = new Timer(30000);
             _userCacheTimer.Elapsed += UserCacheTimerElapsed;
             _userCacheTimer.Start();
+
+            Monitoring.Start();
         }
 
         private static async Task CacheUsersAsync(DiscordSocketClient shard)
