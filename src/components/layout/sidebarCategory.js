@@ -3,7 +3,6 @@ import React from "react";
 class SidebarCategory extends React.Component{
 	constructor(props){
 		super(props);
-		var tmp = "uguu";
 		var page = window.location.pathname.split("/").pop();
 		if(page.match(/[0-9]$/)) page = "";
 		var collapsed = !this.props.children.some(x => x.props.to === page);

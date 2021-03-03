@@ -10,6 +10,7 @@ import "../../styles/layout.css";
 
 import Core from "./core";
 import Autopurge from "./autopurge";
+import InactiveRole from "./inactiverole";
 import MessageLogs from "./messagelogs";
 import MessagePinning from "./messagepinning";
 import VoiceLink from "./voicelink";
@@ -38,6 +39,7 @@ class Layout extends React.Component{
 									<Route exact path="/dashboard/" render={() => window.location.pathname = "dashboard"}/>
 									<Route exact path="/dashboard/:guildId" render={(props) => (<Core {...props} onChanged={() => this.requireSave()} ref={this.body} />)}/>
 									<Route exact path="/dashboard/:guildId/autopurge" render={(props) => (<Autopurge {...props} onChanged={() => this.requireSave()} ref={this.body} />)}/>
+									<Route exact path="/dashboard/:guildId/inactiverole" render={(props) => (<InactiveRole {...props} onChanged={() => this.requireSave()} ref={this.body} />)}/>
 									<Route exact path="/dashboard/:guildId/messagelogs" render={(props) => (<MessageLogs {...props} onChanged={() => this.requireSave()} ref={this.body} />)}/>
 									<Route exact path="/dashboard/:guildId/messagepinning" render={(props) => (<MessagePinning {...props} onChanged={() => this.requireSave()} ref={this.body} />)}/>
 									<Route exact path="/dashboard/:guildId/voicelink" render={(props) => (<VoiceLink {...props} onChanged={() => this.requireSave()} ref={this.body} />)}/>
