@@ -52,5 +52,7 @@ namespace UtiliBackend.Controllers.Dashboard
             ExcludedChannels = row.ExcludedChannels;
             Prefix = row.Prefix.Value;
         }
+
+        public VoiceLinkBody() { }
     }
 }
