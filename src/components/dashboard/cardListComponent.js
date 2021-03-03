@@ -41,7 +41,6 @@ class CardListComponent extends React.Component{
 	}
 
 	renderSelected(){
-		if(this.props.hideSelected) return;
 		var selected = this.sort(this.state.selected);
 		return(
 			<div className={this.state.selecting ? "collapsed" : ""}>
@@ -74,9 +73,10 @@ class CardListComponent extends React.Component{
 	}
 
 	sort(ids){
-		var values = ids.map(x => this.state.values.find(y => y.id === x));
-		values = values.sort(this.compare);
-		return values.map(x => x.id);
+		return ids.map(x => this.state.values.find(y => y.id === x))
+		.sort(this.compare)
+		.map(x => {if(x) return x.id; else return null;})
+		.filter(x => x !== null);
 	}
 
 	compare(a, b) {

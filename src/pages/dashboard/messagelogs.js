@@ -39,8 +39,8 @@ class MessageLogs extends React.Component{
 					</div>
 					<Load loaded={this.state.messageLogs !== null}>
 						<Card title="Message Logging Settings" size={400} titleSize={200} inputSize={200} onChanged={this.props.onChanged}>
-							<CardComponent type="select-channel" title="Deleted messages" channels={this.state.textChannels} value={this.state.messageLogs?.deletedChannelId} ref={this.settings.deletedChannel}></CardComponent>
-							<CardComponent type="select-channel" title="Edited messages" channels={this.state.textChannels} value={this.state.messageLogs?.editedChannelId} ref={this.settings.editedChannel}></CardComponent>
+							<CardComponent type="select-value" title="Deleted messages" values={values} value={this.state.messageLogs?.deletedChannelId} ref={this.settings.deletedChannel}></CardComponent>
+							<CardComponent type="select-value" title="Edited messages" values={values} value={this.state.messageLogs?.editedChannelId} ref={this.settings.editedChannel}></CardComponent>
 						</Card>
 						<Card title="Excluded Channels" size={400} onChanged={this.props.onChanged}>
 							<CardListComponent prompt="Exclude a channel..." values={values} selected={this.state.messageLogs?.excludedChannels} ref={this.settings.excludedChannels}></CardListComponent>

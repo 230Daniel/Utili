@@ -102,11 +102,11 @@
 	outline: none;
 }
 
-.dashboard-card-component-select-channel{
+.dashboard-card-component-select-value{
 	height: 100%;
 }
 
-.dashboard-card-component-select-channel > select{
+.dashboard-card-component-select-value > select{
 	height: 100%;
 	width: 100%;
 	display: flex;
@@ -118,7 +118,7 @@
 	outline: none;
 }
 
-.dashboard-card-component-select-channel > select > option{
+.dashboard-card-component-select-value > select > option{
 	height: 100%;
 	width: 100%;
 	display: flex;
