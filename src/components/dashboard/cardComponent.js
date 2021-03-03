@@ -48,6 +48,17 @@ class CardComponent extends React.Component{
 						})}
 					</select>
 				);
+			case "select-channel":
+				return(
+					<select ref={this.input} onChange={() => this.updateValue()} value={this.state.value}>
+						<option value={0}>None</option>
+						{this.props.channels.map((channel, i) => {
+							return(
+								<option value={channel.id} key={i}>{channel.name}</option>
+							);
+						})}
+					</select>
+				);
 			case "timespan":
 				return(
 					<div ref={this.input}>
@@ -73,6 +84,7 @@ class CardComponent extends React.Component{
 		switch(this.props.type){
 			case "text":
 			case "select":
+			case "select-channel":
 				return this.input.current.value;
 			case "checkbox":
 				return this.input.current.checked;
