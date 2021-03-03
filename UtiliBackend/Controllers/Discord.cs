@@ -40,6 +40,16 @@ namespace UtiliBackend.Controllers
             List<RestVoiceChannel> channels = await DiscordModule.GetVoiceChannelsAsync(auth.Guild);
             return new JsonResult(channels.Select(x => new Channel(x)));
         }
+
+        [HttpGet("discord/{guildId}/roles")]
+        public async Task<ActionResult> Roles([Required] ulong guildId)
+        {
+            AuthDetails auth = await Authentication.GetAuthDetailsAsync(HttpContext, guildId);
+            if (!auth.Authorised) return auth.Action;
+
+            List<Role> roles = auth.Guild.Roles.Where(x => !x.IsEveryone && !x.IsManaged).OrderBy(x => -x.Position).Select(x => new Role(x)).ToList();
+            return new JsonResult(roles);
+        }
     }
 
     public class Channel
@@ -57,6 +67,18 @@ namespace UtiliBackend.Controllers
         {
             Id = channel.Id.ToString();
             Name = channel.Name;
+        }
+    }
+
+    public class Role
+    {
+        public string Id { get; set; }
+        public string Name { get; set; }
+
+        public Role(RestRole role)
+        {
+            Id = role.Id.ToString();
+            Name = role.Name;
         }
     }
 }
