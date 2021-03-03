@@ -40,6 +40,7 @@ class CardComponent extends React.Component{
 			case "select":
 				return(
 					<select ref={this.input} onChange={() => this.updateValue()} value={this.state.value}>
+						<option value={-1} hidden>Select...</option>
 						{this.props.options.map((option, i) => {
 							return(
 								<option value={i} key={i}>{option}</option>

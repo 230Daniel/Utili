@@ -14,13 +14,13 @@
 }
 
 .dashboard-description{
-	font-size: 14px;
+	font-size: 16px;
     font-weight: 300;
 	color: var(--colour-text-invert-muted);
 	margin-top: 30px;
 	margin-bottom: 30px;
 	max-width: 600px;
-	padding-left: 20px;
+	padding-left: 40px;
 }
 
 .dashboard-container{
@@ -38,7 +38,7 @@
 	float: left;
 	padding-top: 30px;
 	max-height: calc(100vh - 65px);
-	overflow-y: scroll;
+	overflow-y: auto;
 }
 
 .sidebar::-webkit-scrollbar{
@@ -116,7 +116,7 @@
 	padding: 40px 0px 60px 60px;
 	overflow-x: auto;
 	max-height: calc(100vh - 65px);
-	overflow-y: scroll;
+	overflow-y: auto;
 }
 
 @media (max-width: 992px){ /* 992 */

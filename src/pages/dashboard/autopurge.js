@@ -16,7 +16,8 @@ class Autopurge extends React.Component{
 		this.guildId = this.props.match.params.guildId;
 		this.state = {
 			autopurge: null,
-			textChannels: null
+			textChannels: null,
+			premium: null
 		};
 		this.settings = {
 			channelAdder: React.createRef(),
@@ -37,8 +38,7 @@ class Autopurge extends React.Component{
 					<div className="dashboard-subtitle">Automatically deletes messages</div>
 					<div className="dashboard-description">
 						<p>Messages are deleted when they're older than the threshold you set.</p>
-						<p>On your server, one autopurge channel will be checked every 30 seconds. If you have more than 1 channel, they cycle around in a queue.</p>
-						<p><b>Premium:</b> Process 5 channels every 10 seconds</p>
+						{this.renderDescription()}
 					</div>
 					<Load loaded={this.state.autopurge !== null}>
 						<Card onChanged={this.props.onChanged}>
@@ -55,7 +55,7 @@ class Autopurge extends React.Component{
 								return(
 									<Card title={row.channelName} size={350} titleSize={150} inputSize={200} key={i} onChanged={this.props.onChanged} onRemoved={() => this.onChannelRemoved(row.channelId)}>
 										<CardComponent title="Threshold" type="timespan" value={Duration.fromISO(row.timespan)} ref={this.settings.channels[i].timespan}/>
-										<CardComponent title="Mode" type="select" value={row.mode} options={["All Messages", "Bot Messages", "Disabled"]} ref={this.settings.channels[i].mode}/>
+										<CardComponent title="Mode" type="select" value={row.mode} options={["All Messages", "Bot Messages", "Disabled", "User Messages"]} ref={this.settings.channels[i].mode}/>
 									</Card>
 								);
 							})}
@@ -65,12 +65,30 @@ class Autopurge extends React.Component{
 			</>
 		);
 	}
+
+	renderDescription(){
+		if(this.state.premium && this.state.premium.premium){
+			return(
+				<p>On your server, five autopurge channels will be checked every 10 seconds. If you have more than 5 channels, they cycle around in a queue.</p>
+			);
+		} else {
+			return(
+				<div>
+					<p>On your server, one autopurge channel will be checked every 30 seconds. If you have more than 1 channel, they cycle around in a queue.</p>
+					<p><b>Premium:</b> Checks 5 channels every 10 seconds</p>
+				</div>
+			);
+		}
+	}
 	
 	async componentDidMount(){
 		var response = await get(`dashboard/${this.guildId}/autopurge`);
 		this.state.autopurge = await response?.json();
 		response = await get(`discord/${this.guildId}/channels/text`);
 		this.state.textChannels = await response?.json();
+		response = await get(`premium/guild/${this.guildId}`);
+		this.state.premium = await response?.json();
+
 		for(var i = 0; i < this.state.autopurge.rows.length; i++){
 			this.settings.channels.push({ timespan: React.createRef(), mode: React.createRef() });
 			this.state.autopurge.rows[i]["channelName"] = this.getChannelName(this.state.autopurge.rows[i].channelId);
@@ -84,7 +102,7 @@ class Autopurge extends React.Component{
 		this.state.autopurge.rows.push({
 			channelId: channel.id.toString(),
 			timespan: "PT5M",
-			mode: 0,
+			mode: -1,
 			channelName: this.getChannelName(channel.id)
 		});
 		this.sortChannels();
