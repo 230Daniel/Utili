@@ -61,8 +61,8 @@ class RolePersist extends React.Component{
 
 	getInput(){
 		this.state.rolePersist = {
-			waitForVerification: this.settings.waitForVerification.current.getValue(),
-			rolePersist: this.settings.rolePersist.current.getSelected()
+			enabled: this.settings.enabled.current.getValue(),
+			excludedRoles: this.settings.excludedRoles.current.getSelected()
 		};
 		this.setState({});
 	}

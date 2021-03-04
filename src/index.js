@@ -66,7 +66,7 @@ function Invite(props){
 
 	var url = 	"https://discord.com/api/oauth2/authorize?permissions=8&scope=bot&response_type=code" +
               	`&client_id=${backend.discord.clientId}` +
-				`&redirect_uri=http%3A%2F%2F${window.location.host}%2Freturn`;
+				`&redirect_uri=${encodeURIComponent(window.location.origin)}%2Freturn`;
 	
 	if(guildId) url += `&guild_id=${guildId}`;
 	window.location.href = url;

@@ -37,14 +37,35 @@ class Core extends React.Component{
 					<div className="dashboard-subtitle">Select a feature to configure from the sidebar</div>
 					<div className="dashboard-description">
 						<p>This new dashboard is still under construction.</p>
-						<p>Completed Pages:</p>
-						<ul>
-							<li>Autopurge</li>
-							<li>Inactive Role</li>
-							<li>Message Logging</li>
-							<li>Message Pinning</li>
-							<li>Voice Link</li>
-						</ul>
+						<div className="inline">
+						<div>
+							<p>To-Do:</p>
+							<ul>
+								<li>Channel Mirroring</li>
+								<li>Channel Notices</li>
+								<li>Message Filter</li>
+								<li>Message Voting</li>
+								<li>Join Message</li>
+								<li>Reputation</li>
+								<li>Role Linking</li>
+								<li>Voice Roles</li>
+							</ul>
+						</div>
+						<div style={{marginLeft: "30px"}}>
+							<p>Done:</p>
+								<ul>
+									<li>Core</li>
+									<li>Autopurge</li>
+									<li>Message Logging</li>
+									<li>Message Pinning</li>
+									<li>Inactive Role</li>
+									<li>Join Roles</li>
+									<li>Role Persist</li>
+									<li>Voice Link</li>
+								</ul>
+							</div>
+						</div>
+						
 					</div>
 					<Load loaded={this.state.core !== null}>
 							<Card title="Core Settings" size={400} titleSize={200} inputSize={200} onChanged={this.props.onChanged}>
