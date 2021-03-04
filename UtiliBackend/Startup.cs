@@ -26,6 +26,12 @@ namespace UtiliBackend
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddHsts(options =>
+            {
+                options.MaxAge = TimeSpan.FromDays(30);
+                options.IncludeSubDomains = true;
+            });
+
             // https://github.com/stefanprodan/AspNetCoreRateLimit/wiki/IpRateLimitMiddleware#setup
 
             services.AddOptions();
@@ -73,10 +79,21 @@ namespace UtiliBackend
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            app.UseIpRateLimiting(); // <-- Keep this at the top
+            //app.UseIpRateLimiting(); // <-- Keep this at the top
 
             if (env.IsDevelopment()) 
                 app.UseDeveloperExceptionPage();
+            else
+            {
+                Console.WriteLine("Development");
+                app.Use((ctx, next) =>
+                {
+                    ctx.Request.Scheme = "https";
+                    return next();
+                });
+                app.UseHsts();
+            }
+                
 
             app.UseHttpsRedirection();
             app.UseRouting();
