@@ -1,4 +1,5 @@
 import React from "react";
+import ThemeSelector from "../layout/themeSelector";
 
 class CardListComponent extends React.Component{
 	constructor(props){
@@ -14,10 +15,11 @@ class CardListComponent extends React.Component{
 	}
 
 	render(){
+		var disabled = this.props.max && this.state.selected?.length >= this.props.max;
 		return(
 			<div className="dashboard-card-list-component" onFocus={() => this.searchUpdated()} onBlur={() => this.searchClosed()}>
 				<div className="dashboard-card-list-component-search">
-					<input placeholder={this.props.prompt} value={this.state.query} ref={this.search}  onInput={() => this.searchUpdated()} />
+					<input placeholder={this.props.prompt} value={this.state.query} ref={this.search} disabled={disabled} onInput={() => this.searchUpdated()} />
 				</div>
 				{this.renderOptions()}
 				{this.renderSelected()}
@@ -73,6 +75,7 @@ class CardListComponent extends React.Component{
 	}
 
 	sort(ids){
+		if(this.props.noReorder) return ids;
 		return ids.map(x => this.state.values.find(y => y.id === x))
 		.sort(this.compare)
 		.map(x => {if(x) return x.id; else return null;})

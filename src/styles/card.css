@@ -183,6 +183,10 @@
 	border-radius: 5px;
 }
 
+.dashboard-card-list-component-search > input:disabled {
+	background-color: var(--colour-nav);
+}
+
 .dashboard-card-adder-component-search{
 	width: 100%;
 	min-height: 50px;
@@ -203,6 +207,10 @@
 	padding-left: 10px;
 	padding-right: 10px;
 	border-radius: 8px;
+}
+
+.dashboard-card-adder-component-search > input:disabled {
+	background-color: var(--colour-nav);
 }
 
 .dashboard-card-list-component-options{
