@@ -44,12 +44,13 @@ namespace Utili
             {
                 for (int i = 0; i < 120; i++)
                 {
-                    if (_client.GetShard(shardId).ConnectionState == Discord.ConnectionState.Connected)
-                        return;
+                    if (_client.GetShard(shardId).ConnectionState == Discord.ConnectionState.Connected) return;
                     await Task.Delay(1000);
                 }
 
-                await _webhook.SendMessageAsync($"Shard {shardId} has been {_client.GetShard(shardId).ConnectionState} for 2 minutes.\nRestarting in 3 seconds!");
+                _logger.Log("Monitoring", $"Shard {shardId} has been {_client.GetShard(shardId).ConnectionState} for 2 minutes.", LogSeverity.Crit);
+                _logger.Log("Monitoring", "Restarting...", LogSeverity.Crit);
+                await _webhook.SendMessageAsync($"Shard {shardId} has been {_client.GetShard(shardId).ConnectionState} for 2 minutes.\nRestarting...");
                 await Task.Delay(3000);
 
                 Restart();
@@ -57,8 +58,15 @@ namespace Utili
             catch(Exception e) { _logger.ReportError("Monitoring", e); }
         }
 
+        private static object _restarting = false;
         private static void Restart()
         {
+            lock (_restarting)
+            {
+                if((bool)_restarting) return;
+                _restarting = true;
+            }
+
             Process process = new Process
             {
                 StartInfo = new ProcessStartInfo
