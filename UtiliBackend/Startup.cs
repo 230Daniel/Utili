@@ -79,7 +79,7 @@ namespace UtiliBackend
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            //app.UseIpRateLimiting(); // <-- Keep this at the top
+            app.UseIpRateLimiting(); // <-- Keep this at the top
 
             if (env.IsDevelopment()) 
                 app.UseDeveloperExceptionPage();
