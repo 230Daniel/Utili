@@ -42,7 +42,7 @@ class RolePersist extends React.Component{
 							<CardComponent type="checkbox" title="Enabled" value={this.state.rolePersist?.enabled} ref={this.settings.enabled}></CardComponent>
 						</Card>
 						<Card title="Excluded Roles" size={400} onChanged={this.props.onChanged}>
-							<CardListComponent prompt="Exclude a role..." values={values} selected={this.state.rolePersist?.excludedRoles} ref={this.settings.excludedRoles} max={5} noReorder={true}></CardListComponent>
+							<CardListComponent prompt="Exclude a role..." values={values} selected={this.state.rolePersist?.excludedRoles} ref={this.settings.excludedRoles} noReorder={true}></CardListComponent>
 						</Card>
 					</Load>
 				</Fade>

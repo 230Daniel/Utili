@@ -1,8 +1,8 @@
-import backend from "../config/backend.json";
+import {getBackend} from "./auth";
 
 export async function ping(){
 	try{
-		var response = await fetch(`${backend.host}/status`, { method: "GET" });
+		var response = await fetch(`${getBackend()}/status`, { method: "GET" });
 		return response.ok;
 	}
 	catch{

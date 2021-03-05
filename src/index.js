@@ -10,7 +10,7 @@ import Document from "./pages/document";
 
 import DashboardIndex from "./pages/dashboard/index";
 
-import backend from "./config/backend.json";
+import {getBackend, getClientId} from "./api/auth";
 
 ReactDOM.render(
 	<Router>
@@ -65,7 +65,7 @@ function Invite(props){
 	cookies.set("return_path_error", `/dashboard`, { path: "/", maxAge: 60, sameSite: "strict" } );
 
 	var url = 	"https://discord.com/api/oauth2/authorize?permissions=8&scope=bot&response_type=code" +
-              	`&client_id=${backend.discord.clientId}` +
+              	`&client_id=${getClientId()}` +
 				`&redirect_uri=${encodeURIComponent(window.location.origin)}%2Freturn`;
 	
 	if(guildId) url += `&guild_id=${guildId}`;
