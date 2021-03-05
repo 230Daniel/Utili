@@ -57,7 +57,7 @@ namespace Database.Data
         public static async Task<RoleLinkingRow> GetRowAsync(ulong guildId, ulong linkId)
         {
             List<RoleLinkingRow> rows = await GetRowsAsync(guildId, linkId);
-            return rows.Count > 0 ? rows.First() : new RoleLinkingRow(guildId, linkId, 0);
+            return rows.Count > 0 ? rows.First() : new RoleLinkingRow(guildId, 0, 0);
         }
 
         public static async Task SaveRowAsync(RoleLinkingRow row)
