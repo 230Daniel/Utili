@@ -20,7 +20,6 @@ namespace UtiliBackend.Controllers.Dashboard
             if (!auth.Authorised) return auth.Action;
 
             JoinMessageRow row = await Database.Data.JoinMessage.GetRowAsync(auth.Guild.Id);
-            string nickname = await DiscordModule.GetBotNicknameAsync(auth.Guild.Id);
 
             return new JsonResult(new JoinMessageBody(row));
         }
