@@ -15,7 +15,7 @@ class SidebarCategory extends React.Component{
 		return(
 			<div className={`sidebar-category${this.state.collapsed ? " collapsed" : ""}`} onClick={(e) => this.toggle(e)}>
 				<div className="sidebar-category-title">{this.props.title}</div>
-				<div className="sidebar-category-items">
+				<div className="sidebar-category-items" style={{pointerEvents: this.state.collapsed ? "none" : "initial"}}>
 					{this.props.children}
 				</div>
 			</div>
