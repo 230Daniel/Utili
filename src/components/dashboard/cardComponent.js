@@ -5,12 +5,17 @@ class CardComponent extends React.Component{
 	constructor(props){
 		super(props);
 		this.input = React.createRef();
+
 		this.state = {
 			value: this.props.value
 		}
 	}
 
 	render(){
+		var visible = this.props.visible;
+		if(this.props.visible === undefined) visible = true;
+		if(!visible) return null;
+		
 		return(
 			<div className="dashboard-card-component">
 				<div className="dashboard-card-component-title" style={{width: this.props.titleSize - 20}}>
@@ -80,6 +85,10 @@ class CardComponent extends React.Component{
 	}
 	
 	getValue(){
+		var visible = this.props.visible;
+		if(this.props.visible === undefined) visible = true;
+		if(!visible) return this.state.value;
+
 		switch(this.props.type){
 			case "text":
 			case "select":
