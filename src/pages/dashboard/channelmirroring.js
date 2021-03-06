@@ -70,6 +70,7 @@ class ChannelMirroring extends React.Component{
 		response = await get(`discord/${this.guildId}/channels/text`);
 		this.state.textChannels = await response?.json();
 
+		this.state.channelMirroring.rows = this.state.channelMirroring.rows.filter(x => this.state.textChannels.some(y => y.id == x.fromChannelId))
 		for(var i = 0; i < this.state.channelMirroring.rows.length; i++){
 			this.settings.channels.push({ toChannelId: React.createRef() });
 			this.state.channelMirroring.rows[i]["channelName"] = this.getChannelName(this.state.channelMirroring.rows[i].fromChannelId);

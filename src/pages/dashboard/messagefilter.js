@@ -72,6 +72,7 @@ class MessageFilter extends React.Component{
 		response = await get(`discord/${this.guildId}/channels/text`);
 		this.state.textChannels = await response?.json();
 
+		this.state.messageFilter.rows = this.state.messageFilter.rows.filter(x => this.state.textChannels.some(y => y.id == x.channelId))
 		for(var i = 0; i < this.state.messageFilter.rows.length; i++){
 			this.settings.channels.push({ mode: React.createRef(), complex: React.createRef() });
 			this.state.messageFilter.rows[i]["channelName"] = this.getChannelName(this.state.messageFilter.rows[i].channelId);

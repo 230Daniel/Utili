@@ -23,7 +23,7 @@ class Sidebar extends React.Component{
 				</SidebarCategory>
 				<SidebarCategory title="Messages" collapseSidebar={() => this.props.collapseSidebar()}>
 					<SidebarItem name="Message Filter" to="messagefilter"/>
-					<SidebarItem name="Logging" to="messagelogs"/>
+					<SidebarItem name="Message Logging" to="messagelogs"/>
 					<SidebarItem name="Message Pinning" to="messagepinning"/>
 					<SidebarItem name="Message Voting" to="voting"/>
 				</SidebarCategory>

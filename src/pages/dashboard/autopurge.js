@@ -89,6 +89,7 @@ class Autopurge extends React.Component{
 		response = await get(`premium/guild/${this.guildId}`);
 		this.state.premium = await response?.json();
 
+		this.state.autopurge.rows = this.state.autopurge.rows.filter(x => this.state.textChannels.some(y => y.id == x.channelId))
 		for(var i = 0; i < this.state.autopurge.rows.length; i++){
 			this.settings.channels.push({ timespan: React.createRef(), mode: React.createRef() });
 			this.state.autopurge.rows[i]["channelName"] = this.getChannelName(this.state.autopurge.rows[i].channelId);
