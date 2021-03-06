@@ -41,8 +41,6 @@ class Core extends React.Component{
 							<p>To-Do:</p>
 							<ul>
 								<li>Channel Notices</li>
-								<li>Message Voting</li>
-								<li>Join Message</li>
 								<li>Reputation</li>
 								<li>Role Linking</li>
 							</ul>

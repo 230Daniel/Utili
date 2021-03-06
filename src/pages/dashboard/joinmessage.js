@@ -38,7 +38,7 @@ class JoinMessage extends React.Component{
 		return(
 			<>
 				<Helmet>
-					<title>Voice Link - Utili Dashboard</title>
+					<title>Join Message - Utili Dashboard</title>
 				</Helmet>
 				<Fade>
 					<div className="dashboard-title">Join Message</div>
@@ -47,10 +47,11 @@ class JoinMessage extends React.Component{
 						<ul>
 							<li>Use <b>%user%</b> to @mention the user</li>
 							<li>Use <b>user</b> as an image url to use the user's avatar</li>
+							<li>You can press <b>enter</b> in the larger text boxes to add a new line</li>
 						</ul>
-						<p>Commands</p>
+						<p>Use this command to preview your join message:</p>
 						<ul>
-							<li>joinmessage preview - Preview the join message</li>
+							<li>joinmessage preview</li>
 						</ul>
 					</div>
 					<Load loaded={this.state.joinMessage !== null}>
