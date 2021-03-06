@@ -16,6 +16,7 @@ import JoinRoles from "./joinroles";
 import MessageFilter from "./messagefilter";
 import MessageLogs from "./messagelogs";
 import MessagePinning from "./messagepinning";
+import VoteChannels from "./votechannels";
 import RolePersist from "./rolepersist";
 import VoiceLink from "./voicelink";
 import VoiceRoles from "./voiceroles";
@@ -60,6 +61,7 @@ class Layout extends React.Component{
 									<Route exact path="/dashboard/:guildId/rolepersist" render={(props) => (<RolePersist {...props} onChanged={() => this.requireSave()} ref={this.body} />)}/>
 									<Route exact path="/dashboard/:guildId/voicelink" render={(props) => (<VoiceLink {...props} onChanged={() => this.requireSave()} ref={this.body} />)}/>
 									<Route exact path="/dashboard/:guildId/voiceroles" render={(props) => (<VoiceRoles {...props} onChanged={() => this.requireSave()} ref={this.body} />)}/>
+									<Route exact path="/dashboard/:guildId/votechannels" render={(props) => (<VoteChannels {...props} onChanged={() => this.requireSave()} ref={this.body} />)}/>
 									<Route component={NotFound}/>
 								</Switch>
 							</div>

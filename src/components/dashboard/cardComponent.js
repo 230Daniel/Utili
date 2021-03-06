@@ -16,12 +16,15 @@ class CardComponent extends React.Component{
 		if(this.props.visible === undefined) visible = true;
 		if(!visible) return null;
 		
+		var type = this.props.type;
+		if(type == "info") type = "text";
+
 		return(
 			<div className="dashboard-card-component" style={{height: this.props.height}}>
 				<div className="dashboard-card-component-title" style={{width: this.props.titleSize - 20}}>
 					{this.props.title}
 				</div>
-				<div className={`dashboard-card-component-${this.props.type}`} style={{width: this.props.inputSize - 20}}>
+				<div className={`dashboard-card-component-${type}`} style={{width: this.props.inputSize - 20}}>
 					{this.renderInput()}
 				</div>
 			</div>
@@ -34,6 +37,10 @@ class CardComponent extends React.Component{
 			case "text":
 				return(
 					<input type="text" value={this.state.value} ref={this.input} onChange={() => this.updateValue()}/>
+				);
+			case "info":
+				return(
+					<input type="text" value={this.state.value} ref={this.input} readOnly={true} onChange={() => this.updateValue()}/>
 				);
 			case "checkbox":
 				return(

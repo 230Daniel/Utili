@@ -45,7 +45,6 @@ class JoinMessage extends React.Component{
 					<div className="dashboard-subtitle">Send a custom message when a user joins the server</div>
 					<div className="dashboard-description">
 						<ul>
-							<li>Use <b>\n</b> to add a new line</li>
 							<li>Use <b>%user%</b> to @mention the user</li>
 							<li>Use <b>user</b> as an image url to use the user's avatar</li>
 						</ul>
@@ -66,7 +65,7 @@ class JoinMessage extends React.Component{
 							<CardComponent type="text" title="Image Url" value={this.state.joinMessage?.image} ref={this.settings.image}/>
 							<CardComponent type="text" title="Thumbnail Url" value={this.state.joinMessage?.thumbnail} ref={this.settings.thumbnail}/>
 							<CardComponent type="text" title="Icon Url" value={this.state.joinMessage?.icon} ref={this.settings.icon}/>
-							<CardComponent type="colour" title="Colour (Hex)" value={this.state.joinMessage?.colour} ref={this.settings.colour}/>
+							<CardComponent type="colour" title="Colour" value={this.state.joinMessage?.colour} ref={this.settings.colour}/>
 						</Card>
 					</Load>
 				</Fade>
