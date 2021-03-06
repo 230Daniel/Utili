@@ -17,7 +17,7 @@ class CardComponent extends React.Component{
 		if(!visible) return null;
 		
 		return(
-			<div className="dashboard-card-component">
+			<div className="dashboard-card-component" style={{height: this.props.height}}>
 				<div className="dashboard-card-component-title" style={{width: this.props.titleSize - 20}}>
 					{this.props.title}
 				</div>
@@ -72,6 +72,14 @@ class CardComponent extends React.Component{
 						<input type="number" value={formatNumber(this.state.value.seconds)} placeholder="ss" onChange={() => this.updateValue()}/>
 					</div>
 				);
+			case "text-multiline":
+				return(
+					<textarea value={this.state.value?.replace("\n", "\r\n")} ref={this.input} onChange={() => this.updateValue()} style={{paddingTop: this.props.padding, paddingBottom: this.props.padding}}/>
+				);
+			case "colour":
+				return(
+					<input type="color" value={"#" + this.state.value} ref={this.input} onChange={() => this.updateValue()}/>
+				)
 			default:
 				return null;
 		}
@@ -103,6 +111,10 @@ class CardComponent extends React.Component{
 					parseInt(zeroNull(this.input.current.children[4].value)) * 60 * 1000 +
 					parseInt(zeroNull(this.input.current.children[6].value)) * 1000;
 				return Duration.fromMillis(milliseconds).shiftTo("days", "hours", "minutes", "seconds");
+			case "text-multiline":
+				return this.input.current.value.replace("\r\n", "\n");
+			case "colour":
+				return this.input.current.value.replace("#", "");
 			default:
 				return null;
 		}

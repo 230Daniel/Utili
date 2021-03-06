@@ -11,6 +11,7 @@ import Core from "./core";
 import Autopurge from "./autopurge";
 import ChannelMirroring from "./channelmirroring";
 import InactiveRole from "./inactiverole";
+import JoinMessage from "./joinmessage";
 import JoinRoles from "./joinroles";
 import MessageFilter from "./messagefilter";
 import MessageLogs from "./messagelogs";
@@ -51,6 +52,7 @@ class Layout extends React.Component{
 									<Route exact path="/dashboard/:guildId/autopurge" render={(props) => (<Autopurge {...props} onChanged={() => this.requireSave()} ref={this.body} />)}/>
 									<Route exact path="/dashboard/:guildId/channelmirroring" render={(props) => (<ChannelMirroring {...props} onChanged={() => this.requireSave()} ref={this.body} />)}/>
 									<Route exact path="/dashboard/:guildId/inactiverole" render={(props) => (<InactiveRole {...props} onChanged={() => this.requireSave()} ref={this.body} />)}/>
+									<Route exact path="/dashboard/:guildId/joinmessage" render={(props) => (<JoinMessage {...props} onChanged={() => this.requireSave()} ref={this.body} />)}/>
 									<Route exact path="/dashboard/:guildId/joinroles" render={(props) => (<JoinRoles {...props} onChanged={() => this.requireSave()} ref={this.body} />)}/>
 									<Route exact path="/dashboard/:guildId/messagefilter" render={(props) => (<MessageFilter {...props} onChanged={() => this.requireSave()} ref={this.body} />)}/>
 									<Route exact path="/dashboard/:guildId/messagelogs" render={(props) => (<MessageLogs {...props} onChanged={() => this.requireSave()} ref={this.body} />)}/>

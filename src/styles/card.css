@@ -63,6 +63,31 @@
 	padding: 0;
 }
 
+.dashboard-card-component-text-multiline{
+	font-size: 16px;
+	height: 100%;
+}
+
+.dashboard-card-component-text-multiline > textarea::-webkit-scrollbar-thumb{
+	background-color: var(--colour-scrollbar)
+}
+
+.dashboard-card-component-text-multiline > textarea::-webkit-scrollbar{
+	background-color: var(--colour-scrollbar-thumb)
+}
+
+.dashboard-card-component-text-multiline > textarea{
+	background-color: initial;
+	border: none;
+	outline: none;
+	height: 100%;
+	width: 100%;
+	color: var(--colour-text);
+	font-size: 16px;
+	padding: 0;
+	resize: none;
+}
+
 .dashboard-card-component-checkbox{
 	height: 100%;
 }
@@ -153,6 +178,25 @@
 .dashboard-card-component-timespan > div > span {
 	margin-bottom: 2px;
 	font-size: 16px;
+}
+
+.dashboard-card-component-colour{
+	font-size: 16px;
+	height: 100%;
+	display: flex;
+	align-items: center;
+}
+
+.dashboard-card-component-colour > input{
+	background-color: initial;
+	border: none;
+	outline: none;
+	height: 32px;
+	width: 100%;
+	color: var(--colour-text);
+	font-size: 16px;
+	padding: 0;
+	border-radius: 5px;
 }
 
 .dashboard-card-list-component{
