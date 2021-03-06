@@ -4,11 +4,10 @@ import { Duration } from "luxon";
 class CardComponent extends React.Component{
 	constructor(props){
 		super(props);
+		this.input = React.createRef();
 		this.state = {
 			value: this.props.value
 		}
-		this.input = React.createRef();
-		this.value = this.props.value;
 	}
 
 	render(){
@@ -75,8 +74,8 @@ class CardComponent extends React.Component{
 
 	updateValue(){
 		var value = this.getValue();
-		this.setState({value: value});
-		this.value = value;
+		this.state.value = value;
+		this.setState({});
 		this.props.onChanged();
 	}
 	
@@ -108,7 +107,7 @@ function zeroNull(value){
 	return 0;
 }
 
-function formatNumber(value, length){
+function formatNumber(value){
 	if(value === 0) return "";
 	return value.toString().padStart(2, "0");
 }

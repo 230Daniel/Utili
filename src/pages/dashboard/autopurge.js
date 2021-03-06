@@ -53,7 +53,7 @@ class Autopurge extends React.Component{
 						<div className="inline">
 							{this.state.autopurge?.rows.map((row, i) =>{
 								return(
-									<Card title={row.channelName} size={350} titleSize={150} inputSize={200} key={i} onChanged={this.props.onChanged} onRemoved={() => this.onChannelRemoved(row.channelId)}>
+									<Card title={row.channelName} size={350} titleSize={150} inputSize={200} key={row.channelId} onChanged={this.props.onChanged} onRemoved={() => this.onChannelRemoved(row.channelId)}>
 										<CardComponent title="Threshold" type="timespan" value={Duration.fromISO(row.timespan)} ref={this.settings.channels[i].timespan}/>
 										<CardComponent title="Mode" type="select" value={row.mode} options={["All Messages", "Bot Messages", "Disabled", "User Messages"]} ref={this.settings.channels[i].mode}/>
 									</Card>
