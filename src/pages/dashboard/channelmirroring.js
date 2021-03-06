@@ -30,13 +30,14 @@ class ChannelMirroring extends React.Component{
 		return(
 			<>
 				<Helmet>
-					<title>ChannelMirroring - Utili Dashboard</title>
+					<title>Channel Mirroring - Utili Dashboard</title>
 				</Helmet>
 				<Fade>
-					<div className="dashboard-title">ChannelMirroring</div>
-					<div className="dashboard-subtitle">Automatically deletes messages</div>
+					<div className="dashboard-title">Channel Mirroring</div>
+					<div className="dashboard-subtitle">Clones messages from one channel to another</div>
 					<div className="dashboard-description">
-						<p>Messages are deleted when they're older than the threshold you set.</p>
+						<p>New messages will be copied to the other channel using the original sender's username and avatar.<br/>
+						Unfortunately it's not possible to copy the username as well.</p>
 					</div>
 					<Load loaded={this.state.channelMirroring !== null}>
 						<Card onChanged={this.props.onChanged}>
