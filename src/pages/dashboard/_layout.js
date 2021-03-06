@@ -1,10 +1,9 @@
 import React from "react";
-import { Switch, Route, Prompt } from "react-router-dom";
+import { Switch, Route, Redirect, Prompt, withRouter } from "react-router-dom";
 
 import Sidebar from "../../components/layout/sidebar";
 import { CheckBackend } from "../_layout";
 import Navbar from "../../components/layout/navbar";
-import Footer from "../../components/layout/footer";
 import Error from "../error";
 import "../../styles/layout.css";
 
@@ -27,6 +26,12 @@ class Layout extends React.Component{
 		}
 		this.body = React.createRef();
 		this.sidebar = React.createRef();
+
+		this.props.history.listen((location, action) => {
+			this.setState({
+				saveStatus: "hidden"
+			});
+		});
 	}
 
 	render(){
@@ -39,7 +44,7 @@ class Layout extends React.Component{
 							<Sidebar ref={this.sidebar} collapsed={this.state.sidebarCollapsed} collapseSidebar={() => this.toggleSidebar(true)}/>
 							<div className="dashboard">
 								<Switch>
-									<Route exact path="/dashboard/" render={() => window.location.pathname = "dashboard"}/>
+									<Redirect exact from="/dashboard/" to="/dashboard"/>
 									<Route exact path="/dashboard/:guildId" render={(props) => (<Core {...props} onChanged={() => this.requireSave()} ref={this.body} />)}/>
 									<Route exact path="/dashboard/:guildId/autopurge" render={(props) => (<Autopurge {...props} onChanged={() => this.requireSave()} ref={this.body} />)}/>
 									<Route exact path="/dashboard/:guildId/channelmirroring" render={(props) => (<ChannelMirroring {...props} onChanged={() => this.requireSave()} ref={this.body} />)}/>
@@ -57,7 +62,6 @@ class Layout extends React.Component{
 					</CheckBackend>
 				</main>
 				<footer>
-					
 					{this.renderSaveButton()}
 				</footer>
 			</>
@@ -150,8 +154,6 @@ class Layout extends React.Component{
 	 }
 }
 
-export default Layout;
-
 function NotFound(props){
 	return(
 		<Error 
@@ -161,3 +163,5 @@ function NotFound(props){
 		/>
 	);
 }
+
+export default withRouter(Layout);
