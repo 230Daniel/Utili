@@ -70,7 +70,7 @@ namespace UtiliBackend.Controllers.Dashboard
             Image = row.Image.Value;
             Thumbnail = row.Thumbnail.Value;
             Icon = row.Icon.Value;
-            Colour = row.Colour.RawValue.ToString();
+            Colour = row.Colour.R.ToString("X2") + row.Colour.G.ToString("X2") + row.Colour.B.ToString("X2");
         }
 
         public JoinMessageBody() { }
