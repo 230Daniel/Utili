@@ -48,6 +48,9 @@ namespace UtiliBackend.Controllers.Dashboard
                 row.Icon = EString.FromDecoded(bodyRow.Icon);
                 row.Colour = new Color(uint.Parse(bodyRow.Colour.Replace("#", ""), System.Globalization.NumberStyles.HexNumber));
                 await row.SaveAsync();
+
+                MiscRow miscRow = new MiscRow(auth.Guild.Id, "RequiresNoticeUpdate", row.ChannelId.ToString());
+                _ = Misc.SaveRowAsync(miscRow);
             }
 
             foreach (NoticesRow row in rows.Where(x => body.Rows.All(y => ulong.Parse(y.ChannelId) != x.ChannelId)))
@@ -95,7 +98,7 @@ namespace UtiliBackend.Controllers.Dashboard
             Image = row.Image.Value;
             Thumbnail = row.Thumbnail.Value;
             Icon = row.Icon.Value;
-            Colour = row.Colour.RawValue.ToString();
+            Colour = row.Colour.R.ToString("X2") + row.Colour.G.ToString("X2") + row.Colour.B.ToString("X2");
         }
 
         public NoticesRowBody() { }
