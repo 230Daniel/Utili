@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import Helmet from "react-helmet";
 import Fade from "../components/effects/fade";
 
@@ -31,7 +32,7 @@ class Index extends React.Component{
 								<div className="title">Utili</div>
 								<span className="subtitle" id="newline">A Discord bot with </span>
 								<span className="subtitle text-highlight">{this.state.feature}</span> <br/>
-								<a className="subtitle a-blue" href="/dashboard">Get started ➔</a>
+								<Link className="subtitle link" to="/dashboard">Get started ➔</Link>
 							</div>
 						</div>
 					</div>

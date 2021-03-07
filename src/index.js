@@ -3,8 +3,9 @@ import ReactDOM from "react-dom";
 import { BrowserRouter as Router, Switch, Route, useParams } from "react-router-dom";
 import Cookies from "universal-cookie";
 
-import Index from "./pages/index";
 import Layout from "./pages/_layout";
+import Index from "./pages/index";
+import Commands from "./pages/commands";
 import DashboardLayout from "./pages/dashboard/_layout";
 import Document from "./pages/document";
 
@@ -23,6 +24,7 @@ ReactDOM.render(
 					<Layout>
 						<Switch>
 							<Route exact path="/" component={Index}/>
+							<Route exact path="/commands/" component={Commands}/>
 							<Route exact path="/dashboard/" component={DashboardIndex}/>
 							<Route exact path="/return/" render={() => Return()}/>
 							<Route exact path="/invite/" component={Invite}/>

@@ -51,7 +51,7 @@ class CheckBackend extends React.Component{
 	}
 
 	async componentDidMount(){
-		await this.ping();
+		//await this.ping();
 	}
 
 	async ping(){

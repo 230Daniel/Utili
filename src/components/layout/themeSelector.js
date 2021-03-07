@@ -15,7 +15,6 @@ class ThemeSelector extends React.Component{
 		return(
 			<NavDropdown id="theme" title={capitalise(this.state.theme)}>
 				<NavDropdown.Item onClick={() => this.save("dark")}>Dark</NavDropdown.Item>
-				<NavDropdown.Item onClick={() => this.save("classic")}>Classic</NavDropdown.Item>
 				<NavDropdown.Item onClick={() => this.save("light")}>Light</NavDropdown.Item>
 			</NavDropdown>
 		);
@@ -51,6 +50,9 @@ class ThemeSelector extends React.Component{
 				c("text-muted", "#d3d3d3");
 				c("text-invert", "#ffffff");
 				c("text-invert-muted", "#d3d3d3");
+				c("link", "#03bfd6");
+				c("link-hover", "#038ed6");
+				c("divider", "#b5b5b5");
 				c("background", "#1e1e1e");
 				c("sidebar-category", "#1e1e1e");
 				c("sidebar-item", "#272727")
@@ -65,32 +67,15 @@ class ThemeSelector extends React.Component{
 				c("card-title", "#353535");
 				c("card-input-important", "#121212")
 				break;
-			case "classic":
-				c("nav", "#e9ecef");
-				c("text", "#495057");
-				c("text-muted", "#666666");
-				c("text-invert", "#ffffff");
-				c("text-invert-muted", "#d3d3d3");
-				c("background", "#2d2d2d");
-				c("sidebar-category", "#d9d9d9");
-				c("sidebar-item", "#efefef")
-				c("shadow", "#2d2d2d");
-				c("shadow-invert", "#1b1b1b");
-				c("dropdown", "#ffffff");
-				c("dropdown-hover", "#efefef");
-				c("scrollbar", "#2d2d2d");
-				c("scrollbar-thumb", "#484848");
-				c("card", "#ffffff");
-				c("card-hover", "#fafafa");
-				c("card-title", "#e9ecef");
-				c("card-input-important", "#bbbbbb")
-				break;
 			case "light":
 				c("nav", "#e2e2e2");
 				c("text", "#495057");
 				c("text-muted", "'#d3d3d3'");
 				c("text-invert", "#000000");
 				c("text-invert-muted", "'#d3d3d3'");
+				c("link", "#027ecc");
+				c("link-hover", "#023f93");
+				c("divider", "#636363");
 				c("background", "#eeeeee");
 				c("sidebar-category", "#d9d9d9");
 				c("sidebar-item", "#efefef")

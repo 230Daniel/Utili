@@ -152,6 +152,19 @@ h2{
 	box-shadow: none !important;
 }
 
+.commands-section{
+	border-bottom-style: hidden;
+	width: 100%;
+    margin-bottom: 20px;
+	font-size: 18px;
+	margin-left: 20px;
+	margin-right: 20px;
+}
+
+.commands-section > tbody > tr > td{
+	padding: 8px;
+}
+
 /* Scrollbars */
 
 ::-webkit-scrollbar{
@@ -224,10 +237,10 @@ a{
 	text-decoration: none !important;
 }
 
-.link-white{
-	color: var(--colour-text);
+.link{
+	color: var(--colour-link) !important;
 }
 
-.link-white:hover{
-	color: var(--colour-text);
+.link:hover{
+	color: var(--colour-link-hover) !important;
 }

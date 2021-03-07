@@ -34,8 +34,6 @@ class Load extends React.Component{
 		switch(this.state.theme){
 			case "dark":
 				return "white";
-			case "classic":
-				return "white";
 			case "light":
 				return "black";
 			default:

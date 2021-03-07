@@ -10,9 +10,9 @@ class MyFooter extends React.Component{
 						© Daniel Baynton 2021 <br/>
 					</div>
 					<div className="footer-right">
-						<Link className="link-white" to="/terms">Terms</Link>•
-						<Link className="link-white" to="/privacy">Privacy</Link>•
-						<Link className="link-white" to="/contact">Contact</Link>
+						<Link className="link" to="/terms">Terms</Link> • 
+						<Link className="link" to="/privacy"> Privacy</Link> •
+						<Link className="link" to="/contact"> Contact</Link>
 					</div>
 				</div>
 			</div>
