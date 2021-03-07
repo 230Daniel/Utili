@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 using Database.Data;
+using Discord;
 
 namespace UtiliBackend.Controllers.Dashboard
 {
@@ -26,10 +27,10 @@ namespace UtiliBackend.Controllers.Dashboard
             if (!auth.Authorised) return auth.Action;
 
             ReputationRow row = await Database.Data.Reputation.GetRowAsync(auth.Guild.Id);
-            row.Emotes = row.Emotes.Where(x => body.Emotes.Any(y => x.Item1.ToString() == y.Item1))
+            row.Emotes = row.Emotes.Where(x => body.Emotes.Any(y => x.Item1.ToString() == y.Emote))
                 .Select(x =>
                 {
-                    x.Item2 = body.Emotes.First(y => y.Item1 == x.Item1.ToString()).Item2;
+                    x.Item2 = body.Emotes.First(y => y.Emote == x.Item1.ToString()).Value;
                     return x;
                 }).ToList();
             await row.SaveAsync();
@@ -40,13 +41,27 @@ namespace UtiliBackend.Controllers.Dashboard
 
     public class ReputationBody
     {
-        public List<(string, int)> Emotes { get; set; }
+        public List<ReputationEmoteBody> Emotes { get; set; }
 
         public ReputationBody(ReputationRow row)
         {
-            Emotes = row.Emotes.Select(x => (x.Item1.ToString(), x.Item2)).ToList();
+            Emotes = row.Emotes.Select(x => new ReputationEmoteBody(x)).ToList();
         }
 
         public ReputationBody() { }
+    }
+
+    public class ReputationEmoteBody
+    {
+        public string Emote { get; set; }
+        public int Value { get; set; }
+
+        public ReputationEmoteBody((IEmote, int) obj)
+        {
+            Emote = obj.Item1.ToString();
+            Value = obj.Item2;
+        }
+
+        public ReputationEmoteBody() { }
     }
 }

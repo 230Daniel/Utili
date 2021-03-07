@@ -35,7 +35,7 @@ namespace UtiliBackend.Controllers.Dashboard
                     row = await Database.Data.RoleLinking.GetRowAsync(auth.Guild.Id, ulong.Parse(bodyRow.LinkId));
 
                 row.RoleId = ulong.Parse(bodyRow.RoleId);
-                row.LinkedRoleId = ulong.Parse(bodyRow.RoleId);
+                row.LinkedRoleId = ulong.Parse(bodyRow.LinkedRoleId);
                 row.Mode = bodyRow.Mode;
                 await row.SaveAsync();
             }
