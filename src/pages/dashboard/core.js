@@ -36,14 +36,8 @@ class Core extends React.Component{
 					<div className="dashboard-title">Utili Dashboard</div>
 					<div className="dashboard-subtitle">Select a feature to configure from the sidebar</div>
 					<div className="dashboard-description">
-						<p>This new dashboard is still under construction.</p>
-						<div>
-							<p>To-Do:</p>
-							<ul>
-								<li>Reputation</li>
-								<li>Role Linking</li>
-							</ul>
-						</div>
+						<p>Welcome to the Utili Dashboard.<br/>
+						The dashboard can only be accessed by people with the <b>Manage Server</b> permission.</p>
 					</div>
 					<Load loaded={this.state.core !== null}>
 							<Card title="Core Settings" size={400} titleSize={200} inputSize={200} onChanged={this.props.onChanged}>

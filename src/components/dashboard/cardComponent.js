@@ -19,11 +19,16 @@ class CardComponent extends React.Component{
 		var type = this.props.type;
 		if(type == "number") type = "text";
 
+		var pl = this.props.noPaddingLeft ? "0" : null;
+		var pr = this.props.noPaddingRight ? "0" : null;
+
 		return(
-			<div className="dashboard-card-component" style={{height: this.props.height}}>
+			<div className="dashboard-card-component" style={{height: this.props.height, width: this.props.forceWidth, paddingLeft: pl, paddingRight: pr}}>
+				{this.props.title &&
 				<div className="dashboard-card-component-title" style={{width: this.props.titleSize - 20}}>
 					{this.props.title}
 				</div>
+				}
 				<div className={`dashboard-card-component-${type}`} style={{width: this.props.inputSize - 20}}>
 					{this.renderInput()}
 				</div>

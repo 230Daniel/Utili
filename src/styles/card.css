@@ -103,6 +103,7 @@
 
 .dashboard-card-component-select{
 	height: 100%;
+	width: 100%;
 }
 
 .dashboard-card-component-select > select{
@@ -131,6 +132,7 @@
 
 .dashboard-card-component-select-value{
 	height: 100%;
+	width: 100%;
 }
 
 .dashboard-card-component-select-value > select{
