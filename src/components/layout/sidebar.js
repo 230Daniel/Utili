@@ -19,7 +19,7 @@ class Sidebar extends React.Component{
 				<SidebarCategory title="Channels" collapseSidebar={() => this.props.collapseSidebar()}>
 					<SidebarItem name="Autopurge" to="autopurge"/>
 					<SidebarItem name="Channel Mirroring" to="channelmirroring"/>
-					<SidebarItem name="Notices" to="notices"/>
+					<SidebarItem name="Sticky Notices" to="notices"/>
 				</SidebarCategory>
 				<SidebarCategory title="Messages" collapseSidebar={() => this.props.collapseSidebar()}>
 					<SidebarItem name="Message Filter" to="messagefilter"/>
