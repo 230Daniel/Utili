@@ -55,7 +55,7 @@ class RolePersist extends React.Component{
 		this.state.rolePersist = await response?.json();
 		response = await get(`discord/${this.guildId}/roles`);
 		this.state.roles = await response?.json();
-
+		this.state.rolePersist.excludedRoles = this.state.rolePersist.excludedRoles.filter(x => this.state.roles.some(y => x == y.id));
 		this.setState({});
 	}
 

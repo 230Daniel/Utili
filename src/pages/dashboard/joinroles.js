@@ -60,7 +60,7 @@ class JoinRoles extends React.Component{
 		this.state.joinRoles = await response?.json();
 		response = await get(`discord/${this.guildId}/roles`);
 		this.state.roles = await response?.json();
-
+		this.state.joinRoles.joinRoles = this.state.joinRoles.joinRoles.filter(x => this.state.roles.some(y => x == y.id))
 		this.setState({});
 	}
 

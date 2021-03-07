@@ -59,6 +59,8 @@ class Core extends React.Component{
 		var core = await response?.json();
 		response = await get(`discord/${this.guildId}/channels/text`);
 		var textChannels = await response?.json();
+		core.excludedChannels = core.excludedChannels.filter(x => this.state.textChannels.some(y => x == y.id));
+		
 		this.setState({core: core, textChannels: textChannels});
 		
 	}
