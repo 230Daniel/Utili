@@ -37,6 +37,13 @@ class Notices extends React.Component{
 					<div className="dashboard-title">Sticky Notices</div>
 					<div className="dashboard-subtitle">Keeps a message at the bottom of a channel</div>
 					<div className="dashboard-description">
+						<ul>
+							<li>You can press <b>enter</b> in the larger text boxes to add a new line</li>
+						</ul>
+						<p>Use this command to preview your notice:</p>
+						<ul>
+							<li>notice preview</li>
+						</ul>
 						<p><b>Delay:</b> The time that the channel must be inactive for the notice to be re-sent.</p>
 					</div>
 					<Load loaded={this.state.notices !== null}>

@@ -40,7 +40,6 @@ class Core extends React.Component{
 						<div>
 							<p>To-Do:</p>
 							<ul>
-								<li>Channel Notices</li>
 								<li>Reputation</li>
 								<li>Role Linking</li>
 							</ul>

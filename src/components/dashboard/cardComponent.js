@@ -17,7 +17,7 @@ class CardComponent extends React.Component{
 		if(!visible) return null;
 		
 		var type = this.props.type;
-		if(type == "info") type = "text";
+		if(type == "number") type = "text";
 
 		return(
 			<div className="dashboard-card-component" style={{height: this.props.height}}>
@@ -38,9 +38,9 @@ class CardComponent extends React.Component{
 				return(
 					<input type="text" value={this.state.value} ref={this.input} onChange={() => this.updateValue()}/>
 				);
-			case "info":
+			case "number":
 				return(
-					<input type="text" value={this.state.value} ref={this.input} readOnly={true} onChange={() => this.updateValue()}/>
+					<input type="number" value={this.state.value} ref={this.input} onChange={() => this.updateValue()}/>
 				);
 			case "checkbox":
 				return(
@@ -106,6 +106,7 @@ class CardComponent extends React.Component{
 
 		switch(this.props.type){
 			case "text":
+			case "number":
 			case "select":
 			case "select-value":
 				return this.input.current.value;

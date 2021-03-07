@@ -69,11 +69,13 @@
 }
 
 .dashboard-card-component-text-multiline > textarea::-webkit-scrollbar-thumb{
-	background-color: var(--colour-scrollbar)
+	background-color: var(--colour-scrollbar);
+	display: none;
 }
 
 .dashboard-card-component-text-multiline > textarea::-webkit-scrollbar{
-	background-color: var(--colour-scrollbar-thumb)
+	background-color: var(--colour-scrollbar-thumb);
+	display: none;
 }
 
 .dashboard-card-component-text-multiline > textarea{
