@@ -2,12 +2,14 @@
 	font-size: 50px;
 	text-align: center;
 	font-weight: 100;
-	margin-top: 30px;
+	margin-top: 40px;
 }
 
 .document > h2 {
 	text-align: left !important;
 	font-weight: 350 !important;
+	margin-top: 40px;
+	margin-bottom: 12px;
 }
 
 .document > h3 {
@@ -16,7 +18,15 @@
 }
 
 .document > p {
-	font-size: 16px;
-	color: gray;
-	margin-bottom: 20px;
+	font-size: 14px;
+	color: var(--colour-text-muted);
+	margin-bottom: 8px;
+}
+
+.document > p > a{
+	color: var(--colour-link) !important;
+}
+
+.document > p > a:hover{
+	color: var(--colour-link-hover) !important;
 }

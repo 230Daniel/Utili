@@ -60,7 +60,7 @@ class Document extends React.Component{
 					<title>{this.state.title} - Utili</title>
 				</Helmet>
 				<Fade>
-					<div className="document" dangerouslySetInnerHTML={{__html: this.state.markdown}}/>
+					<div className="document container" style={{paddingBottom: "40px"}} dangerouslySetInnerHTML={{__html: this.state.markdown}}/>
 				</Fade>
 			</>
 		);
