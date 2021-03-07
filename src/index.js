@@ -6,6 +6,7 @@ import Cookies from "universal-cookie";
 import Layout from "./pages/_layout";
 import Index from "./pages/index";
 import Commands from "./pages/commands";
+import Contact from "./pages/contact";
 import DashboardLayout from "./pages/dashboard/_layout";
 import Document from "./pages/document";
 
@@ -26,6 +27,7 @@ ReactDOM.render(
 							<Route exact path="/" component={Index}/>
 							<Route exact path="/commands/" component={Commands}/>
 							<Route exact path="/dashboard/" component={DashboardIndex}/>
+							<Route exact path="/contact/" component={Contact}/>
 							<Route exact path="/return/" render={() => Return()}/>
 							<Route exact path="/invite/" component={Invite}/>
 							<Route exact path="/invite/:guildId" component={Invite}/>
