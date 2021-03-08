@@ -77,7 +77,7 @@ class MessageFilter extends React.Component{
 			this.settings.channels.push({ mode: React.createRef(), complex: React.createRef() });
 			this.state.messageFilter.rows[i]["channelName"] = this.getChannelName(this.state.messageFilter.rows[i].channelId);
 		}
-		this.sortChannels();
+		this.state.messageFilter.rows.orderBy(x => x.channelName);
 		this.setState({});
 	}
 
@@ -95,7 +95,7 @@ class MessageFilter extends React.Component{
 			complex: "",
 			channelName: this.getChannelName(channel.id)
 		});
-		this.sortChannels();
+		this.state.messageFilter.rows.orderBy(x => x.channelName);
 		this.setState({});
 	}
 
@@ -121,10 +121,6 @@ class MessageFilter extends React.Component{
 		this.getInput();
 		var response = await post(`dashboard/${this.guildId}/messagefilter`, this.state.messageFilter);
 		return response.ok;
-	}
-
-	sortChannels(){
-		this.state.messageFilter.rows.sort((a, b) => (a.channelName > b.channelName) ? 1 : -1)
 	}
 
 	getChannelName(id){

@@ -12,7 +12,9 @@ import Document from "./pages/document";
 
 import DashboardIndex from "./pages/dashboard/index";
 
-import {getBackend, getClientId} from "./api/auth";
+import {getClientId} from "./api/auth";
+
+defineExtensions();
 
 ReactDOM.render(
 	<Router>
@@ -75,4 +77,31 @@ function Invite(props){
 	if(guildId) url += `&guild_id=${guildId}`;
 	window.location.href = url;
 	return null;
+}
+
+function defineExtensions(){
+	Object.defineProperty(Array.prototype, "orderBy", {
+		value: function orderBy(selector){
+
+			var sorted = []
+			var count = this.length;
+			for(var i = 0; i < count; i++)
+				sorted.push(selector(this[i]));
+			sorted = sorted.sort();
+			
+			var reconstructed = []
+			for(var i = 0; i < count; i++){
+				var index = this.findIndex(x => selector(x) == sorted[i]);
+				reconstructed.push(this[index]);
+				this.splice(index, 1);
+			}
+				
+			for(var i = 0; i < count; i++){
+				this.push(reconstructed[i]);
+			}
+			return reconstructed;
+		},
+		writable: true,
+		configurable: true
+	});
 }

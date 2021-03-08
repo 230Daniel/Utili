@@ -26,7 +26,7 @@ class CardAdderComponent extends React.Component{
 	}
 
 	renderOptions(){
-		var options = this.sort(this.state.options.filter(x => x.value.includes(this.state.query)));
+		var options = this.state.options.filter(x => x.value.includes(this.state.query)).orderBy(x => x.value);
 		return(
 			<div className={`dashboard-card-list-component-options${this.state.selecting ? "" : " collapsed"}`}>
 				{options.map((item, i) => {
@@ -52,21 +52,6 @@ class CardAdderComponent extends React.Component{
 
 	getValue(id){
 		return this.state.values.find(x => x.id === id).value.toString();
-	}
-
-	sort(values){
-		values = values.sort(this.compare);
-		return values;
-	}
-
-	compare(a, b) {
-		if ( a.value < b.value ){
-		  return -1;
-		}
-		if ( a.value > b.value ){
-		  return 1;
-		}
-		return 0;
 	}
 
 	selectValue(id){

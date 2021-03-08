@@ -67,7 +67,6 @@ class Reputation extends React.Component{
 		for(var i = 0; i < this.state.reputation.emotes.length; i++){
 			this.settings.emotes.push({ value: React.createRef() });
 		}
-		this.sortChannels();
 		this.setState({});
 	}
 
@@ -93,10 +92,6 @@ class Reputation extends React.Component{
 		this.getInput();
 		var response = await post(`dashboard/${this.guildId}/reputation`, this.state.reputation);
 		return response.ok;
-	}
-
-	sortChannels(){
-		this.state.reputation.emotes.sort((a, b) => (a.channelName > b.channelName) ? 1 : -1)
 	}
 
 	getChannelName(id){

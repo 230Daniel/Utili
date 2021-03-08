@@ -94,7 +94,7 @@ class Autopurge extends React.Component{
 			this.settings.channels.push({ timespan: React.createRef(), mode: React.createRef() });
 			this.state.autopurge.rows[i]["channelName"] = this.getChannelName(this.state.autopurge.rows[i].channelId);
 		}
-		this.sortChannels();
+		this.state.autopurge.rows.orderBy(x => x.channelName);
 		this.setState({});
 	}
 
@@ -106,7 +106,7 @@ class Autopurge extends React.Component{
 			mode: -1,
 			channelName: this.getChannelName(channel.id)
 		});
-		this.sortChannels();
+		this.state.autopurge.rows.orderBy(x => x.channelName);
 		this.setState({});
 	}
 
@@ -132,10 +132,6 @@ class Autopurge extends React.Component{
 		this.getInput();
 		var response = await post(`dashboard/${this.guildId}/autopurge`, this.state.autopurge);
 		return response.ok;
-	}
-
-	sortChannels(){
-		this.state.autopurge.rows.sort((a, b) => (a.channelName > b.channelName) ? 1 : -1)
 	}
 
 	getChannelName(id){

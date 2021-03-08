@@ -77,19 +77,9 @@ class CardListComponent extends React.Component{
 	sort(ids){
 		if(this.props.noReorder) return ids;
 		return ids.map(x => this.state.values.find(y => y.id === x))
-		.sort(this.compare)
+		.orderBy(x => x.value)
 		.map(x => {if(x) return x.id; else return null;})
 		.filter(x => x !== null);
-	}
-
-	compare(a, b) {
-		if ( a.value < b.value ){
-		  return -1;
-		}
-		if ( a.value > b.value ){
-		  return 1;
-		}
-		return 0;
 	}
 
 	selectValue(id){

@@ -107,7 +107,6 @@ class RoleLinking extends React.Component{
 			linkedRoleId: "0",
 			mode: 0
 		});
-		this.sortChannels();
 		this.setState({});
 	}
 
@@ -147,10 +146,6 @@ class RoleLinking extends React.Component{
 		this.getInput();
 		var response = await post(`dashboard/${this.guildId}/roleLinking`, this.state.roleLinking);
 		return response.ok;
-	}
-
-	sortChannels(){
-		this.state.roleLinking.rows.sort((a, b) => (a.channelName > b.channelName) ? 1 : -1)
 	}
 
 	getRoleName(id){

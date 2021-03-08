@@ -102,7 +102,7 @@ class Notices extends React.Component{
 			});
 			this.state.notices.rows[i]["channelName"] = this.getChannelName(this.state.notices.rows[i].channelId);
 		}
-		this.sortChannels();
+		this.state.notices.rows.orderBy(x => x.channelName);
 		this.setState({});
 	}
 
@@ -133,7 +133,7 @@ class Notices extends React.Component{
 			colour: "43b581",
 			channelName: this.getChannelName(channel.id)
 		});
-		this.sortChannels();
+		this.state.notices.rows.orderBy(x => x.channelName);
 		this.setState({});
 	}
 
@@ -167,10 +167,6 @@ class Notices extends React.Component{
 		this.getInput();
 		var response = await post(`dashboard/${this.guildId}/notices`, this.state.notices);
 		return response.ok;
-	}
-
-	sortChannels(){
-		this.state.notices.rows.sort((a, b) => (a.channelName > b.channelName) ? 1 : -1)
 	}
 
 	getChannelName(id){

@@ -77,7 +77,7 @@ class VoiceRoles extends React.Component{
 			this.state.voiceRoles.rows[i]["channelName"] = this.getChannelName(this.state.voiceRoles.rows[i].channelId);
 		}
 
-		this.sortChannels();
+		this.state.voiceRoles.rows.orderBy(x => x.channelName);
 		this.setState({});
 	}
 
@@ -88,7 +88,7 @@ class VoiceRoles extends React.Component{
 			roleId: 0,
 			channelName: this.getChannelName(channel.id)
 		});
-		this.sortChannels();
+		this.state.voiceRoles.rows.orderBy(x => x.channelName);
 		this.setState({});
 	}
 
@@ -113,10 +113,6 @@ class VoiceRoles extends React.Component{
 		this.getInput();
 		var response = await post(`dashboard/${this.guildId}/voiceRoles`, this.state.voiceRoles);
 		return response.ok;
-	}
-
-	sortChannels(){
-		this.state.voiceRoles.rows.sort((a, b) => (a.channelName > b.channelName) ? 1 : -1)
 	}
 
 	getChannelName(id){

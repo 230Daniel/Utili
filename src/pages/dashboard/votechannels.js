@@ -116,7 +116,7 @@ class VoteChannels extends React.Component{
 			else this.state.voteChannels.rows[i].emotes = this.state.voteChannels.rows[i].emotes.slice(0, 2);
 		}
 		
-		this.sortChannels();
+		this.state.voteChannels.rows.orderBy(x => x.channelName);
 		this.setState({});
 	}
 
@@ -128,7 +128,7 @@ class VoteChannels extends React.Component{
 			emotes: [],
 			channelName: this.getChannelName(channel.id)
 		});
-		this.sortChannels();
+		this.state.voteChannels.rows.orderBy(x => x.channelName);
 		this.setState({});
 	}
 
@@ -154,10 +154,6 @@ class VoteChannels extends React.Component{
 		this.getInput();
 		var response = await post(`dashboard/${this.guildId}/votechannels`, this.state.voteChannels);
 		return response.ok;
-	}
-
-	sortChannels(){
-		this.state.voteChannels.rows.sort((a, b) => (a.channelName > b.channelName) ? 1 : -1)
 	}
 
 	getChannelName(id){

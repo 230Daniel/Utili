@@ -75,7 +75,7 @@ class ChannelMirroring extends React.Component{
 			this.settings.channels.push({ toChannelId: React.createRef() });
 			this.state.channelMirroring.rows[i]["channelName"] = this.getChannelName(this.state.channelMirroring.rows[i].fromChannelId);
 		}
-		this.sortChannels();
+		this.state.channelMirroring.rows.orderBy(x => x.channelName);
 		this.setState({});
 	}
 
@@ -86,7 +86,7 @@ class ChannelMirroring extends React.Component{
 			toChannelId: 0,
 			channelName: this.getChannelName(channel.id)
 		});
-		this.sortChannels();
+		this.state.channelMirroring.rows.orderBy(x => x.channelName);
 		this.setState({});
 	}
 
@@ -112,10 +112,6 @@ class ChannelMirroring extends React.Component{
 		this.getInput();
 		var response = await post(`dashboard/${this.guildId}/channelmirroring`, this.state.channelMirroring);
 		return response.ok;
-	}
-
-	sortChannels(){
-		this.state.channelMirroring.rows.sort((a, b) => (a.channelName > b.channelName) ? 1 : -1)
 	}
 
 	getChannelName(id){
