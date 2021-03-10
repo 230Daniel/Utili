@@ -89,5 +89,15 @@ namespace Utili.Commands
             DiscordSocketClient shard = _client.GetShard(0);
             await shard.StopAsync();
         }
+
+        [Command("Restart")]
+        [Permission(Perm.BotOwner)]
+        public async Task Restart()
+        {
+            await SendSuccessAsync(Context.Channel, "Restarting");
+            _logger.Log("Command", $"Restart Requested by {Context.User.Username}#{Context.User.Discriminator} - Killing process 10 seconds.", LogSeverity.Crit);
+            await Task.Delay(10000);
+            Monitoring.Restart();
+        }
     }
 }

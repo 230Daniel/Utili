@@ -56,7 +56,7 @@ namespace Utili
         }
 
         private static object _restarting = false;
-        private static void Restart()
+        public static void Restart()
         {
             lock (_restarting)
             {
