@@ -117,7 +117,7 @@ namespace Utili.Features
 
             await channel.DeleteMessagesAsync(messages);
 
-            if (exceedesCap && mode == 0 && lastMessage.CreatedAt < latestTime)
+            if (exceedesCap && mode == 0 && lastMessage.CreatedAt.UtcDateTime > latestTime)
             {
                 // We must delete excess messages
                 // Only do this if we are to delete all messages, not just bot messages
