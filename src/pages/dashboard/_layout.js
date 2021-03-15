@@ -45,7 +45,7 @@ class Layout extends React.Component{
 		return(
 			<>
 				<main>
-					<Navbar buttonLeft={true} onButtonLeftClick={() => this.toggleSidebar()}/>
+					<Navbar buttonLeft={true} guilds={true} onButtonLeftClick={() => this.toggleSidebar()}/>
 					<CheckBackend>
 						<div className={`dashboard-container${this.state.sidebarCollapsed ? "" : " collapsed"}`}>
 							<Sidebar ref={this.sidebar} collapsed={this.state.sidebarCollapsed} collapseSidebar={() => this.toggleSidebar(true)}/>

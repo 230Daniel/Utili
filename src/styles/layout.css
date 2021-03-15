@@ -87,19 +87,23 @@ button:focus{
 		margin-left: 15px;
 	}
 
-	#user-dropdown{
+	.user-dropdown{
 		padding: 0px;
 		display: flex;
 		align-items: center; 
-		margin-right: 15px;
 	}
-	
+
 	.nav-link > img{
 		width: 35px;
 		height: 35px;
 		border-radius: 17.5px;
-		margin-right: 10px;
+		margin-right: 8px;
 		width: initial !important;
+	}
+
+	.dropdown-toggle::after{
+		margin-left: 8px;
+		margin-bottom: -1px;
 	}
 }
 
@@ -114,6 +118,36 @@ button:focus{
 
 .dropdown-item:hover{
 	background-color: var(--colour-dropdown-hover) !important;
+}
+
+.guild-dropdown{
+	padding: 0px;
+	display: flex;
+	align-items: center; 
+}
+
+.guild-dropdown > div{
+	text-align: start !important;
+}
+
+.guild-dropdown > div > a{
+	padding-top: 6px;
+	padding-bottom: 6px;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+}
+
+.guild-dropdown > div > a > img{
+	width: 35px;
+	height: 35px;
+	border-radius: 17.5px;
+	margin-right: 10px;
+	width: initial !important;
+}
+
+.guild-dropdown-link{
+	color: var(--colour-text-muted) !important;
 }
 
 /* Main */

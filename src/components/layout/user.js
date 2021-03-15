@@ -21,7 +21,7 @@ class User extends React.Component{
 			);
 		}
 		return(
-			<NavDropdown id="user-dropdown" title={<><img src={this.state.user.avatarUrl}/>{this.state.user.username}</>}>
+			<NavDropdown className="user-dropdown" title={<><img src={this.state.user.avatarUrl}/>{this.state.user.username}</>}>
 				<NavDropdown.Item onClick={() => this.signOut()}>Sign out</NavDropdown.Item>
 			</NavDropdown>
 		);

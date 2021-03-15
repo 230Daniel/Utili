@@ -3,6 +3,7 @@ import Cookies from "universal-cookie";
 import { Link } from "react-router-dom";
 import { Navbar, Nav } from "react-bootstrap";
 
+import Guilds from "./guilds";
 import User from "./user";
 import ThemeSelector from "./themeSelector";
 
@@ -33,6 +34,8 @@ class MyNavbar extends React.Component{
 								<Nav.Link to="/dashboard" as={Link}>Dashboard</Nav.Link>
 								<Nav.Link to="/premium" as={Link}>Premium</Nav.Link>
 							</Nav>
+							{this.props.guilds &&
+							<Guilds/>}
 							<User/>
 							<ThemeSelector onChange={() => this.setNavbarButtonColour()}/>
 						</Navbar.Collapse>
