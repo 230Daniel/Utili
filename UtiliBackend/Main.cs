@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using UtiliSite;
 
 namespace UtiliBackend
 {
@@ -11,6 +12,7 @@ namespace UtiliBackend
             Config = Config.Load();
             await Database.Database.InitialiseAsync(false, Config.DefaultPrefix);
             await DiscordModule.InitialiseAsync();
+            StripeController.Initialise();
         }
     }
 }
