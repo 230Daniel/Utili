@@ -32,20 +32,22 @@ namespace Utili.Features
             NoticesRow row = await Database.Data.Notices.GetRowAsync(context.Guild.Id, context.Channel.Id);
             if (!row.Enabled) return;
 
+            TimeSpan delay = row.Delay;
+            TimeSpan minimumDelay = context.User.IsBot ? TimeSpan.FromSeconds(10) : TimeSpan.FromSeconds(5);
+            if (delay < minimumDelay) delay = minimumDelay;
+
             lock (_requiredUpdates)
             {
                 if (_requiredUpdates.Any(x => x.Item1.ChannelId == context.Channel.Id))
                 {
                     (NoticesRow, DateTime) update = _requiredUpdates.First(x => x.Item1.ChannelId == context.Channel.Id);
-                    if (row.Delay < TimeSpan.FromSeconds(5)) row.Delay = TimeSpan.FromSeconds(5);
-                    update.Item2 = DateTime.UtcNow + row.Delay;
+                    update.Item2 = DateTime.UtcNow + delay;
                     _requiredUpdates.RemoveAll(x => x.Item1.ChannelId == context.Channel.Id);
                     _requiredUpdates.Add(update);
                 }
                 else
                 {
-                    if(context.User.IsBot) return;
-                    _requiredUpdates.Add((row, DateTime.UtcNow + row.Delay));
+                    _requiredUpdates.Add((row, DateTime.UtcNow + delay));
                 }
             }
         }
