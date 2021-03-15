@@ -58,7 +58,7 @@ namespace UtiliBackend
 
             services.AddAuthentication(options =>
             {
-                    options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
             })
             .AddDiscord(options =>
             {
@@ -83,7 +83,6 @@ namespace UtiliBackend
                 app.UseDeveloperExceptionPage();
             else
             {
-                Console.WriteLine("Development");
                 app.Use((ctx, next) =>
                 {
                     ctx.Request.Scheme = "https";

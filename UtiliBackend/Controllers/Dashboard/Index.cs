@@ -22,12 +22,16 @@ namespace UtiliBackend.Controllers.Dashboard
 
     public class PartialGuild
     {
+        public string Id { get; }
+        public bool Mutual { get; }
         public string DashboardUrl { get; }
         public string Name { get; }
         public string IconUrl { get; }
 
         public PartialGuild(RestUserGuild guild, bool mutual)
         {
+            Id = guild.Id.ToString();
+            Mutual = mutual;
             DashboardUrl = mutual ? $"/dashboard/{guild.Id}" : $"/invite/{guild.Id}";
             Name = guild.Name;
             IconUrl = string.IsNullOrEmpty(guild.IconUrl) ? "https://cdn.discordapp.com/embed/avatars/0.png" : guild.IconUrl.Remove(guild.IconUrl.Length - 4) + ".png?size=256";
