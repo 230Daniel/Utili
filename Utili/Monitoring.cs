@@ -23,8 +23,6 @@ namespace Utili
             _timer = new Timer(5000);
             _timer.Elapsed += TimerElapsed;
             _timer.Start();
-
-            await _webhook.SendMessageAsync($"Monitoring started for shards {_config.LowerShardId}-{_config.UpperShardId}");
         }
 
         private static void TimerElapsed(object sender, ElapsedEventArgs e)
