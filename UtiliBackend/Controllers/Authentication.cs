@@ -17,9 +17,11 @@ namespace UtiliBackend.Controllers
             if (User.Identity.IsAuthenticated)
             {
                 AuthDetails auth = await GetAuthDetailsAsync(HttpContext);
-                return new JsonResult(new ShortAuthDetails(auth.User));
+                return !auth.Authorised ? 
+                    new JsonResult(new ShortAuthDetails()) : 
+                    new JsonResult(new ShortAuthDetails(auth.User));
             }
-            else return new JsonResult(new ShortAuthDetails());
+            return new JsonResult(new ShortAuthDetails());
         }
 
         [HttpGet("auth/signin")]
@@ -65,7 +67,7 @@ namespace UtiliBackend.Controllers
                     if((await GetManageableGuildsAsync(client)).Any(x => x.Id == guildId)) return new AuthDetails(new StatusCodeResult(404));
                     return new AuthDetails(new StatusCodeResult(403));
                 }
-                if (await IsGuildManageableAsync(client.CurrentUser.Id, guildId.Value)) //  || client.CurrentUser.Id == 218613903653863427
+                if (await IsGuildManageableAsync(client.CurrentUser.Id, guildId.Value) || client.CurrentUser.Id == 218613903653863427)
                     auth.Guild = guild;
                 else
                     return new AuthDetails(new StatusCodeResult(403));
