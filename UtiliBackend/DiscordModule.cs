@@ -46,32 +46,20 @@ namespace UtiliBackend
         public static async Task<DiscordRestClient> GetClientAsync(ulong userId, string token = null)
         {
             DiscordRestClient client;
-            try
+            if (_cachedClients.TryGet(userId, out object cacheResult))
             {
-                if (_cachedClients.TryGet(userId, out object cacheResult))
+                client = cacheResult as DiscordRestClient;
+                if (client.LoginState != LoginState.LoggedIn)
                 {
-                    client = cacheResult as DiscordRestClient;
-                    int wait = 0;
-                    while (client.LoginState != LoginState.LoggedIn)
-                    {
-                        await Task.Delay(10);
-                        if (wait >= 200)
-                        {
-                            _cachedClients.Remove(userId);
-                            Console.WriteLine("Trying again");
-                            return await GetClientAsync(userId);
-                        }
-                        wait++;
-                    }
-                    return client;
+                    _cachedClients.Remove(userId);
+                    return await GetClientAsync(userId);
                 }
-
-                client = new DiscordRestClient();
-                Task task = client.LoginAsync(TokenType.Bearer, token);
-                _cachedClients.Add(userId, client);
-                await task;
+                return client;
             }
-            catch { Console.WriteLine("Error"); return null; }
+
+            client = new DiscordRestClient();
+            await client.LoginAsync(TokenType.Bearer, token);
+            _cachedClients.Add(userId, client);
             return client;
         }
 
