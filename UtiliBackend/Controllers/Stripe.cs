@@ -119,11 +119,11 @@ namespace UtiliSite
                 CustomerService service = new CustomerService(_stripeClient);
                 Customer customer = await service.GetAsync(auth.UserRow.CustomerId);
                 if (!string.IsNullOrEmpty(customer.Currency))
-                    return new JsonResult(new CurrencyObject(customer.Currency, true));
+                    return new JsonResult(new CurrencyBody(customer.Currency, true));
             }
 
             string currencyCode = await GetCustomerCurrencyByIpAsync(HttpContext.Request);
-            return new JsonResult(new CurrencyObject(currencyCode, false));
+            return new JsonResult(new CurrencyBody(currencyCode, false));
         }
 
         private static async Task<string> GetCustomerCurrencyByIpAsync(HttpRequest request)
@@ -205,12 +205,12 @@ namespace UtiliSite
         }
     }
 
-    public class CurrencyObject
+    public class CurrencyBody
     {
         public string CurrencyCode { get; set; }
         public bool Locked { get; set; }
 
-        public CurrencyObject(string currencyCode, bool locked)
+        public CurrencyBody(string currencyCode, bool locked)
         {
             CurrencyCode = currencyCode;
             Locked = locked;
