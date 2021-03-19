@@ -47,6 +47,7 @@ namespace Utili.Features
                 }
                 else
                 {
+                    if (context.User.Id == _client.CurrentUser.Id) return;
                     _requiredUpdates.Add((row, DateTime.UtcNow + delay));
                 }
             }
