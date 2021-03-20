@@ -98,8 +98,8 @@ namespace Utili.Features
             List<IMessage> messages = (await channel.GetMessagesAsync(messageCap).FlattenAsync()).ToList();
             bool exceedesCap = messages.Count == messageCap;
             if(messages.Count == 0) return;
-            IMessage lastMessage = messages.Last();
-            messages.Remove(lastMessage);
+            IMessage lastMessage = messages.OrderBy(x => x.Timestamp.UtcDateTime).First();
+            
 
             // These DateTimes represent the bounds for which messages should be deleted.
             // DateTimes are confusing as heck and I think these are named the wrong way around but the logic works so ¯\_(ツ)_/¯
@@ -115,6 +115,9 @@ namespace Utili.Features
 
             // Only delete user messages
             if (mode == 3) messages.RemoveAll(x => x.Author.IsBot);
+
+            if(exceedesCap)
+                messages.Remove(lastMessage); // Will be deleted in the next check
 
             await channel.DeleteMessagesAsync(messages);
 
