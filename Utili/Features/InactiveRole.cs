@@ -50,7 +50,7 @@ namespace Utili.Features
             }
             catch(Exception er)
             {
-                _logger.ReportError("InactiveRole", er, LogSeverity.Warn);
+                _logger.ReportError("InactiveRole", er);
             }
         }
 

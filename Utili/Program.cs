@@ -93,8 +93,7 @@ namespace Utili
                 ExclusiveBulkDelete = true,
                 LogLevel = Discord.LogSeverity.Info,
                 AlwaysDownloadUsers = false,
-                UseSystemClock = false,
-                
+
                 GatewayIntents = 
                     GatewayIntents.Guilds | 
                     GatewayIntents.GuildMembers | 

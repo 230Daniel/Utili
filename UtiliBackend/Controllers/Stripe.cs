@@ -179,7 +179,10 @@ namespace UtiliSite
                     Product product = await productService.GetAsync(subscription.Items.Data[0].Plan.ProductId);
                     if (!int.TryParse(product.Metadata["slots"], out int slots)) slots = 0;
 
+                    UserRow user = await Users.GetRowAsync(subscription.CustomerId);
+
                     SubscriptionsRow row = await Subscriptions.GetRowAsync(subscription.Id);
+                    row.UserId = user.UserId;
                     row.Slots = slots;
                     row.EndsAt = subscription.CurrentPeriodEnd.AddHours(2);
                     row.Status = subscription.Status switch
