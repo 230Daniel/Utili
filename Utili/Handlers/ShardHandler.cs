@@ -49,14 +49,14 @@ namespace Utili.Handlers
                 _shardStatsUpdater = new Timer(10000);
                 _shardStatsUpdater.Elapsed += Sharding.Update;
                 _shardStatsUpdater.Start();
+
+                Monitoring.Start();
             }
                     
             _userCacheTimer?.Dispose();
             _userCacheTimer = new Timer(30000);
             _userCacheTimer.Elapsed += UserCacheTimerElapsed;
             _userCacheTimer.Start();
-
-            Monitoring.Start();
         }
 
         private static async Task CacheUsersAsync(DiscordSocketClient shard)

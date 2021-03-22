@@ -110,21 +110,21 @@ namespace Utili.Features
                     x.Topic = $"Users in {voiceChannel.Name} have access - Created by Utili";
                     x.PermissionOverwrites = new List<Overwrite>
                     {
+                        new Overwrite(_client.CurrentUser.Id, PermissionTarget.User,
+                            new OverwritePermissions(viewChannel: PermValue.Allow)),
                         new Overwrite(guild.EveryoneRole.Id, PermissionTarget.Role,
                             new OverwritePermissions(viewChannel: PermValue.Deny))
                     };
                 });
 
                 channelRow.TextChannelId = restTextChannel.Id;
-
                 await Database.Data.VoiceLink.SaveChannelRowAsync(channelRow);
-
                 textChannel = restTextChannel;
             }
 
             foreach(Overwrite existingOverwrite in textChannel.PermissionOverwrites)
             {
-                if (existingOverwrite.TargetType == PermissionTarget.User)
+                if (existingOverwrite.TargetType == PermissionTarget.User && existingOverwrite.TargetId != _client.CurrentUser.Id)
                 {
                     try
                     {
