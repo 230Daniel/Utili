@@ -6,6 +6,9 @@ import Cookies from "universal-cookie";
 import Layout from "./pages/_layout";
 import Index from "./pages/index";
 import Commands from "./pages/commands";
+import Premium from "./pages/premium/index";
+import CustomerPortal from "./pages/premium/customerportal";
+import Checkout from "./pages/premium/checkout";
 import Contact from "./pages/contact";
 import DashboardLayout from "./pages/dashboard/_layout";
 import Document from "./pages/document";
@@ -13,6 +16,7 @@ import Document from "./pages/document";
 import DashboardIndex from "./pages/dashboard/index";
 
 import {getClientId} from "./api/auth";
+import PremiumServers from "./pages/premium/servers";
 
 defineExtensions();
 
@@ -29,6 +33,10 @@ ReactDOM.render(
 							<Route exact path="/" component={Index}/>
 							<Route exact path="/commands/" component={Commands}/>
 							<Route exact path="/dashboard/" component={DashboardIndex}/>
+							<Route exact path="/premium/" component={Premium}/>
+							<Route exact path="/premium/servers" component={PremiumServers}/>
+							<Route exact path="/premium/customerportal" component={CustomerPortal}/>
+							<Route exact path="/premium/checkout/:currency/:slots" component={Checkout}/>
 							<Route exact path="/contact/" component={Contact}/>
 							<Route exact path="/return/" render={() => Return()}/>
 							<Route exact path="/invite/" component={Invite}/>

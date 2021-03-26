@@ -5,7 +5,7 @@ import "../../styles/divider.css";
 class Divider extends React.Component{
 	render(){
 		return(
-			<div class="divider" style={{marginTop: this.props.top + "px", marginBottom: this.props.bottom + "px"}}>
+			<div className="divider" style={{marginTop: this.props.top + "px", marginBottom: this.props.bottom + "px"}}>
         		<div></div>
 				<span>{this.props.children}</span>
 			</div>

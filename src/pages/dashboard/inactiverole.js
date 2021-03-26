@@ -52,7 +52,7 @@ class InactiveRole extends React.Component{
 					<Load loaded={this.state.inactiveRole !== null}>
 						<Card title="Inactive Role Settings" size={400} titleSize={200} inputSize={200} onChanged={this.props.onChanged}>
 							<CardComponent type="select-value" title="Inactive Role" values={values} value={this.state.inactiveRole?.roleId} ref={this.settings.role}></CardComponent>
-							<CardComponent type="select-value" title="Immune Role" values={values} value={this.state.immuneRole?.immuneRoleId} ref={this.settings.immuneRole}></CardComponent>
+							<CardComponent type="select-value" title="Immune Role" values={values} value={this.state.inactiveRole?.immuneRoleId} ref={this.settings.immuneRole}></CardComponent>
 							<CardComponent type="timespan" title="Threshold" value={Duration.fromISO(this.state.inactiveRole?.threshold)} ref={this.settings.threshold}></CardComponent>
 						</Card>
 						<div style={{display: this.state.premium && this.state.premium.premium ? "flex" : "none"}}>

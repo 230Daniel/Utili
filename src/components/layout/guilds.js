@@ -16,6 +16,7 @@ class Guilds extends React.Component{
 	render(){
 		if(this.state.guilds == null) return null;
 		var guild = this.state.guilds.find(x => x.id == this.guildId);
+		if(guild == null) return null;
 		return(
 			<NavDropdown className="guild-dropdown" title={<><img src={guild.iconUrl}/>{guild.name}</>}>
 				{this.state.guilds/*.filter(x => x.id != this.guildId)*/.map(guild =>{

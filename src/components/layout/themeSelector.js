@@ -58,6 +58,7 @@ class ThemeSelector extends React.Component{
 				c("sidebar-item", "#272727")
 				c("shadow", "#131313");
 				c("shadow-invert", "#131313");
+				c("shadow-text", "#131313");
 				c("dropdown", "#121212");
 				c("dropdown-hover", "#252525");
 				c("scrollbar", "#1e1e1e");
@@ -81,6 +82,7 @@ class ThemeSelector extends React.Component{
 				c("sidebar-item", "#efefef")
 				c("shadow", "#a3a3a3");
 				c("shadow-invert", "#a3a3a3");
+				c("shadow-text", "#e2e2e2");
 				c("dropdown", "#ffffff");
 				c("dropdown-hover", "#efefef");
 				c("scrollbar", "#eeeeee");

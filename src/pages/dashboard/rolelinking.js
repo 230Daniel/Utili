@@ -55,7 +55,7 @@ class RoleLinking extends React.Component{
 								return(
 									<Card title={this.getRoleName(row.roleId)} size={400} titleSize={200} inputSize={200} key={row.linkId} onChanged={this.props.onChanged} onRemoved={() => this.onLinkRemoved(row.linkId)}>
 										<CardComponent type="select" title={`When ${this.getRoleName(row.roleId)} is`} value={m1} options={["Added", "Removed"]} ref={this.settings.links[i].m1}></CardComponent>
-										<div class="inline">
+										<div className="inline">
 											<CardComponent type="select" forceWidth={200} onChanged={this.props.onChanged} value={m2} options={["Add", "Remove"]} ref={this.settings.links[i].m2}></CardComponent>
 											<CardComponent type="select-value" forceWidth={200} onChanged={this.props.onChanged} noPaddingLeft={true} values={roles} value={row.linkedRoleId} ref={this.settings.links[i].linkedRoleId}></CardComponent>
 										</div>
