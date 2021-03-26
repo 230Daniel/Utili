@@ -47,10 +47,15 @@ namespace UtiliBackend.Controllers.Dashboard
                 row.Thumbnail = EString.FromDecoded(bodyRow.Thumbnail);
                 row.Icon = EString.FromDecoded(bodyRow.Icon);
                 row.Colour = new Color(uint.Parse(bodyRow.Colour.Replace("#", ""), System.Globalization.NumberStyles.HexNumber));
+
+                bool isNew = row.New;
                 await row.SaveAsync();
 
-                MiscRow miscRow = new MiscRow(auth.Guild.Id, "RequiresNoticeUpdate", row.ChannelId.ToString());
-                _ = Misc.SaveRowAsync(miscRow);
+                if (bodyRow.Changed || isNew)
+                {
+                    MiscRow miscRow = new MiscRow(auth.Guild.Id, "RequiresNoticeUpdate", row.ChannelId.ToString());
+                    _ = Misc.SaveRowAsync(miscRow);
+                }
             }
 
             foreach (NoticesRow row in rows.Where(x => body.Rows.All(y => ulong.Parse(y.ChannelId) != x.ChannelId)))
@@ -85,6 +90,7 @@ namespace UtiliBackend.Controllers.Dashboard
         public string Thumbnail { get; set; }
         public string Icon { get; set; }
         public string Colour { get; set; }
+        public bool Changed { get; set; }
         
         public NoticesRowBody(NoticesRow row)
         {
@@ -99,6 +105,7 @@ namespace UtiliBackend.Controllers.Dashboard
             Thumbnail = row.Thumbnail.Value;
             Icon = row.Icon.Value;
             Colour = row.Colour.R.ToString("X2") + row.Colour.G.ToString("X2") + row.Colour.B.ToString("X2");
+            Changed = false;
         }
 
         public NoticesRowBody() { }
