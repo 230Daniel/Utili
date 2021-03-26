@@ -38,8 +38,15 @@ namespace UtiliBackend.Controllers
 
             List<PremiumRow> rows = await Database.Data.Premium.GetUserRowsAsync(auth.User.Id);
             foreach (PremiumRow row in rows)
+            {
                 if (slotsBody.Slots.Any(x => x.SlotId == row.SlotId))
-                    row.GuildId = slotsBody.Slots.First(x => x.SlotId == row.SlotId).GuildId;
+                {
+                    ulong before = row.GuildId;
+                    row.GuildId = ulong.Parse(slotsBody.Slots.First(x => x.SlotId == row.SlotId).GuildId);
+                    if (row.GuildId != before)
+                        await row.SaveAsync();
+                }
+            }
 
             return new OkResult();
         }
@@ -80,12 +87,12 @@ namespace UtiliBackend.Controllers
     public class PremiumSlotBody
     {
         public int SlotId { get; set; }
-        public ulong GuildId { get; set; }
+        public string GuildId { get; set; }
 
         public PremiumSlotBody(PremiumRow row)
         {
             SlotId = row.SlotId;
-            GuildId = row.GuildId;
+            GuildId = row.GuildId.ToString();
         }
 
         public PremiumSlotBody() { }
@@ -93,12 +100,12 @@ namespace UtiliBackend.Controllers
 
     public class PremiumGuild
     {
-        public ulong Id { get; set; }
+        public string Id { get; set; }
         public string Name { get; set; }
 
         public PremiumGuild(RestUserGuild guild)
         {
-            Id = guild.Id;
+            Id = guild.Id.ToString();
             Name = guild.Name;
         }
     }

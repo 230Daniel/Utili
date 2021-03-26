@@ -74,7 +74,7 @@ namespace UtiliSite
             }
         }
 
-        [HttpPost("stripe/customer-portal")]
+        [HttpGet("stripe/customer-portal")]
         public async Task<ActionResult> CustomerPortal()
         {
             await CreateCustomerIfRequiredAsync();
@@ -149,7 +149,17 @@ namespace UtiliSite
             if (gbp.Contains(country)) return "gbp";
             if (eur.Contains(country)) return "eur";
             if (usd.Contains(country)) return "usd";
-            return "usd";
+            return "gbp";
+        }
+
+        [HttpGet("stripe/subscriptions")]
+        public async Task<ActionResult> Subscriptions()
+        {
+            AuthDetails auth = await Authentication.GetAuthDetailsAsync(HttpContext);
+            if (!auth.Authorised) return auth.Action;
+
+            List<SubscriptionsRow> subscriptions = await Database.Data.Subscriptions.GetRowsAsync(userId: auth.User.Id);
+            return new JsonResult(subscriptions.Select(x => new SubscriptionBody(x)));
         }
 
         [HttpPost("stripe/webhook")]
@@ -181,7 +191,7 @@ namespace UtiliSite
 
                     UserRow user = await Users.GetRowAsync(subscription.CustomerId);
 
-                    SubscriptionsRow row = await Subscriptions.GetRowAsync(subscription.Id);
+                    SubscriptionsRow row = await Database.Data.Subscriptions.GetRowAsync(subscription.Id);
                     row.UserId = user.UserId;
                     row.Slots = slots;
                     row.EndsAt = subscription.CurrentPeriodEnd.AddHours(2);
@@ -196,7 +206,7 @@ namespace UtiliSite
                         "trialing" => SubscriptionStatus.Trialing,
                         _ => throw new ArgumentException($"Unknown value for subscription {subscription.Id} status: {subscription.Status}")
                     };
-                    await Subscriptions.SaveRowAsync(row);
+                    await Database.Data.Subscriptions.SaveRowAsync(row);
 
                     break;
 
@@ -215,8 +225,20 @@ namespace UtiliSite
 
         public CurrencyBody(string currencyCode, bool locked)
         {
-            CurrencyCode = currencyCode;
+            CurrencyCode = currencyCode.ToUpper();
             Locked = locked;
+        }
+    }
+
+    public class SubscriptionBody
+    {
+        public int Slots { get; set; }
+        public SubscriptionStatus Status { get; set; }
+
+        public SubscriptionBody(SubscriptionsRow row)
+        {
+            Slots = row.Slots;
+            Status = row.Status;
         }
     }
 

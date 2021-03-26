@@ -14,7 +14,7 @@ namespace Utili.Commands
 {
     public class UtilCommands : ModuleBase<SocketCommandContext>
     {
-        [Command("Prune"), Alias("Purge", "Clear"), Cooldown(10)]
+        [Command("Prune"), Alias("Purge", "Clear"), Cooldown(10), Permission(Perm.ManageMessages)]
         public async Task Prune([Remainder] string argsString = null)
         {
             if (string.IsNullOrEmpty(argsString))

@@ -75,10 +75,11 @@ namespace Utili.Features
 
             SocketGuild guild = voiceChannel.Guild;
 
-            if (BotPermissions.IsMissingPermissions(voiceChannel, new[] {ChannelPermission.ViewChannel}, out _) ||
-                voiceChannel.Category is null ? BotPermissions.IsMissingPermissions(guild, new[] {GuildPermission.ManageChannels, GuildPermission.ManageRoles}, out _) :
-                BotPermissions.IsMissingPermissions(voiceChannel.Category, new[]{ChannelPermission.ManageChannels, ChannelPermission.ManageRoles}, out _))
-                return;
+            bool missingVoiceChannelPerms = BotPermissions.IsMissingPermissions(voiceChannel, new[] {ChannelPermission.ViewChannel}, out _);
+            bool missingCategoryPerms = voiceChannel.Category is null ? BotPermissions.IsMissingPermissions(guild, new[] {GuildPermission.ViewChannel, GuildPermission.ManageChannels, GuildPermission.ManageRoles}, out _) :
+                BotPermissions.IsMissingPermissions(voiceChannel.Category, new[]{ChannelPermission.ViewChannel, ChannelPermission.ManageChannels, ChannelPermission.ManageRoles}, out _);
+
+            if(missingVoiceChannelPerms || missingCategoryPerms) return;
 
             List<SocketGuildUser> connectedUsers =
                 guild.Users.Where(x => x.VoiceChannel is not null && x.VoiceChannel.Id == voiceChannel.Id).ToList();

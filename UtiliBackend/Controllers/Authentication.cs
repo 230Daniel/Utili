@@ -14,14 +14,10 @@ namespace UtiliBackend.Controllers
         [HttpGet("auth")]
         public async Task<ActionResult> Auth()
         {
-            if (User.Identity.IsAuthenticated)
-            {
-                AuthDetails auth = await GetAuthDetailsAsync(HttpContext);
-                return !auth.Authorised ? 
-                    new JsonResult(new ShortAuthDetails()) : 
-                    new JsonResult(new ShortAuthDetails(auth.User));
-            }
-            return new JsonResult(new ShortAuthDetails());
+            AuthDetails auth = await GetAuthDetailsAsync(HttpContext);
+            return auth.Authorised
+                ? new JsonResult(new ShortAuthDetails(auth.User))
+                : new JsonResult(new ShortAuthDetails());
         }
 
         [HttpGet("auth/signin")]
