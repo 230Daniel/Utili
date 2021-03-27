@@ -34,7 +34,7 @@ class PremiumIndex extends React.Component{
 						<Load loaded={!this.state.loading}>
 						<p>Premium benefits include...</p>
 							<ul>
-								<li>Unlimited autopurge channels</li>
+								<li>More frequent autopurge purges</li>
 								<li>Unlimited message logs storage</li>
 								<li>Unlimited role linking rules</li>
 								<li>Up to 5 emojis in vote channels</li>

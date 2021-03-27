@@ -59,7 +59,7 @@ class Notices extends React.Component{
 						<div className="inline">
 							{this.state.notices?.rows.map((row, i) =>{
 								return(
-									<Card title={row.channelName} size={600} titleSize={200} inputSize={400} key={row.channelId} onChanged={this.props.onChanged} onRemoved={() => this.onChannelRemoved(row.channelId)}>
+									<Card title={row.channelName} size={600} titleSize={200} inputSize={400} key={row.channelId} onChanged={() => this.onCardChanged(i)} onRemoved={() => this.onChannelRemoved(row.channelId)}>
 										<CardComponent type="checkbox" title="Enabled" value={row.enabled} ref={this.settings.channels[i].enabled}/>
 										<CardComponent type="timespan" title="Delay" value={Duration.fromISO(row.delay)} ref={this.settings.channels[i].delay}/>
 										<CardComponent type="text" title="Title" value={row.title} ref={this.settings.channels[i].title}/>
@@ -104,6 +104,11 @@ class Notices extends React.Component{
 		}
 		this.state.notices.rows.orderBy(x => x.channelName);
 		this.setState({});
+	}
+
+	onCardChanged(i){
+		this.state.notices.rows[i].changed = true;
+		this.props.onChanged();
 	}
 
 	onChannelAdded(channel){
@@ -166,6 +171,9 @@ class Notices extends React.Component{
 	async save(){
 		this.getInput();
 		var response = await post(`dashboard/${this.guildId}/notices`, this.state.notices);
+		for(var i = 0; i < this.state.notices.rows.length; i++){
+			this.state.notices.rows[i].changed = false;
+		}
 		return response.ok;
 	}
 

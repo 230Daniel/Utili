@@ -17,6 +17,7 @@ import DashboardIndex from "./pages/dashboard/index";
 
 import {getClientId} from "./api/auth";
 import PremiumServers from "./pages/premium/servers";
+import PremiumThankYou from "./pages/premium/thankyou";
 
 defineExtensions();
 
@@ -35,13 +36,14 @@ ReactDOM.render(
 							<Route exact path="/dashboard/" component={DashboardIndex}/>
 							<Route exact path="/premium/" component={Premium}/>
 							<Route exact path="/premium/servers" component={PremiumServers}/>
+							<Route exact path="/premium/thankyou" component={PremiumThankYou}/>
 							<Route exact path="/premium/customerportal" component={CustomerPortal}/>
 							<Route exact path="/premium/checkout/:currency/:slots" component={Checkout}/>
 							<Route exact path="/contact/" component={Contact}/>
 							<Route exact path="/return/" render={() => Return()}/>
 							<Route exact path="/invite/" component={Invite}/>
 							<Route exact path="/invite/:guildId" component={Invite}/>
-							<Route exact path="/:document" component={Document}/>
+							<Route path="/:document" component={Document}/>
 						</Switch>
 					</Layout>
 				</Route>
