@@ -34,7 +34,7 @@ namespace UtiliSite
 
             SessionCreateOptions options = new SessionCreateOptions
             {
-                SuccessUrl = $"{Main.Config.Frontend}/premium/success",
+                SuccessUrl = $"{Main.Config.Frontend}/premium/thankyou",
                 CancelUrl = $"{Main.Config.Frontend}/premium",
                 PaymentMethodTypes = new List<string>
                 {
