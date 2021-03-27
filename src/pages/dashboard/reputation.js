@@ -34,7 +34,6 @@ class Reputation extends React.Component{
 						<p>Each emoji is assigned a value.<br/>
 						When someone's message gets that reaction, their reputation changes by the emoji's value.<br/>
 						The emoji's value can be negative.</p>
-						<p>Commands</p>
 						<ul>
 							<li>rep addEmoji [emoji] [value]</li>
 							<li>rep [user]</li>

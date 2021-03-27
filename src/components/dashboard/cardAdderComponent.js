@@ -26,7 +26,7 @@ class CardAdderComponent extends React.Component{
 	}
 
 	renderOptions(){
-		var options = this.state.options.filter(x => x.value.includes(this.state.query)).orderBy(x => x.value);
+		var options = this.state.options.filter(x => x.value.toLowerCase().includes(this.state.query.toLowerCase())).orderBy(x => x.value);
 		return(
 			<div className={`dashboard-card-list-component-options${this.state.selecting ? "" : " collapsed"}`}>
 				{options.map((item, i) => {

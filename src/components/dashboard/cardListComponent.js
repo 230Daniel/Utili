@@ -28,7 +28,7 @@ class CardListComponent extends React.Component{
 	}
 
 	renderOptions(){
-		var options = this.sort(this.state.options.filter(x => this.getValue(x).includes(this.state.query)));
+		var options = this.sort(this.state.options.filter(x => this.getValue(x).toLowerCase().includes(this.state.query.toLowerCase())));
 		return(
 			<div className={`dashboard-card-list-component-options${this.state.selecting ? "" : " collapsed"}`}>
 				{options.map((item, i) => {

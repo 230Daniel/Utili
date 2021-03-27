@@ -34,14 +34,12 @@ class MessagePinning extends React.Component{
 					<div className="dashboard-title">Message Pinning</div>
 					<div className="dashboard-subtitle">Send messages to a channel using the pin command</div>
 					<div className="dashboard-description">
-						<p>Commands for this feature:
-							<ul>
-								<li>pin [message id]</li>
-								<li>pin [from channel] [message id]</li>
-								<li>pin [message id] [pin channel]</li>
-								<li>pin [from channel] [message id] [pin channel]</li>
-							</ul>
-						</p>
+						<ul>
+							<li>pin [message id]</li>
+							<li>pin [from channel] [message id]</li>
+							<li>pin [message id] [pin channel]</li>
+							<li>pin [from channel] [message id] [pin channel]</li>
+						</ul>
 					</div>
 					<Load loaded={this.state.messagePinning !== null}>
 						<Card title="Message Pinning Settings" size={400} titleSize={200} inputSize={200} onChanged={this.props.onChanged}>

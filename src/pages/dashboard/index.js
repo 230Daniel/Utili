@@ -22,7 +22,8 @@ class Index extends React.Component{
 					<title>Dashboard - Utili</title>
 				</Helmet>
 				<Fade>
-					<h1>Server Select</h1>
+					<h1>Utili Dashboard</h1>
+					<h2>Choose a server</h2>
 					<Load loaded={this.state.guilds !== null}>
 						<div className="guild-container">
 							<div className="guilds">
