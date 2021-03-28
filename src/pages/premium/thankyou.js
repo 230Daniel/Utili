@@ -1,22 +1,17 @@
 import React from "react";
-import { Link, Redirect } from "react-router-dom";
 import { Helmet } from "react-helmet";
-import { get } from "../../api/auth";
 
 import Fade from "../../components/effects/fade"
-import Divider from "../../components/layout/divider";
+import Load from "../../components/load";
+import Subscriptions from "../../components/subscriptions";
 
 import "../../styles/premium.css";
-import Subscriptions from "../../components/subscriptions";
 
 class PremiumThankYou extends React.Component{
 	constructor(props){
 		super(props);
 		this.state = {
-			loading: true,
-			currency: "GBP",
-			currencyLocked: false,
-			subscriptions: []
+			loading: true
 		};
 	}
 
@@ -31,13 +26,30 @@ class PremiumThankYou extends React.Component{
 						<h1>Thank you!</h1>
 						<p style={{fontSize: "18px", textAlign: "center", marginTop: "-18px", color: "var(--colour-text-muted)"}}>Welcome to Utili Premium</p>
 						<div style={{marginTop: "30px"}}>
-							<Subscriptions alwaysShow={true}/>
+							{this.renderContent()}
 						</div>
-						
 					</div>
 				</Fade>
 			</>
 		)
+	}
+
+	renderContent(){
+		if(this.state.loading){
+			return (
+				<Load/>
+			);
+		} else {
+			return(
+				<Subscriptions alwaysDisplay={true}/>
+			);
+		}
+	}
+
+	componentDidMount(){
+		setTimeout(() => {
+			this.setState({loading: false});
+		}, 2000);
 	}
 }
 

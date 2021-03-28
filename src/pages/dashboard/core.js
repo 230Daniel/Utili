@@ -41,7 +41,7 @@ class Core extends React.Component{
 					</div>
 					<Load loaded={this.state.core !== null}>
 							<Card title="Core Settings" size={400} titleSize={200} inputSize={200} onChanged={this.props.onChanged}>
-								<CardComponent type="text" title="Nickname" value={this.state.core?.nickname} ref={this.settings.nickname}></CardComponent>
+								{/*<CardComponent type="text" title="Nickname" value={this.state.core?.nickname} ref={this.settings.nickname}></CardComponent>*/}
 								<CardComponent type="text" title="Command Prefix" value={this.state.core?.prefix} ref={this.settings.prefix}></CardComponent>
 								<CardComponent type="checkbox" title="Enable Commands" value={this.state.core?.enableCommands} ref={this.settings.enableCommands}></CardComponent>
 							</Card>
