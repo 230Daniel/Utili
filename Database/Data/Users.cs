@@ -36,8 +36,7 @@ namespace Database.Data
                     reader.GetUInt64(0),
                     reader.GetString(1),
                     reader.GetDateTime(2),
-                    reader.GetInt32(3),
-                    reader.IsDBNull(4) ? null : reader.GetString(4)));
+                    reader.IsDBNull(3) ? null : reader.GetString(3)));
             }
 
             reader.Close();
@@ -61,11 +60,10 @@ namespace Database.Data
         {
             if (row.New)
             {
-                await Sql.ExecuteAsync("INSERT INTO Users (UserId, Email, LastVisit, Visits, CustomerId) VALUES (@UserId, @Email, @LastVisit, @Visits, @CustomerId);",
+                await Sql.ExecuteAsync("INSERT INTO Users (UserId, Email, LastVisit, CustomerId) VALUES (@UserId, @Email, @LastVisit, @CustomerId);",
                     ("UserId", row.UserId),
                     ("Email", row.Email), 
                     ("LastVisit", row.LastVisit),
-                    ("Visits", row.Visits),
                     ("CustomerId", row.CustomerId));
 
                 row.New = false;
@@ -78,12 +76,6 @@ namespace Database.Data
                     ("LastVisit", row.LastVisit),
                     ("CustomerId", row.CustomerId));
             }
-        }
-
-        public static async Task AddNewVisitAsync(ulong userId)
-        {
-            await Sql.ExecuteAsync("UPDATE Users SET Visits = Visits + 1 WHERE UserId = @UserId;",
-                ("UserId", userId));
         }
 
         public static async Task DeleteRowAsync(UserRow row)
@@ -100,7 +92,6 @@ namespace Database.Data
         public ulong UserId { get; set; }
         public string Email { get; set; }
         public DateTime LastVisit { get; set; }
-        public int Visits { get; set; }
         public string CustomerId { get; set; }
 
         private UserRow()
@@ -115,7 +106,7 @@ namespace Database.Data
             CustomerId = null;
         }
 
-        public static UserRow FromDatabase(ulong userId, string email, DateTime lastVisit, int visits, string customerId)
+        public static UserRow FromDatabase(ulong userId, string email, DateTime lastVisit, string customerId)
         {
             return new UserRow
             {
@@ -123,7 +114,6 @@ namespace Database.Data
                 UserId = userId,
                 Email = email,
                 LastVisit = lastVisit,
-                Visits = visits,
                 CustomerId = customerId
             };
         }

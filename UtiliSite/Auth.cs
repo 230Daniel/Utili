@@ -140,7 +140,7 @@ namespace UtiliSite
             {
                 UserRow.LastVisit = DateTime.UtcNow;
                 Users.SaveRowAsync(UserRow).GetAwaiter().GetResult();
-                _ = Users.AddNewVisitAsync(user.Id);
+                //_ = Users.AddNewVisitAsync(user.Id);
             }
         }
 

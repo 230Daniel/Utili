@@ -17,9 +17,9 @@ namespace UtiliBackend.Controllers.Dashboard
             if (!auth.Authorised) return auth.Action;
 
             CoreRow row = await Database.Data.Core.GetRowAsync(auth.Guild.Id);
-            string nickname = await DiscordModule.GetBotNicknameAsync(auth.Guild.Id);
+            //string nickname = await DiscordModule.GetBotNicknameAsync(auth.Guild.Id);
 
-            return new JsonResult(new CoreBody(row, nickname));
+            return new JsonResult(new CoreBody(row, ""));
         }
 
         [HttpPost("dashboard/{guildId}/core")]
@@ -28,7 +28,7 @@ namespace UtiliBackend.Controllers.Dashboard
             AuthDetails auth = await Authentication.GetAuthDetailsAsync(HttpContext, guildId);
             if (!auth.Authorised) return auth.Action;
 
-            await DiscordModule.SetNicknameAsync(auth.Guild.Id, body.Nickname);
+            //await DiscordModule.SetNicknameAsync(auth.Guild.Id, body.Nickname);
 
             CoreRow row = await Database.Data.Core.GetRowAsync(auth.Guild.Id);
             row.Prefix = EString.FromDecoded(body.Prefix);

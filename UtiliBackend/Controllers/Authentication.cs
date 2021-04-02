@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System;
+using Microsoft.AspNetCore.Mvc;
 using System.Linq;
 using System.Threading.Tasks;
 using Database.Data;
@@ -88,9 +89,10 @@ namespace UtiliBackend.Controllers
             User = user;
 
             UserRow = Users.GetRowAsync(user.Id).GetAwaiter().GetResult();
-            if (UserRow.Email != user.Email)
+            if (UserRow.Email != user.Email || UserRow.LastVisit < DateTime.UtcNow - TimeSpan.FromMinutes(5))
             {
                 UserRow.Email = user.Email;
+                UserRow.LastVisit = DateTime.UtcNow;
                 Users.SaveRowAsync(UserRow).GetAwaiter().GetResult();
             }
         }

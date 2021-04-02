@@ -18,7 +18,7 @@ namespace Utili.Features
         public static void Start()
         {
             _timer?.Dispose();
-            _timer = new Timer(30000);
+            _timer = new Timer(40000);
             _timer.Elapsed += Timer_Elapsed;
             _timer.Start();
 
@@ -90,51 +90,64 @@ namespace Utili.Features
 
         private static async Task PurgeChannelAsync(SocketGuildChannel guildChannel, TimeSpan timespan, int mode, int messageCap)
         {
-            await Task.Delay(1);
-
-            SocketTextChannel channel = guildChannel as SocketTextChannel;
-            if(BotPermissions.IsMissingPermissions(channel, new [] { ChannelPermission.ManageMessages, ChannelPermission.ViewChannel, ChannelPermission.ReadMessageHistory }, out _)) return;
-
-            List<IMessage> messages = (await channel.GetMessagesAsync(messageCap).FlattenAsync()).ToList();
-            bool exceedesCap = messages.Count == messageCap;
-            if(messages.Count == 0) return;
-            IMessage lastMessage = messages.OrderBy(x => x.Timestamp.UtcDateTime).First();
-            
-
-            // These DateTimes represent the bounds for which messages should be deleted.
-            // DateTimes are confusing as heck and I think these are named the wrong way around but the logic works so ¯\_(ツ)_/¯
-            DateTime earliestTime = DateTime.UtcNow - timespan;
-            DateTime latestTime = DateTime.UtcNow - TimeSpan.FromDays(13.5);
-
-            messages.RemoveAll(x => x.CreatedAt.UtcDateTime > earliestTime);
-            messages.RemoveAll(x => x.CreatedAt.UtcDateTime < latestTime);
-            messages.RemoveAll(x => x.IsPinned);
-
-            // Only delete bot messages
-            if (mode == 1) messages.RemoveAll(x => !x.Author.IsBot);
-
-            // Only delete user messages
-            if (mode == 3) messages.RemoveAll(x => x.Author.IsBot);
-
-            if(exceedesCap)
-                messages.Remove(lastMessage); // Will be deleted in the next check
-
-            await channel.DeleteMessagesAsync(messages);
-
-            if (exceedesCap && mode == 0 && lastMessage.CreatedAt.UtcDateTime > latestTime)
+            try
             {
-                await Task.Delay(3000);
-                // We must delete excess messages
-                // Only do this if we are to delete all messages, not just bot messages
-                // Only do this if the earliest message in the channel is deletable
+                await Task.Delay(1);
 
-                List<IMessage> excessMessages = (await channel.GetMessagesAsync(lastMessage.Id, Direction.Before, 100).FlattenAsync()).ToList();
+                SocketTextChannel channel = guildChannel as SocketTextChannel;
+                if (BotPermissions.IsMissingPermissions(channel,
+                    new[]
+                    {
+                        ChannelPermission.ManageMessages, ChannelPermission.ViewChannel,
+                        ChannelPermission.ReadMessageHistory
+                    }, out _)) return;
 
-                excessMessages.Add(lastMessage);
-                excessMessages.RemoveAll(x => x.CreatedAt.UtcDateTime < latestTime);
-                excessMessages.RemoveAll(x => x.IsPinned);
+                List<IMessage> messages = (await channel.GetMessagesAsync(messageCap).FlattenAsync()).ToList();
+                bool exceedesCap = messages.Count == messageCap;
+                if (messages.Count == 0) return;
+                IMessage lastMessage = messages.OrderBy(x => x.Timestamp.UtcDateTime).First();
 
-                await channel.DeleteMessagesAsync(excessMessages);
+
+                // These DateTimes represent the bounds for which messages should be deleted.
+                // DateTimes are confusing as heck and I think these are named the wrong way around but the logic works so ¯\_(ツ)_/¯
+                DateTime earliestTime = DateTime.UtcNow - timespan;
+                DateTime latestTime = DateTime.UtcNow - TimeSpan.FromDays(13.5);
+
+                messages.RemoveAll(x => x.CreatedAt.UtcDateTime > earliestTime);
+                messages.RemoveAll(x => x.CreatedAt.UtcDateTime < latestTime);
+                messages.RemoveAll(x => x.IsPinned);
+
+                // Only delete bot messages
+                if (mode == 1) messages.RemoveAll(x => !x.Author.IsBot);
+
+                // Only delete user messages
+                if (mode == 3) messages.RemoveAll(x => x.Author.IsBot);
+
+                if (exceedesCap)
+                    messages.Remove(lastMessage); // Will be deleted in the next check
+
+                await channel.DeleteMessagesAsync(messages);
+
+                if (messageCap == 200 /*tmp 4 premium only*/ && exceedesCap && mode == 0 && lastMessage.CreatedAt.UtcDateTime > latestTime)
+                {
+                    await Task.Delay(3000);
+                    // We must delete excess messages
+                    // Only do this if we are to delete all messages, not just bot messages
+                    // Only do this if the earliest message in the channel is deletable
+
+                    List<IMessage> excessMessages =
+                        (await channel.GetMessagesAsync(lastMessage.Id, Direction.Before, 100).FlattenAsync()).ToList();
+
+                    excessMessages.Add(lastMessage);
+                    excessMessages.RemoveAll(x => x.CreatedAt.UtcDateTime < latestTime);
+                    excessMessages.RemoveAll(x => x.IsPinned);
+
+                    await channel.DeleteMessagesAsync(excessMessages);
+                }
+            }
+            catch (Exception e)
+            {
+                _logger.ReportError("AutopurgeCnl", e);
             }
         }
 
@@ -154,7 +167,7 @@ namespace Utili.Features
                     if (guildRows.Count > 0)
                     {
                         AutopurgeRow row = guildRows[_purgeNumber % guildRows.Count];
-                        if(!rowsToPurge.Contains(row)) rowsToPurge.Add(row);
+                        if(rowsToPurge.All(x => x.ChannelId != row.ChannelId)) rowsToPurge.Add(row);
                     }
                 }
             }
@@ -181,7 +194,7 @@ namespace Utili.Features
                     if (guildRows.Count > 0)
                     {
                         AutopurgeRow row = guildRows[_premiumPurgeNumber % guildRows.Count];
-                        if(!rowsToPurge.Contains(row)) rowsToPurge.Add(row);
+                        if(rowsToPurge.All(x => x.ChannelId != row.ChannelId)) rowsToPurge.Add(row);
                     }
                 }
 

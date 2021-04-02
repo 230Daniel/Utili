@@ -93,7 +93,7 @@ namespace Utili
                 ExclusiveBulkDelete = true,
                 LogLevel = Discord.LogSeverity.Info,
                 AlwaysDownloadUsers = false,
-
+                DefaultRetryMode = RetryMode.AlwaysFail,
                 GatewayIntents = 
                     GatewayIntents.Guilds | 
                     GatewayIntents.GuildMembers | 
