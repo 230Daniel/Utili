@@ -50,7 +50,7 @@ namespace Utili.Commands
 
             EmbedBuilder embed = GenerateEmbed(
                 MessageSender.EmbedType.Success,
-                guild?.ToString(),
+                guild.ToString(),
                 content).ToEmbedBuilder();
             embed.ThumbnailUrl = guild.IconUrl;
 

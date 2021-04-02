@@ -136,7 +136,7 @@ namespace Utili.Features
                     // Only do this if the earliest message in the channel is deletable
 
                     List<IMessage> excessMessages =
-                        (await channel.GetMessagesAsync(lastMessage.Id, Direction.Before, 100).FlattenAsync()).ToList();
+                        (await channel.GetMessagesAsync(lastMessage.Id, Direction.Before).FlattenAsync()).ToList();
 
                     excessMessages.Add(lastMessage);
                     excessMessages.RemoveAll(x => x.CreatedAt.UtcDateTime < latestTime);
