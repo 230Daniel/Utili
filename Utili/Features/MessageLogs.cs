@@ -41,6 +41,8 @@ namespace Utili.Features
 
         public static async Task MessageEdited(SocketCommandContext context)
         {
+            if(context.User.IsBot) return;
+
             MessageLogsRow row = await Database.Data.MessageLogs.GetRowAsync(context.Guild.Id);
             if ((row.DeletedChannelId == 0 && row.EditedChannelId == 0) || row.ExcludedChannels.Contains(context.Channel.Id)) return;
 

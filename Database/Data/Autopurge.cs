@@ -100,6 +100,112 @@ namespace Database.Data
                 ("GuildId", row.GuildId),
                 ("ChannelId", row.ChannelId));
         }
+
+        public static async Task<List<AutopurgeMessageRow>> GetMessagesAsync(ulong? guildId = null, ulong? channelId = null, ulong? messageId = null)
+        {
+            List<AutopurgeMessageRow> matchedRows = new List<AutopurgeMessageRow>();
+
+            string command = "SELECT * FROM AutopurgeMessages WHERE TRUE";
+            List<(string, object)> values = new List<(string, object)>();
+
+            if (guildId.HasValue)
+            {
+                command += " AND GuildId = @GuildId";
+                values.Add(("GuildId", guildId.Value));
+            }
+
+            if (channelId.HasValue)
+            {
+                command += " AND ChannelId = @ChannelId";
+                values.Add(("ChannelId", channelId.Value));
+            }
+
+            if (messageId.HasValue)
+            {
+                command += " AND MessageId = @MessageId";
+                values.Add(("MessageId", messageId.Value));
+            }
+
+            MySqlDataReader reader = await Sql.ExecuteReaderAsync(command, values.ToArray());
+
+            while (reader.Read())
+            {
+                matchedRows.Add(AutopurgeMessageRow.FromDatabase(
+                    reader.GetUInt64(0),
+                    reader.GetUInt64(1),
+                    reader.GetUInt64(2),
+                    reader.GetDateTime(3),
+                    reader.GetBoolean(4),
+                    reader.GetBoolean(5)));
+            }
+
+            reader.Close();
+            return matchedRows;
+        }
+
+        public static async Task<List<AutopurgeMessageRow>> GetAndDeleteDueMessagesAsync(AutopurgeRow row)
+        {
+            List<AutopurgeMessageRow> matchedRows = new List<AutopurgeMessageRow>();
+            if (row.Mode == 2) return matchedRows;
+
+            MySqlDataReader reader = await Sql.ExecuteReaderAsync(
+                "DELETE FROM AutopurgeMessages WHERE " +
+                "GuildId = @GuildId AND " +
+                "ChannelId = @ChannelId AND " +
+                "Timestamp <= @MaximumTimestamp AND " +
+                "Timestamp >= @MinimumTimestamp AND " +
+                "(@AllMessages OR IsBot = @IsBot) AND " +
+                "IsPinned = @IsPinned " +
+                "RETURNING *",
+
+                ("GuildId", row.GuildId),
+                ("ChannelId", row.ChannelId),
+                ("MaximumTimestamp", DateTime.UtcNow - row.Timespan),
+                ("MinimumTimestamp", DateTime.UtcNow - TimeSpan.FromDays(13.9)),
+                ("IsBot", row.Mode == 1),
+                ("AllMessages", row.Mode == 0),
+                ("IsPinned", false));
+
+            while (reader.Read())
+            {
+                matchedRows.Add(AutopurgeMessageRow.FromDatabase(
+                    reader.GetUInt64(0),
+                    reader.GetUInt64(1),
+                    reader.GetUInt64(2),
+                    reader.GetDateTime(3),
+                    reader.GetBoolean(4),
+                    reader.GetBoolean(5)));
+            }
+
+            reader.Close();
+            return matchedRows;
+        }
+
+        public static async Task SaveMessageAsync(AutopurgeMessageRow row)
+        {
+            if (row.New)
+            {
+                await Sql.ExecuteAsync("INSERT INTO AutopurgeMessages (GuildId, ChannelId, MessageId, Timestamp, IsBot, IsPinned) VALUES (@GuildId, @ChannelId, @MessageId, @Timestamp, @IsBot, @IsPinned);",
+                    ("GuildId", row.GuildId), 
+                    ("ChannelId", row.ChannelId),
+                    ("MessageId", row.MessageId),
+                    ("Timestamp", row.Timestamp),
+                    ("IsBot", row.IsBot),
+                    ("IsPinned", row.IsPinned));
+
+                row.New = false;
+            }
+            else
+            {
+                await Sql.ExecuteAsync("UPDATE AutopurgeMessages SET GuildId = @GuildId, ChannelId = @ChannelId, MessageId = @MessageId, Timestamp = @Timestamp, IsBot = @IsBot, IsPinned = @IsPinned WHERE GuildId = @GuildId AND ChannelId = @ChannelId AND MessageId = @MessageId",
+                    ("GuildId", row.GuildId), 
+                    ("ChannelId", row.ChannelId),
+                    ("MessageId", row.MessageId),
+                    ("Timestamp", row.Timestamp),
+                    ("IsBot", row.IsBot),
+                    ("IsPinned", row.IsPinned));
+            }
+        }
     }
 
     public class AutopurgeRow : IRow
@@ -148,6 +254,36 @@ namespace Database.Data
         public async Task DeleteAsync()
         {
             await Autopurge.DeleteRowAsync(this);
+        }
+    }
+
+    public class AutopurgeMessageRow
+    {
+        public bool New { get; set; }
+        public ulong GuildId { get; set; }
+        public ulong ChannelId { get; set; }
+        public ulong MessageId { get; set; }
+        public DateTime Timestamp { get; set; }
+        public bool IsBot { get; set; }
+        public bool IsPinned { get; set; }
+
+        public AutopurgeMessageRow()
+        {
+            New = true;
+        }
+
+        public static AutopurgeMessageRow FromDatabase(ulong guildId, ulong channelId, ulong messageId, DateTime timestamp, bool isBot, bool isPinned)
+        {
+            return new AutopurgeMessageRow
+            {
+                New = false,
+                GuildId = guildId,
+                ChannelId = channelId,
+                MessageId = messageId,
+                Timestamp = DateTime.SpecifyKind(timestamp, DateTimeKind.Utc),
+                IsBot = isBot,
+                IsPinned = isPinned
+            };
         }
     }
 }

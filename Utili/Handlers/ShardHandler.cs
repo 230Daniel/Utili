@@ -14,7 +14,7 @@ namespace Utili.Handlers
     internal static class ShardHandler
     {
         public static List<(int, DateTime)> ShardRegister { get; } = new List<(int, DateTime)>();
-
+        private static bool _allShardsReadyFired;
         public static async Task ShardReady(DiscordSocketClient shard)
         {
             _ = Task.Run(async () =>
@@ -38,6 +38,9 @@ namespace Utili.Handlers
 
         private static async Task AllShardsReady()
         {
+            if (_allShardsReadyFired) return;
+            _allShardsReadyFired = true;
+
             if (_config.Production)
             {
                 Community.Initialise();
@@ -57,6 +60,8 @@ namespace Utili.Handlers
             _userCacheTimer = new Timer(30000);
             _userCacheTimer.Elapsed += UserCacheTimerElapsed;
             _userCacheTimer.Start();
+
+            Features.Autopurge.Start();
         }
 
         private static async Task CacheUsersAsync(DiscordSocketClient shard)

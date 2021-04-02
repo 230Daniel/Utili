@@ -12,138 +12,43 @@ namespace Utili.Features
 {
     internal static class Autopurge
     {
-        private static Timer _timer;
-        private static Timer _premiumTimer;
+        static Timer _timer;
 
         public static void Start()
         {
-            _timer?.Dispose();
-            _timer = new Timer(40000);
+            _timer = new Timer(5000);
             _timer.Elapsed += Timer_Elapsed;
             _timer.Start();
-
-            _premiumTimer?.Dispose();
-            _premiumTimer = new Timer(10000);
-            _premiumTimer.Elapsed += PremiumTimer_Elapsed;
-            _premiumTimer.Start();
+            _ = GetMessagesAsync();
         }
 
-        private static void Timer_Elapsed(object sender, ElapsedEventArgs e)
+        private static async Task PurgeChannelsAsync()
         {
-            try
-            {
-                PurgeChannelsAsync(false).GetAwaiter().GetResult();
-            }
-            catch(Exception ex)
-            {
-                _logger.ReportError("Autopurge", ex);
-            }
-        }
-
-        private static void PremiumTimer_Elapsed(object sender, ElapsedEventArgs e)
-        {
-            try
-            {
-                PurgeChannelsAsync(true).GetAwaiter().GetResult();
-            }
-            catch(Exception ex)
-            {
-                _logger.ReportError("Autopurge", ex);
-            }
-        }
-
-        private static async Task PurgeChannelsAsync(bool premium)
-        {
-            List<AutopurgeRow> rows;
-            if (premium) rows = await GetPremiumRowsToPurgeAsync();
-            else rows = await GetRowsToPurgeAsync();
-
-            int messageCap;
-            if (premium) messageCap = 200;
-            else messageCap = 100;
+            List<AutopurgeRow> rows = await Database.Data.Autopurge.GetRowsAsync(enabledOnly: true);
+            rows.RemoveAll(x => _client.Guilds.All(y => y.Id != x.GuildId));
+            rows.RemoveAll(x => _client.GetGuild(x.GuildId).TextChannels.All(y => y.Id != x.ChannelId));
 
             List<Task> tasks = new List<Task>();
             foreach (AutopurgeRow row in rows)
             {
-                try
-                {
-                    SocketGuild guild = _client.GetGuild(row.GuildId);
-                    SocketTextChannel channel = guild.GetTextChannel(row.ChannelId);
-
-                    if (!BotPermissions.IsMissingPermissions(channel,
-                        new[]
-                        {
-                            ChannelPermission.ViewChannel,
-                            ChannelPermission.ReadMessageHistory,
-                            ChannelPermission.ManageMessages
-                        }, out _))
-                    {
-                        tasks.Add(PurgeChannelAsync(channel, row.Timespan, row.Mode, messageCap));
-                        await Task.Delay(250);
-                    }
-                }
-                catch { }
+                tasks.Add(PurgeChannelAsync(row));
+                await Task.Delay(250);
             }
 
             await Task.WhenAll(tasks);
         }
 
-        private static async Task PurgeChannelAsync(SocketGuildChannel guildChannel, TimeSpan timespan, int mode, int messageCap)
+        private static async Task PurgeChannelAsync(AutopurgeRow row)
         {
             try
             {
-                await Task.Delay(1);
+                SocketGuild guild = _client.GetGuild(row.GuildId);
+                SocketTextChannel channel = guild.GetTextChannel(row.ChannelId);
 
-                SocketTextChannel channel = guildChannel as SocketTextChannel;
-                if (BotPermissions.IsMissingPermissions(channel,
-                    new[]
-                    {
-                        ChannelPermission.ManageMessages, ChannelPermission.ViewChannel,
-                        ChannelPermission.ReadMessageHistory
-                    }, out _)) return;
+                List<AutopurgeMessageRow> messagesToDelete = await Database.Data.Autopurge.GetAndDeleteDueMessagesAsync(row);
+                if(messagesToDelete.Count == 0) return;
 
-                List<IMessage> messages = (await channel.GetMessagesAsync(messageCap).FlattenAsync()).ToList();
-                bool exceedesCap = messages.Count == messageCap;
-                if (messages.Count == 0) return;
-                IMessage lastMessage = messages.OrderBy(x => x.Timestamp.UtcDateTime).First();
-
-
-                // These DateTimes represent the bounds for which messages should be deleted.
-                // DateTimes are confusing as heck and I think these are named the wrong way around but the logic works so ¯\_(ツ)_/¯
-                DateTime earliestTime = DateTime.UtcNow - timespan;
-                DateTime latestTime = DateTime.UtcNow - TimeSpan.FromDays(13.5);
-
-                messages.RemoveAll(x => x.CreatedAt.UtcDateTime > earliestTime);
-                messages.RemoveAll(x => x.CreatedAt.UtcDateTime < latestTime);
-                messages.RemoveAll(x => x.IsPinned);
-
-                // Only delete bot messages
-                if (mode == 1) messages.RemoveAll(x => !x.Author.IsBot);
-
-                // Only delete user messages
-                if (mode == 3) messages.RemoveAll(x => x.Author.IsBot);
-
-                if (exceedesCap)
-                    messages.Remove(lastMessage); // Will be deleted in the next check
-
-                await channel.DeleteMessagesAsync(messages);
-
-                if (messageCap == 200 /*tmp 4 premium only*/ && exceedesCap && mode == 0 && lastMessage.CreatedAt.UtcDateTime > latestTime)
-                {
-                    await Task.Delay(3000);
-                    // We must delete excess messages
-                    // Only do this if we are to delete all messages, not just bot messages
-                    // Only do this if the earliest message in the channel is deletable
-
-                    List<IMessage> excessMessages =
-                        (await channel.GetMessagesAsync(lastMessage.Id, Direction.Before).FlattenAsync()).ToList();
-
-                    excessMessages.Add(lastMessage);
-                    excessMessages.RemoveAll(x => x.CreatedAt.UtcDateTime < latestTime);
-                    excessMessages.RemoveAll(x => x.IsPinned);
-
-                    await channel.DeleteMessagesAsync(excessMessages);
-                }
+                await channel.DeleteMessagesAsync(messagesToDelete.Select(x => x.MessageId), new RequestOptions { RetryMode = RetryMode.AlwaysRetry });
             }
             catch (Exception e)
             {
@@ -151,58 +56,125 @@ namespace Utili.Features
             }
         }
 
-        private static int _purgeNumber;
-        private static async Task<List<AutopurgeRow>> GetRowsToPurgeAsync()
+        private static void Timer_Elapsed(object sender, ElapsedEventArgs e)
         {
-            List<AutopurgeRow> rows = await Database.Data.Autopurge.GetRowsAsync(enabledOnly: true);
-            List<PremiumRow> premiumRows = await Premium.GetRowsAsync();
-            rows = rows.Where(x => premiumRows.All(y => y.GuildId != x.GuildId)).ToList();
-
-            List<AutopurgeRow> rowsToPurge = new List<AutopurgeRow>();
-            for (int i = 0; i < 1; i++)
-            {
-                foreach (SocketGuild guild in _client.Guilds)
-                {
-                    List<AutopurgeRow> guildRows = rows.Where(x => x.GuildId == guild.Id && guild.TextChannels.Any(y => y.Id == x.ChannelId)).OrderBy(x => x.ChannelId).ToList();
-                    if (guildRows.Count > 0)
-                    {
-                        AutopurgeRow row = guildRows[_purgeNumber % guildRows.Count];
-                        if(rowsToPurge.All(x => x.ChannelId != row.ChannelId)) rowsToPurge.Add(row);
-                    }
-                }
-            }
-
-            _purgeNumber++;
-            if (_purgeNumber == int.MaxValue) _purgeNumber = 0;
-
-            return rowsToPurge;
+            _ = PurgeChannelsAsync();
         }
 
-        private static int _premiumPurgeNumber;
-        private static async Task<List<AutopurgeRow>> GetPremiumRowsToPurgeAsync()
+        public static async Task MessageReceived(SocketMessage message)
+        {
+            SocketTextChannel channel = message.Channel as SocketTextChannel;
+            SocketGuild guild = channel.Guild;
+
+            AutopurgeRow row = await Database.Data.Autopurge.GetRowAsync(guild.Id, channel.Id);
+            if(row.Mode == 2) return;
+
+            AutopurgeMessageRow messageRow = new AutopurgeMessageRow
+            {
+                GuildId = guild.Id,
+                ChannelId = channel.Id,
+                MessageId = message.Id,
+                Timestamp = message.Timestamp.UtcDateTime,
+                IsBot = message.Author.IsBot,
+                IsPinned = message.IsPinned
+            };
+            await Database.Data.Autopurge.SaveMessageAsync(messageRow);
+        }
+
+        public static async Task MessageEdited(SocketMessage message)
+        {
+            SocketTextChannel channel = message.Channel as SocketTextChannel;
+            SocketGuild guild = channel.Guild;
+
+            AutopurgeRow row = await Database.Data.Autopurge.GetRowAsync(guild.Id, channel.Id);
+            if(row.Mode == 2) return;
+
+            AutopurgeMessageRow messageRow = (await Database.Data.Autopurge.GetMessagesAsync(guild.Id, channel.Id, message.Id)).FirstOrDefault();
+            if(messageRow is null) return;
+
+            if (messageRow.IsPinned != message.IsPinned)
+            {
+                messageRow.IsPinned = message.IsPinned;
+                await Database.Data.Autopurge.SaveMessageAsync(messageRow);
+            }
+        }
+
+        private static async Task GetMessagesAsync()
         {
             List<AutopurgeRow> rows = await Database.Data.Autopurge.GetRowsAsync(enabledOnly: true);
-            List<PremiumRow> premiumRows = await Premium.GetRowsAsync();
-            rows = rows.Where(x => premiumRows.Any(y => y.GuildId == x.GuildId)).ToList();
+            rows.RemoveAll(x => _client.Guilds.All(y => y.Id != x.GuildId));
+            rows.RemoveAll(x => _client.GetGuild(x.GuildId).TextChannels.All(y => y.Id != x.ChannelId));
 
-            List<AutopurgeRow> rowsToPurge = new List<AutopurgeRow>();
-            for (int i = 0; i < 5; i++)
+            List<Task> tasks = new List<Task>();
+            foreach (AutopurgeRow row in rows)
             {
-                foreach (SocketGuild guild in _client.Guilds)
-                {
-                    List<AutopurgeRow> guildRows = rows.Where(x => x.GuildId == guild.Id && guild.TextChannels.Any(y => y.Id == x.ChannelId)).OrderBy(x => x.ChannelId).ToList();
-                    if (guildRows.Count > 0)
-                    {
-                        AutopurgeRow row = guildRows[_premiumPurgeNumber % guildRows.Count];
-                        if(rowsToPurge.All(x => x.ChannelId != row.ChannelId)) rowsToPurge.Add(row);
-                    }
-                }
-
-                _premiumPurgeNumber++;
-                if (_premiumPurgeNumber == int.MaxValue) _premiumPurgeNumber = 0;
+                tasks.Add(GetChannelMessagesAsync(row));
+                await Task.Delay(500);
             }
 
-            return rowsToPurge;
+            await Task.WhenAll(tasks);
+        }
+
+        private static async Task GetChannelMessagesAsync(AutopurgeRow row)
+        {
+            try
+            {
+                SocketGuild guild = _client.GetGuild(row.GuildId);
+                SocketTextChannel channel = guild.GetTextChannel(row.ChannelId);
+
+                List<AutopurgeMessageRow> messageRows = await Database.Data.Autopurge.GetMessagesAsync(guild.Id, channel.Id);
+
+                List<IMessage> messages = new List<IMessage>();
+                IMessage oldestMessage = null;
+
+                while (true)
+                {
+                    List<IMessage> fetchedMessages;
+                    if (oldestMessage is null)
+                        fetchedMessages = (await channel.GetMessagesAsync().FlattenAsync()).ToList();
+                    else
+                        fetchedMessages = (await channel.GetMessagesAsync(oldestMessage, Direction.Before).FlattenAsync()).ToList();
+
+                    if(fetchedMessages.Count == 0) break;
+                    oldestMessage = fetchedMessages.OrderBy(x => x.Timestamp.UtcDateTime).First();
+
+                    messages.AddRange(fetchedMessages.Where(x => x.Timestamp.UtcDateTime > DateTime.UtcNow.AddDays(-13.9)));
+
+                    if(messages.Count < 100 || oldestMessage.Timestamp.UtcDateTime < DateTime.UtcNow.AddDays(-13.9)) break;
+
+                    await Task.Delay(1000);
+                }
+                
+                foreach(IMessage message in messages)
+                {
+                    AutopurgeMessageRow messageRow = messageRows.FirstOrDefault(x => x.MessageId == message.Id);
+                    if(messageRow is not null)
+                    {
+                        if (messageRow.IsPinned != message.IsPinned)
+                        {
+                            messageRow.IsPinned = message.IsPinned;
+                            await Database.Data.Autopurge.SaveMessageAsync(messageRow);
+                        }
+                    }
+                    else
+                    {
+                        messageRow = new AutopurgeMessageRow
+                        {
+                            GuildId = guild.Id,
+                            ChannelId = channel.Id,
+                            MessageId = message.Id,
+                            Timestamp = message.Timestamp.UtcDateTime,
+                            IsBot = message.Author.IsBot,
+                            IsPinned = message.IsPinned
+                        };
+                        await Database.Data.Autopurge.SaveMessageAsync(messageRow);
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                _logger.ReportError("AutopurgeGet", e);
+            }
         }
     }
 }

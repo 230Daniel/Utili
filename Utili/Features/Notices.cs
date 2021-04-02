@@ -27,7 +27,7 @@ namespace Utili.Features
             _timer.Start();
         }
 
-        public static async Task MessageReceived(SocketCommandContext context, SocketMessage partialMessage)
+        public static async Task MessageReceived(SocketCommandContext context)
         {
             NoticesRow row = await Database.Data.Notices.GetRowAsync(context.Guild.Id, context.Channel.Id);
             if (!row.Enabled) return;

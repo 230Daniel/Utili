@@ -29,6 +29,8 @@ namespace Utili.Handlers
                     return;
                 }
 
+                _ = Features.Autopurge.MessageReceived(partialMessage);
+
                 SocketUserMessage message = partialMessage as SocketUserMessage;
                 SocketTextChannel channel = message.Channel as SocketTextChannel;
                 SocketGuild guild = channel.Guild;
@@ -68,8 +70,7 @@ namespace Utili.Handlers
                 _ = VoteChannels.MessageReceived(context);
                 _ = InactiveRole.UpdateUserAsync(context.Guild, context.User as SocketGuildUser);
                 _ = ChannelMirroring.MessageReceived(context);
-                _ = Notices.MessageReceived(context, partialMessage);
-
+                _ = Notices.MessageReceived(context);
             });
         }
 
@@ -77,10 +78,11 @@ namespace Utili.Handlers
         {
             _ = Task.Run(async () =>
             {
-                if (message.Author.IsBot || channel is SocketDMChannel) return;
+                if (channel is SocketDMChannel) return;
+
+                _ = Features.Autopurge.MessageEdited(message);
 
                 SocketTextChannel guildChannel = channel as SocketTextChannel;
-
                 SocketCommandContext context = new SocketCommandContext(Helper.GetShardForGuild(guildChannel.Guild), message as SocketUserMessage);
 
                 _ = MessageLogs.MessageEdited(context);

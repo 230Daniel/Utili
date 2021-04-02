@@ -143,7 +143,6 @@ namespace Utili
             _pingTest.Start();
             _dbPingTest.Start();
 
-            Autopurge.Start();
             VoiceLink.Start();
             VoiceRoles.Start();
             InactiveRole.Start();
