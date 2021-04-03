@@ -13,6 +13,7 @@ namespace Utili.Features
     internal static class Autopurge
     {
         static Timer _timer;
+        static List<ulong> _downloadingFor = new List<ulong>();
 
         public static void Start()
         {
@@ -59,6 +60,7 @@ namespace Utili.Features
         private static void Timer_Elapsed(object sender, ElapsedEventArgs e)
         {
             _ = PurgeChannelsAsync();
+            _ = GetNewChannelsMessagesAsync();
         }
 
         public static async Task MessageReceived(SocketMessage message)
@@ -101,6 +103,7 @@ namespace Utili.Features
 
         private static async Task GetMessagesAsync()
         {
+            await Task.Delay(1000);
             List<AutopurgeRow> rows = await Database.Data.Autopurge.GetRowsAsync(enabledOnly: true);
             rows.RemoveAll(x => _client.Guilds.All(y => y.Id != x.GuildId));
             rows.RemoveAll(x => _client.GetGuild(x.GuildId).TextChannels.All(y => y.Id != x.ChannelId));
@@ -108,6 +111,9 @@ namespace Utili.Features
             List<Task> tasks = new List<Task>();
             foreach (AutopurgeRow row in rows)
             {
+                while (tasks.Count(x => !x.IsCompleted) >= 50) 
+                    await Task.Delay(5000);
+
                 tasks.Add(GetChannelMessagesAsync(row));
                 await Task.Delay(500);
             }
@@ -115,14 +121,40 @@ namespace Utili.Features
             await Task.WhenAll(tasks);
         }
 
+        private static async Task GetNewChannelsMessagesAsync()
+        {
+            List<MiscRow> miscRows = await Misc.GetRowsAsync(type: "RequiresAutopurgeMessageDownload");
+            miscRows.RemoveAll(x => _client.Guilds.All(y => y.Id != x.GuildId));
+
+            foreach (MiscRow miscRow in miscRows)
+                _ = Misc.DeleteRowAsync(miscRow);
+
+            foreach (MiscRow miscRow in miscRows)
+            {
+                AutopurgeRow row = await Database.Data.Autopurge.GetRowAsync(miscRow.GuildId, ulong.Parse(miscRow.Value));
+                _ = GetChannelMessagesAsync(row);
+            }
+        }
+
         private static async Task GetChannelMessagesAsync(AutopurgeRow row)
         {
+            await Task.Delay(1);
+            
+            lock (_downloadingFor)
+            {
+                if (_downloadingFor.Contains(row.ChannelId)) return;
+                _downloadingFor.Add(row.ChannelId);
+            }
+
             try
             {
                 SocketGuild guild = _client.GetGuild(row.GuildId);
                 SocketTextChannel channel = guild.GetTextChannel(row.ChannelId);
 
-                List<AutopurgeMessageRow> messageRows = await Database.Data.Autopurge.GetMessagesAsync(guild.Id, channel.Id);
+                _logger.Log("Autopurge", $"Saving messages for {guild.Id}/{channel.Id}");
+
+                List<AutopurgeMessageRow> messageRows =
+                    await Database.Data.Autopurge.GetMessagesAsync(guild.Id, channel.Id);
 
                 List<IMessage> messages = new List<IMessage>();
                 IMessage oldestMessage = null;
@@ -133,22 +165,25 @@ namespace Utili.Features
                     if (oldestMessage is null)
                         fetchedMessages = (await channel.GetMessagesAsync().FlattenAsync()).ToList();
                     else
-                        fetchedMessages = (await channel.GetMessagesAsync(oldestMessage, Direction.Before).FlattenAsync()).ToList();
+                        fetchedMessages =
+                            (await channel.GetMessagesAsync(oldestMessage, Direction.Before).FlattenAsync()).ToList();
 
-                    if(fetchedMessages.Count == 0) break;
+                    if (fetchedMessages.Count == 0) break;
                     oldestMessage = fetchedMessages.OrderBy(x => x.Timestamp.UtcDateTime).First();
 
-                    messages.AddRange(fetchedMessages.Where(x => x.Timestamp.UtcDateTime > DateTime.UtcNow.AddDays(-13.9)));
+                    messages.AddRange(fetchedMessages.Where(x =>
+                        x.Timestamp.UtcDateTime > DateTime.UtcNow.AddDays(-13.9)));
 
-                    if(messages.Count < 100 || oldestMessage.Timestamp.UtcDateTime < DateTime.UtcNow.AddDays(-13.9)) break;
+                    if (messages.Count < 100 ||
+                        oldestMessage.Timestamp.UtcDateTime < DateTime.UtcNow.AddDays(-13.9)) break;
 
                     await Task.Delay(1000);
                 }
-                
-                foreach(IMessage message in messages)
+
+                foreach (IMessage message in messages)
                 {
                     AutopurgeMessageRow messageRow = messageRows.FirstOrDefault(x => x.MessageId == message.Id);
-                    if(messageRow is not null)
+                    if (messageRow is not null)
                     {
                         if (messageRow.IsPinned != message.IsPinned)
                         {
@@ -173,7 +208,14 @@ namespace Utili.Features
             }
             catch (Exception e)
             {
-                _logger.ReportError("AutopurgeGet", e);
+                _logger.ReportError("Autopurge", e);
+            }
+            finally
+            {
+                lock (_downloadingFor)
+                {
+                    _downloadingFor.Remove(row.ChannelId);
+                }
             }
         }
     }

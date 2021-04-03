@@ -35,9 +35,18 @@ namespace UtiliBackend.Controllers.Dashboard
                 else
                     row = await Database.Data.Autopurge.GetRowAsync(auth.Guild.Id, ulong.Parse(bodyRow.ChannelId));
 
+                bool isNew = row.Mode == 2 && bodyRow.Mode != 2;
+
                 row.Timespan = XmlConvert.ToTimeSpan(bodyRow.Timespan);
                 row.Mode = bodyRow.Mode;
+                
                 await row.SaveAsync();
+
+                if (isNew)
+                {
+                    MiscRow miscRow = new MiscRow(auth.Guild.Id, "RequiresAutopurgeMessageDownload", row.ChannelId.ToString());
+                    await miscRow.SaveAsync();
+                }
             }
 
             foreach (AutopurgeRow row in rows.Where(x => body.Rows.All(y => ulong.Parse(y.ChannelId) != x.ChannelId)))
