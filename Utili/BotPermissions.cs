@@ -89,6 +89,16 @@ namespace Utili
             return true;
         }
 
+        public static bool BotHasPermissions(this IGuildChannel channel, params ChannelPermission[] requiredPermissions)
+        {
+            SocketGuild guild = _client.GetGuild(channel.GuildId);
+            SocketGuildUser bot = guild.GetUser(_client.CurrentUser.Id);
+
+            List<ChannelPermission> permissions = bot.GetPermissions(channel).ToList();
+
+            return requiredPermissions.All(x => permissions.Contains(x));
+        }
+
         public static bool CanManageRole(SocketRole role)
         {
             SocketGuild guild = role.Guild;

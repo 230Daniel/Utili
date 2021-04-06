@@ -12,12 +12,14 @@ namespace Utili.Features
 {
     internal static class Autopurge
     {
+        static int _purgeNumber;
         static Timer _timer;
         static List<ulong> _downloadingFor = new List<ulong>();
 
         public static void Start()
         {
-            _timer = new Timer(5000);
+            _purgeNumber = 0;
+            _timer = new Timer(10000);
             _timer.Elapsed += Timer_Elapsed;
             _timer.Start();
             _ = GetMessagesAsync();
@@ -25,7 +27,9 @@ namespace Utili.Features
 
         private static async Task PurgeChannelsAsync()
         {
-            List<AutopurgeRow> rows = await Database.Data.Autopurge.GetRowsAsync(enabledOnly: true);
+            //List<AutopurgeRow> rows = await Database.Data.Autopurge.GetRowsAsync(enabledOnly: true);
+
+            List<AutopurgeRow> rows = await SelectRowsToPurgeAsync();
             rows.RemoveAll(x => _client.Guilds.All(y => y.Id != x.GuildId));
             rows.RemoveAll(x => _client.GetGuild(x.GuildId).TextChannels.All(y => y.Id != x.ChannelId));
 
@@ -39,12 +43,47 @@ namespace Utili.Features
             await Task.WhenAll(tasks);
         }
 
+        private static async Task<List<AutopurgeRow>> SelectRowsToPurgeAsync()
+        {
+            List<AutopurgeRow> rows = await Database.Data.Autopurge.GetRowsAsync(enabledOnly: true);
+            List<PremiumRow> premium = await Premium.GetRowsAsync();
+            List<AutopurgeRow> premiumRows = rows.Where(x => premium.Any(y => y.GuildId == x.GuildId)).ToList();
+            rows.RemoveAll(x => premium.Any(y => y.GuildId == x.GuildId));
+
+            List<AutopurgeRow> rowsToPurge = new List<AutopurgeRow>();
+
+            if (_purgeNumber % 3 == 0)
+            {
+                for (int i = 0; i < 1; i++)
+                {
+                    foreach (SocketGuild guild in _client.Guilds)
+                    {
+                        List<AutopurgeRow> guildRows = rows.Where(x => x.GuildId == guild.Id && guild.TextChannels.Any(y => y.Id == x.ChannelId)).OrderBy(x => x.ChannelId).ToList();
+                        if (guildRows.Count > 0)
+                        {
+                            AutopurgeRow row = guildRows[(_purgeNumber / 3) % guildRows.Count];
+                            if(rowsToPurge.All(x => x.ChannelId != row.ChannelId)) rowsToPurge.Add(row);
+                        }
+                    }
+                }
+            }
+
+            rowsToPurge.AddRange(premiumRows);
+
+            _purgeNumber++;
+            if (_purgeNumber == int.MaxValue) _purgeNumber = 0;
+
+            return rowsToPurge;
+        }
+
         private static async Task PurgeChannelAsync(AutopurgeRow row)
         {
             try
             {
                 SocketGuild guild = _client.GetGuild(row.GuildId);
                 SocketTextChannel channel = guild.GetTextChannel(row.ChannelId);
+
+                if(!channel.BotHasPermissions(ChannelPermission.ViewChannel, ChannelPermission.ReadMessageHistory, ChannelPermission.ManageMessages)) return;
 
                 List<AutopurgeMessageRow> messagesToDelete = await Database.Data.Autopurge.GetAndDeleteDueMessagesAsync(row);
                 if(messagesToDelete.Count == 0) return;
@@ -111,8 +150,8 @@ namespace Utili.Features
             List<Task> tasks = new List<Task>();
             foreach (AutopurgeRow row in rows)
             {
-                while (tasks.Count(x => !x.IsCompleted) >= 50) 
-                    await Task.Delay(5000);
+                while (tasks.Count(x => !x.IsCompleted) >= 10) 
+                    await Task.Delay(1000);
 
                 tasks.Add(GetChannelMessagesAsync(row));
                 await Task.Delay(500);
@@ -150,6 +189,8 @@ namespace Utili.Features
             {
                 SocketGuild guild = _client.GetGuild(row.GuildId);
                 SocketTextChannel channel = guild.GetTextChannel(row.ChannelId);
+
+                if(!channel.BotHasPermissions(ChannelPermission.ViewChannel, ChannelPermission.ReadMessageHistory)) return;
 
                 _logger.Log("Autopurge", $"Saving messages for {guild.Id}/{channel.Id}");
 
