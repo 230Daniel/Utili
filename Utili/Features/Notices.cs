@@ -106,7 +106,13 @@ namespace Utili.Features
             SocketGuild guild = _client.GetGuild(row.GuildId);
             SocketTextChannel channel = guild.GetTextChannel(row.ChannelId);
 
-            if(BotPermissions.IsMissingPermissions(channel, new [] { ChannelPermission.ViewChannel, ChannelPermission.ReadMessageHistory, ChannelPermission.ManageMessages }, out _)) return;
+            if(!channel.BotHasPermissions(
+                ChannelPermission.ViewChannel, 
+                ChannelPermission.ReadMessageHistory, 
+                ChannelPermission.ManageMessages, 
+                ChannelPermission.SendMessages,
+                ChannelPermission.EmbedLinks, 
+                ChannelPermission.AttachFiles)) return;
 
             try
             {

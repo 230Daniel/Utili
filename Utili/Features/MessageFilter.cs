@@ -15,10 +15,7 @@ namespace Utili.Features
     {
         public static async Task MessageReceived(SocketCommandContext context)
         {
-            if (BotPermissions.IsMissingPermissions(context.Channel, new[] {ChannelPermission.ManageMessages}, out _))
-            {
-                return;
-            }
+            if(!(context.Channel as IGuildChannel).BotHasPermissions(ChannelPermission.ViewChannel, ChannelPermission.ManageMessages)) return;
 
             if (context.User.Id == Program._client.CurrentUser.Id && context.Message.Embeds.Count > 0)
             {

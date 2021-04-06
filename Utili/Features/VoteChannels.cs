@@ -14,8 +14,7 @@ namespace Utili.Features
     {
         public static async Task MessageReceived(SocketCommandContext context)
         {
-            if (BotPermissions.IsMissingPermissions(context.Channel, new[] {ChannelPermission.AddReactions}, out _))
-                return;
+            if(!(context.Channel as IGuildChannel).BotHasPermissions(ChannelPermission.ViewChannel, ChannelPermission.ReadMessageHistory, ChannelPermission.AddReactions)) return;
 
             List<VoteChannelsRow> rows = await Database.Data.VoteChannels.GetRowsAsync(context.Guild.Id, context.Channel.Id);
             if (rows.Count == 0) return;
@@ -79,7 +78,7 @@ namespace Utili.Features
             channel ??= Context.Channel as ITextChannel;
 
             if (BotPermissions.IsMissingPermissions(channel,
-                new[] {ChannelPermission.AddReactions}, out string missingPermissions))
+                new[] {ChannelPermission.ViewChannel, ChannelPermission.ReadMessageHistory, ChannelPermission.AddReactions}, out string missingPermissions))
             {
                 await SendFailureAsync(Context.Channel, "Error",
                     $"I'm missing the following permissions: {missingPermissions}");

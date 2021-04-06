@@ -24,7 +24,10 @@ namespace Utili.Features
                 }
                 else
                 {
-                    await guild.GetTextChannel(joinMessage.Item1.ChannelId).SendMessageAsync(joinMessage.Item2, embed: joinMessage.Item3);
+                    ITextChannel channel = guild.GetTextChannel(joinMessage.Item1.ChannelId);
+                    if(!channel.BotHasPermissions(ChannelPermission.ViewChannel, ChannelPermission.SendMessages, ChannelPermission.EmbedLinks)) return;
+
+                    await channel.SendMessageAsync(joinMessage.Item2, embed: joinMessage.Item3);
                 }
             }
         }

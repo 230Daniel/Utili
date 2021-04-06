@@ -99,24 +99,24 @@ namespace Utili
             return requiredPermissions.All(x => permissions.Contains(x));
         }
 
+        public static bool BotHasPermissions(this SocketGuild guild, params GuildPermission[] requiredPermissions)
+        {
+            SocketGuildUser bot = guild.GetUser(_client.CurrentUser.Id);
+            List<GuildPermission> permissions = bot.GuildPermissions.ToList();
+
+            return requiredPermissions.All(x => permissions.Contains(x));
+        }
+
         public static bool CanManageRole(SocketRole role)
         {
             SocketGuild guild = role.Guild;
             SocketGuildUser bot = guild.GetUser(_client.CurrentUser.Id);
 
-            if (IsMissingPermissions(guild, new[] {GuildPermission.ManageRoles}, out _))
-            {
-                return false;
-            }
+            if (!guild.BotHasPermissions(GuildPermission.ManageRoles)) return false;
 
             int highestPossiblePosition = bot.Roles.Max(x => x.Position) - 1;
 
-            if (role.Position > highestPossiblePosition)
-            {
-                return false;
-            }
-
-            return true;
+            return role.Position <= highestPossiblePosition;
         }
     }
 }

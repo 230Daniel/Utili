@@ -74,12 +74,11 @@ namespace Utili.Features
             await Task.Delay(1);
 
             SocketGuild guild = voiceChannel.Guild;
-
-            bool missingVoiceChannelPerms = BotPermissions.IsMissingPermissions(voiceChannel, new[] {ChannelPermission.ViewChannel}, out _);
-            bool missingCategoryPerms = voiceChannel.Category is null ? BotPermissions.IsMissingPermissions(guild, new[] {GuildPermission.ViewChannel, GuildPermission.ManageChannels, GuildPermission.ManageRoles}, out _) :
-                BotPermissions.IsMissingPermissions(voiceChannel.Category, new[]{ChannelPermission.ViewChannel, ChannelPermission.ManageChannels, ChannelPermission.ManageRoles}, out _);
-
-            if(missingVoiceChannelPerms || missingCategoryPerms) return;
+            
+            if(!voiceChannel.BotHasPermissions(ChannelPermission.ViewChannel)) return;
+            if (voiceChannel.Category is not null)
+                if(!voiceChannel.Category.BotHasPermissions(ChannelPermission.ViewChannel, ChannelPermission.ManageChannels, ChannelPermission.ManageRoles)) return;
+            if(!guild.BotHasPermissions(GuildPermission.ViewChannel, GuildPermission.ManageChannels, GuildPermission.ManageRoles)) return;
 
             List<SocketGuildUser> connectedUsers =
                 guild.Users.Where(x => x.VoiceChannel is not null && x.VoiceChannel.Id == voiceChannel.Id).ToList();
@@ -123,29 +122,32 @@ namespace Utili.Features
                 textChannel = restTextChannel;
             }
 
-            foreach(Overwrite existingOverwrite in textChannel.PermissionOverwrites)
+            if(!textChannel.BotHasPermissions(ChannelPermission.ViewChannel, ChannelPermission.ManageChannels, ChannelPermission.ManageRoles)) return;
+
+            List<Overwrite> overwrites = textChannel.PermissionOverwrites.ToList();
+            bool overwritesChanged = false;
+
+            overwrites.RemoveAll(x =>
             {
-                if (existingOverwrite.TargetType == PermissionTarget.User && existingOverwrite.TargetId != _client.CurrentUser.Id)
+                if (x.TargetType == PermissionTarget.User && x.TargetId != _client.CurrentUser.Id)
                 {
-                    try
+                    SocketGuildUser existingUser = guild.GetUser(x.TargetId);
+                    if (existingUser?.VoiceChannel is null || existingUser.VoiceChannel.Id != voiceChannel.Id)
                     {
-                        SocketGuildUser existingUser = guild.GetUser(existingOverwrite.TargetId);
-                        if (existingUser?.VoiceChannel is null || existingUser.VoiceChannel.Id != voiceChannel.Id)
-                        {
-                            IUser user = (IUser) existingUser ?? await _rest.GetUserAsync(existingOverwrite.TargetId);
-                            await textChannel.RemovePermissionOverwriteAsync(user);
-                        }
+                        overwritesChanged = true;
+                        return true;
                     }
-                    catch {}
                 }
-            }
+                return false;
+            });
 
             foreach (SocketGuildUser connectedUser in connectedUsers)
             {
                 if (!textChannel.GetPermissionOverwrite(connectedUser).HasValue)
                 {
-                    await textChannel.AddPermissionOverwriteAsync(connectedUser,
-                        new OverwritePermissions(viewChannel: PermValue.Allow));
+                    overwritesChanged = true;
+                    overwrites.Add(new Overwrite(connectedUser.Id, PermissionTarget.User,
+                        new OverwritePermissions(viewChannel: PermValue.Allow)));
                 }
             }
 
@@ -153,8 +155,14 @@ namespace Utili.Features
 
             if (!everyonePermissions.HasValue || everyonePermissions.Value.ViewChannel != PermValue.Deny)
             {
-                await textChannel.AddPermissionOverwriteAsync(guild.EveryoneRole,
-                    new OverwritePermissions(viewChannel: PermValue.Deny));
+                overwritesChanged = true;
+                overwrites.Add(new Overwrite(guild.EveryoneRole.Id, PermissionTarget.Role,
+                    new OverwritePermissions(viewChannel: PermValue.Deny)));
+            }
+
+            if (overwritesChanged)
+            {
+                await textChannel.ModifyAsync(x => x.PermissionOverwrites = overwrites);
             }
         }
     }

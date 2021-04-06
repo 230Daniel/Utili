@@ -80,10 +80,7 @@ namespace Utili.Features
             SocketRole inactiveRole = guild.GetRole(row.RoleId);
             if(inactiveRole is null) return;
 
-            if (!BotPermissions.CanManageRole(inactiveRole))
-            {
-                return;
-            }
+            if (!BotPermissions.CanManageRole(inactiveRole)) return;
 
             bool premium = await Premium.IsGuildPremiumAsync(guild.Id);
 
@@ -113,7 +110,8 @@ namespace Utili.Features
                 {
                     if (premium && row.AutoKick && lastAction <= minimumKickLastAction)
                     {
-                        await user.KickAsync();
+                        if (guild.BotHasPermissions(GuildPermission.KickMembers))
+                            await user.KickAsync();
                         await Task.Delay(500);
                         continue;
                     }

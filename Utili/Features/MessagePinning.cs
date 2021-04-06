@@ -45,7 +45,7 @@ namespace Utili.Features
             }
             else
             {
-                if (BotPermissions.IsMissingPermissions(channel, new[] {ChannelPermission.ManageWebhooks}, out string missingPermissions))
+                if (BotPermissions.IsMissingPermissions(channel, new[] {ChannelPermission.ViewChannel, ChannelPermission.ManageWebhooks}, out string missingPermissions))
                 {
                     await SendFailureAsync(Context.Channel, "Error",
                         $"I'm missing the following permissions: {missingPermissions}");

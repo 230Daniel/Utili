@@ -44,7 +44,7 @@ namespace Utili.Features
                 }
             }
 
-            foreach (ulong roleId in row.JoinRoles)
+            foreach (ulong roleId in row.JoinRoles.Take(5))
             {
                 SocketRole role = guild.GetRole(roleId);
                 if (role is not null && BotPermissions.CanManageRole(role))
@@ -57,7 +57,7 @@ namespace Utili.Features
 
         private static void PendingRolesTimer_Elapsed(object sender, ElapsedEventArgs e)
         {
-            GivePendingRolesAsync().GetAwaiter().GetResult();
+            _ = GivePendingRolesAsync();
         }
 
         private static async Task GivePendingRolesAsync()
@@ -77,7 +77,7 @@ namespace Utili.Features
 
                     RestGuildUser user = await _rest.GetGuildUserAsync(guild.Id, ulong.Parse(pendingRow.Value.Split("///")[1]));
                     
-                    foreach (ulong roleId in row.JoinRoles)
+                    foreach (ulong roleId in row.JoinRoles.Take(5))
                     {
                         SocketRole role = guild.GetRole(roleId);
                         if (role is not null && BotPermissions.CanManageRole(role))

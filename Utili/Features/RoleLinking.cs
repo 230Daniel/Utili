@@ -46,20 +46,22 @@ namespace Utili.Features
                 _actions.AddRange(rolesToRemove.Select(x => new RoleLinkAction(guild.Id, after.Id, x, RoleLinkActionType.Removed)));
             }
 
-            foreach (ulong role in rolesToAdd)
+            foreach (ulong roleId in rolesToAdd)
             {
                 try
                 {
-                    await after.AddRoleAsync(guild.GetRole(role));
+                    SocketRole role = guild.GetRole(roleId);
+                    if(BotPermissions.CanManageRole(role)) await after.AddRoleAsync(role);
                     await Task.Delay(1000);
                 }
                 catch { }
             }
-            foreach (ulong role in rolesToRemove)
+            foreach (ulong roleId in rolesToRemove)
             {
                 try
                 {
-                    await after.RemoveRoleAsync(guild.GetRole(role));
+                    SocketRole role = guild.GetRole(roleId);
+                    if(BotPermissions.CanManageRole(role)) await after.RemoveRoleAsync(role);
                     await Task.Delay(1000);
                 }
                 catch { }
