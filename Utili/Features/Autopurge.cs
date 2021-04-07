@@ -80,6 +80,9 @@ namespace Utili.Features
         {
             try
             {
+                row = await Database.Data.Autopurge.GetRowAsync(row.GuildId, row.ChannelId);
+                if(row.Mode == 2) return;
+
                 SocketGuild guild = _client.GetGuild(row.GuildId);
                 SocketTextChannel channel = guild.GetTextChannel(row.ChannelId);
 
@@ -92,7 +95,7 @@ namespace Utili.Features
             }
             catch (Exception e)
             {
-                _logger.ReportError("AutopurgeCnl", e);
+                _logger.ReportError("Autopurge", e);
             }
         }
 
@@ -142,10 +145,12 @@ namespace Utili.Features
 
         private static async Task GetMessagesAsync()
         {
-            await Task.Delay(1000);
+            await Task.Delay(30000);
             List<AutopurgeRow> rows = await Database.Data.Autopurge.GetRowsAsync(enabledOnly: true);
             rows.RemoveAll(x => _client.Guilds.All(y => y.Id != x.GuildId));
             rows.RemoveAll(x => _client.GetGuild(x.GuildId).TextChannels.All(y => y.Id != x.ChannelId));
+
+            _logger.Log("AutopurgeG", $"Started downloading messages for {rows.Count} channels");
 
             List<Task> tasks = new List<Task>();
             foreach (AutopurgeRow row in rows)
@@ -154,10 +159,12 @@ namespace Utili.Features
                     await Task.Delay(1000);
 
                 tasks.Add(GetChannelMessagesAsync(row));
-                await Task.Delay(500);
+                await Task.Delay(250);
             }
 
             await Task.WhenAll(tasks);
+
+            _logger.Log("AutopurgeG", $"Finished downloading messages");
         }
 
         private static async Task GetNewChannelsMessagesAsync()
@@ -191,8 +198,6 @@ namespace Utili.Features
                 SocketTextChannel channel = guild.GetTextChannel(row.ChannelId);
 
                 if(!channel.BotHasPermissions(ChannelPermission.ViewChannel, ChannelPermission.ReadMessageHistory)) return;
-
-                _logger.Log("Autopurge", $"Saving messages for {guild.Id}/{channel.Id}");
 
                 List<AutopurgeMessageRow> messageRows =
                     await Database.Data.Autopurge.GetMessagesAsync(guild.Id, channel.Id);
@@ -243,13 +248,13 @@ namespace Utili.Features
                             IsBot = message.Author.IsBot,
                             IsPinned = message.IsPinned
                         };
-                        await Database.Data.Autopurge.SaveMessageAsync(messageRow);
+                        try { await Database.Data.Autopurge.SaveMessageAsync(messageRow); } catch { }
                     }
                 }
             }
             catch (Exception e)
             {
-                _logger.ReportError("Autopurge", e);
+                _logger.ReportError("AutopurgeG", e);
             }
             finally
             {
