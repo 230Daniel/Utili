@@ -164,7 +164,7 @@ namespace Utili.Features
 
             await Task.WhenAll(tasks);
 
-            _logger.Log("AutopurgeG", $"Finished downloading messages");
+            _logger.Log("AutopurgeG", "Finished downloading messages");
         }
 
         private static async Task GetNewChannelsMessagesAsync()
