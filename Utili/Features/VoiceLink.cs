@@ -76,9 +76,9 @@ namespace Utili.Features
             SocketGuild guild = voiceChannel.Guild;
             
             if(!voiceChannel.BotHasPermissions(ChannelPermission.ViewChannel)) return;
-            if (voiceChannel.Category is not null)
-                if(!voiceChannel.Category.BotHasPermissions(ChannelPermission.ViewChannel, ChannelPermission.ManageChannels, ChannelPermission.ManageRoles)) return;
-            if(!guild.BotHasPermissions(GuildPermission.ViewChannel, GuildPermission.ManageChannels, GuildPermission.ManageRoles)) return;
+            if (voiceChannel.Category is not null && !voiceChannel.Category.BotHasPermissions(ChannelPermission.ViewChannel, ChannelPermission.ManageChannels, ChannelPermission.ManageRoles)) return;
+            if (voiceChannel.Category is null && !guild.BotHasPermissions(GuildPermission.ViewChannel, GuildPermission.ManageChannels, GuildPermission.ManageRoles)) return;
+
 
             List<SocketGuildUser> connectedUsers =
                 guild.Users.Where(x => x.VoiceChannel is not null && x.VoiceChannel.Id == voiceChannel.Id).ToList();
@@ -95,7 +95,7 @@ namespace Utili.Features
 
             if (connectedUsers.Count(x => !x.IsBot) == 0 && metaRow.DeleteChannels)
             {
-                if(textChannel is null) return;
+                if(textChannel is null || !textChannel.BotHasPermissions(ChannelPermission.ViewChannel, ChannelPermission.ManageChannels, ChannelPermission.ManageRoles)) return;
                 await textChannel.DeleteAsync();
                 channelRow.TextChannelId = 0;
                 await Database.Data.VoiceLink.SaveChannelRowAsync(channelRow);
@@ -121,8 +121,10 @@ namespace Utili.Features
                 await Database.Data.VoiceLink.SaveChannelRowAsync(channelRow);
                 textChannel = restTextChannel;
             }
-
-            if(!textChannel.BotHasPermissions(ChannelPermission.ViewChannel, ChannelPermission.ManageChannels, ChannelPermission.ManageRoles)) return;
+            else
+            {
+                if(!textChannel.BotHasPermissions(ChannelPermission.ViewChannel, ChannelPermission.ManageChannels, ChannelPermission.ManageRoles)) return;
+            }
 
             List<Overwrite> overwrites = textChannel.PermissionOverwrites.ToList();
             bool overwritesChanged = false;
