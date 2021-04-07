@@ -30,11 +30,40 @@ namespace Utili.Commands
         [Command("Help"), Alias("Commands")]
         public async Task Help()
         {
-            string help = string.Concat(
-                $"[Commands](https://{_config.Domain}/commands)\n",
-                $"[Dashboard](https://{_config.Domain}/dashboard/{Context.Guild.Id}/core)\n");
+            string baseUrl = $"https://{_config.Domain}/dashboard/{Context.Guild.Id}";
+            (string, string)[] fields = {
+                ("**Core**", $"[Command List](https://{_config.Domain}/commands)\n" +
+                             $"[Core Settings]({baseUrl})"),
 
-            await SendInfoAsync(Context.Channel, "Utili", help);
+                ("**Channels**", $"[Autopurge]({baseUrl}/autopurge)\n" +
+                                 $"[Channel Mirroring]({baseUrl}/channelmirroring)\n" +
+                                 $"[Sticky Notices]({baseUrl}/notices)"),
+
+                ("**Messages**", $"[Message Filter]({baseUrl}/messagefilter)\n" +
+                                 $"[Message Logging]({baseUrl}/messagelogs)\n" +
+                                 $"[Message Pinning]({baseUrl}/messagepinning)\n" +
+                                 $"[Message Voting]({baseUrl}/votechannels)"),
+
+                ("**Users**", $"[Inactive Role]({baseUrl}/inactiverole)\n" +
+                              $"[Join Message]({baseUrl}/joinmessage)\n" +
+                              $"[Reputation]({baseUrl}/reputation)"),
+
+                ("**Roles**", $"[Join Roles]({baseUrl}/joinroles)\n" +
+                              $"[Role Linking]({baseUrl}/rolelinking)\n" +
+                              $"[Role Persist]({baseUrl}/rolepersist)"),
+
+                ("**Voice Channels**", $"[Voice Link]({baseUrl}/voicelink)\n" +
+                                       $"[Voice Roles]({baseUrl}/voiceroles)")
+            };
+
+            Embed embed = GenerateEmbed(
+                embedType: MessageSender.EmbedType.Info, 
+                title: "Utili",
+                content: $"You can configure Utili on the [dashboard]({baseUrl}).\n" +
+                         $"If you need help, you should [contact us](https://{_config.Domain}/contact).\n⠀",
+                fields: fields);
+
+            await Context.Channel.SendMessageAsync(embed: embed);
         }
 
         [Command("Ping"), Alias("Lag")]
