@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Text;
-using Discord;
-using Discord.WebSocket;
+using Disqord;
 
 namespace Utili
 {
@@ -22,19 +21,12 @@ namespace Utili
             };
         }
 
-        public static DiscordSocketClient GetShardForGuild(IGuild guild)
+        public static IEmoji GetEmoji(string emojiString, IGuild guild)
         {
-            return Program._oldClient.GetShardFor(guild);
-        }
+            if (guild.Emojis.Values.Any(x => x.Name == emojiString || $":{x.Name}:" == emojiString))
+                return guild.Emojis.Values.First(x => x.Name == emojiString || $":{x.Name}:" == emojiString);
 
-        public static IEmote GetEmote(string emoteString, SocketGuild guild)
-        {
-            if (Emote.TryParse(emoteString, out Emote emote))
-                return emote;
-            if (guild.Emotes.Any(x => x.Name == emoteString || $":{x.Name}:" == emoteString))
-                return guild.Emotes.First(x => x.Name == emoteString || $":{x.Name}:" == emoteString);
-
-            return new Emoji(emoteString);
+            return new LocalEmoji(emojiString);
         }
 
         public static bool RequiresUpdate(SocketVoiceState before, SocketVoiceState after)

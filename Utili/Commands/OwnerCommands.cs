@@ -2,22 +2,23 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Database.Data;
-using Discord;
-using Discord.Commands;
-using Discord.Rest;
-using Discord.WebSocket;
+using Disqord;
+using Disqord.Bot;
+using Disqord.Rest;
+using Utili.Extensions;
 using static Utili.Program;
-using static Utili.MessageSender;
+using Qmmands;
 
 namespace Utili.Commands
 {
-    public class OwnerCommands : ModuleBase<SocketCommandContext>
+    public class OwnerCommands : DiscordGuildModuleBase
     {
-        [Command("UserInfo")] [Permission(Perm.BotOwner)]
+        [Command("UserInfo"), RequireBotOwner]
         public async Task UserInfo(ulong userId)
         {
             UserRow row = await Users.GetRowAsync(userId);
-            RestUser user = await _oldRest.GetUserAsync(userId);
+            IUser user = await Context.Bot.FetchUserAsync(userId);
+
             List<SubscriptionsRow> subscriptions = await Subscriptions.GetRowsAsync(userId: userId);
 
             string content = $"Id: {user?.Id}\n" +
@@ -26,17 +27,14 @@ namespace Utili.Commands
                              $"Subscriptions: {subscriptions.Count}\n" +
                              $"Premium slots: {subscriptions.Sum(x => x.Slots)}";
 
-            EmbedBuilder embed = GenerateEmbed(
-                MessageSender.EmbedType.Success,
-                user?.ToString(),
-                content).ToEmbedBuilder();
-            embed.ThumbnailUrl = user?.GetAvatarUrl() ?? user?.GetDefaultAvatarUrl();
+            LocalEmbedBuilder embed = Utils.MessageUtils.CreateEmbed(Utils.EmbedType.Info, user?.ToString(), content);
+            embed.WithThumbnailUrl(user.GetAvatarUrl());
 
-            await Context.User.SendMessageAsync(embed: embed.Build());
-            await SendSuccessAsync(Context.Channel, "User info sent", $"Information about {user} was sent in a direct message");
+            await Context.Author.SendMessageAsync(new LocalMessageBuilder().WithEmbed(embed).Build());
+            await Context.Channel.SendSuccessAsync("User info sent", $"Information about {user} was sent in a direct message");
         }
 
-        [Command("GuildInfo")] [Permission(Perm.BotOwner)]
+        [Command("GuildInfo"), RequireBotOwner]
         public async Task GuildInfo(ulong guildId)
         {
             RestGuild guild = await _oldRest.GetGuildAsync(guildId, true);
@@ -48,54 +46,44 @@ namespace Utili.Commands
                              $"Created: {guild.CreatedAt.UtcDateTime} UTC\n" +
                              $"Premium: {premium.ToString().ToLower()}";
 
-            EmbedBuilder embed = GenerateEmbed(
-                MessageSender.EmbedType.Success,
-                guild.ToString(),
-                content).ToEmbedBuilder();
-            embed.ThumbnailUrl = guild.IconUrl;
+            LocalEmbedBuilder embed = Utils.MessageUtils.CreateEmbed(Utils.EmbedType.Info, guild.ToString(), content);
+            embed.WithThumbnailUrl(guild.IconUrl);
 
-            await Context.User.SendMessageAsync(embed: embed.Build());
-            await SendSuccessAsync(Context.Channel, "Guild info sent", $"Information about {guild} was sent in a direct message");
+            await Context.Author.SendMessageAsync(new LocalMessageBuilder().WithEmbed(embed).Build());
+            await Context.Channel.SendSuccessAsync("Guild info sent", $"Information about {guild} was sent in a direct message");
         }
 
-
-        [Command("Authorise")] [Permission(Perm.BotOwner)]
+        [Command("Authorise"), RequireBotOwner]
         public async Task Authorise(ulong guildId, ulong userId)
         {
-            RestGuild guild = null;
-            RestGuildUser user = null;
+            IGuild guild = null;
+            IMember member = null;
             try
             {
-                guild = await _oldRest.GetGuildAsync(guildId);
-                user = await guild.GetUserAsync(userId);
+                guild = await Context.Bot.FetchGuildAsync(guildId);
+                member = await guild.FetchMemberAsync(userId);
             }
             catch
             {
-                if(guild is null) await SendFailureAsync(Context.Channel, "Error", "I'm not in that server", supportLink: false);
-                else if(user is null) await SendFailureAsync(Context.Channel, "Not authorised", $"The user is not a member of {guild}", supportLink: false);
+                if(guild is null) await Context.Channel.SendFailureAsync("Error", "I'm not in that server", false);
+                else if(member is null) await Context.Channel.SendFailureAsync("Not authorised", $"The user is not a member of {guild}", false);
                 return;
             }
 
-            if (guild.OwnerId == userId) await SendSuccessAsync(Context.Channel, "Authorised", $"{user} is the owner of {guild}");
-            else if (user.GuildPermissions.Administrator) await SendSuccessAsync(Context.Channel, "Authorised", $"{user} an administrator of {guild}");
-            else if (user.GuildPermissions.ManageGuild) await SendSuccessAsync(Context.Channel, "Authorised", $"{user} has the manage server permission in {guild}");
-            else await SendFailureAsync(Context.Channel, "Not authorised", $"{user} does not have the manage server permission in {guild}", supportLink: false);
+            IEnumerable<IRole> roles = member.RoleIds.Select(x => guild.Roles.First(y => y.Key == x).Value);
+            GuildPermissions perms = Disqord.Discord.Permissions.CalculatePermissions(guild, member, roles);
+
+            if (guild.OwnerId == userId) await Context.Channel.SendSuccessAsync("Authorised", $"{member} is the owner of {guild}");
+            else if (perms.Administrator) await Context.Channel.SendSuccessAsync("Authorised", $"{member} an administrator of {guild}");
+            else if (perms.ManageGuild) await Context.Channel.SendSuccessAsync("Authorised", $"{member} has the manage server permission in {guild}");
+            else await Context.Channel.SendFailureAsync("Not authorised", $"{member} does not have the manage server permission in {guild}", false);
         }
 
-        [Command("SimulateCrash")]
-        [Permission(Perm.BotOwner)]
-        public async Task SimulateCrash()
-        {
-            DiscordSocketClient shard = _oldClient.GetShard(0);
-            await shard.StopAsync();
-        }
-
-        [Command("Restart")]
-        [Permission(Perm.BotOwner)]
+        [Command("Restart"), RequireBotOwner]
         public async Task Restart()
         {
-            await SendSuccessAsync(Context.Channel, "Restarting");
-            _logger.Log("Command", $"Restart Requested by {Context.User.Username}#{Context.User.Discriminator} - Killing process 10 seconds.", LogSeverity.Crit);
+            await Context.Channel.SendSuccessAsync("Restarting");
+            _logger.Log("Command", $"Restart Requested by {Context.Author} - Killing process 10 seconds.", LogSeverity.Crit);
             await Task.Delay(10000);
             Monitoring.Restart();
         }

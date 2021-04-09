@@ -13,7 +13,7 @@ using Discord.WebSocket;
 
 namespace Utili.Features
 {
-    public class MessagePinningCommands : ModuleBase<SocketCommandContext>
+    public class MessagePinningCommands : DiscordGuildModuleBase
     {
         private async Task Pin(ulong messageId, SocketTextChannel pinChannel, SocketTextChannel channel)
         {
@@ -22,7 +22,7 @@ namespace Utili.Features
 
             if (message is null)
             {
-                await SendFailureAsync(Context.Channel, "Error",
+                await Context.Channel.SendFailureAsync("Error",
                     $"No message was found in <#{Context.Channel.Id}> with ID {messageId}\n[How do I get a message ID?](https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID-)");
                 return;
             }
@@ -35,19 +35,19 @@ namespace Utili.Features
 
             if (pinChannel is null && row.Pin)
             {
-                await SendSuccessAsync(Context.Channel, "Message pinned",
+                await Context.Channel.SendSuccessAsync("Message pinned",
                     "Set a pin channel on the dashboard or specify one in the command if you want the message to be copied to another channel as well.");
             }
             else if (pinChannel is null && !row.Pin)
             {
-                await SendFailureAsync(Context.Channel, "Error",
+                await Context.Channel.SendFailureAsync("Error",
                     "Pinning is not enabled on this server.");
             }
             else
             {
                 if (BotPermissions.IsMissingPermissions(channel, new[] {ChannelPermission.ViewChannel, ChannelPermission.ManageWebhooks}, out string missingPermissions))
                 {
-                    await SendFailureAsync(Context.Channel, "Error",
+                    await Context.Channel.SendFailureAsync("Error",
                         $"I'm missing the following permissions: {missingPermissions}");
                     return;
                 }
@@ -88,7 +88,7 @@ namespace Utili.Features
                     stream.Close();
                 }
 
-                await SendSuccessAsync(Context.Channel, "Message pinned",
+                await Context.Channel.SendSuccessAsync("Message pinned",
                     $"The message was sent to {pinChannel.Mention}");
             }
         }

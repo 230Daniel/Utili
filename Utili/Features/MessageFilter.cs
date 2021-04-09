@@ -46,7 +46,7 @@ namespace Utili.Features
                 {
                     string deletionReason = $"Only messages {allowedTypes} are allowed in <#{context.Channel.Id}>";
 
-                    RestUserMessage sentMessage = await SendFailureAsync(context.Channel, "Message deleted", deletionReason, supportLink: false);
+                    RestUserMessage sentMessage = await Context.Channel.SendFailureAsync("Message deleted", deletionReason, supportLink: false);
 
                     await Task.Delay(5000);
 

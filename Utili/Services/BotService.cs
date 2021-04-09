@@ -8,8 +8,13 @@ namespace Utili.Services
 {
     public class BotService : DiscordClientService
     {
+        public static DiscordClientBase Client { get; protected set; }
+
         public BotService(ILogger<BotService> logger, DiscordClientBase client)
-            : base(logger, client) { }
+            : base(logger, client)
+        {
+            Client = client;
+        }
 
         protected override async Task ExecuteAsync(CancellationToken cancellationToken)
         {

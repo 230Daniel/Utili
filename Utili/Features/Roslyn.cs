@@ -50,7 +50,7 @@ namespace Utili.Features
         }
     }
 
-    public class RoslynCommands : ModuleBase<SocketCommandContext>
+    public class RoslynCommands : DiscordGuildModuleBase
     {
         [Command("Evaluate"), Alias("Eval", "e"), Permission(Perm.BotOwner), Cooldown(5)]
         public async Task Evaluate([Remainder] string code)
@@ -61,11 +61,11 @@ namespace Utili.Features
 
             if (result.Success)
             {
-                await SendSuccessAsync(Context.Channel, "Success", result.Result.ToString());
+                await Context.Channel.SendSuccessAsync("Success", result.Result.ToString());
             }
             else
             {
-                await SendFailureAsync(Context.Channel, "Error", result.Exception.Message);
+                await Context.Channel.SendFailureAsync("Error", result.Exception.Message);
             }
         }
     }

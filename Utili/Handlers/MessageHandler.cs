@@ -54,7 +54,7 @@ namespace Utili.Handlers
                         {
                             string errorReason = GetCommandErrorReason(result);
 
-                            if (!string.IsNullOrEmpty(errorReason)) await SendFailureAsync(context.Channel, "Error", errorReason);
+                            if (!string.IsNullOrEmpty(errorReason)) await Context.Channel.SendFailureAsync("Error", errorReason);
                             else logCommand = false;
                         }
 

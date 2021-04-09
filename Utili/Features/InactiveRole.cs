@@ -157,7 +157,7 @@ namespace Utili.Features
     }
 
     [Group("Inactive"), Alias("InactiveRole")]
-    public class InactiveRoleCommands : ModuleBase<SocketCommandContext>
+    public class InactiveRoleCommands : DiscordGuildModuleBase
     {
         [Command("List")]
         public async Task List(int page = 1)
@@ -165,7 +165,7 @@ namespace Utili.Features
             InactiveRoleRow row = await Database.Data.InactiveRole.GetRowAsync(Context.Guild.Id);
             if (Context.Guild.Roles.All(x => x.Id != row.RoleId))
             {
-                await SendFailureAsync(Context.Channel, "Error", "This server does not have an inactive role set");
+                await Context.Channel.SendFailureAsync("Error", "This server does not have an inactive role set");
                 return; 
             }
 
@@ -179,7 +179,7 @@ namespace Utili.Features
             users = users.Skip((page - 1) * 50).Take(50).ToList();
             if ((page < 1 || page > totalPages) && totalPages != 0)
             {
-                await SendFailureAsync(Context.Channel, "Error", "Invalid page number");
+                await Context.Channel.SendFailureAsync("Error", "Invalid page number");
                 return; 
             }
             if (totalPages == 0) page = 0;
@@ -197,20 +197,20 @@ namespace Utili.Features
         {
             if (_kickingIn.Contains(Context.Guild.Id))
             {
-                await SendFailureAsync(Context.Channel, "Error", "A large operation is already taking place in this server, please wait before it has completed before starting another.");
+                await Context.Channel.SendFailureAsync("Error", "A large operation is already taking place in this server, please wait before it has completed before starting another.");
                 return; 
             }
 
             if (BotPermissions.IsMissingPermissions(Context.Guild, new[] {GuildPermission.KickMembers}, out string missingPermissions))
             {
-                await SendFailureAsync(Context.Channel, "Error", $"I'm missing the following permissions: {missingPermissions}");
+                await Context.Channel.SendFailureAsync("Error", $"I'm missing the following permissions: {missingPermissions}");
                 return;
             }
 
             InactiveRoleRow row = await Database.Data.InactiveRole.GetRowAsync(Context.Guild.Id);
             if (Context.Guild.Roles.All(x => x.Id != row.RoleId))
             {
-                await SendFailureAsync(Context.Channel, "Error", "This server does not have an inactive role set");
+                await Context.Channel.SendFailureAsync("Error", "This server does not have an inactive role set");
                 return; 
             }
 
@@ -229,7 +229,7 @@ namespace Utili.Features
                 return;
             }
 
-            await SendSuccessAsync(Context.Channel, $"Kicking {users.Count} inactive users", $"This operation will take {TimeSpan.FromSeconds(users.Count * 1.2).ToLongString()}.");
+            await Context.Channel.SendSuccessAsync($"Kicking {users.Count} inactive users", $"This operation will take {TimeSpan.FromSeconds(users.Count * 1.2).ToLongString()}.");
 
             foreach (SocketGuildUser user in users)
             {
@@ -237,7 +237,7 @@ namespace Utili.Features
                 await Task.Delay(1200);
             }
 
-            await SendSuccessAsync(Context.Channel, $"Kicked {users.Count} inactive users", "The operation ran successfully.");
+            await Context.Channel.SendSuccessAsync($"Kicked {users.Count} inactive users", "The operation ran successfully.");
 
             _kickingIn.Remove(Context.Guild.Id);
         }

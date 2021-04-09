@@ -1,8 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace Utili
+namespace Utili.Extensions
 {
-    internal static class Extensions
+    static class TimeSpanExtensions
     {
         public static string ToLongString (this TimeSpan span)
         {

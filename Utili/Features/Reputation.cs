@@ -6,8 +6,12 @@ using Database.Data;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using Disqord.Bot;
+using Qmmands;
 using Utili.Commands;
+using Utili.Extensions;
 using Utili.Handlers;
+using Utili.Implementations;
 using static Utili.MessageSender;
 using static Utili.Program;
 
@@ -47,10 +51,10 @@ namespace Utili.Features
         }
     }
 
-    [Group("Reputation"), Alias("Rep")]
-    public class ReputationCommands : ModuleBase<SocketCommandContext>
+    [Discord.Commands.Group("Reputation"), Alias("Rep")]
+    public class ReputationCommands : DiscordGuildModuleBase
     {
-        [Command("")]
+        [Discord.Commands.Command("")]
         public async Task Reputation(IUser user = null)
         {
             user ??= Context.User;
@@ -65,7 +69,7 @@ namespace Utili.Features
             await SendInfoAsync(Context.Channel, null, $"{user.Mention}'s reputation: **{row.Reputation}**", colour: colour);
         }
 
-        [Command("Leaderboard"), Alias("Top"), Cooldown(3)]
+        [Discord.Commands.Command("Leaderboard"), Alias("Top"), DefaultCooldown(1, 5)]
         public async Task Leaderboard()
         {
             await Context.Guild.DownloadAndKeepUsersAsync(TimeSpan.FromMinutes(15));
@@ -90,7 +94,7 @@ namespace Utili.Features
             await SendInfoAsync(Context.Channel, "Reputation Leaderboard", content);
         }
 
-        [Command("InverseLeaderboard"), Alias("Bottom"), Cooldown(10)]
+        [Discord.Commands.Command("InverseLeaderboard"), Alias("Bottom"), Cooldown(10)]
         public async Task InvserseLeaderboard()
         {
             await Context.Guild.DownloadAndKeepUsersAsync(TimeSpan.FromMinutes(15));
@@ -115,31 +119,31 @@ namespace Utili.Features
             await SendInfoAsync(Context.Channel, "Inverse Reputation Leaderboard", content);
         }
 
-        [Command("Give"), Permission(Perm.ManageGuild), Cooldown(2)]
+        [Discord.Commands.Command("Give"), Permission(Perm.ManageGuild), Cooldown(2)]
         public async Task Give(IUser user, ulong change)
         {
             await Database.Data.Reputation.AlterUserReputationAsync(Context.Guild.Id, user.Id, (long)change);
-            await SendSuccessAsync(Context.Channel, "Reputation given", $"Gave {change} reputation to {user.Mention}");
+            await Context.Channel.SendSuccessAsync("Reputation given", $"Gave {change} reputation to {user.Mention}");
         }
 
-        [Command("Take"), Permission(Perm.ManageGuild), Cooldown(2)]
+        [Discord.Commands.Command("Take"), Permission(Perm.ManageGuild), Cooldown(2)]
         public async Task Take(IUser user, ulong change)
         {
             await Database.Data.Reputation.AlterUserReputationAsync(Context.Guild.Id, user.Id, -(long)change);
-            await SendSuccessAsync(Context.Channel, "Reputation taken", $"Took {change} reputation from {user.Mention}");
+            await Context.Channel.SendSuccessAsync("Reputation taken", $"Took {change} reputation from {user.Mention}");
         }
 
-        [Command("Set"), Permission(Perm.ManageGuild), Cooldown(2)]
+        [Discord.Commands.Command("Set"), Permission(Perm.ManageGuild), Cooldown(2)]
         public async Task Take(IUser user, long amount)
         {
             await Database.Data.Reputation.SetUserReputationAsync(Context.Guild.Id, user.Id, amount);
-            await SendSuccessAsync(Context.Channel, "Reputation set", $"Set {user.Mention}'s reputation to {amount}");
+            await Context.Channel.SendSuccessAsync("Reputation set", $"Set {user.Mention}'s reputation to {amount}");
         }
 
-        [Command("AddEmoji"), Permission(Perm.ManageGuild), Cooldown(2)]
+        [Discord.Commands.Command("AddEmoji"), Permission(Perm.ManageGuild), Cooldown(2)]
         public async Task AddEmoji(string emoteString, int value = 0)
         {
-            IEmote emote = Helper.GetEmote(emoteString, Context.Guild);
+            IEmote emote = Helper.GetEmoji(emoteString, Context.Guild);
             ReputationRow row = await Database.Data.Reputation.GetRowAsync(Context.Guild.Id);
 
             bool triedAlternative = false;
@@ -159,7 +163,7 @@ namespace Utili.Features
                     }
                     else
                     {
-                        await SendFailureAsync(Context.Channel, "Error", $"An emoji was not found matching {emoteString}");
+                        await Context.Channel.SendFailureAsync("Error", $"An emoji was not found matching {emoteString}");
                         return;
                     }
                 }
@@ -174,14 +178,14 @@ namespace Utili.Features
 
             if (row.Emotes.Any(x => Equals(x.Item1, emote)))
             {
-                await SendFailureAsync(Context.Channel, "Error", "That emoji is already added");
+                await Context.Channel.SendFailureAsync("Error", "That emoji is already added");
                 return;
             }
 
             row.Emotes.Add((emote, value));
             await Database.Data.Reputation.SaveRowAsync(row);
 
-            await SendSuccessAsync(Context.Channel, "Emoji added", 
+            await Context.Channel.SendSuccessAsync("Emoji added", 
                 $"The {emote} emoji was added successfully with value {value}\nYou can change its value or remove it on the dashboard");
         }
     }

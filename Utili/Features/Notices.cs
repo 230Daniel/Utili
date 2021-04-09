@@ -9,6 +9,7 @@ using Discord;
 using Discord.Commands;
 using Discord.Rest;
 using Discord.WebSocket;
+using Disqord.Bot;
 using static Utili.Program;
 
 namespace Utili.Features
@@ -180,7 +181,7 @@ namespace Utili.Features
     }
 
     [Group("Notice"), Alias("Notices")]
-    public class NoticeCommands : ModuleBase<SocketCommandContext>
+    public class NoticeCommands : DiscordGuildModuleBase
     {
         [Command("Preview"), Alias("Send")]
         public async Task Preview(ITextChannel channel = null)

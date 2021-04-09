@@ -1,93 +1,99 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
-using Discord;
-using Discord.Commands;
-using Discord.WebSocket;
-using static Utili.Program;
-using static Utili.MessageSender;
-using static Utili.Helper;
+using Disqord;
+using Disqord.Bot;
+using Microsoft.Extensions.Configuration;
+using Qmmands;
+using Utili.Extensions;
+using Utili.Utils;
 
 namespace Utili.Commands
 {
-    public class InfoCommands : ModuleBase<SocketCommandContext>
+    public class InfoCommands : DiscordGuildModuleBase
     {
-        [Command("About"), Alias("Info")]
+        IConfiguration _config;
+
+        public InfoCommands(IConfiguration config)
+        {
+            _config = config;
+        }
+
+        [Command("About", "Info")]
         public async Task About()
         {
+            string domain = _config.GetValue<string>("domain");
+
             string about = string.Concat(
                 "Created by 230Daniel#1920\n",
                 $"In {await Database.Sharding.GetGuildCountAsync()} servers\n\n",
 
-                $"[Dashboard](https://{_config.Domain}/dashboard)\n",
+                $"[Dashboard](https://{domain}/dashboard)\n",
                 "[Discord Server](https://discord.gg/WsxqABZ)\n",
-                $"[Contact Us](https://{_config.Domain}/contact)\n",
-                $"[Get Premium](https://{_config.Domain}/premium)\n");
+                $"[Contact Us](https://{domain}/contact)\n",
+                $"[Get Premium](https://{domain}/premium)\n");
 
-            await SendInfoAsync(Context.Channel, "Utili", about);
+            await Context.Channel.SendInfoAsync("Utili", about);
         }
 
-        [Command("Help"), Alias("Commands")]
+        [Command("Help", "Commands")]
         public async Task Help()
         {
-            string baseUrl = $"https://{_config.Domain}/dashboard/{Context.Guild.Id}";
-            (string, string)[] fields = {
-                ("**Core**", $"[Command List](https://{_config.Domain}/commands)\n" +
-                             $"[Core Settings]({baseUrl})"),
+            string domain = _config.GetValue<string>("domain");
+            string dashboardUrl = $"https://{domain}/dashboard/{Context.Guild.Id}";
 
-                ("**Channels**", $"[Autopurge]({baseUrl}/autopurge)\n" +
-                                 $"[Channel Mirroring]({baseUrl}/channelmirroring)\n" +
-                                 $"[Sticky Notices]({baseUrl}/notices)"),
+            LocalEmbedBuilder embed = MessageUtils.CreateEmbed(EmbedType.Info, "Utili",
+                $"You can configure Utili on the [dashboard]({dashboardUrl}).\n" +
+                $"If you need help, you should [contact us](https://{domain}/contact).\n⠀");
 
-                ("**Messages**", $"[Message Filter]({baseUrl}/messagefilter)\n" +
-                                 $"[Message Logging]({baseUrl}/messagelogs)\n" +
-                                 $"[Message Pinning]({baseUrl}/messagepinning)\n" +
-                                 $"[Message Voting]({baseUrl}/votechannels)"),
+            embed.AddField("**Core**", $"[Command List](https://{domain}/commands)\n" +
+                                       $"[Core Settings]({dashboardUrl})");
 
-                ("**Users**", $"[Inactive Role]({baseUrl}/inactiverole)\n" +
-                              $"[Join Message]({baseUrl}/joinmessage)\n" +
-                              $"[Reputation]({baseUrl}/reputation)"),
+            embed.AddField("**Channels**", $"[Autopurge]({dashboardUrl}/autopurge)\n" +
+                                           $"[Channel Mirroring]({dashboardUrl}/channelmirroring)\n" +
+                                           $"[Sticky Notices]({dashboardUrl}/notices)");
 
-                ("**Roles**", $"[Join Roles]({baseUrl}/joinroles)\n" +
-                              $"[Role Linking]({baseUrl}/rolelinking)\n" +
-                              $"[Role Persist]({baseUrl}/rolepersist)"),
+            embed.AddField("**Messages**", $"[Message Filter]({dashboardUrl}/messagefilter)\n" +
+                                           $"[Message Logging]({dashboardUrl}/messagelogs)\n" +
+                                           $"[Message Pinning]({dashboardUrl}/messagepinning)\n" +
+                                           $"[Message Voting]({dashboardUrl}/votechannels)");
 
-                ("**Voice Channels**", $"[Voice Link]({baseUrl}/voicelink)\n" +
-                                       $"[Voice Roles]({baseUrl}/voiceroles)")
-            };
+            embed.AddField("**Users**", $"[Inactive Role]({dashboardUrl}/inactiverole)\n" +
+                                        $"[Join Message]({dashboardUrl}/joinmessage)\n" +
+                                        $"[Reputation]({dashboardUrl}/reputation)");
 
-            Embed embed = GenerateEmbed(
-                embedType: MessageSender.EmbedType.Info, 
-                title: "Utili",
-                content: $"You can configure Utili on the [dashboard]({baseUrl}).\n" +
-                         $"If you need help, you should [contact us](https://{_config.Domain}/contact).\n⠀",
-                fields: fields);
+            embed.AddField("**Roles**", $"[Join Roles]({dashboardUrl}/joinroles)\n" +
+                                        $"[Role Linking]({dashboardUrl}/rolelinking)\n" +
+                                        $"[Role Persist]({dashboardUrl}/rolepersist)");
 
-            await Context.Channel.SendMessageAsync(embed: embed);
+            embed.AddField("**Voice Channels**", $"[Voice Link]({dashboardUrl}/voicelink)\n" +
+                                                 $"[Voice Roles]({dashboardUrl}/voiceroles)");
+
+            await Context.Channel.SendEmbedAsync(embed);
         }
 
-        [Command("Ping"), Alias("Lag")]
+        [Command("Ping")]
         public async Task Ping()
         {
             int largestLatency = 0;
-            DiscordSocketClient shard = GetShardForGuild(Context.Guild);
 
-            int gateway = shard.Latency;
+            TimeSpan? gatewayLatency = Context.Bot.ApiClient.GatewayApiClient.Heartbeater.Latency;
+            int gateway = gatewayLatency.HasValue ? (int)Math.Round(gatewayLatency.Value.TotalMilliseconds) : 0;
             if (gateway > largestLatency) largestLatency = gateway;
 
-            int rest = _pingTest.RestLatency;
+            int rest = Program._pingTest.RestLatency;
             if (rest > largestLatency) largestLatency = rest;
 
-            int database = _dbPingTest.NetworkLatency;
+            int database = Program._dbPingTest.NetworkLatency;
             if (database > largestLatency) largestLatency = database;
-            double databaseQueries = Math.Round(_dbPingTest.QueriesPerSecond, 2);
+            double databaseQueries = Math.Round(Program._dbPingTest.QueriesPerSecond, 2);
 
             double cpu = 0;
             double memory = 0;
-            if (_pingTest.Memory is not null)
+            if (Program._pingTest.Memory is not null)
             {
-                cpu = _pingTest.CpuPercentage;
-                memory = Math.Round(_pingTest.Memory.UsedGigabytes / _pingTest.Memory.TotalGigabytes * 100);
+                cpu = Program._pingTest.CpuPercentage;
+                memory = Math.Round(Program._pingTest.Memory.UsedGigabytes / Program._pingTest.Memory.TotalGigabytes * 100);
             }
             
             PingStatus status = PingStatus.Excellent;
@@ -99,8 +105,8 @@ namespace Utili.Commands
             if(status < PingStatus.Poor && cpu > 50) status = PingStatus.Poor;
             if(status < PingStatus.Critical && cpu > 90 || memory > 95) status = PingStatus.Critical;
 
-            DateTime upSince = Handlers.ShardHandler.ShardRegister.First(x => x.Item1 == shard.ShardId).Item2;
-            TimeSpan uptime = DateTime.Now - upSince;
+            //DateTime upSince = Handlers.ShardHandler.ShardRegister.First(x => x.Item1 == shard.ShardId).Item2;
+            //TimeSpan uptime = DateTime.Now - upSince;
 
 #pragma warning disable 8509
             Color color = status switch
@@ -112,18 +118,15 @@ namespace Utili.Commands
             };
 #pragma warning restore 8509
 
-            EmbedBuilder embed = new EmbedBuilder
-            {
-                Author = new EmbedAuthorBuilder { Name = $"Pong! Status: {status}" },
-                Color = color
-            };
+            LocalEmbedBuilder embed = MessageUtils.CreateEmbed(EmbedType.Info, $"Pong! Status: {status}");
+            embed.WithColor(color);
 
             embed.AddField("Discord", $"Api: {gateway}ms\nRest: {rest}ms", true);
             embed.AddField("Database", $"Latency: {database}ms\nQueries: {databaseQueries}/s", true);
             embed.AddField("System", $"CPU: {cpu}%\nMem: {memory}%", true);
 
-            embed.WithFooter($"Shard {shard.ShardId} uptime: {uptime.ToShortString()}");
-            await SendEmbedAsync(Context.Channel, embed.Build());
+            //embed.WithFooter($"Shard {shard.ShardId} uptime: {uptime.ToShortString()}");
+            await Context.Channel.SendEmbedAsync(embed);
         }
 
         private enum PingStatus

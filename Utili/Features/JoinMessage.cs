@@ -95,7 +95,7 @@ namespace Utili.Features
     }
 
     [Group("JoinMessage"), Alias("JoinMessages")]
-    public class JoinMessageCommands : ModuleBase<SocketCommandContext>
+    public class JoinMessageCommands : DiscordGuildModuleBase
     {
         [Command("Preview")]
         public async Task Preview()

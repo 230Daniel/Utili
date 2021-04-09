@@ -70,7 +70,7 @@ namespace Utili.Features
     }
 
     [Group("VoteChannels"), Alias("Votes", "VoteChannel")]
-    public class VoteChannelsCommands : ModuleBase<SocketCommandContext>
+    public class VoteChannelsCommands : DiscordGuildModuleBase
     {
         [Command("AddEmote"), Alias("AddEmotes", "AddEmoji", "AddEmojis")] [Permission(Perm.ManageGuild)] [Cooldown(2)]
         public async Task Add(string emoteString, ITextChannel channel = null)
@@ -80,7 +80,7 @@ namespace Utili.Features
             if (BotPermissions.IsMissingPermissions(channel,
                 new[] {ChannelPermission.ViewChannel, ChannelPermission.ReadMessageHistory, ChannelPermission.AddReactions}, out string missingPermissions))
             {
-                await SendFailureAsync(Context.Channel, "Error",
+                await Context.Channel.SendFailureAsync("Error",
                     $"I'm missing the following permissions: {missingPermissions}");
                 return;
             }
@@ -88,7 +88,7 @@ namespace Utili.Features
             List<VoteChannelsRow> rows = await Database.Data.VoteChannels.GetRowsAsync(Context.Guild.Id, channel.Id);
             if (rows.Count == 0)
             {
-                await SendFailureAsync(Context.Channel, "Error",
+                await Context.Channel.SendFailureAsync("Error",
                     $"{channel.Mention} is not a votes channel");
                 return;
             }
@@ -100,19 +100,19 @@ namespace Utili.Features
 
             if(row.Emotes.Count >= limit)
             {
-                await SendFailureAsync(Context.Channel, "Error",
+                await Context.Channel.SendFailureAsync("Error",
                     $"Your server can only have up to {limit} emojis per votes channel\nRemove emojis with the removeEmoji command");
                 return;
             }
 
-            IEmote emote = Helper.GetEmote(emoteString, Context.Guild);
+            IEmote emote = Helper.GetEmoji(emoteString, Context.Guild);
             try
             {
                 await Context.Message.AddReactionAsync(emote);
             }
             catch
             {
-                await SendFailureAsync(Context.Channel, "Error", $"An emoji was not found matching {emoteString}");
+                await Context.Channel.SendFailureAsync("Error", $"An emoji was not found matching {emoteString}");
                 return;
             }
             
@@ -125,14 +125,14 @@ namespace Utili.Features
 
             if (row.Emotes.Contains(emote))
             {
-                await SendFailureAsync(Context.Channel, "Error", "That emoji is already added");
+                await Context.Channel.SendFailureAsync("Error", "That emoji is already added");
                 return;
             }
 
             row.Emotes.Add(emote);
             await Database.Data.VoteChannels.SaveRowAsync(row);
 
-            await SendSuccessAsync(Context.Channel, "Emote added", 
+            await Context.Channel.SendSuccessAsync("Emote added", 
                 $"The {emote} emoji was added successfully");
         }
 
@@ -150,13 +150,13 @@ namespace Utili.Features
             List<VoteChannelsRow> rows = await Database.Data.VoteChannels.GetRowsAsync(Context.Guild.Id, channel.Id);
             if (rows.Count == 0)
             {
-                await SendFailureAsync(Context.Channel, "Error",
+                await Context.Channel.SendFailureAsync("Error",
                     $"{channel.Mention} is not a votes channel");
                 return;
             }
 
             VoteChannelsRow row = rows.First();
-            IEmote emote = Helper.GetEmote(emoteString, Context.Guild);
+            IEmote emote = Helper.GetEmoji(emoteString, Context.Guild);
 
             if (!row.Emotes.Contains(emote))
             {
@@ -169,14 +169,14 @@ namespace Utili.Features
                     }
                     catch
                     {
-                        await SendFailureAsync(Context.Channel, "Error",
+                        await Context.Channel.SendFailureAsync("Error",
                             "That emote is not added\nIf you can't specify the emoji, use its number found in the listEmoji command");
                         return;
                     }
                 }
                 else
                 {
-                    await SendFailureAsync(Context.Channel, "Error",
+                    await Context.Channel.SendFailureAsync("Error",
                         "That emote is not added\nIf you can't specify the emoji, use its number found in the listEmoji command");
                     return;
                 }
@@ -185,7 +185,7 @@ namespace Utili.Features
             row.Emotes.Remove(emote);
             await Database.Data.VoteChannels.SaveRowAsync(row);
 
-            await SendSuccessAsync(Context.Channel, "Emoji removed", 
+            await Context.Channel.SendSuccessAsync("Emoji removed", 
                 $"The {emote} emoji was removed successfully");
         }
 
@@ -203,7 +203,7 @@ namespace Utili.Features
             List<VoteChannelsRow> rows = await Database.Data.VoteChannels.GetRowsAsync(Context.Guild.Id, channel.Id);
             if (rows.Count == 0)
             {
-                await SendFailureAsync(Context.Channel, "Error",
+                await Context.Channel.SendFailureAsync("Error",
                     $"{channel.Mention} is not a votes channel");
                 return;
             }
