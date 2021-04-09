@@ -17,7 +17,7 @@ namespace Utili.Commands
         public async Task UserInfo(ulong userId)
         {
             UserRow row = await Users.GetRowAsync(userId);
-            RestUser user = await _rest.GetUserAsync(userId);
+            RestUser user = await _oldRest.GetUserAsync(userId);
             List<SubscriptionsRow> subscriptions = await Subscriptions.GetRowsAsync(userId: userId);
 
             string content = $"Id: {user?.Id}\n" +
@@ -39,7 +39,7 @@ namespace Utili.Commands
         [Command("GuildInfo")] [Permission(Perm.BotOwner)]
         public async Task GuildInfo(ulong guildId)
         {
-            RestGuild guild = await _rest.GetGuildAsync(guildId, true);
+            RestGuild guild = await _oldRest.GetGuildAsync(guildId, true);
             bool premium = await Premium.IsGuildPremiumAsync(guildId);
 
             string content = $"Id: {guild?.Id}\n" +
@@ -66,7 +66,7 @@ namespace Utili.Commands
             RestGuildUser user = null;
             try
             {
-                guild = await _rest.GetGuildAsync(guildId);
+                guild = await _oldRest.GetGuildAsync(guildId);
                 user = await guild.GetUserAsync(userId);
             }
             catch
@@ -86,7 +86,7 @@ namespace Utili.Commands
         [Permission(Perm.BotOwner)]
         public async Task SimulateCrash()
         {
-            DiscordSocketClient shard = _client.GetShard(0);
+            DiscordSocketClient shard = _oldClient.GetShard(0);
             await shard.StopAsync();
         }
 

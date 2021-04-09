@@ -110,7 +110,7 @@ namespace Utili.Features
                     x.Topic = $"Users in {voiceChannel.Name} have access - Created by Utili";
                     x.PermissionOverwrites = new List<Overwrite>
                     {
-                        new Overwrite(_client.CurrentUser.Id, PermissionTarget.User,
+                        new Overwrite(_oldClient.CurrentUser.Id, PermissionTarget.User,
                             new OverwritePermissions(viewChannel: PermValue.Allow)),
                         new Overwrite(guild.EveryoneRole.Id, PermissionTarget.Role,
                             new OverwritePermissions(viewChannel: PermValue.Deny))
@@ -131,7 +131,7 @@ namespace Utili.Features
 
             overwrites.RemoveAll(x =>
             {
-                if (x.TargetType == PermissionTarget.User && x.TargetId != _client.CurrentUser.Id)
+                if (x.TargetType == PermissionTarget.User && x.TargetId != _oldClient.CurrentUser.Id)
                 {
                     SocketGuildUser existingUser = guild.GetUser(x.TargetId);
                     if (existingUser?.VoiceChannel is null || existingUser.VoiceChannel.Id != voiceChannel.Id)

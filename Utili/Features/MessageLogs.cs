@@ -137,7 +137,7 @@ namespace Utili.Features
             EmbedBuilder embed = new EmbedBuilder();
             embed.WithColor(245, 66, 66);
 
-            RestUser user = await _rest.GetUserAsync(message.UserId);
+            RestUser user = await _oldRest.GetUserAsync(message.UserId);
             string userMention = message.UserId.ToString();
 
             if (user is not null)
@@ -211,7 +211,7 @@ namespace Utili.Features
                     user = cachedUsers.First(x => x.Id == message.UserId);
                 else
                 {
-                    user = await _rest.GetUserAsync(message.UserId);
+                    user = await _oldRest.GetUserAsync(message.UserId);
                     cachedUsers.Add(user);
                 }
 

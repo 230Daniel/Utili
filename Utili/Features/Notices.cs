@@ -47,7 +47,7 @@ namespace Utili.Features
                 }
                 else
                 {
-                    if (context.User.Id == _client.CurrentUser.Id) return;
+                    if (context.User.Id == _oldClient.CurrentUser.Id) return;
                     _requiredUpdates.Add((row, DateTime.UtcNow + delay));
                 }
             }
@@ -103,7 +103,7 @@ namespace Utili.Features
 
             NoticesRow row = update.Item1;
 
-            SocketGuild guild = _client.GetGuild(row.GuildId);
+            SocketGuild guild = _oldClient.GetGuild(row.GuildId);
             SocketTextChannel channel = guild.GetTextChannel(row.ChannelId);
 
             if(!channel.BotHasPermissions(

@@ -16,7 +16,7 @@ namespace Utili
 
         public static async void Start()
         {
-            RestWebhook webhook = await _rest.GetWebhookAsync(_config.StatusWebhookId);
+            RestWebhook webhook = await _oldRest.GetWebhookAsync(_config.StatusWebhookId);
             _webhook = new DiscordWebhookClient(webhook);
 
             _timer?.Dispose();
@@ -27,7 +27,7 @@ namespace Utili
 
         private static void TimerElapsed(object sender, ElapsedEventArgs e)
         {
-            foreach (DiscordSocketClient shard in _client.Shards)
+            foreach (DiscordSocketClient shard in _oldClient.Shards)
             {
                 _ = Monitor(shard.ShardId);
             }
@@ -39,13 +39,13 @@ namespace Utili
             {
                 for (int i = 0; i < 120; i++)
                 {
-                    if (_client.GetShard(shardId).ConnectionState == Discord.ConnectionState.Connected) return;
+                    if (_oldClient.GetShard(shardId).ConnectionState == Discord.ConnectionState.Connected) return;
                     await Task.Delay(1000);
                 }
 
-                _logger.Log("Monitoring", $"Shard {shardId} has been {_client.GetShard(shardId).ConnectionState} for 2 minutes.", LogSeverity.Crit);
+                _logger.Log("Monitoring", $"Shard {shardId} has been {_oldClient.GetShard(shardId).ConnectionState} for 2 minutes.", LogSeverity.Crit);
                 _logger.Log("Monitoring", "Restarting...", LogSeverity.Crit);
-                await _webhook.SendMessageAsync($"Shard {shardId} has been {_client.GetShard(shardId).ConnectionState} for 2 minutes.\nRestarting...");
+                await _webhook.SendMessageAsync($"Shard {shardId} has been {_oldClient.GetShard(shardId).ConnectionState} for 2 minutes.\nRestarting...");
                 await Task.Delay(3000);
 
                 Restart();

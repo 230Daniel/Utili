@@ -20,7 +20,7 @@ namespace Utili
                 IUser user = guild.GetUser(userId);
                 if (user is not null) return TypeReaderResult.FromSuccess(user);
 
-                user = await _rest.GetGuildUserAsync(guild.Id, userId);
+                user = await _oldRest.GetGuildUserAsync(guild.Id, userId);
                 if (user is not null) return TypeReaderResult.FromSuccess(user);
             }
 

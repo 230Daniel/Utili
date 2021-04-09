@@ -23,7 +23,7 @@ namespace Utili.Handlers
         {
             _ = Task.Run(async () =>
             {
-                if (partialMessage.Author.Id == _client.CurrentUser.Id && partialMessage is SocketSystemMessage)
+                if (partialMessage.Author.Id == _oldClient.CurrentUser.Id && partialMessage is SocketSystemMessage)
                 {
                     await partialMessage.DeleteAsync();
                     return;
@@ -35,7 +35,7 @@ namespace Utili.Handlers
                 SocketTextChannel channel = message.Channel as SocketTextChannel;
                 SocketGuild guild = channel.Guild;
 
-                SocketCommandContext context = new SocketCommandContext(_client.GetShardFor(guild), message);
+                SocketCommandContext context = new SocketCommandContext(_oldClient.GetShardFor(guild), message);
 
                 if (!context.User.IsBot && !string.IsNullOrEmpty(context.Message.Content))
                 {
@@ -45,10 +45,10 @@ namespace Utili.Handlers
 
                     int argPos = 0;
                     if (!excluded && (context.Message.HasStringPrefix(row.Prefix.Value, ref argPos) ||
-                        context.Message.HasMentionPrefix(_client.CurrentUser, ref argPos)))
+                        context.Message.HasMentionPrefix(_oldClient.CurrentUser, ref argPos)))
                     {
                         bool logCommand = _config.LogCommands;
-                        IResult result = await _commands.ExecuteAsync(context, argPos, null);
+                        IResult result = await _oldCommands.ExecuteAsync(context, argPos, null);
 
                         if (!result.IsSuccess)
                         {

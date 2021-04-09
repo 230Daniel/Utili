@@ -64,18 +64,18 @@ namespace Utili.Features
         {
             List<MiscRow> pendingRows = await Misc.GetRowsAsync(type: "JoinRoles-Pending");
             pendingRows.RemoveAll(x => DateTime.UtcNow < DateTime.Parse(x.Value.Split("///")[0]));
-            pendingRows.RemoveAll(x => _client.Guilds.All(y => y.Id != x.GuildId));
+            pendingRows.RemoveAll(x => _oldClient.Guilds.All(y => y.Id != x.GuildId));
             pendingRows.ForEach(x => _ = x.DeleteAsync());
 
             foreach (MiscRow pendingRow in pendingRows)
             {
                 try
                 {
-                    SocketGuild guild = _client.GetGuild(pendingRow.GuildId);
+                    SocketGuild guild = _oldClient.GetGuild(pendingRow.GuildId);
                     JoinRolesRow row = await Database.Data.JoinRoles.GetRowAsync(guild.Id);
                     if(row.JoinRoles.Count == 0) return;
 
-                    RestGuildUser user = await _rest.GetGuildUserAsync(guild.Id, ulong.Parse(pendingRow.Value.Split("///")[1]));
+                    RestGuildUser user = await _oldRest.GetGuildUserAsync(guild.Id, ulong.Parse(pendingRow.Value.Split("///")[1]));
                     
                     foreach (ulong roleId in row.JoinRoles.Take(5))
                     {

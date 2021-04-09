@@ -23,7 +23,7 @@ namespace Utili.Features
 
             IUserMessage message = await partialMessage.GetOrDownloadAsync();
             IUser user = message.Author;
-            IUser reactor = await _rest.GetGuildUserAsync(guild.Id, reactorId);
+            IUser reactor = await _oldRest.GetGuildUserAsync(guild.Id, reactorId);
 
             if(user.Id == reactorId || user.IsBot || reactor.IsBot) return;
 
@@ -38,7 +38,7 @@ namespace Utili.Features
 
             IUserMessage message = await partialMessage.GetOrDownloadAsync();
             IUser user = message.Author;
-            IUser reactor = await _rest.GetGuildUserAsync(guild.Id, reactorId);
+            IUser reactor = await _oldRest.GetGuildUserAsync(guild.Id, reactorId);
 
             if(user.Id == reactorId || user.IsBot || reactor.IsBot) return;
 
@@ -169,7 +169,7 @@ namespace Utili.Features
             {
                 // Rate limit is 1 per 250ms. Stupid but what can you do?
                 await Task.Delay(500);
-                await Context.Message.RemoveReactionAsync(emote, _client.CurrentUser);
+                await Context.Message.RemoveReactionAsync(emote, _oldClient.CurrentUser);
             });
 
             if (row.Emotes.Any(x => Equals(x.Item1, emote)))

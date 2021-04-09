@@ -29,7 +29,7 @@ namespace Utili.Handlers
                 ShardRegister.RemoveAll(x => x.Item1 == shard.ShardId);
                 ShardRegister.Add((shard.ShardId, DateTime.Now));
 
-                if (_client.Shards.All(x => ShardRegister.Any(y => y.Item1 == x.ShardId))) _ = AllShardsReady();
+                if (_oldClient.Shards.All(x => ShardRegister.Any(y => y.Item1 == x.ShardId))) _ = AllShardsReady();
 
                 await CacheUsersAsync(shard);
                 await shard.SetGameAsync($"{_config.Domain} | {_config.DefaultPrefix}help");
@@ -45,8 +45,8 @@ namespace Utili.Handlers
             {
                 Community.Initialise();
 
-                await Database.Sharding.UpdateShardStatsAsync(_client.Shards.Count,
-                    _client.Shards.OrderBy(x => x.ShardId).First().ShardId, _client.Guilds.Count);
+                await Database.Sharding.UpdateShardStatsAsync(_oldClient.Shards.Count,
+                    _oldClient.Shards.OrderBy(x => x.ShardId).First().ShardId, _oldClient.Guilds.Count);
 
                 _shardStatsUpdater?.Dispose();
                 _shardStatsUpdater = new Timer(10000);
@@ -132,7 +132,7 @@ namespace Utili.Handlers
         {
             _ = Task.Run(async() =>
             {
-                DateTimeOffset? joinedAt = guild.GetUser(_client.CurrentUser.Id).JoinedAt;
+                DateTimeOffset? joinedAt = guild.GetUser(_oldClient.CurrentUser.Id).JoinedAt;
                 if (joinedAt.HasValue)
                 {
                     TimeSpan stay = DateTime.UtcNow - joinedAt.Value.UtcDateTime;
@@ -167,10 +167,10 @@ namespace Utili.Handlers
                 List<MiscRow> rows = await Misc.GetRowsAsync(null, "RequiresUserDownload");
                 foreach (MiscRow row in rows)
                 {
-                    if (_client.Guilds.Any(x => x.Id == row.GuildId))
+                    if (_oldClient.Guilds.Any(x => x.Id == row.GuildId))
                     {
                         await Misc.DeleteRowAsync(row);
-                        SocketGuild guild = _client.GetGuild(row.GuildId);
+                        SocketGuild guild = _oldClient.GetGuild(row.GuildId);
                         if (!guild.HasAllMembers) await guild.DownloadUsersAsync();
                         await Task.Delay(5000);
                     }

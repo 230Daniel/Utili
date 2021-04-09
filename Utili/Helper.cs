@@ -24,7 +24,7 @@ namespace Utili
 
         public static DiscordSocketClient GetShardForGuild(IGuild guild)
         {
-            return Program._client.GetShardFor(guild);
+            return Program._oldClient.GetShardFor(guild);
         }
 
         public static IEmote GetEmote(string emoteString, SocketGuild guild)

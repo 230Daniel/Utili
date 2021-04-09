@@ -120,7 +120,7 @@ namespace Utili.Features
             {
                 // Rate limit is 1 per 250ms. Stupid but what can you do?
                 await Task.Delay(500);
-                await Context.Message.RemoveReactionAsync(emote, _client.CurrentUser);
+                await Context.Message.RemoveReactionAsync(emote, _oldClient.CurrentUser);
             });
 
             if (row.Emotes.Contains(emote))

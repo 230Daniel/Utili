@@ -40,7 +40,7 @@ namespace Utili
 
         private static async Task AddRolesAsync()
         {
-            SocketGuild guild = _client.GetGuild(_config.Community.GuildId);
+            SocketGuild guild = _oldClient.GetGuild(_config.Community.GuildId);
 
             if (guild.Roles.Any(x => x.Id == _config.Community.UserRoleId))
             {
@@ -73,7 +73,7 @@ namespace Utili
 
         private static async Task RemoveRolesAsync()
         {
-            SocketGuild guild = _client.GetGuild(_config.Community.GuildId);
+            SocketGuild guild = _oldClient.GetGuild(_config.Community.GuildId);
 
             if (guild.Roles.Any(x => x.Id == _config.Community.UserRoleId))
             {

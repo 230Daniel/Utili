@@ -17,7 +17,7 @@ namespace Utili.Features
         {
             if(!(context.Channel as IGuildChannel).BotHasPermissions(ChannelPermission.ViewChannel, ChannelPermission.ManageMessages)) return;
 
-            if (context.User.Id == Program._client.CurrentUser.Id && context.Message.Embeds.Count > 0)
+            if (context.User.Id == Program._oldClient.CurrentUser.Id && context.Message.Embeds.Count > 0)
             {
                 Embed embed = context.Message.Embeds.First();
                 if (embed.Author.HasValue)

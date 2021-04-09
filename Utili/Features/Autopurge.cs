@@ -30,8 +30,8 @@ namespace Utili.Features
             //List<AutopurgeRow> rows = await Database.Data.Autopurge.GetRowsAsync(enabledOnly: true);
 
             List<AutopurgeRow> rows = await SelectRowsToPurgeAsync();
-            rows.RemoveAll(x => _client.Guilds.All(y => y.Id != x.GuildId));
-            rows.RemoveAll(x => _client.GetGuild(x.GuildId).TextChannels.All(y => y.Id != x.ChannelId));
+            rows.RemoveAll(x => _oldClient.Guilds.All(y => y.Id != x.GuildId));
+            rows.RemoveAll(x => _oldClient.GetGuild(x.GuildId).TextChannels.All(y => y.Id != x.ChannelId));
 
             List<Task> tasks = new List<Task>();
             foreach (AutopurgeRow row in rows)
@@ -56,7 +56,7 @@ namespace Utili.Features
             {
                 for (int i = 0; i < 1; i++)
                 {
-                    foreach (SocketGuild guild in _client.Guilds)
+                    foreach (SocketGuild guild in _oldClient.Guilds)
                     {
                         List<AutopurgeRow> guildRows = rows.Where(x => x.GuildId == guild.Id && guild.TextChannels.Any(y => y.Id == x.ChannelId)).OrderBy(x => x.ChannelId).ToList();
                         if (guildRows.Count > 0)
@@ -83,7 +83,7 @@ namespace Utili.Features
                 row = await Database.Data.Autopurge.GetRowAsync(row.GuildId, row.ChannelId);
                 if(row.Mode == 2) return;
 
-                SocketGuild guild = _client.GetGuild(row.GuildId);
+                SocketGuild guild = _oldClient.GetGuild(row.GuildId);
                 SocketTextChannel channel = guild.GetTextChannel(row.ChannelId);
 
                 if(!channel.BotHasPermissions(ChannelPermission.ViewChannel, ChannelPermission.ReadMessageHistory, ChannelPermission.ManageMessages)) return;
@@ -147,8 +147,8 @@ namespace Utili.Features
         {
             await Task.Delay(30000);
             List<AutopurgeRow> rows = await Database.Data.Autopurge.GetRowsAsync(enabledOnly: true);
-            rows.RemoveAll(x => _client.Guilds.All(y => y.Id != x.GuildId));
-            rows.RemoveAll(x => _client.GetGuild(x.GuildId).TextChannels.All(y => y.Id != x.ChannelId));
+            rows.RemoveAll(x => _oldClient.Guilds.All(y => y.Id != x.GuildId));
+            rows.RemoveAll(x => _oldClient.GetGuild(x.GuildId).TextChannels.All(y => y.Id != x.ChannelId));
 
             _logger.Log("AutopurgeG", $"Started downloading messages for {rows.Count} channels");
 
@@ -170,7 +170,7 @@ namespace Utili.Features
         private static async Task GetNewChannelsMessagesAsync()
         {
             List<MiscRow> miscRows = await Misc.GetRowsAsync(type: "RequiresAutopurgeMessageDownload");
-            miscRows.RemoveAll(x => _client.Guilds.All(y => y.Id != x.GuildId));
+            miscRows.RemoveAll(x => _oldClient.Guilds.All(y => y.Id != x.GuildId));
 
             foreach (MiscRow miscRow in miscRows)
                 _ = Misc.DeleteRowAsync(miscRow);
@@ -194,7 +194,7 @@ namespace Utili.Features
 
             try
             {
-                SocketGuild guild = _client.GetGuild(row.GuildId);
+                SocketGuild guild = _oldClient.GetGuild(row.GuildId);
                 SocketTextChannel channel = guild.GetTextChannel(row.ChannelId);
 
                 if(!channel.BotHasPermissions(ChannelPermission.ViewChannel, ChannelPermission.ReadMessageHistory)) return;

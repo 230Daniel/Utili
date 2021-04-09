@@ -11,7 +11,7 @@ namespace Utili
     {
         public static void Update(object sender, ElapsedEventArgs e)
         {
-            _ = Database.Sharding.UpdateShardStatsAsync(_client.Shards.Count, _client.Shards.OrderBy(x => x.ShardId).First().ShardId, _client.Guilds.Count);
+            _ = Database.Sharding.UpdateShardStatsAsync(_oldClient.Shards.Count, _oldClient.Shards.OrderBy(x => x.ShardId).First().ShardId, _oldClient.Guilds.Count);
             _ = UpdateBotlistCountsAsync();
         }
 
@@ -23,7 +23,7 @@ namespace Utili
 
             int guilds = await Database.Sharding.GetGuildCountAsync();
 
-            StatsPoster poster = new StatsPoster(_client.CurrentUser.Id, _config.BotlistTokens);
+            StatsPoster poster = new StatsPoster(_oldClient.CurrentUser.Id, _config.BotlistTokens);
             await poster.PostGuildCountAsync(guilds);
         }
     }
