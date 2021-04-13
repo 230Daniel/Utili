@@ -27,7 +27,7 @@ namespace Utili.Utils
 
                 case EmbedType.Failure:
                     embed.WithAuthor(title, "https://i.imgur.com/Sg4663k.png");
-                    embed.WithColor(new Color(67, 181, 129));
+                    embed.WithColor(new Color(181, 67, 129));
                     break;
             }
 
