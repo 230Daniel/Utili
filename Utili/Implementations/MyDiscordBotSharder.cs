@@ -17,7 +17,7 @@ namespace Utili.Implementations
     {
         protected override async ValueTask<bool> BeforeExecutedAsync(DiscordCommandContext context)
         {
-            if (!context.GuildId.HasValue) return false;
+            if (!context.GuildId.HasValue || context.Author.IsBot) return false;
 
             CoreRow row = await Core.GetRowAsync(context.GuildId.Value);
             return !row.ExcludedChannels.Contains(context.ChannelId);
