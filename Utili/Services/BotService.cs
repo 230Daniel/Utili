@@ -11,14 +11,20 @@ namespace Utili.Services
     {
         ILogger<BotService> _logger;
         DiscordClientBase _client;
-        AutopurgeService _autopurge;
 
-        public BotService(ILogger<BotService> logger, DiscordClientBase client, AutopurgeService autopurge)
+        AutopurgeService _autopurge;
+        VoiceLinkService _voiceLink;
+
+        public BotService(ILogger<BotService> logger, 
+            DiscordClientBase client, 
+            AutopurgeService autopurge,
+            VoiceLinkService voiceLink)
             : base(logger, client)
         {
             _logger = logger;
             _client = client;
             _autopurge = autopurge;
+            _voiceLink = voiceLink;
         }
 
         protected override async Task ExecuteAsync(CancellationToken cancellationToken)
@@ -28,8 +34,10 @@ namespace Utili.Services
             Logger.LogInformation("Client says it's ready which is really cool.");
 
             _client.MessageReceived += _autopurge.MessageReceived;
+            _client.VoiceStateUpdated += _voiceLink.VoiceStateUpdated;
 
             _autopurge.Start();
+            _voiceLink.Start();
         }
     }
 }

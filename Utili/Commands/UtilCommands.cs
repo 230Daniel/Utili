@@ -135,10 +135,10 @@ namespace Utili.Commands
             int pinned = messages.RemoveAll(x => x is IUserMessage y && y.IsPinned);
             int outdated = messages.RemoveAll(x => x.CreatedAt.UtcDateTime < DateTime.UtcNow - TimeSpan.FromDays(13.9));
 
-            if (pinned == 1) content += $"{pinned} message was not deleted because it is pinned";
-            else if (pinned > 1) content += $"{pinned} messages were not deleted because they are pinned";
-            if (outdated == 1) content += $"{outdated} message was not deleted because it is older than 14 days";
-            else if (outdated > 1) content += $"{outdated} messages were not deleted because they are older than 14 days";
+            if (pinned == 1) content += $"{pinned} message was not deleted because it is pinned\n";
+            else if (pinned > 1) content += $"{pinned} messages were not deleted because they are pinned\n";
+            if (outdated == 1) content += $"{outdated} message was not deleted because it is older than 14 days\n";
+            else if (outdated > 1) content += $"{outdated} messages were not deleted because they are older than 14 days\n";
 
             await Context.Channel.DeleteMessagesAsync(messages.Select(x => x.Id));
 

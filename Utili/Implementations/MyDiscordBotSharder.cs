@@ -4,12 +4,12 @@ using Disqord;
 using Disqord.Bot;
 using Disqord.Bot.Sharding;
 using Disqord.Sharding;
-using DisqordTestBot.Extensions;
+using Utili.Extensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Qmmands;
 
-namespace DisqordTestBot.Implementations
+namespace Utili.Implementations
 {
     public class MyDiscordBotSharder : DiscordBotSharder
     {

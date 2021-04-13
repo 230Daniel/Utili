@@ -6,7 +6,7 @@ using Disqord.Bot;
 using Disqord.Bot.Hosting;
 using Disqord.Extensions.Interactivity;
 using Disqord.Gateway;
-using DisqordTestBot.Implementations;
+using Utili.Implementations;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -47,7 +47,6 @@ namespace Utili
                 .ConfigureDiscordBotSharder<MyDiscordBotSharder>((context, bot) =>
                 {
                     bot.Token = context.Configuration["token"];
-                    bot.UseMentionPrefix = true;
                     bot.ReadyEventDelayMode = ReadyEventDelayMode.Guilds;
                     bot.Intents += GatewayIntent.Members;
                     bot.Intents += GatewayIntent.VoiceStates;
@@ -74,7 +73,9 @@ namespace Utili
         {
             services.AddInteractivity();
             services.AddPrefixProvider<PrefixProvider>();
+
             services.AddSingleton<AutopurgeService>();
+            services.AddSingleton<VoiceLinkService>();
         }
 
         //private static async Task MainAsync()

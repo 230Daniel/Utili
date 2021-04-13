@@ -19,5 +19,33 @@ namespace Utili.Extensions
         {
             return guild.GetChannel(channelId) as CachedVoiceChannel;
         }
+
+        public static CachedCategoryChannel GetCategoryChannel(this CachedGuild guild, Snowflake channelId)
+        {
+            return guild.GetChannel(channelId) as CachedCategoryChannel;
+        }
+
+        public static bool BotHasPermissions(this IGuild guild, DiscordClientBase client, params Permission[] requiredPermissions)
+        {
+            CachedGuild cachedGuild = client.GetGuild(guild.Id);
+            IMember bot = cachedGuild.Members.GetValueOrDefault(client.CurrentUser.Id);
+            List<CachedRole> roles = bot.GetRoles().Values.ToList();
+
+            GuildPermissions permissions = Disqord.Discord.Permissions.CalculatePermissions(cachedGuild, bot, roles);
+            return requiredPermissions.All(x => permissions.Contains(x));
+        }
+
+        public static bool BotHasPermissions(this CachedGuild guild, DiscordClientBase client, out string missingPermissions, params Permission[] requiredPermissions)
+        {
+            CachedGuild cachedGuild = client.GetGuild(guild.Id);
+            IMember bot = cachedGuild.Members.GetValueOrDefault(client.CurrentUser.Id);
+            List<CachedRole> roles = bot.GetRoles().Values.ToList();
+
+            GuildPermissions permissions = Disqord.Discord.Permissions.CalculatePermissions(cachedGuild, bot, roles);
+
+            missingPermissions = "";
+
+            return requiredPermissions.All(x => permissions.Contains(x));
+        }
     }
 }

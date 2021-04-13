@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq;
 
-namespace DisqordTestBot.Extensions
+namespace Utili.Extensions
 {
     public static class StringExtensions
     {

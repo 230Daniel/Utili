@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Disqord;
 using Disqord.Bot;
+using Disqord.Gateway.Api;
 using Microsoft.Extensions.Configuration;
 using Qmmands;
 using Utili.Extensions;
@@ -13,10 +14,12 @@ namespace Utili.Commands
     public class InfoCommands : DiscordGuildModuleBase
     {
         IConfiguration _config;
+        IGatewayHeartbeater _heartbeater;
 
-        public InfoCommands(IConfiguration config)
+        public InfoCommands(IConfiguration config, IGatewayHeartbeater heartbeater)
         {
             _config = config;
+            _heartbeater = heartbeater;
         }
 
         [Command("About", "Info")]
@@ -77,7 +80,7 @@ namespace Utili.Commands
         {
             int largestLatency = 0;
 
-            TimeSpan? gatewayLatency = Context.Bot.ApiClient.GatewayApiClient.Heartbeater.Latency;
+            TimeSpan? gatewayLatency = _heartbeater.Latency;
             int gateway = gatewayLatency.HasValue ? (int)Math.Round(gatewayLatency.Value.TotalMilliseconds) : 0;
             if (gateway > largestLatency) largestLatency = gateway;
 

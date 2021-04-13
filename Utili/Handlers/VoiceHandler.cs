@@ -8,22 +8,7 @@ namespace Utili.Handlers
     {
         public static async Task UserVoiceStateUpdated(SocketUser user, SocketVoiceState before, SocketVoiceState after)
         {
-            _ = VoiceLinkHandler(user, before, after);
             _ = InactiveRoleHandler(user, before, after);
-        }
-
-        private static async Task VoiceLinkHandler(SocketUser user, SocketVoiceState before, SocketVoiceState after)
-        {
-            _ = Task.Run(async () =>
-            {
-                if (false/*Helper.RequiresUpdate(before, after)*/)
-                {
-                    if(before.VoiceChannel is not null) await VoiceLink.RequestUpdateAsync(before.VoiceChannel);
-                    if(after.VoiceChannel is not null) await VoiceLink.RequestUpdateAsync(after.VoiceChannel);
-
-                    VoiceRoles.RequestUpdate(user as SocketGuildUser, before, after);
-                }
-            });
         }
 
         private static async Task InactiveRoleHandler(SocketUser user, SocketVoiceState before, SocketVoiceState after)

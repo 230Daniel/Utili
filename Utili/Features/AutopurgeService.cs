@@ -109,7 +109,7 @@ namespace Utili.Features
             }
             catch (Exception e)
             {
-                _logger.LogError($"Exception thrown while purging channel {row.GuildId}/{row.ChannelId}", e);
+                _logger.LogError(e, $"Exception thrown while purging channel {row.GuildId}/{row.ChannelId}");
             }
         }
 
@@ -271,7 +271,7 @@ namespace Utili.Features
             }
             catch (Exception e)
             {
-                _logger.LogError($"Exception thrown while fetching messages for channel {row.GuildId}/{row.ChannelId}", e);
+                _logger.LogError(e, $"Exception thrown while fetching messages for channel {row.GuildId}/{row.ChannelId}");
             }
             finally
             {
