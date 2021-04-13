@@ -49,11 +49,11 @@ namespace Utili.Extensions
             return await channel.SendMessageAsync(message);
         }
 
-        public static bool BotHasPermissions(this ITextChannel channel, DiscordClientBase client, params Permission[] requiredPermissions)
+        public static bool BotHasPermissions(this CachedTextChannel channel, DiscordClientBase client, params Permission[] requiredPermissions)
         {
             CachedGuild guild = client.GetGuild(channel.GuildId);
             IMember bot = guild.Members.GetValueOrDefault(client.CurrentUser.Id);
-            IEnumerable<CachedRole> roles = bot.GetRoles().Values;
+            List<CachedRole> roles = bot.GetRoles().Values.ToList();
 
             ChannelPermissions permissions = Disqord.Discord.Permissions.CalculatePermissions(guild, channel, bot, roles);
             return requiredPermissions.All(x => permissions.Contains(x));

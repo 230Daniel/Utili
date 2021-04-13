@@ -29,7 +29,7 @@ namespace Utili.Handlers
                     return;
                 }
 
-                _ = Features.Autopurge.MessageReceived(partialMessage);
+                //_ = Features.Autopurge.MessageReceived(partialMessage);
 
                 SocketUserMessage message = partialMessage as SocketUserMessage;
                 SocketTextChannel channel = message.Channel as SocketTextChannel;
@@ -80,7 +80,7 @@ namespace Utili.Handlers
             {
                 if (channel is SocketDMChannel) return;
 
-                _ = Features.Autopurge.MessageEdited(message);
+                //_ = Features.Autopurge.MessageEdited(message);
 
                 //SocketTextChannel guildChannel = channel as SocketTextChannel;
                 //SocketCommandContext context = new SocketCommandContext(Helper.GetShardForGuild(guildChannel.Guild), message as SocketUserMessage);

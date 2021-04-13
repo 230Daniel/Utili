@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using Database.Data;
+using Disqord;
 using Disqord.Bot;
 using Disqord.Gateway;
 using Microsoft.Extensions.Configuration;
@@ -15,12 +17,23 @@ namespace Utili.Services
             _config = config;
         }
 
-        public ValueTask<IEnumerable<IPrefix>> GetPrefixesAsync(IGatewayUserMessage message)
+        public async ValueTask<IEnumerable<IPrefix>> GetPrefixesAsync(IGatewayUserMessage message)
         {
-            return new ValueTask<IEnumerable<IPrefix>>(new List<IPrefix>
+            if (!message.GuildId.HasValue)
             {
-                new StringPrefix(_config.GetValue<string>("prefix"))
-            });
+                return new IPrefix[]
+                {
+                    new StringPrefix(_config.GetValue<string>("defaultPrefix")),
+                    new MentionPrefix((message.Client as DiscordClientBase).CurrentUser.Id)
+                };
+            }
+
+            CoreRow row = await Core.GetRowAsync(message.GuildId.Value);
+            return new IPrefix[]
+            {
+                new StringPrefix(row.Prefix.Value),
+                new MentionPrefix((message.Client as DiscordClientBase).CurrentUser.Id)
+            };
         }
     }
 }

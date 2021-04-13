@@ -10,6 +10,7 @@ using DisqordTestBot.Implementations;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Utili.Features;
 using Utili.Services;
 
 namespace Utili
@@ -47,12 +48,11 @@ namespace Utili
                 {
                     bot.Token = context.Configuration["token"];
                     bot.UseMentionPrefix = true;
-                    bot.Prefixes = new[] {"!"};
                     bot.ReadyEventDelayMode = ReadyEventDelayMode.Guilds;
                     bot.Intents += GatewayIntent.Members;
                     bot.Intents += GatewayIntent.VoiceStates;
                     bot.Activities = new[] { new LocalActivity("v3 ?!??", ActivityType.Playing)};
-                    bot.OwnerIds = new[] { new Snowflake(218613903653863427) };
+                    bot.OwnerIds = new[] { new Snowflake(ulong.Parse(context.Configuration["ownerId"])) };
                 })
                 .Build();
 
@@ -74,6 +74,7 @@ namespace Utili
         {
             services.AddInteractivity();
             services.AddPrefixProvider<PrefixProvider>();
+            services.AddSingleton<AutopurgeService>();
         }
 
         //private static async Task MainAsync()

@@ -62,7 +62,7 @@ namespace Utili.Handlers
             _userCacheTimer.Elapsed += UserCacheTimerElapsed;
             _userCacheTimer.Start();
 
-            Features.Autopurge.Start();
+            //Features.Autopurge.Start();
         }
 
         private static async Task CacheUsersAsync(DiscordSocketClient shard)
