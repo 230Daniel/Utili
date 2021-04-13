@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Linq;
+using System.Threading.Tasks;
+using Database.Data;
 using Disqord;
 using Disqord.Bot;
 using Disqord.Bot.Sharding;
@@ -13,6 +15,14 @@ namespace Utili.Implementations
 {
     public class MyDiscordBotSharder : DiscordBotSharder
     {
+        protected override async ValueTask<bool> BeforeExecutedAsync(DiscordCommandContext context)
+        {
+            if (!context.GuildId.HasValue) return false;
+
+            CoreRow row = await Core.GetRowAsync(context.GuildId.Value);
+            return !row.ExcludedChannels.Contains(context.ChannelId);
+        }
+
         protected override LocalMessageBuilder FormatFailureMessage(DiscordCommandContext context, FailedResult result)
         {
             static string FormatParameter(Parameter parameter)
