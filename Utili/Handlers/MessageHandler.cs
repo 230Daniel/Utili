@@ -8,7 +8,6 @@ using Discord.Commands;
 using Discord.WebSocket;
 using static Utili.Program;
 using static Utili.MessageSender;
-using ChannelMirroring = Utili.Features.ChannelMirroring;
 using InactiveRole = Utili.Features.InactiveRole;
 using MessageFilter = Utili.Features.MessageFilter;
 using MessageLogs = Utili.Features.MessageLogs;
@@ -69,7 +68,6 @@ namespace Utili.Handlers
                 // Low priority
                 _ = VoteChannels.MessageReceived(context);
                 _ = InactiveRole.UpdateUserAsync(context.Guild, context.User as SocketGuildUser);
-                _ = ChannelMirroring.MessageReceived(context);
                 _ = Notices.MessageReceived(context);
             });
         }
