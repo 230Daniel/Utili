@@ -16,7 +16,7 @@ namespace Utili.Handlers
         {
             _ = Task.Run(async () =>
             {
-                if (Helper.RequiresUpdate(before, after))
+                if (false/*Helper.RequiresUpdate(before, after)*/)
                 {
                     if(before.VoiceChannel is not null) await VoiceLink.RequestUpdateAsync(before.VoiceChannel);
                     if(after.VoiceChannel is not null) await VoiceLink.RequestUpdateAsync(after.VoiceChannel);
@@ -32,7 +32,7 @@ namespace Utili.Handlers
             {
                 if(user.IsBot) return;
 
-                if (Helper.RequiresUpdate(before, after))
+                if (false/*Helper.RequiresUpdate(before, after)*/)
                 {
                     SocketGuildUser guildUser = user as SocketGuildUser;
                     await InactiveRole.UpdateUserAsync(guildUser.Guild, guildUser);

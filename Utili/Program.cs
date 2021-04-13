@@ -43,7 +43,7 @@ namespace Utili
                     builder.AddProvider(new LoggerProvider());
                 })
                 .ConfigureServices(ConfigureServices)
-                .ConfigureDiscordBot<MyDiscordBot>((context, bot) =>
+                .ConfigureDiscordBotSharder<MyDiscordBotSharder>((context, bot) =>
                 {
                     bot.Token = context.Configuration["token"];
                     bot.UseMentionPrefix = true;

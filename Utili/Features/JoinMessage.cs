@@ -4,6 +4,7 @@ using Database.Data;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using Disqord.Bot;
 using static Utili.MessageSender;
 
 namespace Utili.Features
@@ -25,7 +26,7 @@ namespace Utili.Features
                 else
                 {
                     ITextChannel channel = guild.GetTextChannel(joinMessage.Item1.ChannelId);
-                    if(!channel.BotHasPermissions(ChannelPermission.ViewChannel, ChannelPermission.SendMessages, ChannelPermission.EmbedLinks)) return;
+                    //if(!channel.BotHasPermissions(ChannelPermission.ViewChannel, ChannelPermission.SendMessages, ChannelPermission.EmbedLinks)) return;
 
                     await channel.SendMessageAsync(joinMessage.Item2, embed: joinMessage.Item3);
                 }
@@ -101,8 +102,8 @@ namespace Utili.Features
         public async Task Preview()
         {
             JoinMessageRow row = await Database.Data.JoinMessage.GetRowAsync(Context.Guild.Id);
-            (JoinMessageRow, string, Embed) joinMessage = JoinMessage.GetJoinMessage(row, Context.User as SocketGuildUser);
-            await SendEmbedAsync(Context.Channel, joinMessage.Item3, joinMessage.Item2);
+            //(JoinMessageRow, string, Embed) joinMessage = JoinMessage.GetJoinMessage(row, Context.User as SocketGuildUser);
+            // TODO await SendEmbedAsync(Context.Channel, joinMessage.Item3, joinMessage.Item2);
         }
     }
 }

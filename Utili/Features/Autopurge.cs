@@ -86,7 +86,7 @@ namespace Utili.Features
                 SocketGuild guild = _oldClient.GetGuild(row.GuildId);
                 SocketTextChannel channel = guild.GetTextChannel(row.ChannelId);
 
-                if(!channel.BotHasPermissions(ChannelPermission.ViewChannel, ChannelPermission.ReadMessageHistory, ChannelPermission.ManageMessages)) return;
+                //if(!channel.BotHasPermissions(ChannelPermission.ViewChannel, ChannelPermission.ReadMessageHistory, ChannelPermission.ManageMessages)) return;
 
                 List<AutopurgeMessageRow> messagesToDelete = await Database.Data.Autopurge.GetAndDeleteDueMessagesAsync(row);
                 if(messagesToDelete.Count == 0) return;
@@ -197,7 +197,7 @@ namespace Utili.Features
                 SocketGuild guild = _oldClient.GetGuild(row.GuildId);
                 SocketTextChannel channel = guild.GetTextChannel(row.ChannelId);
 
-                if(!channel.BotHasPermissions(ChannelPermission.ViewChannel, ChannelPermission.ReadMessageHistory)) return;
+                //if(!channel.BotHasPermissions(ChannelPermission.ViewChannel, ChannelPermission.ReadMessageHistory)) return;
 
                 List<AutopurgeMessageRow> messageRows =
                     await Database.Data.Autopurge.GetMessagesAsync(guild.Id, channel.Id);

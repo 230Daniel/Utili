@@ -150,7 +150,7 @@ namespace Utili.Commands
             await sentMessage.DeleteAsync();
         }
 
-        [Command("React", "AddReaction", "AddEmoji), Alias("), DefaultCooldown(2, 5), RequireAuthorChannelPermissions(Permission.ManageMessages)]
+        [Command("React", "AddReaction", "AddEmoji"), DefaultCooldown(2, 5), RequireAuthorChannelPermissions(Permission.ManageMessages)]
         public async Task React(ulong messageId, [Remainder] string emojiString)
         {
             IMessage message = await Context.Channel.FetchMessageAsync(messageId);
@@ -197,13 +197,13 @@ namespace Utili.Commands
                 return;
             }
 
-            if (BotPermissions.IsMissingPermissions(channel, new[] {ChannelPermission.ViewChannel, ChannelPermission.ReadMessageHistory, ChannelPermission.AddReactions}, out string missingPermissions))
+            if (!channel.BotHasPermissions(Context.Bot, out string missingPermissions, Permission.ViewChannel, Permission.ReadMessageHistory, Permission.AddReactions))
             {
                 await Context.Channel.SendFailureAsync("Error", $"I'm missing the following permissions: {missingPermissions}");
                 return;
             }
 
-            IEmote emoji = Helper.GetEmoji(emojiString, Context.Guild);
+            IEmoji emoji = Helper.GetEmoji(emojiString, Context.Guild);
 
             try
             {
@@ -219,73 +219,75 @@ namespace Utili.Commands
             }
         }
 
-        [Command("Random", "Pick")]
-        public async Task Random(ITextChannel channel = null, ulong messageId = 0, [Remainder] string emojiString = "")
-        {
-            await Context.Guild.DownloadAndKeepUsersAsync(TimeSpan.FromMinutes(15));
-            Random random = new Random();
+        // TODO: Implement when member chunking is done
 
-            if (messageId == 0)
-            {
-                int index = random.Next(Context.Guild.Users.Count);
-                SocketGuildUser user = Context.Guild.Users.ElementAt(index);
+        //[Command("Random", "Pick")]
+        //public async Task Random(ITextChannel channel = null, ulong messageId = 0, [Remainder] string emojiString = "")
+        //{
+        //    await Context.Guild.DownloadAndKeepUsersAsync(TimeSpan.FromMinutes(15));
+        //    Random random = new Random();
 
-                await SendInfoAsync(Context.Channel, "Random user",
-                    $"{user.Mention}\nThis user was picked randomly from {Context.Guild.Users.Count} server member{(Context.Guild.Users.Count == 1 ? "" : "s")}.");
-            }
-            else
-            {
-                channel ??= Context.Channel as ITextChannel;
+        //    if (messageId == 0)
+        //    {
+        //        int index = random.Next(Context.Guild.Users.Count);
+        //        SocketGuildUser user = Context.Guild.Users.ElementAt(index);
 
-                IMessage message = await channel.GetMessageAsync(messageId);
+        //        await SendInfoAsync(Context.Channel, "Random user",
+        //            $"{user.Mention}\nThis user was picked randomly from {Context.Guild.Users.Count} server member{(Context.Guild.Users.Count == 1 ? "" : "s")}.");
+        //    }
+        //    else
+        //    {
+        //        channel ??= Context.Channel as ITextChannel;
 
-                if (message is null)
-                {
-                    await Context.Channel.SendFailureAsync("Error",
-                        $"No message was found in <#{channel.Id}> with ID {messageId}\n[How do I get a message ID?](https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID-)");
-                    return;
-                }
+        //        IMessage message = await channel.GetMessageAsync(messageId);
 
-                IEmote emoji = Helper.GetEmoji(emojiString, Context.Guild);
+        //        if (message is null)
+        //        {
+        //            await Context.Channel.SendFailureAsync("Error",
+        //                $"No message was found in <#{channel.Id}> with ID {messageId}\n[How do I get a message ID?](https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID-)");
+        //            return;
+        //        }
 
-                if(message.Reactions.TryGetValue(emoji, out ReactionMetadata _))
-                {
-                    List<IUser> users = (await message.GetReactionUsersAsync(emoji, 1000).FlattenAsync()).ToList();
-                    int index = random.Next(users.Count);
-                    IUser user = users.ElementAt(index);
+        //        IEmote emoji = Helper.GetEmoji(emojiString, Context.Guild);
 
-                    await SendInfoAsync(Context.Channel, "Random user",
-                        $"{user.Mention}\nThis user was picked randomly from {users.Count} user{(users.Count == 1 ? "" : "s")} that reacted to [this message]({message.GetJumpUrl()}) with {emojiString}.");
-                }
-            }
-        }
+        //        if(message.Reactions.TryGetValue(emoji, out ReactionMetadata _))
+        //        {
+        //            List<IUser> users = (await message.GetReactionUsersAsync(emoji, 1000).FlattenAsync()).ToList();
+        //            int index = random.Next(users.Count);
+        //            IUser user = users.ElementAt(index);
 
-        [Command("Random", "Pick")]
-        public async Task Random(ulong messageId = 0, [Remainder] string emojiString = "")
-        {
-            await Random(Context.Channel as ITextChannel, messageId, emojiString);
-        }
+        //            await SendInfoAsync(Context.Channel, "Random user",
+        //                $"{user.Mention}\nThis user was picked randomly from {users.Count} user{(users.Count == 1 ? "" : "s")} that reacted to [this message]({message.GetJumpUrl()}) with {emojiString}.");
+        //        }
+        //    }
+        //}
 
-        [Command("WhoHas")]
-        public async Task WhoHas(IRole role, int page = 1)
-        {
-            await Context.Guild.DownloadAndKeepUsersAsync(TimeSpan.FromMinutes(15));
-            List<SocketGuildUser> users = Context.Guild.Users.OrderBy(x => x.Nickname ?? x.Username).Where(x => x.Roles.Any(y => y.Id == role.Id)).ToList();
+        //[Command("Random", "Pick")]
+        //public async Task Random(ulong messageId = 0, [Remainder] string emojiString = "")
+        //{
+        //    await Random(Context.Channel as ITextChannel, messageId, emojiString);
+        //}
 
-            int totalPages = (int) Math.Ceiling(users.Count / 50d);
-            users = users.Skip((page - 1) * 50).Take(50).ToList();
-            if ((page < 1 || page > totalPages) && totalPages != 0)
-            {
-                await Context.Channel.SendFailureAsync("Error", "Invalid page number");
-                return; 
-            }
-            if (totalPages == 0) page = 0;
+        //[Command("WhoHas")]
+        //public async Task WhoHas(IRole role, int page = 1)
+        //{
+        //    await Context.Guild.DownloadAndKeepUsersAsync(TimeSpan.FromMinutes(15));
+        //    List<SocketGuildUser> users = Context.Guild.Users.OrderBy(x => x.Nickname ?? x.Username).Where(x => x.Roles.Any(y => y.Id == role.Id)).ToList();
 
-            string output = users.Aggregate("", (current, user) => current + $"{user.Mention}\n");
-            if (output == "") output = "There are no users with that role.";
+        //    int totalPages = (int) Math.Ceiling(users.Count / 50d);
+        //    users = users.Skip((page - 1) * 50).Take(50).ToList();
+        //    if ((page < 1 || page > totalPages) && totalPages != 0)
+        //    {
+        //        await Context.Channel.SendFailureAsync("Error", "Invalid page number");
+        //        return; 
+        //    }
+        //    if (totalPages == 0) page = 0;
 
-            await SendInfoAsync(Context.Channel, $"Users with @{role.Name}", output, $"Page {page} of {totalPages}");
-        }
+        //    string output = users.Aggregate("", (current, user) => current + $"{user.Mention}\n");
+        //    if (output == "") output = "There are no users with that role.";
+
+        //    await SendInfoAsync(Context.Channel, $"Users with @{role.Name}", output, $"Page {page} of {totalPages}");
+        //}
 
         [Command("B64Encode")]
         public async Task B64Encode([Remainder] string input)

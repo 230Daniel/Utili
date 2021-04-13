@@ -15,7 +15,7 @@ namespace Utili.Features
     {
         public static async Task MessageReceived(SocketCommandContext context)
         {
-            if(!(context.Channel as IGuildChannel).BotHasPermissions(ChannelPermission.ViewChannel, ChannelPermission.ManageMessages)) return;
+            //if(!(context.Channel as IGuildChannel).BotHasPermissions(ChannelPermission.ViewChannel, ChannelPermission.ManageMessages)) return;
 
             if (context.User.Id == Program._oldClient.CurrentUser.Id && context.Message.Embeds.Count > 0)
             {
@@ -46,11 +46,11 @@ namespace Utili.Features
                 {
                     string deletionReason = $"Only messages {allowedTypes} are allowed in <#{context.Channel.Id}>";
 
-                    RestUserMessage sentMessage = await Context.Channel.SendFailureAsync("Message deleted", deletionReason, supportLink: false);
+                    // TODO RestUserMessage sentMessage = await context.Channel.SendFailureAsync("Message deleted", deletionReason, supportLink: false);
 
                     await Task.Delay(5000);
 
-                    await sentMessage.DeleteAsync();
+                    // await sentMessage.DeleteAsync();
                 }
             }
         }

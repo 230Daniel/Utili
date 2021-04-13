@@ -51,7 +51,7 @@ namespace Utili.Features
                 try
                 {
                     SocketRole role = guild.GetRole(roleId);
-                    if(BotPermissions.CanManageRole(role)) await after.AddRoleAsync(role);
+                    //if(BotPermissions.CanManageRole(role)) await after.AddRoleAsync(role);
                     await Task.Delay(1000);
                 }
                 catch { }
@@ -61,7 +61,7 @@ namespace Utili.Features
                 try
                 {
                     SocketRole role = guild.GetRole(roleId);
-                    if(BotPermissions.CanManageRole(role)) await after.RemoveRoleAsync(role);
+                    //if(BotPermissions.CanManageRole(role)) await after.RemoveRoleAsync(role);
                     await Task.Delay(1000);
                 }
                 catch { }

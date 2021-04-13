@@ -25,7 +25,7 @@ namespace Utili.Features
             SocketTextChannel channel = context.Guild.GetTextChannel(row.ToChannelId);
             if(channel is null) return;
 
-            if (!channel.BotHasPermissions(ChannelPermission.ViewChannel, ChannelPermission.ManageWebhooks)) return;
+            //if (!channel.BotHasPermissions(ChannelPermission.ViewChannel, ChannelPermission.ManageWebhooks)) return;
 
             RestWebhook webhook = null;
             try { webhook = await GetWebhookAsync(channel, row.WebhookId); } catch { }

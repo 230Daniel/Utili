@@ -107,13 +107,13 @@ namespace Utili.Features
             SocketGuild guild = _oldClient.GetGuild(row.GuildId);
             SocketTextChannel channel = guild.GetTextChannel(row.ChannelId);
 
-            if(!channel.BotHasPermissions(
-                ChannelPermission.ViewChannel, 
-                ChannelPermission.ReadMessageHistory, 
-                ChannelPermission.ManageMessages, 
-                ChannelPermission.SendMessages,
-                ChannelPermission.EmbedLinks, 
-                ChannelPermission.AttachFiles)) return;
+            //if(!channel.BotHasPermissions(
+            //    ChannelPermission.ViewChannel, 
+            //    ChannelPermission.ReadMessageHistory, 
+            //    ChannelPermission.ManageMessages, 
+            //    ChannelPermission.SendMessages,
+            //    ChannelPermission.EmbedLinks, 
+            //    ChannelPermission.AttachFiles)) return;
 
             try
             {
@@ -191,7 +191,7 @@ namespace Utili.Features
             NoticesRow row = await Database.Data.Notices.GetRowAsync(Context.Guild.Id, channel.Id);
             (string, Embed) notice = Notices.GetNotice(row);
             
-            await MessageSender.SendEmbedAsync(Context.Channel, notice.Item2, notice.Item1);
+            //await MessageSender.SendEmbedAsync(Context.Channel, notice.Item2, notice.Item1);
         }
     }
 }

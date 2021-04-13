@@ -5,6 +5,7 @@ using Discord.Commands;
 using Discord.Rest;
 using Discord.WebSocket;
 using Discord.Webhook;
+using Disqord.Bot;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
 using Utili.Commands;
@@ -50,25 +51,25 @@ namespace Utili.Features
         }
     }
 
-    public class RoslynCommands : DiscordGuildModuleBase
-    {
-        [Command("Evaluate"), Alias("Eval", "e"), Permission(Perm.BotOwner), Cooldown(5)]
-        public async Task Evaluate([Remainder] string code)
-        {
-            RoslynGlobals globals = new RoslynGlobals(_oldClient, Context, _config);
+    //public class RoslynCommands : DiscordGuildModuleBase
+    //{
+    //    [Command("Evaluate"), Alias("Eval", "e"), Permission(Perm.BotOwner), Cooldown(5)]
+    //    public async Task Evaluate([Remainder] string code)
+    //    {
+    //        RoslynGlobals globals = new RoslynGlobals(_oldClient, Context, _config);
 
-            RoslynResult result = await Roslyn.EvaluateAsync(code, globals);
+    //        RoslynResult result = await Roslyn.EvaluateAsync(code, globals);
 
-            if (result.Success)
-            {
-                await Context.Channel.SendSuccessAsync("Success", result.Result.ToString());
-            }
-            else
-            {
-                await Context.Channel.SendFailureAsync("Error", result.Exception.Message);
-            }
-        }
-    }
+    //        if (result.Success)
+    //        {
+    //            await Context.Channel.SendSuccessAsync("Success", result.Result.ToString());
+    //        }
+    //        else
+    //        {
+    //            await Context.Channel.SendFailureAsync("Error", result.Exception.Message);
+    //        }
+    //    }
+    //}
 
     internal class RoslynResult
     {

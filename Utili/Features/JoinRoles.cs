@@ -47,7 +47,7 @@ namespace Utili.Features
             foreach (ulong roleId in row.JoinRoles.Take(5))
             {
                 SocketRole role = guild.GetRole(roleId);
-                if (role is not null && BotPermissions.CanManageRole(role))
+                if (role is not null /*&& BotPermissions.CanManageRole(role)*/)
                 {
                     await user.AddRoleAsync(role);
                     await Task.Delay(1000);
@@ -80,7 +80,7 @@ namespace Utili.Features
                     foreach (ulong roleId in row.JoinRoles.Take(5))
                     {
                         SocketRole role = guild.GetRole(roleId);
-                        if (role is not null && BotPermissions.CanManageRole(role))
+                        if (role is not null/* && BotPermissions.CanManageRole(role)*/)
                         {
                             await user.AddRoleAsync(role);
                             await Task.Delay(1000);

@@ -29,20 +29,20 @@ namespace Utili
             return new LocalEmoji(emojiString);
         }
 
-        public static bool RequiresUpdate(SocketVoiceState before, SocketVoiceState after)
-        {
-            if (before.VoiceChannel is null && after.VoiceChannel is null)
-            {
-                return false;
-            }
+        //public static bool RequiresUpdate(SocketVoiceState before, SocketVoiceState after)
+        //{
+        //    if (before.VoiceChannel is null && after.VoiceChannel is null)
+        //    {
+        //        return false;
+        //    }
 
-            if (before.VoiceChannel is null || after.VoiceChannel is null)
-            {
-                return true;
-            }
+        //    if (before.VoiceChannel is null || after.VoiceChannel is null)
+        //    {
+        //        return true;
+        //    }
 
-            return after.VoiceChannel.Id != before.VoiceChannel.Id;
-        }
+        //    return after.VoiceChannel.Id != before.VoiceChannel.Id;
+        //}
 
         public static string EncodeString(string input)
         {

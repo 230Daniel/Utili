@@ -6,6 +6,7 @@ using System.Timers;
 using Database.Data;
 using Discord;
 using Discord.WebSocket;
+using Utili.Extensions;
 using static Utili.Program;
 using static Utili.MessageSender;
 

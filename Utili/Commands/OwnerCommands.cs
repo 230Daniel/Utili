@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Database.Data;
 using Disqord;
 using Disqord.Bot;
+using Disqord.Gateway;
 using Disqord.Rest;
 using Utili.Extensions;
 using static Utili.Program;
@@ -37,17 +38,17 @@ namespace Utili.Commands
         [Command("GuildInfo"), RequireBotOwner]
         public async Task GuildInfo(ulong guildId)
         {
-            RestGuild guild = await _oldRest.GetGuildAsync(guildId, true);
+            IGuild guild = await Context.Bot.FetchGuildAsync(guildId, true);
             bool premium = await Premium.IsGuildPremiumAsync(guildId);
 
             string content = $"Id: {guild?.Id}\n" +
                              $"Owner: {guild.OwnerId}\n" +
-                             $"Members: {guild.ApproximateMemberCount}\n" +
+                             //$"Members: {guild.MemberCount}\n" +
                              $"Created: {guild.CreatedAt.UtcDateTime} UTC\n" +
                              $"Premium: {premium.ToString().ToLower()}";
 
             LocalEmbedBuilder embed = Utils.MessageUtils.CreateEmbed(Utils.EmbedType.Info, guild.ToString(), content);
-            embed.WithThumbnailUrl(guild.IconUrl);
+            embed.WithThumbnailUrl(guild.GetIconUrl());
 
             await Context.Author.SendMessageAsync(new LocalMessageBuilder().WithEmbed(embed).Build());
             await Context.Channel.SendSuccessAsync("Guild info sent", $"Information about {guild} was sent in a direct message");

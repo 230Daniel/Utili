@@ -2,6 +2,8 @@
 using System.Linq;
 using Disqord;
 using Disqord.Bot;
+using Disqord.Bot.Sharding;
+using Disqord.Sharding;
 using DisqordTestBot.Extensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -9,7 +11,7 @@ using Qmmands;
 
 namespace DisqordTestBot.Implementations
 {
-    public class MyDiscordBot : DiscordBot
+    public class MyDiscordBotSharder : DiscordBotSharder
     {
         protected override LocalMessageBuilder FormatFailureMessage(DiscordCommandContext context, FailedResult result)
         {
@@ -69,6 +71,6 @@ namespace DisqordTestBot.Implementations
                 .WithMentions(LocalMentionsBuilder.None);
         }
 
-        public MyDiscordBot(IOptions<DiscordBotConfiguration> options, ILogger<DiscordBot> logger, IPrefixProvider prefixes, ICommandQueue queue, CommandService commands, IServiceProvider services, DiscordClient client) : base(options, logger, prefixes, queue, commands, services, client) { }
+        public MyDiscordBotSharder(IOptions<DiscordBotSharderConfiguration> options, ILogger<DiscordBotSharder> logger, IPrefixProvider prefixes, ICommandQueue queue, CommandService commands, IServiceProvider services, DiscordClientSharder client) : base(options, logger, prefixes, queue, commands, services, client) { }
     }
 }

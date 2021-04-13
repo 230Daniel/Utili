@@ -3,13 +3,15 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using Discord;
-using Discord.Commands;
 using Utili.Commands;
 using static Utili.MessageSender;
 using Database.Data;
 using Discord.Rest;
 using Discord.Webhook;
 using Discord.WebSocket;
+using Disqord.Bot;
+using Qmmands;
+using Utili.Extensions;
 
 namespace Utili.Features
 {
@@ -31,7 +33,7 @@ namespace Utili.Features
 
             if(row.Pin) try { await message.PinAsync(); } catch { }
 
-            try { pinChannel ??= Context.Guild.GetTextChannel(row.PinChannelId); } catch { }
+            //try { pinChannel ??= Context.Guild.GetTextChannel(row.PinChannelId); } catch { }
 
             if (pinChannel is null && row.Pin)
             {
@@ -93,16 +95,16 @@ namespace Utili.Features
             }
         }
 
-        [Command("Pin")] [Permission(Perm.ManageMessages), Cooldown(3)]
-        public async Task Pin(ulong messageId, SocketTextChannel pinChannel = null)
-        {
-            await Pin(messageId, pinChannel, Context.Channel as SocketTextChannel);
-        }
+        //[Discord.Commands.Command("Pin")] [Permission(Perm.ManageMessages), Cooldown(3)]
+        //public async Task Pin(ulong messageId, SocketTextChannel pinChannel = null)
+        //{
+        //    await Pin(messageId, pinChannel, Context.Channel as SocketTextChannel);
+        //}
 
-        [Command("Pin")] [Permission(Perm.ManageMessages), Cooldown(3)]
-        public async Task Pin(SocketTextChannel channel, ulong messageId, SocketTextChannel pinChannel = null)
-        {
-            await Pin(messageId, pinChannel, channel);
-        }
+        //[Discord.Commands.Command("Pin")] [Permission(Perm.ManageMessages), Cooldown(3)]
+        //public async Task Pin(SocketTextChannel channel, ulong messageId, SocketTextChannel pinChannel = null)
+        //{
+        //    await Pin(messageId, pinChannel, channel);
+        //}
     }
 }

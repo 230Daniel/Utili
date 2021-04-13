@@ -54,8 +54,8 @@ namespace Utili.Handlers
                         {
                             string errorReason = GetCommandErrorReason(result);
 
-                            if (!string.IsNullOrEmpty(errorReason)) await Context.Channel.SendFailureAsync("Error", errorReason);
-                            else logCommand = false;
+                            //if (!string.IsNullOrEmpty(errorReason)) await context.Channel.SendFailureAsync("Error", errorReason);
+                            //else logCommand = false;
                         }
 
                         if (logCommand) _logger.Log("Command", context.Message.Content);
@@ -82,10 +82,10 @@ namespace Utili.Handlers
 
                 _ = Features.Autopurge.MessageEdited(message);
 
-                SocketTextChannel guildChannel = channel as SocketTextChannel;
-                SocketCommandContext context = new SocketCommandContext(Helper.GetShardForGuild(guildChannel.Guild), message as SocketUserMessage);
+                //SocketTextChannel guildChannel = channel as SocketTextChannel;
+                //SocketCommandContext context = new SocketCommandContext(Helper.GetShardForGuild(guildChannel.Guild), message as SocketUserMessage);
 
-                _ = MessageLogs.MessageEdited(context);
+                //_ = MessageLogs.MessageEdited(context);
             });
         }
 

@@ -67,7 +67,7 @@ namespace Utili.Features
             SocketGuildUser user = request.User;
             SocketGuild guild = user.Guild;
 
-            if(!Helper.RequiresUpdate(request.Before, request.After)) return;
+            //if(!Helper.RequiresUpdate(request.Before, request.After)) return;
 
             List<VoiceRolesRow> rows = await Database.Data.VoiceRoles.GetRowsAsync(guild.Id);
             rows = rows.Where(x => guild.Roles.Any(y => y.Id == x.RoleId)).ToList();
@@ -108,12 +108,12 @@ namespace Utili.Features
                 return;
             }
 
-            if (beforeRole != guild.EveryoneRole && BotPermissions.CanManageRole(beforeRole))
+            if (beforeRole != guild.EveryoneRole/* && BotPermissions.CanManageRole(beforeRole)*/)
             {
                 await user.RemoveRoleAsync(beforeRole);
             }
 
-            if (afterRole != guild.EveryoneRole && BotPermissions.CanManageRole(afterRole))
+            if (afterRole != guild.EveryoneRole/* && BotPermissions.CanManageRole(afterRole)*/)
             {
                 await user.AddRoleAsync(afterRole);
             }

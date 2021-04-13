@@ -10,7 +10,7 @@ namespace Utili
         public static async Task<RestUserMessage> SendSuccessAsync(IChannel channel, string title, string message = null, string footer = null)
         {
             ISocketMessageChannel textChannel = channel as ISocketMessageChannel;
-            if(channel is IGuildChannel guildChannel && !guildChannel.BotHasPermissions(ChannelPermission.ViewChannel, ChannelPermission.SendMessages, ChannelPermission.EmbedLinks)) return null;
+            //if(channel is IGuildChannel guildChannel && !guildChannel.BotHasPermissions(ChannelPermission.ViewChannel, ChannelPermission.SendMessages, ChannelPermission.EmbedLinks)) return null;
 
             return await textChannel.SendMessageAsync(embed: GenerateEmbed(EmbedType.Success, title, message, footer));
         }
@@ -18,7 +18,7 @@ namespace Utili
         public static async Task<RestUserMessage> SendFailureAsync(IChannel channel, string title, string message = null, string footer = null, bool supportLink = true)
         {
             ISocketMessageChannel textChannel = channel as ISocketMessageChannel;
-            if(channel is IGuildChannel guildChannel && !guildChannel.BotHasPermissions(ChannelPermission.ViewChannel, ChannelPermission.SendMessages, ChannelPermission.EmbedLinks)) return null;
+            //if(channel is IGuildChannel guildChannel && !guildChannel.BotHasPermissions(ChannelPermission.ViewChannel, ChannelPermission.SendMessages, ChannelPermission.EmbedLinks)) return null;
 
             if (!string.IsNullOrEmpty(message) && supportLink)
             {
@@ -31,7 +31,7 @@ namespace Utili
         public static async Task<RestUserMessage> SendInfoAsync(IChannel channel, string title, string message, string footer = null, (string, string)[] fields = null, Color? colour = null)
         {
             ISocketMessageChannel textChannel = channel as ISocketMessageChannel;
-            if(channel is IGuildChannel guildChannel && !guildChannel.BotHasPermissions(ChannelPermission.ViewChannel, ChannelPermission.SendMessages, ChannelPermission.EmbedLinks)) return null;
+            //if(channel is IGuildChannel guildChannel && !guildChannel.BotHasPermissions(ChannelPermission.ViewChannel, ChannelPermission.SendMessages, ChannelPermission.EmbedLinks)) return null;
 
             return await textChannel.SendMessageAsync(embed: GenerateEmbed(EmbedType.Info, title, message, footer, fields, colour));
         }
@@ -39,7 +39,7 @@ namespace Utili
         public static async Task<RestUserMessage> SendEmbedAsync(IChannel channel, Embed embed, string text = null)
         {
             ISocketMessageChannel textChannel = channel as ISocketMessageChannel;
-            if(channel is IGuildChannel guildChannel && !guildChannel.BotHasPermissions(ChannelPermission.ViewChannel, ChannelPermission.SendMessages, ChannelPermission.EmbedLinks)) return null;
+            //if(channel is IGuildChannel guildChannel && !guildChannel.BotHasPermissions(ChannelPermission.ViewChannel, ChannelPermission.SendMessages, ChannelPermission.EmbedLinks)) return null;
 
             return await textChannel.SendMessageAsync(text, embed: embed);
         }

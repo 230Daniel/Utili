@@ -18,7 +18,7 @@ namespace Utili.Features
             foreach (ulong roleId in persistRow.Roles.Distinct().Where(x => !row.ExcludedRoles.Contains(x)))
             {
                 SocketRole role = guild.GetRole(roleId);
-                if (role is not null && BotPermissions.CanManageRole(role))
+                if (role is not null/* && BotPermissions.CanManageRole(role)*/)
                 {
                     try
                     {
