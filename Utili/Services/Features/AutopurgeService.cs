@@ -11,7 +11,7 @@ using Disqord.Rest;
 using Microsoft.Extensions.Logging;
 using Utili.Extensions;
 
-namespace Utili.Features
+namespace Utili.Services
 {
     public class AutopurgeService
     {
