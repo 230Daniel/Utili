@@ -20,7 +20,7 @@ namespace Utili.Services
 
             LogWriter.Write(
                 ($"{DateTime.UtcNow.Hour:00}:{DateTime.UtcNow.Minute:00}:{DateTime.UtcNow.Second:00}  ", ConsoleColor.White),
-                ($"{GetShortLogLevel(logLevel),-5}  ", GetLogLevelConsoleColour(logLevel)),
+                ($"{GetShortLogLevel(logLevel),-4}  ", GetLogLevelConsoleColour(logLevel)),
                 ($"{_categoryName,-16}  ", GetLogLevelConsoleColour(logLevel)),
                 ("»  ", ConsoleColor.Gray),
                 ($"{formatter.Invoke(state, exception)}\n", ConsoleColor.White),
@@ -45,7 +45,7 @@ namespace Utili.Services
                 LogLevel.Debug => "DBUG",
                 LogLevel.Information => "INFO",
                 LogLevel.Warning => "WARN",
-                LogLevel.Error => "EROR",
+                LogLevel.Error => "FAIL",
                 LogLevel.Critical => "CRIT",
                 LogLevel.None => "NONE",
                 _ => throw new ArgumentOutOfRangeException(nameof(logLevel), logLevel, null)

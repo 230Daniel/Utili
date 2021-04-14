@@ -27,7 +27,7 @@ namespace Utili.Services
             _channelsRequiringUpdate = new List<(ulong, ulong)>();
         }
 
-        public async Task VoiceStateUpdated(object sender, VoiceStateUpdatedEventArgs e)
+        public Task VoiceStateUpdated(object sender, VoiceStateUpdatedEventArgs e)
         {
             _ = Task.Run(async () =>
             {
@@ -42,6 +42,7 @@ namespace Utili.Services
                         _channelsRequiringUpdate.Add((e.GuildId, e.OldVoiceState.ChannelId.Value));
                 }
             });
+            return Task.CompletedTask;
         }
 
         public void Start()

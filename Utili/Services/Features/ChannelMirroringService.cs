@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -29,54 +30,63 @@ namespace Utili.Services
             _webhookCache = new Dictionary<ulong, IWebhook>();
         }
 
-        public async Task MessageReceived(object sender, MessageReceivedEventArgs e)
+        public Task MessageReceived(object sender, MessageReceivedEventArgs e)
         {
             _ = Task.Run(async () =>
             {
-                if(!e.GuildId.HasValue || e.Message is not IUserMessage userMessage || userMessage.WebhookId.HasValue) return;
-
-                ChannelMirroringRow row = await ChannelMirroring.GetRowAsync(e.GuildId.Value, e.ChannelId);
-                CachedGuild guild = _client.GetGuild(e.GuildId.Value);
-                CachedTextChannel channel = guild.GetTextChannel(row.ToChannelId);
-                if(channel is null) return;
-
-                if(!channel.BotHasPermissions(_client, Permission.ViewChannel, Permission.ManageWebhooks)) return;
-
-                IWebhook webhook = await GetWebhookAsync(row.WebhookId);
-
-                if (webhook is null)
+                try
                 {
-                    FileStream avatar = File.OpenRead("Avatar.png");
-                    webhook = await channel.CreateWebhookAsync("Utili Mirroring", x => x.Avatar = avatar);
-                    avatar.Close();
+                    if(!e.GuildId.HasValue || !(e.Message is IUserMessage userMessage) || userMessage.WebhookId.HasValue) return;
 
-                    row.WebhookId = webhook.Id;
-                    await row.SaveAsync();
+                    ChannelMirroringRow row = await ChannelMirroring.GetRowAsync(e.GuildId.Value, e.ChannelId);
+                    CachedGuild guild = _client.GetGuild(e.GuildId.Value);
+                    CachedTextChannel channel = guild.GetTextChannel(row.ToChannelId);
+                    if(channel is null) return;
+
+                    if(!channel.BotHasPermissions(_client, Permission.ViewChannel, Permission.ManageWebhooks)) return;
+
+                    IWebhook webhook = await GetWebhookAsync(row.WebhookId);
+
+                    if (webhook is null)
+                    {
+                        FileStream avatar = File.OpenRead("Avatar.png");
+                        webhook = await channel.CreateWebhookAsync("Utili Mirroring", x => x.Avatar = avatar);
+                        avatar.Close();
+
+                        row.WebhookId = webhook.Id;
+                        await row.SaveAsync();
+                    }
+
+                    string username = $"{e.Message.Author} in {e.Channel.Name}";
+                    string avatarUrl = e.Message.Author.GetAvatarUrl();
+
+                    if (!string.IsNullOrWhiteSpace(userMessage.Content) || userMessage.Embeds.Count > 0)
+                    {
+                        LocalWebhookMessageBuilder message = new LocalWebhookMessageBuilder()
+                            .WithName(username)
+                            .WithAvatarUrl(avatarUrl)
+                            .WithOptionalContent(userMessage.Content)
+                            .WithEmbeds(userMessage.Embeds.Select(LocalEmbedBuilder.FromEmbed))
+                            .WithMentions(LocalMentionsBuilder.None);
+
+                        await _client.ExecuteWebhookAsync(webhook.Id, webhook.Token, message.Build());
+                    }
+                    
+                    foreach (Attachment attachment in userMessage.Attachments)
+                    {
+                        LocalWebhookMessageBuilder attachmentMessage = new LocalWebhookMessageBuilder()
+                            .WithName(username)
+                            .WithAvatarUrl(avatarUrl)
+                            .WithContent(attachment.Url);
+                        await _client.ExecuteWebhookAsync(webhook.Id, webhook.Token, attachmentMessage.Build());
+                    }
                 }
-
-                string username = $"{e.Message.Author} in {e.Channel.Name}";
-                string avatarUrl = e.Message.Author.GetAvatarUrl();
-
-                LocalWebhookMessageBuilder message = new LocalWebhookMessageBuilder()
-                    .WithName(username)
-                    .WithAvatarUrl(avatarUrl)
-                    .WithEmbeds((e.Message as IUserMessage).Embeds.Select(x => x.ToLocalEmbedBuilder()))
-                    .WithMentions(LocalMentionsBuilder.None);
-
-                if (!string.IsNullOrWhiteSpace(e.Message.Content)) message.Content = e.Message.Content;
-
-                foreach (Attachment attachment in (e.Message as IUserMessage).Attachments)
+                catch(Exception e)
                 {
-                    WebRequest request = WebRequest.Create(attachment.Url);
-                    Stream stream = (await request.GetResponseAsync()).GetResponseStream();
-
-                    LocalWebhookMessageBuilder attachmentMessage = new LocalWebhookMessageBuilder()
-                        .WithAttachment(new LocalAttachment(stream, attachment.Filename));
-                    // TODO: Send attachment message
-
-                    stream?.Close();
+                    _logger.LogError(e, "Exception thrown on message received");
                 }
             });
+            return Task.CompletedTask;
         }
 
         async Task<IWebhook> GetWebhookAsync(ulong webhookId)

@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Disqord;
 using Disqord.Bot;
 using Disqord.Gateway.Api;
+using Disqord.Rest;
 using Microsoft.Extensions.Configuration;
 using Qmmands;
 using Utili.Extensions;
@@ -80,8 +81,8 @@ namespace Utili.Commands
         {
             int largestLatency = 0;
 
-            TimeSpan? gatewayLatency = _heartbeater.Latency;
-            int gateway = gatewayLatency.HasValue ? (int)Math.Round(gatewayLatency.Value.TotalMilliseconds) : 0;
+            TimeSpan? gatewayLatency = DateTime.UtcNow - Context.Message.CreatedAt.UtcDateTime;
+            int gateway = (int)Math.Round(gatewayLatency.Value.TotalMilliseconds);
             if (gateway > largestLatency) largestLatency = gateway;
 
             int rest = Program._pingTest.RestLatency;

@@ -119,7 +119,7 @@ namespace Utili.Services
             _ = GetNewChannelsMessagesAsync();
         }
 
-        public async Task MessageReceived(object sender, MessageReceivedEventArgs e)
+        public Task MessageReceived(object sender, MessageReceivedEventArgs e)
         {
             _ = Task.Run(async () =>
             {
@@ -140,6 +140,7 @@ namespace Utili.Services
                 };
                 await Autopurge.SaveMessageAsync(messageRow);
             });
+            return Task.CompletedTask;
         }
 
         public async Task MessageEdited(SocketMessage message)
