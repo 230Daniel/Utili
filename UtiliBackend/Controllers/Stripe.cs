@@ -18,16 +18,12 @@ namespace UtiliSite
     public class StripeController : Controller
     {
         static IStripeClient _stripeClient;
-        static List<ulong> _creatingCustomersFor;
+        static List<ulong> _creatingCustomersFor = new List<ulong>();
 
         public static void Initialise()
         {
             StripeConfiguration.ApiKey = Main.Config.StripePrivateKey;
             _stripeClient = new StripeClient(Main.Config.StripePrivateKey);
-            lock (_creatingCustomersFor)
-            {
-                _creatingCustomersFor = new List<ulong>();
-            }
         }
 
         [HttpPost("stripe/create-checkout-session")]
