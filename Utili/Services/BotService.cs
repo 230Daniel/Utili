@@ -16,14 +16,15 @@ namespace Utili.Services
 
         AutopurgeService _autopurge;
         ChannelMirroringService _channelMirroring;
+        JoinMessageService _joinMessage;
         VoiceLinkService _voiceLink;
-        
 
         public BotService(ILogger<BotService> logger, 
             IConfiguration config,
             DiscordClientBase client, 
             AutopurgeService autopurge,
             ChannelMirroringService channelMirroring,
+            JoinMessageService joinMessage,
             VoiceLinkService voiceLink)
             : base(logger, client)
         {
@@ -33,6 +34,7 @@ namespace Utili.Services
 
             _autopurge = autopurge;
             _channelMirroring = channelMirroring;
+            _joinMessage = joinMessage;
             _voiceLink = voiceLink;
         }
 
@@ -44,10 +46,9 @@ namespace Utili.Services
 
             _client.MessageReceived += _autopurge.MessageReceived;
             _client.MessageReceived += _channelMirroring.MessageReceived;
-
             _client.MessageUpdated += _autopurge.MessageUpdated;
-
             _client.VoiceStateUpdated += _voiceLink.VoiceStateUpdated;
+            _client.MemberJoined += _joinMessage.MemberJoined;
 
             _autopurge.Start();
             _voiceLink.Start();

@@ -10,7 +10,6 @@ namespace Utili.Handlers
         {
             _ = Task.Run(async () =>
             {
-                _ = JoinMessage.UserJoined(user);
 
                 // Await these so only one role is added per second
                 await RolePersist.UserJoined(user);
