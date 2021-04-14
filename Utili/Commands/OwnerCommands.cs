@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using Database.Data;
 using Disqord;
 using Disqord.Bot;
-using Disqord.Gateway;
 using Disqord.Rest;
 using Utili.Extensions;
 using static Utili.Program;

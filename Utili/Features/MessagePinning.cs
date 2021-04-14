@@ -3,14 +3,11 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using Discord;
-using Utili.Commands;
-using static Utili.MessageSender;
 using Database.Data;
 using Discord.Rest;
 using Discord.Webhook;
 using Discord.WebSocket;
 using Disqord.Bot;
-using Qmmands;
 using Utili.Extensions;
 
 namespace Utili.Features

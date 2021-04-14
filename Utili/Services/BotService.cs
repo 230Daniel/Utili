@@ -4,7 +4,6 @@ using Disqord;
 using Disqord.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using Utili.Features;
 
 namespace Utili.Services
 {
@@ -18,6 +17,7 @@ namespace Utili.Services
         ChannelMirroringService _channelMirroring;
         JoinMessageService _joinMessage;
         JoinRolesService _joinRoles;
+        MessageFilterService _messageFilter;
         VoiceLinkService _voiceLink;
 
         public BotService(
@@ -28,6 +28,7 @@ namespace Utili.Services
             ChannelMirroringService channelMirroring,
             JoinMessageService joinMessage,
             JoinRolesService joinRoles,
+            MessageFilterService messageFilter,
             VoiceLinkService voiceLink)
             : base(logger, client)
         {
@@ -39,6 +40,7 @@ namespace Utili.Services
             _channelMirroring = channelMirroring;
             _joinMessage = joinMessage;
             _joinRoles = joinRoles;
+            _messageFilter = messageFilter;
             _voiceLink = voiceLink;
         }
 
@@ -50,10 +52,15 @@ namespace Utili.Services
 
             _client.MessageReceived += _autopurge.MessageReceived;
             _client.MessageReceived += _channelMirroring.MessageReceived;
+            _client.MessageReceived += _messageFilter.MessageReceived;
+
             _client.MessageUpdated += _autopurge.MessageUpdated;
+
             _client.VoiceStateUpdated += _voiceLink.VoiceStateUpdated;
+
             _client.MemberJoined += _joinMessage.MemberJoined;
             _client.MemberJoined += _joinRoles.MemberJoined;
+
             _client.MemberUpdated += _joinRoles.MemberUpdated;
 
             _autopurge.Start();

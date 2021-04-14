@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Linq;
 using System.Threading.Tasks;
 using Disqord;
 using Disqord.Bot;
 using Disqord.Gateway.Api;
-using Disqord.Rest;
 using Microsoft.Extensions.Configuration;
 using Qmmands;
 using Utili.Extensions;

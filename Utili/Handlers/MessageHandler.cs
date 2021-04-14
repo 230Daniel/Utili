@@ -7,9 +7,7 @@ using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using static Utili.Program;
-using static Utili.MessageSender;
 using InactiveRole = Utili.Features.InactiveRole;
-using MessageFilter = Utili.Features.MessageFilter;
 using MessageLogs = Utili.Features.MessageLogs;
 using Notices = Utili.Features.Notices;
 using VoteChannels = Utili.Features.VoteChannels;
@@ -63,7 +61,6 @@ namespace Utili.Handlers
 
                 // High priority
                 try { await MessageLogs.MessageReceived(context); } catch (Exception e) { _logger.ReportError("MsgReceived", e); }
-                try { await MessageFilter.MessageReceived(context); } catch (Exception e) { _logger.ReportError("MsgReceived", e); }
 
                 // Low priority
                 _ = VoteChannels.MessageReceived(context);

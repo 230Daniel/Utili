@@ -5,15 +5,8 @@ using System.Threading.Tasks;
 using System.Timers;
 using Database.Data;
 using Discord;
-using Discord.Commands;
 using Discord.WebSocket;
-using Disqord.Bot;
-using Qmmands;
-using Utili.Commands;
-using Utili.Extensions;
-using Utili.Handlers;
 using static Utili.Program;
-using static Utili.MessageSender;
 
 namespace Utili.Features
 {

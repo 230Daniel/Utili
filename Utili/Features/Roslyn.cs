@@ -5,12 +5,8 @@ using Discord.Commands;
 using Discord.Rest;
 using Discord.WebSocket;
 using Discord.Webhook;
-using Disqord.Bot;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
-using Utili.Commands;
-using static Utili.Program;
-using static Utili.MessageSender;
 
 namespace Utili.Features
 {

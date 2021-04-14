@@ -5,9 +5,6 @@ using Database.Data;
 using Discord;
 using Discord.Commands;
 using Disqord.Bot;
-using static Utili.Program;
-using static Utili.MessageSender;
-using Utili.Commands;
 
 namespace Utili.Features
 {
@@ -37,32 +34,32 @@ namespace Utili.Features
         {
             return row.Mode switch
             {
-                // All
-                0 => true,
+                //// All
+                //0 => true,
 
-                // Images
-                1 => MessageFilter.IsImage(context),
+                //// Images
+                //1 => MessageFilterService.IsImage(context),
 
-                // Videos
-                2 => MessageFilter.IsVideo(context),
+                //// Videos
+                //2 => MessageFilterService.IsVideo(context),
 
-                // Media
-                3 => MessageFilter.IsImage(context) || MessageFilter.IsVideo(context),
+                //// Media
+                //3 => MessageFilterService.IsImage(context) || MessageFilterService.IsVideo(context),
 
-                // Music
-                4 => MessageFilter.IsMusic(context) || MessageFilter.IsVideo(context),
+                //// Music
+                //4 => MessageFilterService.IsMusic(context) || MessageFilterService.IsVideo(context),
 
-                // Attachments
-                5 => MessageFilter.IsAttachment(context),
+                //// Attachments
+                //5 => MessageFilterService.IsAttachment(context),
 
-                // URLs
-                6 => MessageFilter.IsUrl(context),
+                //// URLs
+                //6 => MessageFilterService.IsUrl(context),
 
-                // URLs or Media
-                7 => MessageFilter.IsImage(context) || MessageFilter.IsVideo(context) || MessageFilter.IsUrl(context),
+                //// URLs or Media
+                //7 => MessageFilterService.IsImage(context) || MessageFilterService.IsVideo(context) || MessageFilterService.IsUrl(context),
 
-                // Embeds
-                8 => MessageFilter.IsEmbed(context),
+                //// Embeds
+                //8 => MessageFilterService.IsEmbed(context),
 
                 // Default
                 _ => false,

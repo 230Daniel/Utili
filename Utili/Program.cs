@@ -10,7 +10,6 @@ using Utili.Implementations;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Utili.Features;
 using Utili.Services;
 
 namespace Utili
@@ -78,6 +77,7 @@ namespace Utili
             services.AddSingleton<ChannelMirroringService>();
             services.AddSingleton<VoiceLinkService>();
             services.AddSingleton<JoinMessageService>();
+            services.AddSingleton<MessageFilterService>();
             services.AddSingleton<JoinRolesService>();
         }
     }

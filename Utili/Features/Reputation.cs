@@ -1,18 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using Database.Data;
 using Discord;
-using Discord.Commands;
 using Discord.WebSocket;
-using Disqord.Bot;
-using Qmmands;
-using Utili.Commands;
-using Utili.Extensions;
-using Utili.Handlers;
-using Utili.Implementations;
-using static Utili.MessageSender;
 using static Utili.Program;
 
 namespace Utili.Features

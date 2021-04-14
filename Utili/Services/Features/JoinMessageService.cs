@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Net;
 using System.Threading.Tasks;
 using Database.Data;
 using Disqord;
-using Disqord.Bot;
 using Disqord.Gateway;
 using Disqord.Rest;
 using Microsoft.Extensions.Logging;

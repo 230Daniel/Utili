@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Disqord;
+﻿using Disqord;
 
 namespace Utili.Utils
 {
@@ -27,7 +22,7 @@ namespace Utili.Utils
 
                 case EmbedType.Failure:
                     embed.WithAuthor(title, "https://i.imgur.com/Sg4663k.png");
-                    embed.WithColor(new Color(181, 67, 129));
+                    embed.WithColor(new Color(181, 67, 67));
                     break;
             }
 

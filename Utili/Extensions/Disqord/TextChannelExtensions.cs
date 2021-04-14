@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Disqord;
-using Disqord.Gateway;
 using Disqord.Rest;
-using Utili.Services;
 using Utili.Utils;
 
 namespace Utili.Extensions
