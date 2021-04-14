@@ -75,6 +75,7 @@ namespace Utili
             services.AddPrefixProvider<PrefixProvider>();
 
             services.AddSingleton<AutopurgeService>();
+            services.AddSingleton<ChannelMirroringService>();
             services.AddSingleton<VoiceLinkService>();
         }
 

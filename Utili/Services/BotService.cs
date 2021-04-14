@@ -13,17 +13,21 @@ namespace Utili.Services
         DiscordClientBase _client;
 
         AutopurgeService _autopurge;
+        ChannelMirroringService _channelMirroring;
         VoiceLinkService _voiceLink;
-
+        
         public BotService(ILogger<BotService> logger, 
             DiscordClientBase client, 
             AutopurgeService autopurge,
+            ChannelMirroringService channelMirroring,
             VoiceLinkService voiceLink)
             : base(logger, client)
         {
             _logger = logger;
             _client = client;
+
             _autopurge = autopurge;
+            _channelMirroring = channelMirroring;
             _voiceLink = voiceLink;
         }
 
@@ -34,6 +38,8 @@ namespace Utili.Services
             Logger.LogInformation("Client says it's ready which is really cool.");
 
             _client.MessageReceived += _autopurge.MessageReceived;
+            _client.MessageReceived += _channelMirroring.MessageReceived;
+
             _client.VoiceStateUpdated += _voiceLink.VoiceStateUpdated;
 
             _autopurge.Start();
