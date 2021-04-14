@@ -14,8 +14,12 @@ namespace Utili.Commands
 {
     public class UtilCommands : DiscordGuildModuleBase
     {
-        [Command("Prune", "Purge", "Clear"), DefaultCooldown(1, 10), RequireAuthorChannelPermissions(Permission.ManageMessages)]
-        public async Task Prune([Remainder] string argsString = null)
+        [Command("Prune", "Purge", "Clear")]
+        [DefaultCooldown(1, 10)]
+        [RequireAuthorChannelPermissions(Permission.ManageMessages)]
+        public async Task Prune(
+            [Remainder]
+            string argsString = null)
         {
             if (string.IsNullOrEmpty(argsString))
             {
@@ -150,8 +154,14 @@ namespace Utili.Commands
             await sentMessage.DeleteAsync();
         }
 
-        [Command("React", "AddReaction", "AddEmoji"), DefaultCooldown(2, 5), RequireAuthorChannelPermissions(Permission.ManageMessages)]
-        public async Task React(ulong messageId, [Remainder] string emojiString)
+        [Command("React", "AddReaction", "AddEmoji")]
+        [DefaultCooldown(2, 5)]
+        [RequireAuthorChannelPermissions(Permission.AddReactions | Permission.ManageMessages)]
+        [RequireBotChannelPermissions(Permission.AddReactions | Permission.ReadMessageHistory)]
+        public async Task React(
+            ulong messageId, 
+            [Remainder] 
+            string emojiString)
         {
             IMessage message = await Context.Channel.FetchMessageAsync(messageId);
 
@@ -183,11 +193,16 @@ namespace Utili.Commands
             }
         }
 
-        [Command("React", "AddReaction", "AddEmoji"), DefaultCooldown(2, 5), RequireAuthorChannelPermissions(Permission.ManageMessages)]
-        public async Task React(ITextChannel channel, ulong messageId, [Remainder] string emojiString)
+        [Command("React", "AddReaction", "AddEmoji")]
+        [DefaultCooldown(2, 5)]
+        public async Task React(
+            [RequireAuthorParameterChannelPermissions(Permission.AddReactions | Permission.ManageMessages)]
+            [RequireBotParameterChannelPermissions(Permission.AddReactions | Permission.ReadMessageHistory)]
+            ITextChannel channel, 
+            ulong messageId, 
+            [Remainder] 
+            string emojiString)
         {
-            // TODO: Check for perms in the specified channel (custom param attrib?)
-
             IMessage message = await channel.FetchMessageAsync(messageId);
 
             if (message is null)
