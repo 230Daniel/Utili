@@ -78,6 +78,7 @@ namespace Utili
             services.AddSingleton<ChannelMirroringService>();
             services.AddSingleton<VoiceLinkService>();
             services.AddSingleton<JoinMessageService>();
+            services.AddSingleton<JoinRolesService>();
         }
     }
 }

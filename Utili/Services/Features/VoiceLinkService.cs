@@ -33,7 +33,6 @@ namespace Utili.Services
             {
                 VoiceLinkRow row = await VoiceLink.GetRowAsync(e.GuildId);
                 if (!row.Enabled) return;
-
                 lock (_channelsRequiringUpdate)
                 {
                     if (e.NewVoiceState?.ChannelId != null && !row.ExcludedChannels.Contains(e.NewVoiceState.ChannelId.Value))

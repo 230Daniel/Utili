@@ -25,6 +25,11 @@ namespace Utili.Extensions
             return guild.GetChannel(channelId) as CachedCategoryChannel;
         }
 
+        public static IRole GetRole(this IGuild guild, Snowflake roleId)
+        {
+            return guild.Roles.Values.FirstOrDefault(x => x.Id == roleId);
+        }
+
         public static bool BotHasPermissions(this IGuild guild, DiscordClientBase client, params Permission[] requiredPermissions)
         {
             CachedGuild cachedGuild = client.GetGuild(guild.Id);

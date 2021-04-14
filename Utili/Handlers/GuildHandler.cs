@@ -13,7 +13,6 @@ namespace Utili.Handlers
 
                 // Await these so only one role is added per second
                 await RolePersist.UserJoined(user);
-                await JoinRoles.UserJoined(user);
             });
         }
 
@@ -26,7 +25,6 @@ namespace Utili.Handlers
                 if (before.IsPending.HasValue && after.IsPending.HasValue && before.IsPending.Value && !after.IsPending.Value)
                 {
                     // Force bypass of all other delays, the user is no longer pending
-                    await JoinRoles.UserJoined(after, true);
                 }
 
                 await RoleLinking.GuildUserUpdated(before, after);

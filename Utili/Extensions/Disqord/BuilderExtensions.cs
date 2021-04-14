@@ -24,15 +24,13 @@ namespace Utili.Extensions
 
         public static LocalEmbedBuilder WithOptionalAuthor(this LocalEmbedBuilder builder, string name, string iconUrl)
         {
-            builder.Author = new LocalEmbedAuthorBuilder()
-                .WithOptionalName(name)
-                .WithIconUrl(iconUrl);
-            return builder;
-        }
-
-        public static LocalEmbedAuthorBuilder WithOptionalName(this LocalEmbedAuthorBuilder builder, string name)
-        {
-            if (!string.IsNullOrWhiteSpace(name)) builder.WithName(name);
+            if (!string.IsNullOrWhiteSpace(name))
+            {
+                builder.Author = new LocalEmbedAuthorBuilder()
+                    .WithName(name)
+                    .WithIconUrl(iconUrl);
+            }
+            
             return builder;
         }
 
