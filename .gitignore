@@ -346,3 +346,4 @@ DatabaseCredentials.json
 # Log files
 Errors/
 Errors
+/Utili/appsettings.json

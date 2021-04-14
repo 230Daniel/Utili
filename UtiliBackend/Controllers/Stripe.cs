@@ -17,11 +17,17 @@ namespace UtiliSite
 {
     public class StripeController : Controller
     {
-        private static IStripeClient _stripeClient;
+        static IStripeClient _stripeClient;
+        static List<ulong> _creatingCustomersFor;
+
         public static void Initialise()
         {
             StripeConfiguration.ApiKey = Main.Config.StripePrivateKey;
             _stripeClient = new StripeClient(Main.Config.StripePrivateKey);
+            lock (_creatingCustomersFor)
+            {
+                _creatingCustomersFor = new List<ulong>();
+            }
         }
 
         [HttpPost("stripe/create-checkout-session")]
@@ -30,7 +36,7 @@ namespace UtiliSite
             AuthDetails auth = await Authentication.GetAuthDetailsAsync(HttpContext);
             if (!auth.Authorised) return auth.Action;
 
-            await CreateCustomerIfRequiredAsync();
+            await CreateCustomerIfRequiredAsync(HttpContext);
 
             SessionCreateOptions options = new SessionCreateOptions
             {
@@ -77,10 +83,13 @@ namespace UtiliSite
         [HttpGet("stripe/customer-portal")]
         public async Task<ActionResult> CustomerPortal()
         {
-            await CreateCustomerIfRequiredAsync();
+            await CreateCustomerIfRequiredAsync(HttpContext);
+            await Task.Delay(500);
 
             AuthDetails auth = await Authentication.GetAuthDetailsAsync(HttpContext);
             if (!auth.Authorised) return auth.Action;
+
+            if (string.IsNullOrEmpty(auth.UserRow.CustomerId)) throw new Exception("Customer id was null or empty");
 
             Stripe.BillingPortal.SessionCreateOptions options = new Stripe.BillingPortal.SessionCreateOptions
             {
@@ -93,11 +102,28 @@ namespace UtiliSite
             return Ok(session);
         }
 
-        public async Task CreateCustomerIfRequiredAsync()
+        static async Task CreateCustomerIfRequiredAsync(HttpContext httpContext)
         {
-            AuthDetails auth = await Authentication.GetAuthDetailsAsync(HttpContext);
+            AuthDetails auth = await Authentication.GetAuthDetailsAsync(httpContext);
             if (!auth.Authorised) return;
             if (!string.IsNullOrEmpty(auth.UserRow.CustomerId)) return;
+
+            bool wait = false;
+            lock (_creatingCustomersFor)
+            {
+                if (_creatingCustomersFor.Contains(auth.User.Id)) wait = true;
+                else _creatingCustomersFor.Add(auth.User.Id);
+            }
+
+            if (wait)
+            {
+                while (true)
+                {
+                    await Task.Delay(1000);
+                    auth = await Authentication.GetAuthDetailsAsync(httpContext);
+                    if (!string.IsNullOrEmpty(auth.UserRow.CustomerId)) return;
+                }
+            }
 
             CustomerCreateOptions options = new CustomerCreateOptions {Description = $"User Id: {auth.User.Id}", Email = auth.User.Email};
 
@@ -184,6 +210,11 @@ namespace UtiliSite
                     string jsonSubscription = stripeEvent.Data.Object.ToString();
                     jsonSubscription = jsonSubscription.Substring(jsonSubscription.IndexOf('{'));
                     Subscription subscription = Subscription.FromJson(jsonSubscription);
+
+                    if (subscription.Id == "sub_JIYbFIjPeNjEuy" && DateTime.UtcNow < new DateTime(2021, 04, 16))
+                    {
+                        return Ok();
+                    }
 
                     ProductService productService = new ProductService(_stripeClient);
                     Product product = await productService.GetAsync(subscription.Items.Data[0].Plan.ProductId);
