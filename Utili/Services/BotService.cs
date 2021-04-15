@@ -20,6 +20,7 @@ namespace Utili.Services
         MessageFilterService _messageFilter;
         MessageLogsService _messageLogs;
         ReputationService _reputation;
+        RoleLinkingService _roleLinking;
         RolePersistService _rolePersist;
         VoiceLinkService _voiceLink;
 
@@ -34,6 +35,7 @@ namespace Utili.Services
             MessageFilterService messageFilter,
             MessageLogsService messageLogs,
             ReputationService reputation,
+            RoleLinkingService roleLinking,
             RolePersistService rolePersist,
             VoiceLinkService voiceLink)
             : base(logger, client)
@@ -49,6 +51,7 @@ namespace Utili.Services
             _messageFilter = messageFilter;
             _messageLogs = messageLogs;
             _reputation = reputation;
+            _roleLinking = roleLinking;
             _rolePersist = rolePersist;
             _voiceLink = voiceLink;
         }
@@ -83,6 +86,7 @@ namespace Utili.Services
             _client.MemberJoined += _rolePersist.MemberJoined;
 
             _client.MemberUpdated += _joinRoles.MemberUpdated;
+            _client.MemberUpdated += _roleLinking.MemberUpdated;
 
             _client.MemberLeft += _rolePersist.MemberLeft;
 

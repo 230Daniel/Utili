@@ -82,6 +82,8 @@ namespace Utili
             services.AddSingleton<JoinRolesService>();
             services.AddSingleton<MessageLogsService>();
             services.AddSingleton<ReputationService>();
+            services.AddSingleton<RolePersistService>();
+            services.AddSingleton<RoleLinkingService>();
         }
     }
 }
