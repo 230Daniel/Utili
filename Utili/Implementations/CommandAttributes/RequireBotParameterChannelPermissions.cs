@@ -30,7 +30,7 @@ namespace Utili.Implementations
 
             return permissions.Has(Permissions) ? 
                 Success() : 
-                Failure($"I lack the necessary channel permissions in {channel} ({Permissions - permissions}) to execute this.");
+                Failure($"The bot lacks the necessary channel permissions in {channel} ({Permissions - permissions}) to execute this.");
         }
     }
 }

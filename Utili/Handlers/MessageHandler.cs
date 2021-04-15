@@ -6,9 +6,9 @@ using Database.Data;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using Utili.Services;
 using static Utili.Program;
 using InactiveRole = Utili.Features.InactiveRole;
-using MessageLogs = Utili.Features.MessageLogs;
 using Notices = Utili.Features.Notices;
 using VoteChannels = Utili.Features.VoteChannels;
 
@@ -60,7 +60,6 @@ namespace Utili.Handlers
                 }
 
                 // High priority
-                try { await MessageLogs.MessageReceived(context); } catch (Exception e) { _logger.ReportError("MsgReceived", e); }
 
                 // Low priority
                 _ = VoteChannels.MessageReceived(context);
@@ -92,7 +91,6 @@ namespace Utili.Handlers
 
                 SocketTextChannel guildChannel = channel as SocketTextChannel;
 
-                _ = MessageLogs.MessageDeleted(guildChannel.Guild, guildChannel, partialMessage.Id);
             });
         }
 
@@ -103,9 +101,6 @@ namespace Utili.Handlers
                 if (channel is SocketDMChannel) return;
 
                 SocketTextChannel guildChannel = channel as SocketTextChannel;
-
-                _ = MessageLogs.MessagesBulkDeleted(guildChannel.Guild, guildChannel,
-                    messageIds.Select(x => x.Id).ToList());
             });
         }
 

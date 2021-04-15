@@ -8,6 +8,16 @@ namespace Utili.Extensions
 {
     static class MessageExtensions
     {
+        public static ITextChannel GetChannel(this IMessage message, ulong guildId)
+        {
+            return (message.Client as DiscordClientBase).GetTextChannel(guildId, message.ChannelId);
+        }
+
+        public static string GetJumpUrl(this IMessage message, ulong guildId)
+        {
+            return $"https://discord.com/channels/{guildId}/{message.ChannelId}/{message.Id}";
+        }
+
         public static bool IsImage(this IUserMessage message)
         {
             List<string> validAttachmentExtensions = new List<string>

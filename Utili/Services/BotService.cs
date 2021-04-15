@@ -18,6 +18,7 @@ namespace Utili.Services
         JoinMessageService _joinMessage;
         JoinRolesService _joinRoles;
         MessageFilterService _messageFilter;
+        MessageLogsService _messageLogs;
         VoiceLinkService _voiceLink;
 
         public BotService(
@@ -29,6 +30,7 @@ namespace Utili.Services
             JoinMessageService joinMessage,
             JoinRolesService joinRoles,
             MessageFilterService messageFilter,
+            MessageLogsService messageLogs,
             VoiceLinkService voiceLink)
             : base(logger, client)
         {
@@ -41,6 +43,7 @@ namespace Utili.Services
             _joinMessage = joinMessage;
             _joinRoles = joinRoles;
             _messageFilter = messageFilter;
+            _messageLogs = messageLogs;
             _voiceLink = voiceLink;
         }
 
@@ -53,8 +56,14 @@ namespace Utili.Services
             _client.MessageReceived += _autopurge.MessageReceived;
             _client.MessageReceived += _channelMirroring.MessageReceived;
             _client.MessageReceived += _messageFilter.MessageReceived;
+            _client.MessageReceived += _messageLogs.MessageReceived;
 
             _client.MessageUpdated += _autopurge.MessageUpdated;
+            _client.MessageUpdated += _messageLogs.MessageUpdated;
+
+            _client.MessageDeleted += _messageLogs.MessageDeleted;
+
+            _client.MessagesDeleted += _messageLogs.MessagesDeleted;
 
             _client.VoiceStateUpdated += _voiceLink.VoiceStateUpdated;
 

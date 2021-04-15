@@ -25,7 +25,6 @@ namespace Utili
 
         public static Logger _logger;
         public static Config _config;
-        public static Haste _haste;
         public static int _totalShards;
 
         public static Timer _shardStatsUpdater;
@@ -73,12 +72,15 @@ namespace Utili
             services.AddInteractivity();
             services.AddPrefixProvider<PrefixProvider>();
 
+            services.AddSingleton(new HasteService(context.Configuration["hasteServer"]));
+
             services.AddSingleton<AutopurgeService>();
             services.AddSingleton<ChannelMirroringService>();
             services.AddSingleton<VoiceLinkService>();
             services.AddSingleton<JoinMessageService>();
             services.AddSingleton<MessageFilterService>();
             services.AddSingleton<JoinRolesService>();
+            services.AddSingleton<MessageLogsService>();
         }
     }
 }

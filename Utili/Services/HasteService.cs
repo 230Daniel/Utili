@@ -1,30 +1,34 @@
-﻿using System.Net.Http;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 
-namespace Database
+namespace Utili.Services
 {
-    public class Haste
+    public class HasteService
     {
-        private string BaseUrl { get; }
+        string _baseUrl;
 
         public async Task<string> PasteAsync(string content, string format)
         {
             HttpContent httpContent = new StringContent(content);
             HttpClient httpClient = new HttpClient();
 
-            HttpResponseMessage httpResponse = await httpClient.PostAsync($"{BaseUrl}/documents", httpContent);
+            HttpResponseMessage httpResponse = await httpClient.PostAsync($"{_baseUrl}/documents", httpContent);
             string json = await httpResponse.Content.ReadAsStringAsync();
             string key = JsonConvert.DeserializeObject<PasteResponse>(json).Key;
-            return $"{BaseUrl}/{key}.{format}";
+            return $"{_baseUrl}/{key}.{format}";
         }
 
-        public Haste(string baseUrl)
+        public HasteService(string baseUrl)
         {
-            BaseUrl = baseUrl;
+            _baseUrl = baseUrl;
         }
 
-        private class PasteResponse
+        class PasteResponse
         {
             [JsonProperty("key")]
             public string Key { get; set; }
