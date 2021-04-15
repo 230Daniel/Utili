@@ -69,7 +69,7 @@ namespace Utili.Services
             {
                 try
                 {
-                    if (e.OldMember is not null & e.OldMember.IsPending && !e.NewMember.IsPending)
+                    if (e.OldMember is not null && e.OldMember.IsPending && !e.NewMember.IsPending)
                         await AddRolesAsync(e.NewMember.GuildId, e.NewMember.Id, false);
                 }
                 catch(Exception ex)

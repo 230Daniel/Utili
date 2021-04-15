@@ -19,6 +19,7 @@ namespace Utili.Services
         JoinRolesService _joinRoles;
         MessageFilterService _messageFilter;
         MessageLogsService _messageLogs;
+        ReputationService _reputation;
         VoiceLinkService _voiceLink;
 
         public BotService(
@@ -31,6 +32,7 @@ namespace Utili.Services
             JoinRolesService joinRoles,
             MessageFilterService messageFilter,
             MessageLogsService messageLogs,
+            ReputationService reputation,
             VoiceLinkService voiceLink)
             : base(logger, client)
         {
@@ -44,14 +46,16 @@ namespace Utili.Services
             _joinRoles = joinRoles;
             _messageFilter = messageFilter;
             _messageLogs = messageLogs;
+            _reputation = reputation;
             _voiceLink = voiceLink;
         }
 
         protected override async Task ExecuteAsync(CancellationToken cancellationToken)
         {
             await Database.Database.InitialiseAsync(false, _config.GetValue<string>("defaultPrefix"));
+            _logger.LogInformation("Database initialised");
+
             await Client.WaitUntilReadyAsync(cancellationToken);
-            Logger.LogInformation("Ready");
 
             _client.MessageReceived += _autopurge.MessageReceived;
             _client.MessageReceived += _channelMirroring.MessageReceived;
@@ -65,6 +69,10 @@ namespace Utili.Services
 
             _client.MessagesDeleted += _messageLogs.MessagesDeleted;
 
+            _client.ReactionAdded += _reputation.ReactionAdded;
+
+            _client.ReactionRemoved += _reputation.ReactionRemoved;
+
             _client.VoiceStateUpdated += _voiceLink.VoiceStateUpdated;
 
             _client.MemberJoined += _joinMessage.MemberJoined;
@@ -72,9 +80,13 @@ namespace Utili.Services
 
             _client.MemberUpdated += _joinRoles.MemberUpdated;
 
+            _logger.LogInformation("All events registered");
+
             _autopurge.Start();
             _joinRoles.Start();
             _voiceLink.Start();
+
+            _logger.LogInformation("All services started");
         }
     }
 }

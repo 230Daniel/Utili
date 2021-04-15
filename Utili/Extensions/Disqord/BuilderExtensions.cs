@@ -16,6 +16,17 @@ namespace Utili.Extensions
             return builder;
         }
 
+        public static LocalEmbedBuilder WithOptionalAuthor(this LocalEmbedBuilder builder, string name)
+        {
+            if (!string.IsNullOrWhiteSpace(name))
+            {
+                builder.Author = new LocalEmbedAuthorBuilder()
+                    .WithName(name);
+            }
+            
+            return builder;
+        }
+
         public static LocalEmbedBuilder WithOptionalAuthor(this LocalEmbedBuilder builder, string name, string iconUrl)
         {
             if (!string.IsNullOrWhiteSpace(name))

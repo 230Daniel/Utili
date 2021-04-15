@@ -13,8 +13,6 @@ namespace Utili.Handlers
             {
                 IGuild guild = (channel as IGuildChannel).Guild;
                 IEmote emote = reaction.Emote;
-                
-                await Reputation.ReactionAdded(guild, partialMessage, reaction.UserId, channel, emote);
             });
         }
 
@@ -24,8 +22,6 @@ namespace Utili.Handlers
             {
                 IGuild guild = (channel as IGuildChannel).Guild;
                 IEmote emote = reaction.Emote;
-
-                await Reputation.ReactionRemoved(guild, partialMessage, reaction.UserId, channel, emote);
             });
         }
 

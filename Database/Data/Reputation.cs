@@ -166,7 +166,7 @@ namespace Database.Data
     {
         public bool New { get; set; }
         public ulong GuildId { get; set; }
-        public List<(IEmote, int)> Emotes { get; set; }
+        public List<(string, int)> Emotes { get; set; }
 
         private ReputationRow()
         {
@@ -177,7 +177,7 @@ namespace Database.Data
         {
             New = true;
             GuildId = guildId;
-            Emotes = new List<(IEmote, int)>();
+            Emotes = new List<(string, int)>();
         }
 
         public static ReputationRow FromDatabase(ulong guildId, string emotes)
@@ -186,7 +186,7 @@ namespace Database.Data
             {
                 New = false,
                 GuildId = guildId,
-                Emotes = new List<(IEmote, int)>()
+                Emotes = new List<(string, int)>()
             };
 
             emotes = EString.FromEncoded(emotes).Value;
@@ -195,14 +195,8 @@ namespace Database.Data
                 foreach (string emoteString in emotes.Split(","))
                 {
                     int value = int.Parse(emoteString.Split("///").Last());
-                    if (Emote.TryParse(emoteString.Split("///").First(), out Emote emote))
-                    {
-                        row.Emotes.Add((emote, value));
-                    }
-                    else
-                    {
-                        row.Emotes.Add((new Emoji(emoteString.Split("///").First()), value));
-                    }
+                    string emote = emoteString.Split("///").First();
+                    row.Emotes.Add((emote, value));
                 }
             }
 

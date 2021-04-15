@@ -1,4 +1,5 @@
 ﻿using Disqord;
+using Utili.Extensions;
 
 namespace Utili.Utils
 {
@@ -11,17 +12,17 @@ namespace Utili.Utils
             switch (type)
             {
                 case EmbedType.Info:
-                    embed.WithAuthor(title);
+                    embed.WithOptionalAuthor(title);
                     embed.WithColor(new Color(67, 181, 129));
                     break;
 
                 case EmbedType.Success:
-                    embed.WithAuthor(title, "https://i.imgur.com/XnVa7ta.png");
+                    embed.WithOptionalAuthor(title, "https://i.imgur.com/XnVa7ta.png");
                     embed.WithColor(new Color(67, 181, 129));
                     break;
 
                 case EmbedType.Failure:
-                    embed.WithAuthor(title, "https://i.imgur.com/Sg4663k.png");
+                    embed.WithOptionalAuthor(title, "https://i.imgur.com/Sg4663k.png");
                     embed.WithColor(new Color(181, 67, 67));
                     break;
             }

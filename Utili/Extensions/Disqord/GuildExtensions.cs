@@ -7,17 +7,17 @@ namespace Utili.Extensions
 {
     static class GuildExtensions
     {
-        public static CachedTextChannel GetTextChannel(this CachedGuild guild, Snowflake channelId)
+        public static CachedTextChannel GetTextChannel(this IGuild guild, Snowflake channelId)
         {
             return guild.GetChannel(channelId) as CachedTextChannel;
         }
 
-        public static CachedVoiceChannel GetVoiceChannel(this CachedGuild guild, Snowflake channelId)
+        public static CachedVoiceChannel GetVoiceChannel(this IGuild guild, Snowflake channelId)
         {
             return guild.GetChannel(channelId) as CachedVoiceChannel;
         }
 
-        public static CachedCategoryChannel GetCategoryChannel(this CachedGuild guild, Snowflake channelId)
+        public static CachedCategoryChannel GetCategoryChannel(this IGuild guild, Snowflake channelId)
         {
             return guild.GetChannel(channelId) as CachedCategoryChannel;
         }
