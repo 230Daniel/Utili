@@ -7,27 +7,14 @@ namespace Utili.Extensions
 {
     static class ChannelExtensions
     {
-        public static bool BotHasPermissions(this IGuildChannel channel, DiscordClientBase client, params Permission[] requiredPermissions)
+        public static bool BotHasPermissions(this IGuildChannel channel, DiscordClientBase client, Permission permissions)
         {
-            CachedGuild guild = client.GetGuild(channel.GuildId);
-            IMember bot = guild.Members.GetValueOrDefault(client.CurrentUser.Id);
-            List<CachedRole> roles = bot.GetRoles().Values.ToList();
-
-            ChannelPermissions permissions = Disqord.Discord.Permissions.CalculatePermissions(guild, channel, bot, roles);
-            return requiredPermissions.All(x => permissions.Contains(x));
+            return channel.GetGuild(client).GetCurrentMember(client).GetChannelPermissions(channel).Has(permissions);
         }
 
-        public static bool BotHasPermissions(this IGuildChannel channel, DiscordClientBase client, out string missingPermissions, params Permission[] requiredPermissions)
+        public static IGuild GetGuild(this IGuildChannel channel, DiscordClientBase client)
         {
-            CachedGuild guild = client.GetGuild(channel.GuildId);
-            IMember bot = guild.GetMember(client.CurrentUser.Id);
-            IEnumerable<CachedRole> roles = bot.GetRoles().Values;
-
-            ChannelPermissions permissions = Disqord.Discord.Permissions.CalculatePermissions(guild, channel, bot, roles);
-
-            missingPermissions = "";
-
-            return requiredPermissions.All(x => permissions.Contains(x));
+            return client.GetGuild(channel.GuildId);
         }
     }
 }

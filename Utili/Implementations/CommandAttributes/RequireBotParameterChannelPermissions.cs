@@ -7,6 +7,7 @@ using Disqord;
 using Disqord.Bot;
 using Disqord.Gateway;
 using Qmmands;
+using Utili.Extensions;
 
 namespace Utili.Implementations
 {
@@ -25,12 +26,11 @@ namespace Utili.Implementations
         public override ValueTask<CheckResult> CheckAsync(object argument, DiscordGuildCommandContext context)
         {
             IGuildChannel channel = (IGuildChannel) argument;
-            IReadOnlyDictionary<Snowflake, CachedRole> roles = context.Guild.GetMember(context.Bot.CurrentUser.Id).GetRoles();
-            ChannelPermissions permissions = Disqord.Discord.Permissions.CalculatePermissions(context.Guild, channel, context.Guild.GetMember(context.Bot.CurrentUser.Id), roles.Values);
+            ChannelPermissions permissions = context.CurrentMember.GetChannelPermissions(channel);
 
             return permissions.Has(Permissions) ? 
                 Success() : 
-                Failure($"You lack the necessary channel permissions in {channel} ({Permissions - permissions}) to execute this.");
+                Failure($"I lack the necessary channel permissions in {channel} ({Permissions - permissions}) to execute this.");
         }
     }
 }

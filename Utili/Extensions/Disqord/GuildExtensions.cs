@@ -27,27 +27,14 @@ namespace Utili.Extensions
             return guild.Roles.Values.FirstOrDefault(x => x.Id == roleId);
         }
 
-        public static bool BotHasPermissions(this IGuild guild, DiscordClientBase client, params Permission[] requiredPermissions)
+        public static IMember GetCurrentMember(this IGuild guild, DiscordClientBase client)
         {
-            CachedGuild cachedGuild = client.GetGuild(guild.Id);
-            IMember bot = cachedGuild.Members.GetValueOrDefault(client.CurrentUser.Id);
-            List<CachedRole> roles = bot.GetRoles().Values.ToList();
-
-            GuildPermissions permissions = Disqord.Discord.Permissions.CalculatePermissions(cachedGuild, bot, roles);
-            return requiredPermissions.All(x => permissions.Contains(x));
+            return guild.GetMember(client.CurrentUser.Id);
         }
 
-        public static bool BotHasPermissions(this CachedGuild guild, DiscordClientBase client, out string missingPermissions, params Permission[] requiredPermissions)
+        public static bool BotHasPermissions(this IGuild guild, DiscordClientBase client, Permission permissions)
         {
-            CachedGuild cachedGuild = client.GetGuild(guild.Id);
-            IMember bot = cachedGuild.Members.GetValueOrDefault(client.CurrentUser.Id);
-            List<CachedRole> roles = bot.GetRoles().Values.ToList();
-
-            GuildPermissions permissions = Disqord.Discord.Permissions.CalculatePermissions(cachedGuild, bot, roles);
-
-            missingPermissions = "";
-
-            return requiredPermissions.All(x => permissions.Contains(x));
+            return guild.GetCurrentMember(client).GetGuildPermissions().Has(permissions);
         }
     }
 }

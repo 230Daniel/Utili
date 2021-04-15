@@ -40,7 +40,7 @@ namespace Utili.Services
                     CachedTextChannel channel = guild.GetTextChannel(row.ToChannelId);
                     if(channel is null) return;
 
-                    if(!channel.BotHasPermissions(_client, Permission.ViewChannel, Permission.ManageWebhooks)) return;
+                    if(!channel.BotHasPermissions(_client, Permission.ViewChannel | Permission.ManageWebhooks)) return;
 
                     IWebhook webhook = await GetWebhookAsync(row.WebhookId);
 

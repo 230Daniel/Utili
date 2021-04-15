@@ -17,6 +17,7 @@ namespace Utili.Commands
         [Command("Prune", "Purge", "Clear")]
         [DefaultCooldown(1, 10)]
         [RequireAuthorChannelPermissions(Permission.ManageMessages)]
+        [RequireBotChannelPermissions(Permission.ManageMessages | Permission.ReadMessageHistory)]
         public async Task Prune(
             [Remainder]
             string argsString = null)
@@ -31,11 +32,6 @@ namespace Utili.Commands
                     "[How do I get a message ID?](https://support.discord.com/hc/en-us/articles/206346498)");
 
                 return;
-            }
-
-            if(!Context.Channel.BotHasPermissions(Context.Bot, out string missingPermissions, Permission.ViewChannel, Permission.ReadMessageHistory, Permission.ManageMessages))
-            {
-                await Context.Channel.SendFailureAsync("Error", $"I'm missing the following permissions: {missingPermissions}");
             }
 
             string[] args = argsString.Split(" ");
@@ -171,13 +167,6 @@ namespace Utili.Commands
                 return;
             }
 
-            if (!Context.Channel.BotHasPermissions(Context.Bot, out string missingPermissions, Permission.ViewChannel, Permission.ReadMessageHistory, Permission.AddReactions))
-            {
-                await Context.Channel.SendFailureAsync("Error",
-                    $"I'm missing the following permissions: {missingPermissions}");
-                return;
-            }
-
             IEmoji emoji = Helper.GetEmoji(emojiString, Context.Guild);
 
             try
@@ -209,12 +198,6 @@ namespace Utili.Commands
             {
                 await Context.Channel.SendFailureAsync("Error",
                     $"No message was found in <#{channel.Id}> with ID {messageId}\n[How do I get a message ID?](https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID-)");
-                return;
-            }
-
-            if (!channel.BotHasPermissions(Context.Bot, out string missingPermissions, Permission.ViewChannel, Permission.ReadMessageHistory, Permission.AddReactions))
-            {
-                await Context.Channel.SendFailureAsync("Error", $"I'm missing the following permissions: {missingPermissions}");
                 return;
             }
 
