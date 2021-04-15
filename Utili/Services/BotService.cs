@@ -20,6 +20,7 @@ namespace Utili.Services
         MessageFilterService _messageFilter;
         MessageLogsService _messageLogs;
         ReputationService _reputation;
+        RolePersistService _rolePersist;
         VoiceLinkService _voiceLink;
 
         public BotService(
@@ -33,6 +34,7 @@ namespace Utili.Services
             MessageFilterService messageFilter,
             MessageLogsService messageLogs,
             ReputationService reputation,
+            RolePersistService rolePersist,
             VoiceLinkService voiceLink)
             : base(logger, client)
         {
@@ -47,6 +49,7 @@ namespace Utili.Services
             _messageFilter = messageFilter;
             _messageLogs = messageLogs;
             _reputation = reputation;
+            _rolePersist = rolePersist;
             _voiceLink = voiceLink;
         }
 
@@ -77,8 +80,11 @@ namespace Utili.Services
 
             _client.MemberJoined += _joinMessage.MemberJoined;
             _client.MemberJoined += _joinRoles.MemberJoined;
+            _client.MemberJoined += _rolePersist.MemberJoined;
 
             _client.MemberUpdated += _joinRoles.MemberUpdated;
+
+            _client.MemberLeft += _rolePersist.MemberLeft;
 
             _logger.LogInformation("All events registered");
 
