@@ -40,7 +40,7 @@ namespace Utili.Services
                     foreach (ulong roleId in persistRow.Roles.Distinct().Where(x => !row.ExcludedRoles.Contains(x)))
                     {
                         IRole role = guild.GetRole(roleId);
-                        if (role is not null && role.CanBeManaged(_client))
+                        if (role is not null && role.CanBeManaged())
                         {
                             await e.Member.GrantRoleAsync(roleId);
                             await Task.Delay(1000);

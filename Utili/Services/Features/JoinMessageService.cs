@@ -33,7 +33,7 @@ namespace Utili.Services
                     else
                     {
                         ITextChannel channel = _client.GetTextChannel(e.GuildId, row.ChannelId);
-                        if(!channel.BotHasPermissions(_client, Permission.ViewChannel | Permission.SendMessages | Permission.EmbedLinks)) return;
+                        if(!channel.BotHasPermissions(Permission.ViewChannel | Permission.SendMessages | Permission.EmbedLinks)) return;
                         await channel.SendMessageAsync(message);
                     }
                 }

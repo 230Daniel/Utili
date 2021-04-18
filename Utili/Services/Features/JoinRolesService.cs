@@ -88,7 +88,7 @@ namespace Utili.Services
             foreach(ulong roleId in row.JoinRoles.Take(5))
             {
                 IRole role = guild.GetRole(roleId);
-                if (role is not null && role.CanBeManaged(_client))
+                if (role is not null && role.CanBeManaged())
                 {
                     await guild.GrantRoleAsync(memberId, roleId);
                     await Task.Delay(1000);

@@ -7,14 +7,14 @@ namespace Utili.Extensions
 {
     static class ChannelExtensions
     {
-        public static bool BotHasPermissions(this IGuildChannel channel, DiscordClientBase client, Permission permissions)
+        public static bool BotHasPermissions(this IGuildChannel channel, Permission permissions)
         {
-            return channel.GetGuild(client).GetCurrentMember(client).GetChannelPermissions(channel).Has(permissions);
+            return channel.GetGuild().GetCurrentMember().GetChannelPermissions(channel).Has(permissions);
         }
 
-        public static IGuild GetGuild(this IGuildChannel channel, DiscordClientBase client)
+        public static IGuild GetGuild(this IGuildChannel channel)
         {
-            return client.GetGuild(channel.GuildId);
+            return (channel.Client as DiscordClientBase).GetGuild(channel.GuildId);
         }
     }
 }

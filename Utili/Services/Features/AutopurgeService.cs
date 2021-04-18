@@ -104,7 +104,7 @@ namespace Utili.Services
                 CachedGuild guild = _client.GetGuild(row.GuildId);
                 CachedTextChannel channel = guild.GetTextChannel(row.ChannelId);
 
-                if(!channel.BotHasPermissions(_client, Permission.ViewChannel | Permission.ReadMessageHistory | Permission.ManageMessages)) return;
+                if(!channel.BotHasPermissions(Permission.ViewChannel | Permission.ReadMessageHistory | Permission.ManageMessages)) return;
 
                 List<AutopurgeMessageRow> messagesToDelete = await Autopurge.GetAndDeleteDueMessagesAsync(row);
                 if(messagesToDelete.Count == 0) return;
@@ -237,7 +237,7 @@ namespace Utili.Services
                     CachedGuild guild = _client.GetGuild(row.GuildId);
                     CachedTextChannel channel = guild.GetTextChannel(row.ChannelId);
 
-                    if(!channel.BotHasPermissions(_client, Permission.ViewChannel | Permission.ReadMessageHistory)) return;
+                    if(!channel.BotHasPermissions(Permission.ViewChannel | Permission.ReadMessageHistory)) return;
 
                     List<AutopurgeMessageRow> messageRows =
                         await Autopurge.GetMessagesAsync(guild.Id, channel.Id);

@@ -87,5 +87,17 @@ namespace Utili.Commands
             await Task.Delay(10000);
             Monitoring.Restart();
         }
+
+        [Command("Test"), RequireBotOwner]
+        public async Task Test()
+        {
+            var members = await Context.Guild.FetchAllMembersAsync();
+            string content = "";
+            foreach (var member in members)
+            {
+                content += $"{member}\n";
+            }
+            await Context.Channel.SendSuccessAsync("Fetched all members", content);
+        }
     }
 }

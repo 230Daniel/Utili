@@ -29,7 +29,7 @@ namespace Utili.Services
                 {
                     if(!e.GuildId.HasValue) return;
 
-                    if(!e.Channel.BotHasPermissions(_client, Permission.ViewChannel | Permission.ManageMessages)) return;
+                    if(!e.Channel.BotHasPermissions(Permission.ViewChannel | Permission.ManageMessages)) return;
                     if (e.Message is IUserMessage userMessage && 
                         e.Member.Id == _client.CurrentUser.Id &&
                         userMessage.Embeds.Count > 0 && 

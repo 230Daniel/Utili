@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Disqord;
 using Disqord.Gateway;
 
@@ -27,14 +28,19 @@ namespace Utili.Extensions
             return guild.Roles.Values.FirstOrDefault(x => x.Id == roleId);
         }
 
-        public static IMember GetCurrentMember(this IGuild guild, DiscordClientBase client)
+        public static IMember GetCurrentMember(this IGuild guild)
         {
-            return guild.GetMember(client.CurrentUser.Id);
+            return guild.GetMember((guild.Client as DiscordClientBase).CurrentUser.Id);
         }
 
-        public static bool BotHasPermissions(this IGuild guild, DiscordClientBase client, Permission permissions)
+        public static bool BotHasPermissions(this IGuild guild, Permission permissions)
         {
-            return guild.GetCurrentMember(client).GetGuildPermissions().Has(permissions);
+            return guild.GetCurrentMember().GetGuildPermissions().Has(permissions);
+        }
+
+        public static Task<IReadOnlyList<IMember>> FetchAllMembersAsync(this IGuild guild)
+        {
+            return (guild.Client as DiscordClientBase).FetchAllMembersAsync(guild.Id);
         }
     }
 }

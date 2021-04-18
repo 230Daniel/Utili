@@ -1,5 +1,9 @@
-﻿using Disqord;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Disqord;
 using Disqord.Gateway;
+using Disqord.Rest;
 
 namespace Utili.Extensions
 {
@@ -18,6 +22,11 @@ namespace Utili.Extensions
         public static CachedCategoryChannel GetCategoryChannel(this DiscordClientBase client, Snowflake guildId, Snowflake channelId)
         {
             return client.GetChannel(guildId, channelId) as CachedCategoryChannel;
+        }
+
+        public static Task<IReadOnlyList<IMember>> FetchAllMembersAsync(this DiscordClientBase client, Snowflake guildId)
+        {
+            return client.FetchMembersAsync(guildId, int.MaxValue);
         }
     }
 }

@@ -75,7 +75,7 @@ namespace Utili.Services
                     foreach (ulong roleId in rolesToAdd)
                     {
                         IRole role = guild.GetRole(roleId);
-                        if (role.CanBeManaged(_client))
+                        if (role.CanBeManaged())
                         {
                             await e.NewMember.GrantRoleAsync(roleId);
                             await Task.Delay(1000);
@@ -84,7 +84,7 @@ namespace Utili.Services
                     foreach (ulong roleId in rolesToRemove)
                     {
                         IRole role = guild.GetRole(roleId);
-                        if (role.CanBeManaged(_client))
+                        if (role.CanBeManaged())
                         {
                             await e.NewMember.RevokeRoleAsync(roleId);
                             await Task.Delay(1000);

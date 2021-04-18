@@ -84,9 +84,9 @@ namespace Utili.Services
                     CachedVoiceChannel voiceChannel = guild.GetVoiceChannel(channelId);
                     CachedCategoryChannel category = voiceChannel.CategoryId.HasValue ? guild.GetCategoryChannel(voiceChannel.CategoryId.Value) : null;
 
-                    if(!voiceChannel.BotHasPermissions(_client, Permission.ViewChannel)) return;
-                    if (category is not null && !category.BotHasPermissions(_client, Permission.ViewChannel | Permission.ManageChannels | Permission.ManageRoles)) return;
-                    if (category is null && !guild.BotHasPermissions(_client, Permission.ViewChannel | Permission.ManageChannels | Permission.ManageRoles)) return;
+                    if(!voiceChannel.BotHasPermissions(Permission.ViewChannel)) return;
+                    if (category is not null && !category.BotHasPermissions(Permission.ViewChannel | Permission.ManageChannels | Permission.ManageRoles)) return;
+                    if (category is null && !guild.BotHasPermissions(Permission.ViewChannel | Permission.ManageChannels | Permission.ManageRoles)) return;
 
                     List<IVoiceState> voiceStates = guild.VoiceStates.Values.Where(x => x.ChannelId == voiceChannel.Id).ToList();
                     List<IMember> connectedUsers = guild.Members.Values.Where(x => voiceStates.Any(y => y.MemberId == x.Id)).ToList();
@@ -103,7 +103,7 @@ namespace Utili.Services
 
                     if (connectedUsers.Count(x => !x.IsBot) == 0 && metaRow.DeleteChannels)
                     {
-                        if(textChannel is null || !textChannel.BotHasPermissions(_client, Permission.ViewChannel | Permission.ManageChannels)) return;
+                        if(textChannel is null || !textChannel.BotHasPermissions(Permission.ViewChannel | Permission.ManageChannels)) return;
                         await textChannel.DeleteAsync();
                         channelRow.TextChannelId = 0;
                         await VoiceLink.SaveChannelRowAsync(channelRow);
@@ -130,7 +130,7 @@ namespace Utili.Services
                     }
                     else
                     {
-                        if(!textChannel.BotHasPermissions(_client, Permission.ViewChannel | Permission.ManageChannels | Permission.ManageRoles)) return;
+                        if(!textChannel.BotHasPermissions(Permission.ViewChannel | Permission.ManageChannels | Permission.ManageRoles)) return;
                     }
 
                     overwrites = textChannel.Overwrites.Select(x => new LocalOverwrite(x.TargetId, x.TargetType, x.Permissions)).ToList();
