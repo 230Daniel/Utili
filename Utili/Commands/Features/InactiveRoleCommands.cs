@@ -90,6 +90,7 @@ namespace Utili.Commands
         [Command("Kick")]
         [RequireAuthorGuildPermissions(Permission.Administrator)]
         [RequireBotGuildPermissions(Permission.KickMembers)]
+        [RequireBotChannelPermissions(Permission.AddReactions)]
         [Cooldown(1, 10, CooldownMeasure.Seconds, CooldownBucketType.Guild)]
         public async Task Kick()
         {
