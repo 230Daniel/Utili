@@ -15,6 +15,7 @@ namespace Utili.Services
 
         AutopurgeService _autopurge;
         ChannelMirroringService _channelMirroring;
+        InactiveRoleService _inactiveRole;
         JoinMessageService _joinMessage;
         JoinRolesService _joinRoles;
         MessageFilterService _messageFilter;
@@ -30,6 +31,7 @@ namespace Utili.Services
             DiscordClientBase client, 
             AutopurgeService autopurge,
             ChannelMirroringService channelMirroring,
+            InactiveRoleService inactiveRole,
             JoinMessageService joinMessage,
             JoinRolesService joinRoles,
             MessageFilterService messageFilter,
@@ -46,6 +48,7 @@ namespace Utili.Services
 
             _autopurge = autopurge;
             _channelMirroring = channelMirroring;
+            _inactiveRole = inactiveRole;
             _joinMessage = joinMessage;
             _joinRoles = joinRoles;
             _messageFilter = messageFilter;
@@ -65,9 +68,10 @@ namespace Utili.Services
 
             _client.MessageReceived += _autopurge.MessageReceived;
             _client.MessageReceived += _channelMirroring.MessageReceived;
+            _client.MessageReceived += _inactiveRole.MessageReceived;
             _client.MessageReceived += _messageFilter.MessageReceived;
             _client.MessageReceived += _messageLogs.MessageReceived;
-
+            
             _client.MessageUpdated += _autopurge.MessageUpdated;
             _client.MessageUpdated += _messageLogs.MessageUpdated;
 
@@ -80,6 +84,7 @@ namespace Utili.Services
             _client.ReactionRemoved += _reputation.ReactionRemoved;
 
             _client.VoiceStateUpdated += _voiceLink.VoiceStateUpdated;
+            _client.VoiceStateUpdated += _inactiveRole.VoiceStateUpdated;
 
             _client.MemberJoined += _joinMessage.MemberJoined;
             _client.MemberJoined += _joinRoles.MemberJoined;
@@ -93,9 +98,10 @@ namespace Utili.Services
             _logger.LogInformation("All events registered");
 
             _autopurge.Start();
+            _inactiveRole.Start();
             _joinRoles.Start();
             _voiceLink.Start();
-
+            
             _logger.LogInformation("All services started");
         }
     }

@@ -8,9 +8,6 @@ using Discord.Commands;
 using Discord.WebSocket;
 using Utili.Services;
 using static Utili.Program;
-using InactiveRole = Utili.Features.InactiveRole;
-using Notices = Utili.Features.Notices;
-using VoteChannels = Utili.Features.VoteChannels;
 
 namespace Utili.Handlers
 {
@@ -62,9 +59,8 @@ namespace Utili.Handlers
                 // High priority
 
                 // Low priority
-                _ = VoteChannels.MessageReceived(context);
-                _ = InactiveRole.UpdateUserAsync(context.Guild, context.User as SocketGuildUser);
-                _ = Notices.MessageReceived(context);
+                //_ = VoteChannels.MessageReceived(context);
+                //_ = Notices.MessageReceived(context);
             });
         }
 
