@@ -5,7 +5,7 @@ using Utili.Utils;
 
 namespace Utili.Extensions
 {
-    static class TextChannelExtensions
+    public static class TextChannelExtensions
     {
         public static async Task<IUserMessage> SendInfoAsync(this ITextChannel channel, string title, string content = null)
         {

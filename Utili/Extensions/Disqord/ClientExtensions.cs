@@ -7,7 +7,7 @@ using Disqord.Rest;
 
 namespace Utili.Extensions
 {
-    static class ClientExtensions
+    public static class ClientExtensions
     {
         public static CachedTextChannel GetTextChannel(this DiscordClientBase client, Snowflake guildId, Snowflake channelId)
         {

@@ -5,7 +5,7 @@ using Disqord.Gateway;
 
 namespace Utili.Extensions
 {
-    static class RoleExtensions
+    public static class RoleExtensions
     {
         public static bool CanBeManaged(this IRole role)
         {

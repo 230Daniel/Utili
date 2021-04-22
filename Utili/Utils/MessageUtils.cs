@@ -3,7 +3,7 @@ using Utili.Extensions;
 
 namespace Utili.Utils
 {
-    static class MessageUtils
+    public static class MessageUtils
     {
         public static LocalEmbedBuilder CreateEmbed(EmbedType type, string title, string content = null)
         {

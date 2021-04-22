@@ -6,7 +6,7 @@ using Disqord;
 
 namespace Utili.Extensions
 {
-    static class MessageExtensions
+    public static class MessageExtensions
     {
         public static ITextChannel GetChannel(this IMessage message, ulong guildId)
         {

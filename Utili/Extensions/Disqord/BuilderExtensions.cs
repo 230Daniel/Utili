@@ -2,7 +2,7 @@
 
 namespace Utili.Extensions
 {
-    static class BuilderExtensions
+    public static class BuilderExtensions
     {
         public static LocalMessageBuilder WithOptionalContent(this LocalMessageBuilder builder, string content)
         {

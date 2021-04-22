@@ -2,7 +2,7 @@
 
 namespace Utili.Extensions
 {
-    static class TimeSpanExtensions
+    public static class TimeSpanExtensions
     {
         public static string ToLongString (this TimeSpan span)
         {

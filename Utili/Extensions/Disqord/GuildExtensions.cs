@@ -6,7 +6,7 @@ using Disqord.Gateway;
 
 namespace Utili.Extensions
 {
-    static class GuildExtensions
+    public static class GuildExtensions
     {
         public static CachedTextChannel GetTextChannel(this IGuild guild, Snowflake channelId)
         {
