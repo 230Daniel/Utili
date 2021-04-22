@@ -67,7 +67,6 @@ class Core extends React.Component{
 
 	getInput(){
 		this.state.core = {
-			nickname: this.settings.nickname.current.getValue(),
 			prefix: this.settings.prefix.current.getValue(),
 			enableCommands: this.settings.enableCommands.current.getValue(),
 			excludedChannels: this.settings.excludedChannels.current.getSelected()
