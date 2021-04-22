@@ -85,6 +85,7 @@ namespace Utili
             services.AddSingleton<RolePersistService>();
             services.AddSingleton<RoleLinkingService>();
             services.AddSingleton<InactiveRoleService>();
+            services.AddSingleton<VoiceRolesService>();
         }
     }
 }

@@ -24,6 +24,7 @@ namespace Utili.Services
         RoleLinkingService _roleLinking;
         RolePersistService _rolePersist;
         VoiceLinkService _voiceLink;
+        VoiceRolesService _voiceRoles;
 
         public BotService(
             ILogger<BotService> logger, 
@@ -39,7 +40,8 @@ namespace Utili.Services
             ReputationService reputation,
             RoleLinkingService roleLinking,
             RolePersistService rolePersist,
-            VoiceLinkService voiceLink)
+            VoiceLinkService voiceLink,
+            VoiceRolesService voiceRoles)
             : base(logger, client)
         {
             _logger = logger;
@@ -57,6 +59,7 @@ namespace Utili.Services
             _roleLinking = roleLinking;
             _rolePersist = rolePersist;
             _voiceLink = voiceLink;
+            _voiceRoles = voiceRoles;
         }
 
         protected override async Task ExecuteAsync(CancellationToken cancellationToken)
@@ -85,6 +88,7 @@ namespace Utili.Services
 
             _client.VoiceStateUpdated += _voiceLink.VoiceStateUpdated;
             _client.VoiceStateUpdated += _inactiveRole.VoiceStateUpdated;
+            _client.VoiceStateUpdated += _voiceRoles.VoiceStateUpdated;
 
             _client.MemberJoined += _joinMessage.MemberJoined;
             _client.MemberJoined += _joinRoles.MemberJoined;
@@ -101,6 +105,7 @@ namespace Utili.Services
             _inactiveRole.Start();
             _joinRoles.Start();
             _voiceLink.Start();
+            _voiceRoles.Start();
             
             _logger.LogInformation("All services started");
         }
