@@ -4,6 +4,7 @@ using Disqord;
 using Disqord.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Utili.Features;
 
 namespace Utili.Services
 {
@@ -25,6 +26,7 @@ namespace Utili.Services
         RolePersistService _rolePersist;
         VoiceLinkService _voiceLink;
         VoiceRolesService _voiceRoles;
+        VoteChannelsService _voteChannels;
 
         public BotService(
             ILogger<BotService> logger, 
@@ -41,7 +43,8 @@ namespace Utili.Services
             RoleLinkingService roleLinking,
             RolePersistService rolePersist,
             VoiceLinkService voiceLink,
-            VoiceRolesService voiceRoles)
+            VoiceRolesService voiceRoles,
+            VoteChannelsService voteChannels)
             : base(logger, client)
         {
             _logger = logger;
@@ -60,6 +63,7 @@ namespace Utili.Services
             _rolePersist = rolePersist;
             _voiceLink = voiceLink;
             _voiceRoles = voiceRoles;
+            _voteChannels = voteChannels;
         }
 
         protected override async Task ExecuteAsync(CancellationToken cancellationToken)
@@ -74,6 +78,7 @@ namespace Utili.Services
             _client.MessageReceived += _inactiveRole.MessageReceived;
             _client.MessageReceived += _messageFilter.MessageReceived;
             _client.MessageReceived += _messageLogs.MessageReceived;
+            _client.MessageReceived += _voteChannels.MessageReceived;
             
             _client.MessageUpdated += _autopurge.MessageUpdated;
             _client.MessageUpdated += _messageLogs.MessageUpdated;

@@ -100,7 +100,7 @@ namespace Database.Data
         public ulong GuildId { get; set; }
         public ulong ChannelId { get; set; }
         public int Mode { get; set; }
-        public List<IEmote> Emotes { get; set; }
+        public List<string> Emotes { get; set; }
 
         private VoteChannelsRow()
         {
@@ -113,7 +113,7 @@ namespace Database.Data
             GuildId = guildId;
             ChannelId = channelId;
             Mode = 0;
-            Emotes = new List<IEmote>();
+            Emotes = new List<string>();
         }
 
         public static VoteChannelsRow FromDatabase(ulong guildId, ulong channelId, int mode, string emotes)
@@ -124,25 +124,12 @@ namespace Database.Data
                 GuildId = guildId,
                 ChannelId = channelId,
                 Mode = mode,
-                Emotes = new List<IEmote>()
+                Emotes = new List<string>()
             };
-
+            
             emotes = EString.FromEncoded(emotes).Value;
-            if (!string.IsNullOrEmpty(emotes))
-            {
-                foreach (string emoteString in emotes.Split(","))
-                {
-                    if (Emote.TryParse(emoteString, out Emote emote))
-                    {
-                        row.Emotes.Add(emote);
-                    }
-                    else
-                    {
-                        row.Emotes.Add(new Emoji(emoteString));
-                    }
-                }
-            }
-
+            row.Emotes = emotes.Split(",").ToList();
+            row.Emotes.RemoveAll(string.IsNullOrWhiteSpace);
             return row;
         }
 
@@ -152,7 +139,7 @@ namespace Database.Data
 
             for (int i = 0; i < Emotes.Count; i++)
             {
-                emotesString += Emotes[i].ToString();
+                emotesString += Emotes[i];
                 if (i != Emotes.Count - 1)
                 {
                     emotesString += ",";

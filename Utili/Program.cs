@@ -10,6 +10,7 @@ using Utili.Implementations;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Utili.Features;
 using Utili.Services;
 
 namespace Utili
@@ -86,6 +87,7 @@ namespace Utili
             services.AddSingleton<RoleLinkingService>();
             services.AddSingleton<InactiveRoleService>();
             services.AddSingleton<VoiceRolesService>();
+            services.AddSingleton<VoteChannelsService>();
         }
     }
 }

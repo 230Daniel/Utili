@@ -21,6 +21,7 @@ namespace Database.Data
             else
             {
                 string command = "SELECT * FROM Reputation WHERE TRUE";
+                
                 List<(string, object)> values = new List<(string, object)>();
 
                 if (guildId.HasValue)
@@ -194,6 +195,9 @@ namespace Database.Data
             {
                 foreach (string emoteString in emotes.Split(","))
                 {
+                    if(string.IsNullOrWhiteSpace(emoteString))
+                        continue;
+                    
                     int value = int.Parse(emoteString.Split("///").Last());
                     string emote = emoteString.Split("///").First();
                     row.Emotes.Add((emote, value));

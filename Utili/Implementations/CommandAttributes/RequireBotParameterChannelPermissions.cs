@@ -25,6 +25,8 @@ namespace Utili.Implementations
 
         public override ValueTask<CheckResult> CheckAsync(object argument, DiscordGuildCommandContext context)
         {
+            if (argument is null) return Success();
+            
             IGuildChannel channel = (IGuildChannel) argument;
             ChannelPermissions permissions = context.CurrentMember.GetChannelPermissions(channel);
 
