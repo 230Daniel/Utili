@@ -21,66 +21,58 @@ namespace Utili.Services
             _client = client;
         }
 
-        public Task ReactionAdded(object sender, ReactionAddedEventArgs e)
+        public async Task ReactionAdded(ReactionAddedEventArgs e)
         {
-            _ = Task.Run(async () =>
+            try
             {
-                try
-                {
-                    if(!e.GuildId.HasValue) return;
+                if(!e.GuildId.HasValue) return;
 
-                    IGuild guild = _client.GetGuild(e.GuildId.Value);
-                    ITextChannel channel = guild.GetTextChannel(e.ChannelId);
+                IGuild guild = _client.GetGuild(e.GuildId.Value);
+                ITextChannel channel = guild.GetTextChannel(e.ChannelId);
 
-                    ReputationRow row = await Reputation.GetRowAsync(e.GuildId.Value);
-                    if (!row.Emotes.Any(x => Helper.GetEmoji(x.Item1, guild).Equals(e.Emoji))) return;
-                    int change = row.Emotes.First(x => Equals(x.Item1, e.Emoji.ToString())).Item2;
+                ReputationRow row = await Reputation.GetRowAsync(e.GuildId.Value);
+                if (!row.Emotes.Any(x => Helper.GetEmoji(x.Item1, guild).Equals(e.Emoji))) return;
+                int change = row.Emotes.First(x => Equals(x.Item1, e.Emoji.ToString())).Item2;
 
-                    IUserMessage message = e.Message ?? await channel.FetchMessageAsync(e.MessageId) as IUserMessage;
-                    if(message is null || message.Author.IsBot || message.Author.Id == e.UserId) return;
+                IUserMessage message = e.Message ?? await channel.FetchMessageAsync(e.MessageId) as IUserMessage;
+                if(message is null || message.Author.IsBot || message.Author.Id == e.UserId) return;
 
-                    IMember reactor = e.Member ?? await guild.FetchMemberAsync(e.UserId);
-                    if(reactor is null || reactor.IsBot) return;
+                IMember reactor = e.Member ?? await guild.FetchMemberAsync(e.UserId);
+                if(reactor is null || reactor.IsBot) return;
 
-                    await Reputation.AlterUserReputationAsync(guild.Id, message.Author.Id, change);
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Exception thrown on reaction added");
-                }
-            });
-            return Task.CompletedTask;
+                await Reputation.AlterUserReputationAsync(guild.Id, message.Author.Id, change);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Exception thrown on reaction added");
+            }
         }
 
-        public Task ReactionRemoved(object sender, ReactionRemovedEventArgs e)
+        public async Task ReactionRemoved(ReactionRemovedEventArgs e)
         {
-            _ = Task.Run(async () =>
+            try
             {
-                try
-                {
-                    if(!e.GuildId.HasValue) return;
+                if(!e.GuildId.HasValue) return;
 
-                    IGuild guild = _client.GetGuild(e.GuildId.Value);
-                    ITextChannel channel = guild.GetTextChannel(e.ChannelId);
+                IGuild guild = _client.GetGuild(e.GuildId.Value);
+                ITextChannel channel = guild.GetTextChannel(e.ChannelId);
 
-                    ReputationRow row = await Reputation.GetRowAsync(e.GuildId.Value);
-                    if (!row.Emotes.Any(x => Helper.GetEmoji(x.Item1, guild).Equals(e.Emoji))) return;
-                    int change = -1 * row.Emotes.First(x => Equals(x.Item1, e.Emoji.ToString())).Item2;
+                ReputationRow row = await Reputation.GetRowAsync(e.GuildId.Value);
+                if (!row.Emotes.Any(x => Helper.GetEmoji(x.Item1, guild).Equals(e.Emoji))) return;
+                int change = -1 * row.Emotes.First(x => Equals(x.Item1, e.Emoji.ToString())).Item2;
 
-                    IUserMessage message = e.Message ?? await channel.FetchMessageAsync(e.MessageId) as IUserMessage;
-                    if(message is null || message.Author.IsBot || message.Author.Id == e.UserId) return;
+                IUserMessage message = e.Message ?? await channel.FetchMessageAsync(e.MessageId) as IUserMessage;
+                if(message is null || message.Author.IsBot || message.Author.Id == e.UserId) return;
 
-                    IMember reactor = await guild.FetchMemberAsync(e.UserId);
-                    if(reactor is null || reactor.IsBot) return;
+                IMember reactor = await guild.FetchMemberAsync(e.UserId);
+                if(reactor is null || reactor.IsBot) return;
 
-                    await Reputation.AlterUserReputationAsync(guild.Id, message.Author.Id, change);
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Exception thrown on reaction removed");
-                }
-            });
-            return Task.CompletedTask;
+                await Reputation.AlterUserReputationAsync(guild.Id, message.Author.Id, change);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Exception thrown on reaction removed");
+            }
         }
     }
 }

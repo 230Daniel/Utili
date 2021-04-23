@@ -32,52 +32,44 @@ namespace Utili.Services
             _ = ScheduleAllAddRoles();
         }
 
-        public Task MemberJoined(object sender, MemberJoinedEventArgs e)
+        public async Task MemberJoined(MemberJoinedEventArgs e)
         {
-            _ = Task.Run(async () =>
+            try
             {
-                try
-                {
-                    JoinRolesRow row = await JoinRoles.GetRowAsync(e.GuildId);
-                    IGuild guild = _client.GetGuild(e.GuildId);
+                JoinRolesRow row = await JoinRoles.GetRowAsync(e.GuildId);
+                IGuild guild = _client.GetGuild(e.GuildId);
 
-                    if (row.WaitForVerification)
+                if (row.WaitForVerification)
+                {
+                    if(e.Member.IsPending) return;
+                    if (guild.VerificationLevel >= GuildVerificationLevel.High)
                     {
-                        if(e.Member.IsPending) return;
-                        if (guild.VerificationLevel >= GuildVerificationLevel.High)
-                        {
-                            MiscRow pendingRow = new MiscRow(guild.Id, "JoinRoles-Pending", $"{DateTime.UtcNow.AddMinutes(10)}///{e.Member.Id}");
-                            await Misc.SaveRowAsync(pendingRow);
-                            ScheduleAddRoles(e.GuildId, e.Member.Id, DateTime.UtcNow.AddMinutes(10));
-                            return;
-                        }
+                        MiscRow pendingRow = new MiscRow(guild.Id, "JoinRoles-Pending", $"{DateTime.UtcNow.AddMinutes(10)}///{e.Member.Id}");
+                        await Misc.SaveRowAsync(pendingRow);
+                        ScheduleAddRoles(e.GuildId, e.Member.Id, DateTime.UtcNow.AddMinutes(10));
+                        return;
                     }
+                }
 
-                    await AddRolesAsync(e.GuildId, e.Member.Id, false, row);
-                }
-                catch(Exception ex)
-                {
-                    _logger.LogError(ex, "Exception thrown on member joined");
-                }
-            });
-            return Task.CompletedTask;
+                await AddRolesAsync(e.GuildId, e.Member.Id, false, row);
+            }
+            catch(Exception ex)
+            {
+                _logger.LogError(ex, "Exception thrown on member joined");
+            }
         }
 
-        public Task MemberUpdated(object sender, MemberUpdatedEventArgs e)
+        public async Task MemberUpdated(MemberUpdatedEventArgs e)
         {
-            _ = Task.Run(async () =>
+            try
             {
-                try
-                {
-                    if (e.OldMember is not null && e.OldMember.IsPending && !e.NewMember.IsPending)
-                        await AddRolesAsync(e.NewMember.GuildId, e.NewMember.Id, false);
-                }
-                catch(Exception ex)
-                {
-                    _logger.LogError(ex, "Exception thrown on member updated");
-                }
-            });
-            return Task.CompletedTask;
+                if (e.OldMember is not null && e.OldMember.IsPending && !e.NewMember.IsPending)
+                    await AddRolesAsync(e.NewMember.GuildId, e.NewMember.Id, false);
+            }
+            catch(Exception ex)
+            {
+                _logger.LogError(ex, "Exception thrown on member updated");
+            }
         }
 
         async Task AddRolesAsync(ulong guildId, ulong memberId, bool fromDelay, JoinRolesRow row = null)

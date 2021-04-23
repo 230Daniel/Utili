@@ -20,7 +20,7 @@ namespace Utili.Services
             _client = client;
         }
 
-        public async Task MemberJoined(object sender, MemberJoinedEventArgs e)
+        public async Task MemberJoined(MemberJoinedEventArgs e)
         {
             try
             {

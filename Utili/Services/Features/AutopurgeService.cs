@@ -123,15 +123,14 @@ namespace Utili.Services
             _ = GetNewChannelsMessagesAsync();
         }
 
-        public Task MessageReceived(object sender, MessageReceivedEventArgs e)
+        public async Task MessageReceived(MessageReceivedEventArgs e)
         {
-            _ = Task.Run(async () =>
+            try
             {
-                _logger.LogDebug("oi");
-                if(!e.GuildId.HasValue) return;
+                if (!e.GuildId.HasValue) return;
 
                 AutopurgeRow row = await Autopurge.GetRowAsync(e.GuildId.Value, e.ChannelId);
-                if(row.Mode == 2) return;
+                if (row.Mode == 2) return;
 
                 AutopurgeMessageRow messageRow = new AutopurgeMessageRow
                 {
@@ -143,19 +142,23 @@ namespace Utili.Services
                     IsPinned = e.Message is IUserMessage userMessage && userMessage.IsPinned
                 };
                 await Autopurge.SaveMessageAsync(messageRow);
-            });
-            return Task.CompletedTask;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Exception thrown on message received");
+            }
         }
 
-        public Task MessageUpdated(object sender, MessageUpdatedEventArgs e)
+        public async Task MessageUpdated(MessageUpdatedEventArgs e)
         {
-            _ = Task.Run(async () =>
+            try
             {
-                if(!e.GuildId.HasValue) return;
+                if (!e.GuildId.HasValue) return;
                 AutopurgeRow row = await Autopurge.GetRowAsync(e.GuildId.Value, e.ChannelId);
-                if(row.Mode == 2) return;
+                if (row.Mode == 2) return;
 
-                AutopurgeMessageRow messageRow = (await Autopurge.GetMessagesAsync(e.GuildId.Value, e.ChannelId, e.MessageId)).FirstOrDefault();
+                AutopurgeMessageRow messageRow =
+                    (await Autopurge.GetMessagesAsync(e.GuildId.Value, e.ChannelId, e.MessageId)).FirstOrDefault();
                 if (messageRow is null)
                 {
                     messageRow = new AutopurgeMessageRow
@@ -176,8 +179,11 @@ namespace Utili.Services
                     messageRow.IsPinned = e.NewMessage.IsPinned;
                     await Autopurge.SaveMessageAsync(messageRow);
                 }
-            });
-            return Task.CompletedTask;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Exception thrown on message updated");
+            }
         }
 
         async Task GetMessagesAsync()

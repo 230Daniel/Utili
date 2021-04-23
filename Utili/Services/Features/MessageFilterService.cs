@@ -21,47 +21,46 @@ namespace Utili.Services
             _client = client;
         }
 
-        public Task MessageReceived(object sender, MessageReceivedEventArgs e)
+        public async Task<bool> MessageReceived(MessageReceivedEventArgs e)
+        // Returns true if the message was deleted by the filter
         {
-            _ = Task.Run(async () =>
+            try
             {
-                try
+                if(!e.GuildId.HasValue) return false;
+
+                if(!e.Channel.BotHasPermissions(Permission.ViewChannel | Permission.ManageMessages)) return false;
+                if (e.Message is IUserMessage userMessage && 
+                    e.Member.Id == _client.CurrentUser.Id &&
+                    userMessage.Embeds.Count > 0 && 
+                    userMessage.Embeds.First().Author?.Name == "Message deleted")
+                    return false;
+
+                MessageFilterRow row = await MessageFilter.GetRowAsync(e.GuildId.Value, e.ChannelId);
+                if(row.New) return false;
+
+                if (e.Message is not IUserMessage message)
                 {
-                    if(!e.GuildId.HasValue) return;
-
-                    if(!e.Channel.BotHasPermissions(Permission.ViewChannel | Permission.ManageMessages)) return;
-                    if (e.Message is IUserMessage userMessage && 
-                        e.Member.Id == _client.CurrentUser.Id &&
-                        userMessage.Embeds.Count > 0 && 
-                        userMessage.Embeds.First().Author?.Name == "Message deleted")
-                        return;
-
-                    MessageFilterRow row = await MessageFilter.GetRowAsync(e.GuildId.Value, e.ChannelId);
-                    if(row.New) return;
-
-                    if (e.Message is not IUserMessage)
-                    {
-                        await e.Message.DeleteAsync();
-                        return;
-                    }
-
-                    if (!DoesMessageObeyRule(e.Message as IUserMessage, row, out string allowedTypes))
-                    {
-                        await e.Message.DeleteAsync();
-                        if(e.Member.IsBot) return;
-
-                        IUserMessage sent = await e.Channel.SendFailureAsync("Message deleted",
-                            $"Only messages {allowedTypes} are allowed in {e.Channel.Mention}");
-                        await Task.Delay(8000);
-                        await sent.DeleteAsync();
-                    }
+                    await e.Message.DeleteAsync();
+                    return false;
                 }
-                catch (Exception ex)
+
+                if (!DoesMessageObeyRule(message, row, out string allowedTypes))
                 {
-                    _logger.LogError(ex, "Exception thrown on message received");
+                    await e.Message.DeleteAsync();
+                    if(e.Member.IsBot) return true;
+
+                    IUserMessage sent = await e.Channel.SendFailureAsync("Message deleted",
+                        $"Only messages {allowedTypes} are allowed in {e.Channel.Mention}");
+                    await Task.Delay(8000);
+                    await sent.DeleteAsync();
+                    return true;
                 }
-            });
-            return Task.CompletedTask;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Exception thrown on message received");
+            }
+            return false;
         }
 
         static bool DoesMessageObeyRule(IUserMessage message, MessageFilterRow row, out string allowedTypes)

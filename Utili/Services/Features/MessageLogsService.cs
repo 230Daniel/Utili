@@ -26,127 +26,111 @@ namespace Utili.Services
             _haste = haste;
         }
 
-        public Task MessageReceived(object sender, MessageReceivedEventArgs e)
+        public async Task MessageReceived(MessageReceivedEventArgs e)
         {
-            _ = Task.Run(async () =>
+            try
             {
-                try
+                if(e.Message.Author.IsBot || !e.GuildId.HasValue) return;
+
+                MessageLogsRow row = await MessageLogs.GetRowAsync(e.GuildId.Value);
+                if ((row.DeletedChannelId == 0 && row.EditedChannelId == 0) || row.ExcludedChannels.Contains(e.ChannelId)) return;
+
+                MessageLogsMessageRow message = new MessageLogsMessageRow
                 {
-                    if(e.Message.Author.IsBot || !e.GuildId.HasValue) return;
+                    GuildId = e.GuildId.Value,
+                    ChannelId = e.ChannelId,
+                    MessageId = e.MessageId,
+                    UserId = e.Message.Author.Id,
+                    Timestamp = e.Message.CreatedAt.UtcDateTime,
+                    Content = EString.FromDecoded(e.Message.Content)
+                };
 
-                    MessageLogsRow row = await Database.Data.MessageLogs.GetRowAsync(e.GuildId.Value);
-                    if ((row.DeletedChannelId == 0 && row.EditedChannelId == 0) || row.ExcludedChannels.Contains(e.ChannelId)) return;
-
-                    MessageLogsMessageRow message = new MessageLogsMessageRow
-                    {
-                        GuildId = e.GuildId.Value,
-                        ChannelId = e.ChannelId,
-                        MessageId = e.MessageId,
-                        UserId = e.Message.Author.Id,
-                        Timestamp = e.Message.CreatedAt.UtcDateTime,
-                        Content = EString.FromDecoded(e.Message.Content)
-                    };
-
-                    await MessageLogs.SaveMessageAsync(message);
-                    await MessageLogs.DeleteOldMessagesAsync(e.GuildId.Value, e.ChannelId, await Premium.IsGuildPremiumAsync(e.GuildId.Value));
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Exception thrown on message received");
-                }
-            });
-            return Task.CompletedTask;
+                await MessageLogs.SaveMessageAsync(message);
+                await MessageLogs.DeleteOldMessagesAsync(e.GuildId.Value, e.ChannelId, await Premium.IsGuildPremiumAsync(e.GuildId.Value));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Exception thrown on message received");
+            }
         }
 
-        public Task MessageUpdated(object sender, MessageUpdatedEventArgs e)
+        public async Task MessageUpdated(MessageUpdatedEventArgs e)
         {
-            _ = Task.Run(async () =>
+            try
             {
-                try
-                {
-                    if (!e.GuildId.HasValue) return;
+                if (!e.GuildId.HasValue) return;
 
-                    ITextChannel channel = _client.GetTextChannel(e.GuildId.Value, e.ChannelId);
-                    IUserMessage newMessage = e.NewMessage ?? await channel.FetchMessageAsync(e.MessageId) as IUserMessage;
-                    if(newMessage is null || newMessage.Author.IsBot) return;
+                ITextChannel channel = _client.GetTextChannel(e.GuildId.Value, e.ChannelId);
+                IUserMessage newMessage = e.NewMessage ?? await channel.FetchMessageAsync(e.MessageId) as IUserMessage;
+                if(newMessage is null || newMessage.Author.IsBot) return;
 
-                    MessageLogsRow row = await MessageLogs.GetRowAsync(e.GuildId.Value);
-                    if ((row.DeletedChannelId == 0 && row.EditedChannelId == 0) || 
-                        row.ExcludedChannels.Contains(e.ChannelId)) return;
+                MessageLogsRow row = await MessageLogs.GetRowAsync(e.GuildId.Value);
+                if ((row.DeletedChannelId == 0 && row.EditedChannelId == 0) || 
+                    row.ExcludedChannels.Contains(e.ChannelId)) return;
 
-                    MessageLogsMessageRow message = await MessageLogs.GetMessageAsync(e.GuildId.Value, e.ChannelId, e.MessageId);
-                    if (message is null || message.Content.Value == newMessage.Content) return;
+                MessageLogsMessageRow message = await MessageLogs.GetMessageAsync(e.GuildId.Value, e.ChannelId, e.MessageId);
+                if (message is null || message.Content.Value == newMessage.Content) return;
 
-                    LocalEmbedBuilder embed = GetEditedEmbed(message, newMessage);
+                LocalEmbedBuilder embed = GetEditedEmbed(message, newMessage);
 
-                    message.Content = EString.FromDecoded(newMessage.Content);
-                    await MessageLogs.SaveMessageAsync(message);
+                message.Content = EString.FromDecoded(newMessage.Content);
+                await MessageLogs.SaveMessageAsync(message);
 
-                    ITextChannel logChannel = _client.GetTextChannel(e.GuildId.Value, row.EditedChannelId);
-                    if (logChannel is not null) await logChannel.SendEmbedAsync(embed);
-                }
-                catch(Exception ex)
-                {
-                    _logger.LogError(ex, "Exception thrown on message updated");
-                }
-            });
-            return Task.CompletedTask;
+                ITextChannel logChannel = _client.GetTextChannel(e.GuildId.Value, row.EditedChannelId);
+                if (logChannel is not null) await logChannel.SendEmbedAsync(embed);
+            }
+            catch(Exception ex)
+            {
+                _logger.LogError(ex, "Exception thrown on message updated");
+            }
         }
 
-        public Task MessageDeleted(object sender, MessageDeletedEventArgs e)
+        public async Task MessageDeleted(MessageDeletedEventArgs e)
         {
-            _ = Task.Run(async () =>
+            try
             {
-                try
-                {
-                    if (!e.GuildId.HasValue) return;
+                if (!e.GuildId.HasValue) return;
 
-                    MessageLogsRow row = await MessageLogs.GetRowAsync(e.GuildId.Value);
-                    if ((row.DeletedChannelId == 0 && row.EditedChannelId == 0) ||
-                        row.ExcludedChannels.Contains(e.ChannelId)) return;
+                MessageLogsRow row = await MessageLogs.GetRowAsync(e.GuildId.Value);
+                if ((row.DeletedChannelId == 0 && row.EditedChannelId == 0) ||
+                    row.ExcludedChannels.Contains(e.ChannelId)) return;
 
-                    MessageLogsMessageRow message =
-                        await MessageLogs.GetMessageAsync(e.GuildId.Value, e.ChannelId, e.MessageId);
-                    if (message is null) return;
+                MessageLogsMessageRow message =
+                    await MessageLogs.GetMessageAsync(e.GuildId.Value, e.ChannelId, e.MessageId);
+                if (message is null) return;
 
-                    IMember member = await _client.GetGuild(e.GuildId.Value).FetchMemberAsync(message.UserId);
-                    if (member is not null && member.IsBot) return;
+                IMember member = await _client.GetGuild(e.GuildId.Value).FetchMemberAsync(message.UserId);
+                if (member is not null && member.IsBot) return;
 
-                    LocalEmbedBuilder embed = GetDeletedEmbed(message, e, member);
+                LocalEmbedBuilder embed = GetDeletedEmbed(message, e, member);
 
-                    await MessageLogs.DeleteMessagesAsync(e.GuildId.Value, e.ChannelId, new[] {e.MessageId.RawValue});
+                await MessageLogs.DeleteMessagesAsync(e.GuildId.Value, e.ChannelId, new[] {e.MessageId.RawValue});
 
-                    ITextChannel logChannel = _client.GetTextChannel(e.GuildId.Value, row.DeletedChannelId);
-                    if (logChannel is not null) await logChannel.SendEmbedAsync(embed);
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Exception thrown on message deleted");
-                }
-            });
-            return Task.CompletedTask;
+                ITextChannel logChannel = _client.GetTextChannel(e.GuildId.Value, row.DeletedChannelId);
+                if (logChannel is not null) await logChannel.SendEmbedAsync(embed);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Exception thrown on message deleted");
+            }
         }
 
-        public Task MessagesDeleted(object sender, MessagesDeletedEventArgs e)
+        public async Task MessagesDeleted(MessagesDeletedEventArgs e)
         {
-            _ = Task.Run(async () =>
+            try
             {
-                try
-                {
-                    MessageLogsRow row = await MessageLogs.GetRowAsync(e.GuildId);
-                    if ((row.DeletedChannelId == 0 && row.EditedChannelId == 0) ||
-                        row.ExcludedChannels.Contains(e.ChannelId)) return;
+                MessageLogsRow row = await MessageLogs.GetRowAsync(e.GuildId);
+                if ((row.DeletedChannelId == 0 && row.EditedChannelId == 0) ||
+                    row.ExcludedChannels.Contains(e.ChannelId)) return;
 
-                    List<MessageLogsMessageRow> messages = await MessageLogs.GetMessagesAsync(e.GuildId, e.ChannelId, e.MessageIds.Select(x => x.RawValue).ToArray());
+                List<MessageLogsMessageRow> messages = await MessageLogs.GetMessagesAsync(e.GuildId, e.ChannelId, e.MessageIds.Select(x => x.RawValue).ToArray());
 
-                    LocalEmbedBuilder embed = GetBulkDeletedEmbed(messages, e, await PasteMessagesAsync(messages, e.MessageIds.Count));
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Exception thrown on messages deleted");
-                }
-            });
-            return Task.CompletedTask;
+                LocalEmbedBuilder embed = GetBulkDeletedEmbed(messages, e, await PasteMessagesAsync(messages, e.MessageIds.Count));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Exception thrown on messages deleted");
+            }
         }
 
         LocalEmbedBuilder GetEditedEmbed(MessageLogsMessageRow previousMessage, IUserMessage newMessage)

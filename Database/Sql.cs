@@ -28,23 +28,23 @@ namespace Database
             ConnectionString = builder.ConnectionString;
         }
 
-        public static async Task<int> ExecuteAsync(string command, params (string, object)[] parameters)
+        public static Task<int> ExecuteAsync(string command, params (string, object)[] parameters)
         {
             Interlocked.Increment(ref Queries);
             MySqlParameter[] commandParameters = parameters.Select(x => new MySqlParameter(x.Item1, x.Item2)).ToArray();
             commandParameters = PrepareParameters(commandParameters);
-            return await MySqlHelper.ExecuteNonQueryAsync(ConnectionString, command, commandParameters);
+            return MySqlHelper.ExecuteNonQueryAsync(ConnectionString, command, commandParameters);
         }
 
-        public static async Task<MySqlDataReader> ExecuteReaderAsync(string command, params (string, object)[] parameters)
+        public static Task<MySqlDataReader> ExecuteReaderAsync(string command, params (string, object)[] parameters)
         {
             Interlocked.Increment(ref Queries);
             MySqlParameter[] commandParameters = parameters.Select(x => new MySqlParameter(x.Item1, x.Item2)).ToArray();
             commandParameters = PrepareParameters(commandParameters);
-            return await MySqlHelper.ExecuteReaderAsync(ConnectionString, command, commandParameters);
+            return MySqlHelper.ExecuteReaderAsync(ConnectionString, command, commandParameters);
         }
 
-        private static MySqlParameter[] PrepareParameters(IEnumerable<MySqlParameter> parameters)
+        static MySqlParameter[] PrepareParameters(IEnumerable<MySqlParameter> parameters)
         {
             return parameters.Select(parameter =>
             {

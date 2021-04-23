@@ -33,38 +33,30 @@ namespace Utili.Services
             _timer.Start();
         }
 
-        public Task MessageReceived(object sender, MessageReceivedEventArgs e)
+        public async Task MessageReceived(MessageReceivedEventArgs e)
         {
-            _ = Task.Run(async () =>
+            try
             {
-                try
-                {
-                    if(!e.GuildId.HasValue || e.Member.IsBot) return;
-                    await MakeUserActiveAsync(e.GuildId.Value, e.Member);
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Exception thrown on message received");
-                }
-            });
-            return Task.CompletedTask;
+                if(!e.GuildId.HasValue || e.Member.IsBot) return;
+                await MakeUserActiveAsync(e.GuildId.Value, e.Member);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Exception thrown on message received");
+            }
         }
 
-        public Task VoiceStateUpdated(object sender, VoiceStateUpdatedEventArgs e)
+        public async Task VoiceStateUpdated(VoiceStateUpdatedEventArgs e)
         {
-            _ = Task.Run(async () =>
+            try
             {
-                try
-                {
-                    if(e.Member.IsBot) return;
-                    await MakeUserActiveAsync(e.GuildId, e.Member);
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Exception thrown on voice state updated");
-                }
-            });
-            return Task.CompletedTask;
+                if(e.Member.IsBot) return;
+                await MakeUserActiveAsync(e.GuildId, e.Member);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Exception thrown on voice state updated");
+            }
         }
 
         async Task MakeUserActiveAsync(ulong guildId, IMember member)

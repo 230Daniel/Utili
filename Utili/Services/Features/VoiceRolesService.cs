@@ -29,6 +29,21 @@ namespace Utili.Services
         {
             _ = UpdateMembersAsync();
         }
+        
+        public async Task VoiceStateUpdated(VoiceStateUpdatedEventArgs e)
+        {
+            try
+            {
+                lock (_updateRequests)
+                {
+                    _updateRequests.Add(new VoiceUpdateRequest(e.GuildId, e.MemberId, e.OldVoiceState.ChannelId, e.NewVoiceState.ChannelId));
+                }
+            }
+            catch(Exception ex)
+            {
+                _logger.LogError(ex, "Exception thrown in voice state updated");
+            }
+        }
 
         async Task UpdateMembersAsync()
         {
@@ -106,25 +121,6 @@ namespace Utili.Services
                     _logger.LogError(ex, "Exception thrown updating member");
                 }
             });
-        }
-
-        public Task VoiceStateUpdated(object sender, VoiceStateUpdatedEventArgs e)
-        {
-            _ = Task.Run(async () =>
-            {
-                try
-                {
-                    lock (_updateRequests)
-                    {
-                        _updateRequests.Add(new VoiceUpdateRequest(e.GuildId, e.MemberId, e.OldVoiceState.ChannelId, e.NewVoiceState.ChannelId));
-                    }
-                }
-                catch(Exception ex)
-                {
-                    _logger.LogError(ex, "Exception thrown in voice state updated");
-                }
-            });
-            return Task.CompletedTask;
         }
 
         class VoiceUpdateRequest

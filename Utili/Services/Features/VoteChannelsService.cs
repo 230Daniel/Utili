@@ -22,32 +22,28 @@ namespace Utili.Features
             _client = client;
         }
         
-        public Task MessageReceived(object sender, MessageReceivedEventArgs e)
+        public async Task MessageReceived(MessageReceivedEventArgs e)
         {
-            _ = Task.Run(async () =>
+            try
             {
-                try
-                {
-                    if (!e.GuildId.HasValue) return;
+                if (!e.GuildId.HasValue) return;
                     
-                    if (!e.Channel.BotHasPermissions(Permission.ViewChannel | Permission.ReadMessageHistory | Permission.AddReactions)) return;
+                if (!e.Channel.BotHasPermissions(Permission.ViewChannel | Permission.ReadMessageHistory | Permission.AddReactions)) return;
 
-                    VoteChannelsRow row = (await VoteChannels.GetRowsAsync(e.GuildId.Value, e.ChannelId)).FirstOrDefault();
-                    if (row is null || !DoesMessageObeyRule(e.Message as IUserMessage, row)) return;
+                VoteChannelsRow row = (await VoteChannels.GetRowsAsync(e.GuildId.Value, e.ChannelId)).FirstOrDefault();
+                if (row is null || !DoesMessageObeyRule(e.Message as IUserMessage, row)) return;
 
-                    if (await Premium.IsGuildPremiumAsync(e.GuildId.Value)) row.Emotes = row.Emotes.Take(5).ToList();
-                    else row.Emotes = row.Emotes.Take(2).ToList();
+                if (await Premium.IsGuildPremiumAsync(e.GuildId.Value)) row.Emotes = row.Emotes.Take(5).ToList();
+                else row.Emotes = row.Emotes.Take(2).ToList();
 
-                    CachedGuild guild = _client.GetGuild(e.GuildId.Value);
-                    foreach (string emoji in row.Emotes)
-                        await e.Message.AddReactionAsync(Helper.GetEmoji(emoji, guild));
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Exception thrown in message received");
-                }
-            });
-            return Task.CompletedTask;
+                CachedGuild guild = _client.GetGuild(e.GuildId.Value);
+                foreach (string emoji in row.Emotes)
+                    await e.Message.AddReactionAsync(Helper.GetEmoji(emoji, guild));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Exception thrown in message received");
+            }
         }
 
         static bool DoesMessageObeyRule(IUserMessage message, VoteChannelsRow row)

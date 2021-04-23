@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using MySql.Data.MySqlClient;
@@ -46,7 +47,7 @@ namespace Database.Data
                 }
 
                 MySqlDataReader reader = await Sql.ExecuteReaderAsync(command, values.ToArray());
-
+                
                 while (reader.Read())
                 {
                     matchedRows.Add(MessageLogsRow.FromDatabase(

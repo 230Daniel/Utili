@@ -26,21 +26,26 @@ namespace Utili.Services
             _channelsRequiringUpdate = new List<(ulong, ulong)>();
         }
 
-        public Task VoiceStateUpdated(object sender, VoiceStateUpdatedEventArgs e)
+        public async Task VoiceStateUpdated(VoiceStateUpdatedEventArgs e)
         {
-            _ = Task.Run(async () =>
+            try
             {
                 VoiceLinkRow row = await VoiceLink.GetRowAsync(e.GuildId);
                 if (!row.Enabled) return;
                 lock (_channelsRequiringUpdate)
                 {
-                    if (e.NewVoiceState?.ChannelId != null && !row.ExcludedChannels.Contains(e.NewVoiceState.ChannelId.Value))
+                    if (e.NewVoiceState?.ChannelId != null &&
+                        !row.ExcludedChannels.Contains(e.NewVoiceState.ChannelId.Value))
                         _channelsRequiringUpdate.Add((e.GuildId, e.NewVoiceState.ChannelId.Value));
-                    if (e.OldVoiceState?.ChannelId != null && !row.ExcludedChannels.Contains(e.OldVoiceState.ChannelId.Value))
+                    if (e.OldVoiceState?.ChannelId != null &&
+                        !row.ExcludedChannels.Contains(e.OldVoiceState.ChannelId.Value))
                         _channelsRequiringUpdate.Add((e.GuildId, e.OldVoiceState.ChannelId.Value));
                 }
-            });
-            return Task.CompletedTask;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Exception thrown on voice state updated");
+            }
         }
 
         public void Start()
