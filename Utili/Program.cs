@@ -55,9 +55,9 @@ namespace Utili
                     bot.Activities = new[] { new LocalActivity("v3 ?!??", ActivityType.Playing)};
                     bot.OwnerIds = new[] { new Snowflake(ulong.Parse(context.Configuration["ownerId"])) };
 
-                    //int[] shardIds = context.Configuration.GetSection("shardIds").Get<int[]>();
-                    //int totalShards = context.Configuration.GetValue<int>("totalShards");
-                    //bot.ShardIds = shardIds.Select(x => new ShardId(x, totalShards));
+                    int[] shardIds = context.Configuration.GetSection("shardIds").Get<int[]>();
+                    int totalShards = context.Configuration.GetValue<int>("totalShards");
+                    bot.ShardIds = shardIds.Select(x => new ShardId(x, totalShards));
                 })
                 .Build();
 
