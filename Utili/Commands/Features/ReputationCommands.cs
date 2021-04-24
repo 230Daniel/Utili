@@ -126,24 +126,9 @@ namespace Utili.Commands
         [DefaultCooldown(2, 5)]
         [RequireAuthorGuildPermissions(Permission.ManageGuild)]
         [RequireBotChannelPermissions(Permission.AddReactions)]
-        public async Task AddEmoji(string emojiString, int value = 0)
+        public async Task AddEmoji(IEmoji emoji, int value = 0)
         {
-            IEmoji emoji = Helper.GetEmoji(emojiString, Context.Guild);
             ReputationRow row = await Database.Data.Reputation.GetRowAsync(Context.Guild.Id);
-
-            try
-            {
-                await Context.Message.AddReactionAsync(emoji);
-                _ = Task.Run(async () =>
-                {
-                    await Task.Delay(550);
-                    await Context.Message.RemoveReactionAsync(emoji, Context.CurrentMember.Id);
-                });
-            }
-            catch
-            {
-                await Context.Channel.SendFailureAsync("Error", $"Failed to find an emoji matching {emojiString}");
-            }
 
             if (row.Emotes.Any(x => Equals(x.Item1, emoji.ToString())))
             {

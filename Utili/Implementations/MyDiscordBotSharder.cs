@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Database.Data;
 using Disqord;
@@ -10,6 +11,7 @@ using Utili.Extensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Qmmands;
+using Utili.Commands.TypeParsers;
 
 namespace Utili.Implementations
 {
@@ -81,6 +83,12 @@ namespace Utili.Implementations
             return new LocalMessageBuilder()
                 .WithEmbed(embed)
                 .WithMentions(LocalMentionsBuilder.None);
+        }
+        
+        protected override ValueTask AddTypeParsersAsync(CancellationToken cancellationToken = default)
+        {
+            Commands.AddTypeParser(new EmojiTypeParser());
+            return base.AddTypeParsersAsync(cancellationToken);
         }
 
         public MyDiscordBotSharder(IOptions<DiscordBotSharderConfiguration> options, ILogger<DiscordBotSharder> logger, IPrefixProvider prefixes, ICommandQueue queue, CommandService commands, IServiceProvider services, DiscordClientSharder client) : base(options, logger, prefixes, queue, commands, services, client) { }

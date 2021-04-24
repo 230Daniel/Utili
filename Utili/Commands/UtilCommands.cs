@@ -155,9 +155,8 @@ namespace Utili.Commands
         [RequireAuthorChannelPermissions(Permission.AddReactions | Permission.ManageMessages)]
         [RequireBotChannelPermissions(Permission.AddReactions | Permission.ReadMessageHistory)]
         public async Task React(
-            ulong messageId, 
-            [Remainder] 
-            string emojiString)
+            ulong messageId,
+            IEmoji emoji)
         {
             IMessage message = await Context.Channel.FetchMessageAsync(messageId);
 
@@ -166,20 +165,10 @@ namespace Utili.Commands
                 await Context.Channel.SendFailureAsync("Error", $"No message was found in <#{Context.Channel.Id}> with ID {messageId}\n[How do I get a message ID?](https://support.discord.com/hc/en-us/articles/206346498)");
                 return;
             }
-
-            IEmoji emoji = Helper.GetEmoji(emojiString, Context.Guild);
-
-            try
-            {
-                await message.AddReactionAsync(emoji);
-                await Context.Channel.SendSuccessAsync("Reaction added",
-                    $"The {emojiString} reaction was added to a message sent by {message.Author.Mention}");
-            }
-            catch
-            {
-                await Context.Channel.SendFailureAsync("Error",
-                    $"No emoji was found matching {emojiString}\nType the emoji itself in the command");
-            }
+            
+            await message.AddReactionAsync(emoji);
+            await Context.Channel.SendSuccessAsync("Reaction added",
+                $"The {emoji} reaction was added to a message sent by {message.Author.Mention}");
         }
 
         [Command("React", "AddReaction", "AddEmoji")]
@@ -189,8 +178,7 @@ namespace Utili.Commands
             [RequireBotParameterChannelPermissions(Permission.AddReactions | Permission.ReadMessageHistory)]
             ITextChannel channel, 
             ulong messageId, 
-            [Remainder] 
-            string emojiString)
+            IEmoji emoji)
         {
             IMessage message = await channel.FetchMessageAsync(messageId);
 
@@ -201,20 +189,10 @@ namespace Utili.Commands
                 return;
             }
 
-            IEmoji emoji = Helper.GetEmoji(emojiString, Context.Guild);
+            await message.AddReactionAsync(emoji);
 
-            try
-            {
-                await message.AddReactionAsync(emoji);
-
-                await Context.Channel.SendSuccessAsync("Reaction added",
-                    $"The {emojiString} reaction was added to a message sent by {message.Author.Mention} in {channel.Mention}");
-            }
-            catch
-            {
-                await Context.Channel.SendFailureAsync("Error",
-                    $"No emoji was found matching {emojiString}\nType the emoji itself in the command");
-            }
+            await Context.Channel.SendSuccessAsync("Reaction added",
+                $"The {emoji} reaction was added to a message sent by {message.Author.Mention} in {channel.Mention}");
         }
 
         // TODO: Implement when member chunking is done

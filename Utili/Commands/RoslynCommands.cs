@@ -57,7 +57,7 @@ namespace Utili.Features
                     typeof(DiscordClientBase).Assembly,
                     typeof(Program).Assembly);
 
-            RoslynGlobals globals = new RoslynGlobals(_services, Context);
+            RoslynGlobals globals = new(_services, Context);
             try
             {
                 object result = await CSharpScript.EvaluateAsync(code, options, globals);

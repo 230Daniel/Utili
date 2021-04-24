@@ -3,7 +3,6 @@ using System.Threading.Tasks;
 using Database.Data;
 using Disqord;
 using Disqord.Bot;
-using Disqord.Rest;
 using Qmmands;
 using Utili.Extensions;
 using Utili.Implementations;
@@ -18,7 +17,7 @@ namespace Utili.Commands
         [RequireBotChannelPermissions(Permission.AddReactions)]
         [DefaultCooldown(2, 5)]
         public async Task AddEmoji(
-            string emojiString,
+            IEmoji emoji,
             [RequireBotParameterChannelPermissions(Permission.AddReactions)]
             ITextChannel channel = null)
         {
@@ -40,18 +39,6 @@ namespace Utili.Commands
                 return;
             }
 
-            IEmoji emoji = Helper.GetEmoji(emojiString, Context.Guild);
-
-            try
-            {
-                await Context.Message.AddReactionAsync(emoji);
-            }
-            catch
-            {
-                await Context.Channel.SendFailureAsync("Error", $"An emoji was not found matching {emojiString}");
-                return;
-            }
-
             if (row.Emotes.Contains(emoji.ToString()))
             {
                 await Context.Channel.SendFailureAsync("Error", $"That emoji is already added to {channel.Mention}");
@@ -70,8 +57,8 @@ namespace Utili.Commands
         public async Task AddEmoji(
             [RequireBotParameterChannelPermissions(Permission.AddReactions)]
             ITextChannel channel, 
-            string emojiString)
-            => await AddEmoji(emojiString, channel);
+            IEmoji emoji)
+            => await AddEmoji(emoji, channel);
 
         [Command("RemoveEmoji", "RemoveEmote")]
         [RequireAuthorGuildPermissions(Permission.ManageGuild)]
@@ -107,7 +94,7 @@ namespace Utili.Commands
         [Command("RemoveEmoji", "RemoveEmote")]
         [RequireAuthorGuildPermissions(Permission.ManageGuild)]
         public async Task RemoveEmoji(
-            string emojiString,
+            IEmoji emoji,
             ITextChannel channel = null)
         {
             channel ??= Context.Channel;
@@ -118,10 +105,9 @@ namespace Utili.Commands
                 await Context.Channel.SendFailureAsync("Error", $"{channel.Mention} is not a votes channel");
                 return;
             }
-
-            IEmoji emoji = Helper.GetEmoji(emojiString, Context.Guild);
+            
             if (row.Emotes.Any(x => x.ToString() == emoji.ToString()))
-                await RemoveEmoji(row.Emotes.IndexOf(emojiString) + 1, channel);
+                await RemoveEmoji(row.Emotes.IndexOf(emoji.ToString()) + 1, channel);
             else
                 await Context.Channel.SendFailureAsync("Error", $"{emoji} is not added to {channel.Mention}" +
                                                                 "\nIf you can't specify the emoji, use its number found in the listEmoji command");
@@ -139,8 +125,8 @@ namespace Utili.Commands
         [RequireAuthorGuildPermissions(Permission.ManageGuild)]
         public async Task RemoveEmoji(
             ITextChannel channel,
-            string emojiString)
-                => await RemoveEmoji(emojiString, channel);
+            IEmoji emoji)
+                => await RemoveEmoji(emoji, channel);
         
         [Command("ListEmojis", "ListEmoji", "ListEmotes", "ListEmote")]
         public async Task ListEmojis(ITextChannel channel = null)
