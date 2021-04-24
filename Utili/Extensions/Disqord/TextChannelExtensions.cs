@@ -1,4 +1,7 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using Disqord;
 using Disqord.Rest;
 using Utili.Utils;
@@ -41,6 +44,12 @@ namespace Utili.Extensions
                 .Build();
 
             return await channel.SendMessageAsync(message);
+        }
+
+        public static async Task<IWebhook> FetchWebhookAsync(this ITextChannel channel, Snowflake webhookId)
+        {
+            IEnumerable<IWebhook> webhooks = await channel.FetchWebhooksAsync();
+            return webhooks.FirstOrDefault(x => x.Id == webhookId);
         }
     }
 }
