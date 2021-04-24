@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Timers;
 using Database;
 using Disqord;
@@ -6,6 +7,8 @@ using Disqord.Bot;
 using Disqord.Bot.Hosting;
 using Disqord.Extensions.Interactivity;
 using Disqord.Gateway;
+using Disqord.Gateway.Api;
+using Microsoft.Extensions.Configuration;
 using Utili.Implementations;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -51,6 +54,10 @@ namespace Utili
                     bot.Intents += GatewayIntent.VoiceStates;
                     bot.Activities = new[] { new LocalActivity("v3 ?!??", ActivityType.Playing)};
                     bot.OwnerIds = new[] { new Snowflake(ulong.Parse(context.Configuration["ownerId"])) };
+
+                    //int[] shardIds = context.Configuration.GetSection("shardIds").Get<int[]>();
+                    //int totalShards = context.Configuration.GetValue<int>("totalShards");
+                    //bot.ShardIds = shardIds.Select(x => new ShardId(x, totalShards));
                 })
                 .Build();
 
@@ -74,7 +81,8 @@ namespace Utili
             services.AddPrefixProvider<PrefixProvider>();
 
             services.AddSingleton(new HasteService(context.Configuration["hasteServer"]));
-
+            services.AddSingleton<RoleCacheService>();
+            
             services.AddSingleton<AutopurgeService>();
             services.AddSingleton<ChannelMirroringService>();
             services.AddSingleton<VoiceLinkService>();

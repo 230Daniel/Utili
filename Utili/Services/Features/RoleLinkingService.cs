@@ -34,11 +34,12 @@ namespace Utili.Services
                 bool premium = await Premium.IsGuildPremiumAsync(guild.Id);
                 if (!premium) rows = rows.Take(2).ToList();
 
-                List<CachedRole> oldRoles = e.OldMember.GetRoles().Values.ToList();
-                List<CachedRole> newRoles = e.NewMember.GetRoles().Values.ToList();
+                List<ulong> oldRoles = e.OldMember?.RoleIds.Select(x => x.RawValue).ToList();
+                oldRoles ??= (await RoleCache.GetRowAsync(e.NewMember.GuildId, e.MemberId)).RoleIds;
+                List<ulong> newRoles = e.NewMember.RoleIds.Select(x => x.RawValue).ToList();
 
-                List<ulong> addedRoles = newRoles.Where(x => oldRoles.All(y => y.Id != x.Id)).Select(x => x.Id.RawValue).ToList();
-                List<ulong> removedRoles = oldRoles.Where(x => newRoles.All(y => y.Id != x.Id)).Select(x => x.Id.RawValue).ToList();
+                List<ulong> addedRoles = newRoles.Where(x => oldRoles.All(y => y != x)).ToList();
+                List<ulong> removedRoles = oldRoles.Where(x => newRoles.All(y => y != x)).ToList();
 
                 List<ulong> rolesToAdd;
                 List<ulong> rolesToRemove; 

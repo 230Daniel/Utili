@@ -65,7 +65,8 @@ namespace Utili.Services
 
                 RolePersistRolesRow persistRow = await RolePersist.GetPersistRowAsync(guild.Id, e.User.Id);
 
-                persistRow.Roles.AddRange((e.User as IMember).GetRoles().Values.Where(x => x.Id != e.GuildId).Select(x => x.Id.RawValue));
+                RoleCacheRow roleCache = await RoleCache.GetRowAsync(e.GuildId, e.User.Id);
+                persistRow.Roles.AddRange(roleCache.RoleIds);
 
                 await RolePersist.SavePersistRowAsync(persistRow);
             }

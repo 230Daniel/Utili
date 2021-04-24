@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Disqord;
 using Disqord.Gateway;
 using Disqord.Hosting;
+using Disqord.Rest;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Utili.Features;
@@ -17,6 +18,8 @@ namespace Utili.Services
         IConfiguration _config;
         DiscordClientBase _client;
 
+        RoleCacheService _roleCache;
+        
         AutopurgeService _autopurge;
         ChannelMirroringService _channelMirroring;
         InactiveRoleService _inactiveRole;
@@ -34,6 +37,7 @@ namespace Utili.Services
         public BotService(
             ILogger<BotService> logger, 
             IConfiguration config,
+            RoleCacheService roleCache,
             DiscordClientBase client, 
             AutopurgeService autopurge,
             ChannelMirroringService channelMirroring,
@@ -54,6 +58,8 @@ namespace Utili.Services
             _config = config;
             _client = client;
 
+            _roleCache = roleCache;
+            
             _autopurge = autopurge;
             _channelMirroring = channelMirroring;
             _inactiveRole = inactiveRole;
@@ -83,6 +89,12 @@ namespace Utili.Services
             _voiceRoles.Start();
             
             _logger.LogInformation("Services started");
+        }
+
+        protected override async ValueTask OnReady(ReadyEventArgs e)
+        // Unlike other events, this event will block the gateway
+        {
+            _ = _roleCache.Ready(e);
         }
 
         protected override async ValueTask OnMessageReceived(MessageReceivedEventArgs e)
@@ -157,6 +169,7 @@ namespace Utili.Services
             
             await _joinRoles.MemberUpdated(e);
             await _roleLinking.MemberUpdated(e);
+            await _roleCache.MemberUpdated(e);
         }
 
         protected override async ValueTask OnMemberLeft(MemberLeftEventArgs e)
@@ -164,6 +177,7 @@ namespace Utili.Services
             await Task.Yield();
             
             await _rolePersist.MemberLeft(e);
+            await _roleCache.MemberLeft(e);
         }
     }
 }
