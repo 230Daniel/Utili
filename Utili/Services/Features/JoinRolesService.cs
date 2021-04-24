@@ -112,7 +112,7 @@ namespace Utili.Services
                 }
             }
 
-            if(pendingRows.Count > 0) _logger.LogInformation($"Re-scheduled {pendingRows.Count} pending join role user {(pendingRows.Count == 1 ? "" : "s")}");
+            if(pendingRows.Count > 0) _logger.LogInformation($"Re-scheduled {pendingRows.Count} pending join role user{(pendingRows.Count == 1 ? "" : "s")}");
         }
 
         void ScheduleAddRoles(ulong guildId, ulong memberId, DateTime due)
