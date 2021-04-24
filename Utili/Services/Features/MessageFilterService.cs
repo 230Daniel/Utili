@@ -30,9 +30,10 @@ namespace Utili.Services
 
                 if(!e.Channel.BotHasPermissions(Permission.ViewChannel | Permission.ManageMessages)) return false;
                 if (e.Message is IUserMessage userMessage && 
+                    e.Member is not null &&
                     e.Member.Id == _client.CurrentUser.Id &&
                     userMessage.Embeds.Count > 0 && 
-                    userMessage.Embeds.First().Author?.Name == "Message deleted")
+                    userMessage.Embeds[0].Author?.Name == "Message deleted")
                     return false;
 
                 MessageFilterRow row = await MessageFilter.GetRowAsync(e.GuildId.Value, e.ChannelId);

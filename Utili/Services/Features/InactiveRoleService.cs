@@ -37,7 +37,7 @@ namespace Utili.Services
         {
             try
             {
-                if(!e.GuildId.HasValue || e.Member.IsBot) return;
+                if(!e.GuildId.HasValue || e.Member is null || e.Member.IsBot) return;
                 await MakeUserActiveAsync(e.GuildId.Value, e.Member);
             }
             catch (Exception ex)
