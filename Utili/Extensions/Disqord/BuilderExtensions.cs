@@ -9,6 +9,12 @@ namespace Utili.Extensions
             builder.Content = string.IsNullOrWhiteSpace(content) ? null : content;
             return builder;
         }
+        
+        public static LocalMessageBuilder WithRequiredContent(this LocalMessageBuilder builder, string content)
+        {
+            builder.Content = string.IsNullOrWhiteSpace(content) ? "\u200b" : content;
+            return builder;
+        }
 
         public static LocalWebhookMessageBuilder WithOptionalContent(this LocalWebhookMessageBuilder builder, string content)
         {

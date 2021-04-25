@@ -96,6 +96,7 @@ namespace Utili
             services.AddSingleton<InactiveRoleService>();
             services.AddSingleton<VoiceRolesService>();
             services.AddSingleton<VoteChannelsService>();
+            services.AddSingleton<NoticesService>();
         }
     }
 }

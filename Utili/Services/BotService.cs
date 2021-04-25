@@ -27,6 +27,7 @@ namespace Utili.Services
         JoinRolesService _joinRoles;
         MessageFilterService _messageFilter;
         MessageLogsService _messageLogs;
+        NoticesService _notices;
         ReputationService _reputation;
         RoleLinkingService _roleLinking;
         RolePersistService _rolePersist;
@@ -46,6 +47,7 @@ namespace Utili.Services
             JoinRolesService joinRoles,
             MessageFilterService messageFilter,
             MessageLogsService messageLogs,
+            NoticesService notices,
             ReputationService reputation,
             RoleLinkingService roleLinking,
             RolePersistService rolePersist,
@@ -67,6 +69,7 @@ namespace Utili.Services
             _joinRoles = joinRoles;
             _messageFilter = messageFilter;
             _messageLogs = messageLogs;
+            _notices = notices;
             _reputation = reputation;
             _roleLinking = roleLinking;
             _rolePersist = rolePersist;
@@ -85,6 +88,7 @@ namespace Utili.Services
             _autopurge.Start();
             _inactiveRole.Start();
             _joinRoles.Start();
+            _notices.Start();
             _voiceLink.Start();
             _voiceRoles.Start();
             
@@ -103,6 +107,7 @@ namespace Utili.Services
             
             await _messageLogs.MessageReceived(e);
             if(await _messageFilter.MessageReceived(e)) return;
+            await _notices.MessageReceived(e);
             await _voteChannels.MessageReceived(e);
             await _channelMirroring.MessageReceived(e);
             await _autopurge.MessageReceived(e);
