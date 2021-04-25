@@ -50,7 +50,6 @@ namespace Utili.Services
             string title = row.Title.Value.Replace("%user%", member.ToString());
             string content = row.Content.Value.Replace(@"\n", "\n").Replace("%user%", member.Mention);
             string footer = row.Footer.Value.Replace(@"\n", "\n").Replace("%user%", member.ToString());
-
             
             string iconUrl = row.Icon.Value;
             string thumbnailUrl = row.Thumbnail.Value;
@@ -60,9 +59,19 @@ namespace Utili.Services
             if (thumbnailUrl.ToLower() == "user") thumbnailUrl = member.GetAvatarUrl();
             if (imageUrl.ToLower() == "user") imageUrl = member.GetAvatarUrl();
 
-            if (string.IsNullOrWhiteSpace(title) && !string.IsNullOrWhiteSpace(imageUrl))
-            {
+            if (string.IsNullOrWhiteSpace(title) && !string.IsNullOrWhiteSpace(iconUrl))
                 title = "Title";
+            
+            if (string.IsNullOrWhiteSpace(title) &&
+                string.IsNullOrWhiteSpace(content) &&
+                string.IsNullOrWhiteSpace(footer) &&
+                string.IsNullOrWhiteSpace(iconUrl) &&
+                string.IsNullOrWhiteSpace(thumbnailUrl) &&
+                string.IsNullOrWhiteSpace(imageUrl))
+            {
+                return new LocalMessageBuilder()
+                    .WithRequiredContent(text)
+                    .Build();
             }
 
             return new LocalMessageBuilder()
