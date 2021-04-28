@@ -123,7 +123,7 @@ namespace Utili.Handlers
             {
                 await SendInfoAsync(guild.DefaultChannel, "Utili v2", 
                     "Hi, thanks for adding me!\n" +
-                    $"Head to the [dashboard](https://{_config.Domain}/dashboard/{guild.Id}/core) to configure the bot.\n" +
+                    $"Head to the [dashboard](https://{_config.Domain}/dashboard/{guild.Id}) to configure the bot.\n" +
                     "If you need help or have any questions, you can join the [Discord server](https://discord.gg/WsxqABZ)");
             });
         }
