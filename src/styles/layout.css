@@ -24,6 +24,7 @@
 	background-color: var(--colour-nav);
 	box-shadow: 0 5px 10px var(--colour-shadow);
 	min-height: 65px !important;
+	height: 65px !important;
 }
 
 .navbar-brand{
@@ -43,9 +44,11 @@
 }
 
 .nav-link{
+	display: flex;
 	font-size: 18px !important;
 	color: var(--colour-text) !important;
 	padding-left: 0 !important;
+	align-items: center;
 }
 
 .navbar-toggler{
@@ -204,6 +207,7 @@ h2{
 
 ::-webkit-scrollbar{
 	background-color: var(--colour-scrollbar);
+	
 	width: 14px;
 }
 
@@ -213,6 +217,11 @@ h2{
 
 ::-webkit-scrollbar-corner{
 	background-color: var(--colour-background);
+}
+
+* {
+	scrollbar-color: var(--colour-scrollbar-thumb) var(--colour-scrollbar);
+	scrollbar-width: thin;
 }
 
 /* Footer */

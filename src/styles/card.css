@@ -88,6 +88,7 @@
 	font-size: 16px;
 	padding: 0;
 	resize: none;
+	scrollbar-width: none;
 }
 
 .dashboard-card-component-checkbox{
@@ -277,6 +278,10 @@
 
 .dashboard-card-list-component-options::-webkit-scrollbar-thumb{
 	background-color: var(--colour-background);
+}
+
+.dashboard-card-list-component-options{
+	scrollbar-color: var(--colour-background) var(--colour-card);
 }
 
 .dashboard-card-list-component-option{
