@@ -21,7 +21,7 @@ class Guilds extends React.Component{
 			<NavDropdown className="guild-dropdown" title={<><img src={guild.iconUrl}/>{guild.name}</>}>
 				{this.state.guilds/*.filter(x => x.id != this.guildId)*/.map(guild =>{
 					return(
-						<NavDropdown.Item href={guild.dashboardUrl} className={`guild-dropdown-link${guild.mutual ? "-mutual" : ""}`}><img src={guild.iconUrl}/>{guild.name}</NavDropdown.Item>
+						<NavDropdown.Item href={guild.dashboardUrl} className={`guild-dropdown-link-mutual`}><img src={guild.iconUrl}/>{guild.name}</NavDropdown.Item>
 					);
 				})}
 			</NavDropdown>
