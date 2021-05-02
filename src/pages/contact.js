@@ -19,7 +19,7 @@ class Contact extends React.Component{
 		return(
 			<>
 				<Helmet>
-					<title>Commands - Utili</title>
+					<title>Contact Us - Utili</title>
 				</Helmet>
 				<div className="container" style={{paddingBottom: "40px"}}>
 					<Fade>
@@ -30,7 +30,6 @@ class Contact extends React.Component{
 						</div>
 						<Divider top="30" bottom="30">Email</Divider>
 						<div style={{fontSize: "16px"}}>
-							<span style={{color: "red"}}>There is currently an issue with our Email server - Please send everything to daniel.baynton@hotmail.com instead.<br/><br/></span>
 							<p>Alternatively, contact us by email:</p>
 							<ul>
 								<li>Support - <a className="link" href="mailto:support@utili.xyz">support@utili.xyz</a></li>
