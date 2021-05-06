@@ -15,24 +15,21 @@ namespace UtiliBackend.Controllers.Dashboard
             if (!auth.Authorised) return auth.Action;
 
             List<RestUserGuild> guilds = await DiscordModule.GetManageableGuildsAsync(auth.Client);
-            List<RestUserGuild> mutualGuilds = await DiscordModule.GetMutualGuildsAsync(auth.Client);
-            return new JsonResult(guilds.Select(x => new PartialGuild(x, mutualGuilds.Any(y => y.Id == x.Id))));
+            return new JsonResult(guilds.Select(x => new PartialGuild(x)));
         }
     }
 
     public class PartialGuild
     {
         public string Id { get; }
-        public bool Mutual { get; }
         public string DashboardUrl { get; }
         public string Name { get; }
         public string IconUrl { get; }
 
-        public PartialGuild(RestUserGuild guild, bool mutual)
+        public PartialGuild(RestUserGuild guild)
         {
             Id = guild.Id.ToString();
-            Mutual = mutual;
-            DashboardUrl = mutual ? $"/dashboard/{guild.Id}" : $"/invite/{guild.Id}";
+            DashboardUrl = $"/dashboard/{guild.Id}";
             Name = guild.Name;
             IconUrl = string.IsNullOrEmpty(guild.IconUrl) ? "https://cdn.discordapp.com/embed/avatars/0.png" : guild.IconUrl.Remove(guild.IconUrl.Length - 4) + ".png?size=256";
         }

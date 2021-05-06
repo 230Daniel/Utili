@@ -57,7 +57,7 @@ namespace UtiliBackend.Controllers
             AuthDetails auth = await Authentication.GetAuthDetailsAsync(HttpContext);
             if (!auth.Authorised) return auth.Action;
 
-            List<RestUserGuild> mutualGuilds = await DiscordModule.GetMutualGuildsAsync(auth.Client);
+            List<RestUserGuild> mutualGuilds = await DiscordModule.GetGuildsAsync(auth.Client);
             return new JsonResult(mutualGuilds.Select(x => new PremiumGuild(x)));
         }
     }

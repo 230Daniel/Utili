@@ -93,8 +93,13 @@ namespace UtiliBackend
                 });
                 app.UseHsts();
             }
-                
-
+            
+            app.Use((ctx, next) =>
+            {
+                ctx.Response.Headers.Add("cache-control", "no-cache");
+                return next();
+            });
+            
             app.UseHttpsRedirection();
             app.UseRouting();
             app.UseCors("frontend");

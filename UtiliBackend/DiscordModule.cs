@@ -19,28 +19,10 @@ namespace UtiliBackend
         private static DiscordCache _cachedTextChannels = new DiscordCache(15);
         private static DiscordCache _cachedVoiceChannels = new DiscordCache(15);
 
-        private static List<RestUserGuild> _clientGuildSummaries = new List<RestUserGuild>();
-        private static Timer _clientGuildDownloader;
-        
         public static async Task InitialiseAsync()
         {
             _client = new DiscordRestClient();
             await _client.LoginAsync(TokenType.Bot, Main.Config.DiscordToken);
-
-            _clientGuildDownloader?.Dispose();
-            _clientGuildDownloader = new Timer(60000);
-            _clientGuildDownloader.Elapsed += ClientGuildDownloader_Elapsed;
-            _clientGuildDownloader.Start();
-
-            ClientGuildDownloader_Elapsed(null, null);
-        }
-
-        private static void ClientGuildDownloader_Elapsed(object sender, ElapsedEventArgs e)
-        {
-            _ = Task.Run(async () =>
-            {
-                _clientGuildSummaries = (await _client.GetGuildSummariesAsync().FlattenAsync()).ToList();
-            });
         }
 
         public static async Task<DiscordRestClient> GetClientAsync(ulong userId, string token = null)
@@ -67,7 +49,7 @@ namespace UtiliBackend
             return client;
         }
 
-        private static async Task<List<RestUserGuild>> GetGuildsAsync(DiscordRestClient client)
+        public static async Task<List<RestUserGuild>> GetGuildsAsync(DiscordRestClient client)
         {
             List<RestUserGuild> guilds;
             if (_cachedGuildLists.TryGet(client.CurrentUser.Id, out object cacheResult))
@@ -84,12 +66,6 @@ namespace UtiliBackend
         {
             List<RestUserGuild> guilds = await GetGuildsAsync(client);
             return guilds.Where(x => x.Permissions.ManageGuild).ToList();
-        }
-
-        public static async Task<List<RestUserGuild>> GetMutualGuildsAsync(DiscordRestClient client)
-        {
-            List<RestUserGuild> userGuilds = await GetGuildsAsync(client);
-            return _clientGuildSummaries.Where(x => userGuilds.Any(y => y.Id == x.Id)).ToList();
         }
 
         private static async Task<RestGuildUser> GetGuildUserAsync(ulong userId, ulong guildId)
