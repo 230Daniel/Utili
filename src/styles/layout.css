@@ -24,7 +24,6 @@
 	background-color: var(--colour-nav);
 	box-shadow: 0 5px 10px var(--colour-shadow);
 	min-height: 65px !important;
-	height: 65px !important;
 }
 
 .navbar-brand{
@@ -65,6 +64,11 @@ button:focus{
 
 @media (min-width: 992px){
 	/* Styles only applied when navbar is in non-collapsed form */
+
+	.navbar{
+		height: 65px !important;
+	}
+	
 	.dropdown-menu {
 		right: auto !important;
 		left: 50% !important;
