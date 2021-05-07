@@ -93,7 +93,7 @@ namespace Utili.Services
                     if (category is not null && !category.BotHasPermissions(Permission.ViewChannel | Permission.ManageChannels | Permission.ManageRoles)) return;
                     if (category is null && !guild.BotHasPermissions(Permission.ViewChannel | Permission.ManageChannels | Permission.ManageRoles)) return;
 
-                    List<IVoiceState> voiceStates = guild.VoiceStates.Values.Where(x => x.ChannelId == voiceChannel.Id).ToList();
+                    List<CachedVoiceState> voiceStates = guild.GetVoiceStates().Where(x => x.Value.ChannelId == voiceChannel.Id).Select(x => x.Value).ToList();
                     List<IMember> connectedUsers = guild.Members.Values.Where(x => voiceStates.Any(y => y.MemberId == x.Id)).ToList();
 
                     VoiceLinkChannelRow channelRow = await VoiceLink.GetChannelRowAsync(guild.Id, voiceChannel.Id);
@@ -106,7 +106,7 @@ namespace Utili.Services
                     }
                     catch {}
 
-                    if (connectedUsers.Count(x => !x.IsBot) == 0 && metaRow.DeleteChannels)
+                    if (connectedUsers.Any(x => !x.IsBot) && metaRow.DeleteChannels)
                     {
                         if(textChannel is null || !textChannel.BotHasPermissions(Permission.ViewChannel | Permission.ManageChannels)) return;
                         await textChannel.DeleteAsync();
@@ -114,8 +114,6 @@ namespace Utili.Services
                         await VoiceLink.SaveChannelRowAsync(channelRow);
                         return;
                     }
-
-                    List<LocalOverwrite> overwrites;
 
                     if (textChannel is null)
                     {
@@ -138,7 +136,7 @@ namespace Utili.Services
                         if(!textChannel.BotHasPermissions(Permission.ViewChannel | Permission.ManageChannels | Permission.ManageRoles)) return;
                     }
 
-                    overwrites = textChannel.Overwrites.Select(x => new LocalOverwrite(x.TargetId, x.TargetType, x.Permissions)).ToList();
+                    List<LocalOverwrite> overwrites = textChannel.Overwrites.Select(x => new LocalOverwrite(x.TargetId, x.TargetType, x.Permissions)).ToList();
                     bool overwritesChanged = false;
 
                     overwrites.RemoveAll(x =>
