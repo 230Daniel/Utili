@@ -42,6 +42,7 @@ namespace Utili.Services
 
         static void WriteToLogFile(string message)
         {
+            message = message.Replace("»", ">");
             if (!Directory.Exists("Logs")) Directory.CreateDirectory("Logs");
             File.AppendAllText($"Logs/{DateTime.UtcNow:yyyy-MM-dd}.txt", message);
         }
