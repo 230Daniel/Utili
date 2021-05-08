@@ -81,6 +81,7 @@ namespace Utili.Services
         protected override async Task ExecuteAsync(CancellationToken cancellationToken)
         {
             await Database.Database.InitialiseAsync(false, _config.GetValue<string>("DefaultPrefix"));
+            Database.Status.Start();
             _logger.LogInformation("Database initialised");
 
             await Client.WaitUntilReadyAsync(cancellationToken);

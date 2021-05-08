@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using Disqord;
@@ -93,9 +94,9 @@ namespace Utili.Commands
             int rest = (int)sw.ElapsedMilliseconds;
             if (rest > largestLatency) largestLatency = rest;
 
-            int database = Program._dbPingTest.NetworkLatency;
+            int database = Database.Status.Latency;
             if (database > largestLatency) largestLatency = database;
-            double databaseQueries = Math.Round(Program._dbPingTest.QueriesPerSecond, 2);
+            double databaseQueries = Math.Round(Database.Status.QueriesPerSecond, 2);
 
             double cpu = 0;
             double memory = 0;

@@ -78,8 +78,7 @@ namespace Database
             MySqlConnection connection = new MySqlConnection(ConnectionString);
             await connection.OpenAsync();
 
-            Stopwatch sw = new Stopwatch();
-            sw.Start();
+            Stopwatch sw = Stopwatch.StartNew();
             connection.Ping();
             sw.Stop();
 
