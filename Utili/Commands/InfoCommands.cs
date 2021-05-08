@@ -1,12 +1,15 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using Disqord;
 using Disqord.Bot;
 using Disqord.Gateway.Api;
+using Disqord.Rest;
 using Microsoft.Extensions.Configuration;
 using Qmmands;
 using Utili.Extensions;
 using Utili.Utils;
+using LinuxSystemStats;
 
 namespace Utili.Commands
 {
@@ -83,7 +86,11 @@ namespace Utili.Commands
             int gateway = (int)Math.Round(gatewayLatency.Value.TotalMilliseconds);
             if (gateway > largestLatency) largestLatency = gateway;
 
-            int rest = Program._pingTest.RestLatency;
+            Stopwatch sw = Stopwatch.StartNew();
+            await Context.Channel.TriggerTypingAsync();
+            sw.Stop();
+            
+            int rest = (int)sw.ElapsedMilliseconds;
             if (rest > largestLatency) largestLatency = rest;
 
             int database = Program._dbPingTest.NetworkLatency;
@@ -92,15 +99,17 @@ namespace Utili.Commands
 
             double cpu = 0;
             double memory = 0;
-            if (Program._pingTest.Memory is not null)
+            try
             {
-                cpu = Program._pingTest.CpuPercentage;
-                memory = Math.Round(Program._pingTest.Memory.UsedGigabytes / Program._pingTest.Memory.TotalGigabytes * 100);
+                cpu = await Stats.GetCurrentCpuUsagePercentageAsync(2);
+                MemoryInformation memoryInfo = await Stats.GetMemoryInformationAsync(2);
+                memory = Math.Round(memoryInfo.UsedGigabytes / memoryInfo.TotalGigabytes * 100);
             }
-            
+            catch { }
+
             PingStatus status = PingStatus.Excellent;
-            if (largestLatency > 50) status = PingStatus.Normal;
-            if (largestLatency > 250) status = PingStatus.Poor;
+            if (largestLatency > 100) status = PingStatus.Normal;
+            if (largestLatency > 500) status = PingStatus.Poor;
             if (largestLatency > 1000) status = PingStatus.Critical;
 
             if(status < PingStatus.Normal && cpu > 25) status = PingStatus.Normal;

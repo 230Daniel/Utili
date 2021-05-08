@@ -31,7 +31,6 @@ namespace Utili
         public static int _totalShards;
 
         public static Timer _shardStatsUpdater;
-        public static readonly PingTest _pingTest = new PingTest();
         public static readonly Database.PingTest _dbPingTest = new Database.PingTest();
 
         // ReSharper enable InconsistentNaming
