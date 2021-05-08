@@ -1,15 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
 using Database.Data;
 using Disqord;
 using Disqord.Bot;
 using Disqord.Rest;
 using Utili.Extensions;
-using static Utili.Program;
 using Qmmands;
 
 namespace Utili.Commands
@@ -45,7 +41,6 @@ namespace Utili.Commands
 
             string content = $"Id: {guild?.Id}\n" +
                              $"Owner: {guild.OwnerId}\n" +
-                             //$"Members: {guild.MemberCount}\n" +
                              $"Created: {guild.CreatedAt.UtcDateTime} UTC\n" +
                              $"Premium: {premium.ToString().ToLower()}";
 
@@ -79,28 +74,7 @@ namespace Utili.Commands
             if (guild.OwnerId == userId) await Context.Channel.SendSuccessAsync("Authorised", $"{member} is the owner of {guild}");
             else if (perms.Administrator) await Context.Channel.SendSuccessAsync("Authorised", $"{member} an administrator of {guild}");
             else if (perms.ManageGuild) await Context.Channel.SendSuccessAsync("Authorised", $"{member} has the manage server permission in {guild}");
-            else await Context.Channel.SendFailureAsync("Not authorised", $"{member} does not have the manage server permission in {guild}", false);
-        }
-
-        [Command("Restart"), RequireBotOwner]
-        public async Task Restart()
-        {
-            await Context.Channel.SendSuccessAsync("Restarting");
-            _logger.Log("Command", $"Restart Requested by {Context.Author} - Killing process 10 seconds.", LogSeverity.Crit);
-            await Task.Delay(10000);
-            Monitoring.Restart();
-        }
-
-        [Command("Test"), RequireBotOwner]
-        public async Task Test()
-        {
-            var members = await Context.Guild.FetchAllMembersAsync();
-            string content = "";
-            foreach (var member in members)
-            {
-                content += $"{member}\n";
-            }
-            await Context.Channel.SendSuccessAsync("Fetched all members", content);
+            else await Context.Channel.SendFailureAsync("Not authorised", $"{member} does not have the manage server permission in {guild}", false);}
         }
     }
-}
+
