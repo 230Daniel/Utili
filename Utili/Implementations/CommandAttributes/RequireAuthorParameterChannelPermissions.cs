@@ -1,13 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Disqord;
 using Disqord.Bot;
 using Disqord.Gateway;
 using Qmmands;
-using Utili.Extensions;
 
 namespace Utili.Implementations
 {

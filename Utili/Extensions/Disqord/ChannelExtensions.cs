@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using Disqord;
+﻿using Disqord;
 using Disqord.Gateway;
 
 namespace Utili.Extensions

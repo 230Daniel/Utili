@@ -1,11 +1,8 @@
-﻿using System;
-using System.Diagnostics;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using Disqord;
 using Disqord.Gateway;
 using Disqord.Hosting;
-using Disqord.Rest;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Utili.Features;

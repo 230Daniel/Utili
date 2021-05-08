@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using System.Timers;
-using Database;
 using Disqord;
 using Disqord.Bot;
 using Disqord.Bot.Hosting;

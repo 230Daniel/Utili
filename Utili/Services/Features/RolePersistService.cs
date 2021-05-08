@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Database.Data;
-using Discord.WebSocket;
 using Disqord;
 using Disqord.Gateway;
 using Disqord.Rest;

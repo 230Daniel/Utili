@@ -4,12 +4,10 @@ using System.Threading.Tasks;
 using Database.Data;
 using Disqord;
 using Disqord.Bot;
-using Disqord.Gateway;
 using Disqord.Rest;
 using Qmmands;
 using Utili.Extensions;
 using Utili.Implementations;
-using Utili.Services;
 using Utili.Utils;
 
 namespace Utili.Commands
