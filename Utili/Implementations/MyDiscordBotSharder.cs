@@ -24,7 +24,9 @@ namespace Utili.Implementations
             if (!context.GuildId.HasValue || context.Author.IsBot) return false;
 
             CoreRow row = await Core.GetRowAsync(context.GuildId.Value);
-            return !row.ExcludedChannels.Contains(context.ChannelId);
+            bool excluded = row.ExcludedChannels.Contains(context.ChannelId);
+            if (!row.EnableCommands) excluded = !excluded;
+            return !excluded;
         }
 
         protected override LocalMessageBuilder FormatFailureMessage(DiscordCommandContext context, FailedResult result)
