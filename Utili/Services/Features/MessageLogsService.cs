@@ -210,7 +210,7 @@ namespace Utili.Services
 
                     if (user is null) sb.AppendLine($"Unknown member ({user.Id})");
                     else sb.AppendLine($"{user} ({user.Id})");
-                    sb.AppendLine($" at {Helper.ToUniversalDateTime(message.Timestamp)} UTC");
+                    sb.AppendLine($" at {message.Timestamp.ToUniversalFormat()} UTC");
 
                     string messageContent = "    " + message.Content.Value.Replace("\n", "\n    ");
 

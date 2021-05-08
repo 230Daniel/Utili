@@ -42,5 +42,13 @@ namespace Utili.Extensions
         {
             return (guild.Client as DiscordClientBase).FetchAllMembersAsync(guild.Id);
         }
+        
+        public static IEmoji GetEmoji(this IGuild guild, string emojiString)
+        {
+            if (guild.Emojis.Values.Any(x => x.Name == emojiString || $":{x.Name}:" == emojiString))
+                return guild.Emojis.Values.First(x => x.Name == emojiString || $":{x.Name}:" == emojiString);
+
+            return new LocalEmoji(emojiString);
+        }
     }
 }

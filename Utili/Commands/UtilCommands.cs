@@ -268,14 +268,14 @@ namespace Utili.Commands
         [Command("B64Encode")]
         public async Task B64Encode([Remainder] string input)
         {
-            string output = Helper.EncodeString(input);
+            string output = input.ToEncoded();
             await Context.Channel.SendSuccessAsync("Encoded string to base 64", output);
         }
 
         [Command("B64Decode")]
         public async Task B64Decode([Remainder] string input)
         {
-            string output = Helper.DecodeString(input);
+            string output = input.ToDecoded();
 
             if (output == input)
             {

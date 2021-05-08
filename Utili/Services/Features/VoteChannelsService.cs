@@ -37,7 +37,7 @@ namespace Utili.Features
 
                 CachedGuild guild = _client.GetGuild(e.GuildId.Value);
                 foreach (string emoji in row.Emotes)
-                    await e.Message.AddReactionAsync(Helper.GetEmoji(emoji, guild));
+                    await e.Message.AddReactionAsync(guild.GetEmoji(emoji));
             }
             catch (Exception ex)
             {

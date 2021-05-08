@@ -82,7 +82,7 @@ namespace Utili.Commands
                 return;
             }
 
-            IEmoji removedEmoji = Helper.GetEmoji(row.Emotes[emojiNumber - 1], Context.Guild);
+            IEmoji removedEmoji = Context.Guild.GetEmoji(row.Emotes[emojiNumber - 1]);
             
             row.Emotes.RemoveAt(emojiNumber - 1);
             await VoteChannels.SaveRowAsync(row);

@@ -31,7 +31,7 @@ namespace Utili.Services
                 ITextChannel channel = guild.GetTextChannel(e.ChannelId);
 
                 ReputationRow row = await Reputation.GetRowAsync(e.GuildId.Value);
-                if (!row.Emotes.Any(x => Helper.GetEmoji(x.Item1, guild).Equals(e.Emoji))) return;
+                if (!row.Emotes.Any(x => guild.GetEmoji(x.Item1).Equals(e.Emoji))) return;
                 int change = row.Emotes.First(x => Equals(x.Item1, e.Emoji.ToString())).Item2;
 
                 IUserMessage message = e.Message ?? await channel.FetchMessageAsync(e.MessageId) as IUserMessage;
@@ -58,7 +58,7 @@ namespace Utili.Services
                 ITextChannel channel = guild.GetTextChannel(e.ChannelId);
 
                 ReputationRow row = await Reputation.GetRowAsync(e.GuildId.Value);
-                if (!row.Emotes.Any(x => Helper.GetEmoji(x.Item1, guild).Equals(e.Emoji))) return;
+                if (!row.Emotes.Any(x => guild.GetEmoji(x.Item1).Equals(e.Emoji))) return;
                 int change = -1 * row.Emotes.First(x => Equals(x.Item1, e.Emoji.ToString())).Item2;
 
                 IUserMessage message = e.Message ?? await channel.FetchMessageAsync(e.MessageId) as IUserMessage;

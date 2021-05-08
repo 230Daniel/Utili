@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Text;
 
 namespace Utili.Extensions
 {
@@ -12,5 +13,24 @@ namespace Utili.Extensions
                 "" => throw new ArgumentException($"{nameof(input)} cannot be empty", nameof(input)),
                 _ => input.First().ToString().ToUpper() + input.Substring(1)
             };
+        
+        public static string ToEncoded(this string input)
+        {
+            byte[] bytes = Encoding.UTF8.GetBytes(input);
+            return Convert.ToBase64String(bytes);
+        }
+
+        public static string ToDecoded(this string input)
+        {
+            try
+            {
+                byte[] bytes = Convert.FromBase64String(input);
+                return Encoding.UTF8.GetString(bytes);
+            }
+            catch
+            {
+                return input;
+            }
+        }
     }
 }
