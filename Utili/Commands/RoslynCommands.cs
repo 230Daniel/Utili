@@ -42,6 +42,7 @@ namespace Utili.Features
                     "System.Collections.Generic",
                     "System.Text",
                     "System.Threading.Tasks",
+                    "System.Linq",
                     "Microsoft.Extensions.DependencyInjection",
                     "Microsoft.Extensions.Hosting",
                     "Microsoft.Extensions.Logging",
