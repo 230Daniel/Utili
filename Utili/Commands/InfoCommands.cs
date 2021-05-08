@@ -102,7 +102,7 @@ namespace Utili.Commands
             double memory = 0;
             try
             {
-                cpu = await Stats.GetCurrentCpuUsagePercentageAsync(2);
+                cpu = await Stats.GetCurrentCpuUsagePercentageAsync(0);
                 MemoryInformation memoryInfo = await Stats.GetMemoryInformationAsync(2);
                 memory = Math.Round(memoryInfo.UsedGigabytes / memoryInfo.TotalGigabytes * 100);
             }
@@ -119,16 +119,15 @@ namespace Utili.Commands
 
             //DateTime upSince = Handlers.ShardHandler.ShardRegister.First(x => x.Item1 == shard.ShardId).Item2;
             //TimeSpan uptime = DateTime.Now - upSince;
-
-#pragma warning disable 8509
+            
             Color color = status switch
             {
                 PingStatus.Excellent => new Color(67, 181, 129),
                 PingStatus.Normal => new Color(67, 181, 129),
                 PingStatus.Poor => new Color(181, 107, 67),
-                PingStatus.Critical => new Color(181, 67, 67)
+                PingStatus.Critical => new Color(181, 67, 67),
+                _ => throw new ArgumentOutOfRangeException()
             };
-#pragma warning restore 8509
 
             LocalEmbedBuilder embed = MessageUtils.CreateEmbed(EmbedType.Info, $"Pong! Status: {status}");
             embed.WithColor(color);
