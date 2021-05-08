@@ -33,7 +33,7 @@ namespace Utili
             _config = config;
             _client = client;
 
-            _communityGuildId = _config.GetSection("community").GetValue<ulong>("guildId");
+            _communityGuildId = _config.GetSection("Community").GetValue<ulong>("GuildId");
         }
 
         public async Task Ready(ReadyEventArgs e)
@@ -79,7 +79,7 @@ namespace Utili
                 try
                 {
                     CachedGuild guild = _client.GetGuild(_communityGuildId);
-                    IRole premiumRole = guild.GetRole(_config.GetSection("community").GetValue<ulong>("premiumRoleId"));
+                    IRole premiumRole = guild.GetRole(_config.GetSection("Community").GetValue<ulong>("PremiumRoleId"));
                     
                     if (premiumRole is not null)
                     {

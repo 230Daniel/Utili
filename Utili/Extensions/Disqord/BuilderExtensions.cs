@@ -55,5 +55,11 @@ namespace Utili.Extensions
             
             return builder;
         }
+        
+        public static LocalEmbedBuilder AddInlineField(this LocalEmbedBuilder builder, string name, string value)
+        {
+            builder.AddField(name, value, true);
+            return builder;
+        }
     }
 }

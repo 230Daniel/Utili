@@ -24,7 +24,7 @@ namespace Utili.Commands
         [Command("About", "Info")]
         public async Task About()
         {
-            string domain = _config.GetValue<string>("domain");
+            string domain = _config.GetValue<string>("Domain");
 
             string about = string.Concat(
                 "Created by 230Daniel#1920\n",
@@ -41,35 +41,35 @@ namespace Utili.Commands
         [Command("Help", "Commands")]
         public async Task Help()
         {
-            string domain = _config.GetValue<string>("domain");
+            string domain = _config.GetValue<string>("Domain");
             string dashboardUrl = $"https://{domain}/dashboard/{Context.Guild.Id}";
 
             LocalEmbedBuilder embed = MessageUtils.CreateEmbed(EmbedType.Info, "Utili",
-                $"You can configure Utili on the [dashboard]({dashboardUrl}).\n" +
-                $"If you need help, you should [contact us](https://{domain}/contact).\n⠀");
+                    $"You can configure Utili on the [dashboard]({dashboardUrl}).\n" +
+                    $"If you need help, you should [contact us](https://{domain}/contact).\n⠀")
 
-            embed.AddField("**Core**", $"[Command List](https://{domain}/commands)\n" +
-                                       $"[Core Settings]({dashboardUrl})");
+                .AddInlineField("**Core**", $"[Command List](https://{domain}/commands)\n" +
+                                            $"[Core Settings]({dashboardUrl})")
 
-            embed.AddField("**Channels**", $"[Autopurge]({dashboardUrl}/autopurge)\n" +
-                                           $"[Channel Mirroring]({dashboardUrl}/channelmirroring)\n" +
-                                           $"[Sticky Notices]({dashboardUrl}/notices)");
+                .AddInlineField("**Channels**", $"[Autopurge]({dashboardUrl}/autopurge)\n" +
+                                                $"[Channel Mirroring]({dashboardUrl}/channelmirroring)\n" +
+                                                $"[Sticky Notices]({dashboardUrl}/notices)")
 
-            embed.AddField("**Messages**", $"[Message Filter]({dashboardUrl}/messagefilter)\n" +
-                                           $"[Message Logging]({dashboardUrl}/messagelogs)\n" +
-                                           $"[Message Pinning]({dashboardUrl}/messagepinning)\n" +
-                                           $"[Message Voting]({dashboardUrl}/votechannels)");
+                .AddInlineField("**Messages**", $"[Message Filter]({dashboardUrl}/messagefilter)\n" +
+                                                $"[Message Logging]({dashboardUrl}/messagelogs)\n" +
+                                                $"[Message Pinning]({dashboardUrl}/messagepinning)\n" +
+                                                $"[Message Voting]({dashboardUrl}/votechannels)")
 
-            embed.AddField("**Users**", $"[Inactive Role]({dashboardUrl}/inactiverole)\n" +
-                                        $"[Join Message]({dashboardUrl}/joinmessage)\n" +
-                                        $"[Reputation]({dashboardUrl}/reputation)");
+                .AddInlineField("**Users**", $"[Inactive Role]({dashboardUrl}/inactiverole)\n" +
+                                             $"[Join Message]({dashboardUrl}/joinmessage)\n" +
+                                             $"[Reputation]({dashboardUrl}/reputation)")
 
-            embed.AddField("**Roles**", $"[Join Roles]({dashboardUrl}/joinroles)\n" +
-                                        $"[Role Linking]({dashboardUrl}/rolelinking)\n" +
-                                        $"[Role Persist]({dashboardUrl}/rolepersist)");
+                .AddInlineField("**Roles**", $"[Join Roles]({dashboardUrl}/joinroles)\n" +
+                                             $"[Role Linking]({dashboardUrl}/rolelinking)\n" +
+                                             $"[Role Persist]({dashboardUrl}/rolepersist)")
 
-            embed.AddField("**Voice Channels**", $"[Voice Link]({dashboardUrl}/voicelink)\n" +
-                                                 $"[Voice Roles]({dashboardUrl}/voiceroles)");
+                .AddInlineField("**Voice Channels**", $"[Voice Link]({dashboardUrl}/voicelink)\n" +
+                                                      $"[Voice Roles]({dashboardUrl}/voiceroles)");
 
             await Context.Channel.SendEmbedAsync(embed);
         }

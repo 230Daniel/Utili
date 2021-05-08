@@ -48,15 +48,15 @@ namespace Utili
                 .ConfigureServices(ConfigureServices)
                 .ConfigureDiscordBotSharder<MyDiscordBotSharder>((context, bot) =>
                 {
-                    bot.Token = context.Configuration["token"];
+                    bot.Token = context.Configuration.GetValue<string>("Token");
                     bot.ReadyEventDelayMode = ReadyEventDelayMode.Guilds;
                     bot.Intents += GatewayIntent.Members;
                     bot.Intents += GatewayIntent.VoiceStates;
-                    bot.Activities = new[] { new LocalActivity("v3 ?!??", ActivityType.Playing)};
-                    bot.OwnerIds = new[] { new Snowflake(ulong.Parse(context.Configuration["ownerId"])) };
+                    bot.Activities = new[] { new LocalActivity($"{context.Configuration.GetValue<string>("Domain")} | {context.Configuration.GetValue<string>("DefaultPrefix")}help", ActivityType.Playing)};
+                    bot.OwnerIds = new[] { new Snowflake(context.Configuration.GetValue<ulong>("OwnerId")) };
 
-                    int[] shardIds = context.Configuration.GetSection("shardIds").Get<int[]>();
-                    int totalShards = context.Configuration.GetValue<int>("totalShards");
+                    int[] shardIds = context.Configuration.GetSection("ShardIds").Get<int[]>();
+                    int totalShards = context.Configuration.GetValue<int>("TotalShards");
                     bot.ShardIds = shardIds.Select(x => new ShardId(x, totalShards));
                 })
                 .Build();
@@ -80,7 +80,7 @@ namespace Utili
             services.AddInteractivity();
             services.AddPrefixProvider<PrefixProvider>();
 
-            services.AddSingleton(new HasteService(context.Configuration["hasteServer"]));
+            services.AddSingleton(new HasteService(context.Configuration["HasteServer"]));
             services.AddSingleton<RoleCacheService>();
             services.AddSingleton<CommunityService>();
             
