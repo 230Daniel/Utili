@@ -82,6 +82,7 @@ namespace Utili
 
             services.AddSingleton(new HasteService(context.Configuration["hasteServer"]));
             services.AddSingleton<RoleCacheService>();
+            services.AddSingleton<CommunityService>();
             
             services.AddSingleton<AutopurgeService>();
             services.AddSingleton<ChannelMirroringService>();

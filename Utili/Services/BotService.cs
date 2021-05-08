@@ -19,6 +19,7 @@ namespace Utili.Services
         DiscordClientBase _client;
 
         RoleCacheService _roleCache;
+        CommunityService _community;
         
         AutopurgeService _autopurge;
         ChannelMirroringService _channelMirroring;
@@ -39,6 +40,7 @@ namespace Utili.Services
             ILogger<BotService> logger, 
             IConfiguration config,
             RoleCacheService roleCache,
+            CommunityService community,
             DiscordClientBase client, 
             AutopurgeService autopurge,
             ChannelMirroringService channelMirroring,
@@ -61,6 +63,7 @@ namespace Utili.Services
             _client = client;
 
             _roleCache = roleCache;
+            _community = community;
             
             _autopurge = autopurge;
             _channelMirroring = channelMirroring;
@@ -100,6 +103,15 @@ namespace Utili.Services
             _ = Task.Run(async () =>
             {
                 _ = _roleCache.Ready(e);
+                _ = _community.Ready(e);
+            });
+        }
+
+        protected override async ValueTask OnGuildAvailable(GuildAvailableEventArgs e)
+        {
+            _ = Task.Run(async () =>
+            {
+                _ = _community.GuildAvailable(e);
             });
         }
 
