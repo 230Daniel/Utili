@@ -188,7 +188,6 @@ namespace Utili.Services
 
         async Task GetMessagesAsync()
         {
-            await Task.Delay(5000);
             List<AutopurgeRow> rows = await Autopurge.GetRowsAsync(enabledOnly: true);
             rows.RemoveAll(x => _client.GetGuild(x.GuildId) is null);
             rows.RemoveAll(x => _client.GetGuild(x.GuildId).GetTextChannel(x.ChannelId) is null);
