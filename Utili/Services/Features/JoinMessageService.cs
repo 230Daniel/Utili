@@ -82,7 +82,7 @@ namespace Utili.Services
                     .WithOptionalFooter(footer)
                     .WithThumbnailUrl(thumbnailUrl)
                     .WithImageUrl(imageUrl)
-                    .WithColor(new Color((int) row.Colour.RawValue)))
+                    .WithColor(new Color((int) row.Colour)))
                 .Build();
         }
     }

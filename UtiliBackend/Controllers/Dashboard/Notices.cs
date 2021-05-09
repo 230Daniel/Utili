@@ -46,7 +46,7 @@ namespace UtiliBackend.Controllers.Dashboard
                 row.Image = EString.FromDecoded(bodyRow.Image);
                 row.Thumbnail = EString.FromDecoded(bodyRow.Thumbnail);
                 row.Icon = EString.FromDecoded(bodyRow.Icon);
-                row.Colour = new Color(uint.Parse(bodyRow.Colour.Replace("#", ""), System.Globalization.NumberStyles.HexNumber));
+                row.Colour = uint.Parse(bodyRow.Colour.Replace("#", ""), System.Globalization.NumberStyles.HexNumber);
 
                 bool isNew = row.New;
                 await row.SaveAsync();
@@ -104,7 +104,7 @@ namespace UtiliBackend.Controllers.Dashboard
             Image = row.Image.Value;
             Thumbnail = row.Thumbnail.Value;
             Icon = row.Icon.Value;
-            Colour = row.Colour.R.ToString("X2") + row.Colour.G.ToString("X2") + row.Colour.B.ToString("X2");
+            Colour = row.Colour.ToString("X6");
             Changed = false;
         }
 

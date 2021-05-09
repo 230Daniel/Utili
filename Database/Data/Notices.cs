@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Discord;
 using MySql.Data.MySqlClient;
 
 namespace Database.Data
@@ -87,7 +86,7 @@ namespace Database.Data
                     ("Image", row.Image.EncodedValue),
                     ("Thumbnail", row.Thumbnail.EncodedValue),
                     ("Icon", row.Icon.EncodedValue),
-                    ("Colour", row.Colour.RawValue));
+                    ("Colour", row.Colour));
 
                 row.New = false;
                 if(Cache.Initialised) Cache.Notices.Add(row);
@@ -108,7 +107,7 @@ namespace Database.Data
                     ("Image", row.Image.EncodedValue),
                     ("Thumbnail", row.Thumbnail.EncodedValue),
                     ("Icon", row.Icon.EncodedValue),
-                    ("Colour", row.Colour.RawValue));
+                    ("Colour", row.Colour));
 
                 if(Cache.Initialised) Cache.Notices[Cache.Notices.FindIndex(x => x.GuildId == row.GuildId && x.ChannelId == row.ChannelId)] = row;
             }
@@ -157,7 +156,7 @@ namespace Database.Data
         public EString Image { get; set; }
         public EString Thumbnail { get; set; }
         public EString Icon { get; set; }
-        public Color Colour { get; set; }
+        public uint Colour { get; set; }
 
         private NoticesRow()
         {
@@ -179,7 +178,7 @@ namespace Database.Data
             Image = EString.Empty;
             Thumbnail = EString.Empty;
             Icon = EString.Empty;
-            Colour = new Color(67, 181, 129);
+            Colour = 4437377;
         }
 
         public static NoticesRow FromDatabase(ulong guildId, ulong channelId, ulong messageId, bool enabled, string delay, string title, string footer, string content, string text, string image, string thumbnail, string icon, uint colour)
@@ -199,7 +198,7 @@ namespace Database.Data
                 Image = EString.FromEncoded(image),
                 Thumbnail = EString.FromEncoded(thumbnail),
                 Icon = EString.FromEncoded(icon),
-                Colour = new Color(colour)
+                Colour = colour
             };
         }
 
