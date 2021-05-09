@@ -35,12 +35,15 @@ namespace Utili.Services
         VoteChannelsService _voteChannels;
 
         public BotService(
+            
             ILogger<BotService> logger, 
+            DiscordClientBase client, 
             IConfiguration config,
+            
             RoleCacheService roleCache,
             CommunityService community,
             GuildCountService guildCount,
-            DiscordClientBase client, 
+            
             AutopurgeService autopurge,
             ChannelMirroringService channelMirroring,
             InactiveRoleService inactiveRole,
@@ -55,6 +58,7 @@ namespace Utili.Services
             VoiceLinkService voiceLink,
             VoiceRolesService voiceRoles,
             VoteChannelsService voteChannels)
+        
             : base(logger, client)
         {
             _logger = logger;
