@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using System.Xml;
 using Database;
 using Database.Data;
-using Discord;
 
 namespace UtiliBackend.Controllers.Dashboard
 {

@@ -30,7 +30,7 @@ namespace Utili.Features
         {
             if (Context.Message.Author.Id != _config.GetValue<ulong>("OwnerId"))
             {
-                _logger.LogWarning("The bot owner check allowed a non-owner through - The eval command was not executed.");
+                _logger.LogWarning("The bot owner check allowed a non-owner through - The eval command was not executed");
                 return;
             }
 

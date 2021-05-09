@@ -125,7 +125,12 @@ namespace Utili.Services
 
                 List<MessageLogsMessageRow> messages = await MessageLogs.GetMessagesAsync(e.GuildId, e.ChannelId, e.MessageIds.Select(x => x.RawValue).ToArray());
 
-                LocalEmbedBuilder embed = GetBulkDeletedEmbed(messages, e, await PasteMessagesAsync(messages, e.MessageIds.Count));
+                LocalEmbedBuilder embed = GetBulkDeletedEmbed(e, await PasteMessagesAsync(messages, e.MessageIds.Count));
+                
+                await MessageLogs.DeleteMessagesAsync(e.GuildId, e.ChannelId, e.MessageIds.Select(x => x.RawValue).ToArray());
+
+                ITextChannel logChannel = _client.GetTextChannel(e.GuildId, row.DeletedChannelId);
+                if (logChannel is not null) await logChannel.SendEmbedAsync(embed);
             }
             catch (Exception ex)
             {
@@ -177,7 +182,7 @@ namespace Utili.Services
             return builder;
         }
 
-        LocalEmbedBuilder GetBulkDeletedEmbed(List<MessageLogsMessageRow> messages, MessagesDeletedEventArgs e, string paste)
+        LocalEmbedBuilder GetBulkDeletedEmbed(MessagesDeletedEventArgs e, string paste)
         {
             LocalEmbedBuilder builder = new LocalEmbedBuilder()
                 .WithColor(new Color(245, 66, 66))

@@ -3,7 +3,6 @@ using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
 using Database;
 using Database.Data;
-using Discord;
 
 namespace UtiliBackend.Controllers.Dashboard
 {

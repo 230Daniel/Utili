@@ -69,7 +69,7 @@ namespace Utili.Commands
             }
 
             IEnumerable<IRole> roles = member.RoleIds.Select(x => guild.Roles.First(y => y.Key == x).Value);
-            GuildPermissions perms = Disqord.Discord.Permissions.CalculatePermissions(guild, member, roles);
+            GuildPermissions perms = Discord.Permissions.CalculatePermissions(guild, member, roles);
 
             if (guild.OwnerId == userId) await Context.Channel.SendSuccessAsync("Authorised", $"{member} is the owner of {guild}");
             else if (perms.Administrator) await Context.Channel.SendSuccessAsync("Authorised", $"{member} an administrator of {guild}");

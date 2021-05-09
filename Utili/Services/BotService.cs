@@ -13,7 +13,6 @@ namespace Utili.Services
     {
         ILogger<BotService> _logger;
         IConfiguration _config;
-        DiscordClientBase _client;
 
         RoleCacheService _roleCache;
         CommunityService _community;
@@ -63,7 +62,6 @@ namespace Utili.Services
         {
             _logger = logger;
             _config = config;
-            _client = client;
 
             _roleCache = roleCache;
             _community = community;

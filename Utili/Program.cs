@@ -1,13 +1,11 @@
 ﻿using System;
 using System.Linq;
-using System.Timers;
 using Disqord;
 using Disqord.Bot;
 using Disqord.Bot.Hosting;
 using Disqord.Extensions.Interactivity;
 using Disqord.Gateway;
 using Disqord.Gateway.Api;
-using Disqord.Rest.Api;
 using Microsoft.Extensions.Configuration;
 using Utili.Implementations;
 using Microsoft.Extensions.DependencyInjection;

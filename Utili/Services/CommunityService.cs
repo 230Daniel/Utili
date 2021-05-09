@@ -21,8 +21,7 @@ namespace Utili
 
         Snowflake _communityGuildId;
         Timer _roleTimer;
-        bool _cachedMembers;
-        
+
         public CommunityService(
             ILogger<CommunityService> logger, 
             IConfiguration config, 

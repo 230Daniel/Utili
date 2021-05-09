@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Data;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using Disqord;
 using Disqord.Bot;
-using Disqord.Gateway.Api;
 using Disqord.Rest;
 using Microsoft.Extensions.Configuration;
 using Qmmands;
@@ -17,12 +15,10 @@ namespace Utili.Commands
     public class InfoCommands : DiscordGuildModuleBase
     {
         IConfiguration _config;
-        IGatewayHeartbeater _heartbeater;
 
-        public InfoCommands(IConfiguration config, IGatewayHeartbeater heartbeater)
+        public InfoCommands(IConfiguration config)
         {
             _config = config;
-            _heartbeater = heartbeater;
         }
 
         [Command("About", "Info")]

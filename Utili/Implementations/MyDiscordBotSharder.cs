@@ -93,6 +93,20 @@ namespace Utili.Implementations
             return base.AddTypeParsersAsync(cancellationToken);
         }
 
-        public MyDiscordBotSharder(IOptions<DiscordBotSharderConfiguration> options, ILogger<DiscordBotSharder> logger, IPrefixProvider prefixes, ICommandQueue queue, CommandService commands, IServiceProvider services, DiscordClientSharder client) : base(options, logger, prefixes, queue, commands, services, client) { }
+        public MyDiscordBotSharder(
+            IOptions<DiscordBotSharderConfiguration> options, 
+            ILogger<MyDiscordBotSharder> logger, 
+            IPrefixProvider prefixes, 
+            ICommandQueue queue, 
+            CommandService commands, 
+            IServiceProvider services, 
+            DiscordClientSharder client) 
+            : base(options, 
+                logger, 
+                prefixes, 
+                queue, 
+                commands,
+                services, 
+                client) { }
     }
 }
