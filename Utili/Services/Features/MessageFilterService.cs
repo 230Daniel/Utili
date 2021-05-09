@@ -47,7 +47,7 @@ namespace Utili.Services
                 if (!DoesMessageObeyRule(message, row, out string allowedTypes))
                 {
                     await e.Message.DeleteAsync();
-                    if(e.Member.IsBot) return true;
+                    if(e.Member is null || e.Member.IsBot) return true;
 
                     IUserMessage sent = await e.Channel.SendFailureAsync("Message deleted",
                         $"Only messages {allowedTypes} are allowed in {e.Channel.Mention}");
