@@ -7,6 +7,7 @@ using Disqord.Bot.Hosting;
 using Disqord.Extensions.Interactivity;
 using Disqord.Gateway;
 using Disqord.Gateway.Api;
+using Disqord.Rest.Api;
 using Microsoft.Extensions.Configuration;
 using Utili.Implementations;
 using Microsoft.Extensions.DependencyInjection;
@@ -17,23 +18,8 @@ using Utili.Services;
 
 namespace Utili
 {
-    internal static class Program
+    static class Program
     {
-        
-        // ReSharper disable InconsistentNaming
-
-        public static Discord.WebSocket.DiscordShardedClient _oldClient;
-        public static Discord.Commands.CommandService _oldCommands;
-        public static Discord.Rest.DiscordRestClient _oldRest => _oldClient.Rest;
-
-        public static Logger _logger;
-        public static Config _config;
-        public static int _totalShards;
-
-        public static Timer _shardStatsUpdater;
-
-        // ReSharper enable InconsistentNaming
-
         static void Main()
         {
             IHost host = Host.CreateDefaultBuilder()
@@ -80,6 +66,7 @@ namespace Utili
             services.AddSingleton(new HasteService(context.Configuration["HasteServer"]));
             services.AddSingleton<RoleCacheService>();
             services.AddSingleton<CommunityService>();
+            services.AddSingleton<GuildCountService>();
             
             services.AddSingleton<AutopurgeService>();
             services.AddSingleton<ChannelMirroringService>();

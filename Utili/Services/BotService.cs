@@ -17,6 +17,7 @@ namespace Utili.Services
 
         RoleCacheService _roleCache;
         CommunityService _community;
+        GuildCountService _guildCount;
         
         AutopurgeService _autopurge;
         ChannelMirroringService _channelMirroring;
@@ -38,6 +39,7 @@ namespace Utili.Services
             IConfiguration config,
             RoleCacheService roleCache,
             CommunityService community,
+            GuildCountService guildCount,
             DiscordClientBase client, 
             AutopurgeService autopurge,
             ChannelMirroringService channelMirroring,
@@ -61,6 +63,7 @@ namespace Utili.Services
 
             _roleCache = roleCache;
             _community = community;
+            _guildCount = guildCount;
             
             _autopurge = autopurge;
             _channelMirroring = channelMirroring;
@@ -92,6 +95,7 @@ namespace Utili.Services
             _notices.Start();
             _voiceLink.Start();
             _voiceRoles.Start();
+            _guildCount.Start();
             
             _logger.LogInformation("Services started");
         }
