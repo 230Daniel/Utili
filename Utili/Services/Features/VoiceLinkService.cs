@@ -34,10 +34,10 @@ namespace Utili.Services
                 if (!row.Enabled) return;
                 lock (_channelsRequiringUpdate)
                 {
-                    if (e.NewVoiceState?.ChannelId != null &&
+                    if (e.NewVoiceState?.ChannelId is not null &&
                         !row.ExcludedChannels.Contains(e.NewVoiceState.ChannelId.Value))
                         _channelsRequiringUpdate.Add((e.GuildId, e.NewVoiceState.ChannelId.Value));
-                    if (e.OldVoiceState?.ChannelId != null &&
+                    if (e.OldVoiceState?.ChannelId is not null &&
                         !row.ExcludedChannels.Contains(e.OldVoiceState.ChannelId.Value))
                         _channelsRequiringUpdate.Add((e.GuildId, e.OldVoiceState.ChannelId.Value));
                 }
@@ -106,7 +106,7 @@ namespace Utili.Services
                     }
                     catch {}
 
-                    if (connectedUsers.Any(x => !x.IsBot) && metaRow.DeleteChannels)
+                    if (connectedUsers.All(x => x.IsBot) && metaRow.DeleteChannels)
                     {
                         if(textChannel is null || !textChannel.BotHasPermissions(Permission.ViewChannel | Permission.ManageChannels)) return;
                         await textChannel.DeleteAsync();
