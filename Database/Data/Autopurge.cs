@@ -101,7 +101,8 @@ namespace Database.Data
                 ("ChannelId", row.ChannelId));
         }
 
-        public static async Task<List<AutopurgeMessageRow>> GetMessagesAsync(ulong? guildId = null, ulong? channelId = null, ulong? messageId = null)
+        public static async Task<List<AutopurgeMessageRow>> GetMessagesAsync(ulong? guildId = null,
+            ulong? channelId = null, ulong? messageId = null)
         {
             List<AutopurgeMessageRow> matchedRows = new List<AutopurgeMessageRow>();
 
@@ -205,6 +206,23 @@ namespace Database.Data
                     ("IsBot", row.IsBot),
                     ("IsPinned", row.IsPinned));
             }
+        }
+        
+        public static async Task DeleteMessageAsync(AutopurgeMessageRow row)
+        {
+            await Sql.ExecuteAsync(
+                "DELETE FROM AutopurgeMessages WHERE GuildId = @GuildId AND ChannelId = @ChannelId AND MessageId = @MessageId",
+                ("GuildId", row.GuildId),
+                ("ChannelId", row.ChannelId),
+                ("MessageId", row.MessageId));
+        }
+        
+        public static async Task DeleteMessagesAsync(AutopurgeRow row, ulong[] messageIds)
+        {
+            await Sql.ExecuteAsync(
+                $"DELETE FROM AutopurgeMessages WHERE GuildId = @GuildId AND ChannelId = @ChannelId AND MessageId IN {Sql.ToSqlObjectArray(messageIds)}",
+                ("GuildId", row.GuildId),
+                ("ChannelId", row.ChannelId));
         }
     }
 

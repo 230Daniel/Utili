@@ -6,6 +6,7 @@ using System.Timers;
 using Database.Data;
 using Disqord;
 using Disqord.Gateway;
+using Disqord.Http;
 using Disqord.Rest;
 using Microsoft.Extensions.Logging;
 using Utili.Extensions;
@@ -46,7 +47,7 @@ namespace Utili.Services
                 rows.RemoveAll(x => _client.GetGuild(x.GuildId) is null);
                 rows.RemoveAll(x => _client.GetGuild(x.GuildId).GetTextChannel(x.ChannelId) is null);
 
-                List<Task> tasks = new List<Task>();
+                List<Task> tasks = new();
                 foreach (AutopurgeRow row in rows)
                 {
                     tasks.Add(PurgeChannelAsync(row));
@@ -111,9 +112,13 @@ namespace Utili.Services
 
                 await channel.DeleteMessagesAsync(messagesToDelete.Select(x => new Snowflake(x.MessageId)));
             }
-            catch (Exception e)
+            catch (RestApiException ex) when (ex.StatusCode == HttpResponseStatusCode.NotFound)
             {
-                _logger.LogError(e, $"Exception thrown while purging channel {row.GuildId}/{row.ChannelId}");
+                _logger.LogDebug(ex, $"Exception thrown while purging channel {row.GuildId}/{row.ChannelId}");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Exception thrown while purging channel {row.GuildId}/{row.ChannelId}");
             }
         }
 
@@ -183,6 +188,41 @@ namespace Utili.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Exception thrown on message updated");
+            }
+        }
+
+        public async Task MessageDeleted(MessageDeletedEventArgs e)
+        {
+            try
+            {
+                if (!e.GuildId.HasValue) return;
+                AutopurgeRow row = await Autopurge.GetRowAsync(e.GuildId.Value, e.ChannelId);
+                if (row.Mode == 2) return;
+
+                AutopurgeMessageRow messageRow =
+                    (await Autopurge.GetMessagesAsync(e.GuildId.Value, e.ChannelId, e.MessageId)).FirstOrDefault();
+                if (messageRow is null) return;
+                
+                await Autopurge.DeleteMessageAsync(messageRow);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Exception thrown on message deleted");
+            }
+        }
+        
+        public async Task MessagesDeleted(MessagesDeletedEventArgs e)
+        {
+            try
+            {
+                AutopurgeRow row = await Autopurge.GetRowAsync(e.GuildId, e.ChannelId);
+                if (row.Mode == 2) return;
+
+                await Autopurge.DeleteMessagesAsync(row, e.MessageIds.Select(x => x.RawValue).ToArray());
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Exception thrown on messages deleted");
             }
         }
 

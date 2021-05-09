@@ -148,6 +148,7 @@ namespace Utili.Services
             _ = Task.Run(async () =>
             {
                 _ = _messageLogs.MessageDeleted(e);
+                _ = _autopurge.MessageDeleted(e);
             });
         }
     
@@ -156,6 +157,7 @@ namespace Utili.Services
             _ = Task.Run(async () =>
             {
                 _ = _messageLogs.MessagesDeleted(e);
+                _ = _autopurge.MessagesDeleted(e);
             });
         }
 
