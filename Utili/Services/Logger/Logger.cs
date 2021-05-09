@@ -26,7 +26,7 @@ namespace Utili.Services
                 ($"{formatter.Invoke(state, exception)}\n", ConsoleColor.White),
                 (exceptionString, ConsoleColor.White));
 
-            if(exception is not null)
+            if(exception is not null && logLevel > LogLevel.Debug)
             {
                 LogWriter.CreateErrorReport(exception);
             }
