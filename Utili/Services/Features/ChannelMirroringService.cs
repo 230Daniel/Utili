@@ -6,7 +6,9 @@ using System.Threading.Tasks;
 using Database.Data;
 using Disqord;
 using Disqord.Gateway;
+using Disqord.Http;
 using Disqord.Rest;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.Extensions.Logging;
 using Utili.Extensions;
 
@@ -39,8 +41,16 @@ namespace Utili.Services
                 if(channel is null) return;
 
                 if(!channel.BotHasPermissions(Permission.ViewChannel | Permission.ManageWebhooks)) return;
-
-                IWebhook webhook = await GetWebhookAsync(row.WebhookId);
+                
+                IWebhook webhook;
+                try
+                {
+                    webhook = await GetWebhookAsync(row.WebhookId);
+                }
+                catch (RestApiException ex) when (ex.StatusCode == HttpResponseStatusCode.NotFound)
+                {
+                    webhook = null;
+                }
 
                 if (webhook is null)
                 {
