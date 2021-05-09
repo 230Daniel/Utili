@@ -35,7 +35,7 @@ namespace Utili.Services
             {
                 lock (_updateRequests)
                 {
-                    _updateRequests.Add(new VoiceUpdateRequest(e.GuildId, e.MemberId, e.OldVoiceState.ChannelId, e.NewVoiceState.ChannelId));
+                    _updateRequests.Add(new VoiceUpdateRequest(e.GuildId, e.MemberId, e.OldVoiceState?.ChannelId, e.NewVoiceState?.ChannelId));
                 }
             }
             catch(Exception ex)
@@ -50,7 +50,7 @@ namespace Utili.Services
             {
                 try
                 {
-                    List<VoiceUpdateRequest> requests = new List<VoiceUpdateRequest>();
+                    List<VoiceUpdateRequest> requests = new();
 
                     lock (_updateRequests)
                     {
