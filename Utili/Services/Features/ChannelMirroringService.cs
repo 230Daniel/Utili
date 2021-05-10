@@ -8,7 +8,6 @@ using Disqord;
 using Disqord.Gateway;
 using Disqord.Http;
 using Disqord.Rest;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.Extensions.Logging;
 using Utili.Extensions;
 
