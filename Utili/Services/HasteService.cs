@@ -1,5 +1,6 @@
 ﻿using System.Net.Http;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 
 namespace Utili.Services
@@ -19,9 +20,9 @@ namespace Utili.Services
             return $"{_baseUrl}/{key}.{format}";
         }
 
-        public HasteService(string baseUrl)
+        public HasteService(IConfiguration config)
         {
-            _baseUrl = baseUrl;
+            _baseUrl = config.GetValue<string>("HasteServer");
         }
 
         class PasteResponse

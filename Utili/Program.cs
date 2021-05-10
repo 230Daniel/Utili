@@ -6,6 +6,7 @@ using Disqord.Bot.Hosting;
 using Disqord.Extensions.Interactivity;
 using Disqord.Gateway;
 using Disqord.Gateway.Api;
+using Disqord.Gateway.Default;
 using Microsoft.Extensions.Configuration;
 using Utili.Implementations;
 using Microsoft.Extensions.DependencyInjection;
@@ -61,7 +62,7 @@ namespace Utili
             services.AddInteractivity();
             services.AddPrefixProvider<PrefixProvider>();
 
-            services.AddSingleton(new HasteService(context.Configuration["HasteServer"]));
+            services.AddSingleton<HasteService>();
             services.AddSingleton<RoleCacheService>();
             services.AddSingleton<CommunityService>();
             services.AddSingleton<GuildCountService>();
@@ -80,6 +81,8 @@ namespace Utili
             services.AddSingleton<VoiceRolesService>();
             services.AddSingleton<VoteChannelsService>();
             services.AddSingleton<NoticesService>();
+
+            services.Configure<DefaultGatewayCacheProviderConfiguration>(x => x.MessagesPerChannel = 1);
         }
     }
 }
