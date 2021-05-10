@@ -69,19 +69,19 @@ namespace Utili
             
             services.AddSingleton<AutopurgeService>();
             services.AddSingleton<ChannelMirroringService>();
-            services.AddSingleton<VoiceLinkService>();
-            services.AddSingleton<JoinMessageService>();
-            services.AddSingleton<MessageFilterService>();
-            services.AddSingleton<JoinRolesService>();
-            services.AddSingleton<MessageLogsService>();
-            services.AddSingleton<ReputationService>();
-            services.AddSingleton<RolePersistService>();
-            services.AddSingleton<RoleLinkingService>();
             services.AddSingleton<InactiveRoleService>();
+            services.AddSingleton<JoinMessageService>();
+            services.AddSingleton<JoinRolesService>();
+            services.AddSingleton<MessageFilterService>();
+            services.AddSingleton<MessageLogsService>();
+            services.AddSingleton<NoticesService>();
+            services.AddSingleton<ReputationService>();
+            services.AddSingleton<RoleLinkingService>();
+            services.AddSingleton<RolePersistService>();
+            services.AddSingleton<VoiceLinkService>();
             services.AddSingleton<VoiceRolesService>();
             services.AddSingleton<VoteChannelsService>();
-            services.AddSingleton<NoticesService>();
-
+            
             services.Configure<DefaultGatewayCacheProviderConfiguration>(x => x.MessagesPerChannel = 1);
         }
     }
