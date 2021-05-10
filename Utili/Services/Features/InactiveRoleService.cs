@@ -139,12 +139,12 @@ namespace Utili.Services
                         DateTime minimumLastAction = DateTime.UtcNow - row.Threshold;
                         DateTime minimumKickLastAction = DateTime.UtcNow - (row.Threshold + row.AutoKickThreshold);
 
-                        if (lastAction <= minimumLastAction && !member.RoleIds.Contains(new Snowflake(row.ImmuneRoleId)))
+                        if (lastAction <= minimumLastAction && !member.RoleIds.Contains(row.ImmuneRoleId))
                         {
                             if (premium && row.AutoKick && lastAction <= minimumKickLastAction)
                             {
-                                if(guild.BotHasPermissions(Permission.KickMembers))
-                                    await member.KickAsync(new DefaultRestRequestOptions(){Reason = "Kicked automatically for being inactive"});
+                                if(guild.BotHasPermissions(Permission.KickMembers) && member.CanBeManaged())
+                                    await member.KickAsync(new DefaultRestRequestOptions {Reason = "Kicked automatically for being inactive"});
                                 await Task.Delay(500);
                                 continue;
                             }

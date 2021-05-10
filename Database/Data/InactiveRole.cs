@@ -8,7 +8,7 @@ namespace Database.Data
 {
     public static class InactiveRole
     {
-        private static readonly TimeSpan GapBetweenUpdates = TimeSpan.FromMinutes(60); 
+        static readonly TimeSpan GapBetweenUpdates = TimeSpan.FromMinutes(60); 
 
         public static async Task<List<InactiveRoleRow>> GetRowsAsync(ulong? guildId = null, bool ignoreCache = false)
         {
@@ -54,7 +54,7 @@ namespace Database.Data
 
         public static async Task<List<InactiveRoleRow>> GetUpdateRequiredRowsAsync(bool ignoreCache = false)
         {
-            List<InactiveRoleRow> matchedRows = new List<InactiveRoleRow>();
+            List<InactiveRoleRow> matchedRows = new();
 
             if (Cache.Initialised && !ignoreCache)
             {
