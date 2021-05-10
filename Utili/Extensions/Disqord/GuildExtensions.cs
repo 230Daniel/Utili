@@ -50,5 +50,10 @@ namespace Utili.Extensions
 
             return new LocalEmoji(emojiString);
         }
+
+        public static ValueTask<bool> ChunkMembersAsync(this IGatewayGuild guild)
+        {
+            return (guild.Client as DiscordClientBase).Chunker.ChunkAsync(guild);
+        }
     }
 }
