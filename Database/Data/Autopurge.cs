@@ -10,7 +10,7 @@ namespace Database.Data
     {
         public static async Task<List<AutopurgeRow>> GetRowsAsync(ulong? guildId = null, ulong? channelId = null, bool enabledOnly = false, bool ignoreCache = false)
         {
-            List<AutopurgeRow> matchedRows = new List<AutopurgeRow>();
+            List<AutopurgeRow> matchedRows = new();
 
             if (Cache.Initialised && !ignoreCache)
             {
@@ -22,7 +22,7 @@ namespace Database.Data
             else
             {
                 string command = "SELECT * FROM Autopurge WHERE TRUE";
-                List<(string, object)> values = new List<(string, object)>();
+                List<(string, object)> values = new();
 
                 if (guildId.HasValue)
                 {
@@ -104,10 +104,10 @@ namespace Database.Data
         public static async Task<List<AutopurgeMessageRow>> GetMessagesAsync(ulong? guildId = null,
             ulong? channelId = null, ulong? messageId = null)
         {
-            List<AutopurgeMessageRow> matchedRows = new List<AutopurgeMessageRow>();
+            List<AutopurgeMessageRow> matchedRows = new();
 
             string command = "SELECT * FROM AutopurgeMessages WHERE TRUE";
-            List<(string, object)> values = new List<(string, object)>();
+            List<(string, object)> values = new();
 
             if (guildId.HasValue)
             {
@@ -146,7 +146,7 @@ namespace Database.Data
 
         public static async Task<List<AutopurgeMessageRow>> GetAndDeleteDueMessagesAsync(AutopurgeRow row)
         {
-            List<AutopurgeMessageRow> matchedRows = new List<AutopurgeMessageRow>();
+            List<AutopurgeMessageRow> matchedRows = new();
             if (row.Mode == 2) return matchedRows;
 
             MySqlDataReader reader = await Sql.ExecuteReaderAsync(
@@ -254,7 +254,7 @@ namespace Database.Data
 
         public static AutopurgeRow FromDatabase(ulong guildId, ulong channelId, string timespan, int mode)
         {
-            return new AutopurgeRow
+            return new()
             {
                 New = false,
                 GuildId = guildId,
@@ -292,7 +292,7 @@ namespace Database.Data
 
         public static AutopurgeMessageRow FromDatabase(ulong guildId, ulong channelId, ulong messageId, DateTime timestamp, bool isBot, bool isPinned)
         {
-            return new AutopurgeMessageRow
+            return new()
             {
                 New = false,
                 GuildId = guildId,

@@ -9,7 +9,7 @@ namespace Database.Data
     {
         public static async Task<List<VoteChannelsRow>> GetRowsAsync(ulong? guildId = null, ulong? channelId = null, bool ignoreCache = false)
         {
-            List<VoteChannelsRow> matchedRows = new List<VoteChannelsRow>();
+            List<VoteChannelsRow> matchedRows = new();
 
             if (Cache.Initialised && !ignoreCache)
             {
@@ -21,7 +21,7 @@ namespace Database.Data
             else
             {
                 string command = "SELECT * FROM VoteChannels WHERE TRUE";
-                List<(string, object)> values = new List<(string, object)>();
+                List<(string, object)> values = new();
 
                 if (guildId.HasValue)
                 {
@@ -117,7 +117,7 @@ namespace Database.Data
 
         public static VoteChannelsRow FromDatabase(ulong guildId, ulong channelId, int mode, string emotes)
         {
-            VoteChannelsRow row = new VoteChannelsRow
+            VoteChannelsRow row = new()
             {
                 New = false,
                 GuildId = guildId,

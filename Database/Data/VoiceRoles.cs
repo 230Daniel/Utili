@@ -9,7 +9,7 @@ namespace Database.Data
     {
         public static async Task<List<VoiceRolesRow>> GetRowsAsync(ulong? guildId = null, ulong? channelId = null, bool ignoreCache = false)
         {
-            List<VoiceRolesRow> matchedRows = new List<VoiceRolesRow>();
+            List<VoiceRolesRow> matchedRows = new();
 
             if (Cache.Initialised && !ignoreCache)
             {
@@ -21,7 +21,7 @@ namespace Database.Data
             else
             {
                 string command = "SELECT * FROM VoiceRoles WHERE TRUE";
-                List<(string, object)> values = new List<(string, object)>();
+                List<(string, object)> values = new();
 
                 if (guildId.HasValue)
                 {
@@ -112,7 +112,7 @@ namespace Database.Data
 
         public static VoiceRolesRow FromDatabase(ulong guildId, ulong channelId, ulong roleId)
         {
-            return new VoiceRolesRow
+            return new()
             {
                 New = false,
                 GuildId = guildId,

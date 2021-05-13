@@ -20,7 +20,7 @@ namespace Utili.Commands
     [Group("Inactive", "InactiveRole")]
     public class InactiveRoleCommands : DiscordGuildModuleBase
     {
-        static List<ulong> _kickingIn = new List<ulong>();
+        static List<ulong> _kickingIn = new();
 
         [Command("List")]
         [Cooldown(1, 10, CooldownMeasure.Seconds, CooldownBucketType.Guild)]
@@ -45,7 +45,7 @@ namespace Utili.Commands
                 return;
             }
 
-            List<Page> pages = new List<Page>();
+            List<Page> pages = new();
 
             string content = "";
             LocalEmbedBuilder embed = MessageUtils.CreateEmbed(EmbedType.Info, "Inactive Users")
@@ -81,7 +81,7 @@ namespace Utili.Commands
             
 
             IPageProvider pageProvider = new DefaultPageProvider(pages);
-            MyPagedMenu menu = new MyPagedMenu(Context.Author.Id, pageProvider);
+            MyPagedMenu menu = new(Context.Author.Id, pageProvider);
             InteractivityExtension ext = Context.Bot.GetRequiredExtension<InteractivityExtension>();
             await ext.StartMenuAsync(Context.Channel.Id, menu);
         }

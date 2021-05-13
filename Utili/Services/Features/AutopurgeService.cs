@@ -20,7 +20,7 @@ namespace Utili.Services
 
         int _purgeNumber;
         Timer _timer;
-        List<ulong> _downloadingFor = new List<ulong>();
+        List<ulong> _downloadingFor = new();
         
 
         public AutopurgeService(ILogger<AutopurgeService> logger, DiscordClientBase client)
@@ -69,7 +69,7 @@ namespace Utili.Services
             List<AutopurgeRow> premiumRows = rows.Where(x => premium.Any(y => y.GuildId == x.GuildId)).ToList();
             rows.RemoveAll(x => premium.Any(y => y.GuildId == x.GuildId));
 
-            List<AutopurgeRow> rowsToPurge = new List<AutopurgeRow>();
+            List<AutopurgeRow> rowsToPurge = new();
 
             if (_purgeNumber % 3 == 0)
             {
@@ -137,7 +137,7 @@ namespace Utili.Services
                 AutopurgeRow row = await Autopurge.GetRowAsync(e.GuildId.Value, e.ChannelId);
                 if (row.Mode == 2) return;
 
-                AutopurgeMessageRow messageRow = new AutopurgeMessageRow
+                AutopurgeMessageRow messageRow = new()
                 {
                     GuildId = e.GuildId.Value,
                     ChannelId = e.ChannelId,
@@ -234,7 +234,7 @@ namespace Utili.Services
 
             _logger.LogInformation($"Started downloading messages for {rows.Count} channels");
 
-            List<Task> tasks = new List<Task>();
+            List<Task> tasks = new();
             foreach (AutopurgeRow row in rows)
             {
                 while (tasks.Count(x => !x.IsCompleted) >= 10) 
@@ -287,7 +287,7 @@ namespace Utili.Services
                     List<AutopurgeMessageRow> messageRows =
                         await Autopurge.GetMessagesAsync(guild.Id, channel.Id);
 
-                    List<IMessage> messages = new List<IMessage>();
+                    List<IMessage> messages = new();
                     IMessage oldestMessage = null;
 
                     while (true)

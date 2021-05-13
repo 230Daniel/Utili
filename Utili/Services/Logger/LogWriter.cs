@@ -5,7 +5,7 @@ namespace Utili.Services
 {
     static class LogWriter
     {
-        static readonly object LockObj = new object();
+        static readonly object LockObj = new();
 
         public static void Write(params (string, ConsoleColor)[] message)
         {

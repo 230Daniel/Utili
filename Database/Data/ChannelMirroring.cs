@@ -9,7 +9,7 @@ namespace Database.Data
     {
         public static async Task<List<ChannelMirroringRow>> GetRowsAsync(ulong? guildId = null, ulong? fromChannelId = null, bool ignoreCache = false)
         {
-            List<ChannelMirroringRow> matchedRows = new List<ChannelMirroringRow>();
+            List<ChannelMirroringRow> matchedRows = new();
 
             if (Cache.Initialised && !ignoreCache)
             {
@@ -21,7 +21,7 @@ namespace Database.Data
             else
             {
                 string command = "SELECT * FROM ChannelMirroring WHERE TRUE";
-                List<(string, object)> values = new List<(string, object)>();
+                List<(string, object)> values = new();
 
                 if (guildId.HasValue)
                 {
@@ -132,7 +132,7 @@ namespace Database.Data
 
         public static ChannelMirroringRow FromDatabase(ulong guildId, ulong fromChannelId, ulong toChannelId, ulong webhookId)
         {
-            return new ChannelMirroringRow
+            return new()
             {
                 New = false,
                 GuildId = guildId,

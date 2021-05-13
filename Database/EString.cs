@@ -15,7 +15,7 @@ namespace Database
 
         public static EString FromEncoded(string encodedValue)
         {
-            return new EString
+            return new()
             {
                 EncodedValue = encodedValue, 
                 Value = Decode(encodedValue)
@@ -24,7 +24,7 @@ namespace Database
 
         public static EString FromDecoded(string decodedValue)
         {
-            return new EString
+            return new()
             {
                 Value = decodedValue, 
                 EncodedValue = Encode(decodedValue)
@@ -33,7 +33,7 @@ namespace Database
 
         public static EString FromEncrypted(string encryptedValue, ulong[] ids)
         {
-            return new EString
+            return new()
             {
                 EncodedValue = Encode(Decrypt(encryptedValue, ids)),
                 Value = Decrypt(encryptedValue, ids)

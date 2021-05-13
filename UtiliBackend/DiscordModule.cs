@@ -12,14 +12,14 @@ namespace UtiliBackend
     {
         private static DiscordRestClient _client;
 
-        private static DiscordCache _cachedClients = new DiscordCache(600);
-        private static DiscordCache _cachedGuildLists = new DiscordCache(15);
-        private static DiscordCache _cachedGuildUsers = new DiscordCache(15);
-        private static DiscordCache _cachedGuilds = new DiscordCache(15);
-        private static DiscordCache _cachedTextChannels = new DiscordCache(15);
-        private static DiscordCache _cachedVoiceChannels = new DiscordCache(15);
+        private static DiscordCache _cachedClients = new(600);
+        private static DiscordCache _cachedGuildLists = new(15);
+        private static DiscordCache _cachedGuildUsers = new(15);
+        private static DiscordCache _cachedGuilds = new(15);
+        private static DiscordCache _cachedTextChannels = new(15);
+        private static DiscordCache _cachedVoiceChannels = new(15);
 
-        private static List<RestUserGuild> _clientGuildSummaries = new List<RestUserGuild>();
+        private static List<RestUserGuild> _clientGuildSummaries = new();
         private static Timer _clientGuildDownloader;
         
         public static async Task InitialiseAsync()
@@ -234,7 +234,7 @@ namespace UtiliBackend
 
         public void Add(object key, object value)
         {
-            DiscordCacheItem item = new DiscordCacheItem(key, value, Timeout);
+            DiscordCacheItem item = new(key, value, Timeout);
             Items.RemoveAll(x => x.Key == key);
             Items.Add(item);
 

@@ -9,7 +9,7 @@ namespace Database.Data
     {
         public static async Task<List<RolePersistRow>> GetRowsAsync(ulong? guildId = null, bool ignoreCache = false)
         {
-            List<RolePersistRow> matchedRows = new List<RolePersistRow>();
+            List<RolePersistRow> matchedRows = new();
 
             if (Cache.Initialised && !ignoreCache)
             {
@@ -20,7 +20,7 @@ namespace Database.Data
             else
             {
                 string command = "SELECT * FROM RolePersist WHERE TRUE";
-                List<(string, object)> values = new List<(string, object)>();
+                List<(string, object)> values = new();
 
                 if (guildId.HasValue)
                 {
@@ -86,10 +86,10 @@ namespace Database.Data
 
         public static async Task<List<RolePersistRolesRow>> GetPersistRowsAsync(ulong? guildId = null, ulong? userId = null)
         {
-            List<RolePersistRolesRow> matchedRows = new List<RolePersistRolesRow>();
+            List<RolePersistRolesRow> matchedRows = new();
 
             string command = "SELECT * FROM RolePersistRoles WHERE TRUE";
-            List<(string, object)> values = new List<(string, object)>();
+            List<(string, object)> values = new();
 
             if (guildId.HasValue)
             {
@@ -177,7 +177,7 @@ namespace Database.Data
 
         public static RolePersistRow FromDatabase(ulong guildId, bool enabled, string excludedRoles)
         {
-            RolePersistRow row = new RolePersistRow
+            RolePersistRow row = new()
             {
                 New = false,
                 GuildId = guildId,
@@ -249,7 +249,7 @@ namespace Database.Data
 
         public static RolePersistRolesRow FromDatabase(ulong guildId, ulong userId, string roles)
         {
-            RolePersistRolesRow row = new RolePersistRolesRow
+            RolePersistRolesRow row = new()
             {
                 New = false,
                 GuildId = guildId,

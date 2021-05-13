@@ -9,7 +9,7 @@ namespace Database.Data
     {
         public static async Task<List<ReputationRow>> GetRowsAsync(ulong? guildId = null, bool ignoreCache = false)
         {
-            List<ReputationRow> matchedRows = new List<ReputationRow>();
+            List<ReputationRow> matchedRows = new();
 
             if (Cache.Initialised && !ignoreCache)
             {
@@ -21,7 +21,7 @@ namespace Database.Data
             {
                 string command = "SELECT * FROM Reputation WHERE TRUE";
                 
-                List<(string, object)> values = new List<(string, object)>();
+                List<(string, object)> values = new();
 
                 if (guildId.HasValue)
                 {
@@ -83,10 +83,10 @@ namespace Database.Data
 
         public static async Task<List<ReputationUserRow>> GetUserRowsAsync(ulong? guildId = null, ulong? userId = null)
         {
-            List<ReputationUserRow> matchedRows = new List<ReputationUserRow>();
+            List<ReputationUserRow> matchedRows = new();
 
             string command = "SELECT * FROM ReputationUsers WHERE TRUE";
-            List<(string, object)> values = new List<(string, object)>();
+            List<(string, object)> values = new();
 
             if (guildId.HasValue)
             {
@@ -182,7 +182,7 @@ namespace Database.Data
 
         public static ReputationRow FromDatabase(ulong guildId, string emotes)
         {
-            ReputationRow row = new ReputationRow
+            ReputationRow row = new()
             {
                 New = false,
                 GuildId = guildId,

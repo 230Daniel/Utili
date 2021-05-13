@@ -9,7 +9,7 @@ namespace Database.Data
     {
         public static async Task<List<MiscRow>> GetRowsAsync(ulong? guildId = null, string type = null, string value = null, bool ignoreCache = false)
         {
-            List<MiscRow> matchedRows = new List<MiscRow>();
+            List<MiscRow> matchedRows = new();
 
             if (Cache.Initialised && !ignoreCache)
             {
@@ -22,7 +22,7 @@ namespace Database.Data
             else
             {
                 string command = "SELECT * FROM Misc WHERE TRUE";
-                List<(string, object)> values = new List<(string, object)>();
+                List<(string, object)> values = new();
 
                 if (guildId.HasValue)
                 {
@@ -121,7 +121,7 @@ namespace Database.Data
 
         public static MiscRow FromDatabase(ulong guildId, string type, string value)
         {
-            return new MiscRow
+            return new()
             {
                 New = false,
                 GuildId = guildId,

@@ -27,7 +27,7 @@ namespace Database.Data
 
         public static async Task<List<MessageLogsRow>> GetRowsAsync(ulong? guildId = null, bool ignoreCache = false)
         {
-            List<MessageLogsRow> matchedRows = new List<MessageLogsRow>();
+            List<MessageLogsRow> matchedRows = new();
 
             if (Cache.Initialised && !ignoreCache)
             {
@@ -37,7 +37,7 @@ namespace Database.Data
             else
             {
                 string command = "SELECT * FROM MessageLogs WHERE TRUE";
-                List<(string, object)> values = new List<(string, object)>();
+                List<(string, object)> values = new();
 
                 if (guildId.HasValue)
                 {
@@ -106,10 +106,10 @@ namespace Database.Data
 
         public static async Task<List<MessageLogsMessageRow>> GetMessagesAsync(ulong? guildId = null, ulong? channelId = null, ulong? messageId = null)
         {
-            List<MessageLogsMessageRow> matchedRows = new List<MessageLogsMessageRow>();
+            List<MessageLogsMessageRow> matchedRows = new();
 
             string command = "SELECT * FROM MessageLogsMessages WHERE TRUE";
-            List<(string, object)> values = new List<(string, object)>();
+            List<(string, object)> values = new();
 
             if (guildId.HasValue)
             {
@@ -149,10 +149,10 @@ namespace Database.Data
 
         public static async Task<List<MessageLogsMessageRow>> GetMessagesAsync(ulong guildId, ulong channelId, ulong[] messageIds)
         {
-            List<MessageLogsMessageRow> matchedRows = new List<MessageLogsMessageRow>();
+            List<MessageLogsMessageRow> matchedRows = new();
 
             string command = $"SELECT * FROM MessageLogsMessages WHERE GuildId = @GuildId AND ChannelId = @ChannelId AND MessageId IN {Sql.ToSqlObjectArray(messageIds)}";
-            List<(string, object)> values = new List<(string, object)>
+            List<(string, object)> values = new()
             {
                 ("GuildId", guildId), 
                 ("ChannelId", channelId)
@@ -220,7 +220,7 @@ namespace Database.Data
         private static async Task<int> GetStoredMessageCountAsync(ulong guildId, ulong channelId)
         {
             string command = "SELECT COUNT(*) FROM MessageLogsMessages WHERE GuildId = @GuildId AND ChannelId = @ChannelId";
-            List<(string, object)> values = new List<(string, object)>
+            List<(string, object)> values = new()
             {
                 ("GuildId", guildId), 
                 ("ChannelId", channelId)
@@ -285,7 +285,7 @@ namespace Database.Data
 
         public static MessageLogsRow FromDatabase(ulong guildId, ulong deletedChannelId, ulong editedChannelId, string excludedChannels)
         {
-            MessageLogsRow row = new MessageLogsRow
+            MessageLogsRow row = new()
             {
                 New = false,
                 GuildId = guildId,
@@ -355,7 +355,7 @@ namespace Database.Data
 
         public static MessageLogsMessageRow FromDatabase(ulong guildId, ulong channelId, ulong messageId, ulong userId, DateTime timestamp, string content)
         {
-            MessageLogsMessageRow row = new MessageLogsMessageRow
+            MessageLogsMessageRow row = new()
             {
                 New = false,
                 GuildId = guildId,

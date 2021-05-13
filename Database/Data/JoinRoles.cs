@@ -9,7 +9,7 @@ namespace Database.Data
     {
         public static async Task<List<JoinRolesRow>> GetRowsAsync(ulong? guildId = null, bool ignoreCache = false)
         {
-            List<JoinRolesRow> matchedRows = new List<JoinRolesRow>();
+            List<JoinRolesRow> matchedRows = new();
 
             if (Cache.Initialised && !ignoreCache)
             {
@@ -20,7 +20,7 @@ namespace Database.Data
             else
             {
                 string command = "SELECT * FROM JoinRoles WHERE TRUE";
-                List<(string, object)> values = new List<(string, object)>();
+                List<(string, object)> values = new();
 
                 if (guildId.HasValue)
                 {
@@ -107,7 +107,7 @@ namespace Database.Data
 
         public static JoinRolesRow FromDatabase(ulong guildId, bool waitForVerification, string joinRoles)
         {
-            JoinRolesRow row = new JoinRolesRow
+            JoinRolesRow row = new()
             {
                 New = false,
                 WaitForVerification = waitForVerification,

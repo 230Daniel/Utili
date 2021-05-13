@@ -9,7 +9,7 @@ namespace Database.Data
     {
         public static async Task<List<MessageFilterRow>> GetRowsAsync(ulong? guildId = null, ulong? channelId = null, bool ignoreCache = false)
         {
-            List<MessageFilterRow> matchedRows = new List<MessageFilterRow>();
+            List<MessageFilterRow> matchedRows = new();
 
             if (Cache.Initialised && !ignoreCache)
             {
@@ -21,7 +21,7 @@ namespace Database.Data
             else
             {
                 string command = "SELECT * FROM MessageFilter WHERE TRUE";
-                List<(string, object)> values = new List<(string, object)>();
+                List<(string, object)> values = new();
 
                 if (guildId.HasValue)
                 {
@@ -126,7 +126,7 @@ namespace Database.Data
 
         public static MessageFilterRow FromDatabase(ulong guildId, ulong channelId, int mode, string complex)
         {
-            return new MessageFilterRow
+            return new()
             {
                 New = false,
                 GuildId = guildId,

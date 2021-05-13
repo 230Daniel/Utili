@@ -9,7 +9,7 @@ namespace Database.Data
     {
         public static async Task<List<CoreRow>> GetRowsAsync(ulong? guildId = null, bool ignoreCache = false)
         {
-            List<CoreRow> matchedRows = new List<CoreRow>();
+            List<CoreRow> matchedRows = new();
 
             if (Cache.Initialised && !ignoreCache)
             {
@@ -20,7 +20,7 @@ namespace Database.Data
             else
             {
                 string command = "SELECT * FROM Core WHERE TRUE";
-                List<(string, object)> values = new List<(string, object)>();
+                List<(string, object)> values = new();
 
                 if (guildId.HasValue)
                 {
@@ -111,7 +111,7 @@ namespace Database.Data
 
         public static CoreRow FromDatabase(ulong guildId, string prefix, bool enableCommands, string excludedChannels)
         {
-            CoreRow row = new CoreRow
+            CoreRow row = new()
             {
                 New = false,
                 GuildId = guildId,

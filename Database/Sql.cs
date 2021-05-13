@@ -16,7 +16,7 @@ namespace Database
 
         public static void SetCredentials(string server, int port, string database, string username, string password)
         {
-            MySqlConnectionStringBuilder builder = new MySqlConnectionStringBuilder
+            MySqlConnectionStringBuilder builder = new()
             {
                 Server = server,
                 Port = (uint) port,
@@ -75,7 +75,7 @@ namespace Database
 
         public static async Task<int> PingAsync()
         {
-            MySqlConnection connection = new MySqlConnection(ConnectionString);
+            MySqlConnection connection = new(ConnectionString);
             await connection.OpenAsync();
 
             Stopwatch sw = Stopwatch.StartNew();

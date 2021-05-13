@@ -9,7 +9,7 @@ namespace Database.Data
     {
         public static async Task<List<JoinMessageRow>> GetRowsAsync(ulong? guildId = null, bool ignoreCache = false)
         {
-            List<JoinMessageRow> matchedRows = new List<JoinMessageRow>();
+            List<JoinMessageRow> matchedRows = new();
 
             if (Cache.Initialised && !ignoreCache)
             {
@@ -20,7 +20,7 @@ namespace Database.Data
             else
             {
                 string command = "SELECT * FROM JoinMessage WHERE TRUE";
-                List<(string, object)> values = new List<(string, object)>();
+                List<(string, object)> values = new();
 
                 if (guildId.HasValue)
                 {
@@ -151,7 +151,7 @@ namespace Database.Data
 
         public static JoinMessageRow FromDatabase(ulong guildId, bool enabled, bool direct, ulong channelId, string title, string footer, string content, string text, string image, string thumbnail, string icon, uint colour)
         {
-            return new JoinMessageRow
+            return new()
             {
                 New = false,
                 GuildId = guildId,

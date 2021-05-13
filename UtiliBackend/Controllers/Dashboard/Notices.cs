@@ -52,7 +52,7 @@ namespace UtiliBackend.Controllers.Dashboard
 
                 if (bodyRow.Changed || isNew)
                 {
-                    MiscRow miscRow = new MiscRow(auth.Guild.Id, "RequiresNoticeUpdate", row.ChannelId.ToString());
+                    MiscRow miscRow = new(auth.Guild.Id, "RequiresNoticeUpdate", row.ChannelId.ToString());
                     _ = Misc.SaveRowAsync(miscRow);
                 }
             }

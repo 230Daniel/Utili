@@ -123,8 +123,8 @@ namespace Utili.Services
                             x.Topic = $"Users in {voiceChannel.Name} have access - Created by Utili";
                             x.Overwrites = new List<LocalOverwrite>
                             {
-                                new LocalOverwrite(_client.CurrentUser, new OverwritePermissions().Allow(Permission.ViewChannel)),
-                                new LocalOverwrite(guildId, OverwriteTargetType.Role, new OverwritePermissions().Deny(Permission.ViewChannel)) // @everyone
+                                new(_client.CurrentUser, new OverwritePermissions().Allow(Permission.ViewChannel)),
+                                new(guildId, OverwriteTargetType.Role, new OverwritePermissions().Deny(Permission.ViewChannel)) // @everyone
                             };
                         });
 

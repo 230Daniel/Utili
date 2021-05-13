@@ -16,7 +16,7 @@ namespace Utili.Services
         ILogger<RoleLinkingService> _logger;
         DiscordClientBase _client;
 
-        List<RoleLinkAction> _actions = new List<RoleLinkAction>();
+        List<RoleLinkAction> _actions = new();
 
         public RoleLinkingService(ILogger<RoleLinkingService> logger, DiscordClientBase client)
         {

@@ -11,10 +11,10 @@ namespace Database.Data
         
         public static async Task<List<UserRow>> GetRowsAsync(ulong? userId = null, string customerId = null)
         {
-            List<UserRow> matchedRows = new List<UserRow>();
+            List<UserRow> matchedRows = new();
 
             string command = "SELECT * FROM Users WHERE TRUE";
-            List<(string, object)> values = new List<(string, object)>();
+            List<(string, object)> values = new();
 
             if (userId.HasValue)
             {
@@ -108,7 +108,7 @@ namespace Database.Data
 
         public static UserRow FromDatabase(ulong userId, string email, DateTime lastVisit, string customerId)
         {
-            return new UserRow
+            return new()
             {
                 New = false,
                 UserId = userId,

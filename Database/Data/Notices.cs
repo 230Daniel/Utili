@@ -10,7 +10,7 @@ namespace Database.Data
     {
         public static async Task<List<NoticesRow>> GetRowsAsync(ulong? guildId = null, ulong? channelId = null, bool ignoreCache = false)
         {
-            List<NoticesRow> matchedRows = new List<NoticesRow>();
+            List<NoticesRow> matchedRows = new();
 
             if (Cache.Initialised && !ignoreCache)
             {
@@ -22,7 +22,7 @@ namespace Database.Data
             else
             {
                 string command = "SELECT * FROM Notices WHERE TRUE";
-                List<(string, object)> values = new List<(string, object)>();
+                List<(string, object)> values = new();
 
                 if (guildId.HasValue)
                 {
@@ -183,7 +183,7 @@ namespace Database.Data
 
         public static NoticesRow FromDatabase(ulong guildId, ulong channelId, ulong messageId, bool enabled, string delay, string title, string footer, string content, string text, string image, string thumbnail, string icon, uint colour)
         {
-            return new NoticesRow
+            return new()
             {
                 New = false,
                 GuildId = guildId,

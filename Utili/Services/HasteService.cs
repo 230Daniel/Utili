@@ -12,7 +12,7 @@ namespace Utili.Services
         public async Task<string> PasteAsync(string content, string format)
         {
             HttpContent httpContent = new StringContent(content);
-            HttpClient httpClient = new HttpClient();
+            HttpClient httpClient = new();
 
             HttpResponseMessage httpResponse = await httpClient.PostAsync($"{_baseUrl}/documents", httpContent);
             string json = await httpResponse.Content.ReadAsStringAsync();

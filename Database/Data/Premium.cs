@@ -26,7 +26,7 @@ namespace Database.Data
 
         public static async Task<List<PremiumRow>> GetRowsAsync(ulong? userId = null, ulong? guildId = null, int? slotId = null, bool ignoreCache = false)
         {
-            List<PremiumRow> matchedRows = new List<PremiumRow>();
+            List<PremiumRow> matchedRows = new();
 
             if (Cache.Initialised && !ignoreCache)
             {
@@ -39,7 +39,7 @@ namespace Database.Data
             else
             {
                 string command = "SELECT * FROM Premium WHERE TRUE";
-                List<(string, object)> values = new List<(string, object)>();
+                List<(string, object)> values = new();
 
                 if (userId.HasValue)
                 {
@@ -83,7 +83,7 @@ namespace Database.Data
             rows = rows.Take(amount).ToList();
             while (rows.Count < amount)
             {
-                PremiumRow row = new PremiumRow(userId, 0);
+                PremiumRow row = new(userId, 0);
                 await SaveRowAsync(row);
                 rows.Add(row);
             }
@@ -142,7 +142,7 @@ namespace Database.Data
         {
             List<SubscriptionsRow> subscriptions = await Subscriptions.GetRowsAsync(onlyValid: true);
 
-            List<(ulong, int)> usedSlotsRecord = new List<(ulong, int)>();
+            List<(ulong, int)> usedSlotsRecord = new();
             List<PremiumRow> rows = (await GetRowsAsync()).OrderBy(x => x.SlotId).ToList();
             foreach(PremiumRow row in rows)
             {
@@ -188,7 +188,7 @@ namespace Database.Data
 
         public static PremiumRow FromDatabase(int slotId, ulong userId, ulong guildId)
         {
-            return new PremiumRow
+            return new()
             {
                 New = false,
                 SlotId = slotId,

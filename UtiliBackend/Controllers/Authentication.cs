@@ -24,7 +24,7 @@ namespace UtiliBackend.Controllers
         [HttpGet("auth/signin")]
         public ActionResult SignInDiscord()
         {
-            AuthenticationProperties authProperties = new AuthenticationProperties
+            AuthenticationProperties authProperties = new()
             {
                 AllowRefresh = true,
                 IsPersistent = true,
@@ -53,7 +53,7 @@ namespace UtiliBackend.Controllers
             if (client is null)
                 return new AuthDetails(new StatusCodeResult(401));
 
-            AuthDetails auth = new AuthDetails(client, client.CurrentUser);
+            AuthDetails auth = new(client, client.CurrentUser);
 
             if (guildId.HasValue)
             {

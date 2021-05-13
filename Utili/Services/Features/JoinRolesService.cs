@@ -44,7 +44,7 @@ namespace Utili.Services
                     if(e.Member.IsPending) return;
                     if (guild.VerificationLevel >= GuildVerificationLevel.High)
                     {
-                        MiscRow pendingRow = new MiscRow(guild.Id, "JoinRoles-Pending", $"{DateTime.UtcNow.AddMinutes(10)}///{e.Member.Id}");
+                        MiscRow pendingRow = new(guild.Id, "JoinRoles-Pending", $"{DateTime.UtcNow.AddMinutes(10)}///{e.Member.Id}");
                         await Misc.SaveRowAsync(pendingRow);
                         ScheduleAddRoles(e.GuildId, e.Member.Id, DateTime.UtcNow.AddMinutes(10));
                         return;

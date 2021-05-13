@@ -20,7 +20,7 @@ namespace Utili.Extensions
 
         public static bool IsImage(this IUserMessage message)
         {
-            List<string> validAttachmentExtensions = new List<string>
+            List<string> validAttachmentExtensions = new()
             {
                 "png",
                 "jpg"
@@ -34,7 +34,7 @@ namespace Utili.Extensions
 
         public static bool IsVideo(this IUserMessage message)
         {
-            List<string> validAttachmentExtensions = new List<string>
+            List<string> validAttachmentExtensions = new()
             {
                 "mp4",
                 "mov",
@@ -47,7 +47,7 @@ namespace Utili.Extensions
             if (filenames.Any(x => validAttachmentExtensions.Contains(x.Split(".").Last().ToLower())))
                 return true;
 
-            Regex youtubeRegex = new Regex(@"^((?:https?:)?\/\/)?((?:www|m)\.)?((?:youtube\.com|youtu.be))(\/(?:[\w\-]+\?v=|embed\/|v\/)?)([\w\-]+)(\S+)?$");
+            Regex youtubeRegex = new(@"^((?:https?:)?\/\/)?((?:www|m)\.)?((?:youtube\.com|youtu.be))(\/(?:[\w\-]+\?v=|embed\/|v\/)?)([\w\-]+)(\S+)?$");
             foreach (string word in message.Content.Split(' ', '\n'))
                 if (youtubeRegex.IsMatch(word)) return true;
 
@@ -56,7 +56,7 @@ namespace Utili.Extensions
 
         public static bool IsMusic(this IUserMessage message)
         {
-            List<string> validAttachmentExtensions = new List<string>
+            List<string> validAttachmentExtensions = new()
             {
                 "mp3",
                 "m4a",
@@ -98,7 +98,7 @@ namespace Utili.Extensions
         {
             try
             {
-                Regex regex = new Regex(pattern);
+                Regex regex = new(pattern);
                 return regex.IsMatch(message.Content);
             }
             catch

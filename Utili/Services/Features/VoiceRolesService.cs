@@ -16,7 +16,7 @@ namespace Utili.Services
         ILogger<VoiceRolesService> _logger;
         DiscordClientBase _client;
 
-        List<VoiceUpdateRequest> _updateRequests = new List<VoiceUpdateRequest>();
+        List<VoiceUpdateRequest> _updateRequests = new();
 
         public VoiceRolesService(ILogger<VoiceRolesService> logger, DiscordClientBase client)
         {

@@ -12,7 +12,7 @@ namespace Database.Data
 
         public static async Task<List<InactiveRoleRow>> GetRowsAsync(ulong? guildId = null, bool ignoreCache = false)
         {
-            List<InactiveRoleRow> matchedRows = new List<InactiveRoleRow>();
+            List<InactiveRoleRow> matchedRows = new();
 
             if (Cache.Initialised && !ignoreCache)
             {
@@ -22,7 +22,7 @@ namespace Database.Data
             else
             {
                 string command = "SELECT * FROM InactiveRole WHERE TRUE";
-                List<(string, object)> values = new List<(string, object)>();
+                List<(string, object)> values = new();
 
                 if (guildId.HasValue)
                 {
@@ -64,7 +64,7 @@ namespace Database.Data
             else
             {
                 string command = "SELECT * FROM InactiveRole WHERE LastUpdate < @LastUpdate";
-                List<(string, object)> values = new List<(string, object)>
+                List<(string, object)> values = new()
                 {
                     ("LastUpdate", DateTime.UtcNow - GapBetweenUpdates)
                 };
@@ -191,10 +191,10 @@ namespace Database.Data
 
         public static async Task<List<InactiveRoleUserRow>> GetUsersAsync(ulong guildId)
         {
-            List<InactiveRoleUserRow> matchedRows = new List<InactiveRoleUserRow>();
+            List<InactiveRoleUserRow> matchedRows = new();
 
             string command = "SELECT * FROM InactiveRoleUsers WHERE GuildId = @GuildId";
-            List<(string, object)> values = new List<(string, object)>
+            List<(string, object)> values = new()
             {
                 ("GuildId", guildId)
             };
@@ -248,7 +248,7 @@ namespace Database.Data
 
         public static InactiveRoleRow FromDatabase(ulong guildId, ulong roleId, ulong immuneRoleId, string threshold, bool inverse, DateTime defaultLastAction, DateTime lastUpdate, bool autoKick, string autoKickThreshold)
         {
-            return new InactiveRoleRow
+            return new()
             {
                 New = false,
                 GuildId = guildId,

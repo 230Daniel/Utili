@@ -9,7 +9,7 @@ namespace Database.Data
     {
         public static async Task<List<VoiceLinkRow>> GetRowsAsync(ulong? guildId = null, bool ignoreCache = false)
         {
-            List<VoiceLinkRow> matchedRows = new List<VoiceLinkRow>();
+            List<VoiceLinkRow> matchedRows = new();
 
             if (Cache.Initialised && !ignoreCache)
             {
@@ -20,7 +20,7 @@ namespace Database.Data
             else
             {
                 string command = "SELECT * FROM VoiceLink WHERE TRUE";
-                List<(string, object)> values = new List<(string, object)>();
+                List<(string, object)> values = new();
 
                 if (guildId.HasValue)
                 {
@@ -92,7 +92,7 @@ namespace Database.Data
 
         public static async Task<List<VoiceLinkChannelRow>> GetChannelRowsAsync(ulong? guildId = null, ulong? voiceChannelId = null, bool ignoreCache = false)
         {
-            List<VoiceLinkChannelRow> matchedRows = new List<VoiceLinkChannelRow>();
+            List<VoiceLinkChannelRow> matchedRows = new();
 
             if (Cache.Initialised && !ignoreCache)
             {
@@ -104,7 +104,7 @@ namespace Database.Data
             else
             {
                 string command = "SELECT * FROM VoiceLinkChannels WHERE TRUE";
-                List<(string, object)> values = new List<(string, object)>();
+                List<(string, object)> values = new();
 
                 if (guildId.HasValue)
                 {
@@ -202,7 +202,7 @@ namespace Database.Data
 
         public static VoiceLinkRow FromDatabase(ulong guildId, bool enabled, bool deleteChannels, string prefix, string excludedChannels)
         {
-            VoiceLinkRow row = new VoiceLinkRow
+            VoiceLinkRow row = new()
             {
                 New = false,
                 GuildId = guildId,
@@ -275,7 +275,7 @@ namespace Database.Data
 
         public static VoiceLinkChannelRow FromDatabase(ulong guildId, ulong textChannelId, ulong voiceChannelId)
         {
-            return new VoiceLinkChannelRow
+            return new()
             {
                 New = false,
                 GuildId = guildId,

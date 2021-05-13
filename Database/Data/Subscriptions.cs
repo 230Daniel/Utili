@@ -10,10 +10,10 @@ namespace Database.Data
     {
         public static async Task<List<SubscriptionsRow>> GetRowsAsync(string subscriptionId = null, ulong? userId = null, bool onlyValid = false)
         {
-            List<SubscriptionsRow> matchedRows = new List<SubscriptionsRow>();
+            List<SubscriptionsRow> matchedRows = new();
 
             string command = "SELECT * FROM Subscriptions WHERE TRUE";
-            List<(string, object)> values = new List<(string, object)>();
+            List<(string, object)> values = new();
 
             if (!string.IsNullOrEmpty(subscriptionId))
             {
@@ -127,7 +127,7 @@ namespace Database.Data
 
         public static SubscriptionsRow FromDatabase(string subscriptionId, ulong userId, DateTime endsAt, int slots, int status)
         {
-            return new SubscriptionsRow
+            return new()
             {
                 New = false,
                 SubscriptionId = subscriptionId,

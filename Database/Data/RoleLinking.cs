@@ -9,7 +9,7 @@ namespace Database.Data
     {
         public static async Task<List<RoleLinkingRow>> GetRowsAsync(ulong? guildId = null, ulong? linkId = null, bool ignoreCache = false)
         {
-            List<RoleLinkingRow> matchedRows = new List<RoleLinkingRow>();
+            List<RoleLinkingRow> matchedRows = new();
 
             if (Cache.Initialised && !ignoreCache)
             {
@@ -21,7 +21,7 @@ namespace Database.Data
             else
             {
                 string command = "SELECT * FROM RoleLinking WHERE TRUE";
-                List<(string, object)> values = new List<(string, object)>();
+                List<(string, object)> values = new();
 
                 if (guildId.HasValue)
                 {
@@ -124,7 +124,7 @@ namespace Database.Data
 
         public static RoleLinkingRow FromDatabase(ulong linkId, ulong guildId, ulong roleId, ulong linkedRoleId, int mode)
         {
-            return new RoleLinkingRow
+            return new()
             {
                 New = false,
                 LinkId = linkId,

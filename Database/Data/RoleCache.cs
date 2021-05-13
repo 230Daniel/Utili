@@ -12,7 +12,7 @@ namespace Database.Data
             List<RoleCacheRow> matchedRows = new();
 
             string command = "SELECT * FROM RoleCache WHERE TRUE";
-            List<(string, object)> values = new List<(string, object)>();
+            List<(string, object)> values = new();
 
             if (guildId.HasValue)
             {
@@ -99,7 +99,7 @@ namespace Database.Data
 
         public static RoleCacheRow FromDatabase(ulong guildId, ulong userId, string roles)
         {
-            RoleCacheRow row = new RoleCacheRow
+            RoleCacheRow row = new()
             {
                 New = false,
                 GuildId = guildId,

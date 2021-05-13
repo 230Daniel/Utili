@@ -16,7 +16,7 @@ namespace UtiliBackend.Controllers
             AuthDetails auth = await Authentication.GetAuthDetailsAsync(HttpContext, guildId);
             if (!auth.Authorised) return auth.Action;
 
-            PremiumGuildBody body = new PremiumGuildBody(await Database.Data.Premium.IsGuildPremiumAsync(auth.Guild.Id));
+            PremiumGuildBody body = new(await Database.Data.Premium.IsGuildPremiumAsync(auth.Guild.Id));
             return new JsonResult(body);
         }
 

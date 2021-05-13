@@ -35,7 +35,7 @@ namespace Utili.Services
                 MessageLogsRow row = await MessageLogs.GetRowAsync(e.GuildId.Value);
                 if ((row.DeletedChannelId == 0 && row.EditedChannelId == 0) || row.ExcludedChannels.Contains(e.ChannelId)) return;
 
-                MessageLogsMessageRow message = new MessageLogsMessageRow
+                MessageLogsMessageRow message = new()
                 {
                     GuildId = e.GuildId.Value,
                     ChannelId = e.ChannelId,
@@ -196,14 +196,14 @@ namespace Utili.Services
         {
             try
             {
-                StringBuilder sb = new StringBuilder();
+                StringBuilder sb = new();
 
                 sb.AppendLine($"Messages {total}");
                 sb.AppendLine($"Logged   {messages.Count}");
                 sb.AppendLine();
                 sb.AppendLine();
 
-                Dictionary<Snowflake, IUser> cachedUsers = new Dictionary<Snowflake, IUser>();
+                Dictionary<Snowflake, IUser> cachedUsers = new();
 
                 foreach (MessageLogsMessageRow message in messages)
                 {
