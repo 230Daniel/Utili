@@ -63,8 +63,7 @@ namespace Utili.Services
             try
             {
                 Snowflake guildId = e.NewMember.GuildId;
-                IGuild guild = _client.GetGuild(guildId);
-                
+
                 JoinRolesRow row = await JoinRoles.GetRowAsync(guildId);
                 JoinRolesPendingRow pendingRow = await JoinRoles.GetPendingRowAsync(guildId, e.MemberId);
                 if (pendingRow.New) return;
