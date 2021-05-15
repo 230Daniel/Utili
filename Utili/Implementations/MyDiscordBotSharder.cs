@@ -95,17 +95,11 @@ namespace Utili.Implementations
 
         public MyDiscordBotSharder(
             IOptions<DiscordBotSharderConfiguration> options, 
-            ILogger<MyDiscordBotSharder> logger, 
-            IPrefixProvider prefixes, 
-            ICommandQueue queue, 
-            CommandService commands, 
+            ILogger<MyDiscordBotSharder> logger,
             IServiceProvider services, 
             DiscordClientSharder client) 
             : base(options, 
-                logger, 
-                prefixes, 
-                queue, 
-                commands,
+                logger,
                 services, 
                 client) { }
     }
