@@ -49,7 +49,7 @@ namespace Utili.Extensions
 
             Regex youtubeRegex = new(@"^((?:https?:)?\/\/)?((?:www|m)\.)?((?:youtube\.com|youtu.be))(\/(?:[\w\-]+\?v=|embed\/|v\/)?)([\w\-]+)(\S+)?$");
             foreach (string word in message.Content.Split(' ', '\n'))
-                if (youtubeRegex.IsMatch(word)) return true;
+                if (IsUrl(word) && youtubeRegex.IsMatch(word)) return true;
 
             return false;
         }
@@ -89,7 +89,7 @@ namespace Utili.Extensions
             return false;
         }
 
-        private static bool IsUrl(string word)
+        static bool IsUrl(string word)
         {
             return Uri.TryCreate(word, UriKind.Absolute, out Uri uriResult) && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps);
         }

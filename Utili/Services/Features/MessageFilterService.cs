@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Threading.Tasks;
 using Database.Data;
 using Disqord;
@@ -13,11 +14,13 @@ namespace Utili.Services
     {
         ILogger<MessageFilterService> _logger;
         DiscordClientBase _client;
-
+        ConcurrentDictionary<Snowflake, DateTime> _offenceDictionary;
+        
         public MessageFilterService(ILogger<MessageFilterService> logger, DiscordClientBase client)
         {
             _logger = logger;
             _client = client;
+            _offenceDictionary = new();
         }
 
         public async Task<bool> MessageReceived(MessageReceivedEventArgs e)
@@ -48,6 +51,11 @@ namespace Utili.Services
                 {
                     await e.Message.DeleteAsync();
                     if(e.Member is null || e.Member.IsBot) return true;
+
+                    if (_offenceDictionary.TryGetValue(e.ChannelId, out DateTime recentOffence) && recentOffence > DateTime.UtcNow.AddSeconds(-4))
+                        return true;
+                    
+                    _offenceDictionary.AddOrUpdate(e.ChannelId, DateTime.UtcNow, (_, _) => DateTime.UtcNow);
 
                     IUserMessage sent = await e.Channel.SendFailureAsync("Message deleted",
                         $"Only messages {allowedTypes} are allowed in {e.Channel.Mention}");
