@@ -6,6 +6,7 @@ using Database.Data;
 using Disqord;
 using Disqord.Gateway;
 using Microsoft.Extensions.Logging;
+using MySql.Data.MySqlClient;
 using Utili.Extensions;
 
 namespace Utili.Services
@@ -42,16 +43,24 @@ namespace Utili.Services
             }
         }
 
-        public async Task MemberUpdated(MemberUpdatedEventArgs e)
+        public async Task MemberUpdated(MemberUpdatedEventArgs e, bool recursiveCall = false)
         {
             try
             {
                 RoleCacheRow row = await RoleCache.GetRowAsync(e.NewMember.GuildId, e.NewMember.Id);
                 if (row.RoleIds.All(x => e.NewMember.RoleIds.Contains(x)) && 
                     e.NewMember.RoleIds.All(x => row.RoleIds.Contains(x))) return;
-
+                
                 row.RoleIds = e.NewMember.RoleIds.Select(x => x.RawValue).ToList();
-                await row.SaveAsync();
+                
+                try
+                {
+                    await row.SaveAsync();
+                }
+                catch (MySqlException ex) when (ex.Message.ToUpper().Contains("DUPLICATE ENTRY") && !recursiveCall)
+                {
+                    await MemberUpdated(e, true);
+                }
             }
             catch (Exception ex)
             {
