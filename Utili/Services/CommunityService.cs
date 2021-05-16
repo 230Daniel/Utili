@@ -7,6 +7,7 @@ using Database.Data;
 using Disqord;
 using Disqord.Gateway;
 using Disqord.Rest;
+using Disqord.Rest.Default;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Utili.Extensions;
@@ -86,13 +87,13 @@ namespace Utili
 
                         foreach (IMember premiumMember in premiumMembers)
                             if (!premiumMember.RoleIds.Contains(premiumRole.Id))
-                                await premiumMember.GrantRoleAsync(premiumRole.Id);
+                                await premiumMember.GrantRoleAsync(premiumRole.Id, new DefaultRestRequestOptions {Reason = "Premium"});
 
                         List<IMember> markedPremiumMembers = guild.Members.Select(x => x.Value).Where(x => x.RoleIds.Contains(premiumRole.Id)).ToList();
                         
                         foreach (IMember premiumMember in markedPremiumMembers)
                             if (premiumMembers.All(x => x.Id != premiumMember.Id))
-                                await premiumMember.RevokeRoleAsync(premiumRole.Id);
+                                await premiumMember.RevokeRoleAsync(premiumRole.Id, new DefaultRestRequestOptions {Reason = "Premium"});
                     }
                 }
                 catch (Exception ex)

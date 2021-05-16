@@ -5,6 +5,7 @@ using Database.Data;
 using Disqord;
 using Disqord.Bot;
 using Disqord.Rest;
+using Disqord.Rest.Default;
 using Qmmands;
 using Utili.Extensions;
 using Utili.Implementations;
@@ -44,7 +45,7 @@ namespace Utili.Features
             }
             
             MessagePinningRow row = await MessagePinning.GetRowAsync(Context.Guild.Id);
-            if (row.Pin) await message.PinAsync();
+            if (row.Pin) await message.PinAsync(new DefaultRestRequestOptions {Reason = $"Message Pinning (manual by {Context.Message.Author} {Context.Message.Author.Id})"});
 
             pinChannel ??= Context.Guild.GetTextChannel(row.PinChannelId);
             
@@ -70,7 +71,7 @@ namespace Utili.Features
                 webhook = await pinChannel.CreateWebhookAsync("Utili Message Pinning", x =>
                 {
                     x.Avatar = avatar;
-                });
+                }, new DefaultRestRequestOptions {Reason = "Message Pinning"});
                 avatar.Close();
 
                 if (row.WebhookIds.Any(x => x.Item1 == pinChannel.Id))

@@ -8,6 +8,7 @@ using Database.Data;
 using Disqord;
 using Disqord.Gateway;
 using Disqord.Rest;
+using Disqord.Rest.Default;
 using Microsoft.Extensions.Logging;
 using Utili.Extensions;
 using RepeatingTimer = System.Timers.Timer;
@@ -123,7 +124,7 @@ namespace Utili.Services
                 IUserMessage message = await channel.SendMessageAsync(GetNotice(row));
                 row.MessageId = message.Id;
                 await Notices.SaveMessageIdAsync(row);
-                await message.PinAsync();
+                await message.PinAsync(new DefaultRestRequestOptions {Reason = "Sticky Notices"});
             }
             catch (Exception ex)
             {

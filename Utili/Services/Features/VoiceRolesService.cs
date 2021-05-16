@@ -6,6 +6,7 @@ using Database.Data;
 using Disqord;
 using Disqord.Gateway;
 using Disqord.Rest;
+using Disqord.Rest.Default;
 using Microsoft.Extensions.Logging;
 using Utili.Extensions;
 
@@ -110,10 +111,10 @@ namespace Utili.Services
                     if(oldRoleId == newRoleId) return;
 
                     if (oldRoleId.HasValue && guild.GetRole(oldRoleId.Value).CanBeManaged())
-                        await member.RevokeRoleAsync(oldRoleId.Value);
+                        await member.RevokeRoleAsync(oldRoleId.Value, new DefaultRestRequestOptions{Reason = "Voice Roles"});
 
                     if (newRoleId.HasValue && guild.GetRole(newRoleId.Value).CanBeManaged())
-                        await member.GrantRoleAsync(newRoleId.Value);
+                        await member.GrantRoleAsync(newRoleId.Value, new DefaultRestRequestOptions{Reason = "Voice Roles"});
                 }
                 catch(Exception ex)
                 {

@@ -5,6 +5,7 @@ using Database.Data;
 using Disqord;
 using Disqord.Gateway;
 using Disqord.Rest;
+using Disqord.Rest.Default;
 using Microsoft.Extensions.Logging;
 using Utili.Extensions;
 
@@ -22,9 +23,9 @@ namespace Utili.Services
             _client = client;
             _offenceDictionary = new();
         }
-
+        
+        /// <returns>True if the message was deleted by the filter</returns>
         public async Task<bool> MessageReceived(MessageReceivedEventArgs e)
-        // Returns true if the message was deleted by the filter
         {
             try
             {
@@ -43,13 +44,13 @@ namespace Utili.Services
 
                 if (e.Message is not IUserMessage message)
                 {
-                    await e.Message.DeleteAsync();
+                    await e.Message.DeleteAsync(new DefaultRestRequestOptions {Reason = "Message Filter"});
                     return false;
                 }
 
                 if (!DoesMessageObeyRule(message, row, out string allowedTypes))
                 {
-                    await e.Message.DeleteAsync();
+                    await e.Message.DeleteAsync(new DefaultRestRequestOptions {Reason = "Message Filter"});
                     if(e.Member is null || e.Member.IsBot) return true;
 
                     if (_offenceDictionary.TryGetValue(e.ChannelId, out DateTime recentOffence) && recentOffence > DateTime.UtcNow.AddSeconds(-4))

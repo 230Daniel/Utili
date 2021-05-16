@@ -70,7 +70,7 @@ namespace Utili.Services
             await InactiveRole.UpdateUserAsync(guild.Id, member.Id);
 
             if(member.GetRole(inactiveRole.Id) is not null && inactiveRole.CanBeManaged())
-                await member.RevokeRoleAsync(inactiveRole.Id);
+                await member.RevokeRoleAsync(inactiveRole.Id, new DefaultRestRequestOptions {Reason = "Inactive Role"});
         }
 
         void Timer_Elapsed(object sender, ElapsedEventArgs e)
@@ -144,7 +144,7 @@ namespace Utili.Services
                             if (premium && row.AutoKick && lastAction <= minimumKickLastAction)
                             {
                                 if(guild.BotHasPermissions(Permission.KickMembers) && member.CanBeManaged())
-                                    await member.KickAsync(new DefaultRestRequestOptions {Reason = "Kicked automatically for being inactive"});
+                                    await member.KickAsync(new DefaultRestRequestOptions {Reason = "Inactive Role (auto-kick)"});
                                 await Task.Delay(500);
                                 continue;
                             }
@@ -153,7 +153,7 @@ namespace Utili.Services
                             {
                                 if (!member.RoleIds.Contains(inactiveRole.Id))
                                 {
-                                    await member.GrantRoleAsync(inactiveRole.Id);
+                                    await member.GrantRoleAsync(inactiveRole.Id, new DefaultRestRequestOptions {Reason = "Inactive Role"});
                                     await Task.Delay(500);
                                 }
                             }
@@ -161,7 +161,7 @@ namespace Utili.Services
                             {
                                 if (member.RoleIds.Contains(inactiveRole.Id))
                                 {
-                                    await member.RevokeRoleAsync(inactiveRole.Id);
+                                    await member.RevokeRoleAsync(inactiveRole.Id, new DefaultRestRequestOptions {Reason = "Inactive Role"});
                                     await Task.Delay(500);
                                 }
                             }
@@ -172,7 +172,7 @@ namespace Utili.Services
                             {
                                 if (member.RoleIds.Contains(inactiveRole.Id))
                                 {
-                                    await member.RevokeRoleAsync(inactiveRole.Id);
+                                    await member.RevokeRoleAsync(inactiveRole.Id, new DefaultRestRequestOptions {Reason = "Inactive Role"});
                                     await Task.Delay(500);
                                 }
                             }
@@ -180,7 +180,7 @@ namespace Utili.Services
                             {
                                 if (!member.RoleIds.Contains(inactiveRole.Id))
                                 {
-                                    await member.GrantRoleAsync(inactiveRole.Id);
+                                    await member.GrantRoleAsync(inactiveRole.Id, new DefaultRestRequestOptions {Reason = "Inactive Role"});
                                     await Task.Delay(500);
                                 }
                             }

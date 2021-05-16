@@ -91,7 +91,7 @@ namespace Utili.Services
 
                 foreach (ulong roleId in rolesToAdd)
                 {
-                    await e.NewMember.GrantRoleAsync(roleId);
+                    await e.NewMember.GrantRoleAsync(roleId, new DefaultRestRequestOptions{Reason = "Role Linking"});
                     await Task.Delay(1000);
                 }
                 foreach (ulong roleId in rolesToRemove)

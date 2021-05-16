@@ -6,6 +6,7 @@ using Database.Data;
 using Disqord;
 using Disqord.Gateway;
 using Disqord.Rest;
+using Disqord.Rest.Default;
 using Microsoft.Extensions.Logging;
 using Utili.Extensions;
 
@@ -109,7 +110,7 @@ namespace Utili.Services
                     if (connectedUsers.All(x => x.IsBot) && metaRow.DeleteChannels)
                     {
                         if(textChannel is null || !textChannel.BotHasPermissions(Permission.ViewChannel | Permission.ManageChannels)) return;
-                        await textChannel.DeleteAsync();
+                        await textChannel.DeleteAsync(new DefaultRestRequestOptions{Reason = "Voice Link"});
                         channelRow.TextChannelId = 0;
                         await VoiceLink.SaveChannelRowAsync(channelRow);
                         return;
@@ -126,7 +127,7 @@ namespace Utili.Services
                                 new(_client.CurrentUser, new OverwritePermissions().Allow(Permission.ViewChannel)),
                                 new(guildId, OverwriteTargetType.Role, new OverwritePermissions().Deny(Permission.ViewChannel)) // @everyone
                             };
-                        });
+                        }, new DefaultRestRequestOptions{Reason = "Voice Link"});
 
                         channelRow.TextChannelId = textChannel.Id;
                         await VoiceLink.SaveChannelRowAsync(channelRow);
@@ -172,7 +173,7 @@ namespace Utili.Services
 
                     if (overwritesChanged)
                     {
-                        await textChannel.ModifyAsync(x => x.Overwrites = new Optional<IEnumerable<LocalOverwrite>>(overwrites));
+                        await textChannel.ModifyAsync(x => x.Overwrites = new Optional<IEnumerable<LocalOverwrite>>(overwrites), new DefaultRestRequestOptions{Reason = "Voice Link"});
                     }
                 }
                 catch (Exception e)

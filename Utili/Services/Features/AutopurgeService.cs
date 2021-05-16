@@ -8,6 +8,7 @@ using Disqord;
 using Disqord.Gateway;
 using Disqord.Http;
 using Disqord.Rest;
+using Disqord.Rest.Default;
 using Microsoft.Extensions.Logging;
 using Utili.Extensions;
 
@@ -110,7 +111,7 @@ namespace Utili.Services
                 List<AutopurgeMessageRow> messagesToDelete = await Autopurge.GetAndDeleteDueMessagesAsync(row);
                 if(messagesToDelete.Count == 0) return;
 
-                await channel.DeleteMessagesAsync(messagesToDelete.Select(x => new Snowflake(x.MessageId)));
+                await channel.DeleteMessagesAsync(messagesToDelete.Select(x => new Snowflake(x.MessageId)), new DefaultRestRequestOptions {Reason = "Autopurge"});
             }
             catch (RestApiException ex) when (ex.StatusCode == HttpResponseStatusCode.NotFound)
             {

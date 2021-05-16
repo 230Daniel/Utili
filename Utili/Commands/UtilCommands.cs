@@ -6,6 +6,7 @@ using Database.Data;
 using Disqord;
 using Disqord.Bot;
 using Disqord.Rest;
+using Disqord.Rest.Default;
 using Qmmands;
 using Utili.Extensions;
 using Utili.Implementations;
@@ -96,7 +97,7 @@ namespace Utili.Commands
                 return;
             }
 
-            await Context.Message.DeleteAsync();
+            await Context.Message.DeleteAsync(new DefaultRestRequestOptions {Reason = $"Prune (manual by {Context.Message.Author} {Context.Message.Author.Id})"});
             Task delay = Task.Delay(800);
 
             string content = "";
@@ -132,7 +133,7 @@ namespace Utili.Commands
                 }
             }
 
-            int pinned = messages.RemoveAll(x => x is IUserMessage y && y.IsPinned);
+            int pinned = messages.RemoveAll(x => x is IUserMessage {IsPinned: true});
             int outdated = messages.RemoveAll(x => x.CreatedAt.UtcDateTime < DateTime.UtcNow - TimeSpan.FromDays(13.9));
 
             if (pinned == 1) content += $"{pinned} message was not deleted because it is pinned\n";
@@ -140,7 +141,7 @@ namespace Utili.Commands
             if (outdated == 1) content += $"{outdated} message was not deleted because it is older than 14 days\n";
             else if (outdated > 1) content += $"{outdated} messages were not deleted because they are older than 14 days\n";
 
-            await Context.Channel.DeleteMessagesAsync(messages.Select(x => x.Id));
+            await Context.Channel.DeleteMessagesAsync(messages.Select(x => x.Id), new DefaultRestRequestOptions {Reason = $"Prune (manual by {Context.Message.Author} {Context.Message.Author.Id})"});
 
             string title = $"{messages.Count} messages deleted";
             if (messages.Count == 1) title = $"{messages.Count} message deleted";

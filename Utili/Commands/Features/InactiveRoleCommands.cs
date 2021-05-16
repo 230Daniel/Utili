@@ -144,10 +144,7 @@ namespace Utili.Commands
                     try
                     {
                         Task delay = Task.Delay(1100);
-                        Task kick = member.KickAsync(new DefaultRestRequestOptions
-                        {
-                            Reason = $"Inactive kick command run by {Context.Message.Author} ({Context.Message.Author.Id})"
-                        });
+                        Task kick = member.KickAsync(new DefaultRestRequestOptions {Reason = $"Inactive Kick (manual by {Context.Message.Author} {Context.Message.Author.Id})"});
                         await Task.WhenAll(delay, kick);
                     }
                     catch
