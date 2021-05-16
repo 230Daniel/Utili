@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Database;
 using Database.Data;
 using Disqord;
 using Disqord.Gateway;
