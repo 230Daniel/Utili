@@ -7,6 +7,7 @@ using Database.Data;
 using Disqord;
 using Disqord.Gateway;
 using Disqord.Rest;
+using Disqord.Rest.Default;
 using Microsoft.Extensions.Logging;
 using Utili.Extensions;
 
@@ -121,7 +122,7 @@ namespace Utili.Services
             roleIds.AddRange(member.RoleIds);
             roleIds = roleIds.Distinct().ToList();
             
-            await guild.ModifyMemberAsync(memberId, x => x.RoleIds = roleIds);
+            await guild.ModifyMemberAsync(memberId, x => x.RoleIds = roleIds, new DefaultRestRequestOptions{Reason = "Join Roles"});
         }
         
         async Task ScheduleAllAddRoles()

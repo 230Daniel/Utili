@@ -191,9 +191,10 @@ namespace Utili.Services
         {
             _ = Task.Run(async () =>
             {
-                _ = _rolePersist.MemberJoined(e);
                 _ = _joinMessage.MemberJoined(e);
-                _ = _joinRoles.MemberJoined(e);
+                await _joinRoles.MemberJoined(e);
+                await Task.Delay(1000); // Delay to ensure that member is updated in cache before getting the member's roles in the next handler
+                await _rolePersist.MemberJoined(e);
             });
         }
 

@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Database.Data;
 using Disqord;
 using Disqord.Gateway;
 using Disqord.Rest;
+using Disqord.Rest.Default;
 using Microsoft.Extensions.Logging;
 using Utili.Extensions;
 
@@ -33,16 +35,18 @@ namespace Utili.Services
 
                 RolePersistRolesRow persistRow = await RolePersist.GetPersistRowAsync(e.GuildId, e.Member.Id);
 
-                foreach (ulong roleId in persistRow.Roles.Distinct().Where(x => !row.ExcludedRoles.Contains(x)))
-                {
-                    IRole role = guild.GetRole(roleId);
-                    if (role is not null && role.CanBeManaged())
-                    {
-                        await e.Member.GrantRoleAsync(roleId);
-                        await Task.Delay(1000);
-                    }
-                }
-
+                List<IRole> roles = persistRow.Roles.Select(x => guild.GetRole(x)).ToList();
+                roles.RemoveAll(x => x is null || !x.CanBeManaged() || row.ExcludedRoles.Contains(x.Id));
+                
+                IMember member = guild.GetMember(e.Member.Id);
+                member ??= await guild.FetchMemberAsync(e.Member.Id);
+                
+                List<Snowflake> roleIds = roles.Select(x => x.Id).ToList();
+                roleIds.AddRange(member.RoleIds);
+                roleIds = roleIds.Distinct().ToList();
+            
+                await e.Member.ModifyAsync(x => x.RoleIds = roleIds, new DefaultRestRequestOptions{Reason = "Role Persist"});
+                
                 await RolePersist.DeletePersistRowAsync(persistRow);
             }
             catch (Exception ex)
