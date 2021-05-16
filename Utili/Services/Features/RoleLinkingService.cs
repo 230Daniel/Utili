@@ -2,10 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Database;
 using Database.Data;
 using Disqord;
 using Disqord.Gateway;
 using Disqord.Rest;
+using Disqord.Rest.Default;
 using Microsoft.Extensions.Logging;
 using Utili.Extensions;
 
@@ -30,9 +32,14 @@ namespace Utili.Services
             {
                 IGuild guild = _client.GetGuild(e.NewMember.GuildId);
                 List<RoleLinkingRow> rows = await RoleLinking.GetRowsAsync(guild.Id);
-                bool premium = await Premium.IsGuildPremiumAsync(guild.Id);
-                if (!premium) rows = rows.Take(2).ToList();
+                if(rows.Count == 0) return;
 
+                if (rows.Count > 2)
+                {
+                    bool premium = await Premium.IsGuildPremiumAsync(guild.Id);
+                    if (!premium) rows = rows.Take(2).ToList();
+                }
+                
                 List<ulong> oldRoles = e.OldMember?.RoleIds.Select(x => x.RawValue).ToList();
                 oldRoles ??= (await RoleCache.GetRowAsync(e.NewMember.GuildId, e.MemberId)).RoleIds;
                 List<ulong> newRoles = e.NewMember.RoleIds.Select(x => x.RawValue).ToList();
@@ -66,27 +73,31 @@ namespace Utili.Services
                     rolesToRemove = rows.Where(x => addedRoles.Contains(x.RoleId) && x.Mode == 1).Select(x => x.LinkedRoleId).ToList();
                     rolesToRemove.AddRange(rows.Where(x => removedRoles.Contains(x.RoleId) && x.Mode == 3).Select(x => x.LinkedRoleId));
 
+                    rolesToAdd.RemoveAll(x =>
+                    {
+                        IRole role = guild.GetRole(x);
+                        return role is null || !role.CanBeManaged();
+                    });
+                    
+                    rolesToRemove.RemoveAll(x =>
+                    {
+                        IRole role = guild.GetRole(x);
+                        return role is null || !role.CanBeManaged();
+                    });
+                    
                     _actions.AddRange(rolesToAdd.Select(x => new RoleLinkAction(guild.Id, e.NewMember.Id, x, RoleLinkActionType.Added)));
                     _actions.AddRange(rolesToRemove.Select(x => new RoleLinkAction(guild.Id, e.NewMember.Id, x, RoleLinkActionType.Removed)));
                 }
 
                 foreach (ulong roleId in rolesToAdd)
                 {
-                    IRole role = guild.GetRole(roleId);
-                    if (role.CanBeManaged())
-                    {
-                        await e.NewMember.GrantRoleAsync(roleId);
-                        await Task.Delay(1000);
-                    }
+                    await e.NewMember.GrantRoleAsync(roleId);
+                    await Task.Delay(1000);
                 }
                 foreach (ulong roleId in rolesToRemove)
                 {
-                    IRole role = guild.GetRole(roleId);
-                    if (role.CanBeManaged())
-                    {
-                        await e.NewMember.RevokeRoleAsync(roleId);
-                        await Task.Delay(1000);
-                    }
+                    await e.NewMember.RevokeRoleAsync(roleId, new DefaultRestRequestOptions{ Reason = "Role Linking" });
+                    await Task.Delay(1000);
                 }
             }
             catch (Exception ex)
