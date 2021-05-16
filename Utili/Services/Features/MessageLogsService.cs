@@ -125,7 +125,7 @@ namespace Utili.Services
 
                 List<MessageLogsMessageRow> messages = await MessageLogs.GetMessagesAsync(e.GuildId, e.ChannelId, e.MessageIds.Select(x => x.RawValue).ToArray());
 
-                LocalEmbedBuilder embed = GetBulkDeletedEmbed(e, await PasteMessagesAsync(messages, e.MessageIds.Count));
+                LocalEmbedBuilder embed = GetBulkDeletedEmbed(e, await PasteMessagesAsync(messages, e.MessageIds.Count), messages);
                 
                 await MessageLogs.DeleteMessagesAsync(e.GuildId, e.ChannelId, e.MessageIds.Select(x => x.RawValue).ToArray());
 
@@ -144,7 +144,7 @@ namespace Utili.Services
                 .WithColor(new Color(66, 182, 245))
                 .WithDescription($"**Message by {newMessage.Author.Mention} edited in {newMessage.GetChannel(previousMessage.GuildId).Mention}** [Jump]({newMessage.GetJumpUrl(previousMessage.GuildId)})")
                 .WithAuthor(newMessage.Author)
-                .WithFooter($"ID {previousMessage.MessageId}")
+                .WithFooter($"Message {previousMessage.MessageId}")
                 .WithTimestamp(DateTime.SpecifyKind(previousMessage.Timestamp, DateTimeKind.Utc));
 
             if (previousMessage.Content.Value.Length > 1024 || newMessage.Content.Length > 1024)
@@ -168,7 +168,7 @@ namespace Utili.Services
             LocalEmbedBuilder builder = new LocalEmbedBuilder()
                 .WithColor(new Color(245, 66, 66))
                 .WithDescription($"**Message by {Mention.User(deletedMessage.UserId)} deleted in {Mention.TextChannel(deletedMessage.ChannelId)}**")
-                .WithFooter($"ID {e.MessageId}")
+                .WithFooter($"Message {e.MessageId}")
                 .WithTimestamp(DateTime.SpecifyKind(deletedMessage.Timestamp, DateTimeKind.Utc));
 
             if (member is null) builder.WithAuthor("Unknown member");
@@ -182,12 +182,13 @@ namespace Utili.Services
             return builder;
         }
 
-        LocalEmbedBuilder GetBulkDeletedEmbed(MessagesDeletedEventArgs e, string paste)
+        LocalEmbedBuilder GetBulkDeletedEmbed(MessagesDeletedEventArgs e, string paste, List<MessageLogsMessageRow> messages)
         {
             LocalEmbedBuilder builder = new LocalEmbedBuilder()
                 .WithColor(new Color(245, 66, 66))
-                .WithDescription($"**{e.MessageIds.Count} messages bulk deleted in {Mention.TextChannel(e.ChannelId)}**\n{paste}")
-                .WithAuthor("Bulk deletion");
+                .WithDescription($"**{e.MessageIds.Count} messages bulk deleted in {Mention.TextChannel(e.ChannelId)}**\n" +
+                                 $"[View {messages.Count} logged message{(messages.Count == 1 ? "" : "s")}]({paste})")
+                .WithAuthor("Bulk Deletion");
 
             return builder;
         }
