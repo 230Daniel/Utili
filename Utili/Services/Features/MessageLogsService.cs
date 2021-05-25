@@ -61,20 +61,19 @@ namespace Utili.Services
                 if (!e.GuildId.HasValue) return;
 
                 ITextChannel channel = _client.GetTextChannel(e.GuildId.Value, e.ChannelId);
-                IUserMessage newMessage = e.NewMessage ?? await channel.FetchMessageAsync(e.MessageId) as IUserMessage;
-                if(newMessage is null || newMessage.Author.IsBot) return;
 
                 MessageLogsRow row = await MessageLogs.GetRowAsync(e.GuildId.Value);
                 if ((row.DeletedChannelId == 0 && row.EditedChannelId == 0) || 
                     row.ExcludedChannels.Contains(e.ChannelId)) return;
 
-                MessageLogsMessageRow message = await MessageLogs.GetMessageAsync(e.GuildId.Value, e.ChannelId, e.MessageId);
-                if (message is null || message.Content.Value == newMessage.Content) return;
+                MessageLogsMessageRow previousMessage = await MessageLogs.GetMessageAsync(e.GuildId.Value, e.ChannelId, e.MessageId);
+                if (previousMessage is null || !e.Model.Content.HasValue || e.Model.Content.Value == previousMessage.Content.Value) return;
 
-                LocalEmbedBuilder embed = GetEditedEmbed(message, newMessage);
+                IUserMessage newMessage = e.NewMessage ?? await channel.FetchMessageAsync(e.MessageId) as IUserMessage;
+                LocalEmbedBuilder embed = GetEditedEmbed(newMessage, previousMessage);
 
-                message.Content = EString.FromDecoded(newMessage.Content);
-                await MessageLogs.SaveMessageAsync(message);
+                previousMessage.Content = EString.FromDecoded(e.Model.Content.Value);
+                await MessageLogs.SaveMessageAsync(previousMessage);
 
                 ITextChannel logChannel = _client.GetTextChannel(e.GuildId.Value, row.EditedChannelId);
                 if (logChannel is not null) await logChannel.SendEmbedAsync(embed);
@@ -99,10 +98,10 @@ namespace Utili.Services
                     await MessageLogs.GetMessageAsync(e.GuildId.Value, e.ChannelId, e.MessageId);
                 if (message is null) return;
 
-                IMember member = await _client.GetGuild(e.GuildId.Value).FetchMemberAsync(message.UserId);
+                IMember member = _client.GetMember(e.GuildId.Value, message.UserId) ?? await _client.FetchMemberAsync(e.GuildId.Value, message.UserId);
                 if (member is not null && member.IsBot) return;
 
-                LocalEmbedBuilder embed = GetDeletedEmbed(message, e, member);
+                LocalEmbedBuilder embed = GetDeletedEmbed(message, member);
 
                 await MessageLogs.DeleteMessagesAsync(e.GuildId.Value, e.ChannelId, new[] {e.MessageId.RawValue});
 
@@ -138,11 +137,11 @@ namespace Utili.Services
             }
         }
 
-        LocalEmbedBuilder GetEditedEmbed(MessageLogsMessageRow previousMessage, IUserMessage newMessage)
+        LocalEmbedBuilder GetEditedEmbed(IUserMessage newMessage, MessageLogsMessageRow previousMessage)
         {
             LocalEmbedBuilder builder = new LocalEmbedBuilder()
                 .WithColor(new Color(66, 182, 245))
-                .WithDescription($"**Message by {newMessage.Author.Mention} edited in {newMessage.GetChannel(previousMessage.GuildId).Mention}** [Jump]({newMessage.GetJumpUrl(previousMessage.GuildId)})")
+                .WithDescription($"**Message by {newMessage.Author.Mention} edited in {Mention.TextChannel(newMessage.ChannelId)}** [Jump]({newMessage.GetJumpUrl(previousMessage.GuildId)})")
                 .WithAuthor(newMessage.Author)
                 .WithFooter($"Message {previousMessage.MessageId}")
                 .WithTimestamp(DateTime.SpecifyKind(previousMessage.Timestamp, DateTimeKind.Utc));
@@ -163,12 +162,12 @@ namespace Utili.Services
             return builder;
         }
 
-        LocalEmbedBuilder GetDeletedEmbed(MessageLogsMessageRow deletedMessage, MessageDeletedEventArgs e, IMember member)
+        LocalEmbedBuilder GetDeletedEmbed(MessageLogsMessageRow deletedMessage, IMember member)
         {
             LocalEmbedBuilder builder = new LocalEmbedBuilder()
                 .WithColor(new Color(245, 66, 66))
                 .WithDescription($"**Message by {Mention.User(deletedMessage.UserId)} deleted in {Mention.TextChannel(deletedMessage.ChannelId)}**")
-                .WithFooter($"Message {e.MessageId}")
+                .WithFooter($"Message {deletedMessage.MessageId}")
                 .WithTimestamp(DateTime.SpecifyKind(deletedMessage.Timestamp, DateTimeKind.Utc));
 
             if (member is null) builder.WithAuthor("Unknown member");
@@ -212,6 +211,7 @@ namespace Utili.Services
                     {
                         user = await _client.FetchUserAsync(message.UserId);
                         cachedUsers.Add(message.UserId, user);
+                        await Task.Delay(500);
                     }
 
                     if (user is null) sb.AppendLine($"Unknown member ({user.Id})");
