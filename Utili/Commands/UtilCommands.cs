@@ -205,6 +205,7 @@ namespace Utili.Commands
         }
         
         [Command("Random", "Pick")]
+        [DefaultCooldown(2, 5)]
         public async Task Random(ITextChannel channel, ulong messageId, IEmoji emoji)
         {
             IMessage message = await channel.FetchMessageAsync(messageId);
@@ -216,7 +217,7 @@ namespace Utili.Commands
                 return;
             }
             
-            if(message.Reactions.Value.TryGetValue(emoji, out var reaction))
+            if(message.Reactions.Value.TryGetValue(emoji, out _))
             {
                 IReadOnlyList<IUser> reactedMembers = await message.FetchReactionsAsync(emoji, int.MaxValue);
                 Random random = new();
@@ -235,6 +236,7 @@ namespace Utili.Commands
         }
         
         [Command("Random", "Pick")]
+        [DefaultCooldown(2, 5)]
         public async Task Random(ulong messageId, IEmoji emoji)
         {
             await Random(Context.Channel, messageId, emoji);
