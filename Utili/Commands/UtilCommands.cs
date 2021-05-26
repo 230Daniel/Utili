@@ -196,75 +196,56 @@ namespace Utili.Commands
                 $"The {emoji} reaction was added to a message sent by {message.Author.Mention} in {channel.Mention}");
         }
 
-        // TODO: Implement when member chunking is done
+        [Command("Random", "Pick")]
+        public async Task Random()
+        {
+            await Context.Channel.SendFailureAsync("Error",
+                "Sorry, this command has been permanently disabled due to changes in the Discord API and scalability issues" +
+                "\nPerhaps you're looking for `random [channel] [message id] [emoji]`?");
+        }
+        
+        [Command("Random", "Pick")]
+        public async Task Random(ITextChannel channel, ulong messageId, IEmoji emoji)
+        {
+            IMessage message = await channel.FetchMessageAsync(messageId);
+            
+            if (message is null || !message.Reactions.HasValue)
+            {
+                await Context.Channel.SendFailureAsync("Error",
+                    $"No message was found in {channel.Mention} with ID {messageId}\n[How do I get a message ID?](https://support.discord.com/hc/en-us/articles/206346498)");
+                return;
+            }
+            
+            if(message.Reactions.Value.TryGetValue(emoji, out var reaction))
+            {
+                IReadOnlyList<IUser> reactedMembers = await message.FetchReactionsAsync(emoji, int.MaxValue);
+                Random random = new();
+                IUser member = reactedMembers[random.Next(0, reactedMembers.Count)];
 
-        //[Command("Random", "Pick")]
-        //public async Task Random(ITextChannel channel = null, ulong messageId = 0, [Remainder] string emojiString = "")
-        //{
-        //    await Context.Guild.DownloadAndKeepUsersAsync(TimeSpan.FromMinutes(15));
-        //    Random random = new Random();
-
-        //    if (messageId == 0)
-        //    {
-        //        int index = random.Next(Context.Guild.Users.Count);
-        //        SocketGuildUser user = Context.Guild.Users.ElementAt(index);
-
-        //        await SendInfoAsync(Context.Channel, "Random user",
-        //            $"{user.Mention}\nThis user was picked randomly from {Context.Guild.Users.Count} server member{(Context.Guild.Users.Count == 1 ? "" : "s")}.");
-        //    }
-        //    else
-        //    {
-        //        channel ??= Context.Channel as ITextChannel;
-
-        //        IMessage message = await channel.GetMessageAsync(messageId);
-
-        //        if (message is null)
-        //        {
-        //            await Context.Channel.SendFailureAsync("Error",
-        //                $"No message was found in <#{channel.Id}> with ID {messageId}\n[How do I get a message ID?](https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID-)");
-        //            return;
-        //        }
-
-        //        IEmote emoji = Helper.GetEmoji(emojiString, Context.Guild);
-
-        //        if(message.Reactions.TryGetValue(emoji, out ReactionMetadata _))
-        //        {
-        //            List<IUser> users = (await message.GetReactionUsersAsync(emoji, 1000).FlattenAsync()).ToList();
-        //            int index = random.Next(users.Count);
-        //            IUser user = users.ElementAt(index);
-
-        //            await SendInfoAsync(Context.Channel, "Random user",
-        //                $"{user.Mention}\nThis user was picked randomly from {users.Count} user{(users.Count == 1 ? "" : "s")} that reacted to [this message]({message.GetJumpUrl()}) with {emojiString}.");
-        //        }
-        //    }
-        //}
-
-        //[Command("Random", "Pick")]
-        //public async Task Random(ulong messageId = 0, [Remainder] string emojiString = "")
-        //{
-        //    await Random(Context.Channel as ITextChannel, messageId, emojiString);
-        //}
-
-        //[Command("WhoHas")]
-        //public async Task WhoHas(IRole role, int page = 1)
-        //{
-        //    await Context.Guild.DownloadAndKeepUsersAsync(TimeSpan.FromMinutes(15));
-        //    List<SocketGuildUser> users = Context.Guild.Users.OrderBy(x => x.Nickname ?? x.Username).Where(x => x.Roles.Any(y => y.Id == role.Id)).ToList();
-
-        //    int totalPages = (int) Math.Ceiling(users.Count / 50d);
-        //    users = users.Skip((page - 1) * 50).Take(50).ToList();
-        //    if ((page < 1 || page > totalPages) && totalPages != 0)
-        //    {
-        //        await Context.Channel.SendFailureAsync("Error", "Invalid page number");
-        //        return; 
-        //    }
-        //    if (totalPages == 0) page = 0;
-
-        //    string output = users.Aggregate("", (current, user) => current + $"{user.Mention}\n");
-        //    if (output == "") output = "There are no users with that role.";
-
-        //    await SendInfoAsync(Context.Channel, $"Users with @{role.Name}", output, $"Page {page} of {totalPages}");
-        //}
+                await Context.Channel.SendInfoAsync("Random member",
+                    $"{member.Mention}\n" +
+                    $"This member was picked randomly from {reactedMembers.Count} member{(reactedMembers.Count == 1 ? "" : "s")} " +
+                    $"that reacted to [this message]({message.GetJumpUrl(Context.GuildId)}) with {emoji}.");
+            }
+            else
+            {
+                await Context.Channel.SendFailureAsync("Error",
+                    $"That message doesn't have the {emoji} reaction");
+            }
+        }
+        
+        [Command("Random", "Pick")]
+        public async Task Random(ulong messageId, IEmoji emoji)
+        {
+            await Random(Context.Channel, messageId, emoji);
+        }
+        
+        [Command("WhoHas")]
+        public async Task WhoHas()
+        {
+            await Context.Channel.SendFailureAsync("Error",
+                "Sorry, this command has been permanently disabled due to changes in the Discord API and scalability issues");
+        }
 
         [Command("B64Encode")]
         public async Task B64Encode([Remainder] string input)
