@@ -112,17 +112,16 @@ namespace Utili.Services
             row ??= await JoinRoles.GetRowAsync(guildId);
             IGuild guild = _client.GetGuild(guildId);
 
-            IMember member = guild.GetMember(memberId);
-            member ??= await guild.FetchMemberAsync(memberId);
-            
             List<IRole> roles = row.JoinRoles.Select(x => guild.GetRole(x)).ToList();
             roles.RemoveAll(x => x is null || !x.CanBeManaged());
             
             List<Snowflake> roleIds = roles.Select(x => x.Id).ToList();
-            roleIds.AddRange(member.RoleIds);
             roleIds = roleIds.Distinct().ToList();
-            
-            await guild.ModifyMemberAsync(memberId, x => x.RoleIds = roleIds, new DefaultRestRequestOptions{Reason = "Join Roles"});
+
+            foreach (Snowflake roleId in roleIds)
+            {
+                await guild.GrantRoleAsync(memberId, roleId, new DefaultRestRequestOptions{Reason = "Join Roles"});
+            }
         }
         
         async Task ScheduleAllAddRoles()
