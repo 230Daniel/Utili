@@ -43,6 +43,19 @@ namespace Utili.Services
             }
         }
 
+        public async Task JoinedGuild(JoinedGuildEventArgs e)
+        {
+            try
+            {
+                await CacheMembersAsync(e.GuildId);
+                _logger.LogInformation("Cached members for {GuildId}", e.GuildId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Exception thrown on joined guild for {GuildId}", e.GuildId);
+            }
+        }
+
         public async Task MemberUpdated(MemberUpdatedEventArgs e, bool recursiveCall = false)
         {
             try
@@ -55,7 +68,8 @@ namespace Utili.Services
                 
                 try
                 {
-                    await row.SaveAsync();
+                    if (row.RoleIds.Any()) await row.SaveAsync();
+                    else await row.DeleteAsync();
                 }
                 catch (MySqlException ex) when (ex.Message.ToUpper().Contains("DUPLICATE ENTRY") && !recursiveCall)
                 {
@@ -99,8 +113,12 @@ namespace Utili.Services
                 {
                     RoleCacheRow row = rows.FirstOrDefault(x => x.UserId == member.Id);
                     row ??= new RoleCacheRow(guildId, member.Id);
-                    row.RoleIds = member.RoleIds.Select(x => x.RawValue).ToList();
-                    if(row.RoleIds.Any()) await row.SaveAsync();
+                    if (!member.RoleIds.Select(x => x.RawValue).SequenceEqual(row.RoleIds))
+                    {
+                        row.RoleIds = member.RoleIds.Select(x => x.RawValue).ToList();
+                        if (row.RoleIds.Any()) await row.SaveAsync();
+                        else if(!row.New) await row.DeleteAsync();
+                    }
                 }
                 
                 _logger.LogDebug("All members cached for {GuildId}", guildId);
