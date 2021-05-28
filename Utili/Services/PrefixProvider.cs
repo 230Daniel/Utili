@@ -28,6 +28,7 @@ namespace Utili.Services
                 };
             }
 
+            await Task.Yield();
             CoreRow row = await Core.GetRowAsync(message.GuildId.Value);
             return new IPrefix[]
             {
