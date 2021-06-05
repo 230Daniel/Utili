@@ -5,7 +5,6 @@ using Database.Data;
 using Disqord;
 using Disqord.Bot;
 using Disqord.Rest;
-using Disqord.Rest.Default;
 using Qmmands;
 using Utili.Extensions;
 using Utili.Implementations;
@@ -87,23 +86,23 @@ namespace Utili.Features
 
             if (!string.IsNullOrWhiteSpace(message.Content) || message.Embeds.Count > 0)
             {
-                LocalWebhookMessageBuilder messageBuilder = new LocalWebhookMessageBuilder()
+                LocalWebhookMessage messageBuilder = new LocalWebhookMessage()
                     .WithName(username)
                     .WithAvatarUrl(avatarUrl)
                     .WithOptionalContent(message.Content)
-                    .WithEmbeds(message.Embeds.Select(LocalEmbedBuilder.FromEmbed))
-                    .WithMentions(LocalMentionsBuilder.None);
+                    .WithEmbeds(message.Embeds.Select(LocalEmbed.FromEmbed))
+                    .WithAllowedMentions(LocalAllowedMentions.None);
 
-                await Context.Bot.ExecuteWebhookAsync(webhook.Id, webhook.Token, messageBuilder.Build());
+                await Context.Bot.ExecuteWebhookAsync(webhook.Id, webhook.Token, messageBuilder);
             }
             
             foreach (Attachment attachment in message.Attachments)
             {
-                LocalWebhookMessageBuilder attachmentMessage = new LocalWebhookMessageBuilder()
+                LocalWebhookMessage attachmentMessage = new LocalWebhookMessage()
                     .WithName(username)
                     .WithAvatarUrl(avatarUrl)
                     .WithContent(attachment.Url);
-                await Context.Bot.ExecuteWebhookAsync(webhook.Id, webhook.Token, attachmentMessage.Build());
+                await Context.Bot.ExecuteWebhookAsync(webhook.Id, webhook.Token, attachmentMessage);
             }
 
             await Context.Channel.SendSuccessAsync("Message pinned",

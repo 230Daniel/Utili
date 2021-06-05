@@ -8,7 +8,6 @@ using Disqord;
 using Disqord.Gateway;
 using Disqord.Http;
 using Disqord.Rest;
-using Disqord.Rest.Default;
 using Microsoft.Extensions.Logging;
 using Utili.Extensions;
 
@@ -143,7 +142,7 @@ namespace Utili.Services
                     GuildId = e.GuildId.Value,
                     ChannelId = e.ChannelId,
                     MessageId = e.MessageId,
-                    Timestamp = e.Message.CreatedAt.UtcDateTime,
+                    Timestamp = e.Message.CreatedAt().UtcDateTime,
                     IsBot = e.Message.Author.IsBot,
                     IsPinned = e.Message is IUserMessage userMessage && userMessage.IsPinned
                 };
@@ -172,7 +171,7 @@ namespace Utili.Services
                         GuildId = e.GuildId.Value,
                         ChannelId = e.ChannelId,
                         MessageId = e.MessageId,
-                        Timestamp = e.NewMessage.CreatedAt.UtcDateTime,
+                        Timestamp = e.NewMessage.CreatedAt().UtcDateTime,
                         IsBot = e.NewMessage.Author.IsBot,
                         IsPinned = e.NewMessage.IsPinned
                     };
@@ -300,13 +299,13 @@ namespace Utili.Services
                             fetchedMessages = (await channel.FetchMessagesAsync(100, RetrievalDirection.Before, oldestMessage.Id)).ToList();
 
                         if (fetchedMessages.Count == 0) break;
-                        oldestMessage = fetchedMessages.OrderBy(x => x.CreatedAt.UtcDateTime).First();
+                        oldestMessage = fetchedMessages.OrderBy(x => x.CreatedAt().UtcDateTime).First();
 
                         messages.AddRange(fetchedMessages.Where(x =>
-                            x.CreatedAt.UtcDateTime > DateTime.UtcNow.AddDays(-13.9)));
+                            x.CreatedAt().UtcDateTime > DateTime.UtcNow.AddDays(-13.9)));
 
                         if (messages.Count < 100 ||
-                            oldestMessage.CreatedAt.UtcDateTime < DateTime.UtcNow.AddDays(-13.9)) break;
+                            oldestMessage.CreatedAt().UtcDateTime < DateTime.UtcNow.AddDays(-13.9)) break;
 
                         await Task.Delay(1000);
                     }
@@ -330,7 +329,7 @@ namespace Utili.Services
                                 GuildId = guild.Id,
                                 ChannelId = channel.Id,
                                 MessageId = message.Id,
-                                Timestamp = message.CreatedAt.UtcDateTime,
+                                Timestamp = message.CreatedAt().UtcDateTime,
                                 IsBot = message.Author.IsBot,
                                 IsPinned = message is IUserMessage userMessage && userMessage.IsPinned
                             };

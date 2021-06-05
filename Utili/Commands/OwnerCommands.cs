@@ -26,10 +26,10 @@ namespace Utili.Commands
                              $"Subscriptions: {subscriptions.Count}\n" +
                              $"Premium slots: {subscriptions.Sum(x => x.Slots)}";
 
-            LocalEmbedBuilder embed = Utils.MessageUtils.CreateEmbed(Utils.EmbedType.Info, user?.ToString(), content);
+            LocalEmbed embed = Utils.MessageUtils.CreateEmbed(Utils.EmbedType.Info, user?.ToString(), content);
             embed.WithThumbnailUrl(user.GetAvatarUrl());
 
-            await Context.Author.SendMessageAsync(new LocalMessageBuilder().WithEmbed(embed).Build());
+            await Context.Author.SendMessageAsync(new LocalMessage().WithEmbed(embed));
             await Context.Channel.SendSuccessAsync("User info sent",
                 $"Information about {user} was sent in a direct message");
         }
@@ -42,13 +42,13 @@ namespace Utili.Commands
 
             string content = $"Id: {guild?.Id}\n" +
                              $"Owner: {guild.OwnerId}\n" +
-                             $"Created: {guild.CreatedAt.UtcDateTime} UTC\n" +
+                             $"Created: {guild.CreatedAt().UtcDateTime} UTC\n" +
                              $"Premium: {premium.ToString().ToLower()}";
 
-            LocalEmbedBuilder embed = Utils.MessageUtils.CreateEmbed(Utils.EmbedType.Info, guild.ToString(), content);
+            LocalEmbed embed = Utils.MessageUtils.CreateEmbed(Utils.EmbedType.Info, guild.ToString(), content);
             embed.WithThumbnailUrl(guild.GetIconUrl());
 
-            await Context.Author.SendMessageAsync(new LocalMessageBuilder().WithEmbed(embed).Build());
+            await Context.Author.SendMessageAsync(new LocalMessage().WithEmbed(embed));
             await Context.Channel.SendSuccessAsync("Guild info sent",
                 $"Information about {guild} was sent in a direct message");
         }

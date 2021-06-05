@@ -41,7 +41,7 @@ namespace Utili.Services
                     ChannelId = e.ChannelId,
                     MessageId = e.MessageId,
                     UserId = e.Message.Author.Id,
-                    Timestamp = e.Message.CreatedAt.UtcDateTime,
+                    Timestamp = e.Message.CreatedAt().UtcDateTime,
                     Content = EString.FromDecoded(e.Message.Content)
                 };
 
@@ -70,7 +70,7 @@ namespace Utili.Services
                 if (previousMessage is null || !e.Model.Content.HasValue || e.Model.Content.Value == previousMessage.Content.Value) return;
 
                 IUserMessage newMessage = e.NewMessage ?? await channel.FetchMessageAsync(e.MessageId) as IUserMessage;
-                LocalEmbedBuilder embed = GetEditedEmbed(newMessage, previousMessage);
+                LocalEmbed embed = GetEditedEmbed(newMessage, previousMessage);
 
                 previousMessage.Content = EString.FromDecoded(e.Model.Content.Value);
                 await MessageLogs.SaveMessageAsync(previousMessage);
@@ -101,7 +101,7 @@ namespace Utili.Services
                 IMember member = _client.GetMember(e.GuildId.Value, message.UserId) ?? await _client.FetchMemberAsync(e.GuildId.Value, message.UserId);
                 if (member is not null && member.IsBot) return;
 
-                LocalEmbedBuilder embed = GetDeletedEmbed(message, member);
+                LocalEmbed embed = GetDeletedEmbed(message, member);
 
                 await MessageLogs.DeleteMessagesAsync(e.GuildId.Value, e.ChannelId, new[] {e.MessageId.RawValue});
 
@@ -124,7 +124,7 @@ namespace Utili.Services
 
                 List<MessageLogsMessageRow> messages = await MessageLogs.GetMessagesAsync(e.GuildId, e.ChannelId, e.MessageIds.Select(x => x.RawValue).ToArray());
 
-                LocalEmbedBuilder embed = GetBulkDeletedEmbed(e, await PasteMessagesAsync(messages, e.MessageIds.Count), messages);
+                LocalEmbed embed = GetBulkDeletedEmbed(e, await PasteMessagesAsync(messages, e.MessageIds.Count), messages);
                 
                 await MessageLogs.DeleteMessagesAsync(e.GuildId, e.ChannelId, e.MessageIds.Select(x => x.RawValue).ToArray());
 
@@ -137,9 +137,9 @@ namespace Utili.Services
             }
         }
 
-        LocalEmbedBuilder GetEditedEmbed(IUserMessage newMessage, MessageLogsMessageRow previousMessage)
+        LocalEmbed GetEditedEmbed(IUserMessage newMessage, MessageLogsMessageRow previousMessage)
         {
-            LocalEmbedBuilder builder = new LocalEmbedBuilder()
+            LocalEmbed builder = new LocalEmbed()
                 .WithColor(new Color(66, 182, 245))
                 .WithDescription($"**Message by {newMessage.Author.Mention} edited in {Mention.TextChannel(newMessage.ChannelId)}** [Jump]({newMessage.GetJumpUrl(previousMessage.GuildId)})")
                 .WithAuthor(newMessage.Author)
@@ -162,9 +162,9 @@ namespace Utili.Services
             return builder;
         }
 
-        LocalEmbedBuilder GetDeletedEmbed(MessageLogsMessageRow deletedMessage, IMember member)
+        LocalEmbed GetDeletedEmbed(MessageLogsMessageRow deletedMessage, IMember member)
         {
-            LocalEmbedBuilder builder = new LocalEmbedBuilder()
+            LocalEmbed builder = new LocalEmbed()
                 .WithColor(new Color(245, 66, 66))
                 .WithDescription($"**Message by {Mention.User(deletedMessage.UserId)} deleted in {Mention.TextChannel(deletedMessage.ChannelId)}**")
                 .WithFooter($"Message {deletedMessage.MessageId}")
@@ -181,9 +181,9 @@ namespace Utili.Services
             return builder;
         }
 
-        LocalEmbedBuilder GetBulkDeletedEmbed(MessagesDeletedEventArgs e, string paste, List<MessageLogsMessageRow> messages)
+        LocalEmbed GetBulkDeletedEmbed(MessagesDeletedEventArgs e, string paste, List<MessageLogsMessageRow> messages)
         {
-            LocalEmbedBuilder builder = new LocalEmbedBuilder()
+            LocalEmbed builder = new LocalEmbed()
                 .WithColor(new Color(245, 66, 66))
                 .WithDescription($"**{e.MessageIds.Count} messages bulk deleted in {Mention.TextChannel(e.ChannelId)}**\n" +
                                  $"[View {messages.Count} logged message{(messages.Count == 1 ? "" : "s")}]({paste})")

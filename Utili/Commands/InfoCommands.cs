@@ -44,7 +44,7 @@ namespace Utili.Commands
             string domain = _config.GetValue<string>("Domain");
             string dashboardUrl = $"https://{domain}/dashboard/{Context.Guild.Id}";
 
-            LocalEmbedBuilder embed = MessageUtils.CreateEmbed(EmbedType.Info, "Utili",
+            LocalEmbed embed = MessageUtils.CreateEmbed(EmbedType.Info, "Utili",
                     $"You can configure Utili on the [dashboard]({dashboardUrl}).\n" +
                     $"If you need help, you should [contact us](https://{domain}/contact).\n⠀")
 
@@ -79,7 +79,7 @@ namespace Utili.Commands
         {
             int largestLatency = 0;
 
-            TimeSpan? gatewayLatency = DateTime.UtcNow - Context.Message.CreatedAt.UtcDateTime;
+            TimeSpan? gatewayLatency = DateTime.UtcNow - Context.Message.CreatedAt().UtcDateTime;
             int gateway = (int)Math.Round(gatewayLatency.Value.TotalMilliseconds);
             if (gateway > largestLatency) largestLatency = gateway;
 
@@ -125,7 +125,7 @@ namespace Utili.Commands
                 _ => throw new ArgumentOutOfRangeException()
             };
 
-            LocalEmbedBuilder embed = MessageUtils.CreateEmbed(EmbedType.Info, $"Pong! Status: {status}");
+            LocalEmbed embed = MessageUtils.CreateEmbed(EmbedType.Info, $"Pong! Status: {status}");
             embed.WithColor(color);
 
             embed.AddField("Discord", $"Api: {gateway}ms\nRest: {rest}ms", true);

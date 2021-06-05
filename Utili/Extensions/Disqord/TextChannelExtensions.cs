@@ -11,36 +11,32 @@ namespace Utili.Extensions
     {
         public static async Task<IUserMessage> SendInfoAsync(this ITextChannel channel, string title, string content = null)
         {
-            LocalMessage message = new LocalMessageBuilder()
-                .WithEmbed(MessageUtils.CreateEmbed(EmbedType.Info, title, content))
-                .Build();
+            LocalMessage message = new LocalMessage()
+                .WithEmbed(MessageUtils.CreateEmbed(EmbedType.Info, title, content));
 
             return await channel.SendMessageAsync(message);
         }
 
         public static async Task<IUserMessage> SendSuccessAsync(this ITextChannel channel, string title, string content = null)
         {
-            LocalMessage message = new LocalMessageBuilder()
-                .WithEmbed(MessageUtils.CreateEmbed(EmbedType.Success, title, content))
-                .Build();
+            LocalMessage message = new LocalMessage()
+                .WithEmbed(MessageUtils.CreateEmbed(EmbedType.Success, title, content));
 
             return await channel.SendMessageAsync(message);
         }
 
         public static async Task<IUserMessage> SendFailureAsync(this ITextChannel channel, string title, string content = null, bool supportLink = true)
         {
-            LocalMessage message = new LocalMessageBuilder()
-                .WithEmbed(MessageUtils.CreateEmbed(EmbedType.Failure, title, content))
-                .Build();
+            LocalMessage message = new LocalMessage()
+                .WithEmbed(MessageUtils.CreateEmbed(EmbedType.Failure, title, content));
 
             return await channel.SendMessageAsync(message);
         }
 
-        public static async Task<IUserMessage> SendEmbedAsync(this ITextChannel channel, LocalEmbedBuilder embed)
+        public static async Task<IUserMessage> SendEmbedAsync(this ITextChannel channel, LocalEmbed embed)
         {
-            LocalMessage message = new LocalMessageBuilder()
-                .WithEmbed(embed)
-                .Build();
+            LocalMessage message = new LocalMessage()
+                .WithEmbed(embed);
 
             return await channel.SendMessageAsync(message);
         }

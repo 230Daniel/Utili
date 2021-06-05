@@ -66,23 +66,23 @@ namespace Utili.Services
 
                 if (!string.IsNullOrWhiteSpace(userMessage.Content) || userMessage.Embeds.Count > 0)
                 {
-                    LocalWebhookMessageBuilder message = new LocalWebhookMessageBuilder()
+                    LocalWebhookMessage message = new LocalWebhookMessage()
                         .WithName(username)
                         .WithAvatarUrl(avatarUrl)
                         .WithOptionalContent(userMessage.Content)
-                        .WithEmbeds(userMessage.Embeds.Select(LocalEmbedBuilder.FromEmbed))
-                        .WithMentions(LocalMentionsBuilder.None);
+                        .WithEmbeds(userMessage.Embeds.Select(LocalEmbed.FromEmbed))
+                        .WithAllowedMentions(LocalAllowedMentions.None);
 
-                    await _client.ExecuteWebhookAsync(webhook.Id, webhook.Token, message.Build());
+                    await _client.ExecuteWebhookAsync(webhook.Id, webhook.Token, message);
                 }
                     
                 foreach (Attachment attachment in userMessage.Attachments)
                 {
-                    LocalWebhookMessageBuilder attachmentMessage = new LocalWebhookMessageBuilder()
+                    LocalWebhookMessage attachmentMessage = new LocalWebhookMessage()
                         .WithName(username)
                         .WithAvatarUrl(avatarUrl)
                         .WithContent(attachment.Url);
-                    await _client.ExecuteWebhookAsync(webhook.Id, webhook.Token, attachmentMessage.Build());
+                    await _client.ExecuteWebhookAsync(webhook.Id, webhook.Token, attachmentMessage);
                 }
             }
             catch(Exception ex)

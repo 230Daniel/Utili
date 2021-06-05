@@ -29,7 +29,7 @@ namespace Utili.Commands
             else if (row.Reputation > 0) colour = new Color(67, 181, 129);
             else colour = new Color(181, 67, 67);
 
-            LocalEmbedBuilder embed = MessageUtils
+            LocalEmbed embed = MessageUtils
                 .CreateEmbed(EmbedType.Info, "", $"{member.Mention}'s reputation: {row.Reputation}")
                 .WithColor(colour);
 

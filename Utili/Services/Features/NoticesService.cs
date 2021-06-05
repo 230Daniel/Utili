@@ -8,7 +8,6 @@ using Database.Data;
 using Disqord;
 using Disqord.Gateway;
 using Disqord.Rest;
-using Disqord.Rest.Default;
 using Microsoft.Extensions.Logging;
 using Utili.Extensions;
 using RepeatingTimer = System.Timers.Timer;
@@ -153,21 +152,19 @@ namespace Utili.Services
                 string.IsNullOrWhiteSpace(thumbnailUrl) &&
                 string.IsNullOrWhiteSpace(imageUrl))
             {
-                return new LocalMessageBuilder()
-                    .WithRequiredContent(text)
-                    .Build();
+                return new LocalMessage()
+                    .WithRequiredContent(text);
             }
             
-            return new LocalMessageBuilder()
+            return new LocalMessage()
                 .WithOptionalContent(text)
-                .WithEmbed(new LocalEmbedBuilder()
+                .WithEmbed(new LocalEmbed()
                     .WithOptionalAuthor(title, iconUrl)
                     .WithDescription(content)
                     .WithOptionalFooter(footer)
                     .WithThumbnailUrl(thumbnailUrl)
                     .WithImageUrl(imageUrl)
-                    .WithColor(new Color((int) row.Colour)))
-                .Build();
+                    .WithColor(new Color((int) row.Colour)));
         }
     }
 }

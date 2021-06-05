@@ -6,7 +6,6 @@ using Database.Data;
 using Disqord;
 using Disqord.Bot;
 using Disqord.Rest;
-using Disqord.Rest.Default;
 using Qmmands;
 using Utili.Extensions;
 using Utili.Implementations;
@@ -91,7 +90,7 @@ namespace Utili.Commands
                 }
             }
 
-            if(afterMessage is not null && beforeMessage is not null && afterMessage.CreatedAt >= beforeMessage.CreatedAt)
+            if(afterMessage is not null && beforeMessage is not null && afterMessage.CreatedAt() >= beforeMessage.CreatedAt())
             {
                 await Context.Channel.SendFailureAsync("Error", "There are no messages between the after and before messages");
                 return;
@@ -123,7 +122,7 @@ namespace Utili.Commands
             else if (beforeMessage is not null) messages = (await Context.Channel.FetchMessagesAsync((int)count,RetrievalDirection.Before, beforeMessage.Id)).ToList();
             else messages = (await Context.Channel.FetchMessagesAsync((int)count)).ToList();
 
-            messages = messages.OrderBy(x => x.CreatedAt.UtcDateTime).ToList();
+            messages = messages.OrderBy(x => x.CreatedAt().UtcDateTime).ToList();
             if (beforeMessage is not null)
             {
                 if (messages.Any(x => x.Id == beforeMessage.Id))
@@ -134,7 +133,7 @@ namespace Utili.Commands
             }
 
             int pinned = messages.RemoveAll(x => x is IUserMessage {IsPinned: true});
-            int outdated = messages.RemoveAll(x => x.CreatedAt.UtcDateTime < DateTime.UtcNow - TimeSpan.FromDays(13.9));
+            int outdated = messages.RemoveAll(x => x.CreatedAt().UtcDateTime < DateTime.UtcNow - TimeSpan.FromDays(13.9));
 
             if (pinned == 1) content += $"{pinned} message was not deleted because it is pinned\n";
             else if (pinned > 1) content += $"{pinned} messages were not deleted because they are pinned\n";
@@ -167,7 +166,7 @@ namespace Utili.Commands
                 return;
             }
             
-            await message.AddReactionAsync(emoji);
+            await message.AddReactionAsync(LocalEmoji.FromEmoji(emoji));
             await Context.Channel.SendSuccessAsync("Reaction added",
                 $"The {emoji} reaction was added to a message sent by {message.Author.Mention}");
         }
@@ -190,7 +189,7 @@ namespace Utili.Commands
                 return;
             }
 
-            await message.AddReactionAsync(emoji);
+            await message.AddReactionAsync(LocalEmoji.FromEmoji(emoji));
 
             await Context.Channel.SendSuccessAsync("Reaction added",
                 $"The {emoji} reaction was added to a message sent by {message.Author.Mention} in {channel.Mention}");
@@ -219,7 +218,7 @@ namespace Utili.Commands
             
             if(message.Reactions.Value.TryGetValue(emoji, out _))
             {
-                IReadOnlyList<IUser> reactedMembers = await message.FetchReactionsAsync(emoji, int.MaxValue);
+                IReadOnlyList<IUser> reactedMembers = await message.FetchReactionsAsync(LocalEmoji.FromEmoji(emoji), int.MaxValue);
                 Random random = new();
                 IUser member = reactedMembers[random.Next(0, reactedMembers.Count)];
 

@@ -5,9 +5,9 @@ namespace Utili.Utils
 {
     public static class MessageUtils
     {
-        public static LocalEmbedBuilder CreateEmbed(EmbedType type, string title, string content = null)
+        public static LocalEmbed CreateEmbed(EmbedType type, string title, string content = null)
         {
-            LocalEmbedBuilder embed = new();
+            LocalEmbed embed = new();
 
             switch (type)
             {

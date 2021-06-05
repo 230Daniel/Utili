@@ -26,7 +26,7 @@ namespace Utili.Extensions
                 "jpg"
             };
 
-            List<string> filenames = message.Attachments.Select(x => x.Filename).ToList();
+            List<string> filenames = message.Attachments.Select(x => x.FileName).ToList();
             filenames.AddRange(message.Content.Split(' ', '\n').Where(x => IsUrl(x) && x.Split("/").Last().Contains(".")));
             return filenames.Any(x => validAttachmentExtensions.Contains(x.Split(".").Last().ToLower())) || 
                    message.Embeds.Any(x => x.Image is not null);
@@ -42,7 +42,7 @@ namespace Utili.Extensions
                 "gif"
             };
 
-            List<string> filenames = message.Attachments.Select(x => x.Filename).ToList();
+            List<string> filenames = message.Attachments.Select(x => x.FileName).ToList();
             filenames.AddRange(message.Content.Split(' ', '\n').Where(x => IsUrl(x) && x.Split("/").Last().Contains(".")));
             if (filenames.Any(x => validAttachmentExtensions.Contains(x.Split(".").Last().ToLower())))
                 return true;
@@ -64,7 +64,7 @@ namespace Utili.Extensions
                 "flac"
             };
 
-            List<string> filenames = message.Attachments.Select(x => x.Filename).ToList();
+            List<string> filenames = message.Attachments.Select(x => x.FileName).ToList();
             filenames.AddRange(message.Content.Split(' ', '\n').Where(x => IsUrl(x) && x.Split("/").Last().Contains(".")));
             if (filenames.Any(x => validAttachmentExtensions.Contains(x.Split(".").Last().ToLower())))
                 return true;

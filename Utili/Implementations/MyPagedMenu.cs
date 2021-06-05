@@ -18,7 +18,7 @@ namespace Utili.Implementations
         {
             if (e.WasAdded)
             {
-                await e.Message.RemoveReactionAsync(e.Emoji, e.UserId);
+                await e.Message.RemoveReactionAsync(LocalEmoji.FromEmoji(e.Emoji), e.UserId);
                 return false;
             }
             return e.UserId == UserId;

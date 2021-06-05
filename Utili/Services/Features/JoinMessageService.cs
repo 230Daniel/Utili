@@ -69,21 +69,19 @@ namespace Utili.Services
                 string.IsNullOrWhiteSpace(thumbnailUrl) &&
                 string.IsNullOrWhiteSpace(imageUrl))
             {
-                return new LocalMessageBuilder()
-                    .WithRequiredContent(text)
-                    .Build();
+                return new LocalMessage()
+                    .WithRequiredContent(text);
             }
 
-            return new LocalMessageBuilder()
+            return new LocalMessage()
                 .WithOptionalContent(text)
-                .WithEmbed(new LocalEmbedBuilder()
+                .WithEmbed(new LocalEmbed()
                     .WithOptionalAuthor(title, iconUrl)
                     .WithDescription(content)
                     .WithOptionalFooter(footer)
                     .WithThumbnailUrl(thumbnailUrl)
                     .WithImageUrl(imageUrl)
-                    .WithColor(new Color((int) row.Colour)))
-                .Build();
+                    .WithColor(new Color((int) row.Colour)));
         }
     }
 }

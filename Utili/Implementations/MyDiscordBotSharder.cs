@@ -29,7 +29,7 @@ namespace Utili.Implementations
             return !excluded;
         }
 
-        protected override LocalMessageBuilder FormatFailureMessage(DiscordCommandContext context, FailedResult result)
+        protected override LocalMessage FormatFailureMessage(DiscordCommandContext context, FailedResult result)
         {
             static string FormatParameter(Parameter parameter)
             {
@@ -55,7 +55,7 @@ namespace Utili.Implementations
             if (reason == null)
                 return null;
 
-            LocalEmbedBuilder embed = new LocalEmbedBuilder()
+            LocalEmbed embed = new LocalEmbed()
                 .WithAuthor("Error", "https://i.imgur.com/Sg4663k.png")
                 .WithDescription(reason)
                 .WithColor(0xb54343);
@@ -82,9 +82,9 @@ namespace Utili.Implementations
                 embed.WithFooter($"{context.Command.FullAliases[0]} {string.Join(' ', context.Command.Parameters.Select(FormatParameter))}");
             }
 
-            return new LocalMessageBuilder()
+            return new LocalMessage()
                 .WithEmbed(embed)
-                .WithMentions(LocalMentionsBuilder.None);
+                .WithAllowedMentions(LocalAllowedMentions.None);
         }
         
         protected override ValueTask AddTypeParsersAsync(CancellationToken cancellationToken = default)

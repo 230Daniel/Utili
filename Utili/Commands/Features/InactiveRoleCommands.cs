@@ -9,7 +9,6 @@ using Disqord.Extensions.Interactivity;
 using Disqord.Extensions.Interactivity.Menus.Paged;
 using Disqord.Gateway;
 using Disqord.Rest;
-using Disqord.Rest.Default;
 using Qmmands;
 using Utili.Extensions;
 using Utili.Implementations;
@@ -48,7 +47,7 @@ namespace Utili.Commands
             List<Page> pages = new();
 
             string content = "";
-            LocalEmbedBuilder embed = MessageUtils.CreateEmbed(EmbedType.Info, "Inactive Users")
+            LocalEmbed embed = MessageUtils.CreateEmbed(EmbedType.Info, "Inactive Users")
                 .WithFooter($"Page 1 of {Math.Ceiling((decimal) inactiveMembers.Count / 9)}");
 
             for (int i = 0; i < inactiveMembers.Count; i++)
@@ -56,7 +55,7 @@ namespace Utili.Commands
                 content += $"{inactiveMembers[i].Mention}\n";
                 if ((i + 1) % 3 == 0)
                 {
-                    embed.AddField(new LocalEmbedFieldBuilder()
+                    embed.AddField(new LocalEmbedField()
                         .WithBlankName()
                         .WithValue(content)
                         .WithIsInline(true));
@@ -71,7 +70,7 @@ namespace Utili.Commands
             }
 
             if (!string.IsNullOrWhiteSpace(content))
-                embed.AddField(new LocalEmbedFieldBuilder()
+                embed.AddField(new LocalEmbedField()
                     .WithBlankName()
                     .WithValue(content)
                     .WithIsInline(true));
@@ -131,12 +130,12 @@ namespace Utili.Commands
             if (reaction is null || !reaction.Emoji.Equals(Constants.CheckmarkEmoji))
             {
                 await confirmMessage.ClearReactionsAsync();
-                await confirmMessage.ModifyAsync(x => x.Embed = MessageUtils.CreateEmbed(EmbedType.Failure, "Command Canceled", "No action was performed").Build());
+                await confirmMessage.ModifyAsync(x => x.Embed = MessageUtils.CreateEmbed(EmbedType.Failure, "Command Canceled", "No action was performed"));
             }
             else
             {
                 await confirmMessage.ClearReactionsAsync();
-                await confirmMessage.ModifyAsync(x => x.Embed = MessageUtils.CreateEmbed(EmbedType.Success, "Kicking inactive users", $"Under ideal conditions, this action will take {TimeSpan.FromSeconds(inactiveMembers.Count * 1.1).ToLongString()}").Build());
+                await confirmMessage.ModifyAsync(x => x.Embed = MessageUtils.CreateEmbed(EmbedType.Success, "Kicking inactive users", $"Under ideal conditions, this action will take {TimeSpan.FromSeconds(inactiveMembers.Count * 1.1).ToLongString()}"));
 
                 int failed = 0;
                 foreach(IMember member in inactiveMembers)
