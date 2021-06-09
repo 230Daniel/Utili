@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Database.Data;
 using Discord.Rest;
+using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using static UtiliBackend.DiscordModule;
@@ -12,6 +13,12 @@ namespace UtiliBackend.Controllers
 {
     public class Authentication : Controller
     {
+        IAntiforgery _antiForgery;
+        public Authentication(IAntiforgery antiForgery)
+        {
+            _antiForgery = antiForgery;
+        }
+        
         [HttpGet("auth")]
         public async Task<ActionResult> Auth()
         {
@@ -35,12 +42,21 @@ namespace UtiliBackend.Controllers
         }
 
         [HttpPost("auth/signout")]
+        [ValidateAntiForgeryToken]
         public async Task<ActionResult> SignOutDiscord()
         {
             await HttpContext.SignOutAsync();
             return new OkResult();
         }
 
+        [HttpGet("auth/antiforgery")]
+        [IgnoreAntiforgeryToken]
+        public async Task<ActionResult> AntiForgery()
+        {
+            AntiforgeryTokenSet tokens = _antiForgery.GetAndStoreTokens(HttpContext);
+            return new JsonResult(tokens.RequestToken);
+        }
+        
         public static async Task<AuthDetails> GetAuthDetailsAsync(HttpContext httpContext, ulong? guildId = null)
         {
             if (!httpContext.User.Identity.IsAuthenticated)
