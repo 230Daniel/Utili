@@ -29,7 +29,7 @@ namespace Utili.Commands
             LocalEmbed embed = Utils.MessageUtils.CreateEmbed(Utils.EmbedType.Info, user?.ToString(), content);
             embed.WithThumbnailUrl(user.GetAvatarUrl());
 
-            await Context.Author.SendMessageAsync(new LocalMessage().WithEmbed(embed));
+            await Context.Author.SendMessageAsync(new LocalMessage().AddEmbed(embed));
             await Context.Channel.SendSuccessAsync("User info sent",
                 $"Information about {user} was sent in a direct message");
         }
@@ -48,7 +48,7 @@ namespace Utili.Commands
             LocalEmbed embed = Utils.MessageUtils.CreateEmbed(Utils.EmbedType.Info, guild.ToString(), content);
             embed.WithThumbnailUrl(guild.GetIconUrl());
 
-            await Context.Author.SendMessageAsync(new LocalMessage().WithEmbed(embed));
+            await Context.Author.SendMessageAsync(new LocalMessage().AddEmbed(embed));
             await Context.Channel.SendSuccessAsync("Guild info sent",
                 $"Information about {guild} was sent in a direct message");
         }

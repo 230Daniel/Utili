@@ -11,7 +11,6 @@ using Disqord.Gateway;
 using Disqord.Rest;
 using Qmmands;
 using Utili.Extensions;
-using Utili.Implementations;
 using Utili.Utils;
 
 namespace Utili.Commands
@@ -63,7 +62,7 @@ namespace Utili.Commands
                 }
                 if ((i + 1) % 9 == 0)
                 {
-                    pages.Add(new Page(embed));
+                    pages.Add(new Page().AddEmbed(embed));
                     embed = MessageUtils.CreateEmbed(EmbedType.Info, "Inactive Members")
                         .WithFooter($"Page {Math.Ceiling((decimal) i / 9) + 1} of {Math.Ceiling((decimal) inactiveMembers.Count / 9)}");
                 }
@@ -76,13 +75,12 @@ namespace Utili.Commands
                     .WithIsInline(true));
 
             if (embed.Fields.Count > 0)
-                pages.Add(new Page(embed));
+                pages.Add(new Page().AddEmbed(embed));
             
 
-            IPageProvider pageProvider = new DefaultPageProvider(pages);
-            MyPagedMenu menu = new(Context.Author.Id, pageProvider);
-            InteractivityExtension ext = Context.Bot.GetRequiredExtension<InteractivityExtension>();
-            await ext.StartMenuAsync(Context.Channel.Id, menu);
+            IPageProvider pageProvider = new PageProvider(pages);
+            PagedView menu = new(pageProvider);
+            await View(menu);
         }
 
         [Command("Kick")]
@@ -130,12 +128,12 @@ namespace Utili.Commands
             if (reaction is null || !reaction.Emoji.Equals(Constants.CheckmarkEmoji))
             {
                 await confirmMessage.ClearReactionsAsync();
-                await confirmMessage.ModifyAsync(x => x.Embed = MessageUtils.CreateEmbed(EmbedType.Failure, "Command Canceled", "No action was performed"));
+                await confirmMessage.ModifyAsync(x => x.Embeds = new[]{MessageUtils.CreateEmbed(EmbedType.Failure, "Command Canceled", "No action was performed")});
             }
             else
             {
                 await confirmMessage.ClearReactionsAsync();
-                await confirmMessage.ModifyAsync(x => x.Embed = MessageUtils.CreateEmbed(EmbedType.Success, "Kicking inactive users", $"Under ideal conditions, this action will take {TimeSpan.FromSeconds(inactiveMembers.Count * 1.1).ToLongString()}"));
+                await confirmMessage.ModifyAsync(x => x.Embeds = new[]{MessageUtils.CreateEmbed(EmbedType.Success, "Kicking inactive users", $"Under ideal conditions, this action will take {TimeSpan.FromSeconds(inactiveMembers.Count * 1.1).ToLongString()}")});
 
                 int failed = 0;
                 foreach(IMember member in inactiveMembers)

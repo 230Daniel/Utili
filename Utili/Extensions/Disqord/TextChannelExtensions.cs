@@ -12,7 +12,7 @@ namespace Utili.Extensions
         public static async Task<IUserMessage> SendInfoAsync(this ITextChannel channel, string title, string content = null)
         {
             LocalMessage message = new LocalMessage()
-                .WithEmbed(MessageUtils.CreateEmbed(EmbedType.Info, title, content));
+                .AddEmbed(MessageUtils.CreateEmbed(EmbedType.Info, title, content));
 
             return await channel.SendMessageAsync(message);
         }
@@ -20,7 +20,7 @@ namespace Utili.Extensions
         public static async Task<IUserMessage> SendSuccessAsync(this ITextChannel channel, string title, string content = null)
         {
             LocalMessage message = new LocalMessage()
-                .WithEmbed(MessageUtils.CreateEmbed(EmbedType.Success, title, content));
+                .AddEmbed(MessageUtils.CreateEmbed(EmbedType.Success, title, content));
 
             return await channel.SendMessageAsync(message);
         }
@@ -28,7 +28,7 @@ namespace Utili.Extensions
         public static async Task<IUserMessage> SendFailureAsync(this ITextChannel channel, string title, string content = null, bool supportLink = true)
         {
             LocalMessage message = new LocalMessage()
-                .WithEmbed(MessageUtils.CreateEmbed(EmbedType.Failure, title, content));
+                .AddEmbed(MessageUtils.CreateEmbed(EmbedType.Failure, title, content));
 
             return await channel.SendMessageAsync(message);
         }
@@ -36,7 +36,7 @@ namespace Utili.Extensions
         public static async Task<IUserMessage> SendEmbedAsync(this ITextChannel channel, LocalEmbed embed)
         {
             LocalMessage message = new LocalMessage()
-                .WithEmbed(embed);
+                .AddEmbed(embed);
 
             return await channel.SendMessageAsync(message);
         }

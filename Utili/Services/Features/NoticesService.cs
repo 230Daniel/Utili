@@ -158,7 +158,7 @@ namespace Utili.Services
             
             return new LocalMessage()
                 .WithOptionalContent(text)
-                .WithEmbed(new LocalEmbed()
+                .AddEmbed(new LocalEmbed()
                     .WithOptionalAuthor(title, iconUrl)
                     .WithDescription(content)
                     .WithOptionalFooter(footer)

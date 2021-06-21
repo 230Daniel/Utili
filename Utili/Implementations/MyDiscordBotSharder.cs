@@ -83,7 +83,7 @@ namespace Utili.Implementations
             }
 
             return new LocalMessage()
-                .WithEmbed(embed)
+                .AddEmbed(embed)
                 .WithAllowedMentions(LocalAllowedMentions.None);
         }
         
