@@ -23,7 +23,9 @@ namespace Utili.Extensions
             List<string> validAttachmentExtensions = new()
             {
                 "png",
-                "jpg"
+                "jpg",
+                "jpeg",
+                "webp"
             };
 
             List<string> filenames = message.Attachments.Select(x => x.FileName).ToList();
@@ -39,7 +41,8 @@ namespace Utili.Extensions
                 "mp4",
                 "mov",
                 "wmv",
-                "gif"
+                "gif",
+                "webm"
             };
 
             List<string> filenames = message.Attachments.Select(x => x.FileName).ToList();
@@ -61,7 +64,8 @@ namespace Utili.Extensions
                 "mp3",
                 "m4a",
                 "wav",
-                "flac"
+                "flac",
+                "webm"
             };
 
             List<string> filenames = message.Attachments.Select(x => x.FileName).ToList();
