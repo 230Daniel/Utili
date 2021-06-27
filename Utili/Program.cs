@@ -63,7 +63,6 @@ namespace Utili
             services.AddPrefixProvider<PrefixProvider>();
 
             services.AddSingleton<HasteService>();
-            services.AddSingleton<RoleCacheService>();
             services.AddSingleton<CommunityService>();
             services.AddSingleton<GuildCountService>();
             

@@ -1,5 +1,8 @@
-﻿using System.Threading;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
+using Database.Data;
 using Disqord;
 using Disqord.Gateway;
 using Disqord.Hosting;
@@ -13,8 +16,8 @@ namespace Utili.Services
     {
         ILogger<BotService> _logger;
         IConfiguration _config;
-
-        RoleCacheService _roleCache;
+        DiscordClientBase _client;
+        
         CommunityService _community;
         GuildCountService _guildCount;
         
@@ -35,11 +38,10 @@ namespace Utili.Services
 
         public BotService(
             
-            ILogger<BotService> logger, 
-            DiscordClientBase client, 
+            ILogger<BotService> logger,
             IConfiguration config,
+            DiscordClientBase client, 
             
-            RoleCacheService roleCache,
             CommunityService community,
             GuildCountService guildCount,
             
@@ -62,8 +64,8 @@ namespace Utili.Services
         {
             _logger = logger;
             _config = config;
-
-            _roleCache = roleCache;
+            _client = client;
+            
             _community = community;
             _guildCount = guildCount;
             
@@ -91,23 +93,36 @@ namespace Utili.Services
 
             await Client.WaitUntilReadyAsync(cancellationToken);
 
-            _autopurge.Start();
+            /*_autopurge.Start();
             _inactiveRole.Start();
             _joinRoles.Start();
             _notices.Start();
             _voiceLink.Start();
             _voiceRoles.Start();
-            _guildCount.Start();
-            
+            _guildCount.Start();*/
+
             _logger.LogInformation("Services started");
+        }
+
+        private async Task DownloadMembersAsync(IEnumerable<Snowflake> shardGuildIds = null)
+        {
+            List<ulong> guildIds = new();
+            guildIds.AddRange((await RolePersist.GetRowsAsync()).Where(x => x.Enabled).Select(x => x.GuildId));
+            guildIds.AddRange((await RoleLinking.GetRowsAsync()).Select(x => x.GuildId));
+            if (shardGuildIds is not null) guildIds.RemoveAll(x => !shardGuildIds.Contains(x));
+            
+            foreach (ulong guildId in guildIds.Distinct())
+            {
+                CachedGuild guild = _client.GetGuild(guildId);
+                _ = _client.Chunker.ChunkAsync(guild);
+            }
         }
 
         protected override async ValueTask OnReady(ReadyEventArgs e)
         {
             _ = Task.Run(async () =>
             {
-                _ = _roleCache.Ready(e);
-                _ = _community.Ready(e);
+                await DownloadMembersAsync(e.GuildIds);
             });
         }
 
@@ -115,6 +130,7 @@ namespace Utili.Services
         {
             _ = Task.Run(async () =>
             {
+                return;
                 _ = _community.GuildAvailable(e);
             });
         }
@@ -123,6 +139,7 @@ namespace Utili.Services
         {
             _ = Task.Run(async () =>
             {
+                return;
                 await _messageLogs.MessageReceived(e);
                 if(await _messageFilter.MessageReceived(e)) return;
                 _ = _notices.MessageReceived(e);
@@ -138,6 +155,7 @@ namespace Utili.Services
         {
             _ = Task.Run(async () =>
             {
+                return;
                 _ = _messageLogs.MessageUpdated(e);
                 _ = _autopurge.MessageUpdated(e);
             });
@@ -147,6 +165,7 @@ namespace Utili.Services
         {
             _ = Task.Run(async () =>
             {
+                return;
                 _ = _messageLogs.MessageDeleted(e);
                 _ = _autopurge.MessageDeleted(e);
             });
@@ -156,6 +175,7 @@ namespace Utili.Services
         {
             _ = Task.Run(async () =>
             {
+                return;
                 _ = _messageLogs.MessagesDeleted(e);
                 _ = _autopurge.MessagesDeleted(e);
             });
@@ -165,6 +185,7 @@ namespace Utili.Services
         {
             _ = Task.Run(async () =>
             {
+                return;
                 _ = _reputation.ReactionAdded(e);
             });
         }
@@ -173,6 +194,7 @@ namespace Utili.Services
         {
             _ = Task.Run(async () =>
             {
+                return;
                 _ = _reputation.ReactionRemoved(e);
             });
         }
@@ -181,6 +203,7 @@ namespace Utili.Services
         {
             _ = Task.Run(async () =>
             {
+                return;
                 _ = _voiceLink.VoiceStateUpdated(e);
                 _ = _voiceRoles.VoiceStateUpdated(e);
                 _ = _inactiveRole.VoiceStateUpdated(e);
@@ -191,6 +214,7 @@ namespace Utili.Services
         {
             _ = Task.Run(async () =>
             {
+                return;
                 _ = _joinMessage.MemberJoined(e);
                 await _joinRoles.MemberJoined(e);
                 await Task.Delay(1000); // Delay to ensure that member is updated in cache before getting the member's roles in the next handler
@@ -202,18 +226,17 @@ namespace Utili.Services
         {
             _ = Task.Run(async () =>
             {
-                await _joinRoles.MemberUpdated(e);
-                await _roleLinking.MemberUpdated(e);
-                _ = _roleCache.MemberUpdated(e);
+                //await _joinRoles.MemberUpdated(e);
+                //await _roleLinking.MemberUpdated(e);
             });
         }
 
         protected override async ValueTask OnMemberLeft(MemberLeftEventArgs e)
         {
+            CachedMember member = _client.GetMember(e.GuildId, e.User.Id);
             _ = Task.Run(async () =>
             {
-                await _rolePersist.MemberLeft(e);
-                _ = _roleCache.MemberLeft(e);
+                await _rolePersist.MemberLeft(e, member);
             });
         }
     }

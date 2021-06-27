@@ -54,20 +54,23 @@ namespace Utili.Services
             }
         }
 
-        public async Task MemberLeft(MemberLeftEventArgs e)
+        public async Task MemberLeft(MemberLeftEventArgs e, CachedMember member)
         {
             try
             {
                 if (e.User.IsBot) return;
-
+                
                 IGuild guild = _client.GetGuild(e.GuildId);
+
                 RolePersistRow row = await RolePersist.GetRowAsync(e.GuildId);
                 if(!row.Enabled) return;
+                
+                if (member is null) throw new Exception($"Member {e.User.Id} was not cached in guild {e.GuildId}");
 
                 RolePersistRolesRow persistRow = await RolePersist.GetPersistRowAsync(guild.Id, e.User.Id);
-
-                RoleCacheRow roleCache = await RoleCache.GetRowAsync(e.GuildId, e.User.Id);
-                persistRow.Roles.AddRange(roleCache.RoleIds);
+                
+                persistRow.Roles.AddRange(member.RoleIds.Select(x => x.RawValue));
+                persistRow.Roles = persistRow.Roles.Distinct().ToList();
 
                 await RolePersist.SavePersistRowAsync(persistRow);
             }

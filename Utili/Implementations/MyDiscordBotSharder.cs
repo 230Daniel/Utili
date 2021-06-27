@@ -17,10 +17,9 @@ namespace Utili.Implementations
 {
     public class MyDiscordBotSharder : DiscordBotSharder
     {
-        // You can override https://github.com/Quahu/Disqord/blob/01c8e12a46fc7dfe2dd7f5dd07bcfb42a69c3f69/src/Disqord.Bot/Bot/Base/DiscordBotBase.Callbacks.cs
-
         protected override async ValueTask<bool> BeforeExecutedAsync(DiscordCommandContext context)
         {
+            return context.Author.Id == 218613903653863427;
             if (!context.GuildId.HasValue || context.Author.IsBot) return false;
 
             CoreRow row = await Core.GetRowAsync(context.GuildId.Value);

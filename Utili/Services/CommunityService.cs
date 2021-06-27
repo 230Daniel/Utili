@@ -34,21 +34,6 @@ namespace Utili
             _communityGuildId = _config.GetSection("Community").GetValue<ulong>("GuildId");
         }
 
-        public async Task Ready(ReadyEventArgs e)
-        {
-            try
-            {
-                if (e.GuildIds.Contains(_communityGuildId))
-                {
-                    _logger.LogInformation($"Community guild is on shard {e.ShardId.Id}");
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Exception thrown on ready");
-            }
-        }
-
         public async Task GuildAvailable(GuildAvailableEventArgs e)
         {
             try
