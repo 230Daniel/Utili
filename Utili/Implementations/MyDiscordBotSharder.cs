@@ -19,7 +19,6 @@ namespace Utili.Implementations
     {
         protected override async ValueTask<bool> BeforeExecutedAsync(DiscordCommandContext context)
         {
-            return context.Author.Id == 218613903653863427;
             if (!context.GuildId.HasValue || context.Author.IsBot) return false;
 
             var row = await Core.GetRowAsync(context.GuildId.Value);

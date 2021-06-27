@@ -1,8 +1,5 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
-using Database.Data;
 using Disqord;
 using Disqord.Gateway;
 using Disqord.Hosting;
@@ -16,7 +13,6 @@ namespace Utili.Services
     {
         private readonly ILogger<BotService> _logger;
         private readonly IConfiguration _config;
-        private readonly DiscordClientBase _client;
 
         private readonly CommunityService _community;
         private readonly GuildCountService _guildCount;
@@ -67,7 +63,6 @@ namespace Utili.Services
         {
             _logger = logger;
             _config = config;
-            _client = client;
 
             _community = community;
             _guildCount = guildCount;
@@ -98,7 +93,6 @@ namespace Utili.Services
             await Client.WaitUntilReadyAsync(cancellationToken);
 
             _memberCache.Start();
-            return;
             _autopurge.Start();
             _inactiveRole.Start();
             _joinRoles.Start();
@@ -112,18 +106,16 @@ namespace Utili.Services
 
         protected override async ValueTask OnReady(ReadyEventArgs e)
         {
-            await _memberCache.Ready(e);
+            _ = _memberCache.Ready(e);
         }
 
         protected override async ValueTask OnGuildAvailable(GuildAvailableEventArgs e)
         {
-            return;
             _ = _community.GuildAvailable(e);
         }
 
         protected override async ValueTask OnMessageReceived(MessageReceivedEventArgs e)
         {
-            return;
             await _messageLogs.MessageReceived(e);
             if(await _messageFilter.MessageReceived(e)) return;
             _ = _notices.MessageReceived(e);
@@ -135,40 +127,34 @@ namespace Utili.Services
 
         protected override async ValueTask OnMessageUpdated(MessageUpdatedEventArgs e)
         {
-            return;
             _ = _messageLogs.MessageUpdated(e);
             _ = _autopurge.MessageUpdated(e);
         }
 
         protected override async ValueTask OnMessageDeleted(MessageDeletedEventArgs e)
         {
-            return;
             _ = _messageLogs.MessageDeleted(e);
             _ = _autopurge.MessageDeleted(e);
         }
     
         protected override async ValueTask OnMessagesDeleted(MessagesDeletedEventArgs e)
         {
-            return;
             _ = _messageLogs.MessagesDeleted(e);
             _ = _autopurge.MessagesDeleted(e);
         }
 
         protected override async ValueTask OnReactionAdded(ReactionAddedEventArgs e)
         {
-            return;
             _ = _reputation.ReactionAdded(e);
         }
         
         protected override async ValueTask OnReactionRemoved(ReactionRemovedEventArgs e)
         {
-            return;
             _ = _reputation.ReactionRemoved(e);
         }
 
         protected override async ValueTask OnVoiceStateUpdated(VoiceStateUpdatedEventArgs e)
         {
-            return;
             _ = _voiceLink.VoiceStateUpdated(e);
             _ = _voiceRoles.VoiceStateUpdated(e);
             _ = _inactiveRole.VoiceStateUpdated(e);
@@ -176,16 +162,13 @@ namespace Utili.Services
 
         protected override async ValueTask OnMemberJoined(MemberJoinedEventArgs e)
         {
-            return;
             _ = _joinMessage.MemberJoined(e);
-            await _joinRoles.MemberJoined(e);
-            await Task.Delay(1000); // Delay to ensure that member is updated in cache before getting the member's roles in the next handler
             await _rolePersist.MemberJoined(e);
+            await _joinRoles.MemberJoined(e);
         }
 
         protected override async ValueTask OnMemberUpdated(MemberUpdatedEventArgs e)
         {
-            return;
             await _joinRoles.MemberUpdated(e);
             await _roleLinking.MemberUpdated(e);
         }
