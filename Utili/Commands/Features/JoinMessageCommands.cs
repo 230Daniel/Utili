@@ -13,8 +13,8 @@ namespace Utili.Commands
         [Command("Preview")]
         public async Task Preview()
         {
-            JoinMessageRow row = await JoinMessage.GetRowAsync(Context.GuildId);
-            LocalMessage message = JoinMessageService.GetJoinMessage(row, Context.Message.Author as IMember);
+            var row = await JoinMessage.GetRowAsync(Context.GuildId);
+            var message = JoinMessageService.GetJoinMessage(row, Context.Message.Author as IMember);
             await Response(message);
         }
     }

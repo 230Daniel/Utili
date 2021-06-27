@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using MySql.Data.MySqlClient;
 
 namespace Database.Data
 {
@@ -9,7 +8,7 @@ namespace Database.Data
     {
         public static async Task<List<RolePersistRow>> GetRowsAsync(ulong? guildId = null, bool ignoreCache = false)
         {
-            List<RolePersistRow> matchedRows = new();
+            var matchedRows = new List<RolePersistRow>();
 
             if (Cache.Initialised && !ignoreCache)
             {
@@ -19,8 +18,8 @@ namespace Database.Data
             }
             else
             {
-                string command = "SELECT * FROM RolePersist WHERE TRUE";
-                List<(string, object)> values = new();
+                var command = "SELECT * FROM RolePersist WHERE TRUE";
+                var values = new List<(string, object)>();
 
                 if (guildId.HasValue)
                 {
@@ -28,7 +27,7 @@ namespace Database.Data
                     values.Add(("GuildId", guildId.Value));
                 }
 
-                MySqlDataReader reader = await Sql.ExecuteReaderAsync(command, values.ToArray());
+                var reader = await Sql.ExecuteReaderAsync(command, values.ToArray());
 
                 while (reader.Read())
                 {
@@ -46,7 +45,7 @@ namespace Database.Data
 
         public static async Task<RolePersistRow> GetRowAsync(ulong guildId)
         {
-            List<RolePersistRow> rows = await GetRowsAsync(guildId);
+            var rows = await GetRowsAsync(guildId);
             return rows.Count > 0 ? rows.First() : new RolePersistRow(guildId);
         }
 
@@ -86,10 +85,10 @@ namespace Database.Data
 
         public static async Task<List<RolePersistRolesRow>> GetPersistRowsAsync(ulong? guildId = null, ulong? userId = null)
         {
-            List<RolePersistRolesRow> matchedRows = new();
+            var matchedRows = new List<RolePersistRolesRow>();
 
-            string command = "SELECT * FROM RolePersistRoles WHERE TRUE";
-            List<(string, object)> values = new();
+            var command = "SELECT * FROM RolePersistRoles WHERE TRUE";
+            var values = new List<(string, object)>();
 
             if (guildId.HasValue)
             {
@@ -103,7 +102,7 @@ namespace Database.Data
                 values.Add(("UserId", userId.Value));
             }
 
-            MySqlDataReader reader = await Sql.ExecuteReaderAsync(command, values.ToArray());
+            var reader = await Sql.ExecuteReaderAsync(command, values.ToArray());
 
             while (reader.Read())
             {
@@ -120,7 +119,7 @@ namespace Database.Data
 
         public static async Task<RolePersistRolesRow> GetPersistRowAsync(ulong guildId, ulong userId)
         {
-            List<RolePersistRolesRow> rows = await GetPersistRowsAsync(guildId, userId);
+            var rows = await GetPersistRowsAsync(guildId, userId);
             return rows.Count > 0 ? rows.First() : new RolePersistRolesRow(guildId, userId);
         }
 
@@ -177,7 +176,7 @@ namespace Database.Data
 
         public static RolePersistRow FromDatabase(ulong guildId, bool enabled, string excludedRoles)
         {
-            RolePersistRow row = new()
+            var row = new RolePersistRow
             {
                 New = false,
                 GuildId = guildId,
@@ -188,9 +187,9 @@ namespace Database.Data
 
             if (!string.IsNullOrEmpty(excludedRoles))
             {
-                foreach (string excludedRole in excludedRoles.Split(","))
+                foreach (var excludedRole in excludedRoles.Split(","))
                 {
-                    if (ulong.TryParse(excludedRole, out ulong roleId))
+                    if (ulong.TryParse(excludedRole, out var roleId))
                     {
                         row.ExcludedRoles.Add(roleId);
                     }
@@ -202,11 +201,11 @@ namespace Database.Data
 
         public string GetExcludedRolesString()
         {
-            string excludedRolesString = "";
+            var excludedRolesString = "";
 
-            for (int i = 0; i < ExcludedRoles.Count; i++)
+            for (var i = 0; i < ExcludedRoles.Count; i++)
             {
-                ulong excludedRole = ExcludedRoles[i];
+                var excludedRole = ExcludedRoles[i];
                 excludedRolesString += excludedRole.ToString();
                 if (i != ExcludedRoles.Count - 1)
                 {
@@ -259,9 +258,9 @@ namespace Database.Data
             
             if (!string.IsNullOrEmpty(roles))
             {
-                foreach (string role in roles.Split(","))
+                foreach (var role in roles.Split(","))
                 {
-                    if (ulong.TryParse(role, out ulong channelId))
+                    if (ulong.TryParse(role, out var channelId))
                     {
                         row.Roles.Add(channelId);
                     }
@@ -273,11 +272,11 @@ namespace Database.Data
 
         public string GetRolesString()
         {
-            string rolesString = "";
+            var rolesString = "";
 
-            for (int i = 0; i < Roles.Count; i++)
+            for (var i = 0; i < Roles.Count; i++)
             {
-                ulong role = Roles[i];
+                var role = Roles[i];
                 rolesString += role.ToString();
                 if (i != Roles.Count - 1)
                 {

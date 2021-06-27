@@ -7,7 +7,7 @@ namespace Utili.Utils
     {
         public static LocalEmbed CreateEmbed(EmbedType type, string title, string content = null)
         {
-            LocalEmbed embed = new();
+            var embed = new LocalEmbed();
 
             switch (type)
             {

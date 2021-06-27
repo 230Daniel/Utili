@@ -16,7 +16,7 @@ namespace Database
 
         public static void SetCredentials(string server, int port, string database, string username, string password)
         {
-            MySqlConnectionStringBuilder builder = new()
+            var builder = new MySqlConnectionStringBuilder
             {
                 Server = server,
                 Port = (uint) port,
@@ -31,7 +31,7 @@ namespace Database
         public static Task<int> ExecuteAsync(string command, params (string, object)[] parameters)
         {
             Interlocked.Increment(ref Queries);
-            MySqlParameter[] commandParameters = parameters.Select(x => new MySqlParameter(x.Item1, x.Item2)).ToArray();
+            var commandParameters = parameters.Select(x => new MySqlParameter(x.Item1, x.Item2)).ToArray();
             commandParameters = PrepareParameters(commandParameters);
             return MySqlHelper.ExecuteNonQueryAsync(ConnectionString, command, commandParameters);
         }
@@ -39,24 +39,24 @@ namespace Database
         public static Task<MySqlDataReader> ExecuteReaderAsync(string command, params (string, object)[] parameters)
         {
             Interlocked.Increment(ref Queries);
-            MySqlParameter[] commandParameters = parameters.Select(x => new MySqlParameter(x.Item1, x.Item2)).ToArray();
+            var commandParameters = parameters.Select(x => new MySqlParameter(x.Item1, x.Item2)).ToArray();
             commandParameters = PrepareParameters(commandParameters);
             return MySqlHelper.ExecuteReaderAsync(ConnectionString, command, commandParameters);
         }
 
-        static MySqlParameter[] PrepareParameters(IEnumerable<MySqlParameter> parameters)
+        private static MySqlParameter[] PrepareParameters(IEnumerable<MySqlParameter> parameters)
         {
             return parameters.Select(parameter =>
             {
-                object value = parameter.Value;
+                var value = parameter.Value;
                 if(value is null) return new MySqlParameter(parameter.ParameterName, null);
 
-                Type type = value.GetType();
+                var type = value.GetType();
                 object preparedValue = value.ToString();
 
                 if (type == typeof(DateTime))
                 {
-                    DateTime time = (DateTime) value;
+                    var time = (DateTime) value;
                     preparedValue = $"{time.Year:0000}-{time.Month:00}-{time.Day:00} {time.Hour:00}:{time.Minute:00}:{time.Second:00}";
                 }
                 if (value is bool boolean)
@@ -78,7 +78,7 @@ namespace Database
             MySqlConnection connection = new(ConnectionString);
             await connection.OpenAsync();
 
-            Stopwatch sw = Stopwatch.StartNew();
+            var sw = Stopwatch.StartNew();
             connection.Ping();
             sw.Stop();
 
@@ -88,8 +88,8 @@ namespace Database
 
         public static string ToSqlObjectArray(ulong[] values)
         {
-            string sqlArray = "(";
-            for (int i = 0; i < values.Length; i++)
+            var sqlArray = "(";
+            for (var i = 0; i < values.Length; i++)
             {
                 sqlArray += $"{values[i]}";
                 if (i != values.Length - 1) sqlArray += ",";

@@ -34,17 +34,17 @@ namespace Utili.Commands
                 return;
             }
 
-            string[] args = argsString.Split(" ");
+            var args = argsString.Split(" ");
 
             uint count = 0;
-            bool countSet = false;
+            var countSet = false;
 
             IMessage afterMessage = null;
             IMessage beforeMessage = null;
 
-            for (int i = 0; i < args.Length; i++)
+            for (var i = 0; i < args.Length; i++)
             {
-                if (uint.TryParse(args[i], out uint newCount))
+                if (uint.TryParse(args[i], out var newCount))
                 {
                     count = newCount;
                     countSet = true;
@@ -57,7 +57,7 @@ namespace Utili.Commands
                             try
                             {
                                 i++;
-                                ulong messageId = ulong.Parse(args[i]);
+                                var messageId = ulong.Parse(args[i]);
                                 beforeMessage = await Context.Channel.FetchMessageAsync(messageId);
                                 if (beforeMessage is null) throw new Exception();
                                 break;
@@ -72,7 +72,7 @@ namespace Utili.Commands
                             try
                             {
                                 i++;
-                                ulong messageId = ulong.Parse(args[i]);
+                                var messageId = ulong.Parse(args[i]);
                                 afterMessage = await Context.Channel.FetchMessageAsync(messageId);
                                 if (afterMessage is null) throw new Exception();
                                 break;
@@ -97,9 +97,9 @@ namespace Utili.Commands
             }
 
             await Context.Message.DeleteAsync(new DefaultRestRequestOptions {Reason = $"Prune (manual by {Context.Message.Author} {Context.Message.Author.Id})"});
-            Task delay = Task.Delay(800);
+            var delay = Task.Delay(800);
 
-            string content = "";
+            var content = "";
 
             if(!countSet) count = 100;
 
@@ -127,13 +127,13 @@ namespace Utili.Commands
             {
                 if (messages.Any(x => x.Id == beforeMessage.Id))
                 {
-                    int index = messages.FindIndex(x => x.Id == beforeMessage.Id);
+                    var index = messages.FindIndex(x => x.Id == beforeMessage.Id);
                     messages.RemoveRange(index, messages.Count - index);
                 }
             }
 
-            int pinned = messages.RemoveAll(x => x is IUserMessage {IsPinned: true});
-            int outdated = messages.RemoveAll(x => x.CreatedAt().UtcDateTime < DateTime.UtcNow - TimeSpan.FromDays(13.9));
+            var pinned = messages.RemoveAll(x => x is IUserMessage {IsPinned: true});
+            var outdated = messages.RemoveAll(x => x.CreatedAt().UtcDateTime < DateTime.UtcNow - TimeSpan.FromDays(13.9));
 
             if (pinned == 1) content += $"{pinned} message was not deleted because it is pinned\n";
             else if (pinned > 1) content += $"{pinned} messages were not deleted because they are pinned\n";
@@ -142,10 +142,10 @@ namespace Utili.Commands
 
             await Context.Channel.DeleteMessagesAsync(messages.Select(x => x.Id), new DefaultRestRequestOptions {Reason = $"Prune (manual by {Context.Message.Author} {Context.Message.Author.Id})"});
 
-            string title = $"{messages.Count} messages deleted";
+            var title = $"{messages.Count} messages deleted";
             if (messages.Count == 1) title = $"{messages.Count} message deleted";
 
-            IUserMessage sentMessage = await Context.Channel.SendSuccessAsync(title, content);
+            var sentMessage = await Context.Channel.SendSuccessAsync(title, content);
             await Task.Delay(5000);
             await sentMessage.DeleteAsync();
         }
@@ -158,7 +158,7 @@ namespace Utili.Commands
             ulong messageId,
             IEmoji emoji)
         {
-            IMessage message = await Context.Channel.FetchMessageAsync(messageId);
+            var message = await Context.Channel.FetchMessageAsync(messageId);
 
             if (message is null)
             {
@@ -180,7 +180,7 @@ namespace Utili.Commands
             ulong messageId, 
             IEmoji emoji)
         {
-            IMessage message = await channel.FetchMessageAsync(messageId);
+            var message = await channel.FetchMessageAsync(messageId);
 
             if (message is null)
             {
@@ -207,7 +207,7 @@ namespace Utili.Commands
         [DefaultCooldown(2, 5)]
         public async Task Random(ITextChannel channel, ulong messageId, IEmoji emoji)
         {
-            IMessage message = await channel.FetchMessageAsync(messageId);
+            var message = await channel.FetchMessageAsync(messageId);
             
             if (message is null || !message.Reactions.HasValue)
             {
@@ -218,9 +218,9 @@ namespace Utili.Commands
             
             if(message.Reactions.Value.TryGetValue(emoji, out _))
             {
-                IReadOnlyList<IUser> reactedMembers = await message.FetchReactionsAsync(LocalEmoji.FromEmoji(emoji), int.MaxValue);
-                Random random = new();
-                IUser member = reactedMembers[random.Next(0, reactedMembers.Count)];
+                var reactedMembers = await message.FetchReactionsAsync(LocalEmoji.FromEmoji(emoji), int.MaxValue);
+                var random = new Random();
+                var member = reactedMembers[random.Next(0, reactedMembers.Count)];
 
                 await Context.Channel.SendInfoAsync("Random member",
                     $"{member.Mention}\n" +
@@ -251,14 +251,14 @@ namespace Utili.Commands
         [Command("B64Encode")]
         public async Task B64Encode([Remainder] string input)
         {
-            string output = input.ToEncoded();
+            var output = input.ToEncoded();
             await Context.Channel.SendSuccessAsync("Encoded string to base 64", output);
         }
 
         [Command("B64Decode")]
         public async Task B64Decode([Remainder] string input)
         {
-            string output = input.ToDecoded();
+            var output = input.ToDecoded();
 
             if (output == input)
             {

@@ -2,7 +2,7 @@
 
 namespace Utili.Extensions
 {
-    static class DateTimeExtensions
+    internal static class DateTimeExtensions
     {
         public static string ToUniversalFormat(this DateTime dt)
         {

@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using MySql.Data.MySqlClient;
 
 namespace Database.Data
 {
@@ -9,7 +8,7 @@ namespace Database.Data
     {
         public static async Task<List<JoinMessageRow>> GetRowsAsync(ulong? guildId = null, bool ignoreCache = false)
         {
-            List<JoinMessageRow> matchedRows = new();
+            var matchedRows = new List<JoinMessageRow>();
 
             if (Cache.Initialised && !ignoreCache)
             {
@@ -19,8 +18,8 @@ namespace Database.Data
             }
             else
             {
-                string command = "SELECT * FROM JoinMessage WHERE TRUE";
-                List<(string, object)> values = new();
+                var command = "SELECT * FROM JoinMessage WHERE TRUE";
+                var values = new List<(string, object)>();
 
                 if (guildId.HasValue)
                 {
@@ -28,7 +27,7 @@ namespace Database.Data
                     values.Add(("GuildId", guildId.Value));
                 }
 
-                MySqlDataReader reader = await Sql.ExecuteReaderAsync(command, values.ToArray());
+                var reader = await Sql.ExecuteReaderAsync(command, values.ToArray());
 
                 while (reader.Read())
                 {
@@ -55,7 +54,7 @@ namespace Database.Data
 
         public static async Task<JoinMessageRow> GetRowAsync(ulong guildId)
         {
-            List<JoinMessageRow> rows = await GetRowsAsync(guildId);
+            var rows = await GetRowsAsync(guildId);
             return rows.Count > 0 ? rows.First() : new JoinMessageRow(guildId);
         }
 

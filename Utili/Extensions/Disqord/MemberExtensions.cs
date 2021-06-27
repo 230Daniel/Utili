@@ -13,8 +13,8 @@ namespace Utili.Extensions
 
         public static bool CanBeManaged(this IMember member)
         {
-            CachedGuild guild = member.GetGuild();
-            IMember bot = guild.GetCurrentMember();
+            var guild = member.GetGuild();
+            var bot = guild.GetCurrentMember();
 
             return guild.OwnerId != member.Id && 
                    member.GetHighestRolePosition() < bot.GetHighestRolePosition();

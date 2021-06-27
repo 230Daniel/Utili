@@ -14,27 +14,27 @@ namespace Utili.Services
 {
     public class BotService : DiscordClientService
     {
-        ILogger<BotService> _logger;
-        IConfiguration _config;
-        DiscordClientBase _client;
-        
-        CommunityService _community;
-        GuildCountService _guildCount;
-        
-        AutopurgeService _autopurge;
-        ChannelMirroringService _channelMirroring;
-        InactiveRoleService _inactiveRole;
-        JoinMessageService _joinMessage;
-        JoinRolesService _joinRoles;
-        MessageFilterService _messageFilter;
-        MessageLogsService _messageLogs;
-        NoticesService _notices;
-        ReputationService _reputation;
-        RoleLinkingService _roleLinking;
-        RolePersistService _rolePersist;
-        VoiceLinkService _voiceLink;
-        VoiceRolesService _voiceRoles;
-        VoteChannelsService _voteChannels;
+        private readonly ILogger<BotService> _logger;
+        private readonly IConfiguration _config;
+        private readonly DiscordClientBase _client;
+
+        private readonly CommunityService _community;
+        private readonly GuildCountService _guildCount;
+
+        private readonly AutopurgeService _autopurge;
+        private readonly ChannelMirroringService _channelMirroring;
+        private readonly InactiveRoleService _inactiveRole;
+        private readonly JoinMessageService _joinMessage;
+        private readonly JoinRolesService _joinRoles;
+        private readonly MessageFilterService _messageFilter;
+        private readonly MessageLogsService _messageLogs;
+        private readonly NoticesService _notices;
+        private readonly ReputationService _reputation;
+        private readonly RoleLinkingService _roleLinking;
+        private readonly RolePersistService _rolePersist;
+        private readonly VoiceLinkService _voiceLink;
+        private readonly VoiceRolesService _voiceRoles;
+        private readonly VoteChannelsService _voteChannels;
 
         public BotService(
             
@@ -93,27 +93,28 @@ namespace Utili.Services
 
             await Client.WaitUntilReadyAsync(cancellationToken);
 
-            /*_autopurge.Start();
+            return;
+            _autopurge.Start();
             _inactiveRole.Start();
             _joinRoles.Start();
             _notices.Start();
             _voiceLink.Start();
             _voiceRoles.Start();
-            _guildCount.Start();*/
+            _guildCount.Start();
 
             _logger.LogInformation("Services started");
         }
 
         private async Task DownloadMembersAsync(IEnumerable<Snowflake> shardGuildIds = null)
         {
-            List<ulong> guildIds = new();
+            var guildIds = new List<ulong>();
             guildIds.AddRange((await RolePersist.GetRowsAsync()).Where(x => x.Enabled).Select(x => x.GuildId));
             guildIds.AddRange((await RoleLinking.GetRowsAsync()).Select(x => x.GuildId));
             if (shardGuildIds is not null) guildIds.RemoveAll(x => !shardGuildIds.Contains(x));
             
-            foreach (ulong guildId in guildIds.Distinct())
+            foreach (var guildId in guildIds.Distinct())
             {
-                CachedGuild guild = _client.GetGuild(guildId);
+                var guild = _client.GetGuild(guildId);
                 _ = _client.Chunker.ChunkAsync(guild);
             }
         }
@@ -226,14 +227,15 @@ namespace Utili.Services
         {
             _ = Task.Run(async () =>
             {
-                //await _joinRoles.MemberUpdated(e);
-                //await _roleLinking.MemberUpdated(e);
+                return;
+                await _joinRoles.MemberUpdated(e);
+                await _roleLinking.MemberUpdated(e);
             });
         }
 
         protected override async ValueTask OnMemberLeft(MemberLeftEventArgs e)
         {
-            CachedMember member = _client.GetMember(e.GuildId, e.User.Id);
+            var member = _client.GetMember(e.GuildId, e.User.Id);
             _ = Task.Run(async () =>
             {
                 await _rolePersist.MemberLeft(e, member);

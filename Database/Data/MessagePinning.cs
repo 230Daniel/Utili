@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using MySql.Data.MySqlClient;
 
 namespace Database.Data
 {
@@ -9,7 +8,7 @@ namespace Database.Data
     {
         public static async Task<List<MessagePinningRow>> GetRowsAsync(ulong? guildId = null, bool ignoreCache = false)
         {
-            List<MessagePinningRow> matchedRows = new();
+            var matchedRows = new List<MessagePinningRow>();
 
             if (Cache.Initialised && !ignoreCache)
             {
@@ -19,8 +18,8 @@ namespace Database.Data
             }
             else
             {
-                string command = "SELECT * FROM MessagePinning WHERE TRUE";
-                List<(string, object)> values = new();
+                var command = "SELECT * FROM MessagePinning WHERE TRUE";
+                var values = new List<(string, object)>();
 
                 if (guildId.HasValue)
                 {
@@ -28,7 +27,7 @@ namespace Database.Data
                     values.Add(("GuildId", guildId.Value));
                 }
 
-                MySqlDataReader reader = await Sql.ExecuteReaderAsync(command, values.ToArray());
+                var reader = await Sql.ExecuteReaderAsync(command, values.ToArray());
 
                 while (reader.Read())
                 {
@@ -47,7 +46,7 @@ namespace Database.Data
 
         public static async Task<MessagePinningRow> GetRowAsync(ulong guildId)
         {
-            List<MessagePinningRow> rows = await GetRowsAsync(guildId);
+            var rows = await GetRowsAsync(guildId);
             return rows.Count > 0 ? rows.First() : new MessagePinningRow(guildId);
         }
 
@@ -110,7 +109,7 @@ namespace Database.Data
 
         public static MessagePinningRow FromDatabase(ulong guildId, ulong pinChannelId, string webhookIds, bool pin)
         {
-            MessagePinningRow row = new()
+            var row = new MessagePinningRow
             {
                 New = false,
                 GuildId = guildId,
@@ -122,10 +121,10 @@ namespace Database.Data
             webhookIds = EString.FromEncoded(webhookIds).Value;
             if (!string.IsNullOrEmpty(webhookIds))
             {
-                foreach (string emoteString in webhookIds.Split(","))
+                foreach (var emoteString in webhookIds.Split(","))
                 {
-                    ulong channelId = ulong.Parse(emoteString.Split("///").First());
-                    ulong webhookId = ulong.Parse(emoteString.Split("///").Last());
+                    var channelId = ulong.Parse(emoteString.Split("///").First());
+                    var webhookId = ulong.Parse(emoteString.Split("///").Last());
                     row.WebhookIds.Add((channelId, webhookId));
                 }
             }
@@ -135,9 +134,9 @@ namespace Database.Data
 
         public string GetWebhookIdsString()
         {
-            string idsString = "";
+            var idsString = "";
 
-            for (int i = 0; i < WebhookIds.Count; i++)
+            for (var i = 0; i < WebhookIds.Count; i++)
             {
                 idsString += $"{WebhookIds[i].Item1}///{WebhookIds[i].Item2}";
                 if (i != WebhookIds.Count - 1)

@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using MySql.Data.MySqlClient;
 
 namespace Database.Data
 {
@@ -9,7 +8,7 @@ namespace Database.Data
     {
         public static async Task<List<ReputationRow>> GetRowsAsync(ulong? guildId = null, bool ignoreCache = false)
         {
-            List<ReputationRow> matchedRows = new();
+            var matchedRows = new List<ReputationRow>();
 
             if (Cache.Initialised && !ignoreCache)
             {
@@ -19,9 +18,9 @@ namespace Database.Data
             }
             else
             {
-                string command = "SELECT * FROM Reputation WHERE TRUE";
+                var command = "SELECT * FROM Reputation WHERE TRUE";
                 
-                List<(string, object)> values = new();
+                var values = new List<(string, object)>();
 
                 if (guildId.HasValue)
                 {
@@ -29,7 +28,7 @@ namespace Database.Data
                     values.Add(("GuildId", guildId.Value));
                 }
 
-                MySqlDataReader reader = await Sql.ExecuteReaderAsync(command, values.ToArray());
+                var reader = await Sql.ExecuteReaderAsync(command, values.ToArray());
 
                 while (reader.Read())
                 {
@@ -46,7 +45,7 @@ namespace Database.Data
 
         public static async Task<ReputationRow> GetRowAsync(ulong guildId)
         {
-            List<ReputationRow> rows = await GetRowsAsync(guildId);
+            var rows = await GetRowsAsync(guildId);
             return rows.Count > 0 ? rows.First() : new ReputationRow(guildId);
         }
 
@@ -83,10 +82,10 @@ namespace Database.Data
 
         public static async Task<List<ReputationUserRow>> GetUserRowsAsync(ulong? guildId = null, ulong? userId = null)
         {
-            List<ReputationUserRow> matchedRows = new();
+            var matchedRows = new List<ReputationUserRow>();
 
-            string command = "SELECT * FROM ReputationUsers WHERE TRUE";
-            List<(string, object)> values = new();
+            var command = "SELECT * FROM ReputationUsers WHERE TRUE";
+            var values = new List<(string, object)>();
 
             if (guildId.HasValue)
             {
@@ -100,7 +99,7 @@ namespace Database.Data
                 values.Add(("UserId", userId.Value));
             }
 
-            MySqlDataReader reader = await Sql.ExecuteReaderAsync(command, values.ToArray());
+            var reader = await Sql.ExecuteReaderAsync(command, values.ToArray());
 
             while (reader.Read())
             {
@@ -117,13 +116,13 @@ namespace Database.Data
 
         public static async Task<ReputationUserRow> GetUserRowAsync(ulong guildId, ulong userId)
         {
-            List<ReputationUserRow> rows = await GetUserRowsAsync(guildId, userId);
+            var rows = await GetUserRowsAsync(guildId, userId);
             return rows.Count > 0 ? rows.First() : new ReputationUserRow(guildId, userId);
         }
 
         public static async Task AlterUserReputationAsync(ulong guildId, ulong userId, long reputationChange)
         {
-            int affected = await Sql.ExecuteAsync("UPDATE ReputationUsers SET Reputation = Reputation + @ReputationChange WHERE GuildId = @GuildId AND UserId = @UserId;",
+            var affected = await Sql.ExecuteAsync("UPDATE ReputationUsers SET Reputation = Reputation + @ReputationChange WHERE GuildId = @GuildId AND UserId = @UserId;",
                 ("GuildId", guildId), 
                 ("UserId", userId),
                 ("ReputationChange", reputationChange));
@@ -147,7 +146,7 @@ namespace Database.Data
                 return;
             }
 
-            int affected = await Sql.ExecuteAsync("UPDATE ReputationUsers SET Reputation = @Reputation WHERE GuildId = @GuildId AND UserId = @UserId;",
+            var affected = await Sql.ExecuteAsync("UPDATE ReputationUsers SET Reputation = @Reputation WHERE GuildId = @GuildId AND UserId = @UserId;",
                 ("GuildId", guildId), 
                 ("UserId", userId),
                 ("Reputation", reputation));
@@ -182,7 +181,7 @@ namespace Database.Data
 
         public static ReputationRow FromDatabase(ulong guildId, string emotes)
         {
-            ReputationRow row = new()
+            var row = new ReputationRow
             {
                 New = false,
                 GuildId = guildId,
@@ -192,13 +191,13 @@ namespace Database.Data
             emotes = EString.FromEncoded(emotes).Value;
             if (!string.IsNullOrEmpty(emotes))
             {
-                foreach (string emoteString in emotes.Split(","))
+                foreach (var emoteString in emotes.Split(","))
                 {
                     if(string.IsNullOrWhiteSpace(emoteString))
                         continue;
                     
-                    int value = int.Parse(emoteString.Split("///").Last());
-                    string emote = emoteString.Split("///").First();
+                    var value = int.Parse(emoteString.Split("///").Last());
+                    var emote = emoteString.Split("///").First();
                     row.Emotes.Add((emote, value));
                 }
             }
@@ -208,9 +207,9 @@ namespace Database.Data
 
         public string GetEmotesString()
         {
-            string emotesString = "";
+            var emotesString = "";
 
-            for (int i = 0; i < Emotes.Count; i++)
+            for (var i = 0; i < Emotes.Count; i++)
             {
                 emotesString += $"{Emotes[i].Item1}///{Emotes[i].Item2}";
                 if (i != Emotes.Count - 1)

@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using Database.Data;
 using Disqord;
@@ -15,18 +14,18 @@ namespace Utili.Commands
         [Command("UserInfo"), RequireBotOwner]
         public async Task UserInfo(ulong userId)
         {
-            UserRow row = await Users.GetRowAsync(userId);
-            IUser user = await Context.Bot.FetchUserAsync(userId);
+            var row = await Users.GetRowAsync(userId);
+            var user = await Context.Bot.FetchUserAsync(userId);
 
-            List<SubscriptionsRow> subscriptions = await Subscriptions.GetRowsAsync(userId: userId);
+            var subscriptions = await Subscriptions.GetRowsAsync(userId: userId);
 
-            string content = $"Id: {user?.Id}\n" +
-                             $"Email: {row.Email}\n" +
-                             $"Customer: {row.CustomerId}\n" +
-                             $"Subscriptions: {subscriptions.Count}\n" +
-                             $"Premium slots: {subscriptions.Sum(x => x.Slots)}";
+            var content = $"Id: {user?.Id}\n" +
+                          $"Email: {row.Email}\n" +
+                          $"Customer: {row.CustomerId}\n" +
+                          $"Subscriptions: {subscriptions.Count}\n" +
+                          $"Premium slots: {subscriptions.Sum(x => x.Slots)}";
 
-            LocalEmbed embed = Utils.MessageUtils.CreateEmbed(Utils.EmbedType.Info, user?.ToString(), content);
+            var embed = Utils.MessageUtils.CreateEmbed(Utils.EmbedType.Info, user?.ToString(), content);
             embed.WithThumbnailUrl(user.GetAvatarUrl());
 
             await Context.Author.SendMessageAsync(new LocalMessage().AddEmbed(embed));
@@ -37,15 +36,15 @@ namespace Utili.Commands
         [Command("GuildInfo"), RequireBotOwner]
         public async Task GuildInfo(ulong guildId)
         {
-            IGuild guild = await Context.Bot.FetchGuildAsync(guildId, true);
-            bool premium = await Premium.IsGuildPremiumAsync(guildId);
+            var guild = await Context.Bot.FetchGuildAsync(guildId, true);
+            var premium = await Premium.IsGuildPremiumAsync(guildId);
 
-            string content = $"Id: {guild?.Id}\n" +
-                             $"Owner: {guild.OwnerId}\n" +
-                             $"Created: {guild.CreatedAt().UtcDateTime} UTC\n" +
-                             $"Premium: {premium.ToString().ToLower()}";
+            var content = $"Id: {guild?.Id}\n" +
+                          $"Owner: {guild.OwnerId}\n" +
+                          $"Created: {guild.CreatedAt().UtcDateTime} UTC\n" +
+                          $"Premium: {premium.ToString().ToLower()}";
 
-            LocalEmbed embed = Utils.MessageUtils.CreateEmbed(Utils.EmbedType.Info, guild.ToString(), content);
+            var embed = Utils.MessageUtils.CreateEmbed(Utils.EmbedType.Info, guild.ToString(), content);
             embed.WithThumbnailUrl(guild.GetIconUrl());
 
             await Context.Author.SendMessageAsync(new LocalMessage().AddEmbed(embed));
@@ -72,8 +71,8 @@ namespace Utili.Commands
                 return;
             }
 
-            IEnumerable<IRole> roles = member.RoleIds.Select(x => guild.Roles.First(y => y.Key == x).Value);
-            GuildPermissions perms = Discord.Permissions.CalculatePermissions(guild, member, roles);
+            var roles = member.RoleIds.Select(x => guild.Roles.First(y => y.Key == x).Value);
+            var perms = Discord.Permissions.CalculatePermissions(guild, member, roles);
 
             if (guild.OwnerId == userId)
                 await Context.Channel.SendSuccessAsync("Authorised", $"{member} is the owner of {guild}");

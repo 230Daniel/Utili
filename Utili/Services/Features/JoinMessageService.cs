@@ -11,8 +11,8 @@ namespace Utili.Services
 {
     public class JoinMessageService
     {
-        ILogger<JoinMessageService> _logger;
-        DiscordClientBase _client;
+        private readonly ILogger<JoinMessageService> _logger;
+        private readonly DiscordClientBase _client;
 
         public JoinMessageService(ILogger<JoinMessageService> logger, DiscordClientBase client)
         {
@@ -24,11 +24,11 @@ namespace Utili.Services
         {
             try
             {
-                JoinMessageRow row = await JoinMessage.GetRowAsync(e.GuildId);
+                var row = await JoinMessage.GetRowAsync(e.GuildId);
 
                 if (row.Enabled)
                 {
-                    LocalMessage message = GetJoinMessage(row, e.Member);
+                    var message = GetJoinMessage(row, e.Member);
                     if (row.Direct) try { await e.Member.SendMessageAsync(message); } catch { }
                     else
                     {
@@ -46,14 +46,14 @@ namespace Utili.Services
 
         public static LocalMessage GetJoinMessage(JoinMessageRow row, IMember member)
         {
-            string text = row.Text.Value.Replace(@"\n", "\n").Replace("%user%", member.Mention);
-            string title = row.Title.Value.Replace("%user%", member.ToString());
-            string content = row.Content.Value.Replace(@"\n", "\n").Replace("%user%", member.Mention);
-            string footer = row.Footer.Value.Replace(@"\n", "\n").Replace("%user%", member.ToString());
+            var text = row.Text.Value.Replace(@"\n", "\n").Replace("%user%", member.Mention);
+            var title = row.Title.Value.Replace("%user%", member.ToString());
+            var content = row.Content.Value.Replace(@"\n", "\n").Replace("%user%", member.Mention);
+            var footer = row.Footer.Value.Replace(@"\n", "\n").Replace("%user%", member.ToString());
             
-            string iconUrl = row.Icon.Value;
-            string thumbnailUrl = row.Thumbnail.Value;
-            string imageUrl = row.Image.Value;
+            var iconUrl = row.Icon.Value;
+            var thumbnailUrl = row.Thumbnail.Value;
+            var imageUrl = row.Image.Value;
 
             if (iconUrl.ToLower() == "user") iconUrl = member.GetAvatarUrl();
             if (thumbnailUrl.ToLower() == "user") thumbnailUrl = member.GetAvatarUrl();

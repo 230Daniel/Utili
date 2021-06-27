@@ -3,7 +3,7 @@ using Qmmands;
 
 namespace Utili.Implementations
 {
-    class DefaultCooldown : CooldownAttribute
+    internal class DefaultCooldown : CooldownAttribute
     {
         public DefaultCooldown(int amount, int per)
             : base(amount, per, CooldownMeasure.Seconds, CooldownBucketType.Channel)

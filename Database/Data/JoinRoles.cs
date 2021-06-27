@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using MySql.Data.MySqlClient;
 
 namespace Database.Data
 {
@@ -10,7 +9,7 @@ namespace Database.Data
     {
         public static async Task<List<JoinRolesRow>> GetRowsAsync(ulong? guildId = null, bool ignoreCache = false)
         {
-            List<JoinRolesRow> matchedRows = new();
+            var matchedRows = new List<JoinRolesRow>();
 
             if (Cache.Initialised && !ignoreCache)
             {
@@ -20,8 +19,8 @@ namespace Database.Data
             }
             else
             {
-                string command = "SELECT * FROM JoinRoles WHERE TRUE";
-                List<(string, object)> values = new();
+                var command = "SELECT * FROM JoinRoles WHERE TRUE";
+                var values = new List<(string, object)>();
 
                 if (guildId.HasValue)
                 {
@@ -29,7 +28,7 @@ namespace Database.Data
                     values.Add(("GuildId", guildId.Value));
                 }
 
-                MySqlDataReader reader = await Sql.ExecuteReaderAsync(command, values.ToArray());
+                var reader = await Sql.ExecuteReaderAsync(command, values.ToArray());
 
                 while (reader.Read())
                 {
@@ -47,7 +46,7 @@ namespace Database.Data
 
         public static async Task<JoinRolesRow> GetRowAsync(ulong guildId)
         {
-            List<JoinRolesRow> rows = await GetRowsAsync(guildId);
+            var rows = await GetRowsAsync(guildId);
             return rows.Count > 0 ? rows.First() : new JoinRolesRow(guildId);
         }
 
@@ -87,10 +86,10 @@ namespace Database.Data
         
         public static async Task<List<JoinRolesPendingRow>> GetPendingRowsAsync(ulong? guildId = null, ulong? userId = null)
         {
-            List<JoinRolesPendingRow> matchedRows = new();
+            var matchedRows = new List<JoinRolesPendingRow>();
 
-            string command = "SELECT * FROM JoinRolesPending WHERE TRUE";
-            List<(string, object)> values = new();
+            var command = "SELECT * FROM JoinRolesPending WHERE TRUE";
+            var values = new List<(string, object)>();
 
             if (guildId.HasValue)
             {
@@ -104,7 +103,7 @@ namespace Database.Data
                 values.Add(("UserId", userId.Value));
             }
 
-            MySqlDataReader reader = await Sql.ExecuteReaderAsync(command, values.ToArray());
+            var reader = await Sql.ExecuteReaderAsync(command, values.ToArray());
 
             while (reader.Read())
             {
@@ -122,7 +121,7 @@ namespace Database.Data
 
         public static async Task<JoinRolesPendingRow> GetPendingRowAsync(ulong guildId, ulong userId)
         {
-            List<JoinRolesPendingRow> rows = await GetPendingRowsAsync(guildId, userId);
+            var rows = await GetPendingRowsAsync(guildId, userId);
             return rows.Count > 0 ? rows.First() : new JoinRolesPendingRow(guildId, userId);
         }
 
@@ -181,7 +180,7 @@ namespace Database.Data
 
         public static JoinRolesRow FromDatabase(ulong guildId, bool waitForVerification, string joinRoles)
         {
-            JoinRolesRow row = new()
+            var row = new JoinRolesRow
             {
                 New = false,
                 WaitForVerification = waitForVerification,
@@ -192,9 +191,9 @@ namespace Database.Data
 
             if (!string.IsNullOrEmpty(joinRoles))
             {
-                foreach (string joinRole in joinRoles.Split(","))
+                foreach (var joinRole in joinRoles.Split(","))
                 {
-                    if (ulong.TryParse(joinRole, out ulong channelId))
+                    if (ulong.TryParse(joinRole, out var channelId))
                     {
                         row.JoinRoles.Add(channelId);
                     }
@@ -206,11 +205,11 @@ namespace Database.Data
 
         public string GetJoinRolesString()
         {
-            string joinRolesString = "";
+            var joinRolesString = "";
 
-            for (int i = 0; i < JoinRoles.Count; i++)
+            for (var i = 0; i < JoinRoles.Count; i++)
             {
-                ulong joinRole = JoinRoles[i];
+                var joinRole = JoinRoles[i];
                 joinRolesString += joinRole.ToString();
                 if (i != JoinRoles.Count - 1)
                 {
@@ -241,7 +240,7 @@ namespace Database.Data
         public bool IsPending { get; set; }
         public DateTime ScheduledFor { get; set; }
 
-        JoinRolesPendingRow() { }
+        private JoinRolesPendingRow() { }
 
         public JoinRolesPendingRow(ulong guildId, ulong userId)
         {

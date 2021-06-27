@@ -13,10 +13,10 @@ namespace Utili.Services
 {
     public class VoiceLinkService
     {
-        ILogger<VoiceLinkService> _logger;
-        DiscordClientBase _client;
+        private readonly ILogger<VoiceLinkService> _logger;
+        private readonly DiscordClientBase _client;
 
-        List<(ulong, ulong)> _channelsRequiringUpdate;
+        private List<(ulong, ulong)> _channelsRequiringUpdate;
 
         public VoiceLinkService(ILogger<VoiceLinkService> logger, DiscordClientBase client)
         {
@@ -30,7 +30,7 @@ namespace Utili.Services
         {
             try
             {
-                VoiceLinkRow row = await VoiceLink.GetRowAsync(e.GuildId);
+                var row = await VoiceLink.GetRowAsync(e.GuildId);
                 if (!row.Enabled) return;
                 lock (_channelsRequiringUpdate)
                 {
@@ -53,7 +53,7 @@ namespace Utili.Services
             _ = UpdateLinkedChannelsAsync();
         }
 
-        async Task UpdateLinkedChannelsAsync()
+        private async Task UpdateLinkedChannelsAsync()
         {
             while (true)
             {
@@ -67,7 +67,7 @@ namespace Utili.Services
                         _channelsRequiringUpdate.Clear();
                     }
 
-                    List<Task> tasks = channelsToUpdate.Select(x => UpdateLinkedChannelAsync(x.Item1, x.Item2)).ToList();
+                    var tasks = channelsToUpdate.Select(x => UpdateLinkedChannelAsync(x.Item1, x.Item2)).ToList();
                     await Task.WhenAll(tasks);
                 }
                 catch (Exception e)
@@ -79,25 +79,25 @@ namespace Utili.Services
             }
         }
 
-        Task UpdateLinkedChannelAsync(ulong guildId, ulong channelId)
+        private Task UpdateLinkedChannelAsync(ulong guildId, ulong channelId)
         {
             return Task.Run(async () =>
             {
                 try
                 {
-                    CachedGuild guild = _client.GetGuild(guildId);
-                    CachedVoiceChannel voiceChannel = guild.GetVoiceChannel(channelId);
-                    CachedCategoryChannel category = voiceChannel.CategoryId.HasValue ? guild.GetCategoryChannel(voiceChannel.CategoryId.Value) : null;
+                    var guild = _client.GetGuild(guildId);
+                    var voiceChannel = guild.GetVoiceChannel(channelId);
+                    var category = voiceChannel.CategoryId.HasValue ? guild.GetCategoryChannel(voiceChannel.CategoryId.Value) : null;
 
                     if(!voiceChannel.BotHasPermissions(Permission.ViewChannel)) return;
                     if (category is not null && !category.BotHasPermissions(Permission.ViewChannel | Permission.ManageChannels | Permission.ManageRoles)) return;
                     if (category is null && !guild.BotHasPermissions(Permission.ViewChannel | Permission.ManageChannels | Permission.ManageRoles)) return;
 
-                    List<CachedVoiceState> voiceStates = guild.GetVoiceStates().Where(x => x.Value.ChannelId == voiceChannel.Id).Select(x => x.Value).ToList();
-                    List<IMember> connectedUsers = guild.Members.Values.Where(x => voiceStates.Any(y => y.MemberId == x.Id)).ToList();
+                    var voiceStates = guild.GetVoiceStates().Where(x => x.Value.ChannelId == voiceChannel.Id).Select(x => x.Value).ToList();
+                    var connectedUsers = guild.Members.Values.Where(x => voiceStates.Any(y => y.MemberId == x.Id)).ToList();
 
-                    VoiceLinkChannelRow channelRow = await VoiceLink.GetChannelRowAsync(guild.Id, voiceChannel.Id);
-                    VoiceLinkRow metaRow = await VoiceLink.GetRowAsync(guild.Id);
+                    var channelRow = await VoiceLink.GetChannelRowAsync(guild.Id, voiceChannel.Id);
+                    var metaRow = await VoiceLink.GetRowAsync(guild.Id);
 
                     ITextChannel textChannel = null;
                     try
@@ -136,8 +136,8 @@ namespace Utili.Services
                         if(!textChannel.BotHasPermissions(Permission.ViewChannel | Permission.ManageChannels | Permission.ManageRoles)) return;
                     }
 
-                    List<LocalOverwrite> overwrites = textChannel.Overwrites.Select(x => new LocalOverwrite(x.TargetId, x.TargetType, x.Permissions)).ToList();
-                    bool overwritesChanged = false;
+                    var overwrites = textChannel.Overwrites.Select(x => new LocalOverwrite(x.TargetId, x.TargetType, x.Permissions)).ToList();
+                    var overwritesChanged = false;
 
                     overwrites.RemoveAll(x =>
                     {
@@ -153,7 +153,7 @@ namespace Utili.Services
                         return false;
                     });
 
-                    foreach (IMember member in connectedUsers)
+                    foreach (var member in connectedUsers)
                     {
                         if (!overwrites.Any(x => x.TargetId == member.Id && x.TargetType == OverwriteTargetType.Member))
                         {
@@ -162,7 +162,7 @@ namespace Utili.Services
                         }
                     }
 
-                    LocalOverwrite everyoneOverwrite = overwrites.FirstOrDefault(x => x.TargetId == guildId && x.TargetType == OverwriteTargetType.Role);
+                    var everyoneOverwrite = overwrites.FirstOrDefault(x => x.TargetId == guildId && x.TargetType == OverwriteTargetType.Role);
                     if (everyoneOverwrite is null || everyoneOverwrite.Permissions.Denied.ViewChannel)
                     {
                         overwritesChanged = true;

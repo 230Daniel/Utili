@@ -44,7 +44,7 @@ namespace Database
         {
             if(input is null) return null;
 
-            byte[] bytes = Encoding.UTF8.GetBytes(input);
+            var bytes = Encoding.UTF8.GetBytes(input);
             return Convert.ToBase64String(bytes);
         }
 
@@ -52,13 +52,13 @@ namespace Database
         {
             if(input is null) return null;
 
-            byte[] bytes = Convert.FromBase64String(input);
+            var bytes = Convert.FromBase64String(input);
             return Encoding.UTF8.GetString(bytes);
         }
 
         private static string Encrypt(string input, ulong[] ids)
         {
-            byte[] bytes = Encoding.UTF8.GetBytes(input);
+            var bytes = Encoding.UTF8.GetBytes(input);
 
             bytes = Encryption.Encrypt(bytes, Encryption.GeneratePassword(ids));
 
@@ -67,7 +67,7 @@ namespace Database
 
         private static string Decrypt(string input, ulong[] ids)
         {
-            byte[] bytes = Convert.FromBase64String(input);
+            var bytes = Convert.FromBase64String(input);
 
             bytes = Encryption.Decrypt(bytes, Encryption.GeneratePassword(ids));
 

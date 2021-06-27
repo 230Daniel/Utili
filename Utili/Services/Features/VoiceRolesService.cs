@@ -13,10 +13,10 @@ namespace Utili.Services
 {
     public class VoiceRolesService
     {
-        ILogger<VoiceRolesService> _logger;
-        DiscordClientBase _client;
+        private readonly ILogger<VoiceRolesService> _logger;
+        private readonly DiscordClientBase _client;
 
-        List<VoiceUpdateRequest> _updateRequests = new();
+        private List<VoiceUpdateRequest> _updateRequests = new();
 
         public VoiceRolesService(ILogger<VoiceRolesService> logger, DiscordClientBase client)
         {
@@ -44,19 +44,19 @@ namespace Utili.Services
             }
         }
 
-        async Task UpdateMembersAsync()
+        private async Task UpdateMembersAsync()
         {
             while (true)
             {
                 try
                 {
-                    List<VoiceUpdateRequest> requests = new();
+                    var requests = new List<VoiceUpdateRequest>();
 
                     lock (_updateRequests)
                     {
-                        foreach (VoiceUpdateRequest request in _updateRequests)
+                        foreach (var request in _updateRequests)
                         {
-                            VoiceUpdateRequest existingRequest = requests.FirstOrDefault(x => x.GuildId == request.GuildId && x.MemberId == request.MemberId);
+                            var existingRequest = requests.FirstOrDefault(x => x.GuildId == request.GuildId && x.MemberId == request.MemberId);
                             if (existingRequest is not null) existingRequest.NewChannelId = request.NewChannelId;
                             else requests.Add(request);
                         }
@@ -64,7 +64,7 @@ namespace Utili.Services
                         _updateRequests.Clear();
                     }
 
-                    List<Task> tasks = requests.Select(UpdateMemberAsync).ToList();
+                    var tasks = requests.Select(UpdateMemberAsync).ToList();
                     await Task.WhenAll(tasks);
 
                     await Task.Delay(250);
@@ -76,7 +76,7 @@ namespace Utili.Services
             }
         }
 
-        Task UpdateMemberAsync(VoiceUpdateRequest request)
+        private Task UpdateMemberAsync(VoiceUpdateRequest request)
         {
             return Task.Run(async () =>
             {
@@ -87,7 +87,7 @@ namespace Utili.Services
                     IGuild guild = _client.GetGuild(request.GuildId);
                     IMember member = guild.GetMember(request.MemberId);
 
-                    List<VoiceRolesRow> rows = await VoiceRoles.GetRowsAsync(request.GuildId);
+                    var rows = await VoiceRoles.GetRowsAsync(request.GuildId);
                     rows.RemoveAll(x => guild.GetRole(x.RoleId) is null);
 
                     Snowflake? oldRoleId = null;
@@ -95,15 +95,15 @@ namespace Utili.Services
 
                     if (request.OldChannelId.HasValue)
                     {
-                        VoiceRolesRow row = rows.FirstOrDefault(x => x.ChannelId == request.OldChannelId.Value) ?? 
-                                            rows.FirstOrDefault(x => x.ChannelId == 0);
+                        var row = rows.FirstOrDefault(x => x.ChannelId == request.OldChannelId.Value) ?? 
+                                  rows.FirstOrDefault(x => x.ChannelId == 0);
                         oldRoleId = row?.RoleId;
                     }
 
                     if (request.NewChannelId.HasValue)
                     {
-                        VoiceRolesRow row = rows.FirstOrDefault(x => x.ChannelId == request.NewChannelId.Value) ?? 
-                                            rows.FirstOrDefault(x => x.ChannelId == 0);
+                        var row = rows.FirstOrDefault(x => x.ChannelId == request.NewChannelId.Value) ?? 
+                                  rows.FirstOrDefault(x => x.ChannelId == 0);
                         newRoleId = row?.RoleId;
                     }
 
@@ -122,7 +122,7 @@ namespace Utili.Services
             });
         }
 
-        class VoiceUpdateRequest
+        private class VoiceUpdateRequest
         {
             public Snowflake GuildId { get; }
             public Snowflake MemberId { get; }

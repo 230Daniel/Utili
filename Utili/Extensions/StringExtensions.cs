@@ -16,7 +16,7 @@ namespace Utili.Extensions
         
         public static string ToEncoded(this string input)
         {
-            byte[] bytes = Encoding.UTF8.GetBytes(input);
+            var bytes = Encoding.UTF8.GetBytes(input);
             return Convert.ToBase64String(bytes);
         }
 
@@ -24,7 +24,7 @@ namespace Utili.Extensions
         {
             try
             {
-                byte[] bytes = Convert.FromBase64String(input);
+                var bytes = Convert.FromBase64String(input);
                 return Encoding.UTF8.GetString(bytes);
             }
             catch

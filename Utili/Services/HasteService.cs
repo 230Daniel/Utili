@@ -7,16 +7,16 @@ namespace Utili.Services
 {
     public class HasteService
     {
-        string _baseUrl;
+        private string _baseUrl;
 
         public async Task<string> PasteAsync(string content, string format)
         {
             HttpContent httpContent = new StringContent(content);
-            HttpClient httpClient = new();
+            var httpClient = new HttpClient();
 
-            HttpResponseMessage httpResponse = await httpClient.PostAsync($"{_baseUrl}/documents", httpContent);
-            string json = await httpResponse.Content.ReadAsStringAsync();
-            string key = JsonConvert.DeserializeObject<PasteResponse>(json).Key;
+            var httpResponse = await httpClient.PostAsync($"{_baseUrl}/documents", httpContent);
+            var json = await httpResponse.Content.ReadAsStringAsync();
+            var key = JsonConvert.DeserializeObject<PasteResponse>(json).Key;
             return $"{_baseUrl}/{key}.{format}";
         }
 
@@ -25,7 +25,7 @@ namespace Utili.Services
             _baseUrl = config.GetValue<string>("HasteServer");
         }
 
-        class PasteResponse
+        private class PasteResponse
         {
             [JsonProperty("key")]
             public string Key { get; set; }

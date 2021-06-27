@@ -13,10 +13,10 @@ namespace Utili.Services
 {
     public class RoleLinkingService
     {
-        ILogger<RoleLinkingService> _logger;
-        DiscordClientBase _client;
+        private readonly ILogger<RoleLinkingService> _logger;
+        private readonly DiscordClientBase _client;
 
-        List<RoleLinkAction> _actions = new();
+        private List<RoleLinkAction> _actions = new();
 
         public RoleLinkingService(ILogger<RoleLinkingService> logger, DiscordClientBase client)
         {
@@ -29,29 +29,29 @@ namespace Utili.Services
             try
             {
                 IGuild guild = _client.GetGuild(e.NewMember.GuildId);
-                List<RoleLinkingRow> rows = await RoleLinking.GetRowsAsync(guild.Id);
+                var rows = await RoleLinking.GetRowsAsync(guild.Id);
                 if(rows.Count == 0) return;
 
                 if (rows.Count > 2)
                 {
-                    bool premium = await Premium.IsGuildPremiumAsync(guild.Id);
+                    var premium = await Premium.IsGuildPremiumAsync(guild.Id);
                     if (!premium) rows = rows.Take(2).ToList();
                 }
 
                 if (e.OldMember is null) throw new Exception($"Member {e.MemberId} was not cached in guild {e.NewMember.GuildId}");
-                List<ulong> oldRoles = e.OldMember.RoleIds.Select(x => x.RawValue).ToList();
-                List<ulong> newRoles = e.NewMember.RoleIds.Select(x => x.RawValue).ToList();
+                var oldRoles = e.OldMember.RoleIds.Select(x => x.RawValue).ToList();
+                var newRoles = e.NewMember.RoleIds.Select(x => x.RawValue).ToList();
 
-                List<ulong> addedRoles = newRoles.Where(x => oldRoles.All(y => y != x)).ToList();
-                List<ulong> removedRoles = oldRoles.Where(x => newRoles.All(y => y != x)).ToList();
+                var addedRoles = newRoles.Where(x => oldRoles.All(y => y != x)).ToList();
+                var removedRoles = oldRoles.Where(x => newRoles.All(y => y != x)).ToList();
 
                 List<ulong> rolesToAdd;
                 List<ulong> rolesToRemove; 
                     
                 lock (_actions)
                 {
-                    List<RoleLinkAction> actionsPerformedByBot = _actions.Where(x => x.GuildId == guild.Id && x.UserId == e.NewMember.Id).ToList();
-                    foreach (RoleLinkAction action in actionsPerformedByBot)
+                    var actionsPerformedByBot = _actions.Where(x => x.GuildId == guild.Id && x.UserId == e.NewMember.Id).ToList();
+                    foreach (var action in actionsPerformedByBot)
                     {
                         if (addedRoles.Contains(action.RoleId) && action.ActionType == RoleLinkActionType.Added)
                         {
@@ -73,13 +73,13 @@ namespace Utili.Services
 
                     rolesToAdd.RemoveAll(x =>
                     {
-                        IRole role = guild.GetRole(x);
+                        var role = guild.GetRole(x);
                         return role is null || !role.CanBeManaged();
                     });
                     
                     rolesToRemove.RemoveAll(x =>
                     {
-                        IRole role = guild.GetRole(x);
+                        var role = guild.GetRole(x);
                         return role is null || !role.CanBeManaged();
                     });
                     
@@ -87,12 +87,12 @@ namespace Utili.Services
                     _actions.AddRange(rolesToRemove.Select(x => new RoleLinkAction(guild.Id, e.NewMember.Id, x, RoleLinkActionType.Removed)));
                 }
 
-                foreach (ulong roleId in rolesToAdd)
+                foreach (var roleId in rolesToAdd)
                 {
                     await e.NewMember.GrantRoleAsync(roleId, new DefaultRestRequestOptions{Reason = "Role Linking"});
                     await Task.Delay(1000);
                 }
-                foreach (ulong roleId in rolesToRemove)
+                foreach (var roleId in rolesToRemove)
                 {
                     await e.NewMember.RevokeRoleAsync(roleId, new DefaultRestRequestOptions{ Reason = "Role Linking" });
                     await Task.Delay(1000);
@@ -104,7 +104,7 @@ namespace Utili.Services
             }
         }
 
-        class RoleLinkAction
+        private class RoleLinkAction
         {
             public ulong GuildId { get; }
             public ulong UserId { get; }
@@ -120,7 +120,7 @@ namespace Utili.Services
             }
         }
 
-        enum RoleLinkActionType
+        private enum RoleLinkActionType
         {
             Added, 
             Removed

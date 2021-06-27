@@ -9,12 +9,12 @@ namespace Database
 
         public static byte[] Encrypt(byte[] plain, string password)
         {
-            Rijndael rijndael = Rijndael.Create();
+            var rijndael = Rijndael.Create();
             Rfc2898DeriveBytes pdb = new(password, Salt);
             rijndael.Key = pdb.GetBytes(32);
             rijndael.IV = pdb.GetBytes(16);
-            MemoryStream memoryStream = new();
-            CryptoStream cryptoStream = new(memoryStream, rijndael.CreateEncryptor(), CryptoStreamMode.Write);
+            var memoryStream = new MemoryStream();
+            var cryptoStream = new CryptoStream(memoryStream, rijndael.CreateEncryptor(), CryptoStreamMode.Write);
             cryptoStream.Write(plain, 0, plain.Length);
             cryptoStream.Close();
             return memoryStream.ToArray();
@@ -24,7 +24,7 @@ namespace Database
         {
             try
             {
-                Rijndael rijndael = Rijndael.Create();
+                var rijndael = Rijndael.Create();
                 Rfc2898DeriveBytes pdb = new(password, Salt);
                 rijndael.Key = pdb.GetBytes(32);
                 rijndael.IV = pdb.GetBytes(16);
@@ -43,10 +43,10 @@ namespace Database
 
         public static string GeneratePassword(ulong[] ids)
         {
-            string password = "";
+            var password = "";
 
-            int amountTake = 16;
-            foreach (ulong id in ids)
+            var amountTake = 16;
+            foreach (var id in ids)
             {
                 password += id.ToString().Substring(0, amountTake);
 

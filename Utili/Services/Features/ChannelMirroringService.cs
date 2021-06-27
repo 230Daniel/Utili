@@ -15,10 +15,10 @@ namespace Utili.Services
 {
     public class ChannelMirroringService
     {
-        ILogger<ChannelMirroringService> _logger;
-        DiscordClientBase _client;
+        private readonly ILogger<ChannelMirroringService> _logger;
+        private readonly DiscordClientBase _client;
 
-        Dictionary<ulong, IWebhook> _webhookCache;
+        private Dictionary<ulong, IWebhook> _webhookCache;
 
         public ChannelMirroringService(ILogger<ChannelMirroringService> logger, DiscordClientBase client)
         {
@@ -34,9 +34,9 @@ namespace Utili.Services
             {
                 if(!e.GuildId.HasValue || e.Message is not IUserMessage {WebhookId: null} userMessage) return;
 
-                ChannelMirroringRow row = await ChannelMirroring.GetRowAsync(e.GuildId.Value, e.ChannelId);
-                CachedGuild guild = _client.GetGuild(e.GuildId.Value);
-                CachedTextChannel channel = guild.GetTextChannel(row.ToChannelId);
+                var row = await ChannelMirroring.GetRowAsync(e.GuildId.Value, e.ChannelId);
+                var guild = _client.GetGuild(e.GuildId.Value);
+                var channel = guild.GetTextChannel(row.ToChannelId);
                 if(channel is null) return;
 
                 if(!channel.BotHasPermissions(Permission.ViewChannel | Permission.ManageWebhooks)) return;
@@ -53,7 +53,7 @@ namespace Utili.Services
 
                 if (webhook is null)
                 {
-                    FileStream avatar = File.OpenRead("Avatar.png");
+                    var avatar = File.OpenRead("Avatar.png");
                     webhook = await channel.CreateWebhookAsync("Utili Mirroring", x => x.Avatar = avatar);
                     avatar.Close();
 
@@ -61,12 +61,12 @@ namespace Utili.Services
                     await row.SaveAsync();
                 }
 
-                string username = $"{e.Message.Author} in {e.Channel.Name}";
-                string avatarUrl = e.Message.Author.GetAvatarUrl();
+                var username = $"{e.Message.Author} in {e.Channel.Name}";
+                var avatarUrl = e.Message.Author.GetAvatarUrl();
 
                 if (!string.IsNullOrWhiteSpace(userMessage.Content) || userMessage.Embeds.Count > 0)
                 {
-                    LocalWebhookMessage message = new LocalWebhookMessage()
+                    var message = new LocalWebhookMessage()
                         .WithName(username)
                         .WithAvatarUrl(avatarUrl)
                         .WithOptionalContent(userMessage.Content)
@@ -76,9 +76,9 @@ namespace Utili.Services
                     await _client.ExecuteWebhookAsync(webhook.Id, webhook.Token, message);
                 }
                     
-                foreach (Attachment attachment in userMessage.Attachments)
+                foreach (var attachment in userMessage.Attachments)
                 {
-                    LocalWebhookMessage attachmentMessage = new LocalWebhookMessage()
+                    var attachmentMessage = new LocalWebhookMessage()
                         .WithName(username)
                         .WithAvatarUrl(avatarUrl)
                         .WithContent(attachment.Url);
@@ -91,12 +91,12 @@ namespace Utili.Services
             }
         }
 
-        async Task<IWebhook> GetWebhookAsync(ulong webhookId)
+        private async Task<IWebhook> GetWebhookAsync(ulong webhookId)
         {
-            if (_webhookCache.TryGetValue(webhookId, out IWebhook cachedWebhook)) return cachedWebhook;
+            if (_webhookCache.TryGetValue(webhookId, out var cachedWebhook)) return cachedWebhook;
             try
             {
-                IWebhook webhook = await _client.FetchWebhookAsync(webhookId);
+                var webhook = await _client.FetchWebhookAsync(webhookId);
                 _webhookCache.TryAdd(webhookId, webhook);
                 return webhook;
             }

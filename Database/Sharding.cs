@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Threading.Tasks;
-using MySql.Data.MySqlClient;
 
 namespace Database
 {
@@ -8,10 +7,10 @@ namespace Database
     {
         public static async Task<int> GetTotalShardsAsync()
         {
-            MySqlDataReader reader = await Sql.ExecuteReaderAsync("SELECT * FROM Sharding WHERE Id = 1;");
+            var reader = await Sql.ExecuteReaderAsync("SELECT * FROM Sharding WHERE Id = 1;");
 
             reader.Read();
-            int result = reader.GetInt32(1);
+            var result = reader.GetInt32(1);
             reader.Close();
 
             return result;
@@ -19,7 +18,7 @@ namespace Database
 
         public static async Task UpdateShardStatsAsync(int shards, int lowerShardId, int guilds)
         {
-            int affected = await Sql.ExecuteAsync(
+            var affected = await Sql.ExecuteAsync(
                 "UPDATE Sharding SET Heartbeat = @Heartbeat, Guilds = @Guilds WHERE Shards = @Shards AND LowerShardId = @LowerShardId",
                 ("Heartbeat", DateTime.UtcNow),
                 ("Guilds", guilds),
@@ -39,12 +38,12 @@ namespace Database
 
         public static async Task<int> GetGuildCountAsync()
         {
-            MySqlDataReader reader = await Sql.ExecuteReaderAsync(
+            var reader = await Sql.ExecuteReaderAsync(
                 "SELECT SUM(Guilds) FROM Sharding WHERE Heartbeat > @MinimumHeartbeat AND Guilds IS NOT NULL",
                 ("MinimumHeartbeat", DateTime.UtcNow - TimeSpan.FromSeconds(30)));
 
             reader.Read();
-            int guilds = reader.GetInt32(0);
+            var guilds = reader.GetInt32(0);
             reader.Close();
 
             return guilds;

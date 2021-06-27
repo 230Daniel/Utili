@@ -2,17 +2,16 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using MySql.Data.MySqlClient;
 
 namespace Database.Data
 {
     public static class InactiveRole
     {
-        static readonly TimeSpan GapBetweenUpdates = TimeSpan.FromMinutes(60); 
+        private static readonly TimeSpan GapBetweenUpdates = TimeSpan.FromMinutes(60); 
 
         public static async Task<List<InactiveRoleRow>> GetRowsAsync(ulong? guildId = null, bool ignoreCache = false)
         {
-            List<InactiveRoleRow> matchedRows = new();
+            var matchedRows = new List<InactiveRoleRow>();
 
             if (Cache.Initialised && !ignoreCache)
             {
@@ -21,8 +20,8 @@ namespace Database.Data
             }
             else
             {
-                string command = "SELECT * FROM InactiveRole WHERE TRUE";
-                List<(string, object)> values = new();
+                var command = "SELECT * FROM InactiveRole WHERE TRUE";
+                var values = new List<(string, object)>();
 
                 if (guildId.HasValue)
                 {
@@ -30,7 +29,7 @@ namespace Database.Data
                     values.Add(("GuildId", guildId.Value));
                 }
 
-                MySqlDataReader reader = await Sql.ExecuteReaderAsync(command, values.ToArray());
+                var reader = await Sql.ExecuteReaderAsync(command, values.ToArray());
 
                 while (reader.Read())
                 {
@@ -54,7 +53,7 @@ namespace Database.Data
 
         public static async Task<List<InactiveRoleRow>> GetUpdateRequiredRowsAsync(bool ignoreCache = false)
         {
-            List<InactiveRoleRow> matchedRows = new();
+            var matchedRows = new List<InactiveRoleRow>();
 
             if (Cache.Initialised && !ignoreCache)
             {
@@ -63,13 +62,13 @@ namespace Database.Data
             }
             else
             {
-                string command = "SELECT * FROM InactiveRole WHERE LastUpdate < @LastUpdate";
-                List<(string, object)> values = new()
+                var command = "SELECT * FROM InactiveRole WHERE LastUpdate < @LastUpdate";
+                var values = new List<(string, object)>
                 {
                     ("LastUpdate", DateTime.UtcNow - GapBetweenUpdates)
                 };
 
-                MySqlDataReader reader = await Sql.ExecuteReaderAsync(command, values.ToArray());
+                var reader = await Sql.ExecuteReaderAsync(command, values.ToArray());
 
                 while (reader.Read())
                 {
@@ -93,7 +92,7 @@ namespace Database.Data
 
         public static async Task<InactiveRoleRow> GetRowAsync(ulong guildId)
         {
-            List<InactiveRoleRow> rows = await GetRowsAsync(guildId);
+            var rows = await GetRowsAsync(guildId);
             return rows.Count > 0 ? rows.First() : new InactiveRoleRow(guildId);
         }
 
@@ -165,7 +164,7 @@ namespace Database.Data
         {
             lastAction ??= DateTime.UtcNow;
 
-            int affected = await Sql.ExecuteAsync(
+            var affected = await Sql.ExecuteAsync(
                 "UPDATE InactiveRoleUsers SET LastAction = @LastAction WHERE GuildId = @GuildId AND UserId = @UserId",
                 ("GuildId", guildId), 
                 ("UserId", userId),
@@ -191,15 +190,15 @@ namespace Database.Data
 
         public static async Task<List<InactiveRoleUserRow>> GetUsersAsync(ulong guildId)
         {
-            List<InactiveRoleUserRow> matchedRows = new();
+            var matchedRows = new List<InactiveRoleUserRow>();
 
-            string command = "SELECT * FROM InactiveRoleUsers WHERE GuildId = @GuildId";
+            var command = "SELECT * FROM InactiveRoleUsers WHERE GuildId = @GuildId";
             List<(string, object)> values = new()
             {
                 ("GuildId", guildId)
             };
 
-            MySqlDataReader reader = await Sql.ExecuteReaderAsync(command, values.ToArray());
+            var reader = await Sql.ExecuteReaderAsync(command, values.ToArray());
 
             while (reader.Read())
             {

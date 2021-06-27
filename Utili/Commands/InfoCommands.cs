@@ -14,7 +14,7 @@ namespace Utili.Commands
 {
     public class InfoCommands : DiscordGuildModuleBase
     {
-        IConfiguration _config;
+        private readonly IConfiguration _config;
 
         public InfoCommands(IConfiguration config)
         {
@@ -24,9 +24,9 @@ namespace Utili.Commands
         [Command("About", "Info")]
         public async Task About()
         {
-            string domain = _config.GetValue<string>("Domain");
+            var domain = _config.GetValue<string>("Domain");
 
-            string about = string.Concat(
+            var about = string.Concat(
                 "Created by 230Daniel#1920\n",
                 $"In {await Database.Sharding.GetGuildCountAsync()} servers\n\n",
 
@@ -41,10 +41,10 @@ namespace Utili.Commands
         [Command("Help", "Commands")]
         public async Task Help()
         {
-            string domain = _config.GetValue<string>("Domain");
-            string dashboardUrl = $"https://{domain}/dashboard/{Context.Guild.Id}";
+            var domain = _config.GetValue<string>("Domain");
+            var dashboardUrl = $"https://{domain}/dashboard/{Context.Guild.Id}";
 
-            LocalEmbed embed = MessageUtils.CreateEmbed(EmbedType.Info, "Utili",
+            var embed = MessageUtils.CreateEmbed(EmbedType.Info, "Utili",
                     $"You can configure Utili on the [dashboard]({dashboardUrl}).\n" +
                     $"If you need help, you should [contact us](https://{domain}/contact).\n⠀")
 
@@ -77,34 +77,34 @@ namespace Utili.Commands
         [Command("Ping")]
         public async Task Ping()
         {
-            int largestLatency = 0;
+            var largestLatency = 0;
 
             TimeSpan? gatewayLatency = DateTime.UtcNow - Context.Message.CreatedAt().UtcDateTime;
-            int gateway = (int)Math.Round(gatewayLatency.Value.TotalMilliseconds);
+            var gateway = (int)Math.Round(gatewayLatency.Value.TotalMilliseconds);
             if (gateway > largestLatency) largestLatency = gateway;
 
-            Stopwatch sw = Stopwatch.StartNew();
+            var sw = Stopwatch.StartNew();
             await Context.Channel.TriggerTypingAsync();
             sw.Stop();
             
-            int rest = (int)sw.ElapsedMilliseconds;
+            var rest = (int)sw.ElapsedMilliseconds;
             if (rest > largestLatency) largestLatency = rest;
 
-            int database = Database.Status.Latency;
+            var database = Database.Status.Latency;
             if (database > largestLatency) largestLatency = database;
-            double databaseQueries = Math.Round(Database.Status.QueriesPerSecond, 2);
+            var databaseQueries = Math.Round(Database.Status.QueriesPerSecond, 2);
 
             double cpu = 0;
             double memory = 0;
             try
             {
                 cpu = await Stats.GetCurrentCpuUsagePercentageAsync(0);
-                MemoryInformation memoryInfo = await Stats.GetMemoryInformationAsync(2);
+                var memoryInfo = await Stats.GetMemoryInformationAsync(2);
                 memory = Math.Round(memoryInfo.UsedGigabytes / memoryInfo.TotalGigabytes * 100);
             }
             catch { }
 
-            PingStatus status = PingStatus.Excellent;
+            var status = PingStatus.Excellent;
             if (largestLatency > 100) status = PingStatus.Normal;
             if (largestLatency > 500) status = PingStatus.Poor;
             if (largestLatency > 1000) status = PingStatus.Critical;
@@ -116,7 +116,7 @@ namespace Utili.Commands
             //DateTime upSince = Handlers.ShardHandler.ShardRegister.First(x => x.Item1 == shard.ShardId).Item2;
             //TimeSpan uptime = DateTime.Now - upSince;
             
-            Color color = status switch
+            var color = status switch
             {
                 PingStatus.Excellent => new Color(67, 181, 129),
                 PingStatus.Normal => new Color(67, 181, 129),
@@ -125,7 +125,7 @@ namespace Utili.Commands
                 _ => throw new ArgumentOutOfRangeException()
             };
 
-            LocalEmbed embed = MessageUtils.CreateEmbed(EmbedType.Info, $"Pong! Status: {status}");
+            var embed = MessageUtils.CreateEmbed(EmbedType.Info, $"Pong! Status: {status}");
             embed.WithColor(color);
 
             embed.AddField("Discord", $"Api: {gateway}ms\nRest: {rest}ms", true);

@@ -17,11 +17,11 @@ using Utili.Services;
 
 namespace Utili
 {
-    static class Program
+    internal static class Program
     {
-        static void Main()
+        private static void Main()
         {
-            IHost host = Host.CreateDefaultBuilder()
+            var host = Host.CreateDefaultBuilder()
                 .ConfigureLogging(builder =>
                 {
                     builder.ClearProviders();
@@ -37,8 +37,8 @@ namespace Utili
                     bot.Activities = new[] { new LocalActivity($"{context.Configuration.GetValue<string>("Domain")} | {context.Configuration.GetValue<string>("DefaultPrefix")}help", ActivityType.Playing)};
                     bot.OwnerIds = new[] { new Snowflake(context.Configuration.GetValue<ulong>("OwnerId")) };
 
-                    int[] shardIds = context.Configuration.GetSection("ShardIds").Get<int[]>();
-                    int totalShards = context.Configuration.GetValue<int>("TotalShards");
+                    var shardIds = context.Configuration.GetSection("ShardIds").Get<int[]>();
+                    var totalShards = context.Configuration.GetValue<int>("TotalShards");
                     bot.ShardIds = shardIds.Select(x => new ShardId(x, totalShards));
                 })
                 .Build();
@@ -57,7 +57,7 @@ namespace Utili
             }
         }
 
-        static void ConfigureServices(HostBuilderContext context, IServiceCollection services)
+        private static void ConfigureServices(HostBuilderContext context, IServiceCollection services)
         {
             services.AddInteractivity();
             services.AddPrefixProvider<PrefixProvider>();

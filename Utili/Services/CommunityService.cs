@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Timers;
@@ -15,12 +14,12 @@ namespace Utili
 {
     public class CommunityService
     {
-        ILogger<CommunityService> _logger;
-        IConfiguration _config;
-        DiscordClientBase _client;
-
-        Snowflake _communityGuildId;
-        Timer _roleTimer;
+        private readonly ILogger<CommunityService> _logger;
+        private readonly IConfiguration _config;
+        private readonly DiscordClientBase _client;
+        private readonly Snowflake _communityGuildId;
+        
+        private Timer _roleTimer;
 
         public CommunityService(
             ILogger<CommunityService> logger, 
@@ -55,27 +54,27 @@ namespace Utili
             }
         }
 
-        void RoleTimer_Elapsed(object sender, ElapsedEventArgs e)
+        private void RoleTimer_Elapsed(object sender, ElapsedEventArgs e)
         {
             _ = Task.Run(async () =>
             {
                 try
                 {
-                    CachedGuild guild = _client.GetGuild(_communityGuildId);
-                    IRole premiumRole = guild.GetRole(_config.GetSection("Community").GetValue<ulong>("PremiumRoleId"));
+                    var guild = _client.GetGuild(_communityGuildId);
+                    var premiumRole = guild.GetRole(_config.GetSection("Community").GetValue<ulong>("PremiumRoleId"));
                     
                     if (premiumRole is not null)
                     {
-                        List<SubscriptionsRow> subscriptionRows = await Subscriptions.GetRowsAsync(onlyValid: true);
-                        List<IMember> premiumMembers = guild.Members.Select(x => x.Value).Where(x => subscriptionRows.Any(y => y.UserId == x.Id)).ToList();
+                        var subscriptionRows = await Subscriptions.GetRowsAsync(onlyValid: true);
+                        var premiumMembers = guild.Members.Select(x => x.Value).Where(x => subscriptionRows.Any(y => y.UserId == x.Id)).ToList();
 
-                        foreach (IMember premiumMember in premiumMembers)
+                        foreach (var premiumMember in premiumMembers)
                             if (!premiumMember.RoleIds.Contains(premiumRole.Id))
                                 await premiumMember.GrantRoleAsync(premiumRole.Id, new DefaultRestRequestOptions {Reason = "Premium"});
 
-                        List<IMember> markedPremiumMembers = guild.Members.Select(x => x.Value).Where(x => x.RoleIds.Contains(premiumRole.Id)).ToList();
+                        var markedPremiumMembers = guild.Members.Select(x => x.Value).Where(x => x.RoleIds.Contains(premiumRole.Id)).ToList();
                         
-                        foreach (IMember premiumMember in markedPremiumMembers)
+                        foreach (var premiumMember in markedPremiumMembers)
                             if (premiumMembers.All(x => x.Id != premiumMember.Id))
                                 await premiumMember.RevokeRoleAsync(premiumRole.Id, new DefaultRestRequestOptions {Reason = "Premium"});
                     }

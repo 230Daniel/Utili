@@ -22,8 +22,8 @@ namespace Utili.Implementations
             return context.Author.Id == 218613903653863427;
             if (!context.GuildId.HasValue || context.Author.IsBot) return false;
 
-            CoreRow row = await Core.GetRowAsync(context.GuildId.Value);
-            bool excluded = row.ExcludedChannels.Contains(context.ChannelId);
+            var row = await Core.GetRowAsync(context.GuildId.Value);
+            var excluded = row.ExcludedChannels.Contains(context.ChannelId);
             if (!row.EnableCommands) excluded = !excluded;
             return !excluded;
         }
@@ -50,11 +50,11 @@ namespace Utili.Implementations
                 return string.Format(format, parameter.Name);
             }
 
-            string reason = FormatFailureReason(context, result);
+            var reason = FormatFailureReason(context, result);
             if (reason == null)
                 return null;
 
-            LocalEmbed embed = new LocalEmbed()
+            var embed = new LocalEmbed()
                 .WithAuthor("Error", "https://i.imgur.com/Sg4663k.png")
                 .WithDescription(reason)
                 .WithColor(0xb54343);
@@ -71,8 +71,8 @@ namespace Utili.Implementations
             }
             else if (result is CommandOnCooldownResult cooldownResult)
             {
-                (Cooldown, TimeSpan) cooldown = cooldownResult.Cooldowns.OrderBy(x => x.RetryAfter).Last();
-                int seconds = (int) Math.Round(cooldown.Item2.TotalSeconds);
+                var cooldown = cooldownResult.Cooldowns.OrderBy(x => x.RetryAfter).Last();
+                var seconds = (int) Math.Round(cooldown.Item2.TotalSeconds);
                 embed.WithDescription($"You're doing that too fast, try again in {seconds} {(seconds == 1 ? "second" : "seconds")}");
                 embed.WithFooter($"{cooldown.Item1.BucketType.ToString().Title()} cooldown");
             }

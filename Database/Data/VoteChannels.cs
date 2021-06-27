@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using MySql.Data.MySqlClient;
 
 namespace Database.Data
 {
@@ -9,7 +8,7 @@ namespace Database.Data
     {
         public static async Task<List<VoteChannelsRow>> GetRowsAsync(ulong? guildId = null, ulong? channelId = null, bool ignoreCache = false)
         {
-            List<VoteChannelsRow> matchedRows = new();
+            var matchedRows = new List<VoteChannelsRow>();
 
             if (Cache.Initialised && !ignoreCache)
             {
@@ -20,8 +19,8 @@ namespace Database.Data
             }
             else
             {
-                string command = "SELECT * FROM VoteChannels WHERE TRUE";
-                List<(string, object)> values = new();
+                var command = "SELECT * FROM VoteChannels WHERE TRUE";
+                var values = new List<(string, object)>();
 
                 if (guildId.HasValue)
                 {
@@ -35,7 +34,7 @@ namespace Database.Data
                     values.Add(("ChannelId", channelId.Value));
                 }
 
-                MySqlDataReader reader = await Sql.ExecuteReaderAsync(command, values.ToArray());
+                var reader = await Sql.ExecuteReaderAsync(command, values.ToArray());
 
                 while (reader.Read())
                 {
@@ -117,7 +116,7 @@ namespace Database.Data
 
         public static VoteChannelsRow FromDatabase(ulong guildId, ulong channelId, int mode, string emotes)
         {
-            VoteChannelsRow row = new()
+            var row = new VoteChannelsRow
             {
                 New = false,
                 GuildId = guildId,
@@ -134,9 +133,9 @@ namespace Database.Data
 
         public string GetEmotesString()
         {
-            string emotesString = "";
+            var emotesString = "";
 
-            for (int i = 0; i < Emotes.Count; i++)
+            for (var i = 0; i < Emotes.Count; i++)
             {
                 emotesString += Emotes[i];
                 if (i != Emotes.Count - 1)

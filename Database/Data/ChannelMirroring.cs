@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using MySql.Data.MySqlClient;
 
 namespace Database.Data
 {
@@ -9,7 +8,7 @@ namespace Database.Data
     {
         public static async Task<List<ChannelMirroringRow>> GetRowsAsync(ulong? guildId = null, ulong? fromChannelId = null, bool ignoreCache = false)
         {
-            List<ChannelMirroringRow> matchedRows = new();
+            var matchedRows = new List<ChannelMirroringRow>();
 
             if (Cache.Initialised && !ignoreCache)
             {
@@ -20,8 +19,8 @@ namespace Database.Data
             }
             else
             {
-                string command = "SELECT * FROM ChannelMirroring WHERE TRUE";
-                List<(string, object)> values = new();
+                var command = "SELECT * FROM ChannelMirroring WHERE TRUE";
+                var values = new List<(string, object)>();
 
                 if (guildId.HasValue)
                 {
@@ -35,7 +34,7 @@ namespace Database.Data
                     values.Add(("FromChannelId", fromChannelId.Value));
                 }
 
-                MySqlDataReader reader = await Sql.ExecuteReaderAsync(command, values.ToArray());
+                var reader = await Sql.ExecuteReaderAsync(command, values.ToArray());
 
                 while (reader.Read())
                 {
@@ -54,7 +53,7 @@ namespace Database.Data
 
         public static async Task<ChannelMirroringRow> GetRowAsync(ulong guildId, ulong fromChannelId)
         {
-            List<ChannelMirroringRow> rows = await GetRowsAsync(guildId, fromChannelId);
+            var rows = await GetRowsAsync(guildId, fromChannelId);
             return rows.Count > 0 ? rows.First() : new ChannelMirroringRow(guildId, fromChannelId);
         }
 

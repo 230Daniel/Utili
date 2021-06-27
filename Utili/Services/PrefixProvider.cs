@@ -8,9 +8,9 @@ using Microsoft.Extensions.Configuration;
 
 namespace Utili.Services
 {
-    class PrefixProvider : IPrefixProvider
+    internal class PrefixProvider : IPrefixProvider
     {
-        IConfiguration _config;
+        private IConfiguration _config;
 
         public PrefixProvider(IConfiguration config)
         {
@@ -29,7 +29,7 @@ namespace Utili.Services
             }
 
             await Task.Yield();
-            CoreRow row = await Core.GetRowAsync(message.GuildId.Value);
+            var row = await Core.GetRowAsync(message.GuildId.Value);
             return new IPrefix[]
             {
                 new StringPrefix(row.Prefix.Value),

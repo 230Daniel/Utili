@@ -12,8 +12,8 @@ namespace Utili.Features
 {
     public class VoteChannelsService
     {
-        readonly ILogger<VoteChannelsService> _logger;
-        readonly DiscordClientBase _client;
+        private readonly ILogger<VoteChannelsService> _logger;
+        private readonly DiscordClientBase _client;
 
         public VoteChannelsService(ILogger<VoteChannelsService> logger, DiscordClientBase client)
         {
@@ -29,14 +29,14 @@ namespace Utili.Features
                     
                 if (!e.Channel.BotHasPermissions(Permission.ViewChannel | Permission.ReadMessageHistory | Permission.AddReactions)) return;
 
-                VoteChannelsRow row = (await VoteChannels.GetRowsAsync(e.GuildId.Value, e.ChannelId)).FirstOrDefault();
+                var row = (await VoteChannels.GetRowsAsync(e.GuildId.Value, e.ChannelId)).FirstOrDefault();
                 if (row is null || !DoesMessageObeyRule(e.Message as IUserMessage, row)) return;
 
                 if (await Premium.IsGuildPremiumAsync(e.GuildId.Value)) row.Emotes = row.Emotes.Take(5).ToList();
                 else row.Emotes = row.Emotes.Take(2).ToList();
 
-                CachedGuild guild = _client.GetGuild(e.GuildId.Value);
-                foreach (string emoji in row.Emotes)
+                var guild = _client.GetGuild(e.GuildId.Value);
+                foreach (var emoji in row.Emotes)
                     await e.Message.AddReactionAsync(LocalEmoji.FromEmoji(guild.GetEmoji(emoji)));
             }
             catch (Exception ex)
@@ -45,7 +45,7 @@ namespace Utili.Features
             }
         }
 
-        static bool DoesMessageObeyRule(IUserMessage message, VoteChannelsRow row)
+        private static bool DoesMessageObeyRule(IUserMessage message, VoteChannelsRow row)
         {
             return row.Mode switch
             {

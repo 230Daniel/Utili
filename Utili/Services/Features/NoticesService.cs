@@ -17,11 +17,11 @@ namespace Utili.Services
 {
     public class NoticesService
     {
-        ILogger<NoticesService> _logger;
-        DiscordClientBase _client;
+        private readonly ILogger<NoticesService> _logger;
+        private readonly DiscordClientBase _client;
 
-        List<(Snowflake, Timer)> _channelUpdateTimers = new();
-        RepeatingTimer _dashboardNoticeUpdateTimer;
+        private List<(Snowflake, Timer)> _channelUpdateTimers = new();
+        private RepeatingTimer _dashboardNoticeUpdateTimer;
 
         public NoticesService(ILogger<NoticesService> logger, DiscordClientBase client)
         {
@@ -41,7 +41,7 @@ namespace Utili.Services
             {
                 if (!e.GuildId.HasValue) return;
 
-                NoticesRow row = await Notices.GetRowAsync(e.GuildId.Value, e.ChannelId);
+                var row = await Notices.GetRowAsync(e.GuildId.Value, e.ChannelId);
                 if (row.Enabled && e.Message is ISystemMessage && e.Message.Author.Id == _client.CurrentUser.Id)
                 {
                     await e.Message.DeleteAsync();
@@ -49,8 +49,8 @@ namespace Utili.Services
                 }
                 if (!row.Enabled || e.Message.Author.Id == _client.CurrentUser.Id) return;
                 
-                TimeSpan delay = row.Delay;
-                TimeSpan minimumDelay = e.Member is null || e.Member.IsBot
+                var delay = row.Delay;
+                var minimumDelay = e.Member is null || e.Member.IsBot
                     ? TimeSpan.FromSeconds(10)
                     : TimeSpan.FromSeconds(5);
                 if (delay < minimumDelay) delay = minimumDelay;
@@ -63,23 +63,23 @@ namespace Utili.Services
             }
         }
 
-        void DashboardNoticeUpdateTimer_Elapsed(object sender, ElapsedEventArgs e)
+        private void DashboardNoticeUpdateTimer_Elapsed(object sender, ElapsedEventArgs e)
         {
             _ = UpdateNoticesFromDashboardAsync();
         }
 
-        async Task UpdateNoticesFromDashboardAsync()
+        private async Task UpdateNoticesFromDashboardAsync()
         {
-            List<MiscRow> fromDashboard = await Misc.GetRowsAsync(type: "RequiresNoticeUpdate");
+            var fromDashboard = await Misc.GetRowsAsync(type: "RequiresNoticeUpdate");
             fromDashboard.RemoveAll(x => _client.GetGuilds().All(y => x.GuildId != y.Key));
-            foreach (MiscRow miscRow in fromDashboard)
+            foreach (var miscRow in fromDashboard)
             {
                 await Misc.DeleteRowAsync(miscRow);
                 ScheduleNoticeUpdate(miscRow.GuildId, ulong.Parse(miscRow.Value), TimeSpan.FromSeconds(1));
             }
         }
 
-        void ScheduleNoticeUpdate(Snowflake guildId, Snowflake channelId, TimeSpan delay)
+        private void ScheduleNoticeUpdate(Snowflake guildId, Snowflake channelId, TimeSpan delay)
         {
             Timer newTimer = new(x =>
             {
@@ -88,7 +88,7 @@ namespace Utili.Services
 
             lock (_channelUpdateTimers)
             {
-                (Snowflake, Timer) channelUpdate = _channelUpdateTimers.FirstOrDefault(x => x.Item1 == channelId);
+                var channelUpdate = _channelUpdateTimers.FirstOrDefault(x => x.Item1 == channelId);
                 if (channelUpdate.Item2 is not null)
                 {
                     channelUpdate.Item2.Dispose();
@@ -99,11 +99,11 @@ namespace Utili.Services
             }
         }
 
-        async Task UpdateNoticeAsync(Snowflake guildId, Snowflake channelId)
+        private async Task UpdateNoticeAsync(Snowflake guildId, Snowflake channelId)
         {
             try
             {
-                NoticesRow row = await Notices.GetRowAsync(guildId, channelId);
+                var row = await Notices.GetRowAsync(guildId, channelId);
                 if (row is null || !row.Enabled) return;
 
                 IGuild guild = _client.GetGuild(guildId);
@@ -117,10 +117,10 @@ namespace Utili.Services
                     Permission.EmbedLinks |
                     Permission.AttachFiles)) return;
 
-                IMessage previousMessage = await channel.FetchMessageAsync(row.MessageId);
+                var previousMessage = await channel.FetchMessageAsync(row.MessageId);
                 if(previousMessage is not null) await previousMessage.DeleteAsync();
 
-                IUserMessage message = await channel.SendMessageAsync(GetNotice(row));
+                var message = await channel.SendMessageAsync(GetNotice(row));
                 row.MessageId = message.Id;
                 await Notices.SaveMessageIdAsync(row);
                 await message.PinAsync(new DefaultRestRequestOptions {Reason = "Sticky Notices"});
@@ -133,14 +133,14 @@ namespace Utili.Services
 
         public static LocalMessage GetNotice(NoticesRow row)
         {
-            string text = row.Text.Value.Replace(@"\n", "\n");
-            string title = row.Title.Value;
-            string content = row.Content.Value.Replace(@"\n", "\n");
-            string footer = row.Footer.Value.Replace(@"\n", "\n");
+            var text = row.Text.Value.Replace(@"\n", "\n");
+            var title = row.Title.Value;
+            var content = row.Content.Value.Replace(@"\n", "\n");
+            var footer = row.Footer.Value.Replace(@"\n", "\n");
 
-            string iconUrl = row.Icon.Value;
-            string thumbnailUrl = row.Thumbnail.Value;
-            string imageUrl = row.Image.Value;
+            var iconUrl = row.Icon.Value;
+            var thumbnailUrl = row.Thumbnail.Value;
+            var imageUrl = row.Image.Value;
 
             if (string.IsNullOrWhiteSpace(title) && !string.IsNullOrWhiteSpace(iconUrl))
                 title = "Title";

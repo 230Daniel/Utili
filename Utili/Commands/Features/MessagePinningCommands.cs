@@ -31,10 +31,10 @@ namespace Utili.Features
             [RequireBotParameterChannelPermissions(Permission.ViewChannel | Permission.ManageWebhooks)]
             ITextChannel pinChannel = null)
             => await Pin(messageId, pinChannel, channel);
-        
-        async Task Pin(ulong messageId, ITextChannel pinChannel, ITextChannel channel)
+
+        private async Task Pin(ulong messageId, ITextChannel pinChannel, ITextChannel channel)
         {
-            IUserMessage message = await channel.FetchMessageAsync(messageId) as IUserMessage;
+            var message = await channel.FetchMessageAsync(messageId) as IUserMessage;
 
             if (message is null)
             {
@@ -43,7 +43,7 @@ namespace Utili.Features
                 return;
             }
             
-            MessagePinningRow row = await MessagePinning.GetRowAsync(Context.Guild.Id);
+            var row = await MessagePinning.GetRowAsync(Context.Guild.Id);
             if (row.Pin) await message.PinAsync(new DefaultRestRequestOptions {Reason = $"Message Pinning (manual by {Context.Message.Author} {Context.Message.Author.Id})"});
 
             pinChannel ??= Context.Guild.GetTextChannel(row.PinChannelId);
@@ -61,12 +61,12 @@ namespace Utili.Features
                 return;
             }
             
-            ulong webhookId = row.WebhookIds.FirstOrDefault(x => x.Item1 == pinChannel.Id).Item2;
-            IWebhook webhook = await pinChannel.FetchWebhookAsync(webhookId);
+            var webhookId = row.WebhookIds.FirstOrDefault(x => x.Item1 == pinChannel.Id).Item2;
+            var webhook = await pinChannel.FetchWebhookAsync(webhookId);
             
             if (webhook is null)
             {
-                FileStream avatar = File.OpenRead("Avatar.png");
+                var avatar = File.OpenRead("Avatar.png");
                 webhook = await pinChannel.CreateWebhookAsync("Utili Message Pinning", x =>
                 {
                     x.Avatar = avatar;
@@ -81,12 +81,12 @@ namespace Utili.Features
                 await MessagePinning.SaveRowAsync(row);
             }
             
-            string username = $"{message.Author} in {channel.Name}";
-            string avatarUrl = message.Author.GetAvatarUrl();
+            var username = $"{message.Author} in {channel.Name}";
+            var avatarUrl = message.Author.GetAvatarUrl();
 
             if (!string.IsNullOrWhiteSpace(message.Content) || message.Embeds.Count > 0)
             {
-                LocalWebhookMessage messageBuilder = new LocalWebhookMessage()
+                var messageBuilder = new LocalWebhookMessage()
                     .WithName(username)
                     .WithAvatarUrl(avatarUrl)
                     .WithOptionalContent(message.Content)
@@ -96,9 +96,9 @@ namespace Utili.Features
                 await Context.Bot.ExecuteWebhookAsync(webhook.Id, webhook.Token, messageBuilder);
             }
             
-            foreach (Attachment attachment in message.Attachments)
+            foreach (var attachment in message.Attachments)
             {
-                LocalWebhookMessage attachmentMessage = new LocalWebhookMessage()
+                var attachmentMessage = new LocalWebhookMessage()
                     .WithName(username)
                     .WithAvatarUrl(avatarUrl)
                     .WithContent(attachment.Url);

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using MySql.Data.MySqlClient;
 
 namespace Database.Data
 {
@@ -10,10 +9,10 @@ namespace Database.Data
     {
         public static async Task<List<SubscriptionsRow>> GetRowsAsync(string subscriptionId = null, ulong? userId = null, bool onlyValid = false)
         {
-            List<SubscriptionsRow> matchedRows = new();
+            var matchedRows = new List<SubscriptionsRow>();
 
-            string command = "SELECT * FROM Subscriptions WHERE TRUE";
-            List<(string, object)> values = new();
+            var command = "SELECT * FROM Subscriptions WHERE TRUE";
+            var values = new List<(string, object)>();
 
             if (!string.IsNullOrEmpty(subscriptionId))
             {
@@ -32,7 +31,7 @@ namespace Database.Data
                 command += " AND (Status=0 OR Status=1 OR Status=6)";
             }
 
-            MySqlDataReader reader = await Sql.ExecuteReaderAsync(command, values.ToArray());
+            var reader = await Sql.ExecuteReaderAsync(command, values.ToArray());
 
             while (reader.Read())
             {
@@ -51,17 +50,17 @@ namespace Database.Data
 
         public static async Task<SubscriptionsRow> GetRowAsync(string subscriptionId)
         {
-            List<SubscriptionsRow> rows = await GetRowsAsync(subscriptionId);
+            var rows = await GetRowsAsync(subscriptionId);
             return rows.Count > 0 ? rows.First() : new SubscriptionsRow(subscriptionId);
         }
 
         public static async Task<int> GetSlotCountAsync(ulong userId)
         {
-            MySqlDataReader reader = await Sql.ExecuteReaderAsync(
+            var reader = await Sql.ExecuteReaderAsync(
                 "SELECT SUM(Slots) FROM Subscriptions WHERE UserId = @UserId AND (Status=0 OR Status=1 OR Status=6);",
                 ("UserId", userId));
 
-            int slots = 0;
+            var slots = 0;
 
             reader.Read();
             try { slots = reader.GetInt32(0); } catch { }

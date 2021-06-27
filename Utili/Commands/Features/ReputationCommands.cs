@@ -1,7 +1,5 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
-using Database.Data;
 using Disqord;
 using Disqord.Bot;
 using Disqord.Rest;
@@ -22,14 +20,14 @@ namespace Utili.Commands
         {
             member ??= Context.Message.Author as IMember;
 
-            ReputationUserRow row = await Database.Data.Reputation.GetUserRowAsync(Context.Guild.Id, member.Id);
+            var row = await Database.Data.Reputation.GetUserRowAsync(Context.Guild.Id, member.Id);
 
             Color colour;
             if (row.Reputation == 0) colour = new Color(195, 195, 195);
             else if (row.Reputation > 0) colour = new Color(67, 181, 129);
             else colour = new Color(181, 67, 67);
 
-            LocalEmbed embed = MessageUtils
+            var embed = MessageUtils
                 .CreateEmbed(EmbedType.Info, "", $"{member.Mention}'s reputation: {row.Reputation}")
                 .WithColor(colour);
 
@@ -40,15 +38,15 @@ namespace Utili.Commands
         [DefaultCooldown(1, 5)]
         public async Task Leaderboard()
         {
-            List<ReputationUserRow> rows = await Database.Data.Reputation.GetUserRowsAsync(Context.Guild.Id);
+            var rows = await Database.Data.Reputation.GetUserRowsAsync(Context.Guild.Id);
             rows = rows.OrderBy(x => x.Reputation).ToList();
 
-            int position = 1;
-            string content = "";
+            var position = 1;
+            var content = "";
 
-            foreach (ReputationUserRow row in rows)
+            foreach (var row in rows)
             {
-                IMember member = await Context.Guild.FetchMemberAsync(row.UserId);
+                var member = await Context.Guild.FetchMemberAsync(row.UserId);
                 if (member is not null)
                 {
                     content += $"{position}. {member.Mention} {row.Reputation}\n";
@@ -64,15 +62,15 @@ namespace Utili.Commands
         [DefaultCooldown(1, 5)]
         public async Task InvserseLeaderboard()
         {
-            List<ReputationUserRow> rows = await Database.Data.Reputation.GetUserRowsAsync(Context.Guild.Id);
+            var rows = await Database.Data.Reputation.GetUserRowsAsync(Context.Guild.Id);
             rows = rows.OrderBy(x => x.Reputation).ToList();
 
-            int position = rows.Count;
-            string content = "";
+            var position = rows.Count;
+            var content = "";
 
-            foreach (ReputationUserRow row in rows)
+            foreach (var row in rows)
             {
-                IMember member = await Context.Guild.FetchMemberAsync(row.UserId);
+                var member = await Context.Guild.FetchMemberAsync(row.UserId);
                 if (member is not null)
                 {
                     content += $"{position}. {member.Mention} {row.Reputation}\n";
@@ -126,7 +124,7 @@ namespace Utili.Commands
         [RequireBotChannelPermissions(Permission.AddReactions)]
         public async Task AddEmoji(IEmoji emoji, int value = 0)
         {
-            ReputationRow row = await Database.Data.Reputation.GetRowAsync(Context.Guild.Id);
+            var row = await Database.Data.Reputation.GetRowAsync(Context.Guild.Id);
 
             if (row.Emotes.Any(x => Equals(x.Item1, emoji.ToString())))
             {

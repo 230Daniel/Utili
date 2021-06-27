@@ -13,9 +13,9 @@ namespace Utili.Features
 {
     public class RoslynCommands : DiscordGuildModuleBase
     {
-        IServiceProvider _services;
-        ILogger<RoslynCommands> _logger;
-        IConfiguration _config;
+        private IServiceProvider _services;
+        private ILogger<RoslynCommands> _logger;
+        private IConfiguration _config;
 
         public RoslynCommands(IServiceProvider services, ILogger<RoslynCommands> logger, IConfiguration config)
         {
@@ -36,7 +36,7 @@ namespace Utili.Features
 
             _logger.LogInformation($"Executing code: {code}");
 
-            ScriptOptions options = ScriptOptions.Default
+            var options = ScriptOptions.Default
                 .WithImports(
                     "System",
                     "System.Collections.Generic",
@@ -61,7 +61,7 @@ namespace Utili.Features
             RoslynGlobals globals = new(_services, Context);
             try
             {
-                object result = await CSharpScript.EvaluateAsync(code, options, globals);
+                var result = await CSharpScript.EvaluateAsync(code, options, globals);
                 _logger.LogInformation($"Roslyn result: {result}");
                 if (result is null) await Context.Channel.SendSuccessAsync("Evaluated result", "null");
                 else await Context.Channel.SendSuccessAsync("Evaluated result", result.ToString());

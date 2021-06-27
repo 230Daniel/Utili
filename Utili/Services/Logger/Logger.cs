@@ -3,9 +3,9 @@ using Microsoft.Extensions.Logging;
 
 namespace Utili.Services
 {
-    class Logger : ILogger
+    internal class Logger : ILogger
     {
-        string _categoryName;
+        private string _categoryName;
 
         public Logger(string categoryCategoryName)
         {
@@ -16,7 +16,7 @@ namespace Utili.Services
         {
             if(!IsEnabled(logLevel)) return;
 
-            string exceptionString = exception is null ? "" : $"    {exception.ToString().Replace("\n", "\n    ")}\n";
+            var exceptionString = exception is null ? "" : $"    {exception.ToString().Replace("\n", "\n    ")}\n";
 
             LogWriter.Write(
                 ($"{DateTime.UtcNow.Hour:00}:{DateTime.UtcNow.Minute:00}:{DateTime.UtcNow.Second:00}  ", ConsoleColor.White),
@@ -37,7 +37,7 @@ namespace Utili.Services
             return true;
         }
 
-        string GetShortLogLevel(LogLevel logLevel)
+        private string GetShortLogLevel(LogLevel logLevel)
         {
             return logLevel switch
             {
@@ -52,7 +52,7 @@ namespace Utili.Services
             };
         }
 
-        ConsoleColor GetLogLevelConsoleColour(LogLevel logLevel)
+        private ConsoleColor GetLogLevelConsoleColour(LogLevel logLevel)
         {
             return logLevel switch
             {

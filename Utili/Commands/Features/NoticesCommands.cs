@@ -19,7 +19,7 @@ namespace Utili.Commands.Features
             ITextChannel channel = null)
         {
             channel ??= Context.Channel;
-            NoticesRow row = await Notices.GetRowAsync(Context.Guild.Id, channel.Id);
+            var row = await Notices.GetRowAsync(Context.Guild.Id, channel.Id);
             await Context.Channel.SendMessageAsync(NoticesService.GetNotice(row));
         }
     }

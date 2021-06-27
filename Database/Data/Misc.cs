@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using MySql.Data.MySqlClient;
 
 namespace Database.Data
 {
@@ -21,7 +20,7 @@ namespace Database.Data
             }
             else
             {
-                string command = "SELECT * FROM Misc WHERE TRUE";
+                var command = "SELECT * FROM Misc WHERE TRUE";
                 List<(string, object)> values = new();
 
                 if (guildId.HasValue)
@@ -42,7 +41,7 @@ namespace Database.Data
                     values.Add(("Value", EString.FromDecoded(value).EncodedValue));
                 }
 
-                MySqlDataReader reader = await Sql.ExecuteReaderAsync(command, values.ToArray());
+                var reader = await Sql.ExecuteReaderAsync(command, values.ToArray());
 
                 while (reader.Read())
                 {
@@ -60,7 +59,7 @@ namespace Database.Data
 
         public static async Task<MiscRow> GetRowAsync(ulong? guildId = null, string type = null)
         {
-            List<MiscRow> rows = await GetRowsAsync(guildId, type);
+            var rows = await GetRowsAsync(guildId, type);
             return rows.Count == 0 ? null : rows.First();
         }
 

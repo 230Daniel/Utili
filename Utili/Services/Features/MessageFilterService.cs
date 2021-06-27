@@ -12,9 +12,10 @@ namespace Utili.Services
 {
     public class MessageFilterService
     {
-        ILogger<MessageFilterService> _logger;
-        DiscordClientBase _client;
-        ConcurrentDictionary<Snowflake, DateTime> _offenceDictionary;
+        private readonly ILogger<MessageFilterService> _logger;
+        private readonly DiscordClientBase _client;
+        
+        private ConcurrentDictionary<Snowflake, DateTime> _offenceDictionary;
         
         public MessageFilterService(ILogger<MessageFilterService> logger, DiscordClientBase client)
         {
@@ -38,7 +39,7 @@ namespace Utili.Services
                     userMessage.Embeds[0].Author?.Name == "Message deleted")
                     return false;
 
-                MessageFilterRow row = await MessageFilter.GetRowAsync(e.GuildId.Value, e.ChannelId);
+                var row = await MessageFilter.GetRowAsync(e.GuildId.Value, e.ChannelId);
                 if(row.New) return false;
 
                 if (e.Message is not IUserMessage message)
@@ -47,17 +48,17 @@ namespace Utili.Services
                     return false;
                 }
 
-                if (!DoesMessageObeyRule(message, row, out string allowedTypes))
+                if (!DoesMessageObeyRule(message, row, out var allowedTypes))
                 {
                     await e.Message.DeleteAsync(new DefaultRestRequestOptions {Reason = "Message Filter"});
                     if(e.Member is null || e.Member.IsBot) return true;
 
-                    if (_offenceDictionary.TryGetValue(e.ChannelId, out DateTime recentOffence) && recentOffence > DateTime.UtcNow.AddSeconds(-4))
+                    if (_offenceDictionary.TryGetValue(e.ChannelId, out var recentOffence) && recentOffence > DateTime.UtcNow.AddSeconds(-4))
                         return true;
                     
                     _offenceDictionary.AddOrUpdate(e.ChannelId, DateTime.UtcNow, (_, _) => DateTime.UtcNow);
 
-                    IUserMessage sent = await e.Channel.SendFailureAsync("Message deleted",
+                    var sent = await e.Channel.SendFailureAsync("Message deleted",
                         $"Only messages {allowedTypes} are allowed in {e.Channel.Mention}");
                     await Task.Delay(8000);
                     await sent.DeleteAsync();
@@ -71,7 +72,7 @@ namespace Utili.Services
             return false;
         }
 
-        static bool DoesMessageObeyRule(IUserMessage message, MessageFilterRow row, out string allowedTypes)
+        private static bool DoesMessageObeyRule(IUserMessage message, MessageFilterRow row, out string allowedTypes)
         {
             switch (row.Mode)
             {

@@ -18,21 +18,21 @@ namespace Utili.Commands
     [Group("Inactive", "InactiveRole")]
     public class InactiveRoleCommands : DiscordGuildModuleBase
     {
-        static List<ulong> _kickingIn = new();
+        private static List<ulong> _kickingIn = new();
 
         [Command("List")]
         [Cooldown(1, 10, CooldownMeasure.Seconds, CooldownBucketType.Guild)]
         public async Task List()
         {
-            InactiveRoleRow row = await InactiveRole.GetRowAsync(Context.Guild.Id);
+            var row = await InactiveRole.GetRowAsync(Context.Guild.Id);
             if (Context.Guild.GetRole(row.RoleId) is null)
             {
                 await Context.Channel.SendFailureAsync("Error", "This server does not have an inactive role set");
                 return; 
             }
 
-            IReadOnlyList<IMember> members = await Context.Guild.FetchAllMembersAsync();
-            List<IMember> inactiveMembers = members
+            var members = await Context.Guild.FetchAllMembersAsync();
+            var inactiveMembers = members
                 .Where(x => x.GetRole(row.RoleId) is not null && x.GetRole(row.ImmuneRoleId) is null)
                 .OrderBy(x => x.Nick ?? x.Name)
                 .ToList();
@@ -43,13 +43,12 @@ namespace Utili.Commands
                 return;
             }
 
-            List<Page> pages = new();
-
-            string content = "";
-            LocalEmbed embed = MessageUtils.CreateEmbed(EmbedType.Info, "Inactive Users")
+            var pages = new List<Page>();
+            var content = "";
+            var embed = MessageUtils.CreateEmbed(EmbedType.Info, "Inactive Users")
                 .WithFooter($"Page 1 of {Math.Ceiling((decimal) inactiveMembers.Count / 9)}");
 
-            for (int i = 0; i < inactiveMembers.Count; i++)
+            for (var i = 0; i < inactiveMembers.Count; i++)
             {
                 content += $"{inactiveMembers[i].Mention}\n";
                 if ((i + 1) % 3 == 0)
@@ -90,7 +89,7 @@ namespace Utili.Commands
         [Cooldown(1, 10, CooldownMeasure.Seconds, CooldownBucketType.Guild)]
         public async Task Kick()
         {
-            bool cancelCommand = false;
+            var cancelCommand = false;
 
             lock (_kickingIn)
             {
@@ -104,27 +103,27 @@ namespace Utili.Commands
                 return;
             }
 
-            InactiveRoleRow row = await InactiveRole.GetRowAsync(Context.Guild.Id);
+            var row = await InactiveRole.GetRowAsync(Context.Guild.Id);
             if (Context.Guild.GetRole(row.RoleId) is null)
             {
                 await Context.Channel.SendFailureAsync("Error", "This server does not have an inactive role set");
                 return; 
             }
 
-            IReadOnlyList<IMember> members = await Context.Guild.FetchAllMembersAsync();
-            List<IMember> inactiveMembers = members
+            var members = await Context.Guild.FetchAllMembersAsync();
+            var inactiveMembers = members
                 .Where(x => x.GetRole(row.RoleId) is not null && x.GetRole(row.ImmuneRoleId) is null)
                 .OrderBy(x => x.Nick ?? x.Name)
                 .ToList();
 
-            IUserMessage confirmMessage = await Context.Channel.SendInfoAsync("Are you sure?", 
+            var confirmMessage = await Context.Channel.SendInfoAsync("Are you sure?", 
                 $"This command will kick {inactiveMembers.Count} inactive members - View them with {Context.Prefix}inactive list\n" +
                 $"Press {Constants.CheckmarkEmoji} to continue or {Constants.CrossEmoji} to cancel.");
 
             await confirmMessage.AddReactionAsync(Constants.CheckmarkEmoji);
             await confirmMessage.AddReactionAsync(Constants.CrossEmoji);
 
-            ReactionAddedEventArgs reaction = await confirmMessage.WaitForReactionAsync(x => x.UserId == Context.Message.Author.Id && (x.Emoji.Equals(Constants.CheckmarkEmoji) || x.Emoji.Equals(Constants.CrossEmoji)), TimeSpan.FromMinutes(1));
+            var reaction = await confirmMessage.WaitForReactionAsync(x => x.UserId == Context.Message.Author.Id && (x.Emoji.Equals(Constants.CheckmarkEmoji) || x.Emoji.Equals(Constants.CrossEmoji)), TimeSpan.FromMinutes(1));
             if (reaction is null || !reaction.Emoji.Equals(Constants.CheckmarkEmoji))
             {
                 await confirmMessage.ClearReactionsAsync();
@@ -135,13 +134,13 @@ namespace Utili.Commands
                 await confirmMessage.ClearReactionsAsync();
                 await confirmMessage.ModifyAsync(x => x.Embeds = new[]{MessageUtils.CreateEmbed(EmbedType.Success, "Kicking inactive users", $"Under ideal conditions, this action will take {TimeSpan.FromSeconds(inactiveMembers.Count * 1.1).ToLongString()}")});
 
-                int failed = 0;
-                foreach(IMember member in inactiveMembers)
+                var failed = 0;
+                foreach(var member in inactiveMembers)
                 {
                     try
                     {
-                        Task delay = Task.Delay(1100);
-                        Task kick = member.KickAsync(new DefaultRestRequestOptions {Reason = $"Inactive Kick (manual by {Context.Message.Author} {Context.Message.Author.Id})"});
+                        var delay = Task.Delay(1100);
+                        var kick = member.KickAsync(new DefaultRestRequestOptions {Reason = $"Inactive Kick (manual by {Context.Message.Author} {Context.Message.Author.Id})"});
                         await Task.WhenAll(delay, kick);
                     }
                     catch

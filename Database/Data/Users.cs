@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using MySql.Data.MySqlClient;
 
 namespace Database.Data
 {
@@ -11,10 +10,10 @@ namespace Database.Data
         
         public static async Task<List<UserRow>> GetRowsAsync(ulong? userId = null, string customerId = null)
         {
-            List<UserRow> matchedRows = new();
+            var matchedRows = new List<UserRow>();
 
-            string command = "SELECT * FROM Users WHERE TRUE";
-            List<(string, object)> values = new();
+            var command = "SELECT * FROM Users WHERE TRUE";
+            var values = new List<(string, object)>();
 
             if (userId.HasValue)
             {
@@ -28,7 +27,7 @@ namespace Database.Data
                 values.Add(("CustomerId", customerId));
             }
 
-            MySqlDataReader reader = await Sql.ExecuteReaderAsync(command, values.ToArray());
+            var reader = await Sql.ExecuteReaderAsync(command, values.ToArray());
 
             while (reader.Read())
             {
@@ -46,13 +45,13 @@ namespace Database.Data
 
         public static async Task<UserRow> GetRowAsync(ulong userId)
         {
-            List<UserRow> rows = await GetRowsAsync(userId);
+            var rows = await GetRowsAsync(userId);
             return rows.Count > 0 ? rows.First() : new UserRow(userId);
         }
 
         public static async Task<UserRow> GetRowAsync(string customerId)
         {
-            List<UserRow> rows = await GetRowsAsync(customerId: customerId);
+            var rows = await GetRowsAsync(customerId: customerId);
             return rows.Count > 0 ? rows.First() : null;
         }
 

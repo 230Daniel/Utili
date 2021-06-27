@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using MySql.Data.MySqlClient;
 
 namespace Database.Data
 {
@@ -9,7 +8,7 @@ namespace Database.Data
     {
         public static async Task<List<RoleLinkingRow>> GetRowsAsync(ulong? guildId = null, ulong? linkId = null, bool ignoreCache = false)
         {
-            List<RoleLinkingRow> matchedRows = new();
+            var matchedRows = new List<RoleLinkingRow>();
 
             if (Cache.Initialised && !ignoreCache)
             {
@@ -20,8 +19,8 @@ namespace Database.Data
             }
             else
             {
-                string command = "SELECT * FROM RoleLinking WHERE TRUE";
-                List<(string, object)> values = new();
+                var command = "SELECT * FROM RoleLinking WHERE TRUE";
+                var values = new List<(string, object)>();
 
                 if (guildId.HasValue)
                 {
@@ -35,7 +34,7 @@ namespace Database.Data
                     values.Add(("LinkId", linkId.Value));
                 }
 
-                MySqlDataReader reader = await Sql.ExecuteReaderAsync(command, values.ToArray());
+                var reader = await Sql.ExecuteReaderAsync(command, values.ToArray());
 
                 while (reader.Read())
                 {
@@ -55,7 +54,7 @@ namespace Database.Data
 
         public static async Task<RoleLinkingRow> GetRowAsync(ulong guildId, ulong linkId)
         {
-            List<RoleLinkingRow> rows = await GetRowsAsync(guildId, linkId);
+            var rows = await GetRowsAsync(guildId, linkId);
             return rows.Count > 0 ? rows.First() : new RoleLinkingRow(guildId, 0, 0);
         }
 

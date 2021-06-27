@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using Disqord;
 using Disqord.Gateway;
 
@@ -10,8 +9,8 @@ namespace Utili.Extensions
         public static bool CanBeManaged(this IRole role)
         {
             IGuild guild = (role.Client as DiscordClientBase).GetGuild(role.GuildId);
-            IMember bot = guild.GetCurrentMember();
-            IEnumerable<CachedRole> roles = bot.GetRoles().Values;
+            var bot = guild.GetCurrentMember();
+            var roles = bot.GetRoles().Values;
 
             // The higher the position the higher the role in the hierarchy
 

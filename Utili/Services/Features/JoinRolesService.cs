@@ -14,10 +14,10 @@ namespace Utili.Services
 {
     public class JoinRolesService
     {
-        ILogger<JoinRolesService> _logger;
-        DiscordClientBase _client;
+        private readonly ILogger<JoinRolesService> _logger;
+        private readonly DiscordClientBase _client;
 
-        Dictionary<(ulong, ulong), Timer> _pendingTimers = new();
+        private Dictionary<(ulong, ulong), Timer> _pendingTimers = new();
 
         public JoinRolesService(ILogger<JoinRolesService> logger, DiscordClientBase client)
         {
@@ -34,12 +34,12 @@ namespace Utili.Services
         {
             try
             {
-                JoinRolesRow row = await JoinRoles.GetRowAsync(e.GuildId);
+                var row = await JoinRoles.GetRowAsync(e.GuildId);
                 IGuild guild = _client.GetGuild(e.GuildId);
 
                 if (row.WaitForVerification && (e.Member.IsPending || guild.VerificationLevel >= GuildVerificationLevel.High))
                 {
-                    JoinRolesPendingRow pendingRow = await JoinRoles.GetPendingRowAsync(e.GuildId, e.Member.Id);
+                    var pendingRow = await JoinRoles.GetPendingRowAsync(e.GuildId, e.Member.Id);
                     pendingRow.IsPending = e.Member.IsPending;
                     if (guild.VerificationLevel >= GuildVerificationLevel.High)
                     {
@@ -62,10 +62,10 @@ namespace Utili.Services
         {
             try
             {
-                Snowflake guildId = e.NewMember.GuildId;
+                var guildId = e.NewMember.GuildId;
 
-                JoinRolesRow row = await JoinRoles.GetRowAsync(guildId);
-                JoinRolesPendingRow pendingRow = await JoinRoles.GetPendingRowAsync(guildId, e.MemberId);
+                var row = await JoinRoles.GetRowAsync(guildId);
+                var pendingRow = await JoinRoles.GetPendingRowAsync(guildId, e.MemberId);
                 if (pendingRow.New) return;
                 
                 if (e.NewMember.RoleIds.Any())
@@ -98,11 +98,11 @@ namespace Utili.Services
             }
         }
 
-        async Task AddRolesAsync(ulong guildId, ulong memberId, bool fromDelay, JoinRolesRow row = null)
+        private async Task AddRolesAsync(ulong guildId, ulong memberId, bool fromDelay, JoinRolesRow row = null)
         {
             if (fromDelay)
             {
-                JoinRolesPendingRow pendingRow = await JoinRoles.GetPendingRowAsync(guildId, memberId);
+                var pendingRow = await JoinRoles.GetPendingRowAsync(guildId, memberId);
                 // If the member is yet to complete membership screening they will be granted their roles when they do so.
                 if (pendingRow.IsPending) return;
                 await pendingRow.DeleteAsync();
@@ -111,22 +111,22 @@ namespace Utili.Services
             row ??= await JoinRoles.GetRowAsync(guildId);
             IGuild guild = _client.GetGuild(guildId);
 
-            List<IRole> roles = row.JoinRoles.Select(x => guild.GetRole(x)).ToList();
+            var roles = row.JoinRoles.Select(x => guild.GetRole(x)).ToList();
             roles.RemoveAll(x => x is null || !x.CanBeManaged());
             
-            List<Snowflake> roleIds = roles.Select(x => x.Id).ToList();
+            var roleIds = roles.Select(x => x.Id).ToList();
             roleIds = roleIds.Distinct().ToList();
 
-            foreach (Snowflake roleId in roleIds)
+            foreach (var roleId in roleIds)
             {
                 await guild.GrantRoleAsync(memberId, roleId, new DefaultRestRequestOptions{Reason = "Join Roles"});
             }
         }
-        
-        async Task ScheduleAllAddRoles()
+
+        private async Task ScheduleAllAddRoles()
         {
-            List<JoinRolesPendingRow> rows = await JoinRoles.GetPendingRowsAsync();
-            foreach(JoinRolesPendingRow row in rows)
+            var rows = await JoinRoles.GetPendingRowsAsync();
+            foreach(var row in rows)
             {
                 try
                 {
@@ -141,12 +141,12 @@ namespace Utili.Services
             if(rows.Count > 0) _logger.LogInformation($"Re-scheduled {rows.Count} pending join role user{(rows.Count == 1 ? "" : "s")}");
         }
 
-        void ScheduleAddRoles(ulong guildId, ulong memberId, DateTime due)
+        private void ScheduleAddRoles(ulong guildId, ulong memberId, DateTime due)
         {
             lock (_pendingTimers)
             {
-                (ulong, ulong) key = (guildId, memberId);
-                if (_pendingTimers.TryGetValue(key, out Timer timer))
+                var key = (guildId, memberId);
+                if (_pendingTimers.TryGetValue(key, out var timer))
                 {
                     timer.Dispose();
                     _pendingTimers.Remove(key);

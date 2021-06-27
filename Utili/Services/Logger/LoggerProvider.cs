@@ -6,7 +6,7 @@ namespace Utili.Services
 {
     public sealed class LoggerProvider : ILoggerProvider
     {
-        readonly ConcurrentDictionary<string, Logger> _loggers = new();
+        private readonly ConcurrentDictionary<string, Logger> _loggers = new();
 
         public ILogger CreateLogger(string categoryName)
         {

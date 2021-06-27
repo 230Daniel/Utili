@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using MySql.Data.MySqlClient;
 
 namespace Database.Data
 {
@@ -10,7 +9,7 @@ namespace Database.Data
     {
         public static async Task<List<AutopurgeRow>> GetRowsAsync(ulong? guildId = null, ulong? channelId = null, bool enabledOnly = false, bool ignoreCache = false)
         {
-            List<AutopurgeRow> matchedRows = new();
+            var matchedRows = new List<AutopurgeRow>();
 
             if (Cache.Initialised && !ignoreCache)
             {
@@ -21,8 +20,8 @@ namespace Database.Data
             }
             else
             {
-                string command = "SELECT * FROM Autopurge WHERE TRUE";
-                List<(string, object)> values = new();
+                var command = "SELECT * FROM Autopurge WHERE TRUE";
+                var values = new List<(string, object)>();
 
                 if (guildId.HasValue)
                 {
@@ -42,7 +41,7 @@ namespace Database.Data
                     values.Add(("Mode", 2));
                 }
 
-                MySqlDataReader reader = await Sql.ExecuteReaderAsync(command, values.ToArray());
+                var reader = await Sql.ExecuteReaderAsync(command, values.ToArray());
 
                 while (reader.Read())
                 {
@@ -61,7 +60,7 @@ namespace Database.Data
 
         public static async Task<AutopurgeRow> GetRowAsync(ulong guildId, ulong channelId)
         {
-            List<AutopurgeRow> rows = await GetRowsAsync(guildId, channelId);
+            var rows = await GetRowsAsync(guildId, channelId);
             return rows.Count > 0 ? rows.First() : new AutopurgeRow(guildId, channelId);
         }
 
@@ -104,10 +103,10 @@ namespace Database.Data
         public static async Task<List<AutopurgeMessageRow>> GetMessagesAsync(ulong? guildId = null,
             ulong? channelId = null, ulong? messageId = null)
         {
-            List<AutopurgeMessageRow> matchedRows = new();
+            var matchedRows = new List<AutopurgeMessageRow>();
 
-            string command = "SELECT * FROM AutopurgeMessages WHERE TRUE";
-            List<(string, object)> values = new();
+            var command = "SELECT * FROM AutopurgeMessages WHERE TRUE";
+            var values = new List<(string, object)>();
 
             if (guildId.HasValue)
             {
@@ -127,7 +126,7 @@ namespace Database.Data
                 values.Add(("MessageId", messageId.Value));
             }
 
-            MySqlDataReader reader = await Sql.ExecuteReaderAsync(command, values.ToArray());
+            var reader = await Sql.ExecuteReaderAsync(command, values.ToArray());
 
             while (reader.Read())
             {
@@ -146,10 +145,10 @@ namespace Database.Data
 
         public static async Task<List<AutopurgeMessageRow>> GetAndDeleteDueMessagesAsync(AutopurgeRow row)
         {
-            List<AutopurgeMessageRow> matchedRows = new();
+            var matchedRows = new List<AutopurgeMessageRow>();
             if (row.Mode == 2) return matchedRows;
 
-            MySqlDataReader reader = await Sql.ExecuteReaderAsync(
+            var reader = await Sql.ExecuteReaderAsync(
                 "DELETE FROM AutopurgeMessages WHERE " +
                 "GuildId = @GuildId AND " +
                 "ChannelId = @ChannelId AND " +

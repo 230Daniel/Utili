@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Database.Data;
@@ -13,8 +12,8 @@ namespace Utili.Services
 {
     public class RolePersistService
     {
-        ILogger<RolePersistService> _logger;
-        DiscordClientBase _client;
+        private readonly ILogger<RolePersistService> _logger;
+        private readonly DiscordClientBase _client;
 
         public RolePersistService(ILogger<RolePersistService> logger, DiscordClientBase client)
         {
@@ -29,18 +28,18 @@ namespace Utili.Services
                 if (e.Member.IsBot) return;
 
                 IGuild guild = _client.GetGuild(e.GuildId);
-                RolePersistRow row = await RolePersist.GetRowAsync(e.GuildId);
+                var row = await RolePersist.GetRowAsync(e.GuildId);
                 if (!row.Enabled) return;
 
-                RolePersistRolesRow persistRow = await RolePersist.GetPersistRowAsync(e.GuildId, e.Member.Id);
+                var persistRow = await RolePersist.GetPersistRowAsync(e.GuildId, e.Member.Id);
 
-                List<IRole> roles = persistRow.Roles.Select(x => guild.GetRole(x)).ToList();
+                var roles = persistRow.Roles.Select(x => guild.GetRole(x)).ToList();
                 roles.RemoveAll(x => x is null || !x.CanBeManaged() || row.ExcludedRoles.Contains(x.Id));
                 
                 IMember member = guild.GetMember(e.Member.Id);
                 member ??= await guild.FetchMemberAsync(e.Member.Id);
                 
-                List<Snowflake> roleIds = roles.Select(x => x.Id).ToList();
+                var roleIds = roles.Select(x => x.Id).ToList();
                 roleIds.AddRange(member.RoleIds);
                 roleIds = roleIds.Distinct().ToList();
             
@@ -62,12 +61,12 @@ namespace Utili.Services
                 
                 IGuild guild = _client.GetGuild(e.GuildId);
 
-                RolePersistRow row = await RolePersist.GetRowAsync(e.GuildId);
+                var row = await RolePersist.GetRowAsync(e.GuildId);
                 if(!row.Enabled) return;
                 
                 if (member is null) throw new Exception($"Member {e.User.Id} was not cached in guild {e.GuildId}");
 
-                RolePersistRolesRow persistRow = await RolePersist.GetPersistRowAsync(guild.Id, e.User.Id);
+                var persistRow = await RolePersist.GetPersistRowAsync(guild.Id, e.User.Id);
                 
                 persistRow.Roles.AddRange(member.RoleIds.Select(x => x.RawValue));
                 persistRow.Roles = persistRow.Roles.Distinct().ToList();

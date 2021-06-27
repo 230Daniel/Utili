@@ -23,14 +23,14 @@ namespace Utili.Commands
         {
             channel ??= Context.Channel;
 
-            VoteChannelsRow row = (await VoteChannels.GetRowsAsync(Context.Guild.Id, channel.Id)).FirstOrDefault();
+            var row = (await VoteChannels.GetRowsAsync(Context.Guild.Id, channel.Id)).FirstOrDefault();
             if (row is null)
             {
                 await Context.Channel.SendFailureAsync("Error", $"{channel.Mention} is not a votes channel");
                 return;
             }
 
-            int emojiLimit = await Premium.IsGuildPremiumAsync(Context.Guild.Id) ? 5 : 2;
+            var emojiLimit = await Premium.IsGuildPremiumAsync(Context.Guild.Id) ? 5 : 2;
 
             if (row.Emotes.Count >= emojiLimit)
             {
@@ -69,7 +69,7 @@ namespace Utili.Commands
         {
             channel ??= Context.Channel;
             
-            VoteChannelsRow row = (await VoteChannels.GetRowsAsync(Context.Guild.Id, channel.Id)).FirstOrDefault();
+            var row = (await VoteChannels.GetRowsAsync(Context.Guild.Id, channel.Id)).FirstOrDefault();
             if (row is null)
             {
                 await Context.Channel.SendFailureAsync("Error", $"{channel.Mention} is not a votes channel");
@@ -82,7 +82,7 @@ namespace Utili.Commands
                 return;
             }
 
-            IEmoji removedEmoji = Context.Guild.GetEmoji(row.Emotes[emojiNumber - 1]);
+            var removedEmoji = Context.Guild.GetEmoji(row.Emotes[emojiNumber - 1]);
             
             row.Emotes.RemoveAt(emojiNumber - 1);
             await VoteChannels.SaveRowAsync(row);
@@ -99,7 +99,7 @@ namespace Utili.Commands
         {
             channel ??= Context.Channel;
             
-            VoteChannelsRow row = (await VoteChannels.GetRowsAsync(Context.Guild.Id, channel.Id)).FirstOrDefault();
+            var row = (await VoteChannels.GetRowsAsync(Context.Guild.Id, channel.Id)).FirstOrDefault();
             if (row is null)
             {
                 await Context.Channel.SendFailureAsync("Error", $"{channel.Mention} is not a votes channel");
@@ -133,15 +133,15 @@ namespace Utili.Commands
         {
             channel ??= Context.Channel;
 
-            VoteChannelsRow row = (await VoteChannels.GetRowsAsync(Context.Guild.Id, channel.Id)).FirstOrDefault();
+            var row = (await VoteChannels.GetRowsAsync(Context.Guild.Id, channel.Id)).FirstOrDefault();
             if (row is null)
             {
                 await Context.Channel.SendFailureAsync("Error", $"{channel.Mention} is not a votes channel");
                 return;
             }
             
-            string content = "";
-            for (int i = 0; i < row.Emotes.Count; i++)
+            var content = "";
+            for (var i = 0; i < row.Emotes.Count; i++)
                 content += $"{i + 1}: {row.Emotes[i]}\n";
             
             await Context.Channel.SendInfoAsync("Emojis", $"There are {row.Emotes.Count} emojis for {channel.Mention}\n\n{content}");

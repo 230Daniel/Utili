@@ -23,8 +23,8 @@ namespace Utili.Implementations
         {
             if (argument is null) return Success();
             
-            IGuildChannel channel = (IGuildChannel) argument;
-            ChannelPermissions permissions = context.CurrentMember.GetChannelPermissions(channel);
+            var channel = (IGuildChannel) argument;
+            var permissions = context.CurrentMember.GetChannelPermissions(channel);
 
             return permissions.Has(Permissions) ? 
                 Success() : 

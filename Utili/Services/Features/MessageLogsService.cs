@@ -15,9 +15,9 @@ namespace Utili.Services
 {
     public class MessageLogsService
     {
-        ILogger<MessageLogsService> _logger;
-        DiscordClientBase _client;
-        HasteService _haste;
+        private readonly ILogger<MessageLogsService> _logger;
+        private readonly DiscordClientBase _client;
+        private readonly HasteService _haste;
 
         public MessageLogsService(ILogger<MessageLogsService> logger, DiscordClientBase client, HasteService haste)
         {
@@ -32,10 +32,10 @@ namespace Utili.Services
             {
                 if(e.Message.Author.IsBot || !e.GuildId.HasValue) return;
 
-                MessageLogsRow row = await MessageLogs.GetRowAsync(e.GuildId.Value);
+                var row = await MessageLogs.GetRowAsync(e.GuildId.Value);
                 if ((row.DeletedChannelId == 0 && row.EditedChannelId == 0) || row.ExcludedChannels.Contains(e.ChannelId)) return;
 
-                MessageLogsMessageRow message = new()
+                var message = new MessageLogsMessageRow()
                 {
                     GuildId = e.GuildId.Value,
                     ChannelId = e.ChannelId,
@@ -62,15 +62,15 @@ namespace Utili.Services
 
                 ITextChannel channel = _client.GetTextChannel(e.GuildId.Value, e.ChannelId);
 
-                MessageLogsRow row = await MessageLogs.GetRowAsync(e.GuildId.Value);
+                var row = await MessageLogs.GetRowAsync(e.GuildId.Value);
                 if ((row.DeletedChannelId == 0 && row.EditedChannelId == 0) || 
                     row.ExcludedChannels.Contains(e.ChannelId)) return;
 
-                MessageLogsMessageRow previousMessage = await MessageLogs.GetMessageAsync(e.GuildId.Value, e.ChannelId, e.MessageId);
+                var previousMessage = await MessageLogs.GetMessageAsync(e.GuildId.Value, e.ChannelId, e.MessageId);
                 if (previousMessage is null || !e.Model.Content.HasValue || e.Model.Content.Value == previousMessage.Content.Value) return;
 
-                IUserMessage newMessage = e.NewMessage ?? await channel.FetchMessageAsync(e.MessageId) as IUserMessage;
-                LocalEmbed embed = GetEditedEmbed(newMessage, previousMessage);
+                var newMessage = e.NewMessage ?? await channel.FetchMessageAsync(e.MessageId) as IUserMessage;
+                var embed = GetEditedEmbed(newMessage, previousMessage);
 
                 previousMessage.Content = EString.FromDecoded(e.Model.Content.Value);
                 await MessageLogs.SaveMessageAsync(previousMessage);
@@ -90,18 +90,18 @@ namespace Utili.Services
             {
                 if (!e.GuildId.HasValue) return;
 
-                MessageLogsRow row = await MessageLogs.GetRowAsync(e.GuildId.Value);
+                var row = await MessageLogs.GetRowAsync(e.GuildId.Value);
                 if ((row.DeletedChannelId == 0 && row.EditedChannelId == 0) ||
                     row.ExcludedChannels.Contains(e.ChannelId)) return;
 
-                MessageLogsMessageRow message =
+                var message =
                     await MessageLogs.GetMessageAsync(e.GuildId.Value, e.ChannelId, e.MessageId);
                 if (message is null) return;
 
-                IMember member = _client.GetMember(e.GuildId.Value, message.UserId) ?? await _client.FetchMemberAsync(e.GuildId.Value, message.UserId);
+                var member = _client.GetMember(e.GuildId.Value, message.UserId) ?? await _client.FetchMemberAsync(e.GuildId.Value, message.UserId);
                 if (member is not null && member.IsBot) return;
 
-                LocalEmbed embed = GetDeletedEmbed(message, member);
+                var embed = GetDeletedEmbed(message, member);
 
                 await MessageLogs.DeleteMessagesAsync(e.GuildId.Value, e.ChannelId, new[] {e.MessageId.RawValue});
 
@@ -118,13 +118,13 @@ namespace Utili.Services
         {
             try
             {
-                MessageLogsRow row = await MessageLogs.GetRowAsync(e.GuildId);
+                var row = await MessageLogs.GetRowAsync(e.GuildId);
                 if ((row.DeletedChannelId == 0 && row.EditedChannelId == 0) ||
                     row.ExcludedChannels.Contains(e.ChannelId)) return;
 
-                List<MessageLogsMessageRow> messages = await MessageLogs.GetMessagesAsync(e.GuildId, e.ChannelId, e.MessageIds.Select(x => x.RawValue).ToArray());
+                var messages = await MessageLogs.GetMessagesAsync(e.GuildId, e.ChannelId, e.MessageIds.Select(x => x.RawValue).ToArray());
 
-                LocalEmbed embed = GetBulkDeletedEmbed(e, await PasteMessagesAsync(messages, e.MessageIds.Count), messages);
+                var embed = GetBulkDeletedEmbed(e, await PasteMessagesAsync(messages, e.MessageIds.Count), messages);
                 
                 await MessageLogs.DeleteMessagesAsync(e.GuildId, e.ChannelId, e.MessageIds.Select(x => x.RawValue).ToArray());
 
@@ -137,9 +137,9 @@ namespace Utili.Services
             }
         }
 
-        LocalEmbed GetEditedEmbed(IUserMessage newMessage, MessageLogsMessageRow previousMessage)
+        private LocalEmbed GetEditedEmbed(IUserMessage newMessage, MessageLogsMessageRow previousMessage)
         {
-            LocalEmbed builder = new LocalEmbed()
+            var builder = new LocalEmbed()
                 .WithColor(new Color(66, 182, 245))
                 .WithDescription($"**Message by {newMessage.Author.Mention} edited in {Mention.TextChannel(newMessage.ChannelId)}** [Jump]({newMessage.GetJumpUrl(previousMessage.GuildId)})")
                 .WithAuthor(newMessage.Author)
@@ -162,9 +162,9 @@ namespace Utili.Services
             return builder;
         }
 
-        LocalEmbed GetDeletedEmbed(MessageLogsMessageRow deletedMessage, IMember member)
+        private LocalEmbed GetDeletedEmbed(MessageLogsMessageRow deletedMessage, IMember member)
         {
-            LocalEmbed builder = new LocalEmbed()
+            var builder = new LocalEmbed()
                 .WithColor(new Color(245, 66, 66))
                 .WithDescription($"**Message by {Mention.User(deletedMessage.UserId)} deleted in {Mention.TextChannel(deletedMessage.ChannelId)}**")
                 .WithFooter($"Message {deletedMessage.MessageId}")
@@ -181,9 +181,9 @@ namespace Utili.Services
             return builder;
         }
 
-        LocalEmbed GetBulkDeletedEmbed(MessagesDeletedEventArgs e, string paste, List<MessageLogsMessageRow> messages)
+        private LocalEmbed GetBulkDeletedEmbed(MessagesDeletedEventArgs e, string paste, List<MessageLogsMessageRow> messages)
         {
-            LocalEmbed builder = new LocalEmbed()
+            var builder = new LocalEmbed()
                 .WithColor(new Color(245, 66, 66))
                 .WithDescription($"**{e.MessageIds.Count} messages bulk deleted in {Mention.TextChannel(e.ChannelId)}**\n" +
                                  $"[View {messages.Count} logged message{(messages.Count == 1 ? "" : "s")}]({paste})")
@@ -192,22 +192,22 @@ namespace Utili.Services
             return builder;
         }
 
-        async Task<string> PasteMessagesAsync(List<MessageLogsMessageRow> messages, int total)
+        private async Task<string> PasteMessagesAsync(List<MessageLogsMessageRow> messages, int total)
         {
             try
             {
-                StringBuilder sb = new();
+                var sb = new StringBuilder();
 
                 sb.AppendLine($"Messages {total}");
                 sb.AppendLine($"Logged   {messages.Count}");
                 sb.AppendLine();
                 sb.AppendLine();
 
-                Dictionary<Snowflake, IUser> cachedUsers = new();
+                var cachedUsers = new Dictionary<Snowflake, IUser>();
 
-                foreach (MessageLogsMessageRow message in messages)
+                foreach (var message in messages)
                 {
-                    if (!cachedUsers.TryGetValue(message.UserId, out IUser user))
+                    if (!cachedUsers.TryGetValue(message.UserId, out var user))
                     {
                         user = await _client.FetchUserAsync(message.UserId);
                         cachedUsers.Add(message.UserId, user);
@@ -218,12 +218,12 @@ namespace Utili.Services
                     else sb.AppendLine($"{user} ({user.Id})");
                     sb.AppendLine($" at {message.Timestamp.ToUniversalFormat()} UTC");
 
-                    string messageContent = "    " + message.Content.Value.Replace("\n", "\n    ");
+                    var messageContent = "    " + message.Content.Value.Replace("\n", "\n    ");
 
                     sb.AppendLine($"{messageContent}\n");
                 }
 
-                string content = sb.ToString().TrimEnd('\r', '\n');
+                var content = sb.ToString().TrimEnd('\r', '\n');
                 return await _haste.PasteAsync(content, "txt");
             }
             catch (Exception e)

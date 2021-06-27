@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Timers;
@@ -14,9 +13,10 @@ namespace Utili.Services
 {
     public class InactiveRoleService
     {
-        ILogger<InactiveRoleService> _logger;
-        DiscordClientBase _client;
-        Timer _timer;
+        private readonly ILogger<InactiveRoleService> _logger;
+        private readonly DiscordClientBase _client;
+        
+        private Timer _timer;
 
         public InactiveRoleService(ILogger<InactiveRoleService> logger, DiscordClientBase client)
         {
@@ -58,11 +58,11 @@ namespace Utili.Services
             }
         }
 
-        async Task MakeUserActiveAsync(ulong guildId, IMember member)
+        private async Task MakeUserActiveAsync(ulong guildId, IMember member)
         {
-            InactiveRoleRow row = await InactiveRole.GetRowAsync(guildId);
+            var row = await InactiveRole.GetRowAsync(guildId);
             IGuild guild = _client.GetGuild(guildId);
-            IRole inactiveRole = guild.GetRole(row.RoleId);
+            var inactiveRole = guild.GetRole(row.RoleId);
 
             if(inactiveRole is null) return;
 
@@ -72,27 +72,27 @@ namespace Utili.Services
                 await member.RevokeRoleAsync(inactiveRole.Id, new DefaultRestRequestOptions {Reason = "Inactive Role"});
         }
 
-        void Timer_Elapsed(object sender, ElapsedEventArgs e)
+        private void Timer_Elapsed(object sender, ElapsedEventArgs e)
         {
             _ = UpdateGuildsAsync();
         }
 
-        async Task UpdateGuildsAsync()
+        private async Task UpdateGuildsAsync()
         {
             try
             {
-                List<InactiveRoleRow> guildsRequiringUpdate =
+                var guildsRequiringUpdate =
                     (await InactiveRole.GetUpdateRequiredRowsAsync())
                     .Where(x => _client.GetGuild(x.GuildId) is not null)
                     .Take(5).ToList();
 
-                foreach (InactiveRoleRow row in guildsRequiringUpdate)
+                foreach (var row in guildsRequiringUpdate)
                 {
                     row.LastUpdate = DateTime.UtcNow;
                     await InactiveRole.SaveLastUpdateAsync(row);
                 }
 
-                IEnumerable<Task> tasks = guildsRequiringUpdate.Select(UpdateGuildAsync);
+                var tasks = guildsRequiringUpdate.Select(UpdateGuildAsync);
                 await Task.WhenAll(tasks);
             }
             catch (Exception e)
@@ -101,33 +101,33 @@ namespace Utili.Services
             }
         }
 
-        Task UpdateGuildAsync(InactiveRoleRow row)
+        private Task UpdateGuildAsync(InactiveRoleRow row)
         {
             return Task.Run(async () =>
             {
                 try
                 {
                     IGuild guild = _client.GetGuild(row.GuildId);
-                    IRole inactiveRole = guild.GetRole(row.RoleId);
+                    var inactiveRole = guild.GetRole(row.RoleId);
                     if(inactiveRole is null || !inactiveRole.CanBeManaged()) return;
 
-                    List<InactiveRoleUserRow> userRows = await InactiveRole.GetUsersAsync(guild.Id);
-                    bool premium = await Premium.IsGuildPremiumAsync(guild.Id);
+                    var userRows = await InactiveRole.GetUsersAsync(guild.Id);
+                    var premium = await Premium.IsGuildPremiumAsync(guild.Id);
 
-                    IReadOnlyList<IMember> members = await guild.FetchAllMembersAsync();
-                    IMember bot = guild.GetCurrentMember();
+                    var members = await guild.FetchAllMembersAsync();
+                    var bot = guild.GetCurrentMember();
 
-                    foreach (IMember member in members.Where(x => !x.IsBot).OrderBy(x => x.Id))
+                    foreach (var member in members.Where(x => !x.IsBot).OrderBy(x => x.Id))
                     {
                         // DefaultLastAction is set to the time when the activity data started being recorded
-                        DateTime lastAction = row.DefaultLastAction;
+                        var lastAction = row.DefaultLastAction;
 
                         // If the bot joined after activity data started being recorded, we know our data before the bot joined is invalid
                         if (bot.JoinedAt.HasValue && bot.JoinedAt.Value.UtcDateTime > lastAction)
                             lastAction = bot.JoinedAt.Value.UtcDateTime;
 
                         // If the member did something since the default last action, their last action is more recent
-                        InactiveRoleUserRow userRow = userRows.FirstOrDefault(x => x.UserId == member.Id);
+                        var userRow = userRows.FirstOrDefault(x => x.UserId == member.Id);
                         if (userRow is not null && userRow.LastAction > lastAction)
                             lastAction = userRow.LastAction;
                         
@@ -135,8 +135,8 @@ namespace Utili.Services
                         if (member.JoinedAt.HasValue && member.JoinedAt.Value.UtcDateTime > lastAction)
                             lastAction = member.JoinedAt.Value.UtcDateTime;
 
-                        DateTime minimumLastAction = DateTime.UtcNow - row.Threshold;
-                        DateTime minimumKickLastAction = DateTime.UtcNow - (row.Threshold + row.AutoKickThreshold);
+                        var minimumLastAction = DateTime.UtcNow - row.Threshold;
+                        var minimumKickLastAction = DateTime.UtcNow - (row.Threshold + row.AutoKickThreshold);
 
                         if (lastAction <= minimumLastAction && !member.RoleIds.Contains(row.ImmuneRoleId))
                         {
