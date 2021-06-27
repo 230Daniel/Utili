@@ -1,0 +1,82 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Timers;
+using Database.Data;
+using Disqord;
+using Disqord.Gateway;
+using Microsoft.Extensions.Logging;
+
+namespace Utili.Services
+{
+    public class MemberCacheService
+    {
+        private readonly ILogger<MemberCacheService> _logger;
+        private readonly DiscordClientBase _client;
+
+        private Timer _timer;
+
+        public MemberCacheService(ILogger<MemberCacheService> logger, DiscordClientBase client)
+        {
+            _logger = logger;
+            _client = client;
+
+            _timer = new(5000);
+            _timer.Elapsed += TimerElapsed;
+        }
+
+        public void Start()
+        {
+            _timer.Start();
+        }
+
+        public async Task Ready(ReadyEventArgs e)
+        {
+            try
+            {
+                var guildIds = await GetRequiredDownloadsAsync(e.GuildIds);
+                _logger.LogInformation("Caching users for {Guilds} guilds on {ShardId}", guildIds.Count, e.ShardId);
+                await CacheMembersAsync(guildIds);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Exception thrown on ready");
+            }
+        }
+        
+        private void TimerElapsed(object sender, ElapsedEventArgs e)
+        {
+            _ = Task.Run(async () =>
+            {
+                var guildIds = await GetNewRequiredDownloadsAsync();
+            });
+        }
+
+        private async Task CacheMembersAsync(IEnumerable<ulong> guildIds)
+        {
+            foreach (var guildId in guildIds.Distinct())
+            {
+                var guild = _client.GetGuild(guildId);
+                _ = Task.Run(async () =>
+                {
+                    await _client.Chunker.ChunkAsync(guild);
+                });
+            }
+        }
+
+        private static async Task<List<ulong>> GetRequiredDownloadsAsync(IEnumerable<Snowflake> shardGuildIds)
+        {
+            var guildIds = new List<ulong>();
+            guildIds.AddRange((await RolePersist.GetRowsAsync()).Where(x => x.Enabled).Select(x => x.GuildId));
+            guildIds.AddRange((await RoleLinking.GetRowsAsync()).Select(x => x.GuildId));
+            guildIds.RemoveAll(x => !shardGuildIds.Contains(x));
+            return guildIds.Distinct().ToList();
+        }
+
+        private async Task<List<ulong>> GetNewRequiredDownloadsAsync()
+        {
+            return new();
+        }
+    }
+}

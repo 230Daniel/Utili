@@ -62,6 +62,7 @@ namespace Utili
             services.AddInteractivity();
             services.AddPrefixProvider<PrefixProvider>();
 
+            services.AddSingleton<MemberCacheService>();
             services.AddSingleton<HasteService>();
             services.AddSingleton<CommunityService>();
             services.AddSingleton<GuildCountService>();

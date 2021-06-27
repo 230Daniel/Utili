@@ -20,7 +20,8 @@ namespace Utili.Services
 
         private readonly CommunityService _community;
         private readonly GuildCountService _guildCount;
-
+        private readonly MemberCacheService _memberCache;
+        
         private readonly AutopurgeService _autopurge;
         private readonly ChannelMirroringService _channelMirroring;
         private readonly InactiveRoleService _inactiveRole;
@@ -35,6 +36,7 @@ namespace Utili.Services
         private readonly VoiceLinkService _voiceLink;
         private readonly VoiceRolesService _voiceRoles;
         private readonly VoteChannelsService _voteChannels;
+        
 
         public BotService(
             
@@ -44,6 +46,7 @@ namespace Utili.Services
             
             CommunityService community,
             GuildCountService guildCount,
+            MemberCacheService memberCache,
             
             AutopurgeService autopurge,
             ChannelMirroringService channelMirroring,
@@ -65,9 +68,10 @@ namespace Utili.Services
             _logger = logger;
             _config = config;
             _client = client;
-            
+
             _community = community;
             _guildCount = guildCount;
+            _memberCache = memberCache;
             
             _autopurge = autopurge;
             _channelMirroring = channelMirroring;
@@ -94,6 +98,7 @@ namespace Utili.Services
             await Client.WaitUntilReadyAsync(cancellationToken);
 
             return;
+            _memberCache.Start();
             _autopurge.Start();
             _inactiveRole.Start();
             _joinRoles.Start();
@@ -105,23 +110,9 @@ namespace Utili.Services
             _logger.LogInformation("Services started");
         }
 
-        private async Task DownloadMembersAsync(IEnumerable<Snowflake> shardGuildIds = null)
-        {
-            var guildIds = new List<ulong>();
-            guildIds.AddRange((await RolePersist.GetRowsAsync()).Where(x => x.Enabled).Select(x => x.GuildId));
-            guildIds.AddRange((await RoleLinking.GetRowsAsync()).Select(x => x.GuildId));
-            if (shardGuildIds is not null) guildIds.RemoveAll(x => !shardGuildIds.Contains(x));
-            
-            foreach (var guildId in guildIds.Distinct())
-            {
-                var guild = _client.GetGuild(guildId);
-                _ = _client.Chunker.ChunkAsync(guild);
-            }
-        }
-
         protected override async ValueTask OnReady(ReadyEventArgs e)
         {
-            await DownloadMembersAsync(e.GuildIds);
+            await _memberCache.Ready(e);
         }
 
         protected override async ValueTask OnGuildAvailable(GuildAvailableEventArgs e)
