@@ -53,7 +53,7 @@ namespace Utili.Services
             }
         }
 
-        public async Task MemberLeft(MemberLeftEventArgs e, CachedMember member)
+        public async Task MemberLeft(MemberLeftEventArgs e, IMember member)
         {
             try
             {
