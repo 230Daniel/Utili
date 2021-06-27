@@ -97,8 +97,8 @@ namespace Utili.Services
 
             await Client.WaitUntilReadyAsync(cancellationToken);
 
-            return;
             _memberCache.Start();
+            return;
             _autopurge.Start();
             _inactiveRole.Start();
             _joinRoles.Start();

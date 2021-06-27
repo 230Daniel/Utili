@@ -15,6 +15,7 @@ namespace Utili.Services
         private readonly ILogger<MemberCacheService> _logger;
         private readonly DiscordClientBase _client;
 
+        private List<ulong> _cachedGuilds;
         private Timer _timer;
 
         public MemberCacheService(ILogger<MemberCacheService> logger, DiscordClientBase client)
@@ -22,7 +23,8 @@ namespace Utili.Services
             _logger = logger;
             _client = client;
 
-            _timer = new(5000);
+            _cachedGuilds = new();
+            _timer = new(10000);
             _timer.Elapsed += TimerElapsed;
         }
 
@@ -49,19 +51,29 @@ namespace Utili.Services
         {
             _ = Task.Run(async () =>
             {
-                var guildIds = await GetNewRequiredDownloadsAsync();
+                var guildIdsToCheck = _client.GetGuilds().Select(x => x.Key).ToList();
+                guildIdsToCheck.RemoveAll(x => _cachedGuilds.Contains(x));
+
+                var guildIds = await GetRequiredDownloadsAsync(guildIdsToCheck);
+                await CacheMembersAsync(guildIds);
             });
         }
 
         private async Task CacheMembersAsync(IEnumerable<ulong> guildIds)
         {
-            foreach (var guildId in guildIds.Distinct())
+            guildIds = guildIds.Distinct();
+            lock (_cachedGuilds)
             {
-                var guild = _client.GetGuild(guildId);
-                _ = Task.Run(async () =>
+                foreach (var guildId in guildIds)
                 {
-                    await _client.Chunker.ChunkAsync(guild);
-                });
+                    _logger.LogDebug("Caching members for {Guild}", guildId);
+                    _cachedGuilds.Add(guildId);
+                    
+                    _ = Task.Run(async () =>
+                    {
+                        await _client.Chunker.ChunkAsync(_client.GetGuild(guildId));
+                    });
+                }
             }
         }
 
@@ -72,11 +84,6 @@ namespace Utili.Services
             guildIds.AddRange((await RoleLinking.GetRowsAsync()).Select(x => x.GuildId));
             guildIds.RemoveAll(x => !shardGuildIds.Contains(x));
             return guildIds.Distinct().ToList();
-        }
-
-        private async Task<List<ulong>> GetNewRequiredDownloadsAsync()
-        {
-            return new();
         }
     }
 }
