@@ -35,7 +35,7 @@ namespace Utili.Services
         public void Start()
         {
             _timer.Start();
-            _ = GetMessagesAsync();
+            _ = FetchForAllChannelsAsync();
         }
 
         private async Task PurgeChannelsAsync()
@@ -124,7 +124,7 @@ namespace Utili.Services
         private void Timer_Elapsed(object sender, ElapsedEventArgs e)
         {
             _ = PurgeChannelsAsync();
-            _ = GetNewChannelsMessagesAsync();
+            _ = FetchForNewChannelsAsync();
         }
 
         public async Task MessageReceived(MessageReceivedEventArgs e)
@@ -143,7 +143,7 @@ namespace Utili.Services
                     MessageId = e.MessageId,
                     Timestamp = e.Message.CreatedAt().UtcDateTime,
                     IsBot = e.Message.Author.IsBot,
-                    IsPinned = e.Message is IUserMessage userMessage && userMessage.IsPinned
+                    IsPinned = e.Message is IUserMessage {IsPinned: true}
                 };
                 await Autopurge.SaveMessageAsync(messageRow);
             }
@@ -225,32 +225,38 @@ namespace Utili.Services
             }
         }
 
-        private async Task GetMessagesAsync()
+        private async Task FetchForAllChannelsAsync()
         {
-            var rows = await Autopurge.GetRowsAsync(enabledOnly: true);
-            rows.RemoveAll(x => _client.GetGuild(x.GuildId) is null);
-            rows.RemoveAll(x => _client.GetGuild(x.GuildId).GetTextChannel(x.ChannelId) is null);
-
-            _logger.LogInformation($"Started downloading messages for {rows.Count} channels");
-
-            var tasks = new List<Task>();
-            foreach (var row in rows)
+            try
             {
-                while (tasks.Count(x => !x.IsCompleted) >= 10) 
-                    await Task.Delay(1000);
+                var rows = await Autopurge.GetRowsAsync(enabledOnly: true);
+                rows.RemoveAll(x => _client.GetGuild(x.GuildId)?.GetTextChannel(x.ChannelId) is null);
 
-                tasks.Add(GetChannelMessagesAsync(row));
-                await Task.Delay(250);
+                _logger.LogInformation($"Started downloading messages for {rows.Count} channels");
+
+                var tasks = new List<Task>();
+                foreach (var row in rows)
+                {
+                    while (tasks.Count(x => !x.IsCompleted) >= 10)
+                        await Task.Delay(1000);
+
+                    tasks.Add(FetchForChannelAsync(row));
+                    await Task.Delay(250);
+                }
+
+                await Task.WhenAll(tasks);
+
+                _logger.LogInformation("Finished downloading messages");
             }
-
-            await Task.WhenAll(tasks);
-
-            _logger.LogInformation("Finished downloading messages");
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Exception thrown on while fetching messages for all channels");
+            }
         }
 
-        private async Task GetNewChannelsMessagesAsync()
+        private async Task FetchForNewChannelsAsync()
         {
-            _ = Task.Run(async () =>
+            try
             {
                 var miscRows = await Misc.GetRowsAsync(type: "RequiresAutopurgeMessageDownload");
                 miscRows.RemoveAll(x => _client.GetGuild(x.GuildId) is null);
@@ -261,12 +267,16 @@ namespace Utili.Services
                 foreach (var miscRow in miscRows)
                 {
                     var row = await Autopurge.GetRowAsync(miscRow.GuildId, ulong.Parse(miscRow.Value));
-                    _ = GetChannelMessagesAsync(row);
+                    _ = FetchForChannelAsync(row);
                 }
-            });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Exception thrown while fetching messages for new channels");
+            }
         }
 
-        private Task GetChannelMessagesAsync(AutopurgeRow row)
+        private Task FetchForChannelAsync(AutopurgeRow row)
         {
             return Task.Run(async () =>
             {
