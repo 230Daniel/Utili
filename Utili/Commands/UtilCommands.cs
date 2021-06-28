@@ -15,14 +15,89 @@ namespace Utili.Commands
     public class UtilCommands : DiscordGuildModuleBase
     {
         [Command("Prune", "Purge", "Clear")]
+        [RequireAuthorChannelPermissions(Permission.ManageMessages)]
+        [RequireBotChannelPermissions(Permission.ManageMessages | Permission.ReadMessageHistory)]
+        public async Task Prune()
+        {
+            await Context.Channel.SendInfoAsync("Prune",
+                "Add one or more of the following arguments in any order to delete messages\n" +
+                "[amount] - The amount of messages to delete (default 100)\n" +
+                "before [message id] - Only messages before a particular message\n" +
+                "after [message id] - Only messages after a particular message\n\n" +
+                "[How do I get a message ID?](https://support.discord.com/hc/en-us/articles/206346498)");
+        }
+        
+        [Command("Prune", "Purge", "Clear")]
         [DefaultCooldown(1, 10)]
         [RequireAuthorChannelPermissions(Permission.ManageMessages)]
         [RequireBotChannelPermissions(Permission.ManageMessages | Permission.ReadMessageHistory)]
         public async Task Prune(
             [Remainder]
-            string argsString = null)
+            string arguments)
         {
-            if (string.IsNullOrEmpty(argsString))
+            var args = arguments is not null
+                ? arguments.Split(" ")
+                : Array.Empty<string>();
+
+            uint count = 0;
+            var countSet = false;
+            var beforeSet = false;
+            var afterSet = false;
+
+            IMessage afterMessage = null;
+            IMessage beforeMessage = Context.Message;
+
+            for (var i = 0; i < args.Length; i++)
+            {
+                if (!countSet && uint.TryParse(args[i], out var newCount))
+                {
+                    count = newCount;
+                    countSet = true;
+                }
+                else
+                {
+                    switch (args[i].ToLower())
+                    {
+                        case "before" when !beforeSet:
+                            try
+                            {
+                                i++;
+                                var messageId = ulong.Parse(args[i]);
+                                beforeMessage = await Context.Channel.FetchMessageAsync(messageId);
+                                if (beforeMessage is null) throw new Exception();
+                                beforeSet = true;
+                                break;
+                            }
+                            catch
+                            {
+                                await Context.Channel.SendFailureAsync("Error", $"Invalid message id \"{args[i].ToLower()}\"\n[How do I get a message ID?](https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID-)");
+                                return;
+                            }
+
+                        case "after" when !afterSet:
+                            try
+                            {
+                                i++;
+                                var messageId = ulong.Parse(args[i]);
+                                afterMessage = await Context.Channel.FetchMessageAsync(messageId);
+                                if (afterMessage is null) throw new Exception();
+                                afterSet = true;
+                                break;
+                            }
+                            catch
+                            {
+                                await Context.Channel.SendFailureAsync("Error", $"Invalid message id \"{args[i].ToLower()}\"\n[How do I get a message ID?](https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID-)");
+                                return;
+                            }
+                            
+                        default:
+                            await Context.Channel.SendFailureAsync("Error", $"Invalid argument \"{args[i].ToLower()}\"");
+                            return;
+                    }
+                }
+            }
+
+            if (!countSet && !beforeSet && !afterSet)
             {
                 await Context.Channel.SendInfoAsync("Prune",
                     "Add one or more of the following arguments in any order to delete messages\n" +
@@ -34,88 +109,39 @@ namespace Utili.Commands
                 return;
             }
 
-            var args = argsString.Split(" ");
-
-            uint count = 0;
-            var countSet = false;
-
-            IMessage afterMessage = null;
-            IMessage beforeMessage = null;
-
-            for (var i = 0; i < args.Length; i++)
-            {
-                if (uint.TryParse(args[i], out var newCount))
-                {
-                    count = newCount;
-                    countSet = true;
-                }
-                else
-                {
-                    switch (args[i].ToLower())
-                    {
-                        case "before":
-                            try
-                            {
-                                i++;
-                                var messageId = ulong.Parse(args[i]);
-                                beforeMessage = await Context.Channel.FetchMessageAsync(messageId);
-                                if (beforeMessage is null) throw new Exception();
-                                break;
-                            }
-                            catch
-                            {
-                                await Context.Channel.SendFailureAsync("Error", "Invalid message ID after \"before\"\n[How do I get a message ID?](https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID-)");
-                                return;
-                            }
-
-                        case "after":
-                            try
-                            {
-                                i++;
-                                var messageId = ulong.Parse(args[i]);
-                                afterMessage = await Context.Channel.FetchMessageAsync(messageId);
-                                if (afterMessage is null) throw new Exception();
-                                break;
-                            }
-                            catch
-                            {
-                                await Context.Channel.SendFailureAsync("Error", "Invalid message ID after \"after\"\n[How do I get a message ID?](https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID-)");
-                                return;
-                            }
-                            
-                        default:
-                            await Context.Channel.SendFailureAsync("Error", $"Invalid argument \"{args[i].ToLower()}\"");
-                            return;
-                    }
-                }
-            }
-
             if(afterMessage is not null && beforeMessage is not null && afterMessage.CreatedAt() >= beforeMessage.CreatedAt())
             {
                 await Context.Channel.SendFailureAsync("Error", "There are no messages between the after and before messages");
                 return;
             }
 
-            await Context.Message.DeleteAsync(new DefaultRestRequestOptions {Reason = $"Prune (manual by {Context.Message.Author} {Context.Message.Author.Id})"});
-            var delay = Task.Delay(800);
-
             var content = "";
+            bool? premium = null;
 
-            if(!countSet) count = 100;
+            if (!countSet)
+            {
+                premium = await Premium.IsGuildPremiumAsync(Context.Guild.Id);
+                count = premium.Value ? 1000u : 100u;
+            }
 
             if (count > 1000)
             {
                 count = 1000;
-                content = "For premium servers, you can delete up to 1000 messages at once\n";
+                premium ??= await Premium.IsGuildPremiumAsync(Context.Guild.Id);
+                content = premium.Value
+                    ? "For premium servers, you can delete up to 1000 messages at once\n" 
+                    : "For non-premium servers, you can delete up to 100 messages at once\n";
             }
 
-            else if (count > 100 && !await Premium.IsGuildPremiumAsync(Context.Guild.Id))
+            if (count > 100)
             {
-                count = 100;
-                content = "For non-premium servers, you can delete up to 100 messages at once\n";
+                premium ??= await Premium.IsGuildPremiumAsync(Context.Guild.Id);
+                if (!premium.Value)
+                {
+                    count = 100;
+                    content = "For non-premium servers, you can delete up to 100 messages at once\n";
+                }
             }
-
-            await delay;
 
             List<IMessage> messages;
             if(afterMessage is not null) messages = (await Context.Channel.FetchMessagesAsync((int)count, RetrievalDirection.After, afterMessage.Id)).ToList();
@@ -147,7 +173,7 @@ namespace Utili.Commands
 
             var sentMessage = await Context.Channel.SendSuccessAsync(title, content);
             await Task.Delay(5000);
-            await sentMessage.DeleteAsync();
+            await Context.Channel.DeleteMessagesAsync(new[] {sentMessage.Id, Context.Message.Id});
         }
 
         [Command("React", "AddReaction", "AddEmoji")]
