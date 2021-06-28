@@ -13,7 +13,7 @@ namespace Utili.Services
     {
         private readonly ILogger<BotService> _logger;
         private readonly IConfiguration _config;
-
+        
         private readonly CommunityService _community;
         private readonly GuildCountService _guildCount;
         private readonly MemberCacheService _memberCache;
@@ -33,7 +33,6 @@ namespace Utili.Services
         private readonly VoiceRolesService _voiceRoles;
         private readonly VoteChannelsService _voteChannels;
         
-
         public BotService(
             
             ILogger<BotService> logger,
