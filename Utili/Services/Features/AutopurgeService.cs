@@ -125,6 +125,7 @@ namespace Utili.Services
         {
             _ = PurgeChannelsAsync();
             _ = FetchForNewChannelsAsync();
+            _ = Autopurge.DeleteOldMessagesAsync();
         }
 
         public async Task MessageReceived(MessageReceivedEventArgs e)
@@ -311,10 +312,10 @@ namespace Utili.Services
                         oldestMessage = fetchedMessages.OrderBy(x => x.CreatedAt().UtcDateTime).First();
 
                         messages.AddRange(fetchedMessages.Where(x =>
-                            x.CreatedAt().UtcDateTime > DateTime.UtcNow.AddDays(-13.9)));
+                            x.CreatedAt().UtcDateTime > DateTime.UtcNow.AddDays(-14)));
 
                         if (messages.Count < 100 ||
-                            oldestMessage.CreatedAt().UtcDateTime < DateTime.UtcNow.AddDays(-13.9)) break;
+                            oldestMessage.CreatedAt().UtcDateTime < DateTime.UtcNow.AddDays(-14)) break;
 
                         await Task.Delay(1000);
                     }
@@ -324,7 +325,7 @@ namespace Utili.Services
                         var messageRow = messageRows.FirstOrDefault(x => x.MessageId == message.Id);
                         if (messageRow is not null)
                         {
-                            var pinned = message is IUserMessage userMessage && userMessage.IsPinned;
+                            var pinned = message is IUserMessage {IsPinned: true};
                             if (messageRow.IsPinned != pinned)
                             {
                                 messageRow.IsPinned = pinned;
@@ -340,7 +341,7 @@ namespace Utili.Services
                                 MessageId = message.Id,
                                 Timestamp = message.CreatedAt().UtcDateTime,
                                 IsBot = message.Author.IsBot,
-                                IsPinned = message is IUserMessage userMessage && userMessage.IsPinned
+                                IsPinned = message is IUserMessage {IsPinned: true}
                             };
                             try { await Autopurge.SaveMessageAsync(messageRow); } catch { }
                         }

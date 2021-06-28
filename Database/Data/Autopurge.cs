@@ -223,8 +223,15 @@ namespace Database.Data
                 ("GuildId", row.GuildId),
                 ("ChannelId", row.ChannelId));
         }
+        
+        public static async Task DeleteOldMessagesAsync()
+        {
+            await Sql.ExecuteAsync(
+                "DELETE FROM AutopurgeMessages WHERE Timestamp < @MinimumTimestamp",
+                ("MinimumTimestamp", DateTime.UtcNow - TimeSpan.FromDays(14)));
+        }
     }
-
+    
     public class AutopurgeRow : IRow
     {
         public bool New { get; set; }
