@@ -111,11 +111,11 @@ namespace Utili.Services
                     var inactiveRole = guild.GetRole(row.RoleId);
                     if(inactiveRole is null || !inactiveRole.CanBeManaged()) return;
 
-                    var userRows = await InactiveRole.GetUsersAsync(guild.Id);
-                    var premium = await Premium.IsGuildPremiumAsync(guild.Id);
-
                     var members = await guild.FetchAllMembersAsync();
                     var bot = guild.GetCurrentMember();
+                    
+                    var userRows = await InactiveRole.GetUsersAsync(guild.Id);
+                    var premium = await Premium.IsGuildPremiumAsync(guild.Id);
 
                     foreach (var member in members.Where(x => !x.IsBot).OrderBy(x => x.Id))
                     {
