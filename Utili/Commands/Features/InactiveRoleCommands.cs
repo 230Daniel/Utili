@@ -11,6 +11,7 @@ using Disqord.Gateway;
 using Disqord.Rest;
 using Qmmands;
 using Utili.Extensions;
+using Utili.Implementations;
 using Utili.Utils;
 
 namespace Utili.Commands
@@ -77,8 +78,8 @@ namespace Utili.Commands
                 pages.Add(new Page().AddEmbed(embed));
             
 
-            IPageProvider pageProvider = new PageProvider(pages);
-            PagedView menu = new(pageProvider);
+            var pageProvider = new PageProvider(pages);
+            var menu = new MyPagedView(pageProvider);
             await View(menu);
         }
 
