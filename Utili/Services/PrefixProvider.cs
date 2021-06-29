@@ -27,12 +27,11 @@ namespace Utili.Services
                     new MentionPrefix((message.Client as DiscordClientBase).CurrentUser.Id)
                 };
             }
-
-            await Task.Yield();
+            
             var row = await Core.GetRowAsync(message.GuildId.Value);
             return new IPrefix[]
             {
-                new StringPrefix(row.Prefix.Value),
+                new StringPrefix(string.IsNullOrWhiteSpace(row.Prefix.Value) ? _config.GetValue<string>("defaultPrefix") : row.Prefix.Value),
                 new MentionPrefix((message.Client as DiscordClientBase).CurrentUser.Id)
             };
         }

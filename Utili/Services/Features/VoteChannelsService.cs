@@ -38,15 +38,15 @@ namespace Utili.Features
                 var guild = _client.GetGuild(e.GuildId.Value);
                 foreach (var emojiString in row.Emotes)
                 {
-                    var emoji = LocalEmoji.FromEmoji(guild.GetEmoji(emojiString));
+                    var emoji = guild.GetEmoji(emojiString);
                     if (emoji is null) continue;
-                    await e.Message.AddReactionAsync(emoji);
+                    await e.Message.AddReactionAsync(LocalEmoji.FromEmoji(emoji));
                 }
                     
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Exception thrown in message received");
+                _logger.LogError(ex, "Exception thrown in message received ({Guild}/{Channel}/{Message})", e.GuildId, e.ChannelId, e.MessageId);
             }
         }
 

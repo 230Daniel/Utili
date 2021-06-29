@@ -41,7 +41,7 @@ namespace Utili.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Exception thrown on message received");
+                _logger.LogError(ex, "Exception thrown on message received ({Guild}/{Channel}/{Message})", e.GuildId, e.ChannelId, e.MessageId);
             }
         }
 
