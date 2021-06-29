@@ -158,30 +158,15 @@ namespace Utili.Services
         {
             try
             {
-                if (!e.GuildId.HasValue) return;
+                if (!e.GuildId.HasValue || !e.Model.Pinned.HasValue) return;
                 var row = await Autopurge.GetRowAsync(e.GuildId.Value, e.ChannelId);
                 if (row.Mode == 2) return;
 
-                var messageRow =
-                    (await Autopurge.GetMessagesAsync(e.GuildId.Value, e.ChannelId, e.MessageId)).FirstOrDefault();
-                if (messageRow is null)
+                var messageRow = (await Autopurge.GetMessagesAsync(e.GuildId.Value, e.ChannelId, e.MessageId)).FirstOrDefault();
+                if (messageRow is null) return;
+                if (messageRow.IsPinned != e.Model.Pinned.Value)
                 {
-                    messageRow = new AutopurgeMessageRow
-                    {
-                        GuildId = e.GuildId.Value,
-                        ChannelId = e.ChannelId,
-                        MessageId = e.MessageId,
-                        Timestamp = e.NewMessage.CreatedAt().UtcDateTime,
-                        IsBot = e.NewMessage.Author.IsBot,
-                        IsPinned = e.NewMessage.IsPinned
-                    };
-                    await Autopurge.SaveMessageAsync(messageRow);
-                    return;
-                }
-
-                if (messageRow.IsPinned != e.NewMessage.IsPinned)
-                {
-                    messageRow.IsPinned = e.NewMessage.IsPinned;
+                    messageRow.IsPinned = e.Model.Pinned.Value;
                     await Autopurge.SaveMessageAsync(messageRow);
                 }
             }

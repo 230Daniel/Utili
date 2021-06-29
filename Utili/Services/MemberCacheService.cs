@@ -6,6 +6,7 @@ using System.Timers;
 using Database.Data;
 using Disqord;
 using Disqord.Gateway;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace Utili.Services
@@ -13,14 +14,16 @@ namespace Utili.Services
     public class MemberCacheService
     {
         private readonly ILogger<MemberCacheService> _logger;
+        private readonly IConfiguration _configuration;
         private readonly DiscordClientBase _client;
 
         private List<ulong> _cachedGuilds;
         private Timer _timer;
 
-        public MemberCacheService(ILogger<MemberCacheService> logger, DiscordClientBase client)
+        public MemberCacheService(ILogger<MemberCacheService> logger, IConfiguration configuration, DiscordClientBase client)
         {
             _logger = logger;
+            _configuration = configuration;
             _client = client;
 
             _cachedGuilds = new();
@@ -38,8 +41,10 @@ namespace Utili.Services
             try
             {
                 var guildIds = await GetRequiredDownloadsAsync(e.GuildIds);
-                _logger.LogInformation("Caching users for {Guilds} guilds on {ShardId}", guildIds.Count, e.ShardId);
+                _logger.LogInformation("Caching members for {Guilds} guilds on {ShardId}", guildIds.Count, e.ShardId);
                 await CacheMembersAsync(guildIds);
+                _logger.LogInformation("Finished caching members for {Shard}", e.ShardId);
+                await e.CurrentUser.GetGatewayClient().SetPresenceAsync(new LocalActivity($"{_configuration.GetValue<string>("Domain")} | {_configuration.GetValue<string>("DefaultPrefix")}help", ActivityType.Playing));
             }
             catch (Exception ex)
             {
@@ -64,16 +69,13 @@ namespace Utili.Services
             guildIds = guildIds.Distinct();
             lock (_cachedGuilds)
             {
-                foreach (var guildId in guildIds)
-                {
-                    _logger.LogDebug("Caching members for {Guild}", guildId);
-                    _cachedGuilds.Add(guildId);
-                    
-                    _ = Task.Run(async () =>
-                    {
-                        await _client.Chunker.ChunkAsync(_client.GetGuild(guildId));
-                    });
-                }
+                _cachedGuilds.AddRange(guildIds);
+            }
+            
+            foreach (var guildId in guildIds)
+            {
+                await _client.Chunker.ChunkAsync(_client.GetGuild(guildId));
+                _logger.LogDebug("Cached members for {Guild}", guildId);
             }
         }
 

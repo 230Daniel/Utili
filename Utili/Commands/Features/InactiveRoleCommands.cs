@@ -47,12 +47,12 @@ namespace Utili.Commands
             var pages = new List<Page>();
             var content = "";
             var embed = MessageUtils.CreateEmbed(EmbedType.Info, "Inactive Users")
-                .WithFooter($"Page 1 of {Math.Ceiling((decimal) inactiveMembers.Count / 9)}");
+                .WithFooter($"Page 1 of {Math.Ceiling((decimal) inactiveMembers.Count / 30)}");
 
             for (var i = 0; i < inactiveMembers.Count; i++)
             {
                 content += $"{inactiveMembers[i].Mention}\n";
-                if ((i + 1) % 3 == 0)
+                if ((i + 1) % 10 == 0)
                 {
                     embed.AddField(new LocalEmbedField()
                         .WithBlankName()
@@ -60,11 +60,11 @@ namespace Utili.Commands
                         .WithIsInline(true));
                     content = "";
                 }
-                if ((i + 1) % 9 == 0)
+                if ((i + 1) % 30 == 0)
                 {
                     pages.Add(new Page().AddEmbed(embed));
                     embed = MessageUtils.CreateEmbed(EmbedType.Info, "Inactive Members")
-                        .WithFooter($"Page {Math.Ceiling((decimal) i / 9) + 1} of {Math.Ceiling((decimal) inactiveMembers.Count / 9)}");
+                        .WithFooter($"Page {Math.Ceiling((decimal) i / 9) + 1} of {Math.Ceiling((decimal) inactiveMembers.Count / 30)}");
                 }
             }
 

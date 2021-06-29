@@ -30,14 +30,19 @@ namespace Utili.Features
                 if (!e.Channel.BotHasPermissions(Permission.ViewChannel | Permission.ReadMessageHistory | Permission.AddReactions)) return;
 
                 var row = (await VoteChannels.GetRowsAsync(e.GuildId.Value, e.ChannelId)).FirstOrDefault();
-                if (row is null || !DoesMessageObeyRule(e.Message as IUserMessage, row)) return;
+                if (row is null || !DoesMessageObeyRule(e.Message, row)) return;
 
                 if (await Premium.IsGuildPremiumAsync(e.GuildId.Value)) row.Emotes = row.Emotes.Take(5).ToList();
                 else row.Emotes = row.Emotes.Take(2).ToList();
 
                 var guild = _client.GetGuild(e.GuildId.Value);
-                foreach (var emoji in row.Emotes)
-                    await e.Message.AddReactionAsync(LocalEmoji.FromEmoji(guild.GetEmoji(emoji)));
+                foreach (var emojiString in row.Emotes)
+                {
+                    var emoji = LocalEmoji.FromEmoji(guild.GetEmoji(emojiString));
+                    if (emoji is null) continue;
+                    await e.Message.AddReactionAsync(emoji);
+                }
+                    
             }
             catch (Exception ex)
             {
@@ -45,28 +50,28 @@ namespace Utili.Features
             }
         }
 
-        private static bool DoesMessageObeyRule(IUserMessage message, VoteChannelsRow row)
+        private static bool DoesMessageObeyRule(IMessage msg, VoteChannelsRow row)
         {
             return row.Mode switch
             {
                 0 => // All
                     true,
                 1 => // Images
-                    message.IsImage(),
+                    msg is IUserMessage message && message.IsImage(),
                 2 => // Videos
-                    message.IsVideo(),
+                    msg is IUserMessage message && message.IsVideo(),
                 3 => // Media
-                    message.IsImage() || message.IsVideo(),
+                    msg is IUserMessage message && (message.IsImage() || message.IsVideo()),
                 4 => // Music
-                    message.IsMusic() || message.IsVideo(),
+                    msg is IUserMessage message && (message.IsMusic() || message.IsVideo()),
                 5 => // Attachments
-                    message.IsAttachment(),
+                    msg is IUserMessage message && message.IsAttachment(),
                 6 => // URLs
-                    message.IsUrl(),
+                    msg is IUserMessage message && message.IsUrl(),
                 7 => // URLs or Media
-                    message.IsImage() || message.IsVideo() || message.IsUrl(),
+                    msg is IUserMessage message && (message.IsImage() || message.IsVideo() || message.IsUrl()),
                 8 => // Embeds
-                    message.IsEmbed(),
+                    msg is IUserMessage message && message.IsEmbed(),
                 _ => false
             };
         }

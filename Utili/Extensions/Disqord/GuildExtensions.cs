@@ -45,10 +45,10 @@ namespace Utili.Extensions
         
         public static IEmoji GetEmoji(this IGuild guild, string emojiString)
         {
-            if (guild.Emojis.Values.Any(x => x.Name == emojiString || $":{x.Name}:" == emojiString))
-                return guild.Emojis.Values.First(x => x.Name == emojiString || $":{x.Name}:" == emojiString);
-
-            return new LocalEmoji(emojiString);
+            var guildEmoji = guild.Emojis.Values.FirstOrDefault(x => x.Tag == emojiString || $":{x.Name}:" == emojiString);
+            return guildEmoji is null
+                ? emojiString.Contains("<") ? null : new LocalEmoji(emojiString)
+                : guildEmoji;
         }
 
         public static ValueTask<bool> ChunkMembersAsync(this IGatewayGuild guild)
