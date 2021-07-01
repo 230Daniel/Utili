@@ -249,7 +249,7 @@ namespace Utili.Commands
                 var member = reactedMembers[random.Next(0, reactedMembers.Count)];
 
                 await Context.Channel.SendInfoAsync("Random member",
-                    $"{member.Mention}\n" +
+                    $"{member.Mention} ({member})\n" +
                     $"This member was picked randomly from {reactedMembers.Count} member{(reactedMembers.Count == 1 ? "" : "s")} " +
                     $"that reacted to [this message]({message.GetJumpUrl(Context.GuildId)}) with {emoji}.");
             }
