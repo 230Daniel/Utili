@@ -42,9 +42,8 @@ namespace Utili.Features
                     if (emoji is null) continue;
                     await e.Message.AddReactionAsync(LocalEmoji.FromEmoji(emoji));
                 }
-                    
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is not RestApiException { Message: "Unknown Message" })
             {
                 _logger.LogError(ex, "Exception thrown in message received ({Guild}/{Channel}/{Message})", e.GuildId, e.ChannelId, e.MessageId);
             }

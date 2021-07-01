@@ -20,19 +20,21 @@ namespace Utili.Services
         private readonly ILogger<NoticesService> _logger;
         private readonly DiscordClientBase _client;
 
-        private List<(Snowflake, Timer)> _channelUpdateTimers = new();
+        private Dictionary<Snowflake, Timer> _channelUpdateTimers = new();
         private RepeatingTimer _dashboardNoticeUpdateTimer;
 
         public NoticesService(ILogger<NoticesService> logger, DiscordClientBase client)
         {
             _logger = logger;
             _client = client;
+            
+            _dashboardNoticeUpdateTimer = new RepeatingTimer(3000);
+            _dashboardNoticeUpdateTimer.Elapsed += DashboardNoticeUpdateTimer_Elapsed;
         }
 
         public void Start()
         {
-            _dashboardNoticeUpdateTimer = new RepeatingTimer(3000);
-            _dashboardNoticeUpdateTimer.Elapsed += DashboardNoticeUpdateTimer_Elapsed;
+            _dashboardNoticeUpdateTimer.Start();
         }
 
         public async Task MessageReceived(MessageReceivedEventArgs e)
@@ -70,12 +72,19 @@ namespace Utili.Services
 
         private async Task UpdateNoticesFromDashboardAsync()
         {
-            var fromDashboard = await Misc.GetRowsAsync(type: "RequiresNoticeUpdate");
-            fromDashboard.RemoveAll(x => _client.GetGuilds().All(y => x.GuildId != y.Key));
-            foreach (var miscRow in fromDashboard)
+            try
             {
-                await Misc.DeleteRowAsync(miscRow);
-                ScheduleNoticeUpdate(miscRow.GuildId, ulong.Parse(miscRow.Value), TimeSpan.FromSeconds(1));
+                var fromDashboard = await Misc.GetRowsAsync(type: "RequiresNoticeUpdate");
+                fromDashboard.RemoveAll(x => _client.GetGuilds().All(y => x.GuildId != y.Key));
+                foreach (var miscRow in fromDashboard)
+                {
+                    await Misc.DeleteRowAsync(miscRow);
+                    ScheduleNoticeUpdate(miscRow.GuildId, ulong.Parse(miscRow.Value), TimeSpan.FromSeconds(1));
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Exception thrown updating notices from dashboard");
             }
         }
 
@@ -88,14 +97,13 @@ namespace Utili.Services
 
             lock (_channelUpdateTimers)
             {
-                var channelUpdate = _channelUpdateTimers.FirstOrDefault(x => x.Item1 == channelId);
-                if (channelUpdate.Item2 is not null)
+                if(_channelUpdateTimers.TryGetValue(channelId, out var timer))
                 {
-                    channelUpdate.Item2.Dispose();
-                    _channelUpdateTimers.Remove(channelUpdate);
+                    timer.Dispose();
+                    _channelUpdateTimers.Remove(channelId);
                 }
 
-                _channelUpdateTimers.Add((channelId, newTimer));
+                _channelUpdateTimers.Add(channelId, newTimer);
             }
         }
 

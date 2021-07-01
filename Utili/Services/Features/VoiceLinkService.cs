@@ -87,6 +87,7 @@ namespace Utili.Services
                 {
                     var guild = _client.GetGuild(guildId);
                     var voiceChannel = guild.GetVoiceChannel(channelId);
+                    if (voiceChannel is null) return;
                     var category = voiceChannel.CategoryId.HasValue ? guild.GetCategoryChannel(voiceChannel.CategoryId.Value) : null;
 
                     if(!voiceChannel.BotHasPermissions(Permission.ViewChannel)) return;
