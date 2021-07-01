@@ -160,6 +160,12 @@ namespace Database.Data
                     ("Reputation", reputation));
             }
         }
+        
+        public static async Task ResetGuildUserReputationAsync(ulong guildId)
+        {
+            await Sql.ExecuteAsync("DELETE FROM ReputationUsers WHERE GuildId = @GuildId;",
+                ("GuildId", guildId));
+        }
     }
     public class ReputationRow : IRow
     {

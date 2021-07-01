@@ -11,7 +11,7 @@ using Utili.Utils;
 namespace Utili.Commands
 {
     [Group("Reputation", "Rep")]
-    public class RepuatationCommands : DiscordGuildModuleBase
+    public class RepuatationCommands : DiscordInteractiveGuildModuleBase
     {
         [Command("")]
         public async Task Reputation(
@@ -121,7 +121,6 @@ namespace Utili.Commands
         [Command("AddEmoji")]
         [DefaultCooldown(2, 5)]
         [RequireAuthorGuildPermissions(Permission.ManageGuild)]
-        [RequireBotChannelPermissions(Permission.AddReactions)]
         public async Task AddEmoji(IEmoji emoji, int value = 0)
         {
             var row = await Database.Data.Reputation.GetRowAsync(Context.Guild.Id);
@@ -137,6 +136,22 @@ namespace Utili.Commands
 
             await Context.Channel.SendSuccessAsync("Emoji added",
                 $"The {emoji} emoji was added successfully with value {value}\nYou can change its value or remove it on the dashboard");
+        }
+
+        [Command("Reset")]
+        [DefaultCooldown(1, 10)]
+        [RequireAuthorGuildPermissions(Permission.ManageGuild)]
+        public async Task Reset()
+        {
+            if (await ConfirmAsync("Are you sure?", "This command will reset reputation for all server members", "Reset all reputation"))
+            {
+                await Database.Data.Reputation.ResetGuildUserReputationAsync(Context.GuildId);
+                await Context.Channel.SendSuccessAsync("Reputation reset", "The reputation of all server members has been set to 0");
+            }
+            else
+            {
+                await Context.Channel.SendFailureAsync("Action canceled", "No action was performed");
+            }
         }
     }
 }

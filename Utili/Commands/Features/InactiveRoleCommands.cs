@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using Database.Data;
 using Disqord;
 using Disqord.Bot;
-using Disqord.Extensions.Interactivity;
 using Disqord.Extensions.Interactivity.Menus.Paged;
 using Disqord.Gateway;
 using Disqord.Rest;
@@ -17,7 +16,7 @@ using Utili.Utils;
 namespace Utili.Commands
 {
     [Group("Inactive", "InactiveRole")]
-    public class InactiveRoleCommands : DiscordGuildModuleBase
+    public class InactiveRoleCommands : DiscordInteractiveGuildModuleBase
     {
         private static List<ulong> _kickingIn = new();
 
@@ -117,24 +116,10 @@ namespace Utili.Commands
                 .OrderBy(x => x.Nick ?? x.Name)
                 .ToList();
 
-            var confirmMessage = await Context.Channel.SendInfoAsync("Are you sure?", 
-                $"This command will kick {inactiveMembers.Count} inactive members - View them with {Context.Prefix}inactive list\n" +
-                $"Press {Constants.CheckmarkEmoji} to continue or {Constants.CrossEmoji} to cancel.");
-
-            await confirmMessage.AddReactionAsync(Constants.CheckmarkEmoji);
-            await confirmMessage.AddReactionAsync(Constants.CrossEmoji);
-
-            var reaction = await confirmMessage.WaitForReactionAsync(x => x.UserId == Context.Message.Author.Id && (x.Emoji.Equals(Constants.CheckmarkEmoji) || x.Emoji.Equals(Constants.CrossEmoji)), TimeSpan.FromMinutes(1));
-            if (reaction is null || !reaction.Emoji.Equals(Constants.CheckmarkEmoji))
+            if (await ConfirmAsync("Are you sure?", $"This command will kick {inactiveMembers.Count} inactive members - View them with {Context.Prefix}inactive list", $"Kick {inactiveMembers.Count} inactive members"))
             {
-                await confirmMessage.ClearReactionsAsync();
-                await confirmMessage.ModifyAsync(x => x.Embeds = new[]{MessageUtils.CreateEmbed(EmbedType.Failure, "Command Canceled", "No action was performed")});
-            }
-            else
-            {
-                await confirmMessage.ClearReactionsAsync();
-                await confirmMessage.ModifyAsync(x => x.Embeds = new[]{MessageUtils.CreateEmbed(EmbedType.Success, "Kicking inactive users", $"Under ideal conditions, this action will take {TimeSpan.FromSeconds(inactiveMembers.Count * 1.1).ToLongString()}")});
-
+                await Context.Channel.SendSuccessAsync($"Kicking {inactiveMembers.Count} inactive members", $"Under ideal conditions, this action will take {TimeSpan.FromSeconds(inactiveMembers.Count * 1.1).ToLongString()}");
+                
                 var failed = 0;
                 foreach(var member in inactiveMembers)
                 {
@@ -152,6 +137,10 @@ namespace Utili.Commands
 
                 await Context.Channel.SendSuccessAsync("Inactive members kicked",
                     $"{inactiveMembers.Count - failed} inactive members were kicked {(failed > 0 ? $"\nFailed to kick {failed} members" : "")}");
+            }
+            else
+            {
+                await Context.Channel.SendFailureAsync("Action canceled", "No action was performed");
             }
 
             lock (_kickingIn)
