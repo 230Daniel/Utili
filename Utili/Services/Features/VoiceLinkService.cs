@@ -124,8 +124,8 @@ namespace Utili.Services
                             x.Topic = $"Users in {voiceChannel.Name} have access - Created by Utili";
                             x.Overwrites = new List<LocalOverwrite>
                             {
-                                new(_client.CurrentUser, new OverwritePermissions().Allow(Permission.ViewChannel)),
-                                new(guildId, OverwriteTargetType.Role, new OverwritePermissions().Deny(Permission.ViewChannel)) // @everyone
+                                LocalOverwrite.Member(_client.CurrentUser.Id, new OverwritePermissions().Allow(Permission.ViewChannel)),
+                                LocalOverwrite.Role(guildId, new OverwritePermissions().Deny(Permission.ViewChannel)) // @everyone
                             };
                         }, new DefaultRestRequestOptions{Reason = "Voice Link"});
 
@@ -159,7 +159,7 @@ namespace Utili.Services
                         if (!overwrites.Any(x => x.TargetId == member.Id && x.TargetType == OverwriteTargetType.Member))
                         {
                             overwritesChanged = true;
-                            overwrites.Add(new LocalOverwrite(member, new OverwritePermissions().Allow(Permission.ViewChannel)));
+                            overwrites.Add(LocalOverwrite.Member(member.Id, new OverwritePermissions().Allow(Permission.ViewChannel)));
                         }
                     }
 
