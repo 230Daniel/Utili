@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using MySql.Data.MySqlClient;
 using System.Timers;
 
 namespace Database.Data
@@ -27,7 +26,7 @@ namespace Database.Data
 
         public static async Task<List<MessageLogsRow>> GetRowsAsync(ulong? guildId = null, bool ignoreCache = false)
         {
-            List<MessageLogsRow> matchedRows = new List<MessageLogsRow>();
+            var matchedRows = new List<MessageLogsRow>();
 
             if (Cache.Initialised && !ignoreCache)
             {
@@ -36,8 +35,8 @@ namespace Database.Data
             }
             else
             {
-                string command = "SELECT * FROM MessageLogs WHERE TRUE";
-                List<(string, object)> values = new List<(string, object)>();
+                var command = "SELECT * FROM MessageLogs WHERE TRUE";
+                var values = new  List<(string, object)>();
 
                 if (guildId.HasValue)
                 {
@@ -45,8 +44,8 @@ namespace Database.Data
                     values.Add(("GuildId", guildId.Value));
                 }
 
-                MySqlDataReader reader = await Sql.ExecuteReaderAsync(command, values.ToArray());
-
+                var reader = await Sql.ExecuteReaderAsync(command, values.ToArray());
+                
                 while (reader.Read())
                 {
                     matchedRows.Add(MessageLogsRow.FromDatabase(
@@ -64,7 +63,7 @@ namespace Database.Data
 
         public static async Task<MessageLogsRow> GetRowAsync(ulong guildId)
         {
-            List<MessageLogsRow> rows = await GetRowsAsync(guildId);
+            var rows = await GetRowsAsync(guildId);
             return rows.Count > 0 ? rows.First() : new MessageLogsRow(guildId);
         }
 
@@ -106,10 +105,10 @@ namespace Database.Data
 
         public static async Task<List<MessageLogsMessageRow>> GetMessagesAsync(ulong? guildId = null, ulong? channelId = null, ulong? messageId = null)
         {
-            List<MessageLogsMessageRow> matchedRows = new List<MessageLogsMessageRow>();
+            var matchedRows = new List<MessageLogsMessageRow>();
 
-            string command = "SELECT * FROM MessageLogsMessages WHERE TRUE";
-            List<(string, object)> values = new List<(string, object)>();
+            var command = "SELECT * FROM MessageLogsMessages WHERE TRUE";
+            var values = new List<(string, object)>();
 
             if (guildId.HasValue)
             {
@@ -129,7 +128,7 @@ namespace Database.Data
                 values.Add(("MessageId", messageId.Value));
             }
 
-            MySqlDataReader reader = await Sql.ExecuteReaderAsync(command, values.ToArray());
+            var reader = await Sql.ExecuteReaderAsync(command, values.ToArray());
 
             while (reader.Read())
             {
@@ -149,16 +148,16 @@ namespace Database.Data
 
         public static async Task<List<MessageLogsMessageRow>> GetMessagesAsync(ulong guildId, ulong channelId, ulong[] messageIds)
         {
-            List<MessageLogsMessageRow> matchedRows = new List<MessageLogsMessageRow>();
+            var matchedRows = new List<MessageLogsMessageRow>();
 
-            string command = $"SELECT * FROM MessageLogsMessages WHERE GuildId = @GuildId AND ChannelId = @ChannelId AND MessageId IN {Sql.ToSqlObjectArray(messageIds)}";
-            List<(string, object)> values = new List<(string, object)>
+            var command = $"SELECT * FROM MessageLogsMessages WHERE GuildId = @GuildId AND ChannelId = @ChannelId AND MessageId IN {Sql.ToSqlObjectArray(messageIds)}";
+            var values = new List<(string, object)>
             {
                 ("GuildId", guildId), 
                 ("ChannelId", channelId)
             };
 
-            MySqlDataReader reader = await Sql.ExecuteReaderAsync(command, values.ToArray());
+            var reader = await Sql.ExecuteReaderAsync(command, values.ToArray());
 
             while (reader.Read())
             {
@@ -178,7 +177,7 @@ namespace Database.Data
 
         public static async Task<MessageLogsMessageRow> GetMessageAsync(ulong guildId, ulong channelId, ulong messageId)
         {
-            List<MessageLogsMessageRow> messages = await GetMessagesAsync(guildId, channelId, messageId);
+            var messages = await GetMessagesAsync(guildId, channelId, messageId);
             return messages.Count > 0 ? messages.First() : null;
         }
 
@@ -219,16 +218,16 @@ namespace Database.Data
 
         private static async Task<int> GetStoredMessageCountAsync(ulong guildId, ulong channelId)
         {
-            string command = "SELECT COUNT(*) FROM MessageLogsMessages WHERE GuildId = @GuildId AND ChannelId = @ChannelId";
-            List<(string, object)> values = new List<(string, object)>
+            var command = "SELECT COUNT(*) FROM MessageLogsMessages WHERE GuildId = @GuildId AND ChannelId = @ChannelId";
+            var values = new List<(string, object)>
             {
                 ("GuildId", guildId), 
                 ("ChannelId", channelId)
             };
 
-            MySqlDataReader reader = await Sql.ExecuteReaderAsync(command, values.ToArray());
+            var reader = await Sql.ExecuteReaderAsync(command, values.ToArray());
             reader.Read();
-            int count = reader.GetInt32(0);
+            var count = reader.GetInt32(0);
             reader.Close();
             return count;
         }
@@ -237,8 +236,8 @@ namespace Database.Data
         {
             if(premium) return;
 
-            int count = await GetStoredMessageCountAsync(guildId, channelId);
-            int toDelete = count - 50;
+            var count = await GetStoredMessageCountAsync(guildId, channelId);
+            var toDelete = count - 50;
             if(toDelete <= 0) return;
 
             // Double-nesting is used to workaround a limitation of mysql
@@ -285,7 +284,7 @@ namespace Database.Data
 
         public static MessageLogsRow FromDatabase(ulong guildId, ulong deletedChannelId, ulong editedChannelId, string excludedChannels)
         {
-            MessageLogsRow row = new MessageLogsRow
+            var row = new MessageLogsRow
             {
                 New = false,
                 GuildId = guildId,
@@ -296,9 +295,9 @@ namespace Database.Data
 
             if (!string.IsNullOrEmpty(excludedChannels))
             {
-                foreach (string excludedChannel in excludedChannels.Split(","))
+                foreach (var excludedChannel in excludedChannels.Split(","))
                 {
-                    if (ulong.TryParse(excludedChannel, out ulong channelId))
+                    if (ulong.TryParse(excludedChannel, out var channelId))
                     {
                         row.ExcludedChannels.Add(channelId);
                     }
@@ -310,11 +309,11 @@ namespace Database.Data
 
         public string GetExcludedChannelsString()
         {
-            string excludedChannelsString = "";
+            var excludedChannelsString = "";
 
-            for (int i = 0; i < ExcludedChannels.Count; i++)
+            for (var i = 0; i < ExcludedChannels.Count; i++)
             {
-                ulong excludedChannelId = ExcludedChannels[i];
+                var excludedChannelId = ExcludedChannels[i];
                 excludedChannelsString += excludedChannelId.ToString();
                 if (i != ExcludedChannels.Count - 1)
                 {
@@ -355,7 +354,7 @@ namespace Database.Data
 
         public static MessageLogsMessageRow FromDatabase(ulong guildId, ulong channelId, ulong messageId, ulong userId, DateTime timestamp, string content)
         {
-            MessageLogsMessageRow row = new MessageLogsMessageRow
+            var row = new MessageLogsMessageRow
             {
                 New = false,
                 GuildId = guildId,

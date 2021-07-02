@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using MySql.Data.MySqlClient;
 using System.Timers;
 
 namespace Database.Data
@@ -26,7 +25,7 @@ namespace Database.Data
 
         public static async Task<List<PremiumRow>> GetRowsAsync(ulong? userId = null, ulong? guildId = null, int? slotId = null, bool ignoreCache = false)
         {
-            List<PremiumRow> matchedRows = new List<PremiumRow>();
+            var matchedRows = new List<PremiumRow>();
 
             if (Cache.Initialised && !ignoreCache)
             {
@@ -38,8 +37,8 @@ namespace Database.Data
             }
             else
             {
-                string command = "SELECT * FROM Premium WHERE TRUE";
-                List<(string, object)> values = new List<(string, object)>();
+                var command = "SELECT * FROM Premium WHERE TRUE";
+                var values = new List<(string, object)>();
 
                 if (userId.HasValue)
                 {
@@ -59,7 +58,7 @@ namespace Database.Data
                     values.Add(("SlotId", slotId.Value.ToString()));
                 }
 
-                MySqlDataReader reader = await Sql.ExecuteReaderAsync(command, values.ToArray());
+                var reader = await Sql.ExecuteReaderAsync(command, values.ToArray());
 
                 while (reader.Read())
                 {
@@ -77,13 +76,13 @@ namespace Database.Data
 
         public static async Task<List<PremiumRow>> GetUserRowsAsync(ulong userId)
         {
-            List<PremiumRow> rows = (await GetRowsAsync(userId)).OrderBy(x => x.SlotId).ToList();
-            int amount = await Subscriptions.GetSlotCountAsync(userId);
+            var rows = (await GetRowsAsync(userId)).OrderBy(x => x.SlotId).ToList();
+            var amount = await Subscriptions.GetSlotCountAsync(userId);
 
             rows = rows.Take(amount).ToList();
             while (rows.Count < amount)
             {
-                PremiumRow row = new PremiumRow(userId, 0);
+                PremiumRow row = new(userId, 0);
                 await SaveRowAsync(row);
                 rows.Add(row);
             }
@@ -93,13 +92,13 @@ namespace Database.Data
 
         public static async Task<PremiumRow> GetUserRowAsync(ulong userId, int slotId)
         {
-            List<PremiumRow> rows = await GetRowsAsync(userId, slotId: slotId);
+            var rows = await GetRowsAsync(userId, slotId: slotId);
             return rows.Count > 0 ? rows.First() : null;
         }
 
         public static async Task<bool> IsGuildPremiumAsync(ulong guildId)
         {
-            List<PremiumRow> rows = await GetRowsAsync(guildId: guildId);
+            var rows = await GetRowsAsync(guildId: guildId);
             return rows.Count > 0;
         }
 
@@ -140,17 +139,17 @@ namespace Database.Data
 
         public static async Task DeleteExpiredSlotsAsync()
         {
-            List<SubscriptionsRow> subscriptions = await Subscriptions.GetRowsAsync(onlyValid: true);
+            var subscriptions = await Subscriptions.GetRowsAsync(onlyValid: true);
 
-            List<(ulong, int)> usedSlotsRecord = new List<(ulong, int)>();
-            List<PremiumRow> rows = (await GetRowsAsync()).OrderBy(x => x.SlotId).ToList();
-            foreach(PremiumRow row in rows)
+            var usedSlotsRecord = new List<(ulong, int)>();
+            var rows = (await GetRowsAsync()).OrderBy(x => x.SlotId).ToList();
+            foreach(var row in rows)
             {
                 // usedSlots is how many slots that have been counted so far by this script.
                 // It has nothing to do with the slots which have servers assigned.
 
-                int availableSlots = subscriptions.Where(x => x.UserId == row.UserId).Sum(x => x.Slots);
-                int usedSlots = 0;
+                var availableSlots = subscriptions.Where(x => x.UserId == row.UserId).Sum(x => x.Slots);
+                var usedSlots = 0;
                 if (usedSlotsRecord.Any(x => x.Item1 == row.UserId))
                     usedSlots = usedSlotsRecord.First(x => x.Item1 == row.UserId).Item2;
                 else usedSlotsRecord.Add((row.UserId, 0));
@@ -188,7 +187,7 @@ namespace Database.Data
 
         public static PremiumRow FromDatabase(int slotId, ulong userId, ulong guildId)
         {
-            return new PremiumRow
+            return new()
             {
                 New = false,
                 SlotId = slotId,

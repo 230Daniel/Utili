@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using MySql.Data.MySqlClient;
 
 namespace Database.Data
 {
@@ -9,7 +8,7 @@ namespace Database.Data
     {
         public static async Task<List<VoiceRolesRow>> GetRowsAsync(ulong? guildId = null, ulong? channelId = null, bool ignoreCache = false)
         {
-            List<VoiceRolesRow> matchedRows = new List<VoiceRolesRow>();
+            var matchedRows = new List<VoiceRolesRow>();
 
             if (Cache.Initialised && !ignoreCache)
             {
@@ -20,8 +19,8 @@ namespace Database.Data
             }
             else
             {
-                string command = "SELECT * FROM VoiceRoles WHERE TRUE";
-                List<(string, object)> values = new List<(string, object)>();
+                var command = "SELECT * FROM VoiceRoles WHERE TRUE";
+                var values = new List<(string, object)>();
 
                 if (guildId.HasValue)
                 {
@@ -35,7 +34,7 @@ namespace Database.Data
                     values.Add(("ChannelId", channelId.Value));
                 }
 
-                MySqlDataReader reader = await Sql.ExecuteReaderAsync(command, values.ToArray());
+                var reader = await Sql.ExecuteReaderAsync(command, values.ToArray());
 
                 while (reader.Read())
                 {
@@ -112,7 +111,7 @@ namespace Database.Data
 
         public static VoiceRolesRow FromDatabase(ulong guildId, ulong channelId, ulong roleId)
         {
-            return new VoiceRolesRow
+            return new()
             {
                 New = false,
                 GuildId = guildId,

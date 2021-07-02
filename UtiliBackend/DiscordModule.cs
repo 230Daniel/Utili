@@ -210,7 +210,7 @@ namespace UtiliBackend
 
         public void Add(object key, object value)
         {
-            DiscordCacheItem item = new DiscordCacheItem(key, value, Timeout);
+            DiscordCacheItem item = new(key, value, Timeout);
             Items.RemoveAll(x => x.Key == key);
             Items.Add(item);
 

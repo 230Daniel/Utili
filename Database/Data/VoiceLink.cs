@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using MySql.Data.MySqlClient;
 
 namespace Database.Data
 {
@@ -9,7 +8,7 @@ namespace Database.Data
     {
         public static async Task<List<VoiceLinkRow>> GetRowsAsync(ulong? guildId = null, bool ignoreCache = false)
         {
-            List<VoiceLinkRow> matchedRows = new List<VoiceLinkRow>();
+            var matchedRows = new List<VoiceLinkRow>();
 
             if (Cache.Initialised && !ignoreCache)
             {
@@ -19,8 +18,8 @@ namespace Database.Data
             }
             else
             {
-                string command = "SELECT * FROM VoiceLink WHERE TRUE";
-                List<(string, object)> values = new List<(string, object)>();
+                var command = "SELECT * FROM VoiceLink WHERE TRUE";
+                var values = new List<(string, object)>();
 
                 if (guildId.HasValue)
                 {
@@ -28,7 +27,7 @@ namespace Database.Data
                     values.Add(("GuildId", guildId.Value));
                 }
 
-                MySqlDataReader reader = await Sql.ExecuteReaderAsync(command, values.ToArray());
+                var reader = await Sql.ExecuteReaderAsync(command, values.ToArray());
 
                 while (reader.Read())
                 {
@@ -48,7 +47,7 @@ namespace Database.Data
 
         public static async Task<VoiceLinkRow> GetRowAsync(ulong guildId)
         {
-            List<VoiceLinkRow> rows = await GetRowsAsync(guildId);
+            var rows = await GetRowsAsync(guildId);
             return rows.Count > 0 ? rows.First() : new VoiceLinkRow(guildId);
         }
 
@@ -92,7 +91,7 @@ namespace Database.Data
 
         public static async Task<List<VoiceLinkChannelRow>> GetChannelRowsAsync(ulong? guildId = null, ulong? voiceChannelId = null, bool ignoreCache = false)
         {
-            List<VoiceLinkChannelRow> matchedRows = new List<VoiceLinkChannelRow>();
+            var matchedRows = new List<VoiceLinkChannelRow>();
 
             if (Cache.Initialised && !ignoreCache)
             {
@@ -103,8 +102,8 @@ namespace Database.Data
             }
             else
             {
-                string command = "SELECT * FROM VoiceLinkChannels WHERE TRUE";
-                List<(string, object)> values = new List<(string, object)>();
+                var command = "SELECT * FROM VoiceLinkChannels WHERE TRUE";
+                var values = new List<(string, object)>();
 
                 if (guildId.HasValue)
                 {
@@ -118,7 +117,7 @@ namespace Database.Data
                     values.Add(("VoiceChannelId", voiceChannelId.Value));
                 }
 
-                MySqlDataReader reader = await Sql.ExecuteReaderAsync(command, values.ToArray());
+                var reader = await Sql.ExecuteReaderAsync(command, values.ToArray());
 
                 while (reader.Read())
                 {
@@ -136,7 +135,7 @@ namespace Database.Data
 
         public static async Task<VoiceLinkChannelRow> GetChannelRowAsync(ulong guildId, ulong voiceChannelId)
         {
-            List<VoiceLinkChannelRow> rows = await GetChannelRowsAsync(guildId, voiceChannelId);
+            var rows = await GetChannelRowsAsync(guildId, voiceChannelId);
             return rows.Count > 0 ? rows.First() : new VoiceLinkChannelRow(guildId, voiceChannelId);
         }
 
@@ -202,7 +201,7 @@ namespace Database.Data
 
         public static VoiceLinkRow FromDatabase(ulong guildId, bool enabled, bool deleteChannels, string prefix, string excludedChannels)
         {
-            VoiceLinkRow row = new VoiceLinkRow
+            VoiceLinkRow row = new()
             {
                 New = false,
                 GuildId = guildId,
@@ -214,9 +213,9 @@ namespace Database.Data
 
             if (!string.IsNullOrEmpty(excludedChannels))
             {
-                foreach (string excludedChannel in excludedChannels.Split(","))
+                foreach (var excludedChannel in excludedChannels.Split(","))
                 {
-                    if (ulong.TryParse(excludedChannel, out ulong channelId))
+                    if (ulong.TryParse(excludedChannel, out var channelId))
                     {
                         row.ExcludedChannels.Add(channelId);
                     }
@@ -228,11 +227,11 @@ namespace Database.Data
 
         public string GetExcludedChannelsString()
         {
-            string excludedChannelsString = "";
+            var excludedChannelsString = "";
 
-            for (int i = 0; i < ExcludedChannels.Count; i++)
+            for (var i = 0; i < ExcludedChannels.Count; i++)
             {
-                ulong excludedChannelId = ExcludedChannels[i];
+                var excludedChannelId = ExcludedChannels[i];
                 excludedChannelsString += excludedChannelId.ToString();
                 if (i != ExcludedChannels.Count - 1)
                 {
@@ -275,7 +274,7 @@ namespace Database.Data
 
         public static VoiceLinkChannelRow FromDatabase(ulong guildId, ulong textChannelId, ulong voiceChannelId)
         {
-            return new VoiceLinkChannelRow
+            return new()
             {
                 New = false,
                 GuildId = guildId,

@@ -1,8 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Discord;
-using MySql.Data.MySqlClient;
 
 namespace Database.Data
 {
@@ -10,7 +8,7 @@ namespace Database.Data
     {
         public static async Task<List<JoinMessageRow>> GetRowsAsync(ulong? guildId = null, bool ignoreCache = false)
         {
-            List<JoinMessageRow> matchedRows = new List<JoinMessageRow>();
+            var matchedRows = new List<JoinMessageRow>();
 
             if (Cache.Initialised && !ignoreCache)
             {
@@ -20,8 +18,8 @@ namespace Database.Data
             }
             else
             {
-                string command = "SELECT * FROM JoinMessage WHERE TRUE";
-                List<(string, object)> values = new List<(string, object)>();
+                var command = "SELECT * FROM JoinMessage WHERE TRUE";
+                var values = new List<(string, object)>();
 
                 if (guildId.HasValue)
                 {
@@ -29,7 +27,7 @@ namespace Database.Data
                     values.Add(("GuildId", guildId.Value));
                 }
 
-                MySqlDataReader reader = await Sql.ExecuteReaderAsync(command, values.ToArray());
+                var reader = await Sql.ExecuteReaderAsync(command, values.ToArray());
 
                 while (reader.Read())
                 {
@@ -56,7 +54,7 @@ namespace Database.Data
 
         public static async Task<JoinMessageRow> GetRowAsync(ulong guildId)
         {
-            List<JoinMessageRow> rows = await GetRowsAsync(guildId);
+            var rows = await GetRowsAsync(guildId);
             return rows.Count > 0 ? rows.First() : new JoinMessageRow(guildId);
         }
 
@@ -77,7 +75,7 @@ namespace Database.Data
                     ("Image", row.Image.EncodedValue),
                     ("Thumbnail", row.Thumbnail.EncodedValue),
                     ("Icon", row.Icon.EncodedValue),
-                    ("Colour", row.Colour.RawValue));
+                    ("Colour", row.Colour));
 
                 row.New = false;
                 if(Cache.Initialised) Cache.JoinMessage.Add(row);
@@ -97,7 +95,7 @@ namespace Database.Data
                     ("Image", row.Image.EncodedValue),
                     ("Thumbnail", row.Thumbnail.EncodedValue),
                     ("Icon", row.Icon.EncodedValue),
-                    ("Colour", row.Colour.RawValue));
+                    ("Colour", row.Colour));
 
                 if(Cache.Initialised) Cache.JoinMessage[Cache.JoinMessage.FindIndex(x => x.GuildId == row.GuildId)] = row;
             }
@@ -126,7 +124,7 @@ namespace Database.Data
         public EString Image { get; set; }
         public EString Thumbnail { get; set; }
         public EString Icon { get; set; }
-        public Color Colour { get; set; }
+        public uint Colour { get; set; }
 
         private JoinMessageRow()
         {
@@ -147,12 +145,12 @@ namespace Database.Data
             Image = EString.Empty;
             Thumbnail = EString.Empty;
             Icon = EString.Empty;
-            Colour = new Color(67, 181, 129);
+            Colour = 4437377;
         }
 
         public static JoinMessageRow FromDatabase(ulong guildId, bool enabled, bool direct, ulong channelId, string title, string footer, string content, string text, string image, string thumbnail, string icon, uint colour)
         {
-            return new JoinMessageRow
+            return new()
             {
                 New = false,
                 GuildId = guildId,
@@ -166,7 +164,7 @@ namespace Database.Data
                 Image = EString.FromEncoded(image),
                 Thumbnail = EString.FromEncoded(thumbnail),
                 Icon = EString.FromEncoded(icon),
-                Colour = new Color(colour)
+                Colour = colour
             };
         }
 

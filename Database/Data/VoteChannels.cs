@@ -1,8 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Discord;
-using MySql.Data.MySqlClient;
 
 namespace Database.Data
 {
@@ -10,7 +8,7 @@ namespace Database.Data
     {
         public static async Task<List<VoteChannelsRow>> GetRowsAsync(ulong? guildId = null, ulong? channelId = null, bool ignoreCache = false)
         {
-            List<VoteChannelsRow> matchedRows = new List<VoteChannelsRow>();
+            var matchedRows = new List<VoteChannelsRow>();
 
             if (Cache.Initialised && !ignoreCache)
             {
@@ -21,8 +19,8 @@ namespace Database.Data
             }
             else
             {
-                string command = "SELECT * FROM VoteChannels WHERE TRUE";
-                List<(string, object)> values = new List<(string, object)>();
+                var command = "SELECT * FROM VoteChannels WHERE TRUE";
+                var values = new List<(string, object)>();
 
                 if (guildId.HasValue)
                 {
@@ -36,7 +34,7 @@ namespace Database.Data
                     values.Add(("ChannelId", channelId.Value));
                 }
 
-                MySqlDataReader reader = await Sql.ExecuteReaderAsync(command, values.ToArray());
+                var reader = await Sql.ExecuteReaderAsync(command, values.ToArray());
 
                 while (reader.Read())
                 {
@@ -100,7 +98,7 @@ namespace Database.Data
         public ulong GuildId { get; set; }
         public ulong ChannelId { get; set; }
         public int Mode { get; set; }
-        public List<IEmote> Emotes { get; set; }
+        public List<string> Emotes { get; set; }
 
         private VoteChannelsRow()
         {
@@ -113,46 +111,33 @@ namespace Database.Data
             GuildId = guildId;
             ChannelId = channelId;
             Mode = 0;
-            Emotes = new List<IEmote>();
+            Emotes = new List<string>();
         }
 
         public static VoteChannelsRow FromDatabase(ulong guildId, ulong channelId, int mode, string emotes)
         {
-            VoteChannelsRow row = new VoteChannelsRow
+            var row = new VoteChannelsRow
             {
                 New = false,
                 GuildId = guildId,
                 ChannelId = channelId,
                 Mode = mode,
-                Emotes = new List<IEmote>()
+                Emotes = new List<string>()
             };
-
+            
             emotes = EString.FromEncoded(emotes).Value;
-            if (!string.IsNullOrEmpty(emotes))
-            {
-                foreach (string emoteString in emotes.Split(","))
-                {
-                    if (Emote.TryParse(emoteString, out Emote emote))
-                    {
-                        row.Emotes.Add(emote);
-                    }
-                    else
-                    {
-                        row.Emotes.Add(new Emoji(emoteString));
-                    }
-                }
-            }
-
+            row.Emotes = emotes.Split(",").ToList();
+            row.Emotes.RemoveAll(string.IsNullOrWhiteSpace);
             return row;
         }
 
         public string GetEmotesString()
         {
-            string emotesString = "";
+            var emotesString = "";
 
-            for (int i = 0; i < Emotes.Count; i++)
+            for (var i = 0; i < Emotes.Count; i++)
             {
-                emotesString += Emotes[i].ToString();
+                emotesString += Emotes[i];
                 if (i != Emotes.Count - 1)
                 {
                     emotesString += ",";

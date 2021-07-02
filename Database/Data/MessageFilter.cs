@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using MySql.Data.MySqlClient;
 
 namespace Database.Data
 {
@@ -9,7 +8,7 @@ namespace Database.Data
     {
         public static async Task<List<MessageFilterRow>> GetRowsAsync(ulong? guildId = null, ulong? channelId = null, bool ignoreCache = false)
         {
-            List<MessageFilterRow> matchedRows = new List<MessageFilterRow>();
+            var matchedRows = new List<MessageFilterRow>();
 
             if (Cache.Initialised && !ignoreCache)
             {
@@ -20,8 +19,8 @@ namespace Database.Data
             }
             else
             {
-                string command = "SELECT * FROM MessageFilter WHERE TRUE";
-                List<(string, object)> values = new List<(string, object)>();
+                var command = "SELECT * FROM MessageFilter WHERE TRUE";
+                var values = new List<(string, object)>();
 
                 if (guildId.HasValue)
                 {
@@ -35,7 +34,7 @@ namespace Database.Data
                     values.Add(("ChannelId", channelId.Value));
                 }
 
-                MySqlDataReader reader = await Sql.ExecuteReaderAsync(command, values.ToArray());
+                var reader = await Sql.ExecuteReaderAsync(command, values.ToArray());
 
                 while (reader.Read())
                 {
@@ -54,7 +53,7 @@ namespace Database.Data
 
         public static async Task<MessageFilterRow> GetRowAsync(ulong guildId, ulong channelId)
         {
-            List<MessageFilterRow> rows = await GetRowsAsync(guildId, channelId);
+            var rows = await GetRowsAsync(guildId, channelId);
             return rows.Count > 0 ? rows.First() : new MessageFilterRow(guildId, channelId);
         }
 
@@ -126,7 +125,7 @@ namespace Database.Data
 
         public static MessageFilterRow FromDatabase(ulong guildId, ulong channelId, int mode, string complex)
         {
-            return new MessageFilterRow
+            return new()
             {
                 New = false,
                 GuildId = guildId,

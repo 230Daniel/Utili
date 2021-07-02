@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using MySql.Data.MySqlClient;
 
 namespace Database.Data
 {
@@ -9,7 +8,7 @@ namespace Database.Data
     {
         public static async Task<List<CoreRow>> GetRowsAsync(ulong? guildId = null, bool ignoreCache = false)
         {
-            List<CoreRow> matchedRows = new List<CoreRow>();
+            List<CoreRow> matchedRows = new();
 
             if (Cache.Initialised && !ignoreCache)
             {
@@ -19,8 +18,8 @@ namespace Database.Data
             }
             else
             {
-                string command = "SELECT * FROM Core WHERE TRUE";
-                List<(string, object)> values = new List<(string, object)>();
+                var command = "SELECT * FROM Core WHERE TRUE";
+                List<(string, object)> values = new();
 
                 if (guildId.HasValue)
                 {
@@ -28,7 +27,7 @@ namespace Database.Data
                     values.Add(("GuildId", guildId.Value));
                 }
 
-                MySqlDataReader reader = await Sql.ExecuteReaderAsync(command, values.ToArray());
+                var reader = await Sql.ExecuteReaderAsync(command, values.ToArray());
 
                 while (reader.Read())
                 {
@@ -47,7 +46,7 @@ namespace Database.Data
 
         public static async Task<CoreRow> GetRowAsync(ulong guildId)
         {
-            List<CoreRow> rows = await GetRowsAsync(guildId);
+            var rows = await GetRowsAsync(guildId);
             return rows.Count > 0 ? rows.First() : new CoreRow(guildId);
         }
 
@@ -111,7 +110,7 @@ namespace Database.Data
 
         public static CoreRow FromDatabase(ulong guildId, string prefix, bool enableCommands, string excludedChannels)
         {
-            CoreRow row = new CoreRow
+            CoreRow row = new()
             {
                 New = false,
                 GuildId = guildId,
@@ -122,9 +121,9 @@ namespace Database.Data
 
             if (!string.IsNullOrEmpty(excludedChannels))
             {
-                foreach (string excludedChannel in excludedChannels.Split(","))
+                foreach (var excludedChannel in excludedChannels.Split(","))
                 {
-                    if (ulong.TryParse(excludedChannel, out ulong channelId))
+                    if (ulong.TryParse(excludedChannel, out var channelId))
                     {
                         row.ExcludedChannels.Add(channelId);
                     }
@@ -136,11 +135,11 @@ namespace Database.Data
 
         public string GetExcludedChannelsString()
         {
-            string excludedChannelsString = "";
+            var excludedChannelsString = "";
 
-            for (int i = 0; i < ExcludedChannels.Count; i++)
+            for (var i = 0; i < ExcludedChannels.Count; i++)
             {
-                ulong excludedChannelId = ExcludedChannels[i];
+                var excludedChannelId = ExcludedChannels[i];
                 excludedChannelsString += excludedChannelId.ToString();
                 if (i != ExcludedChannels.Count - 1)
                 {

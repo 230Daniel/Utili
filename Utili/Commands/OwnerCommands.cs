@@ -1,103 +1,95 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using Database.Data;
-using Discord;
-using Discord.Commands;
-using Discord.Rest;
-using Discord.WebSocket;
-using static Utili.Program;
-using static Utili.MessageSender;
+using Disqord;
+using Disqord.Bot;
+using Disqord.Rest;
+using Utili.Extensions;
+using Qmmands;
 
 namespace Utili.Commands
 {
-    public class OwnerCommands : ModuleBase<SocketCommandContext>
+    public class OwnerCommands : DiscordGuildModuleBase
     {
-        [Command("UserInfo")] [Permission(Perm.BotOwner)]
+        [Command("UserInfo"), RequireBotOwner]
         public async Task UserInfo(ulong userId)
         {
-            UserRow row = await Users.GetRowAsync(userId);
-            RestUser user = await _rest.GetUserAsync(userId);
-            List<SubscriptionsRow> subscriptions = await Subscriptions.GetRowsAsync(userId: userId);
+            var row = await Users.GetRowAsync(userId);
+            var user = await Context.Bot.FetchUserAsync(userId);
 
-            string content = $"Id: {user?.Id}\n" +
-                             $"Email: {row.Email}\n" +
-                             $"Customer: {row.CustomerId}\n" +
-                             $"Subscriptions: {subscriptions.Count}\n" +
-                             $"Premium slots: {subscriptions.Sum(x => x.Slots)}";
+            var subscriptions = await Subscriptions.GetRowsAsync(userId: userId);
 
-            EmbedBuilder embed = GenerateEmbed(
-                MessageSender.EmbedType.Success,
-                user?.ToString(),
-                content).ToEmbedBuilder();
-            embed.ThumbnailUrl = user?.GetAvatarUrl() ?? user?.GetDefaultAvatarUrl();
+            var content = $"Id: {user?.Id}\n" +
+                          $"Email: {row.Email}\n" +
+                          $"Customer: {row.CustomerId}\n" +
+                          $"Subscriptions: {subscriptions.Count}\n" +
+                          $"Premium slots: {subscriptions.Sum(x => x.Slots)}";
 
-            await Context.User.SendMessageAsync(embed: embed.Build());
-            await SendSuccessAsync(Context.Channel, "User info sent", $"Information about {user} was sent in a direct message");
+            var embed = Utils.MessageUtils.CreateEmbed(Utils.EmbedType.Info, user?.ToString(), content);
+            embed.WithThumbnailUrl(user.GetAvatarUrl());
+
+            await Context.Author.SendMessageAsync(new LocalMessage().AddEmbed(embed));
+            await Context.Channel.SendSuccessAsync("User info sent",
+                $"Information about {user} was sent in a direct message");
         }
 
-        [Command("GuildInfo")] [Permission(Perm.BotOwner)]
+        [Command("GuildInfo"), RequireBotOwner]
         public async Task GuildInfo(ulong guildId)
         {
-            RestGuild guild = await _rest.GetGuildAsync(guildId, true);
-            bool premium = await Premium.IsGuildPremiumAsync(guildId);
+            var guild = await Context.Bot.FetchGuildAsync(guildId, true);
+            var premium = await Premium.IsGuildPremiumAsync(guildId);
 
-            string content = $"Id: {guild?.Id}\n" +
-                             $"Owner: {guild.OwnerId}\n" +
-                             $"Members: {guild.ApproximateMemberCount}\n" +
-                             $"Created: {guild.CreatedAt.UtcDateTime} UTC\n" +
-                             $"Premium: {premium.ToString().ToLower()}";
+            var content = $"Id: {guild?.Id}\n" +
+                          $"Owner: {guild.OwnerId}\n" +
+                          $"Created: {guild.CreatedAt().UtcDateTime} UTC\n" +
+                          $"Premium: {premium.ToString().ToLower()}";
 
-            EmbedBuilder embed = GenerateEmbed(
-                MessageSender.EmbedType.Success,
-                guild.ToString(),
-                content).ToEmbedBuilder();
-            embed.ThumbnailUrl = guild.IconUrl;
+            var embed = Utils.MessageUtils.CreateEmbed(Utils.EmbedType.Info, guild.ToString(), content);
+            embed.WithThumbnailUrl(guild.GetIconUrl());
 
-            await Context.User.SendMessageAsync(embed: embed.Build());
-            await SendSuccessAsync(Context.Channel, "Guild info sent", $"Information about {guild} was sent in a direct message");
+            await Context.Author.SendMessageAsync(new LocalMessage().AddEmbed(embed));
+            await Context.Channel.SendSuccessAsync("Guild info sent",
+                $"Information about {guild} was sent in a direct message");
         }
 
-
-        [Command("Authorise")] [Permission(Perm.BotOwner)]
+        [Command("Authorise"), RequireBotOwner]
         public async Task Authorise(ulong guildId, ulong userId)
         {
-            RestGuild guild = null;
-            RestGuildUser user = null;
+            IGuild guild = null;
+            IMember member = null;
             try
             {
-                guild = await _rest.GetGuildAsync(guildId);
-                user = await guild.GetUserAsync(userId);
+                guild = await Context.Bot.FetchGuildAsync(guildId);
+                member = await guild.FetchMemberAsync(userId);
             }
             catch
             {
-                if(guild is null) await SendFailureAsync(Context.Channel, "Error", "I'm not in that server", supportLink: false);
-                else if(user is null) await SendFailureAsync(Context.Channel, "Not authorised", $"The user is not a member of {guild}", supportLink: false);
+                if (guild is null) await Context.Channel.SendFailureAsync("Error", "I'm not in that server", false);
+                else if (member is null)
+                    await Context.Channel.SendFailureAsync("Not authorised", $"The user is not a member of {guild}",
+                        false);
                 return;
             }
 
-            if (guild.OwnerId == userId) await SendSuccessAsync(Context.Channel, "Authorised", $"{user} is the owner of {guild}");
-            else if (user.GuildPermissions.Administrator) await SendSuccessAsync(Context.Channel, "Authorised", $"{user} an administrator of {guild}");
-            else if (user.GuildPermissions.ManageGuild) await SendSuccessAsync(Context.Channel, "Authorised", $"{user} has the manage server permission in {guild}");
-            else await SendFailureAsync(Context.Channel, "Not authorised", $"{user} does not have the manage server permission in {guild}", supportLink: false);
-        }
+            var roles = member.RoleIds.Select(x => guild.Roles.First(y => y.Key == x).Value);
+            var perms = Discord.Permissions.CalculatePermissions(guild, member, roles);
 
-        [Command("SimulateCrash")]
-        [Permission(Perm.BotOwner)]
-        public async Task SimulateCrash()
-        {
-            DiscordSocketClient shard = _client.GetShard(0);
-            await shard.StopAsync();
+            if (guild.OwnerId == userId)
+                await Context.Channel.SendSuccessAsync("Authorised", $"{member} is the owner of {guild}");
+            else if (perms.Administrator)
+                await Context.Channel.SendSuccessAsync("Authorised", $"{member} an administrator of {guild}");
+            else if (perms.ManageGuild)
+                await Context.Channel.SendSuccessAsync("Authorised",
+                    $"{member} has the manage server permission in {guild}");
+            else
+                await Context.Channel.SendFailureAsync("Not authorised",
+                    $"{member} does not have the manage server permission in {guild}", false);
         }
-
-        [Command("Restart")]
-        [Permission(Perm.BotOwner)]
-        public async Task Restart()
+        
+        [Command("DownloadedMembers"), RequireBotOwner]
+        public async Task DownloadedMembers()
         {
-            await SendSuccessAsync(Context.Channel, "Restarting");
-            _logger.Log("Command", $"Restart Requested by {Context.User.Username}#{Context.User.Discriminator} - Killing process 10 seconds.", LogSeverity.Crit);
-            await Task.Delay(10000);
-            Monitoring.Restart();
+            await Context.Channel.SendInfoAsync("Downloaded Members", $"{string.Join("\n", Context.Guild.Members.Values.Select(x => x.Mention))}");
         }
     }
 }

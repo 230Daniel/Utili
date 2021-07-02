@@ -44,7 +44,7 @@ namespace UtiliBackend.Controllers.Dashboard
 
                 if (isNew)
                 {
-                    MiscRow miscRow = new MiscRow(auth.Guild.Id, "RequiresAutopurgeMessageDownload", row.ChannelId.ToString());
+                    MiscRow miscRow = new(auth.Guild.Id, "RequiresAutopurgeMessageDownload", row.ChannelId.ToString());
                     await miscRow.SaveAsync();
                 }
             }

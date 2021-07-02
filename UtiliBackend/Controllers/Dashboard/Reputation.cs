@@ -4,7 +4,6 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 using Database.Data;
-using Discord;
 
 namespace UtiliBackend.Controllers.Dashboard
 {
@@ -56,9 +55,9 @@ namespace UtiliBackend.Controllers.Dashboard
         public string Emote { get; set; }
         public int Value { get; set; }
 
-        public ReputationEmoteBody((IEmote, int) obj)
+        public ReputationEmoteBody((string, int) obj)
         {
-            Emote = obj.Item1.ToString();
+            Emote = obj.Item1;
             Value = obj.Item2;
         }
 

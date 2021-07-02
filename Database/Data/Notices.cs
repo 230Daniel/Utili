@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Discord;
-using MySql.Data.MySqlClient;
 
 namespace Database.Data
 {
@@ -11,7 +9,7 @@ namespace Database.Data
     {
         public static async Task<List<NoticesRow>> GetRowsAsync(ulong? guildId = null, ulong? channelId = null, bool ignoreCache = false)
         {
-            List<NoticesRow> matchedRows = new List<NoticesRow>();
+            var matchedRows = new List<NoticesRow>();
 
             if (Cache.Initialised && !ignoreCache)
             {
@@ -22,8 +20,8 @@ namespace Database.Data
             }
             else
             {
-                string command = "SELECT * FROM Notices WHERE TRUE";
-                List<(string, object)> values = new List<(string, object)>();
+                var command = "SELECT * FROM Notices WHERE TRUE";
+                var values = new List<(string, object)>();
 
                 if (guildId.HasValue)
                 {
@@ -37,7 +35,7 @@ namespace Database.Data
                     values.Add(("ChannelId", channelId.Value));
                 }
 
-                MySqlDataReader reader = await Sql.ExecuteReaderAsync(command, values.ToArray());
+                var reader = await Sql.ExecuteReaderAsync(command, values.ToArray());
 
                 while (reader.Read())
                 {
@@ -65,7 +63,7 @@ namespace Database.Data
 
         public static async Task<NoticesRow> GetRowAsync(ulong guildId, ulong channelId)
         {
-            List<NoticesRow> rows = await GetRowsAsync(guildId, channelId);
+            var rows = await GetRowsAsync(guildId, channelId);
             return rows.Count > 0 ? rows.First() : new NoticesRow(guildId, channelId);
         }
 
@@ -87,7 +85,7 @@ namespace Database.Data
                     ("Image", row.Image.EncodedValue),
                     ("Thumbnail", row.Thumbnail.EncodedValue),
                     ("Icon", row.Icon.EncodedValue),
-                    ("Colour", row.Colour.RawValue));
+                    ("Colour", row.Colour));
 
                 row.New = false;
                 if(Cache.Initialised) Cache.Notices.Add(row);
@@ -108,7 +106,7 @@ namespace Database.Data
                     ("Image", row.Image.EncodedValue),
                     ("Thumbnail", row.Thumbnail.EncodedValue),
                     ("Icon", row.Icon.EncodedValue),
-                    ("Colour", row.Colour.RawValue));
+                    ("Colour", row.Colour));
 
                 if(Cache.Initialised) Cache.Notices[Cache.Notices.FindIndex(x => x.GuildId == row.GuildId && x.ChannelId == row.ChannelId)] = row;
             }
@@ -157,7 +155,7 @@ namespace Database.Data
         public EString Image { get; set; }
         public EString Thumbnail { get; set; }
         public EString Icon { get; set; }
-        public Color Colour { get; set; }
+        public uint Colour { get; set; }
 
         private NoticesRow()
         {
@@ -179,12 +177,12 @@ namespace Database.Data
             Image = EString.Empty;
             Thumbnail = EString.Empty;
             Icon = EString.Empty;
-            Colour = new Color(67, 181, 129);
+            Colour = 4437377;
         }
 
         public static NoticesRow FromDatabase(ulong guildId, ulong channelId, ulong messageId, bool enabled, string delay, string title, string footer, string content, string text, string image, string thumbnail, string icon, uint colour)
         {
-            return new NoticesRow
+            return new()
             {
                 New = false,
                 GuildId = guildId,
@@ -199,7 +197,7 @@ namespace Database.Data
                 Image = EString.FromEncoded(image),
                 Thumbnail = EString.FromEncoded(thumbnail),
                 Icon = EString.FromEncoded(icon),
-                Colour = new Color(colour)
+                Colour = colour
             };
         }
 

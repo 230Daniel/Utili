@@ -16,9 +16,9 @@ namespace Database
         {
             try
             {
-                string json = File.ReadAllText("DatabaseCredentials.json");
+                var json = File.ReadAllText("DatabaseCredentials.json");
 
-                Config config = JsonSerializer.Deserialize<Config>(json);
+                var config = JsonSerializer.Deserialize<Config>(json);
 
                 Server = config.Server;
                 Port = config.Port;
@@ -28,7 +28,7 @@ namespace Database
             }
             catch (FileNotFoundException)
             {
-                string json = JsonSerializer.Serialize(this, new JsonSerializerOptions{WriteIndented = true});
+                var json = JsonSerializer.Serialize(this, new JsonSerializerOptions{WriteIndented = true});
 
                 File.WriteAllText("DatabaseCredentials.json", json);
             }

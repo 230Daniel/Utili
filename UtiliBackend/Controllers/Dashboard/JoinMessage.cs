@@ -3,7 +3,6 @@ using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
 using Database;
 using Database.Data;
-using Discord;
 
 namespace UtiliBackend.Controllers.Dashboard
 {
@@ -37,7 +36,7 @@ namespace UtiliBackend.Controllers.Dashboard
             row.Image = EString.FromDecoded(body.Image);
             row.Thumbnail = EString.FromDecoded(body.Thumbnail);
             row.Icon = EString.FromDecoded(body.Icon);
-            row.Colour = new Color(uint.Parse(body.Colour.Replace("#", ""), System.Globalization.NumberStyles.HexNumber));
+            row.Colour = uint.Parse(body.Colour.Replace("#", ""), System.Globalization.NumberStyles.HexNumber);
             await row.SaveAsync();
 
             return new OkResult();
@@ -70,7 +69,7 @@ namespace UtiliBackend.Controllers.Dashboard
             Image = row.Image.Value;
             Thumbnail = row.Thumbnail.Value;
             Icon = row.Icon.Value;
-            Colour = row.Colour.R.ToString("X2") + row.Colour.G.ToString("X2") + row.Colour.B.ToString("X2");
+            Colour = row.Colour.ToString("X6");
         }
 
         public JoinMessageBody() { }

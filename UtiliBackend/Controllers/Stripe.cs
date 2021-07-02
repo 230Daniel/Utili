@@ -34,7 +34,7 @@ namespace UtiliSite
 
             await CreateCustomerIfRequiredAsync(HttpContext);
 
-            SessionCreateOptions options = new SessionCreateOptions
+            SessionCreateOptions options = new()
             {
                 SuccessUrl = $"{Main.Config.Frontend}/premium/thankyou",
                 CancelUrl = $"{Main.Config.Frontend}/premium",
@@ -45,7 +45,7 @@ namespace UtiliSite
                 Mode = "subscription",
                 LineItems = new List<SessionLineItemOptions>
                 {
-                    new SessionLineItemOptions
+                    new()
                     {
                         Price = req.PriceId,
                         Quantity = 1
@@ -54,7 +54,7 @@ namespace UtiliSite
                 Customer = auth.UserRow.CustomerId,
                 AllowPromotionCodes = true
             };
-            SessionService service = new SessionService(_stripeClient);
+            SessionService service = new(_stripeClient);
             try
             {
                 Session session = await service.CreateAsync(options);
@@ -93,7 +93,7 @@ namespace UtiliSite
                 ReturnUrl = $"{Main.Config.Frontend}/premium",
             };
 
-            Stripe.BillingPortal.SessionService service = new Stripe.BillingPortal.SessionService(_stripeClient);
+            Stripe.BillingPortal.SessionService service = new(_stripeClient);
             Stripe.BillingPortal.Session session = await service.CreateAsync(options);
             return Ok(session);
         }
@@ -123,7 +123,7 @@ namespace UtiliSite
 
             CustomerCreateOptions options = new CustomerCreateOptions {Description = $"User Id: {auth.User.Id}", Email = auth.User.Email};
 
-            CustomerService service = new CustomerService(_stripeClient);
+            CustomerService service = new(_stripeClient);
             Customer customer = await service.CreateAsync(options);
 
             auth.UserRow.CustomerId = customer.Id;
@@ -138,7 +138,7 @@ namespace UtiliSite
 
             if (!string.IsNullOrEmpty(auth.UserRow.CustomerId))
             {
-                CustomerService service = new CustomerService(_stripeClient);
+                CustomerService service = new(_stripeClient);
                 Customer customer = await service.GetAsync(auth.UserRow.CustomerId);
                 if (!string.IsNullOrEmpty(customer.Currency))
                     return new JsonResult(new CurrencyBody(customer.Currency, true));
@@ -163,7 +163,7 @@ namespace UtiliSite
                 "VI", "UM"
             };
 
-            HttpClient client = new HttpClient();
+            HttpClient client = new();
 
             string response = await client.GetStringAsync($"https://ipinfo.io/{request.HttpContext.Connection.RemoteIpAddress}/json");
             string country = JsonConvert.DeserializeObject<IpResponse>(response).Country;
