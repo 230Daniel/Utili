@@ -87,7 +87,14 @@ namespace Utili.Services
                 {
                     var guild = _client.GetGuild(guildId);
                     var voiceChannel = guild.GetVoiceChannel(channelId);
-                    if (voiceChannel is null) return;
+                    if (voiceChannel is null)
+                    {
+                        await CloseLinkedChannelAsync(guild, 
+                            await VoiceLink.GetRowAsync(guild.Id), 
+                            await VoiceLink.GetChannelRowAsync(guild.Id, channelId));
+                        return;
+                    }
+                    
                     var category = voiceChannel.CategoryId.HasValue ? guild.GetCategoryChannel(voiceChannel.CategoryId.Value) : null;
 
                     if(!voiceChannel.BotHasPermissions(Permission.ViewChannel)) return;
@@ -100,19 +107,11 @@ namespace Utili.Services
                     var channelRow = await VoiceLink.GetChannelRowAsync(guild.Id, voiceChannel.Id);
                     var metaRow = await VoiceLink.GetRowAsync(guild.Id);
 
-                    ITextChannel textChannel = null;
-                    try
-                    {
-                        textChannel = guild.GetTextChannel(channelRow.TextChannelId);
-                    }
-                    catch {}
+                    ITextChannel textChannel = guild.GetTextChannel(channelRow.TextChannelId);
 
-                    if (connectedUsers.All(x => x.IsBot) && metaRow.DeleteChannels)
+                    if (connectedUsers.All(x => x.IsBot))
                     {
-                        if(textChannel is null || !textChannel.BotHasPermissions(Permission.ViewChannel | Permission.ManageChannels)) return;
-                        await textChannel.DeleteAsync(new DefaultRestRequestOptions{Reason = "Voice Link"});
-                        channelRow.TextChannelId = 0;
-                        await VoiceLink.SaveChannelRowAsync(channelRow);
+                        await CloseLinkedChannelAsync(guild, metaRow, channelRow);
                         return;
                     }
 
@@ -181,6 +180,26 @@ namespace Utili.Services
                     _logger.LogError(e, $"Exception thrown updating linked channel {guildId}/{channelId}");
                 }
             });
+        }
+
+        private static async Task CloseLinkedChannelAsync(IGuild guild, VoiceLinkRow metaRow, VoiceLinkChannelRow channelRow)
+        {
+            var textChannel = guild.GetTextChannel(channelRow.TextChannelId);
+            if (textChannel is null || !textChannel.BotHasPermissions(Permission.ViewChannel | Permission.ManageChannels)) return;
+            
+            if (metaRow.DeleteChannels)
+            {
+                await textChannel.DeleteAsync(new DefaultRestRequestOptions{Reason = "Voice Link"});
+                channelRow.TextChannelId = 0;
+                await VoiceLink.SaveChannelRowAsync(channelRow);
+            }
+            else
+            {
+                // Remove all permission overwrites except @everyone
+                var overwrites = textChannel.Overwrites.Select(x => new LocalOverwrite(x.TargetId, x.TargetType, x.Permissions)).ToList();
+                overwrites.RemoveAll(x => x.TargetId != guild.Id);
+                await textChannel.ModifyAsync(x => x.Overwrites = new Optional<IEnumerable<LocalOverwrite>>(overwrites), new DefaultRestRequestOptions {Reason = "Voice Link"});
+            }
         }
     }
 }
