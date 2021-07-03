@@ -6,16 +6,16 @@ namespace DatabaseMigrator.Services
 {
     public class DatabaseMigratorService : IHostedService
     {
-        private readonly TestService _testService;
+        private readonly MigratorService _migratorService;
 
-        public DatabaseMigratorService(TestService testService)
+        public DatabaseMigratorService(MigratorService migratorService)
         {
-            _testService = testService;
+            _migratorService = migratorService;
         }
         
         public async Task StartAsync(CancellationToken cancellationToken)
         {
-            _ = _testService.RunAsync();
+            _ = _migratorService.RunAsync();
         }
 
         public async Task StopAsync(CancellationToken cancellationToken)

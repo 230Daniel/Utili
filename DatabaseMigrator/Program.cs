@@ -33,7 +33,7 @@ namespace DatabaseMigrator
         private static void ConfigureServices(HostBuilderContext context, IServiceCollection services)
         {
             services.AddHostedService<DatabaseMigratorService>();
-            services.AddTransient<TestService>();
+            services.AddTransient<MigratorService>();
             services.AddDbContext<DatabaseContext>();
         }
     }

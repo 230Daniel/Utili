@@ -7,8 +7,9 @@ namespace NewDatabase
 {
     public class DatabaseContext : DbContext
     {
-        public DbSet<TestEntity> TestEntities { get; set; }
-        
+        public DbSet<AutopurgeConfiguration> AutopurgeConfigurations { get; set; }
+        public DbSet<AutopurgeMessage> AutopurgeMessages { get; set; }
+
         private readonly string _connectionString;
         
         public DatabaseContext(IConfiguration configuration)
@@ -26,6 +27,8 @@ namespace NewDatabase
         {
             modelBuilder.ConfigureGuildEntities();
             modelBuilder.ConfigureGuildChannelEntities();
+            modelBuilder.ConfigureMessageEntities();
+            modelBuilder.ConfigureOtherEntities();
         }
     }
 }

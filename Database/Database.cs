@@ -6,10 +6,10 @@ namespace Database
     {
         public static Config Config { get; private set; }
 
-        public static async Task InitialiseAsync(bool useCache, string defaultPrefix)
+        public static async Task InitialiseAsync(bool useCache, string defaultPrefix, bool prod = false)
         {
             Config = new Config();
-            Config.Load();
+            Config.Load(prod);
             Config.DefaultPrefix = defaultPrefix;
 
             Sql.SetCredentials(Config.Server, Config.Port, Config.Database, Config.Username, Config.Password);
