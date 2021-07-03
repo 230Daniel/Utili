@@ -74,6 +74,74 @@ namespace NewDatabase.Migrations
 
                     b.ToTable("autopurge_messages");
                 });
+
+            modelBuilder.Entity("NewDatabase.Entities.CoreConfiguration", b =>
+                {
+                    b.Property<decimal>("GuildId")
+                        .HasColumnType("numeric(20,0)")
+                        .HasColumnName("guild_id");
+
+                    b.Property<bool>("CommandsEnabled")
+                        .HasColumnType("boolean")
+                        .HasColumnName("commands_enabled");
+
+                    b.Property<decimal[]>("NonCommandChannels")
+                        .HasColumnType("numeric(20,0)[]")
+                        .HasColumnName("non_command_channels");
+
+                    b.Property<string>("Prefix")
+                        .HasColumnType("text")
+                        .HasColumnName("prefix");
+
+                    b.HasKey("GuildId")
+                        .HasName("pk_core_configurations");
+
+                    b.ToTable("core_configurations");
+                });
+
+            modelBuilder.Entity("NewDatabase.Entities.InactiveRoleConfiguration", b =>
+                {
+                    b.Property<decimal>("GuildId")
+                        .HasColumnType("numeric(20,0)")
+                        .HasColumnName("guild_id");
+
+                    b.Property<bool>("AutoKick")
+                        .HasColumnType("boolean")
+                        .HasColumnName("auto_kick");
+
+                    b.Property<TimeSpan>("AutoKickThreshold")
+                        .HasColumnType("interval")
+                        .HasColumnName("auto_kick_threshold");
+
+                    b.Property<DateTime>("DefaultLastAction")
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("default_last_action");
+
+                    b.Property<decimal>("ImmuneRoleId")
+                        .HasColumnType("numeric(20,0)")
+                        .HasColumnName("immune_role_id");
+
+                    b.Property<DateTime>("LastUpdate")
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("last_update");
+
+                    b.Property<int>("Mode")
+                        .HasColumnType("integer")
+                        .HasColumnName("mode");
+
+                    b.Property<decimal>("RoleId")
+                        .HasColumnType("numeric(20,0)")
+                        .HasColumnName("role_id");
+
+                    b.Property<TimeSpan>("Threshold")
+                        .HasColumnType("interval")
+                        .HasColumnName("threshold");
+
+                    b.HasKey("GuildId")
+                        .HasName("pk_inactive_role_configurations");
+
+                    b.ToTable("inactive_role_configurations");
+                });
 #pragma warning restore 612, 618
         }
     }

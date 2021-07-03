@@ -9,7 +9,9 @@ namespace NewDatabase
     {
         public DbSet<AutopurgeConfiguration> AutopurgeConfigurations { get; set; }
         public DbSet<AutopurgeMessage> AutopurgeMessages { get; set; }
-
+        public DbSet<CoreConfiguration> CoreConfigurations { get; set; }
+        public DbSet<InactiveRoleConfiguration> InactiveRoleConfigurations { get; set; }
+        
         private readonly string _connectionString;
         
         public DatabaseContext(IConfiguration configuration)
@@ -29,6 +31,7 @@ namespace NewDatabase
             modelBuilder.ConfigureGuildChannelEntities();
             modelBuilder.ConfigureMessageEntities();
             modelBuilder.ConfigureOtherEntities();
+            modelBuilder.ConfigureUlongListConverters();
         }
     }
 }

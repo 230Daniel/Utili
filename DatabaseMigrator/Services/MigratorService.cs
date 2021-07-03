@@ -11,7 +11,7 @@ namespace DatabaseMigrator.Services
     
     public class MigratorService
     {
-        private static readonly bool UseProdDb = false;
+        private static readonly bool UseProdDb = true;
         
         private readonly ILogger<MigratorService> _logger;
         private readonly DatabaseContext _db;
@@ -31,6 +31,12 @@ namespace DatabaseMigrator.Services
 
                 _logger.LogInformation("Migrating autopurge...");
                 await MigrateAutopurgeAsync();
+                
+                _logger.LogInformation("Migrating core...");
+                await MigrateCoreAsync();
+                
+                _logger.LogInformation("Migrating inactive role...");
+                await MigrateInactiveRoleAsync();
                 
                 _logger.LogInformation("Finished");
             }
@@ -87,6 +93,51 @@ namespace DatabaseMigrator.Services
                 _logger.LogDebug("Migrated autopurge message {MessageId}", messageRow.MessageId);
             }
             */
+
+            await _db.SaveChangesAsync();
+        }
+        
+        private async Task MigrateCoreAsync()
+        {
+            var rows = await Core.GetRowsAsync();
+            _db.CoreConfigurations.RemoveRange(await _db.CoreConfigurations.ToListAsync());
+            
+            foreach (var row in rows)
+            {
+                var coreConfiguration = new CoreConfiguration(row.GuildId)
+                {
+                    Prefix = row.Prefix.Value,
+                    CommandsEnabled = row.EnableCommands,
+                    NonCommandChannels = row.ExcludedChannels
+                };
+                _db.CoreConfigurations.Add(coreConfiguration);
+                _logger.LogDebug("Migrated core configuration {GuildId}", row.GuildId);
+            }
+
+            await _db.SaveChangesAsync();
+        }
+        
+        private async Task MigrateInactiveRoleAsync()
+        {
+            var rows = await InactiveRole.GetRowsAsync();
+            _db.InactiveRoleConfigurations.RemoveRange(await _db.InactiveRoleConfigurations.ToListAsync());
+            
+            foreach (var row in rows)
+            {
+                var inactiveRoleConfiguration = new InactiveRoleConfiguration(row.GuildId)
+                {
+                    RoleId = row.RoleId,
+                    ImmuneRoleId = row.ImmuneRoleId,
+                    Threshold = row.Threshold,
+                    Mode = row.Inverse ? InactiveRoleMode.GrantWhenInactive : InactiveRoleMode.RevokeWhenInactive,
+                    AutoKick = row.AutoKick,
+                    AutoKickThreshold = row.AutoKickThreshold,
+                    DefaultLastAction = row.DefaultLastAction,
+                    LastUpdate = row.LastUpdate
+                };
+                _db.InactiveRoleConfigurations.Add(inactiveRoleConfiguration);
+                _logger.LogDebug("Migrated inactive role configuration {GuildId}", row.GuildId);
+            }
 
             await _db.SaveChangesAsync();
         }

@@ -1,6 +1,9 @@
-﻿using System.Linq;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NewDatabase.Entities.Base;
 
 namespace NewDatabase.Extensions
@@ -43,10 +46,29 @@ namespace NewDatabase.Extensions
                 modelBuilder.Entity(type).Property("MessageId").ValueGeneratedNever();
             }
         }
-
+        
         public static void ConfigureOtherEntities(this ModelBuilder modelBuilder)
         {
             
+        }
+        
+        public static void ConfigureUlongListConverters(this ModelBuilder modelBuilder)
+        {
+            var ulongListConverter = new ValueConverter<List<ulong>, decimal[]>(
+                ulongs => ulongs.Select(Convert.ToDecimal).ToArray(),
+                decimals => decimals.Select(Convert.ToUInt64).ToList());
+
+            foreach (var type in modelBuilder.Model.GetEntityTypes())
+            {
+                foreach (var property in type.GetProperties())
+                {
+                    if (property.ClrType == typeof(List<ulong>))
+                    {
+                        property.SetValueConverter(ulongListConverter);
+                        property.SetColumnType("numeric(20,0)[]");
+                    }
+                }
+            }
         }
     }
 }
