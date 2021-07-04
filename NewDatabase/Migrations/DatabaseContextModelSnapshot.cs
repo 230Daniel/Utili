@@ -266,6 +266,105 @@ namespace NewDatabase.Migrations
 
                     b.ToTable("message_filter_configurations");
                 });
+
+            modelBuilder.Entity("NewDatabase.Entities.MessageLogsConfiguration", b =>
+                {
+                    b.Property<decimal>("GuildId")
+                        .HasColumnType("numeric(20,0)")
+                        .HasColumnName("guild_id");
+
+                    b.Property<decimal>("DeletedChannelId")
+                        .HasColumnType("numeric(20,0)")
+                        .HasColumnName("deleted_channel_id");
+
+                    b.Property<decimal>("EditedChannelId")
+                        .HasColumnType("numeric(20,0)")
+                        .HasColumnName("edited_channel_id");
+
+                    b.Property<decimal[]>("ExcludedChannels")
+                        .HasColumnType("numeric(20,0)[]")
+                        .HasColumnName("excluded_channels");
+
+                    b.HasKey("GuildId")
+                        .HasName("pk_message_logs_configurations");
+
+                    b.ToTable("message_logs_configurations");
+                });
+
+            modelBuilder.Entity("NewDatabase.Entities.MessageLogsMessage", b =>
+                {
+                    b.Property<decimal>("MessageId")
+                        .HasColumnType("numeric(20,0)")
+                        .HasColumnName("message_id");
+
+                    b.Property<decimal>("AuthorId")
+                        .HasColumnType("numeric(20,0)")
+                        .HasColumnName("author_id");
+
+                    b.Property<decimal>("ChannelId")
+                        .HasColumnType("numeric(20,0)")
+                        .HasColumnName("channel_id");
+
+                    b.Property<string>("Content")
+                        .HasColumnType("text")
+                        .HasColumnName("content");
+
+                    b.Property<decimal>("GuildId")
+                        .HasColumnType("numeric(20,0)")
+                        .HasColumnName("guild_id");
+
+                    b.Property<DateTime>("Timestamp")
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("timestamp");
+
+                    b.HasKey("MessageId")
+                        .HasName("pk_message_logs_messages");
+
+                    b.HasIndex("Timestamp")
+                        .HasDatabaseName("ix_message_logs_messages_timestamp");
+
+                    b.ToTable("message_logs_messages");
+                });
+
+            modelBuilder.Entity("NewDatabase.Entities.MessagePinningConfiguration", b =>
+                {
+                    b.Property<decimal>("GuildId")
+                        .HasColumnType("numeric(20,0)")
+                        .HasColumnName("guild_id");
+
+                    b.Property<decimal>("PinChannelId")
+                        .HasColumnType("numeric(20,0)")
+                        .HasColumnName("pin_channel_id");
+
+                    b.Property<bool>("PinMessages")
+                        .HasColumnType("boolean")
+                        .HasColumnName("pin_messages");
+
+                    b.HasKey("GuildId")
+                        .HasName("pk_message_pinning_configurations");
+
+                    b.ToTable("message_pinning_configurations");
+                });
+
+            modelBuilder.Entity("NewDatabase.Entities.MessagePinningWebhook", b =>
+                {
+                    b.Property<decimal>("GuildId")
+                        .HasColumnType("numeric(20,0)")
+                        .HasColumnName("guild_id");
+
+                    b.Property<decimal>("ChannelId")
+                        .HasColumnType("numeric(20,0)")
+                        .HasColumnName("channel_id");
+
+                    b.Property<decimal>("WebhookId")
+                        .HasColumnType("numeric(20,0)")
+                        .HasColumnName("webhook_id");
+
+                    b.HasKey("GuildId", "ChannelId")
+                        .HasName("pk_message_pinning_webhooks");
+
+                    b.ToTable("message_pinning_webhooks");
+                });
 #pragma warning restore 612, 618
         }
     }

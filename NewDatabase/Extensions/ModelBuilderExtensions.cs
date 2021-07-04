@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using NewDatabase.Entities;
 using NewDatabase.Entities.Base;
 
 namespace NewDatabase.Extensions
@@ -62,7 +63,7 @@ namespace NewDatabase.Extensions
 
         public static void ConfigureOtherEntities(this ModelBuilder modelBuilder)
         {
-            
+            modelBuilder.Entity<MessageLogsMessage>().HasIndex(e => e.Timestamp);
         }
         
         public static void ConfigureUlongListConverters(this ModelBuilder modelBuilder)

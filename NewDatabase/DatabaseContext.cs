@@ -15,6 +15,10 @@ namespace NewDatabase
         public DbSet<JoinRolesConfiguration> JoinRolesConfigurations { get; set; }
         public DbSet<JoinRolesPendingMember> JoinRolesPendingMembers { get; set; }
         public DbSet<MessageFilterConfiguration> MessageFilterConfigurations { get; set; }
+        public DbSet<MessageLogsConfiguration> MessageLogsConfigurations { get; set; }
+        public DbSet<MessageLogsMessage> MessageLogsMessages { get; set; }
+        public DbSet<MessagePinningConfiguration> MessagePinningConfigurations { get; set; }
+        public DbSet<MessagePinningWebhook> MessagePinningWebhooks { get; set; }
 
         private readonly string _connectionString;
         

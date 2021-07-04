@@ -46,6 +46,12 @@ namespace DatabaseMigrator.Services
 
                 _logger.LogInformation("Migrating message filter...");
                 await MigrateMessageFilterAsync();
+
+                _logger.LogInformation("Migrating message logs...");
+                await MigrateMessageLogsAsync();
+
+                _logger.LogInformation("Migrating message pinning...");
+                await MigrateMessgePinningAsync();
                 
                 _logger.LogInformation("Finished");
             }
@@ -246,6 +252,77 @@ namespace DatabaseMigrator.Services
 
                 _db.MessageFilterConfigurations.Add(messageFilterConfiguration);
                 _logger.LogDebug("Migrated message filter configuration {GuildId}/{ChannelId}", row.GuildId, row.ChannelId);
+            }
+
+            await _db.SaveChangesAsync();
+        }
+
+        private async Task MigrateMessageLogsAsync()
+        {
+            var rows = await MessageLogs.GetRowsAsync();
+            _db.MessageLogsConfigurations.RemoveRange(await _db.MessageLogsConfigurations.ToListAsync());
+
+            foreach (var row in rows)
+            {
+                var messageLogsConfiguration = new MessageLogsConfiguration(row.GuildId)
+                {
+                    DeletedChannelId = row.DeletedChannelId,
+                    EditedChannelId = row.EditedChannelId,
+                    ExcludedChannels = row.ExcludedChannels
+                };
+
+                _db.MessageLogsConfigurations.Add(messageLogsConfiguration);
+                _logger.LogDebug("Migrated message logs configuration {GuildId}", row.GuildId);
+            }
+
+            var messageRows = await MessageLogs.GetMessagesAsync();
+            _db.MessageLogsMessages.RemoveRange(await _db.MessageLogsMessages.ToListAsync());
+
+            foreach (var messageRow in messageRows)
+            {
+                var messageLogsMessage = new MessageLogsMessage(messageRow.MessageId)
+                {
+                    GuildId = messageRow.GuildId,
+                    ChannelId = messageRow.ChannelId,
+                    AuthorId = messageRow.UserId,
+                    Timestamp = messageRow.Timestamp,
+                    Content = messageRow.Content.Value
+                };
+
+                _db.MessageLogsMessages.Add(messageLogsMessage);
+                _logger.LogDebug("Migrated message logs message {MessageId}", messageRow.MessageId);
+            }
+
+            await _db.SaveChangesAsync();
+        }
+
+        private async Task MigrateMessgePinningAsync()
+        {
+            var rows = await MessagePinning.GetRowsAsync();
+            _db.MessagePinningConfigurations.RemoveRange(await _db.MessagePinningConfigurations.ToListAsync());
+            _db.MessagePinningWebhooks.RemoveRange(await _db.MessagePinningWebhooks.ToListAsync());
+
+            foreach (var row in rows)
+            {
+                var messagePinningConfiguration = new MessagePinningConfiguration(row.GuildId)
+                {
+                    PinChannelId = row.PinChannelId,
+                    PinMessages = row.Pin
+                };
+                
+                _db.MessagePinningConfigurations.Add(messagePinningConfiguration);
+                _logger.LogDebug("Migrated message pinning configuration {GuildId}", row.GuildId);
+
+                foreach (var rowWebhookId in row.WebhookIds)
+                {
+                    var messagePinningWebhook = new MessagePinningWebhook(row.GuildId, rowWebhookId.Item1)
+                    {
+                        WebhookId = rowWebhookId.Item2
+                    };
+
+                    _db.MessagePinningWebhooks.Add(messagePinningWebhook);
+                    _logger.LogDebug("Migrated message pinning webhook {GuildId}/{ChannelId}", messagePinningWebhook.GuildId, messagePinningWebhook.ChannelId);
+                }
             }
 
             await _db.SaveChangesAsync();
