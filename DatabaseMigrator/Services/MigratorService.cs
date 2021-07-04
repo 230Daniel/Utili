@@ -37,6 +37,15 @@ namespace DatabaseMigrator.Services
                 
                 _logger.LogInformation("Migrating inactive role...");
                 await MigrateInactiveRoleAsync();
+
+                _logger.LogInformation("Migrating join message...");
+                await MigrateJoinMessageAsync();
+
+                _logger.LogInformation("Migrating join roles...");
+                await MigrateJoinRolesAsync();
+
+                _logger.LogInformation("Migrating message filter...");
+                await MigrateMessageFilterAsync();
                 
                 _logger.LogInformation("Finished");
             }
@@ -137,6 +146,106 @@ namespace DatabaseMigrator.Services
                 };
                 _db.InactiveRoleConfigurations.Add(inactiveRoleConfiguration);
                 _logger.LogDebug("Migrated inactive role configuration {GuildId}", row.GuildId);
+            }
+
+            await _db.SaveChangesAsync();
+        }
+        
+        private async Task MigrateJoinMessageAsync()
+        {
+            var rows = await JoinMessage.GetRowsAsync();
+            _db.JoinMessageConfigurations.RemoveRange(await _db.JoinMessageConfigurations.ToListAsync());
+            
+            foreach (var row in rows)
+            {
+                var joinMessageConfiguration = new JoinMessageConfiguration(row.GuildId)
+                {
+                    Enabled = row.Enabled,
+                    Mode = row.Direct ? JoinMessageMode.DirectMessage : JoinMessageMode.Channel,
+                    ChannelId = row.ChannelId,
+                    Title = row.Title.Value,
+                    Footer = row.Footer.Value,
+                    Content = row.Content.Value,
+                    Text = row.Text.Value,
+                    Image = row.Image.Value,
+                    Thumbnail = row.Thumbnail.Value,
+                    Icon = row.Icon.Value,
+                    Colour = row.Colour
+                };
+                _db.JoinMessageConfigurations.Add(joinMessageConfiguration);
+                _logger.LogDebug("Migrated join message configuration {GuildId}", row.GuildId);
+            }
+
+            await _db.SaveChangesAsync();
+        }
+
+        private async Task MigrateJoinRolesAsync()
+        {
+            var rows = await JoinRoles.GetRowsAsync();
+            _db.JoinRolesConfigurations.RemoveRange(await _db.JoinRolesConfigurations.ToListAsync());
+
+            foreach (var row in rows)
+            {
+                var joinRolesConfiguration = new JoinRolesConfiguration(row.GuildId)
+                {
+                    WaitForVerification = row.WaitForVerification,
+                    JoinRoles = row.JoinRoles
+                };
+
+                _db.JoinRolesConfigurations.Add(joinRolesConfiguration);
+                _logger.LogDebug("Migrated join roles configuration {GuildId}", row.GuildId);
+            }
+
+            var pendingRows = await JoinRoles.GetPendingRowsAsync();
+            _db.JoinRolesPendingMembers.RemoveRange(await _db.JoinRolesPendingMembers.ToListAsync());
+
+            foreach (var pendingRow in pendingRows)
+            {
+                var joinRolesPendingMember = new JoinRolesPendingMember(pendingRow.GuildId, pendingRow.UserId)
+                {
+                    IsPending = pendingRow.IsPending,
+                    ScheduledFor = pendingRow.ScheduledFor
+                };
+
+                _db.JoinRolesPendingMembers.Add(joinRolesPendingMember);
+                _logger.LogDebug("Migrated join roles pending member {GuildId}/{MemberId}", pendingRow.GuildId, pendingRow.UserId);
+            }
+
+            await _db.SaveChangesAsync();
+        }
+
+        private async Task MigrateMessageFilterAsync()
+        {
+            static MessageFilterMode GetMode(int mode)
+            {
+                return mode switch
+                {
+                    0 => MessageFilterMode.All,
+                    1 => MessageFilterMode.Images,
+                    2 => MessageFilterMode.Videos,
+                    3 => MessageFilterMode.Images | MessageFilterMode.Videos,
+                    4 => MessageFilterMode.Music,
+                    5 => MessageFilterMode.Attachments,
+                    6 => MessageFilterMode.Links,
+                    7 => MessageFilterMode.Images | MessageFilterMode.Videos | MessageFilterMode.Links,
+                    8 => MessageFilterMode.RegEx,
+                    _ => throw new ArgumentOutOfRangeException(nameof(mode), mode, "Bad message filter mode")
+                };
+            }
+            
+            var rows = await MessageFilter.GetRowsAsync();
+            _db.MessageFilterConfigurations.RemoveRange(await _db.MessageFilterConfigurations.ToListAsync());
+
+            foreach (var row in rows)
+            {
+                var messageFilterConfiguration = new MessageFilterConfiguration(row.GuildId, row.ChannelId)
+                {
+                    Mode = GetMode(row.Mode),
+                    RegEx = row.Complex.Value
+                };
+
+                _db.MessageFilterConfigurations.Add(messageFilterConfiguration);
+                _logger.LogDebug("Migrated message filter configuration {GuildId}/{ChannelId}", row.GuildId, row.ChannelId);
             }
 
             await _db.SaveChangesAsync();

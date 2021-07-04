@@ -35,6 +35,19 @@ namespace NewDatabase.Extensions
             }
         }
         
+        public static void ConfigureMemberEntities(this ModelBuilder modelBuilder)
+        {
+            var types = Assembly.GetExecutingAssembly().GetTypes()
+                .Where(x => x.IsAssignableTo(typeof(MemberEntity)) && !x.IsEquivalentTo(typeof(MemberEntity)));
+            
+            foreach (var type in types)
+            {
+                modelBuilder.Entity(type).HasKey("GuildId", "MemberId");
+                modelBuilder.Entity(type).Property("GuildId").ValueGeneratedNever();
+                modelBuilder.Entity(type).Property("MemberId").ValueGeneratedNever();
+            }
+        }
+        
         public static void ConfigureMessageEntities(this ModelBuilder modelBuilder)
         {
             var types = Assembly.GetExecutingAssembly().GetTypes()
@@ -46,7 +59,7 @@ namespace NewDatabase.Extensions
                 modelBuilder.Entity(type).Property("MessageId").ValueGeneratedNever();
             }
         }
-        
+
         public static void ConfigureOtherEntities(this ModelBuilder modelBuilder)
         {
             

@@ -142,6 +142,130 @@ namespace NewDatabase.Migrations
 
                     b.ToTable("inactive_role_configurations");
                 });
+
+            modelBuilder.Entity("NewDatabase.Entities.JoinMessageConfiguration", b =>
+                {
+                    b.Property<decimal>("GuildId")
+                        .HasColumnType("numeric(20,0)")
+                        .HasColumnName("guild_id");
+
+                    b.Property<decimal>("ChannelId")
+                        .HasColumnType("numeric(20,0)")
+                        .HasColumnName("channel_id");
+
+                    b.Property<long>("Colour")
+                        .HasColumnType("bigint")
+                        .HasColumnName("colour");
+
+                    b.Property<string>("Content")
+                        .HasColumnType("text")
+                        .HasColumnName("content");
+
+                    b.Property<bool>("Enabled")
+                        .HasColumnType("boolean")
+                        .HasColumnName("enabled");
+
+                    b.Property<string>("Footer")
+                        .HasColumnType("text")
+                        .HasColumnName("footer");
+
+                    b.Property<string>("Icon")
+                        .HasColumnType("text")
+                        .HasColumnName("icon");
+
+                    b.Property<string>("Image")
+                        .HasColumnType("text")
+                        .HasColumnName("image");
+
+                    b.Property<int>("Mode")
+                        .HasColumnType("integer")
+                        .HasColumnName("mode");
+
+                    b.Property<string>("Text")
+                        .HasColumnType("text")
+                        .HasColumnName("text");
+
+                    b.Property<string>("Thumbnail")
+                        .HasColumnType("text")
+                        .HasColumnName("thumbnail");
+
+                    b.Property<string>("Title")
+                        .HasColumnType("text")
+                        .HasColumnName("title");
+
+                    b.HasKey("GuildId")
+                        .HasName("pk_join_message_configurations");
+
+                    b.ToTable("join_message_configurations");
+                });
+
+            modelBuilder.Entity("NewDatabase.Entities.JoinRolesConfiguration", b =>
+                {
+                    b.Property<decimal>("GuildId")
+                        .HasColumnType("numeric(20,0)")
+                        .HasColumnName("guild_id");
+
+                    b.Property<decimal[]>("JoinRoles")
+                        .HasColumnType("numeric(20,0)[]")
+                        .HasColumnName("join_roles");
+
+                    b.Property<bool>("WaitForVerification")
+                        .HasColumnType("boolean")
+                        .HasColumnName("wait_for_verification");
+
+                    b.HasKey("GuildId")
+                        .HasName("pk_join_roles_configurations");
+
+                    b.ToTable("join_roles_configurations");
+                });
+
+            modelBuilder.Entity("NewDatabase.Entities.JoinRolesPendingMember", b =>
+                {
+                    b.Property<decimal>("GuildId")
+                        .HasColumnType("numeric(20,0)")
+                        .HasColumnName("guild_id");
+
+                    b.Property<decimal>("MemberId")
+                        .HasColumnType("numeric(20,0)")
+                        .HasColumnName("member_id");
+
+                    b.Property<bool>("IsPending")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_pending");
+
+                    b.Property<DateTime>("ScheduledFor")
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("scheduled_for");
+
+                    b.HasKey("GuildId", "MemberId")
+                        .HasName("pk_join_roles_pending_members");
+
+                    b.ToTable("join_roles_pending_members");
+                });
+
+            modelBuilder.Entity("NewDatabase.Entities.MessageFilterConfiguration", b =>
+                {
+                    b.Property<decimal>("GuildId")
+                        .HasColumnType("numeric(20,0)")
+                        .HasColumnName("guild_id");
+
+                    b.Property<decimal>("ChannelId")
+                        .HasColumnType("numeric(20,0)")
+                        .HasColumnName("channel_id");
+
+                    b.Property<int>("Mode")
+                        .HasColumnType("integer")
+                        .HasColumnName("mode");
+
+                    b.Property<string>("RegEx")
+                        .HasColumnType("text")
+                        .HasColumnName("reg_ex");
+
+                    b.HasKey("GuildId", "ChannelId")
+                        .HasName("pk_message_filter_configurations");
+
+                    b.ToTable("message_filter_configurations");
+                });
 #pragma warning restore 612, 618
         }
     }
