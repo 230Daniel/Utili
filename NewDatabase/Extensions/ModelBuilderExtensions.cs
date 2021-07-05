@@ -64,6 +64,12 @@ namespace NewDatabase.Extensions
         public static void ConfigureOtherEntities(this ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<MessageLogsMessage>().HasIndex(e => e.Timestamp);
+            
+            modelBuilder.Entity<PremiumSlot>().HasKey(e => e.SlotId);
+            modelBuilder.Entity<PremiumSlot>().Property(e => e.SlotId).ValueGeneratedOnAdd();
+
+            modelBuilder.Entity<ReputationConfigurationEmoji>().HasKey(e => new {e.GuildId, e.Emoji});
+            modelBuilder.Entity<ReputationConfigurationEmoji>().Property(e => e.GuildId).ValueGeneratedNever();
         }
         
         public static void ConfigureUlongListConverters(this ModelBuilder modelBuilder)

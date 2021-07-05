@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using NewDatabase;
@@ -52,6 +53,15 @@ namespace DatabaseMigrator.Services
 
                 _logger.LogInformation("Migrating message pinning...");
                 await MigrateMessgePinningAsync();
+                
+                _logger.LogInformation("Migrating notices...");
+                await MigrateNoticesAsync();
+
+                _logger.LogInformation("Migrating premium slots...");
+                await MigratePremiumSlotsAsync();
+
+                _logger.LogInformation("Migrating reputation...");
+                await MigrateReputationAsync();
                 
                 _logger.LogInformation("Finished");
             }
@@ -323,6 +333,93 @@ namespace DatabaseMigrator.Services
                     _db.MessagePinningWebhooks.Add(messagePinningWebhook);
                     _logger.LogDebug("Migrated message pinning webhook {GuildId}/{ChannelId}", messagePinningWebhook.GuildId, messagePinningWebhook.ChannelId);
                 }
+            }
+
+            await _db.SaveChangesAsync();
+        }
+
+        private async Task MigrateNoticesAsync()
+        {
+            var rows = await Notices.GetRowsAsync();
+            _db.NoticeConfigurations.RemoveRange(await _db.NoticeConfigurations.ToListAsync());
+
+            foreach (var row in rows)
+            {
+                var noticeConfiguration = new NoticeConfiguration(row.GuildId, row.ChannelId)
+                {
+                    Enabled = row.Enabled,
+                    Delay = row.Delay,
+                    Title = row.Title.Value,
+                    Footer = row.Footer.Value,
+                    Content = row.Content.Value,
+                    Text = row.Text.Value,
+                    Image = row.Image.Value,
+                    Thumbnail = row.Thumbnail.Value,
+                    Icon = row.Icon.Value,
+                    Colour = row.Colour,
+                    MessageId = row.MessageId,
+                    UpdatedFromDashboard = false
+                };
+
+                _db.NoticeConfigurations.Add(noticeConfiguration);
+                _logger.LogDebug("Migrated notice configuration {GuildId}/{ChannelId}", row.GuildId, row.ChannelId);
+            }
+
+            await _db.SaveChangesAsync();
+        }
+
+        private async Task MigratePremiumSlotsAsync()
+        {
+            var rows = await Premium.GetRowsAsync();
+            _db.PremiumSlots.RemoveRange(await _db.PremiumSlots.ToListAsync());
+
+            foreach (var row in rows)
+            {
+                var premiumSlot = new PremiumSlot()
+                {
+                    SlotId = row.SlotId,
+                    UserId = row.UserId,
+                    GuildId = row.GuildId
+                };
+
+                _db.PremiumSlots.Add(premiumSlot);
+                _logger.LogDebug("Mirgated premium slot {SlotId}", row.SlotId);
+            }
+
+            await _db.SaveChangesAsync();
+        }
+
+        private async Task MigrateReputationAsync()
+        {
+            var rows = await Reputation.GetRowsAsync();
+            _db.ReputationConfigurations.RemoveRange(await _db.ReputationConfigurations.ToListAsync());
+
+            foreach (var row in rows)
+            {
+                var reputationConfiguration = new ReputationConfiguration(row.GuildId)
+                {
+                    Emojis = row.Emotes.Select(x => new ReputationConfigurationEmoji(row.GuildId, x.Item1)
+                    {
+                        Value = x.Item2
+                    }).ToList()
+                };
+
+                _db.ReputationConfigurations.Add(reputationConfiguration);
+                _logger.LogDebug("Migrated reputation configuration {GuildId}", row.GuildId);
+            }
+
+            var memberRows = await Reputation.GetUserRowsAsync();
+            _db.ReputationMembers.RemoveRange(await _db.ReputationMembers.ToListAsync());
+
+            foreach (var memberRow in memberRows)
+            {
+                var reputationMember = new ReputationMember(memberRow.GuildId, memberRow.UserId)
+                {
+                    Reputation = memberRow.Reputation
+                };
+
+                _db.ReputationMembers.Add(reputationMember);
+                _logger.LogDebug("Migrated reputation member {GuildId}/{MemberId}", memberRow.GuildId, memberRow.UserId);
             }
 
             await _db.SaveChangesAsync();

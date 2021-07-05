@@ -19,6 +19,10 @@ namespace NewDatabase
         public DbSet<MessageLogsMessage> MessageLogsMessages { get; set; }
         public DbSet<MessagePinningConfiguration> MessagePinningConfigurations { get; set; }
         public DbSet<MessagePinningWebhook> MessagePinningWebhooks { get; set; }
+        public DbSet<NoticeConfiguration> NoticeConfigurations { get; set; }
+        public DbSet<PremiumSlot> PremiumSlots { get; set; }
+        public DbSet<ReputationConfiguration> ReputationConfigurations { get; set; }
+        public DbSet<ReputationMember> ReputationMembers { get; set; }
 
         private readonly string _connectionString;
         
