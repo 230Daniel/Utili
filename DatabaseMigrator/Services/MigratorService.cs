@@ -62,6 +62,18 @@ namespace DatabaseMigrator.Services
 
                 _logger.LogInformation("Migrating reputation...");
                 await MigrateReputationAsync();
+
+                _logger.LogInformation("Migrating role linking...");
+                await MigrateRoleLinkingAsync();
+
+                _logger.LogInformation("Migrating role persist...");
+                await MigrateRolePersistAsync();
+
+                _logger.LogInformation("Migrating subscriptions...");
+                await MigrateSubscriptionsAsync();
+
+                _logger.LogInformation("Migrating users...");
+                await MigrateUsersAsync();
                 
                 _logger.LogInformation("Finished");
             }
@@ -375,10 +387,8 @@ namespace DatabaseMigrator.Services
 
             foreach (var row in rows)
             {
-                var premiumSlot = new PremiumSlot()
+                var premiumSlot = new PremiumSlot(row.UserId)
                 {
-                    SlotId = row.SlotId,
-                    UserId = row.UserId,
                     GuildId = row.GuildId
                 };
 
@@ -420,6 +430,98 @@ namespace DatabaseMigrator.Services
 
                 _db.ReputationMembers.Add(reputationMember);
                 _logger.LogDebug("Migrated reputation member {GuildId}/{MemberId}", memberRow.GuildId, memberRow.UserId);
+            }
+
+            await _db.SaveChangesAsync();
+        }
+
+        private async Task MigrateRoleLinkingAsync()
+        {
+            static RoleLinkingMode GetMode(int mode)
+            {
+                return mode switch
+                {
+                    0 => RoleLinkingMode.GrantOnGrant,
+                    1 => RoleLinkingMode.RevokeOnGrant,
+                    2 => RoleLinkingMode.GrantOnRevoke,
+                    3 => RoleLinkingMode.RevokeOnRevoke,
+                    _ => throw new ArgumentOutOfRangeException(nameof(mode), mode, null)
+                };
+            }
+            
+            var rows = await RoleLinking.GetRowsAsync();
+            _db.RoleLinkingConfigurations.RemoveRange(await _db.RoleLinkingConfigurations.ToListAsync());
+
+            foreach (var row in rows)
+            {
+                var roleLinkingConfiguration = new RoleLinkingConfiguration(row.GuildId, row.RoleId)
+                {
+                    LinkedRoleId = row.LinkedRoleId,
+                    Mode = GetMode(row.Mode)
+                };
+
+                _db.RoleLinkingConfigurations.Add(roleLinkingConfiguration);
+                _logger.LogDebug("Migrated role linking configuration {GuildId}/{RoleId} ({LinkId})", row.GuildId, row.RoleId, row.LinkId);
+            }
+
+            await _db.SaveChangesAsync();
+        }
+
+        private async Task MigrateRolePersistAsync()
+        {
+            var rows = await RolePersist.GetRowsAsync();
+            _db.RolePersistConfigurations.RemoveRange(await _db.RolePersistConfigurations.ToListAsync());
+
+            foreach (var row in rows)
+            {
+                var rolePersistConfiguration = new RolePersistConfiguration(row.GuildId)
+                {
+                    Enabled = row.Enabled,
+                    ExcludedRoles = row.ExcludedRoles
+                };
+
+                _db.RolePersistConfigurations.Add(rolePersistConfiguration);
+                _logger.LogDebug("Migrated role persist configuration {GuildId}", row.GuildId);
+            }
+
+            await _db.SaveChangesAsync();
+        }
+
+        private async Task MigrateSubscriptionsAsync()
+        {
+            var rows = await Subscriptions.GetRowsAsync();
+            _db.Subscriptions.RemoveRange(await _db.Subscriptions.ToListAsync());
+
+            foreach (var row in rows)
+            {
+                var subscription = new Subscription(row.SubscriptionId, row.UserId, row.Slots)
+                {
+                    Status = (NewDatabase.Entities.SubscriptionStatus) (int) row.Status,
+                    ExpiresAt = row.EndsAt,
+                };
+
+                _db.Subscriptions.Add(subscription);
+                _logger.LogDebug("Migrated subscription {Id}", subscription.Id);
+            }
+
+            await _db.SaveChangesAsync();
+        }
+
+        private async Task MigrateUsersAsync()
+        {
+            var rows = await Users.GetRowsAsync();
+            _db.Users.RemoveRange(await _db.Users.ToListAsync());
+
+            foreach (var row in rows)
+            {
+                var user = new User(row.UserId)
+                {
+                    Email = row.Email,
+                    CustomerId = row.CustomerId
+                };
+
+                _db.Users.Add(user);
+                _logger.LogDebug("Migrated user {UserId}", row.UserId);
             }
 
             await _db.SaveChangesAsync();

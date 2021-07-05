@@ -70,6 +70,12 @@ namespace NewDatabase.Extensions
 
             modelBuilder.Entity<ReputationConfigurationEmoji>().HasKey(e => new {e.GuildId, e.Emoji});
             modelBuilder.Entity<ReputationConfigurationEmoji>().Property(e => e.GuildId).ValueGeneratedNever();
+            
+            modelBuilder.Entity<RoleLinkingConfiguration>().HasKey(e => e.Id);
+            modelBuilder.Entity<RoleLinkingConfiguration>().Property(e => e.Id).ValueGeneratedOnAdd();
+
+            modelBuilder.Entity<Subscription>().HasKey(e => e.Id);
+            modelBuilder.Entity<Subscription>().Property(e => e.Id).ValueGeneratedNever();
         }
         
         public static void ConfigureUlongListConverters(this ModelBuilder modelBuilder)
