@@ -45,8 +45,7 @@ namespace Utili.Commands
 
             var pages = new List<Page>();
             var content = "";
-            var embed = MessageUtils.CreateEmbed(EmbedType.Info, "Inactive Users")
-                .WithFooter($"Page 1 of {Math.Ceiling((decimal) inactiveMembers.Count / 30)}");
+            var embed = MessageUtils.CreateEmbed(EmbedType.Info, "Inactive Users");
 
             for (var i = 0; i < inactiveMembers.Count; i++)
             {
@@ -62,8 +61,7 @@ namespace Utili.Commands
                 if ((i + 1) % 30 == 0)
                 {
                     pages.Add(new Page().AddEmbed(embed));
-                    embed = MessageUtils.CreateEmbed(EmbedType.Info, "Inactive Members")
-                        .WithFooter($"Page {Math.Ceiling((decimal) i / 9) + 1} of {Math.Ceiling((decimal) inactiveMembers.Count / 30)}");
+                    embed = MessageUtils.CreateEmbed(EmbedType.Info, "Inactive Members");
                 }
             }
 
@@ -76,8 +74,7 @@ namespace Utili.Commands
             if (embed.Fields.Count > 0)
                 pages.Add(new Page().AddEmbed(embed));
             
-
-            var pageProvider = new PageProvider(pages);
+            var pageProvider = new ListPageProvider(pages);
             var menu = new MyPagedView(pageProvider);
             await View(menu);
         }
