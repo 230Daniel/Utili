@@ -26,7 +26,7 @@ namespace Utili.Implementations.Views
             })
             {
                 Label = "Cancel",
-                Style = ButtonComponentStyle.Secondary
+                Style = LocalButtonComponentStyle.Secondary
             };
 
             var confirmButton = new ButtonViewComponent(async e =>
@@ -39,7 +39,7 @@ namespace Utili.Implementations.Views
             })
             {
                 Label = confirmButtonLabel,
-                Style = ButtonComponentStyle.Danger
+                Style = LocalButtonComponentStyle.Danger
             };
             
             AddComponent(cancelButton);
