@@ -74,6 +74,15 @@ namespace DatabaseMigrator.Services
 
                 _logger.LogInformation("Migrating users...");
                 await MigrateUsersAsync();
+
+                _logger.LogInformation("Mirgating voice link...");
+                await MigrateVoiceLinkAsync();
+
+                _logger.LogInformation("Migrating voice roles...");
+                await MigrateVoiceRolesAsync();
+
+                _logger.LogInformation("Migrating vote channels...");
+                await MigrateVoteChannelsAsync();
                 
                 _logger.LogInformation("Finished");
             }
@@ -522,6 +531,98 @@ namespace DatabaseMigrator.Services
 
                 _db.Users.Add(user);
                 _logger.LogDebug("Migrated user {UserId}", row.UserId);
+            }
+
+            await _db.SaveChangesAsync();
+        }
+
+        private async Task MigrateVoiceLinkAsync()
+        {
+            var rows = await VoiceLink.GetRowsAsync();
+            _db.VoiceLinkConfigurations.RemoveRange(await _db.VoiceLinkConfigurations.ToListAsync());
+
+            foreach (var row in rows)
+            {
+                var voiceLinkConfiguration = new VoiceLinkConfiguration(row.GuildId)
+                {
+                    Enabled = row.Enabled,
+                    DeleteChannels = row.DeleteChannels,
+                    ChannelPrefix = row.Prefix.Value,
+                    ExcludedChannels = row.ExcludedChannels
+                };
+
+                _db.VoiceLinkConfigurations.Add(voiceLinkConfiguration);
+                _logger.LogDebug("Migrated voice link configuration {GuildId}", row.GuildId);
+            }
+
+            var channelRows = await VoiceLink.GetChannelRowsAsync();
+            _db.VoiceLinkChannels.RemoveRange(await _db.VoiceLinkChannels.ToListAsync());
+
+            foreach (var channelRow in channelRows)
+            {
+                var voiceLinkChannel = new VoiceLinkChannel(channelRow.GuildId, channelRow.VoiceChannelId)
+                {
+                    TextChannelId = channelRow.TextChannelId
+                };
+
+                _db.VoiceLinkChannels.Add(voiceLinkChannel);
+                _logger.LogDebug("Migrated voice link channel {GuildId}/{ChannelId}", channelRow.GuildId, channelRow.VoiceChannelId);
+            }
+
+            await _db.SaveChangesAsync();
+        }
+
+        private async Task MigrateVoiceRolesAsync()
+        {
+            var rows = await VoiceRoles.GetRowsAsync();
+            _db.VoiceRoleConfigurations.RemoveRange(await _db.VoiceRoleConfigurations.ToListAsync());
+
+            foreach (var row in rows)
+            {
+                var voiceRoleConfiguration = new VoiceRoleConfiguration(row.GuildId, row.ChannelId)
+                {
+                    RoleId = row.RoleId
+                };
+
+                _db.VoiceRoleConfigurations.Add(voiceRoleConfiguration);
+                _logger.LogDebug("Migrated voice role configuration {GuildId}/{ChannelId}", row.GuildId, row.ChannelId);
+            }
+
+            await _db.SaveChangesAsync();
+        }
+
+        private async Task MigrateVoteChannelsAsync()
+        {
+            static VoteChannelMode GetMode(int mode)
+            {
+                return mode switch
+                {
+                    0 => VoteChannelMode.All,
+                    1 => VoteChannelMode.Images,
+                    2 => VoteChannelMode.Videos,
+                    3 => VoteChannelMode.Images | VoteChannelMode.Videos,
+                    4 => VoteChannelMode.Music,
+                    5 => VoteChannelMode.Attachments,
+                    6 => VoteChannelMode.Links,
+                    7 => VoteChannelMode.Images | VoteChannelMode.Videos | VoteChannelMode.Links,
+                    8 => VoteChannelMode.Embeds,
+                    _ => throw new ArgumentOutOfRangeException(nameof(mode), mode, "Bad message filter mode")
+                };
+            }
+            
+            var rows = await VoteChannels.GetRowsAsync();
+            _db.VoteChannelConfigurations.RemoveRange(await _db.VoteChannelConfigurations.ToListAsync());
+
+            foreach (var row in rows)
+            {
+                var voteChannelConfiguration = new VoteChannelConfiguration(row.GuildId, row.ChannelId)
+                {
+                    Mode = GetMode(row.Mode),
+                    Emotes = row.Emotes
+                };
+
+                _db.VoteChannelConfigurations.Add(voteChannelConfiguration);
+                _logger.LogDebug("Migrated vote channel configuration {GuildId}/{ChannelId}", row.GuildId, row.ChannelId);
             }
 
             await _db.SaveChangesAsync();

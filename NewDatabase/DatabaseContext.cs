@@ -27,6 +27,10 @@ namespace NewDatabase
         public DbSet<RolePersistConfiguration> RolePersistConfigurations { get; internal set; }
         public DbSet<Subscription> Subscriptions { get; internal set; }
         public DbSet<User> Users { get; internal set; }
+        public DbSet<VoiceLinkConfiguration> VoiceLinkConfigurations { get; internal set; }
+        public DbSet<VoiceLinkChannel> VoiceLinkChannels { get; internal set; }
+        public DbSet<VoiceRoleConfiguration> VoiceRoleConfigurations { get; internal set; }
+        public DbSet<VoteChannelConfiguration> VoteChannelConfigurations { get; internal set; }
 
         private readonly string _connectionString;
         
