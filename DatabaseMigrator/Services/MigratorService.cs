@@ -12,7 +12,7 @@ namespace DatabaseMigrator.Services
     
     public class MigratorService
     {
-        private static readonly bool UseProdDb = true;
+        private static readonly bool UseProdDb = false;
         
         private readonly ILogger<MigratorService> _logger;
         private readonly DatabaseContext _db;
@@ -120,12 +120,11 @@ namespace DatabaseMigrator.Services
                 _db.AutopurgeConfigurations.Add(autopurgeConfiguration);
                 _logger.LogDebug("Migrated autopurge configuration {GuildId}/{ChannelId}", row.GuildId, row.ChannelId);
             }
-
-            /*
+            
             var messageRows = await Autopurge.GetMessagesAsync();
             _db.AutopurgeMessages.RemoveRange(await _db.AutopurgeMessages.ToListAsync());
             
-            foreach (var messageRow in messageRows.Where(x => !messageKeys.Contains(x.MessageId)))
+            foreach (var messageRow in messageRows)
             {
                 var autopurgeMessage = new AutopurgeMessage(messageRow.MessageId)
                 {
@@ -138,8 +137,7 @@ namespace DatabaseMigrator.Services
                 _db.AutopurgeMessages.Add(autopurgeMessage);
                 _logger.LogDebug("Migrated autopurge message {MessageId}", messageRow.MessageId);
             }
-            */
-
+            
             await _db.SaveChangesAsync();
         }
         

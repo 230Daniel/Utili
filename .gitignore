@@ -348,6 +348,3 @@ appsettings*
 Errors/
 Errors
 /Utili/appsettings.json
-
-# Database migrations (temporarily excluded)
-/NewDatabase/Migrations/
