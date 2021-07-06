@@ -5,22 +5,12 @@ using Disqord.Extensions.Interactivity.Menus.Paged;
 
 namespace Utili.Implementations
 {
-    public class MyPagedView : PagedViewBase
+    public class MyPagedView : PagedView
     {
-        public MyPagedView(IPageProvider pageProvider) : base(pageProvider) { }
-
-        [Button(Label = "<─", Style = ButtonComponentStyle.Primary)]
-        public ValueTask Previous(ButtonEventArgs e)
+        protected override ButtonViewComponent FirstPageButton { get; set; } = null;
+        
+        public MyPagedView(PageProvider pageProvider) : base(pageProvider)
         {
-            CurrentPageIndex--;
-            return default;
-        }
-
-        [Button(Label = "─>", Style = ButtonComponentStyle.Primary)]
-        public ValueTask Next(ButtonEventArgs e)
-        {
-            CurrentPageIndex++;
-            return default;
         }
     }
 }
