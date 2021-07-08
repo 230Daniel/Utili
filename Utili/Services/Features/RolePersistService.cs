@@ -35,6 +35,7 @@ namespace Utili.Services
 
                 var roles = persistRow.Roles.Select(x => guild.GetRole(x)).ToList();
                 roles.RemoveAll(x => x is null || !x.CanBeManaged() || row.ExcludedRoles.Contains(x.Id));
+                if (!roles.Any()) return;
                 
                 IMember member = guild.GetMember(e.Member.Id);
                 member ??= await guild.FetchMemberAsync(e.Member.Id);
