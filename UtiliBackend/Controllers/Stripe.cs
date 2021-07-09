@@ -185,6 +185,7 @@ namespace UtiliSite
         }
 
         [HttpPost("stripe/webhook")]
+        [IgnoreAntiforgeryToken]
         public async Task<IActionResult> Webhook()
         {
             string json = await new StreamReader(HttpContext.Request.Body).ReadToEndAsync();
@@ -206,11 +207,6 @@ namespace UtiliSite
                     string jsonSubscription = stripeEvent.Data.Object.ToString();
                     jsonSubscription = jsonSubscription.Substring(jsonSubscription.IndexOf('{'));
                     Subscription subscription = Subscription.FromJson(jsonSubscription);
-
-                    if (subscription.Id == "sub_JIYbFIjPeNjEuy" && DateTime.UtcNow < new DateTime(2021, 04, 16))
-                    {
-                        return Ok();
-                    }
 
                     ProductService productService = new ProductService(_stripeClient);
                     Product product = await productService.GetAsync(subscription.Items.Data[0].Plan.ProductId);
