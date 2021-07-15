@@ -9,61 +9,48 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using NewDatabase;
 
 namespace UtiliBackend
 {
     public class Startup
     {
+        private readonly IConfiguration _configuration;
+        
         public Startup(IConfiguration configuration)
         {
-            Configuration = configuration;
-            Main.InitialiseAsync().GetAwaiter().GetResult();
+            _configuration = configuration;
         }
-
-        public IConfiguration Configuration { get; }
-
-        // This method gets called by the runtime. Use this method to add services to the container.
+        
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddCors(options => 
+                options.AddPolicy("CorsPolicy", 
+                    builder => builder
+                        .WithOrigins(_configuration["Frontend:Origin"])
+                        .AllowAnyMethod()
+                        .AllowAnyHeader()));
+            
             services.AddHsts(options =>
             {
                 options.MaxAge = TimeSpan.FromDays(30);
                 options.IncludeSubDomains = true;
             });
-
-            // https://github.com/stefanprodan/AspNetCoreRateLimit/wiki/IpRateLimitMiddleware#setup
-
+            
+            services.AddMvc(options => options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute()));
+            services.AddControllers();
+            services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+            services.AddHttpContextAccessor();
             services.AddOptions();
             services.AddMemoryCache();
-            services.AddMvc(options => options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute()));
-            
-            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
-
-            services.AddCors(options =>
-            {
-                options.AddPolicy("frontend",
-                    builder =>
-                    {
-                        builder.WithOrigins(Main.Config.Frontend)
-                            .AllowAnyMethod()
-                            .AllowAnyHeader()
-                            .AllowCredentials();
-                    });
-            });
-
-            services.AddAntiforgery(options =>
-            {
-                options.HeaderName = "X-XSRF-TOKEN";
-            });
-
-            services.AddAuthentication().AddCookie(options =>
-            {
-                options.Cookie.SameSite = SameSiteMode.None;
-            });
 
             services.AddAuthentication(options =>
             {
                 options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+            })
+            .AddCookie(options =>
+            {
+                options.Cookie.SameSite = SameSiteMode.None;
             })
             .AddDiscord(options =>
             {
@@ -75,15 +62,20 @@ namespace UtiliBackend
                 options.SaveTokens = true;
                 options.ClaimActions.MapAll();
             });
-
-            services.AddControllers();
             
-            services.Configure<IpRateLimitOptions>(Configuration.GetSection("IpRateLimiting"));
-            services.Configure<IpRateLimitPolicies>(Configuration.GetSection("IpRateLimitPolicies"));
+            services.AddAntiforgery(options =>
+            {
+                options.HeaderName = "X-XSRF-TOKEN";
+            });
+
             services.AddSingleton<IIpPolicyStore, MemoryCacheIpPolicyStore>();
             services.AddSingleton<IRateLimitCounterStore, MemoryCacheRateLimitCounterStore>();
             services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();
-            services.AddHttpContextAccessor();
+
+            services.AddDbContext<DatabaseContext>();
+            
+            services.Configure<IpRateLimitOptions>(_configuration.GetSection("IpRateLimiting"));
+            services.Configure<IpRateLimitPolicies>(_configuration.GetSection("IpRateLimitPolicies"));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -91,9 +83,7 @@ namespace UtiliBackend
         {
             app.UseIpRateLimiting();
 
-            if (env.IsDevelopment()) 
-                app.UseDeveloperExceptionPage();
-            else
+            if (!env.IsDevelopment())
             {
                 app.Use((ctx, next) =>
                 {
@@ -102,7 +92,7 @@ namespace UtiliBackend
                 });
                 app.UseHsts();
             }
-            
+
             app.Use((ctx, next) =>
             {
                 ctx.Response.Headers.Add("cache-control", "no-cache");
@@ -111,7 +101,7 @@ namespace UtiliBackend
             
             app.UseHttpsRedirection();
             app.UseRouting();
-            app.UseCors("frontend");
+            app.UseCors("CorsPolicy");
             app.UseAuthentication();
             app.UseAuthorization();
             
