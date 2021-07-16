@@ -119,7 +119,7 @@ namespace Utili.Services
                     {
                         textChannel = await guild.CreateTextChannelAsync($"{metaRow.Prefix.Value}{voiceChannel.Name}", x =>
                         {
-                            if (voiceChannel.CategoryId.HasValue) x.ParentId = voiceChannel.CategoryId.Value;
+                            if (voiceChannel.CategoryId.HasValue) x.CategoryId = voiceChannel.CategoryId.Value;
                             x.Topic = $"Users in {voiceChannel.Name} have access - Created by Utili";
                             x.Overwrites = new List<LocalOverwrite>
                             {

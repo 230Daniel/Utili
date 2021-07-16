@@ -18,7 +18,7 @@ namespace Utili.Commands.Features
             [RequireAuthorParameterChannelPermissions(Permission.ViewChannel | Permission.ReadMessageHistory)]
             ITextChannel channel = null)
         {
-            channel ??= Context.Channel;
+            channel ??= Context.Channel as ITextChannel;
             var row = await Notices.GetRowAsync(Context.Guild.Id, channel.Id);
             await Context.Channel.SendMessageAsync(NoticesService.GetNotice(row));
         }

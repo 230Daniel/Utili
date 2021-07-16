@@ -35,7 +35,7 @@ namespace Utili.Extensions
 
         public static bool BotHasPermissions(this IGuild guild, Permission permissions)
         {
-            return guild.GetCurrentMember().GetGuildPermissions().Has(permissions);
+            return guild.GetCurrentMember().GetPermissions().Has(permissions);
         }
 
         public static Task<IReadOnlyList<IMember>> FetchAllMembersAsync(this IGuild guild)

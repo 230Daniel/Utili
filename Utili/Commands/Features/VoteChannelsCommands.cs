@@ -21,7 +21,7 @@ namespace Utili.Commands
             [RequireBotParameterChannelPermissions(Permission.AddReactions)]
             ITextChannel channel = null)
         {
-            channel ??= Context.Channel;
+            channel ??= Context.Channel as ITextChannel;
 
             var row = (await VoteChannels.GetRowsAsync(Context.Guild.Id, channel.Id)).FirstOrDefault();
             if (row is null)
@@ -67,7 +67,7 @@ namespace Utili.Commands
             int emojiNumber, 
             ITextChannel channel = null)
         {
-            channel ??= Context.Channel;
+            channel ??= Context.Channel as ITextChannel;
             
             var row = (await VoteChannels.GetRowsAsync(Context.Guild.Id, channel.Id)).FirstOrDefault();
             if (row is null)
@@ -97,7 +97,7 @@ namespace Utili.Commands
             IEmoji emoji,
             ITextChannel channel = null)
         {
-            channel ??= Context.Channel;
+            channel ??= Context.Channel as ITextChannel;
             
             var row = (await VoteChannels.GetRowsAsync(Context.Guild.Id, channel.Id)).FirstOrDefault();
             if (row is null)
@@ -131,7 +131,7 @@ namespace Utili.Commands
         [Command("ListEmojis", "ListEmoji", "ListEmotes", "ListEmote")]
         public async Task ListEmojis(ITextChannel channel = null)
         {
-            channel ??= Context.Channel;
+            channel ??= Context.Channel as ITextChannel;
 
             var row = (await VoteChannels.GetRowsAsync(Context.Guild.Id, channel.Id)).FirstOrDefault();
             if (row is null)

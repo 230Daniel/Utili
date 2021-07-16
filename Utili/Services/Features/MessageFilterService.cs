@@ -59,7 +59,7 @@ namespace Utili.Services
                     _offenceDictionary.AddOrUpdate(e.ChannelId, DateTime.UtcNow, (_, _) => DateTime.UtcNow);
 
                     var sent = await e.Channel.SendFailureAsync("Message deleted",
-                        $"Only messages {allowedTypes} are allowed in {e.Channel.Mention}");
+                        $"Only messages {allowedTypes} are allowed in {(e.Channel as ITextChannel).Mention}");
                     await Task.Delay(8000);
                     await sent.DeleteAsync();
                     return true;

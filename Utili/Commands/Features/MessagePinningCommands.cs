@@ -20,7 +20,7 @@ namespace Utili.Features
             ulong messageId,
             [RequireBotParameterChannelPermissions(Permission.ViewChannel | Permission.ManageWebhooks)]
             ITextChannel pinChannel = null)
-            => await Pin(messageId, pinChannel, Context.Channel);
+            => await Pin(messageId, pinChannel, Context.Channel as ITextChannel);
         
         [Command("Pin")]
         [DefaultCooldown(2, 5)]

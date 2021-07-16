@@ -118,7 +118,9 @@ namespace Utili.Implementations
             if (Menu is InteractiveMenu interactiveMenu)
                 _ = interactiveMenu.Message.DeleteAsync();
 
-            return Menu.StopAsync();
+            Menu.Stop();
+            
+            return default;
         }
     }
 }

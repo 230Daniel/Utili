@@ -166,14 +166,14 @@ namespace Utili.Commands
             if (outdated == 1) content += $"{outdated} message was not deleted because it is older than 14 days\n";
             else if (outdated > 1) content += $"{outdated} messages were not deleted because they are older than 14 days\n";
 
-            await Context.Channel.DeleteMessagesAsync(messages.Select(x => x.Id), new DefaultRestRequestOptions {Reason = $"Prune (manual by {Context.Message.Author} {Context.Message.Author.Id})"});
+            await (Context.Channel as ITextChannel).DeleteMessagesAsync(messages.Select(x => x.Id), new DefaultRestRequestOptions {Reason = $"Prune (manual by {Context.Message.Author} {Context.Message.Author.Id})"});
 
             var title = $"{messages.Count} messages deleted";
             if (messages.Count == 1) title = $"{messages.Count} message deleted";
 
             var sentMessage = await Context.Channel.SendSuccessAsync(title, content);
             await Task.Delay(5000);
-            await Context.Channel.DeleteMessagesAsync(new[] {sentMessage.Id, Context.Message.Id});
+            await (Context.Channel as ITextChannel).DeleteMessagesAsync(new[] {sentMessage.Id, Context.Message.Id});
         }
 
         [Command("React", "AddReaction", "AddEmoji")]
@@ -264,7 +264,7 @@ namespace Utili.Commands
         [DefaultCooldown(2, 5)]
         public async Task Random(ulong messageId, IEmoji emoji)
         {
-            await Random(Context.Channel, messageId, emoji);
+            await Random(Context.Channel as ITextChannel, messageId, emoji);
         }
         
         [Command("WhoHas")]

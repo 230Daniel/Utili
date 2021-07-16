@@ -22,7 +22,7 @@ namespace Utili.Implementations.Views
                 _clicked = true;
                 Result = false;
                 await Message.DeleteAsync();
-                await Menu.StopAsync();
+                Menu.Stop();
             })
             {
                 Label = "Cancel",
@@ -35,7 +35,7 @@ namespace Utili.Implementations.Views
                 _clicked = true;
                 Result = true;
                 await Message.DeleteAsync();
-                await Menu.StopAsync();
+                Menu.Stop();
             })
             {
                 Label = confirmButtonLabel,
@@ -53,7 +53,7 @@ namespace Utili.Implementations.Views
                     _clicked = true;
                     Result = false;
                     await Message.DeleteAsync();
-                    await Menu.StopAsync();
+                    Menu.Stop();
                 }
             });
         }
