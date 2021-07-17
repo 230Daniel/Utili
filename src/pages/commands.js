@@ -65,15 +65,19 @@ class Commands extends React.Component{
 							</tr>
 							<tr>
 								<td>random</td>
-								<td>Select a random user from the server</td>
+								<td>Select a random member from the server</td>
+							</tr>
+							<tr>
+								<td>random [role]</td>
+								<td>Select a random member which has a role</td>
 							</tr>
 							<tr>
 								<td>random (channel) [message id] [emoji]</td>
-								<td>Select a random user which reacted to a message with an emoji</td>
+								<td>Select a random member which reacted to a message with an emoji</td>
 							</tr>
 							<tr>
-								<td>whohas [role] (page)</td>
-								<td>Get a paged list of users who have a role</td>
+								<td>whohas [roles]</td>
+								<td>Get a list of members who have a set of roles</td>
 							</tr>
 						</CommandsSection>
 						<Divider top="30" bottom="30">Message Pinning</Divider>
@@ -86,24 +90,24 @@ class Commands extends React.Component{
 						<Divider top="30" bottom="30">Reputation</Divider>
 						<CommandsSection>
 							<tr>
-								<td>rep [user]</td>
-								<td>Get a user's reputation</td>
+								<td>rep [member]</td>
+								<td>Get a member's reputation</td>
 							</tr>
 							<tr>
 								<td>rep top</td>
 								<td>Get the leaderboard</td>
 							</tr>
 							<tr>
-								<td>rep give [user] [amount]</td>
-								<td>Give a user some reputation</td>
+								<td>rep give [member] [amount]</td>
+								<td>Give a member some reputation</td>
 							</tr>
 							<tr>
-								<td>rep take [user] [amount]</td>
-								<td>Take some reputation from a user</td>
+								<td>rep take [member] [amount]</td>
+								<td>Take some reputation from a member</td>
 							</tr>
 							<tr>
-								<td>rep set [user] [amount]</td>
-								<td>Set a user's reputation</td>
+								<td>rep set [member] [amount]</td>
+								<td>Set a member's reputation</td>
 							</tr>
 						</CommandsSection>
 					</Fade>
