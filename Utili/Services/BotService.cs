@@ -1,15 +1,16 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
 using Disqord;
+using Disqord.Bot;
+using Disqord.Bot.Hosting;
 using Disqord.Gateway;
-using Disqord.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Utili.Features;
 
 namespace Utili.Services
 {
-    public class BotService : DiscordClientService
+    public class BotService : DiscordBotService
     {
         private readonly ILogger<BotService> _logger;
         private readonly IConfiguration _config;
@@ -37,7 +38,7 @@ namespace Utili.Services
             
             ILogger<BotService> logger,
             IConfiguration config,
-            DiscordClientBase client, 
+            DiscordBotBase client, 
             
             CommunityService community,
             GuildCountService guildCount,
@@ -113,7 +114,7 @@ namespace Utili.Services
             _ = _community.GuildAvailable(e);
         }
 
-        protected override async ValueTask OnMessageReceived(MessageReceivedEventArgs e)
+        protected override async ValueTask OnMessageReceived(BotMessageReceivedEventArgs e)
         {
             await _messageLogs.MessageReceived(e);
             if(await _messageFilter.MessageReceived(e)) return;

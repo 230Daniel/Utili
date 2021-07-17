@@ -11,6 +11,7 @@ using Disqord.Rest;
 using Qmmands;
 using Utili.Extensions;
 using Utili.Implementations;
+using Utili.Services;
 using Utili.Utils;
 
 namespace Utili.Commands
@@ -18,21 +19,26 @@ namespace Utili.Commands
     [Group("Inactive", "InactiveRole")]
     public class InactiveRoleCommands : DiscordInteractiveGuildModuleBase
     {
+        private readonly MemberCacheService _memberCache;
         private static List<ulong> _kickingIn = new();
 
+        public InactiveRoleCommands(MemberCacheService memberCache)
+        {
+            _memberCache = memberCache;
+        }
+        
         [Command("List")]
-        [Cooldown(1, 10, CooldownMeasure.Seconds, CooldownBucketType.Guild)]
-        public async Task List()
+        public async Task<DiscordCommandResult> List()
         {
             var row = await InactiveRole.GetRowAsync(Context.Guild.Id);
             if (Context.Guild.GetRole(row.RoleId) is null)
             {
                 await Context.Channel.SendFailureAsync("Error", "This server does not have an inactive role set");
-                return; 
+                return null; 
             }
 
-            var members = await Context.Guild.FetchAllMembersAsync();
-            var inactiveMembers = members
+            await _memberCache.TemporarilyCacheMembersAsync(Context.GuildId);
+            var inactiveMembers = Context.Guild.GetMembers().Values
                 .Where(x => x.GetRole(row.RoleId) is not null && x.GetRole(row.ImmuneRoleId) is null)
                 .OrderBy(x => x.Nick ?? x.Name)
                 .ToList();
@@ -40,7 +46,7 @@ namespace Utili.Commands
             if (inactiveMembers.Count == 0)
             {
                 await Context.Channel.SendInfoAsync("Inactive Users", "None");
-                return;
+                return null;
             }
 
             var pages = new List<Page>();
@@ -76,7 +82,7 @@ namespace Utili.Commands
             
             var pageProvider = new ListPageProvider(pages);
             var menu = new MyPagedView(pageProvider);
-            await View(menu);
+            return View(menu);
         }
 
         [Command("Kick")]
@@ -107,8 +113,8 @@ namespace Utili.Commands
                 return; 
             }
 
-            var members = await Context.Guild.FetchAllMembersAsync();
-            var inactiveMembers = members
+            await _memberCache.TemporarilyCacheMembersAsync(Context.GuildId);
+            var inactiveMembers = Context.Guild.GetMembers().Values
                 .Where(x => x.GetRole(row.RoleId) is not null && x.GetRole(row.ImmuneRoleId) is null)
                 .OrderBy(x => x.Nick ?? x.Name)
                 .ToList();

@@ -88,6 +88,7 @@ namespace Utili.Implementations
         protected override ValueTask AddTypeParsersAsync(CancellationToken cancellationToken = default)
         {
             Commands.AddTypeParser(new EmojiTypeParser());
+            Commands.AddTypeParser(new RoleArrayTypeParser());
             return base.AddTypeParsersAsync(cancellationToken);
         }
 

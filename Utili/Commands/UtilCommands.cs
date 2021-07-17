@@ -5,15 +5,26 @@ using System.Threading.Tasks;
 using Database.Data;
 using Disqord;
 using Disqord.Bot;
+using Disqord.Extensions.Interactivity.Menus.Paged;
+using Disqord.Gateway;
 using Disqord.Rest;
 using Qmmands;
 using Utili.Extensions;
 using Utili.Implementations;
+using Utili.Services;
+using Utili.Utils;
 
 namespace Utili.Commands
 {
     public class UtilCommands : DiscordGuildModuleBase
     {
+        private readonly MemberCacheService _memberCache;
+        
+        public UtilCommands(MemberCacheService memberCache)
+        {
+            _memberCache = memberCache;
+        }
+        
         [Command("Prune", "Purge", "Clear")]
         [RequireAuthorChannelPermissions(Permission.ManageMessages)]
         [RequireBotChannelPermissions(Permission.ManageMessages | Permission.ReadMessageHistory)]
@@ -224,9 +235,33 @@ namespace Utili.Commands
         [Command("Random", "Pick")]
         public async Task Random()
         {
-            await Context.Channel.SendFailureAsync("Error",
-                "Sorry, this command has been permanently disabled due to changes in the Discord API and scalability issues" +
-                "\nPerhaps you're looking for `random [channel] [message id] [emoji]`?");
+            await _memberCache.TemporarilyCacheMembersAsync(Context.Guild.Id);
+            
+            var random = new Random();
+            var members = Context.Guild.GetMembers().Values.ToList();
+            var member = members[random.Next(0, members.Count)];
+
+            await Context.Channel.SendInfoAsync("Random member",
+                $"{member.Mention} ({member})\n" +
+                $"This member was picked randomly from {members.Count} server member{(members.Count == 1 ? "" : "s")}");
+        }
+        
+        [Command("Random", "Pick")]
+        public async Task Random(
+            [Remainder]
+            IRole role)
+        {
+            await _memberCache.TemporarilyCacheMembersAsync(Context.Guild.Id);
+            
+            var random = new Random();
+            var members = Context.Guild.GetMembers().Values
+                .Where(x => x.RoleIds.Contains(role.Id))
+                .ToList();
+            var member = members[random.Next(0, members.Count)];
+
+            await Context.Channel.SendInfoAsync("Random member",
+                $"{member.Mention} ({member})\n" +
+                $"This member was picked randomly from {members.Count} server member{(members.Count == 1 ? "" : "s")} with the {role.Mention} role");
         }
         
         [Command("Random", "Pick")]
@@ -268,10 +303,64 @@ namespace Utili.Commands
         }
         
         [Command("WhoHas")]
-        public async Task WhoHas()
+        public async Task<DiscordCommandResult> WhoHas(
+            [Remainder]
+            IRole[] roles)
         {
-            await Context.Channel.SendFailureAsync("Error",
-                "Sorry, this command has been permanently disabled due to changes in the Discord API and scalability issues");
+            await _memberCache.TemporarilyCacheMembersAsync(Context.GuildId);
+            
+            var members = Context.Guild.GetMembers().Values
+                .Where(x =>
+                {
+                    foreach (var role in roles.Where(y => y.Id != Context.Guild.Id))
+                        if(!x.RoleIds.Contains(role.Id)) return false;
+                    return true;
+                })
+                .OrderBy(x => x.Nick ?? x.Name)
+                .ToList();
+
+            var roleString = string.Join(", ", roles.Select(x => x.Name));
+            
+            if (members.Count == 0)
+            {
+                await Context.Channel.SendFailureAsync($"Members with {roleString}", "There are no members with those roles.");
+                return null;
+            }
+
+            var pages = new List<Page>();
+            var content = "";
+            var embed = MessageUtils.CreateEmbed(EmbedType.Info, $"Members with {roleString}");
+
+            for (var i = 0; i < members.Count; i++)
+            {
+                content += $"{members[i].Mention}\n";
+                if ((i + 1) % 10 == 0)
+                {
+                    embed.AddField(new LocalEmbedField()
+                        .WithBlankName()
+                        .WithValue(content)
+                        .WithIsInline(true));
+                    content = "";
+                }
+                if ((i + 1) % 30 == 0)
+                {
+                    pages.Add(new Page().AddEmbed(embed));
+                    embed = MessageUtils.CreateEmbed(EmbedType.Info, "Inactive Members");
+                }
+            }
+
+            if (!string.IsNullOrWhiteSpace(content))
+                embed.AddField(new LocalEmbedField()
+                    .WithBlankName()
+                    .WithValue(content)
+                    .WithIsInline(true));
+
+            if (embed.Fields.Count > 0)
+                pages.Add(new Page().AddEmbed(embed));
+            
+            var pageProvider = new ListPageProvider(pages);
+            var menu = new MyPagedView(pageProvider);
+            return View(menu);
         }
 
         [Command("B64Encode")]

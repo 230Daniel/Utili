@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using Disqord;
 using Disqord.Bot;
+using Disqord.Gateway;
 using Disqord.Rest;
 using Qmmands;
 using Utili.Extensions;
@@ -46,7 +47,8 @@ namespace Utili.Commands
 
             foreach (var row in rows)
             {
-                var member = await Context.Guild.FetchMemberAsync(row.UserId);
+                var member = Context.Guild.GetMember(row.UserId) as IMember;
+                member ??= await Context.Guild.FetchMemberAsync(row.UserId);
                 if (member is not null)
                 {
                     content += $"{position}. {member.Mention} {row.Reputation}\n";
@@ -70,7 +72,8 @@ namespace Utili.Commands
 
             foreach (var row in rows)
             {
-                var member = await Context.Guild.FetchMemberAsync(row.UserId);
+                var member = Context.Guild.GetMember(row.UserId) as IMember;
+                member ??= await Context.Guild.FetchMemberAsync(row.UserId);
                 if (member is not null)
                 {
                     content += $"{position}. {member.Mention} {row.Reputation}\n";

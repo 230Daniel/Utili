@@ -15,14 +15,16 @@ namespace Utili.Services
     {
         private readonly ILogger<InactiveRoleService> _logger;
         private readonly DiscordClientBase _client;
+        private readonly MemberCacheService _memberCache;
         
         private Timer _timer;
-
-        public InactiveRoleService(ILogger<InactiveRoleService> logger, DiscordClientBase client)
+        
+        public InactiveRoleService(ILogger<InactiveRoleService> logger, DiscordClientBase client, MemberCacheService memberCache)
         {
             _logger = logger;
             _client = client;
-
+            _memberCache = memberCache;
+            
             _timer = new Timer(30000);
             _timer.Elapsed += Timer_Elapsed;
         }
@@ -111,13 +113,13 @@ namespace Utili.Services
                     var inactiveRole = guild.GetRole(row.RoleId);
                     if(inactiveRole is null || !inactiveRole.CanBeManaged()) return;
 
-                    var members = await guild.FetchAllMembersAsync();
+                    await _memberCache.TemporarilyCacheMembersAsync(row.GuildId);
                     var bot = guild.GetCurrentMember();
                     
                     var userRows = await InactiveRole.GetUsersAsync(guild.Id);
                     var premium = await Premium.IsGuildPremiumAsync(guild.Id);
 
-                    foreach (var member in members.Where(x => !x.IsBot).OrderBy(x => x.Id))
+                    foreach (var member in guild.GetMembers().Values.Where(x => !x.IsBot).OrderBy(x => x.Id))
                     {
                         // DefaultLastAction is set to the time when the activity data started being recorded
                         var lastAction = row.DefaultLastAction;
