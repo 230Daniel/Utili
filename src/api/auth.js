@@ -20,13 +20,22 @@ export function getClientId(){
 	}
 }
 
+export async function setAntiForgeryToken(){
+	if(window.__antiForgeryToken) return;
+	var response = await fetch(`${getBackend()}/auth/antiforgery`, { mode: "cors", credentials: "include" });
+	var token = await response.json();
+	window.__antiForgeryToken = token;
+}
+
 export async function getDetails(){
 	var response = await fetch(`${getBackend()}/auth`, { mode: "cors", credentials: "include" });
-	return await response.json();
+	var details = await response.json();
+	setAntiForgeryToken();
+	return details;
 }
 
 export async function signOut(){
-	await fetch(`${getBackend()}/auth/signout`, { method: "POST", credentials: "include" });
+	await fetch(`${getBackend()}/auth/signout`, { method: "POST", credentials: "include", headers: {"X-XSRF-TOKEN": window.__antiForgeryToken }});
 }
 
 export async function signIn(){
@@ -36,7 +45,7 @@ export async function signIn(){
 }
 
 export async function get(endpoint){
-	var result = await fetch(`${getBackend()}/${endpoint}`, { method: "GET", credentials: "include" });
+	var result = await fetch(`${getBackend()}/${endpoint}`, { method: "GET", credentials: "include", headers: {"X-XSRF-TOKEN": window.__antiForgeryToken }});
 	switch(result.status){
 		case 401:
 			signIn();
@@ -59,7 +68,8 @@ export async function post(endpoint, body){
 	var result = await fetch(`${getBackend()}/${endpoint}`, { 
 		method: "POST",
 		headers: {
-			"Content-Type": "application/json"
+			"Content-Type": "application/json",
+			"X-XSRF-TOKEN": window.__antiForgeryToken
 		},
 		credentials: "include", 
 		body: JSON.stringify(body)
