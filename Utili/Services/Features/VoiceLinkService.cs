@@ -144,7 +144,7 @@ namespace Utili.Services
                         if (x.TargetType == OverwriteTargetType.Member && x.TargetId != _client.CurrentUser.Id)
                         {
                             IMember member = guild.GetMember(x.TargetId);
-                            if (voiceStates.All(y => y.MemberId != member.Id) || voiceStates.First(y => y.MemberId == member.Id).ChannelId == voiceChannel.Id)
+                            if (member is null || voiceStates.All(y => y.MemberId != member.Id) || voiceStates.First(y => y.MemberId == member.Id).ChannelId == voiceChannel.Id)
                             {
                                 overwritesChanged = true;
                                 return true;
