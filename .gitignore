@@ -347,4 +347,5 @@ appsettings.production.json
 # Log files
 Errors/
 Errors
-/Utili/appsettings.json
+UtiliBackend/Exceptions/*
+UtiliBackend/Logs/*

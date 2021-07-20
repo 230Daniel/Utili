@@ -2,6 +2,7 @@ using System;
 using AspNetCoreRateLimit;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -10,6 +11,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using NewDatabase;
+using UtiliBackend.Authorisation;
+using UtiliBackend.Services;
 
 namespace UtiliBackend
 {
@@ -29,7 +32,12 @@ namespace UtiliBackend
                     builder => builder
                         .WithOrigins(_configuration["Frontend:Origin"])
                         .AllowAnyMethod()
-                        .AllowAnyHeader()));
+                        .AllowAnyHeader()
+                        .AllowCredentials()));
+            
+            services.AddSingleton<IAuthorizationPolicyProvider, DiscordPolicyProvider>();
+            services.AddSingleton<IAuthorizationHandler, DiscordAuthorisationHandler>();
+            services.AddSingleton<IAuthorizationMiddlewareResultHandler, DiscordResultHandler>();
             
             services.AddHsts(options =>
             {
@@ -72,6 +80,8 @@ namespace UtiliBackend
             services.AddSingleton<IRateLimitCounterStore, MemoryCacheRateLimitCounterStore>();
             services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();
 
+            services.AddSingleton<DiscordClientService>();
+            
             services.AddDbContext<DatabaseContext>();
             
             services.Configure<IpRateLimitOptions>(_configuration.GetSection("IpRateLimiting"));
@@ -103,7 +113,7 @@ namespace UtiliBackend
             app.UseCors("CorsPolicy");
             app.UseAuthentication();
             app.UseAuthorization();
-            
+
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
