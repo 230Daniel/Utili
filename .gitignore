@@ -340,9 +340,9 @@ ASALocalRun/
 healthchecksdb
 
 # Files with passwords and that
-Config.json
-DatabaseCredentials.json
-appsettings*
+appsettings.json
+appsettings.development.json
+appsettings.production.json
 
 # Log files
 Errors/

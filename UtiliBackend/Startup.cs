@@ -54,8 +54,8 @@ namespace UtiliBackend
             })
             .AddDiscord(options =>
             {
-                options.ClientId = Main.Config.DiscordClientId;
-                options.ClientSecret = Main.Config.DiscordClientSecret;
+                options.ClientId = _configuration["Discord:ClientId"];
+                options.ClientSecret = _configuration["Discord:ClientSecret"];
                 options.AccessDeniedPath = "/";
                 options.Scope.Add("email");
                 options.Scope.Add("guilds");
