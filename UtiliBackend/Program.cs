@@ -2,6 +2,8 @@ using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using UtiliBackend.Services;
 
 namespace UtiliBackend
 {
@@ -14,8 +16,13 @@ namespace UtiliBackend
                 {
                     webBuilder.UseStartup<Startup>();
                 })
+                .ConfigureLogging(builder =>
+                {
+                    builder.ClearProviders();
+                    builder.AddProvider(new LoggerProvider());
+                })
                 .Build();
-
+            
             try
             {
                 await host.RunAsync();
