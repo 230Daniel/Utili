@@ -27,8 +27,7 @@ namespace UtiliBackend.Authorisation
                 return;
             }
 
-            await _defaultHandler.HandleAsync(requestDelegate, httpContext, authorizationPolicy, 
-                policyAuthorizationResult);
+            await _defaultHandler.HandleAsync(requestDelegate, httpContext, authorizationPolicy, policyAuthorizationResult);
         }
     }
 }
