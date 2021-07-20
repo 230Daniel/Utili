@@ -77,9 +77,8 @@ namespace UtiliBackend
             services.Configure<IpRateLimitOptions>(_configuration.GetSection("IpRateLimiting"));
             services.Configure<IpRateLimitPolicies>(_configuration.GetSection("IpRateLimitPolicies"));
         }
-
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        
+        public static void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             app.UseIpRateLimiting();
 
