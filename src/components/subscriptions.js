@@ -48,7 +48,7 @@ class Subscriptions extends React.Component{
 	}
 
 	async componentDidMount(){
-		var response = await get(`stripe/subscriptions`);
+		var response = await get(`premium/subscriptions`);
 		this.state.subscriptions = await response?.json();
 		this.setState({});
 	}
