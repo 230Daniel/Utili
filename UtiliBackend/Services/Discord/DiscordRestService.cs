@@ -9,6 +9,7 @@ namespace UtiliBackend.Services
 {
     public class DiscordRestService
     {
+        private readonly IConfiguration _configuration;
         private readonly DiscordRestClient _client;
         
         private static readonly TimeSpan GuildCacheDuration = TimeSpan.FromSeconds(20);
@@ -19,15 +20,20 @@ namespace UtiliBackend.Services
         
         private static readonly TimeSpan VoiceChannelCacheDuration = TimeSpan.FromSeconds(20);
         private readonly Dictionary<ulong, (IEnumerable<RestVoiceChannel>, DateTime)> _cachedVoiceChannels;
-        
+
         public DiscordRestService(IConfiguration configuration)
         {
-            _client = new DiscordRestClient();
-            _client.LoginAsync(TokenType.Bot, configuration["Discord:Token"]).GetAwaiter().GetResult();
-
+            _configuration = configuration;
+            
+            _client = new();
             _cachedGuilds = new();
             _cachedTextChannels = new();
             _cachedVoiceChannels = new();
+        }
+
+        public async Task InitialiseAsync()
+        {
+            await _client.LoginAsync(TokenType.Bot, _configuration["Discord:Token"]);
         }
 
         public async Task<RestGuild> GetGuildAsync(ulong guildId)

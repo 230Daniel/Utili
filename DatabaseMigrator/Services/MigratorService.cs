@@ -12,7 +12,7 @@ namespace DatabaseMigrator.Services
     
     public class MigratorService
     {
-        private static readonly bool UseProdDb = false;
+        private static readonly bool UseProdDb = true;
         
         private readonly ILogger<MigratorService> _logger;
         private readonly DatabaseContext _db;
@@ -124,7 +124,7 @@ namespace DatabaseMigrator.Services
                 _logger.LogDebug("Migrated autopurge configuration {GuildId}/{ChannelId}", row.GuildId, row.ChannelId);
             }
             
-            var messageRows = await Autopurge.GetMessagesAsync();
+            /*var messageRows = await Autopurge.GetMessagesAsync();
             _db.AutopurgeMessages.RemoveRange(await _db.AutopurgeMessages.ToListAsync());
             
             foreach (var messageRow in messageRows)
@@ -139,7 +139,7 @@ namespace DatabaseMigrator.Services
                 };
                 _db.AutopurgeMessages.Add(autopurgeMessage);
                 _logger.LogDebug("Migrated autopurge message {MessageId}", messageRow.MessageId);
-            }
+            }*/
             
             await _db.SaveChangesAsync();
         }
@@ -326,7 +326,7 @@ namespace DatabaseMigrator.Services
                 _logger.LogDebug("Migrated message logs configuration {GuildId}", row.GuildId);
             }
 
-            var messageRows = await MessageLogs.GetMessagesAsync();
+            /*var messageRows = await MessageLogs.GetMessagesAsync();
             _db.MessageLogsMessages.RemoveRange(await _db.MessageLogsMessages.ToListAsync());
 
             foreach (var messageRow in messageRows)
@@ -342,7 +342,7 @@ namespace DatabaseMigrator.Services
 
                 _db.MessageLogsMessages.Add(messageLogsMessage);
                 _logger.LogDebug("Migrated message logs message {MessageId}", messageRow.MessageId);
-            }
+            }*/
 
             await _db.SaveChangesAsync();
         }

@@ -1,4 +1,4 @@
-﻿namespace UtiliBackend.Models.Authentication
+﻿namespace UtiliBackend.Models
 {
     public class AuthenticationInfoModel
     {

@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using UtiliBackend.Authorisation;
 using UtiliBackend.Extensions;
-using UtiliBackend.Models.Authentication;
+using UtiliBackend.Models;
 
 namespace UtiliBackend.Controllers
 {

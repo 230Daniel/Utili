@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace UtiliBackend.Models.Dashboard
+namespace UtiliBackend.Models
 {
     public class CoreConfigurationModel
     {

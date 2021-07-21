@@ -1,6 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using UtiliBackend.Services;
@@ -25,6 +26,9 @@ namespace UtiliBackend
             
             try
             {
+                var discordRestService = host.Services.GetRequiredService<DiscordRestService>();
+                await discordRestService.InitialiseAsync();
+                
                 await host.RunAsync();
             }
             catch (Exception ex)

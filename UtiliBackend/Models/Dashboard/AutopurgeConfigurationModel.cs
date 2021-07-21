@@ -1,4 +1,4 @@
-﻿namespace UtiliBackend.Models.Dashboard
+﻿namespace UtiliBackend.Models
 {
     public class AutopurgeConfigurationModel
     {

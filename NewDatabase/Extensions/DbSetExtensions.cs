@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using NewDatabase.Entities;
 using NewDatabase.Entities.Base;
 
 namespace NewDatabase.Extensions
@@ -26,6 +27,16 @@ namespace NewDatabase.Extensions
         public static Task<T> GetForMessageAsync<T>(this DbSet<T> dbSet, ulong messageId) where T : MessageEntity
         {
             return dbSet.FirstOrDefaultAsync(x => x.MessageId == messageId);
+        }
+        
+        public static Task<List<PremiumSlot>> GetAllForUserAsync(this DbSet<PremiumSlot> dbSet, ulong userId)
+        {
+            return dbSet.Where(x => x.UserId == userId).ToListAsync();
+        }
+        
+        public static Task<List<Subscription>> GetAllForUserAsync(this DbSet<Subscription> dbSet, ulong userId)
+        {
+            return dbSet.Where(x => x.UserId == userId).ToListAsync();
         }
     }
 }

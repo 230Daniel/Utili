@@ -8,7 +8,7 @@ using NewDatabase;
 using NewDatabase.Entities;
 using NewDatabase.Extensions;
 using UtiliBackend.Authorisation;
-using UtiliBackend.Models.Dashboard;
+using UtiliBackend.Models;
 
 namespace UtiliBackend.Controllers
 {

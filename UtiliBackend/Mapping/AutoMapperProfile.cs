@@ -3,7 +3,6 @@ using AutoMapper;
 using Discord.Rest;
 using NewDatabase.Entities;
 using UtiliBackend.Models;
-using UtiliBackend.Models.Dashboard;
 
 namespace UtiliBackend.Mapping
 {
@@ -21,6 +20,12 @@ namespace UtiliBackend.Mapping
                     dest => dest.Timespan, 
                     opt => opt.MapFrom(s => XmlConvert.ToString(s.Timespan)));
             CreateMap<ChannelMirroringConfiguration, ChannelMirroringConfigurationModel>();
+
+            CreateMap<PremiumSlot, PremiumSlotModel>();
+            CreateMap<Subscription, SubscriptionModel>()
+                .ForMember(
+                    dest => dest.ExpiresAt, 
+                    opt => opt.MapFrom(s => XmlConvert.ToString(s.ExpiresAt, XmlDateTimeSerializationMode.Utc)));
         }
     }
 }
