@@ -1,4 +1,6 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using NewDatabase.Entities.Base;
 
@@ -9,6 +11,11 @@ namespace NewDatabase.Extensions
         public static Task<T> GetForGuildAsync<T>(this DbSet<T> dbSet, ulong guildId) where T : GuildEntity
         {
             return dbSet.FirstOrDefaultAsync(x => x.GuildId == guildId);
+        }
+        
+        public static Task<List<T>> GetAllForGuildAsync<T>(this DbSet<T> dbSet, ulong guildId) where T : GuildChannelEntity
+        {
+            return dbSet.Where(x => x.GuildId == guildId).ToListAsync();
         }
         
         public static Task<T> GetForGuildChannelAsync<T>(this DbSet<T> dbSet, ulong guildId, ulong channelId) where T : GuildChannelEntity

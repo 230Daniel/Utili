@@ -47,7 +47,7 @@ namespace UtiliBackend.Controllers
             if (configuration is null)
             {
                 configuration = new CoreConfiguration(guildId);
-                _dbContext.Add(configuration);
+                _dbContext.CoreConfigurations.Add(configuration);
                 await _dbContext.SaveChangesAsync();
             }
 

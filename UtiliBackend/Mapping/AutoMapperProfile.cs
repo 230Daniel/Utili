@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿using System.Xml;
+using AutoMapper;
 using Discord.Rest;
 using NewDatabase.Entities;
 using UtiliBackend.Models;
@@ -15,6 +16,10 @@ namespace UtiliBackend.Mapping
             CreateMap<RestRole, RoleModel>();
 
             CreateMap<CoreConfiguration, CoreConfigurationModel>();
+            CreateMap<AutopurgeConfiguration, AutopurgeConfigurationModel>()
+                .ForMember(
+                    dest => dest.Timespan, 
+                    opt => opt.MapFrom(s => XmlConvert.ToString(s.Timespan)));
         }
     }
 }
