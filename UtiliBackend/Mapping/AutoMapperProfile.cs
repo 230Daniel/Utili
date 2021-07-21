@@ -20,6 +20,7 @@ namespace UtiliBackend.Mapping
                 .ForMember(
                     dest => dest.Timespan, 
                     opt => opt.MapFrom(s => XmlConvert.ToString(s.Timespan)));
+            CreateMap<ChannelMirroringConfiguration, ChannelMirroringConfigurationModel>();
         }
     }
 }
