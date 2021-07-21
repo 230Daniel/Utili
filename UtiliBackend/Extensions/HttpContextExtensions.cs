@@ -14,5 +14,10 @@ namespace UtiliBackend.Extensions
         {
             return httpContext.GetDiscordClient().CurrentUser;
         }
+        
+        public static RestGuild GetDiscordGuild(this HttpContext httpContext)
+        {
+            return (RestGuild) httpContext.Items["DiscordGuild"];
+        }
     }
 }

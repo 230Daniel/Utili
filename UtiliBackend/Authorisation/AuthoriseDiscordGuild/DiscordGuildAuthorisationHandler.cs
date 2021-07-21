@@ -39,6 +39,8 @@ namespace UtiliBackend.Authorisation
                     {
                         requirement.GuildHasBot = true;
                         context.Succeed(requirement);
+
+                        httpContext.Items["DiscordGuild"] ??= guild;
                     }
                 }
             }

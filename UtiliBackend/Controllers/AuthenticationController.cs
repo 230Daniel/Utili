@@ -3,6 +3,9 @@ using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
+using UtiliBackend.Authorisation;
+using UtiliBackend.Extensions;
+using UtiliBackend.Models.Authentication;
 
 namespace UtiliBackend.Controllers
 {
@@ -32,9 +35,21 @@ namespace UtiliBackend.Controllers
         }
         
         [HttpPost("signout")]
-        public async Task<IActionResult> SignOutAsync()
+        public new IActionResult SignOut()
         {
             return SignOut("Cookies");
+        }
+        
+        [DiscordAuthorise]
+        [HttpGet("me")]
+        public IActionResult Me()
+        {
+            var user = HttpContext.GetDiscordUser();
+            return Json(new AuthenticationInfoModel()
+            {
+                Username = user.Username,
+                AvatarUrl = user.GetAvatarUrl()
+            });
         }
         
         [IgnoreAntiforgeryToken]

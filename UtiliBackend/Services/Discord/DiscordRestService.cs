@@ -14,12 +14,20 @@ namespace UtiliBackend.Services
         private static readonly TimeSpan GuildCacheDuration = TimeSpan.FromSeconds(20);
         private readonly Dictionary<ulong, (RestGuild, DateTime)> _cachedGuilds;
         
+        private static readonly TimeSpan TextChannelCacheDuration = TimeSpan.FromSeconds(20);
+        private readonly Dictionary<ulong, (IEnumerable<RestTextChannel>, DateTime)> _cachedTextChannels;
+        
+        private static readonly TimeSpan VoiceChannelCacheDuration = TimeSpan.FromSeconds(20);
+        private readonly Dictionary<ulong, (IEnumerable<RestVoiceChannel>, DateTime)> _cachedVoiceChannels;
+        
         public DiscordRestService(IConfiguration configuration)
         {
             _client = new DiscordRestClient();
             _client.LoginAsync(TokenType.Bot, configuration["Discord:Token"]).GetAwaiter().GetResult();
 
             _cachedGuilds = new();
+            _cachedTextChannels = new();
+            _cachedVoiceChannels = new();
         }
 
         public async Task<RestGuild> GetGuildAsync(ulong guildId)
@@ -56,6 +64,62 @@ namespace UtiliBackend.Services
             }
 
             return guild;
+        }
+        
+        public async Task<IEnumerable<RestTextChannel>> GetTextChannelsAsync(RestGuild guild)
+        {
+            lock (_cachedTextChannels)
+            {
+                var now = DateTime.UtcNow;
+                foreach (var cachedValue in _cachedTextChannels)
+                {
+                    if (cachedValue.Value.Item2 <= now)
+                        _cachedTextChannels.Remove(cachedValue.Key);
+                }
+
+                if (_cachedTextChannels.TryGetValue(guild.Id, out var tuple))
+                {
+                    return tuple.Item1;
+                }
+            }
+
+            var channels = await guild.GetTextChannelsAsync();
+
+            lock (_cachedTextChannels)
+            {
+                _cachedTextChannels.Remove(guild.Id);
+                _cachedTextChannels.Add(guild.Id, (channels, DateTime.Now.Add(TextChannelCacheDuration)));
+            }
+
+            return channels;
+        }
+        
+        public async Task<IEnumerable<RestVoiceChannel>> GetVoiceChannelsAsync(RestGuild guild)
+        {
+            lock (_cachedVoiceChannels)
+            {
+                var now = DateTime.UtcNow;
+                foreach (var cachedValue in _cachedVoiceChannels)
+                {
+                    if (cachedValue.Value.Item2 <= now)
+                        _cachedVoiceChannels.Remove(cachedValue.Key);
+                }
+
+                if (_cachedVoiceChannels.TryGetValue(guild.Id, out var tuple))
+                {
+                    return tuple.Item1;
+                }
+            }
+
+            var channels = await guild.GetVoiceChannelsAsync();
+
+            lock (_cachedVoiceChannels)
+            {
+                _cachedVoiceChannels.Remove(guild.Id);
+                _cachedVoiceChannels.Add(guild.Id, (channels, DateTime.Now.Add(VoiceChannelCacheDuration)));
+            }
+
+            return channels;
         }
     }
 }
