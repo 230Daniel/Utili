@@ -26,7 +26,7 @@ class ChannelMirroring extends React.Component{
 
 	render(){
 		var channels = this.state.textChannels?.map(x => {return {id: x.id, value: x.name}});
-		var mirroringChannels = channels?.filter(x => this.state.channelMirroring?.rows.some(y => y.fromChannelId == x.id));
+		var mirroringChannels = channels?.filter(x => this.state.channelMirroring?.some(y => y.channelId == x.id));
 		return(
 			<>
 				<Helmet>
@@ -46,10 +46,10 @@ class ChannelMirroring extends React.Component{
 								ref={this.settings.channelAdder}/>
 						</Card>
 						<div className="inline">
-							{this.state.channelMirroring?.rows.map((row, i) =>{
+							{this.state.channelMirroring?.map((row, i) =>{
 								return(
-									<Card title={row.channelName} size={350} titleSize={150} inputSize={200} key={row.fromChannelId} onChanged={this.props.onChanged} onRemoved={() => this.onChannelRemoved(row.fromChannelId)}>
-										<CardComponent type="select-value" title="Mirror to" values={channels} value={row.toChannelId} ref={this.settings.channels[i].toChannelId}/>
+									<Card title={row.channelName} size={350} titleSize={150} inputSize={200} key={row.channelId} onChanged={this.props.onChanged} onRemoved={() => this.onChannelRemoved(row.channelId)}>
+										<CardComponent type="select-value" title="Mirror to" values={channels} value={row.destinationChannelId} ref={this.settings.channels[i].destinationChannelId}/>
 									</Card>
 								);
 							})}
@@ -61,52 +61,52 @@ class ChannelMirroring extends React.Component{
 	}
 	
 	async componentDidMount(){
-		var response = await get(`dashboard/${this.guildId}/channelmirroring`);
+		var response = await get(`dashboard/${this.guildId}/channel-mirroring`);
 		this.state.channelMirroring = await response?.json();
-		response = await get(`discord/${this.guildId}/channels/text`);
+		response = await get(`discord/${this.guildId}/text-channels`);
 		this.state.textChannels = await response?.json();
 
-		this.state.channelMirroring.rows = this.state.channelMirroring.rows.filter(x => this.state.textChannels.some(y => y.id == x.fromChannelId))
-		for(var i = 0; i < this.state.channelMirroring.rows.length; i++){
-			this.settings.channels.push({ toChannelId: React.createRef() });
-			this.state.channelMirroring.rows[i]["channelName"] = this.getChannelName(this.state.channelMirroring.rows[i].fromChannelId);
+		this.state.channelMirroring = this.state.channelMirroring.filter(x => this.state.textChannels.some(y => y.id == x.channelId))
+		for(var i = 0; i < this.state.channelMirroring.length; i++){
+			this.settings.channels.push({ destinationChannelId: React.createRef() });
+			this.state.channelMirroring[i]["channelName"] = this.getChannelName(this.state.channelMirroring[i].channelId);
 		}
-		this.state.channelMirroring.rows.orderBy(x => x.channelName);
+		this.state.channelMirroring.orderBy(x => x.channelName);
 		this.setState({});
 	}
 
 	onChannelAdded(channel){
-		this.settings.channels.push({ toChannelId: React.createRef() });
-		this.state.channelMirroring.rows.push({
-			fromChannelId: channel.id,
-			toChannelId: 0,
+		this.settings.channels.push({ destinationChannelId: React.createRef() });
+		this.state.channelMirroring.push({
+			channelId: channel.id,
+			destinationChannelId: 0,
 			channelName: this.getChannelName(channel.id)
 		});
-		this.state.channelMirroring.rows.orderBy(x => x.channelName);
+		this.state.channelMirroring.orderBy(x => x.channelName);
 		this.setState({});
 	}
 
 	onChannelRemoved(id){
-		var index = this.state.channelMirroring.rows.map(x => x.fromChannelId).indexOf(id);
+		var index = this.state.channelMirroring.map(x => x.channelId).indexOf(id);
 		this.settings.channels.splice(index, 1);
-		this.state.channelMirroring.rows.splice(index, 1);
+		this.state.channelMirroring.splice(index, 1);
 		this.setState({});
 		this.props.onChanged();
 	}
 
 	getInput(){
-		var rows = this.state.channelMirroring.rows;
+		var rows = this.state.channelMirroring;
 		for(var i = 0; i < rows.length; i++){
 			var card = this.settings.channels[i];
-			rows[i].toChannelId = card.toChannelId.current.getValue();
+			rows[i].destinationChannelId = card.destinationChannelId.current.getValue();
 		}
-		this.state.channelMirroring.rows = rows;
+		this.state.channelMirroring = rows;
 		this.setState({});
 	}
 
 	async save(){
 		this.getInput();
-		var response = await post(`dashboard/${this.guildId}/channelmirroring`, this.state.channelMirroring);
+		var response = await post(`dashboard/${this.guildId}/channel-mirroring`, this.state.channelMirroring);
 		return response.ok;
 	}
 
