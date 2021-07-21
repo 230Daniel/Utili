@@ -59,6 +59,7 @@ namespace UtiliBackend
             })
             .AddCookie(options =>
             {
+                // Same-site none is safe because the cookie is http-only
                 options.Cookie.SameSite = SameSiteMode.None;
             })
             .AddDiscord(options =>
@@ -75,6 +76,8 @@ namespace UtiliBackend
             services.AddAntiforgery(options =>
             {
                 options.HeaderName = "X-XSRF-TOKEN";
+                options.Cookie.SameSite = SameSiteMode.None;
+                options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
             });
 
             services.AddSingleton<IIpPolicyStore, MemoryCacheIpPolicyStore>();
