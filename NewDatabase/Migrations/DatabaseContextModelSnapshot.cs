@@ -76,6 +76,30 @@ namespace NewDatabase.Migrations
                     b.ToTable("autopurge_messages");
                 });
 
+            modelBuilder.Entity("NewDatabase.Entities.ChannelMirroringConfiguration", b =>
+                {
+                    b.Property<decimal>("GuildId")
+                        .HasColumnType("numeric(20,0)")
+                        .HasColumnName("guild_id");
+
+                    b.Property<decimal>("ChannelId")
+                        .HasColumnType("numeric(20,0)")
+                        .HasColumnName("channel_id");
+
+                    b.Property<decimal>("DestinationChannelId")
+                        .HasColumnType("numeric(20,0)")
+                        .HasColumnName("destination_channel_id");
+
+                    b.Property<decimal>("WebhookId")
+                        .HasColumnType("numeric(20,0)")
+                        .HasColumnName("webhook_id");
+
+                    b.HasKey("GuildId", "ChannelId")
+                        .HasName("pk_channel_mirroring_configurations");
+
+                    b.ToTable("channel_mirroring_configurations");
+                });
+
             modelBuilder.Entity("NewDatabase.Entities.CoreConfiguration", b =>
                 {
                     b.Property<decimal>("GuildId")

@@ -33,6 +33,9 @@ namespace DatabaseMigrator.Services
                 _logger.LogInformation("Migrating autopurge...");
                 await MigrateAutopurgeAsync();
                 
+                _logger.LogInformation("Migrating channel mirroring...");
+                await MigrateChannelMirroringAsync();
+                
                 _logger.LogInformation("Migrating core...");
                 await MigrateCoreAsync();
                 
@@ -136,6 +139,25 @@ namespace DatabaseMigrator.Services
                 };
                 _db.AutopurgeMessages.Add(autopurgeMessage);
                 _logger.LogDebug("Migrated autopurge message {MessageId}", messageRow.MessageId);
+            }
+            
+            await _db.SaveChangesAsync();
+        }
+        
+        private async Task MigrateChannelMirroringAsync()
+        {
+            var rows = await ChannelMirroring.GetRowsAsync();
+            _db.ChannelMirroringConfigurations.RemoveRange(await _db.ChannelMirroringConfigurations.ToListAsync());
+            
+            foreach (var row in rows)
+            {
+                var channelMirroringConfiguration = new ChannelMirroringConfiguration(row.GuildId, row.FromChannelId)
+                {
+                    DestinationChannelId = row.ToChannelId,
+                    WebhookId = row.WebhookId
+                };
+                _db.ChannelMirroringConfigurations.Add(channelMirroringConfiguration);
+                _logger.LogDebug("Migrated channel mirroring configuration {GuildId}/{ChannelId}", row.GuildId, row.FromChannelId);
             }
             
             await _db.SaveChangesAsync();

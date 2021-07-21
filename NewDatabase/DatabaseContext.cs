@@ -9,6 +9,7 @@ namespace NewDatabase
     {
         public DbSet<AutopurgeConfiguration> AutopurgeConfigurations { get; internal set; }
         public DbSet<AutopurgeMessage> AutopurgeMessages { get; internal set; }
+        public DbSet<ChannelMirroringConfiguration> ChannelMirroringConfigurations { get; set; }
         public DbSet<CoreConfiguration> CoreConfigurations { get; internal set; }
         public DbSet<InactiveRoleConfiguration> InactiveRoleConfigurations { get; internal set; }
         public DbSet<JoinMessageConfiguration> JoinMessageConfigurations { get; internal set; }
