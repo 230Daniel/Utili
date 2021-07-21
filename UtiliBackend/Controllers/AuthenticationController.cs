@@ -39,10 +39,10 @@ namespace UtiliBackend.Controllers
         
         [IgnoreAntiforgeryToken]
         [HttpGet("antiforgery")]
-        public async Task<ActionResult> AntiForgery()
+        public async Task<IActionResult> AntiforgeryAsync()
         {
             var tokens = _antiforgery.GetAndStoreTokens(HttpContext);
-            return new JsonResult(tokens.RequestToken);
+            return Json(tokens.RequestToken);
         }
     }
 }

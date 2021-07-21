@@ -35,9 +35,10 @@ namespace UtiliBackend
                         .AllowAnyHeader()
                         .AllowCredentials()));
             
-            services.AddSingleton<IAuthorizationPolicyProvider, DiscordPolicyProvider>();
+            services.AddSingleton<IAuthorizationPolicyProvider, PolicyProvider>();
             services.AddSingleton<IAuthorizationHandler, DiscordAuthorisationHandler>();
-            services.AddSingleton<IAuthorizationMiddlewareResultHandler, DiscordResultHandler>();
+            services.AddSingleton<IAuthorizationHandler, DiscordGuildAuthorisationHandler>();
+            services.AddSingleton<IAuthorizationMiddlewareResultHandler, ResultHandler>();
             
             services.AddHsts(options =>
             {
@@ -81,7 +82,9 @@ namespace UtiliBackend
             services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();
 
             services.AddSingleton<DiscordClientService>();
-            
+            services.AddSingleton<DiscordUserGuildsService>();
+            services.AddSingleton<DiscordRestService>();
+
             services.AddDbContext<DatabaseContext>();
             
             services.Configure<IpRateLimitOptions>(_configuration.GetSection("IpRateLimiting"));

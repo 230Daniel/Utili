@@ -5,11 +5,11 @@ using Microsoft.Extensions.Options;
 
 namespace UtiliBackend.Authorisation
 {
-    public class DiscordPolicyProvider : IAuthorizationPolicyProvider
+    public class PolicyProvider : IAuthorizationPolicyProvider
     {
         public DefaultAuthorizationPolicyProvider FallbackPolicyProvider { get; }
         
-        public DiscordPolicyProvider(IOptions<AuthorizationOptions> options)
+        public PolicyProvider(IOptions<AuthorizationOptions> options)
         {
             FallbackPolicyProvider = new DefaultAuthorizationPolicyProvider(options);
         }
@@ -20,6 +20,13 @@ namespace UtiliBackend.Authorisation
             {
                 var policy = new AuthorizationPolicyBuilder();
                 policy.AddRequirements(new DiscordRequirement());
+                return Task.FromResult(policy.Build());
+            }
+            
+            if (policyName.Equals("DiscordGuild", StringComparison.OrdinalIgnoreCase))
+            {
+                var policy = new AuthorizationPolicyBuilder();
+                policy.AddRequirements(new DiscordGuildRequirement());
                 return Task.FromResult(policy.Build());
             }
             

@@ -21,6 +21,7 @@ namespace UtiliBackend.Authorisation
             
             if (identity is not null && identity.IsAuthenticated)
             {
+                requirement.DiscordAuthenticated = true;
                 context.Succeed(requirement);
             
                 var httpContext = (HttpContext) context.Resource;
