@@ -27,7 +27,7 @@ class Autopurge extends React.Component{
 
 	render(){
 		var channels = this.state.textChannels?.map(x => {return {id: x.id, value: x.name}});
-		var autopurgeChannels = channels?.filter(x => this.state.autopurge?.rows.some(y => y.channelId == x.id));
+		var autopurgeChannels = channels?.filter(x => this.state.autopurge?.some(y => y.channelId == x.id));
 		return(
 			<>
 				<Helmet>
@@ -51,11 +51,11 @@ class Autopurge extends React.Component{
 								ref={this.settings.channelAdder}/>
 						</Card>
 						<div className="inline">
-							{this.state.autopurge?.rows.map((row, i) =>{
+							{this.state.autopurge?.map((row, i) =>{
 								return(
 									<Card title={row.channelName} size={350} titleSize={150} inputSize={200} key={row.channelId} onChanged={this.props.onChanged} onRemoved={() => this.onChannelRemoved(row.channelId)}>
 										<CardComponent title="Threshold" type="timespan" value={Duration.fromISO(row.timespan)} ref={this.settings.channels[i].timespan}/>
-										<CardComponent title="Mode" type="select" value={row.mode} options={["All Messages", "Bot Messages", "Disabled", "User Messages"]} ref={this.settings.channels[i].mode}/>
+										<CardComponent title="Mode" type="select" value={row.mode} options={["All Messages", "Bot Messages", "User Messages"]} ref={this.settings.channels[i].mode}/>
 									</Card>
 								);
 							})}
@@ -84,47 +84,47 @@ class Autopurge extends React.Component{
 	async componentDidMount(){
 		var response = await get(`dashboard/${this.guildId}/autopurge`);
 		this.state.autopurge = await response?.json();
-		response = await get(`discord/${this.guildId}/channels/text`);
+		response = await get(`discord/${this.guildId}/text-channels`);
 		this.state.textChannels = await response?.json();
 		response = await get(`premium/guild/${this.guildId}`);
 		this.state.premium = await response?.json();
 
-		this.state.autopurge.rows = this.state.autopurge.rows.filter(x => this.state.textChannels.some(y => y.id == x.channelId))
-		for(var i = 0; i < this.state.autopurge.rows.length; i++){
+		this.state.autopurge = this.state.autopurge.filter(x => this.state.textChannels.some(y => y.id == x.channelId))
+		for(var i = 0; i < this.state.autopurge.length; i++){
 			this.settings.channels.push({ timespan: React.createRef(), mode: React.createRef() });
-			this.state.autopurge.rows[i]["channelName"] = this.getChannelName(this.state.autopurge.rows[i].channelId);
+			this.state.autopurge[i]["channelName"] = this.getChannelName(this.state.autopurge[i].channelId);
 		}
-		this.state.autopurge.rows.orderBy(x => x.channelName);
+		this.state.autopurge.orderBy(x => x.channelName);
 		this.setState({});
 	}
 
 	onChannelAdded(channel){
 		this.settings.channels.push({ timespan: React.createRef(), mode: React.createRef() });
-		this.state.autopurge.rows.push({
+		this.state.autopurge.push({
 			channelId: channel.id,
 			timespan: "PT5M",
-			mode: -1,
+			mode: 0,
 			channelName: this.getChannelName(channel.id)
 		});
-		this.state.autopurge.rows.orderBy(x => x.channelName);
+		this.state.autopurge.orderBy(x => x.channelName);
 		this.setState({});
 	}
 
 	onChannelRemoved(id){
 		this.settings.channels.pop();
-		this.state.autopurge.rows = this.state.autopurge.rows.filter(x => x.channelId != id);
+		this.state.autopurge = this.state.autopurge.filter(x => x.channelId != id);
 		this.setState({});
 		this.props.onChanged();
 	}
 
 	getInput(){
-		var rows = this.state.autopurge.rows;
+		var rows = this.state.autopurge;
 		for(var i = 0; i < rows.length; i++){
 			var card = this.settings.channels[i];
 			rows[i].timespan = card.timespan.current.getValue();
 			rows[i].mode = card.mode.current.getValue();
 		}
-		this.state.autopurge.rows = rows;
+		this.state.autopurge = rows;
 		this.setState({});
 	}
 
