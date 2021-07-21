@@ -54,7 +54,7 @@ namespace UtiliBackend.Controllers
                 _dbContext.AutopurgeConfigurations.Update(configuration);
             }
 
-            _dbContext.RemoveRange(configurations.Where(x => models.All(y => y.ChannelId != x.ChannelId.ToString())));
+            _dbContext.AutopurgeConfigurations.RemoveRange(configurations.Where(x => models.All(y => y.ChannelId != x.ChannelId.ToString())));
 
             await _dbContext.SaveChangesAsync();
 
