@@ -20,8 +20,8 @@ class Core extends React.Component{
 		this.settings = {
 			nickname: React.createRef(),
 			prefix: React.createRef(),
-			enableCommands: React.createRef(),
-			excludedChannels: React.createRef()
+			commandsEnabled: React.createRef(),
+			nonCommandChannels: React.createRef()
 		}
 	}
 
@@ -43,10 +43,10 @@ class Core extends React.Component{
 							<Card title="Core Settings" size={400} titleSize={200} inputSize={200} onChanged={this.props.onChanged}>
 								{/*<CardComponent type="text" title="Nickname" value={this.state.core?.nickname} ref={this.settings.nickname}></CardComponent>*/}
 								<CardComponent type="text" title="Command Prefix" value={this.state.core?.prefix} ref={this.settings.prefix}></CardComponent>
-								<CardComponent type="checkbox" title="Enable Commands" value={this.state.core?.enableCommands} ref={this.settings.enableCommands}></CardComponent>
+								<CardComponent type="checkbox" title="Enable Commands" value={this.state.core?.commandsEnabled} ref={this.settings.commandsEnabled}></CardComponent>
 							</Card>
-							<Card title={this.state.core?.enableCommands ? "Block commands in..." : "Allow commands in..."} size={400} onChanged={this.props.onChanged}>
-								<CardListComponent prompt="Add a channel..." values={values} selected={this.state.core?.excludedChannels} ref={this.settings.excludedChannels}></CardListComponent>
+							<Card title={this.state.core?.commandsEnabled ? "Block commands in..." : "Allow commands in..."} size={400} onChanged={this.props.onChanged}>
+								<CardListComponent prompt="Add a channel..." values={values} selected={this.state.core?.nonCommandChannels} ref={this.settings.nonCommandChannels}></CardListComponent>
 							</Card>
 					</Load>
 				</Fade>
@@ -57,9 +57,9 @@ class Core extends React.Component{
 	async componentDidMount(){
 		var response = await get(`dashboard/${this.guildId}/core`);
 		var core = await response?.json();
-		response = await get(`discord/${this.guildId}/channels/text`);
+		response = await get(`discord/${this.guildId}/text-channels`);
 		var textChannels = await response?.json();
-		core.excludedChannels = core.excludedChannels.filter(x => textChannels.some(y => x == y.id));
+		core.nonCommandChannels = core.nonCommandChannels.filter(x => textChannels.some(y => x == y.id));
 
 		this.setState({core: core, textChannels: textChannels});
 		
@@ -68,8 +68,8 @@ class Core extends React.Component{
 	getInput(){
 		this.state.core = {
 			prefix: this.settings.prefix.current.getValue(),
-			enableCommands: this.settings.enableCommands.current.getValue(),
-			excludedChannels: this.settings.excludedChannels.current.getSelected()
+			commandsEnabled: this.settings.commandsEnabled.current.getValue(),
+			nonCommandChannels: this.settings.nonCommandChannels.current.getSelected()
 		};
 	}
 
