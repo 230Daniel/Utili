@@ -32,10 +32,15 @@ namespace Utili.Commands
             }
 
             var members = await Context.Guild.FetchAllMembersAsync();
-            var inactiveMembers = members
-                .Where(x => x.GetRole(row.RoleId) is not null && x.GetRole(row.ImmuneRoleId) is null)
-                .OrderBy(x => x.Nick ?? x.Name)
-                .ToList();
+            var inactiveMembers = row.Inverse
+                ? members
+                    .Where(x => x.GetRole(row.RoleId) is null && x.GetRole(row.ImmuneRoleId) is null)
+                    .OrderBy(x => x.Nick ?? x.Name)
+                    .ToList()
+                : members
+                    .Where(x => x.GetRole(row.RoleId) is not null && x.GetRole(row.ImmuneRoleId) is null)
+                    .OrderBy(x => x.Nick ?? x.Name)
+                    .ToList();
 
             if (inactiveMembers.Count == 0)
             {
@@ -111,10 +116,15 @@ namespace Utili.Commands
             }
 
             var members = await Context.Guild.FetchAllMembersAsync();
-            var inactiveMembers = members
-                .Where(x => x.GetRole(row.RoleId) is not null && x.GetRole(row.ImmuneRoleId) is null)
-                .OrderBy(x => x.Nick ?? x.Name)
-                .ToList();
+            var inactiveMembers = row.Inverse
+                ? members
+                    .Where(x => x.GetRole(row.RoleId) is null && x.GetRole(row.ImmuneRoleId) is null)
+                    .OrderBy(x => x.Nick ?? x.Name)
+                    .ToList()
+                : members
+                    .Where(x => x.GetRole(row.RoleId) is not null && x.GetRole(row.ImmuneRoleId) is null)
+                    .OrderBy(x => x.Nick ?? x.Name)
+                    .ToList();
 
             if (await ConfirmAsync("Are you sure?", $"This command will kick {inactiveMembers.Count} inactive members - View them with {Context.Prefix}inactive list", $"Kick {inactiveMembers.Count} inactive members"))
             {
