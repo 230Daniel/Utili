@@ -37,6 +37,8 @@ namespace UtiliBackend.Mapping
                 .ForMember(
                     dest => dest.Colour,
                     opt => opt.MapFrom(s => s.Colour.ToString("X6")));
+
+            CreateMap<JoinRolesConfiguration, JoinRolesConfigurationModel>();
             
             CreateMap<PremiumSlot, PremiumSlotModel>();
             
