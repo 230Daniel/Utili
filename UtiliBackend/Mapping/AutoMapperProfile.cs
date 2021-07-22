@@ -33,6 +33,11 @@ namespace UtiliBackend.Mapping
                     dest => dest.AutoKickThreshold,
                     opt => opt.MapFrom(s => XmlConvert.ToString(s.AutoKickThreshold)));
 
+            CreateMap<JoinMessageConfiguration, JoinMessageConfigurationModel>()
+                .ForMember(
+                    dest => dest.Colour,
+                    opt => opt.MapFrom(s => s.Colour.ToString("X6")));
+            
             CreateMap<PremiumSlot, PremiumSlotModel>();
             
             CreateMap<Subscription, SubscriptionModel>()
