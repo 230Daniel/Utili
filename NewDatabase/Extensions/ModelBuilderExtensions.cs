@@ -68,9 +68,8 @@ namespace NewDatabase.Extensions
             modelBuilder.Entity<PremiumSlot>().HasKey(e => e.SlotId);
             modelBuilder.Entity<PremiumSlot>().Property(e => e.SlotId).ValueGeneratedOnAdd();
 
-            modelBuilder.Entity<ReputationConfigurationEmoji>().HasKey(e => new {e.GuildId, e.Emoji});
-            modelBuilder.Entity<ReputationConfigurationEmoji>().Property(e => e.GuildId).ValueGeneratedNever();
-            
+            modelBuilder.Entity<ReputationConfigurationEmoji>().HasKey("ReputationConfigurationGuildId", "Emoji");
+
             modelBuilder.Entity<RoleLinkingConfiguration>().HasKey(e => e.Id);
             modelBuilder.Entity<RoleLinkingConfiguration>().Property(e => e.Id).ValueGeneratedOnAdd();
 

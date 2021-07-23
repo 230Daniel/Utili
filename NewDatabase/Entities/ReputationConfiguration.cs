@@ -12,13 +12,11 @@ namespace NewDatabase.Entities
 
     public class ReputationConfigurationEmoji
     {
-        public ulong GuildId { get; }
         public string Emoji { get; }
         public int Value { get; set; }
 
-        public ReputationConfigurationEmoji(ulong guildId, string emoji)
+        public ReputationConfigurationEmoji(string emoji)
         {
-            GuildId = guildId;
             Emoji = emoji;
         }
     }

@@ -437,7 +437,7 @@ namespace DatabaseMigrator.Services
             {
                 var reputationConfiguration = new ReputationConfiguration(row.GuildId)
                 {
-                    Emojis = row.Emotes.Select(x => new ReputationConfigurationEmoji(row.GuildId, x.Item1)
+                    Emojis = row.Emotes.Select(x => new ReputationConfigurationEmoji(x.Item1)
                     {
                         Value = x.Item2
                     }).ToList()
