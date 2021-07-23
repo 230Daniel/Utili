@@ -18,7 +18,7 @@ class CardAdderComponent extends React.Component{
 		return(
 			<div className="dashboard-card-list-component" onFocus={() => this.searchUpdated()} onBlur={() => this.searchClosed()}>
 				<div className="dashboard-card-adder-component-search">
-					<input placeholder={this.props.prompt} value={this.state.query} ref={this.search}  onInput={() => this.searchUpdated()} />
+					<input placeholder={this.props.prompt} value={this.state.query} ref={this.search} disabled={this.props.disabled} onInput={() => this.searchUpdated()} />
 				</div>
 				{this.renderOptions()}
 			</div>
