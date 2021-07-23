@@ -17,7 +17,7 @@ class Reputation extends React.Component{
 			reputation: null
 		};
 		this.settings = {
-			emotes: []
+			emojis: []
 		}
 	}
 
@@ -45,10 +45,10 @@ class Reputation extends React.Component{
 					</div>
 					<Load loaded={this.state.reputation !== null}>
 						<div className="inline">
-							{this.state.reputation?.emotes.map((emote, i) =>{
+							{this.state.reputation?.emojis.map((emoji, i) =>{
 								return(
-									<Card title={emote.emote} size={300} titleSize={150} inputSize={150} key={emote.emote} onChanged={this.props.onChanged} onRemoved={() => this.onEmoteRemoved(emote.emote)}>
-										<CardComponent title="Value" type="number" value={emote.value} ref={this.settings.emotes[i].value}/>
+									<Card title={emoji.emoji} size={300} titleSize={150} inputSize={150} key={emoji.emoji} onChanged={this.props.onChanged} onRemoved={() => this.onemojiRemoved(emoji.emoji)}>
+										<CardComponent title="Value" type="number" value={emoji.value} ref={this.settings.emojis[i].value}/>
 									</Card>
 								);
 							})}
@@ -63,27 +63,27 @@ class Reputation extends React.Component{
 		var response = await get(`dashboard/${this.guildId}/reputation`);
 		this.state.reputation = await response?.json();
 
-		for(var i = 0; i < this.state.reputation.emotes.length; i++){
-			this.settings.emotes.push({ value: React.createRef() });
+		for(var i = 0; i < this.state.reputation.emojis.length; i++){
+			this.settings.emojis.push({ value: React.createRef() });
 		}
 		this.setState({});
 	}
 
 
-	onEmoteRemoved(emote){
-		this.settings.emotes.pop();
-		this.state.reputation.emotes = this.state.reputation.emotes.filter(x => x.emote != emote);
+	onemojiRemoved(emoji){
+		this.settings.emojis.pop();
+		this.state.reputation.emojis = this.state.reputation.emojis.filter(x => x.emoji != emoji);
 		this.setState({});
 		this.props.onChanged();
 	}
 
 	getInput(){
-		var emotes = this.state.reputation.emotes;
-		for(var i = 0; i < emotes.length; i++){
-			var card = this.settings.emotes[i];
-			emotes[i].value = card.value.current.getValue();
+		var emojis = this.state.reputation.emojis;
+		for(var i = 0; i < emojis.length; i++){
+			var card = this.settings.emojis[i];
+			emojis[i].value = card.value.current.getValue();
 		}
-		this.state.reputation.emotes = emotes;
+		this.state.reputation.emojis = emojis;
 		this.setState({});
 	}
 
