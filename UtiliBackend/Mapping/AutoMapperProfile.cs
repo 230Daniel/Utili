@@ -43,6 +43,8 @@ namespace UtiliBackend.Mapping
             CreateMap<MessageFilterConfiguration, MessageFilterConfigurationModel>();
 
             CreateMap<MessageLogsConfiguration, MessageLogsConfigurationModel>();
+
+            CreateMap<MessagePinningConfiguration, MessagePinningConfigurationModel>();
             
             CreateMap<PremiumSlot, PremiumSlotModel>();
             
