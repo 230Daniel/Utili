@@ -53,6 +53,9 @@ namespace UtiliBackend.Mapping
                 .ForMember(
                     dest => dest.Colour,
                     opt => opt.MapFrom(s => s.Colour.ToString("X6")));
+
+            CreateMap<ReputationConfiguration, ReputationConfigurationModel>();
+            CreateMap<ReputationConfigurationEmoji, ReputationConfigurationEmojiModel>();
             
             CreateMap<PremiumSlot, PremiumSlotModel>();
             
