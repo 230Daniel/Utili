@@ -37,7 +37,7 @@ namespace UtiliBackend.Services
             return true;
         }
 
-        private string GetShortLogLevel(LogLevel logLevel)
+        private static string GetShortLogLevel(LogLevel logLevel)
         {
             return logLevel switch
             {
@@ -52,7 +52,7 @@ namespace UtiliBackend.Services
             };
         }
 
-        private ConsoleColor GetLogLevelConsoleColour(LogLevel logLevel)
+        private static ConsoleColor GetLogLevelConsoleColour(LogLevel logLevel)
         {
             return logLevel switch
             {

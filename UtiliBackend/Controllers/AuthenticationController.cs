@@ -44,7 +44,7 @@ namespace UtiliBackend.Controllers
         public IActionResult Me()
         {
             var user = HttpContext.GetDiscordUser();
-            return Json(new AuthenticationInfoModel()
+            return Json(new AuthenticationInfoModel
             {
                 Username = user.Username,
                 AvatarUrl = user.GetAvatarUrl()

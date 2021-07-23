@@ -35,7 +35,7 @@ namespace UtiliBackend.Controllers
                 Mode = InactiveRoleMode.GrantWhenInactive,
                 AutoKickThreshold = TimeSpan.FromDays(30),
                 DefaultLastAction = DateTime.MinValue,
-                LastUpdate = DateTime.MinValue,
+                LastUpdate = DateTime.MinValue
             };
             return Json(_mapper.Map<InactiveRoleConfigurationModel>(configuration));
         }

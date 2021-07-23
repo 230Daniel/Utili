@@ -2,7 +2,7 @@
 {
     public class AuthenticationInfoModel
     {
-        public string Username { get; set; }
-        public string AvatarUrl { get; set; }
+        public string Username { get; init; }
+        public string AvatarUrl { get; init; }
     }
 }

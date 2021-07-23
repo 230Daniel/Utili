@@ -43,13 +43,10 @@ namespace UtiliBackend.Authorisation
                 }
             }
             
-            if (authorisationPolicy.Requirements.FirstOrDefault(x => x is DiscordRequirement) is DiscordRequirement discordRequirement)
+            if (authorisationPolicy.Requirements.FirstOrDefault(x => x is DiscordRequirement) is DiscordRequirement {DiscordAuthenticated: false})
             {
-                if (!discordRequirement.DiscordAuthenticated)
-                {
-                    httpContext.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
-                    return;
-                }
+                httpContext.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
+                return;
             }
 
             await _defaultHandler.HandleAsync(requestDelegate, httpContext, authorisationPolicy, policyAuthorisationResult);
