@@ -56,6 +56,8 @@ namespace UtiliBackend.Mapping
 
             CreateMap<ReputationConfiguration, ReputationConfigurationModel>();
             CreateMap<ReputationConfigurationEmoji, ReputationConfigurationEmojiModel>();
+
+            CreateMap<RoleLinkingConfiguration, RoleLinkingConfigurationModel>();
             
             CreateMap<PremiumSlot, PremiumSlotModel>();
             

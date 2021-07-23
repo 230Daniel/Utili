@@ -34,6 +34,11 @@ namespace NewDatabase.Extensions
             return dbSet.Include(x => x.Emojis).FirstOrDefaultAsync(x => x.GuildId == guildId);
         }
         
+        public static Task<List<RoleLinkingConfiguration>> GetAllForGuildAsync(this DbSet<RoleLinkingConfiguration> dbSet, ulong guildId)
+        {
+            return dbSet.Where(x => x.GuildId == guildId).ToListAsync();
+        }
+        
         public static Task<List<PremiumSlot>> GetAllForUserAsync(this DbSet<PremiumSlot> dbSet, ulong userId)
         {
             return dbSet.Where(x => x.UserId == userId).ToListAsync();

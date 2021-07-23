@@ -483,8 +483,9 @@ namespace DatabaseMigrator.Services
 
             foreach (var row in rows)
             {
-                var roleLinkingConfiguration = new RoleLinkingConfiguration(row.GuildId, row.RoleId)
+                var roleLinkingConfiguration = new RoleLinkingConfiguration(row.GuildId)
                 {
+                    RoleId = row.RoleId,
                     LinkedRoleId = row.LinkedRoleId,
                     Mode = GetMode(row.Mode)
                 };
