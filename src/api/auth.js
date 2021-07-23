@@ -70,29 +70,36 @@ export async function get(endpoint){
 }
 
 export async function post(endpoint, body){
-	var result = await fetch(`${getBackend()}/${endpoint}`, { 
-		method: "POST",
-		headers: {
-			"Content-Type": "application/json",
-			"X-XSRF-TOKEN": window.__antiForgeryToken
-		},
-		credentials: "include", 
-		body: JSON.stringify(body)
-	 });
-	switch(result.status){
-		case 401:
-			signIn();
-			break;
-		case 403:
-			window.location.pathname = "dashboard";
-			break;
-		case 404:
-			if(endpoint.includes("dashboard")){
-				window.location.pathname = `/invite/${endpoint.split("/")[1]}`;
+	try{
+		var result = await fetch(`${getBackend()}/${endpoint}`, { 
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+				"X-XSRF-TOKEN": window.__antiForgeryToken
+			},
+			credentials: "include", 
+			body: JSON.stringify(body)
+		 });
+		switch(result.status){
+			case 401:
+				signIn();
+				break;
+			case 403:
+				window.location.pathname = "dashboard";
+				break;
+			case 404:
+				if(endpoint.includes("dashboard")){
+					window.location.pathname = `/invite/${endpoint.split("/")[1]}`;
+				}
+				break;
+			case 200:
+				break;
+			default:
+				throw new Error(`Server returned unexpected response code ${result.status}`);
 			}
-			break;
-		default:
-			break;
+	} catch(e){
+		console.log(e);
+		return {ok: false};
 	}
 	return result;
 }
