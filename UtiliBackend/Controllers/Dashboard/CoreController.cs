@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
@@ -44,20 +43,20 @@ namespace UtiliBackend.Controllers
         public async Task<IActionResult> PostAsync([Required] ulong guildId, [FromBody] CoreConfigurationModel model)
         {
             var configuration = await _dbContext.CoreConfigurations.GetForGuildAsync(guildId);
+            
             if (configuration is null)
             {
                 configuration = new CoreConfiguration(guildId);
+                model.ApplyTo(configuration);
                 _dbContext.CoreConfigurations.Add(configuration);
-                await _dbContext.SaveChangesAsync();
             }
-
-            configuration.Prefix = model.Prefix;
-            configuration.CommandsEnabled = model.CommandsEnabled;
-            configuration.NonCommandChannels = model.NonCommandChannels.Select(ulong.Parse).ToList();
-
-            _dbContext.CoreConfigurations.Update(configuration);
+            else
+            {
+                model.ApplyTo(configuration);
+                _dbContext.CoreConfigurations.Update(configuration);
+            }
+            
             await _dbContext.SaveChangesAsync();
-
             return Ok();
         }
     }

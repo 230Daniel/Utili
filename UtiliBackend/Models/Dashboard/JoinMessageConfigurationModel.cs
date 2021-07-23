@@ -1,4 +1,7 @@
-﻿namespace UtiliBackend.Models
+﻿using System.Globalization;
+using NewDatabase.Entities;
+
+namespace UtiliBackend.Models
 {
     public class JoinMessageConfigurationModel
     {
@@ -13,5 +16,20 @@
         public string Thumbnail { get; set; }
         public string Icon { get; set; }
         public string Colour { get; set; }
+
+        public void ApplyTo(JoinMessageConfiguration configuration)
+        {
+            configuration.Enabled = Enabled;
+            configuration.Mode = (JoinMessageMode) Mode;
+            configuration.ChannelId = ulong.Parse(ChannelId);
+            configuration.Title = Title;
+            configuration.Footer = Footer;
+            configuration.Content = Content;
+            configuration.Text = Text;
+            configuration.Image = Image;
+            configuration.Thumbnail = Thumbnail;
+            configuration.Icon = Icon;
+            configuration.Colour = uint.Parse(Colour.Replace("#", ""), NumberStyles.HexNumber);
+        }
     }
 }

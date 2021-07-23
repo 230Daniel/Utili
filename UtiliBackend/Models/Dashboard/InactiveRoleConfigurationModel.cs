@@ -1,4 +1,7 @@
-﻿namespace UtiliBackend.Models
+﻿using System.Xml;
+using NewDatabase.Entities;
+
+namespace UtiliBackend.Models
 {
     public class InactiveRoleConfigurationModel
     {
@@ -8,5 +11,15 @@
         public int Mode { get; set; }
         public bool AutoKick { get; set; }
         public string AutoKickThreshold { get; set; }
+
+        public void ApplyTo(InactiveRoleConfiguration configuration)
+        {
+            configuration.RoleId = ulong.Parse(RoleId);
+            configuration.ImmuneRoleId = ulong.Parse(ImmuneRoleId);
+            configuration.Threshold = XmlConvert.ToTimeSpan(Threshold);
+            configuration.Mode = (InactiveRoleMode) Mode;
+            configuration.AutoKick = AutoKick;
+            configuration.AutoKickThreshold = XmlConvert.ToTimeSpan(AutoKickThreshold);
+        }
     }
 }

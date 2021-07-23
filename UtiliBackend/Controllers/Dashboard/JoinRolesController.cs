@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
@@ -39,19 +38,20 @@ namespace UtiliBackend.Controllers
         public async Task<IActionResult> PostAsync([Required] ulong guildId, [FromBody] JoinRolesConfigurationModel model)
         {
             var configuration = await _dbContext.JoinRolesConfigurations.GetForGuildAsync(guildId);
+            
             if (configuration is null)
             {
                 configuration = new JoinRolesConfiguration(guildId);
+                model.ApplyTo(configuration);
                 _dbContext.JoinRolesConfigurations.Add(configuration);
-                await _dbContext.SaveChangesAsync();
             }
-
-            configuration.WaitForVerification = model.WaitForVerification;
-            configuration.JoinRoles = model.JoinRoles.Select(ulong.Parse).ToList();
-
-            _dbContext.JoinRolesConfigurations.Update(configuration);
+            else
+            {
+                model.ApplyTo(configuration);
+                _dbContext.JoinRolesConfigurations.Update(configuration);
+            }
+            
             await _dbContext.SaveChangesAsync();
-
             return Ok();
         }
     }

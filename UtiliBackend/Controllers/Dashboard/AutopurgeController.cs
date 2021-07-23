@@ -2,7 +2,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Xml;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using NewDatabase;
@@ -42,22 +41,22 @@ namespace UtiliBackend.Controllers
             {
                 var channelId = ulong.Parse(model.ChannelId);
                 var configuration = configurations.FirstOrDefault(x => x.ChannelId == channelId);
+                
                 if (configuration is null)
                 {
                     configuration = new AutopurgeConfiguration(guildId, channelId);
+                    model.ApplyTo(configuration);
                     _dbContext.AutopurgeConfigurations.Add(configuration);
-                    await _dbContext.SaveChangesAsync();
                 }
-
-                configuration.Timespan = XmlConvert.ToTimeSpan(model.Timespan);
-                configuration.Mode = (AutopurgeMode) model.Mode;
-                _dbContext.AutopurgeConfigurations.Update(configuration);
+                else
+                {
+                    model.ApplyTo(configuration);
+                    _dbContext.AutopurgeConfigurations.Update(configuration);
+                }
             }
 
             _dbContext.AutopurgeConfigurations.RemoveRange(configurations.Where(x => models.All(y => y.ChannelId != x.ChannelId.ToString())));
-
             await _dbContext.SaveChangesAsync();
-
             return Ok();
         }
     }

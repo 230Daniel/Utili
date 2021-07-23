@@ -45,25 +45,22 @@ namespace UtiliBackend.Controllers
             {
                 var channelId = ulong.Parse(model.ChannelId);
                 var configuration = configurations.FirstOrDefault(x => x.ChannelId == channelId);
+                
                 if (configuration is null)
                 {
-                    configuration = new MessageFilterConfiguration(guildId, channelId)
-                    {
-                        RegEx = ""
-                    };
+                    configuration = new MessageFilterConfiguration(guildId, channelId);
+                    model.ApplyTo(configuration);
                     _dbContext.MessageFilterConfigurations.Add(configuration);
-                    await _dbContext.SaveChangesAsync();
                 }
-                
-                configuration.Mode = (MessageFilterMode) model.Mode;
-                configuration.RegEx = model.RegEx;
-                _dbContext.MessageFilterConfigurations.Update(configuration);
+                else
+                {
+                    model.ApplyTo(configuration);
+                    _dbContext.MessageFilterConfigurations.Update(configuration);
+                }
             }
 
             _dbContext.MessageFilterConfigurations.RemoveRange(configurations.Where(x => models.All(y => y.ChannelId != x.ChannelId.ToString())));
-
             await _dbContext.SaveChangesAsync();
-
             return Ok();
         }
     }

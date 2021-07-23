@@ -2,7 +2,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Xml;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using NewDatabase;
@@ -44,30 +43,27 @@ namespace UtiliBackend.Controllers
         [HttpPost]
         public async Task<IActionResult> PostAsync([Required] ulong guildId, [FromBody] InactiveRoleConfigurationModel model)
         {
-            var configuration = await _dbContext.InactiveRoleConfigurations.GetForGuildAsync(guildId);
-            if (configuration is null)
-            {
-                configuration = new InactiveRoleConfiguration(guildId);
-                _dbContext.InactiveRoleConfigurations.Add(configuration);
-                await _dbContext.SaveChangesAsync();
-            }
-
             if (model.AutoKick)
             {
                 var premium = await _dbContext.PremiumSlots.AnyAsync(x => x.GuildId == guildId);
                 if (!premium) model.AutoKick = false;
             }
             
-            configuration.RoleId = ulong.Parse(model.RoleId);
-            configuration.ImmuneRoleId = ulong.Parse(model.ImmuneRoleId);
-            configuration.Threshold = XmlConvert.ToTimeSpan(model.Threshold);
-            configuration.Mode = (InactiveRoleMode) model.Mode;
-            configuration.AutoKick = model.AutoKick;
-            configuration.AutoKickThreshold = XmlConvert.ToTimeSpan(model.AutoKickThreshold);
-
-            _dbContext.InactiveRoleConfigurations.Update(configuration);
+            var configuration = await _dbContext.InactiveRoleConfigurations.GetForGuildAsync(guildId);
+            
+            if (configuration is null)
+            {
+                configuration = new InactiveRoleConfiguration(guildId);
+                model.ApplyTo(configuration);
+                _dbContext.InactiveRoleConfigurations.Add(configuration);
+            }
+            else
+            {
+                model.ApplyTo(configuration);
+                _dbContext.InactiveRoleConfigurations.Update(configuration);
+            }
+            
             await _dbContext.SaveChangesAsync();
-
             return Ok();
         }
     }

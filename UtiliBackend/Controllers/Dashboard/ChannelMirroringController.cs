@@ -41,22 +41,22 @@ namespace UtiliBackend.Controllers
             {
                 var channelId = ulong.Parse(model.ChannelId);
                 var configuration = configurations.FirstOrDefault(x => x.ChannelId == channelId);
+                
                 if (configuration is null)
                 {
                     configuration = new ChannelMirroringConfiguration(guildId, channelId);
+                    model.ApplyTo(configuration);
                     _dbContext.ChannelMirroringConfigurations.Add(configuration);
-                    await _dbContext.SaveChangesAsync();
                 }
-
-                configuration.DestinationChannelId = ulong.Parse(model.DestinationChannelId);
-                
-                _dbContext.ChannelMirroringConfigurations.Update(configuration);
+                else
+                {
+                    model.ApplyTo(configuration);
+                    _dbContext.ChannelMirroringConfigurations.Update(configuration);
+                }
             }
 
             _dbContext.ChannelMirroringConfigurations.RemoveRange(configurations.Where(x => models.All(y => y.ChannelId != x.ChannelId.ToString())));
-
             await _dbContext.SaveChangesAsync();
-
             return Ok();
         }
     }
