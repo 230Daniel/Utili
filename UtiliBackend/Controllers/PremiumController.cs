@@ -28,7 +28,8 @@ namespace UtiliBackend.Controllers
         [HttpGet("guild/{GuildId}")]
         public async Task<IActionResult> GuildIsPremiumAsync([Required] ulong guildId)
         {
-            return Json(await _databaseContext.PremiumSlots.AnyAsync(x => x.GuildId == guildId));
+            var isPremium = await _databaseContext.PremiumSlots.AnyAsync(x => x.GuildId == guildId);
+            return Json(isPremium);
         }
 
         [DiscordAuthorise]
@@ -51,12 +52,12 @@ namespace UtiliBackend.Controllers
             {
                 var model = models.FirstOrDefault(x => x.SlotId == slot.SlotId);
                 if(model is null) continue;
-                slot.GuildId = ulong.Parse(model.GuildId);
+                
+                model.ApplyTo(slot);
                 _databaseContext.PremiumSlots.Update(slot);
             }
 
             await _databaseContext.SaveChangesAsync();
-            
             return Ok();
         }
 

@@ -1,5 +1,4 @@
-﻿using System.Threading.Tasks;
-using Microsoft.AspNetCore.Antiforgery;
+﻿using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -22,7 +21,7 @@ namespace UtiliBackend.Controllers
         }
 
         [HttpGet("signin")]
-        public async Task<IActionResult> SignInAsync()
+        public IActionResult SignIn()
         {
             AuthenticationProperties authProperties = new()
             {
@@ -54,7 +53,7 @@ namespace UtiliBackend.Controllers
         
         [IgnoreAntiforgeryToken]
         [HttpGet("antiforgery")]
-        public async Task<IActionResult> AntiforgeryAsync()
+        public IActionResult Antiforgery()
         {
             var tokens = _antiforgery.GetAndStoreTokens(HttpContext);
             return Json(tokens.RequestToken);
