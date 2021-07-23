@@ -18,7 +18,7 @@ class MessagePinning extends React.Component{
 			textChannels: null
 		};
 		this.settings = {
-			pin: React.createRef(),
+			pinMessages: React.createRef(),
 			pinChannel: React.createRef()
 		}
 	}
@@ -43,7 +43,7 @@ class MessagePinning extends React.Component{
 					</div>
 					<Load loaded={this.state.messagePinning !== null}>
 						<Card title="Message Pinning Settings" size={400} titleSize={200} inputSize={200} onChanged={this.props.onChanged}>
-							<CardComponent type="checkbox" title="Pin messages" values={values} value={this.state.messagePinning?.pin} ref={this.settings.pin}></CardComponent>
+							<CardComponent type="checkbox" title="Pin messages" values={values} value={this.state.messagePinning?.pinMessages} ref={this.settings.pinMessages}></CardComponent>
 							<CardComponent type="select-value" title="Send pins to" values={values} value={this.state.messagePinning?.pinChannelId} ref={this.settings.pinChannel}></CardComponent>
 						</Card>
 					</Load>
@@ -53,9 +53,9 @@ class MessagePinning extends React.Component{
 	}
 	
 	async componentDidMount(){
-		var response = await get(`dashboard/${this.guildId}/messagepinning`);
+		var response = await get(`dashboard/${this.guildId}/message-pinning`);
 		this.state.messagePinning = await response?.json();
-		response = await get(`discord/${this.guildId}/channels/text`);
+		response = await get(`discord/${this.guildId}/text-channels`);
 		this.state.textChannels = await response?.json();
 
 		this.setState({});
@@ -63,7 +63,7 @@ class MessagePinning extends React.Component{
 
 	getInput(){
 		this.state.messagePinning = {
-			pin: this.settings.pin.current.getValue(),
+			pinMessages: this.settings.pinMessages.current.getValue(),
 			pinChannelId: this.settings.pinChannel.current.getValue()
 		};
 		this.setState({});
@@ -71,7 +71,7 @@ class MessagePinning extends React.Component{
 
 	async save(){
 		this.getInput();
-		var response = await post(`dashboard/${this.guildId}/messagepinning`, this.state.messagePinning);
+		var response = await post(`dashboard/${this.guildId}/message-pinning`, this.state.messagePinning);
 		return response.ok;
 	}
 }
