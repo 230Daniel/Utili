@@ -41,6 +41,8 @@ namespace UtiliBackend.Mapping
             CreateMap<JoinRolesConfiguration, JoinRolesConfigurationModel>();
 
             CreateMap<MessageFilterConfiguration, MessageFilterConfigurationModel>();
+
+            CreateMap<MessageLogsConfiguration, MessageLogsConfigurationModel>();
             
             CreateMap<PremiumSlot, PremiumSlotModel>();
             
