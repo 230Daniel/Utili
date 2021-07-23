@@ -46,6 +46,14 @@ namespace UtiliBackend.Mapping
 
             CreateMap<MessagePinningConfiguration, MessagePinningConfigurationModel>();
             
+            CreateMap<NoticeConfiguration, NoticeConfigurationModel>()
+                .ForMember(
+                    dest => dest.Delay,
+                    opt => opt.MapFrom(s => XmlConvert.ToString(s.Delay)))
+                .ForMember(
+                    dest => dest.Colour,
+                    opt => opt.MapFrom(s => s.Colour.ToString("X6")));
+            
             CreateMap<PremiumSlot, PremiumSlotModel>();
             
             CreateMap<Subscription, SubscriptionModel>()
