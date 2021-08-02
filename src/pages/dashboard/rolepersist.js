@@ -48,7 +48,7 @@ class RolePersist extends React.Component{
 	}
 	
 	async componentDidMount(){
-		var response = await get(`dashboard/${this.guildId}/rolepersist`);
+		var response = await get(`dashboard/${this.guildId}/role-persist`);
 		this.state.rolePersist = await response?.json();
 		response = await get(`discord/${this.guildId}/roles`);
 		this.state.roles = await response?.json();
@@ -66,7 +66,7 @@ class RolePersist extends React.Component{
 
 	async save(){
 		this.getInput();
-		var response = await post(`dashboard/${this.guildId}/rolepersist`, this.state.rolePersist);
+		var response = await post(`dashboard/${this.guildId}/role-persist`, this.state.rolePersist);
 		return response.ok;
 	}
 }
