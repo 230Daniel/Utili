@@ -23,8 +23,6 @@ namespace UtiliBackend.Authorisation
             
             if (identity is not null && identity.IsAuthenticated)
             {
-                requirement.DiscordAuthenticated = true;
-                
                 var httpContext = (HttpContext) context.Resource;
                 var managedGuilds = await _discordUserGuildsService.GetManagedGuildsAsync(httpContext);
 

@@ -26,7 +26,7 @@ namespace UtiliBackend.Authorisation
             if (policyName.Equals("DiscordGuild", StringComparison.OrdinalIgnoreCase))
             {
                 var policy = new AuthorizationPolicyBuilder();
-                policy.AddRequirements(new DiscordGuildRequirement());
+                policy.AddRequirements(new DiscordRequirement(), new DiscordGuildRequirement());
                 return Task.FromResult(policy.Build());
             }
             

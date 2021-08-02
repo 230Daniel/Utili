@@ -21,11 +21,15 @@ namespace UtiliBackend.Authorisation
             
             if (identity is not null && identity.IsAuthenticated)
             {
-                requirement.DiscordAuthenticated = true;
-                context.Succeed(requirement);
-            
                 var httpContext = (HttpContext) context.Resource;
-                httpContext.Items["DiscordClient"] ??= await _discordClientService.GetClientAsync(httpContext);
+                var client = await _discordClientService.GetClientAsync(httpContext);
+                httpContext.Items["DiscordClient"] ??= client;
+                
+                if (client is not null)
+                {
+                    requirement.DiscordAuthenticated = true;
+                    context.Succeed(requirement);
+                }
             }
         }
     }

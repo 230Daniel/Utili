@@ -1,7 +1,9 @@
 ﻿using System.Collections.Generic;
+using System.Net;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Discord;
+using Discord.Net;
 using Discord.Rest;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
@@ -31,8 +33,15 @@ namespace UtiliBackend.Services
             }
 
             var newClient = new DiscordRestClient();
-            var token = await httpContext.GetTokenAsync("Discord", "access_token");
-            await newClient.LoginAsync(TokenType.Bearer, token);
+            try
+            {
+                var token = await httpContext.GetTokenAsync("Discord", "access_token");
+                await newClient.LoginAsync(TokenType.Bearer, token);
+            }
+            catch (HttpException ex) when (ex.HttpCode == HttpStatusCode.Unauthorized)
+            {
+                return null;
+            }
 
             lock (_clients)
             {
