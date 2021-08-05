@@ -1,6 +1,4 @@
-﻿using NewDatabase.Entities.Base;
-
-namespace NewDatabase.Entities
+﻿namespace NewDatabase.Entities
 {
     public class CustomerDetails
     {

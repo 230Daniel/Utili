@@ -2,7 +2,11 @@
 using System.Threading.Tasks;
 using Disqord;
 using Disqord.Bot;
+using Disqord.Gateway;
 using Disqord.Rest;
+using NewDatabase;
+using NewDatabase.Entities;
+using NewDatabase.Extensions;
 using Qmmands;
 using Utili.Extensions;
 using Utili.Implementations;
@@ -13,6 +17,13 @@ namespace Utili.Commands
     [Group("Reputation", "Rep")]
     public class RepuatationCommands : DiscordInteractiveGuildModuleBase
     {
+        private readonly DatabaseContext _dbContext;
+        
+        public RepuatationCommands(DatabaseContext dbContext)
+        {
+            _dbContext = dbContext;
+        }
+        
         [Command("")]
         public async Task Reputation(
             [RequireNotBot]
@@ -20,15 +31,17 @@ namespace Utili.Commands
         {
             member ??= Context.Message.Author as IMember;
 
-            var row = await Database.Data.Reputation.GetUserRowAsync(Context.Guild.Id, member.Id);
+            var repMember = await _dbContext.ReputationMembers.GetForMemberAsync(Context.GuildId, member.Id);
 
-            Color colour;
-            if (row.Reputation == 0) colour = new Color(195, 195, 195);
-            else if (row.Reputation > 0) colour = new Color(67, 181, 129);
-            else colour = new Color(181, 67, 67);
+            var colour = repMember.Reputation switch
+            {
+                0 => new Color(195, 195, 195),
+                > 0 => new Color(67, 181, 129),
+                < 0 => new Color(181, 67, 67)
+            };
 
             var embed = MessageUtils
-                .CreateEmbed(EmbedType.Info, "", $"{member.Mention}'s reputation: {row.Reputation}")
+                .CreateEmbed(EmbedType.Info, "", $"{member.Mention}'s reputation: {repMember.Reputation}")
                 .WithColor(colour);
 
             await Context.Channel.SendEmbedAsync(embed);
@@ -38,18 +51,18 @@ namespace Utili.Commands
         [DefaultCooldown(1, 5)]
         public async Task Leaderboard()
         {
-            var rows = await Database.Data.Reputation.GetUserRowsAsync(Context.Guild.Id);
-            rows = rows.OrderBy(x => x.Reputation).ToList();
+            var repMembers = await _dbContext.ReputationMembers.GetAllForGuildMembersAsync(Context.GuildId);
+            repMembers = repMembers.OrderBy(x => x.Reputation).ToList();
 
             var position = 1;
             var content = "";
 
-            foreach (var row in rows)
+            foreach (var repMember in repMembers)
             {
-                var member = await Context.Guild.FetchMemberAsync(row.UserId);
+                var member = Context.Guild.GetMember(repMember.MemberId) ?? await Context.Guild.FetchMemberAsync(repMember.MemberId);
                 if (member is not null)
                 {
-                    content += $"{position}. {member.Mention} {row.Reputation}\n";
+                    content += $"{position}. {member.Mention} {repMember.Reputation}\n";
                     if (position == 10) break;
                     position++;
                 }
@@ -62,19 +75,19 @@ namespace Utili.Commands
         [DefaultCooldown(1, 5)]
         public async Task InvserseLeaderboard()
         {
-            var rows = await Database.Data.Reputation.GetUserRowsAsync(Context.Guild.Id);
-            rows = rows.OrderBy(x => x.Reputation).ToList();
+            var repMembers = await _dbContext.ReputationMembers.GetAllForGuildMembersAsync(Context.GuildId);
+            repMembers = repMembers.OrderBy(x => x.Reputation).ToList();
 
-            var position = rows.Count;
+            var position = repMembers.Count;
             var content = "";
 
-            foreach (var row in rows)
+            foreach (var repMember in repMembers)
             {
-                var member = await Context.Guild.FetchMemberAsync(row.UserId);
+                var member = Context.Guild.GetMember(repMember.MemberId) ?? await Context.Guild.FetchMemberAsync(repMember.MemberId);
                 if (member is not null)
                 {
-                    content += $"{position}. {member.Mention} {row.Reputation}\n";
-                    if (position == rows.Count - 10) break;
+                    content += $"{position}. {member.Mention} {repMember.Reputation}\n";
+                    if (position == repMembers.Count - 10) break;
                     position--;
                 }
             }
@@ -90,7 +103,9 @@ namespace Utili.Commands
             IMember member, 
             ulong change)
         {
-            await Database.Data.Reputation.AlterUserReputationAsync(Context.Guild.Id, member.Id, (long)change);
+            await _dbContext.ReputationMembers.UpdateMemberReputationAsync(Context.GuildId, member.Id, (long)change);
+            await _dbContext.SaveChangesAsync();
+            
             await Context.Channel.SendSuccessAsync("Reputation given", $"Gave {change} reputation to {member.Mention}");
         }
 
@@ -102,7 +117,9 @@ namespace Utili.Commands
             IMember member, 
             ulong change)
         {
-            await Database.Data.Reputation.AlterUserReputationAsync(Context.Guild.Id, member.Id, -(long)change);
+            await _dbContext.ReputationMembers.UpdateMemberReputationAsync(Context.GuildId, member.Id, -(long)change);
+            await _dbContext.SaveChangesAsync();
+            
             await Context.Channel.SendSuccessAsync("Reputation given", $"Took {change} reputation from {member.Mention}");
         }
 
@@ -114,7 +131,11 @@ namespace Utili.Commands
             IMember member, 
             long amount)
         {
-            await Database.Data.Reputation.SetUserReputationAsync(Context.Guild.Id, member.Id, amount);
+            var repMember = await _dbContext.ReputationMembers.GetForMemberAsync(Context.GuildId, member.Id);
+            repMember.Reputation = amount;
+            _dbContext.ReputationMembers.Update(repMember);
+            await _dbContext.SaveChangesAsync();
+            
             await Context.Channel.SendSuccessAsync("Reputation set", $"Set {member.Mention}'s reputation to {amount}");
         }
 
@@ -123,16 +144,20 @@ namespace Utili.Commands
         [RequireAuthorGuildPermissions(Permission.ManageGuild)]
         public async Task AddEmoji(IEmoji emoji, int value = 0)
         {
-            var row = await Database.Data.Reputation.GetRowAsync(Context.Guild.Id);
-
-            if (row.Emotes.Any(x => Equals(x.Item1, emoji.ToString())))
+            var config = await _dbContext.ReputationConfigurations.GetForGuildAsync(Context.GuildId);
+            
+            if (config.Emojis.Any(x => Equals(x.Emoji, emoji.ToString())))
             {
                 await Context.Channel.SendFailureAsync("Error", "That emoji is already added");
                 return;
             }
 
-            row.Emotes.Add((emoji.ToString(), value));
-            await Database.Data.Reputation.SaveRowAsync(row);
+            config.Emojis.Add(new ReputationConfigurationEmoji(emoji.ToString())
+            {
+                Value = value
+            });
+            _dbContext.ReputationConfigurations.Update(config);
+            await _dbContext.SaveChangesAsync();
 
             await Context.Channel.SendSuccessAsync("Emoji added",
                 $"The {emoji} emoji was added successfully with value {value}\nYou can change its value or remove it on the dashboard");
@@ -145,7 +170,9 @@ namespace Utili.Commands
         {
             if (await ConfirmAsync("Are you sure?", "This command will reset reputation for all server members", "Reset all reputation"))
             {
-                await Database.Data.Reputation.ResetGuildUserReputationAsync(Context.GuildId);
+                _dbContext.ReputationMembers.RemoveRange(await _dbContext.ReputationMembers.GetAllForGuildMembersAsync(Context.GuildId));
+                await _dbContext.SaveChangesAsync();
+                
                 await Context.Channel.SendSuccessAsync("Reputation reset", "The reputation of all server members has been set to 0");
             }
             else

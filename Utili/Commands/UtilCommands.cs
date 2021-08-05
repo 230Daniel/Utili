@@ -2,10 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Database.Data;
 using Disqord;
 using Disqord.Bot;
 using Disqord.Rest;
+using NewDatabase;
+using NewDatabase.Extensions;
 using Qmmands;
 using Utili.Extensions;
 using Utili.Implementations;
@@ -14,6 +15,13 @@ namespace Utili.Commands
 {
     public class UtilCommands : DiscordGuildModuleBase
     {
+        private readonly DatabaseContext _dbContext;
+        
+        public UtilCommands(DatabaseContext dbContext)
+        {
+            _dbContext = dbContext;
+        }
+        
         [Command("Prune", "Purge", "Clear")]
         [RequireAuthorChannelPermissions(Permission.ManageMessages)]
         [RequireBotChannelPermissions(Permission.ManageMessages | Permission.ReadMessageHistory)]
@@ -120,14 +128,14 @@ namespace Utili.Commands
 
             if (!countSet)
             {
-                premium = await Premium.IsGuildPremiumAsync(Context.Guild.Id);
+                premium = await _dbContext.GetIsGuildPremiumAsync(Context.GuildId);
                 count = premium.Value ? 1000u : 100u;
             }
 
             if (count > 1000)
             {
                 count = 1000;
-                premium ??= await Premium.IsGuildPremiumAsync(Context.Guild.Id);
+                premium ??= await _dbContext.GetIsGuildPremiumAsync(Context.GuildId);
                 content = premium.Value
                     ? "For premium servers, you can delete up to 1000 messages at once\n" 
                     : "For non-premium servers, you can delete up to 100 messages at once\n";
@@ -135,7 +143,7 @@ namespace Utili.Commands
 
             if (count > 100)
             {
-                premium ??= await Premium.IsGuildPremiumAsync(Context.Guild.Id);
+                premium ??= await _dbContext.GetIsGuildPremiumAsync(Context.GuildId);
                 if (!premium.Value)
                 {
                     count = 100;

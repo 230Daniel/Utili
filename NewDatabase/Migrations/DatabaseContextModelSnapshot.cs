@@ -595,6 +595,26 @@ namespace NewDatabase.Migrations
                     b.ToTable("role_persist_configurations");
                 });
 
+            modelBuilder.Entity("NewDatabase.Entities.ShardDetail", b =>
+                {
+                    b.Property<int>("ShardId")
+                        .HasColumnType("integer")
+                        .HasColumnName("shard_id");
+
+                    b.Property<int>("Guilds")
+                        .HasColumnType("integer")
+                        .HasColumnName("guilds");
+
+                    b.Property<DateTime>("Heartbeat")
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("heartbeat");
+
+                    b.HasKey("ShardId")
+                        .HasName("pk_shard_details");
+
+                    b.ToTable("shard_details");
+                });
+
             modelBuilder.Entity("NewDatabase.Entities.Subscription", b =>
                 {
                     b.Property<string>("Id")

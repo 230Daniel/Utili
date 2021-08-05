@@ -9,6 +9,7 @@ using Disqord;
 using Disqord.Gateway;
 using Disqord.Rest;
 using Microsoft.Extensions.Logging;
+using NewDatabase.Entities;
 using Utili.Extensions;
 using RepeatingTimer = System.Timers.Timer;
 using Timer = System.Threading.Timer;
@@ -139,16 +140,16 @@ namespace Utili.Services
             }
         }
 
-        public static LocalMessage GetNotice(NoticesRow row)
+        public static LocalMessage GetNotice(NoticeConfiguration config)
         {
-            var text = row.Text.Value.Replace(@"\n", "\n");
-            var title = row.Title.Value;
-            var content = row.Content.Value.Replace(@"\n", "\n");
-            var footer = row.Footer.Value.Replace(@"\n", "\n");
+            var text = config.Text.Replace(@"\n", "\n");
+            var title = config.Title;
+            var content = config.Content.Replace(@"\n", "\n");
+            var footer = config.Footer.Replace(@"\n", "\n");
 
-            var iconUrl = row.Icon.Value;
-            var thumbnailUrl = row.Thumbnail.Value;
-            var imageUrl = row.Image.Value;
+            var iconUrl = config.Icon;
+            var thumbnailUrl = config.Thumbnail;
+            var imageUrl = config.Image;
 
             if (string.IsNullOrWhiteSpace(title) && !string.IsNullOrWhiteSpace(iconUrl))
                 title = "Title";
@@ -172,7 +173,7 @@ namespace Utili.Services
                     .WithOptionalFooter(footer)
                     .WithThumbnailUrl(thumbnailUrl)
                     .WithImageUrl(imageUrl)
-                    .WithColor(new Color((int) row.Colour)));
+                    .WithColor(new Color((int) config.Colour)));
         }
     }
 }

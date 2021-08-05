@@ -29,6 +29,16 @@ namespace NewDatabase.Extensions
             return dbSet.FirstOrDefaultAsync(x => x.MessageId == messageId);
         }
         
+        public static Task<T> GetForMemberAsync<T>(this DbSet<T> dbSet, ulong guildId, ulong memberId) where T : MemberEntity
+        {
+            return dbSet.FirstOrDefaultAsync(x => x.GuildId == guildId && x.MemberId == memberId);
+        }
+        
+        public static Task<List<T>> GetAllForGuildMembersAsync<T>(this DbSet<T> dbSet, ulong guildId) where T : MemberEntity
+        {
+            return dbSet.Where(x => x.GuildId == guildId).ToListAsync();
+        }
+        
         public static Task<ReputationConfiguration> GetForGuildWithEmojisAsync(this DbSet<ReputationConfiguration> dbSet, ulong guildId)
         {
             return dbSet.Include(x => x.Emojis).FirstOrDefaultAsync(x => x.GuildId == guildId);
@@ -47,6 +57,14 @@ namespace NewDatabase.Extensions
         public static Task<List<Subscription>> GetAllForUserAsync(this DbSet<Subscription> dbSet, ulong userId)
         {
             return dbSet.Where(x => x.UserId == userId).ToListAsync();
+        }
+
+        public static async Task<ReputationMember> UpdateMemberReputationAsync(this DbSet<ReputationMember> dbSet, ulong guildId, ulong memberId, long change)
+        {
+            var repMember = await dbSet.GetForMemberAsync(guildId, memberId);
+            repMember.Reputation += change;
+            dbSet.Update(repMember);
+            return repMember;
         }
     }
 }

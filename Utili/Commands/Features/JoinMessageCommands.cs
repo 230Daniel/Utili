@@ -2,6 +2,8 @@
 using Database.Data;
 using Disqord;
 using Disqord.Bot;
+using NewDatabase;
+using NewDatabase.Extensions;
 using Qmmands;
 using Utili.Services;
 
@@ -10,11 +12,18 @@ namespace Utili.Commands
     [Group("JoinMessage", "JoinMessages")]
     public class JoinMessageCommands : DiscordGuildModuleBase
     {
+        private readonly DatabaseContext _dbContext;
+        
+        public JoinMessageCommands(DatabaseContext dbContext)
+        {
+            _dbContext = dbContext;
+        }
+        
         [Command("Preview")]
         public async Task Preview()
         {
-            var row = await JoinMessage.GetRowAsync(Context.GuildId);
-            var message = JoinMessageService.GetJoinMessage(row, Context.Message.Author as IMember);
+            var config = await _dbContext.JoinMessageConfigurations.GetForGuildAsync(Context.GuildId);
+            var message = JoinMessageService.GetJoinMessage(config, Context.Message.Author as IMember);
             await Response(message);
         }
     }

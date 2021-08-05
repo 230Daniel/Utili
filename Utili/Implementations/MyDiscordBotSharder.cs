@@ -2,7 +2,6 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Database.Data;
 using Disqord;
 using Disqord.Bot;
 using Disqord.Bot.Sharding;
@@ -10,6 +9,7 @@ using Disqord.Sharding;
 using Utili.Extensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using NewDatabase.Extensions;
 using Qmmands;
 using Utili.Commands.TypeParsers;
 
@@ -21,12 +21,14 @@ namespace Utili.Implementations
         {
             if (!context.GuildId.HasValue || context.Author.IsBot) return false;
 
-            var row = await Core.GetRowAsync(context.GuildId.Value);
-            var excluded = row.ExcludedChannels.Contains(context.ChannelId);
-            if (!row.EnableCommands) excluded = !excluded;
-            return !excluded;
-        }
+            var db = context.Services.GetDatabaseContext();
+            var config = await db.CoreConfigurations.GetForGuildAsync(context.GuildId.Value);
 
+            return !config.NonCommandChannels.Contains(context.ChannelId) 
+                ? config.CommandsEnabled 
+                : !config.CommandsEnabled;
+        }
+        
         protected override LocalMessage FormatFailureMessage(DiscordCommandContext context, FailedResult result)
         {
             static string FormatParameter(Parameter parameter)

@@ -5,6 +5,7 @@ using Disqord;
 using Disqord.Gateway;
 using Disqord.Rest;
 using Microsoft.Extensions.Logging;
+using NewDatabase.Entities;
 using Utili.Extensions;
 
 namespace Utili.Services
@@ -44,16 +45,16 @@ namespace Utili.Services
             }
         }
 
-        public static LocalMessage GetJoinMessage(JoinMessageRow row, IMember member)
+        public static LocalMessage GetJoinMessage(JoinMessageConfiguration config, IMember member)
         {
-            var text = row.Text.Value.Replace(@"\n", "\n").Replace("%user%", member.Mention);
-            var title = row.Title.Value.Replace("%user%", member.ToString());
-            var content = row.Content.Value.Replace(@"\n", "\n").Replace("%user%", member.Mention);
-            var footer = row.Footer.Value.Replace(@"\n", "\n").Replace("%user%", member.ToString());
+            var text = config.Text.Replace(@"\n", "\n").Replace("%user%", member.Mention);
+            var title = config.Title.Replace("%user%", member.ToString());
+            var content = config.Content.Replace(@"\n", "\n").Replace("%user%", member.Mention);
+            var footer = config.Footer.Replace(@"\n", "\n").Replace("%user%", member.ToString());
             
-            var iconUrl = row.Icon.Value;
-            var thumbnailUrl = row.Thumbnail.Value;
-            var imageUrl = row.Image.Value;
+            var iconUrl = config.Icon;
+            var thumbnailUrl = config.Thumbnail;
+            var imageUrl = config.Image;
 
             if (iconUrl.ToLower() == "user") iconUrl = member.GetAvatarUrl();
             if (thumbnailUrl.ToLower() == "user") thumbnailUrl = member.GetAvatarUrl();
@@ -81,7 +82,7 @@ namespace Utili.Services
                     .WithOptionalFooter(footer)
                     .WithThumbnailUrl(thumbnailUrl)
                     .WithImageUrl(imageUrl)
-                    .WithColor(new Color((int) row.Colour)));
+                    .WithColor(new Color((int) config.Colour)));
         }
     }
 }

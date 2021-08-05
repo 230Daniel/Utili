@@ -27,6 +27,7 @@ namespace NewDatabase
         public DbSet<ReputationMember> ReputationMembers { get; internal set; }
         public DbSet<RoleLinkingConfiguration> RoleLinkingConfigurations { get; internal set; }
         public DbSet<RolePersistConfiguration> RolePersistConfigurations { get; internal set; }
+        public DbSet<ShardDetail> ShardDetails { get; internal set; }
         public DbSet<Subscription> Subscriptions { get; internal set; }
         public DbSet<User> Users { get; internal set; }
         public DbSet<VoiceLinkConfiguration> VoiceLinkConfigurations { get; internal set; }
@@ -53,8 +54,6 @@ namespace NewDatabase
             modelBuilder.ConfigureGuildChannelEntities();
             modelBuilder.ConfigureMemberEntities();
             modelBuilder.ConfigureMessageEntities();
-            modelBuilder.ConfigureUserEntities();
-            modelBuilder.ConfigureCustomerEntities();
             modelBuilder.ConfigureOtherEntities();
             modelBuilder.ConfigureUlongListConverters();
         }

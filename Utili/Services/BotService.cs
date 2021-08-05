@@ -3,7 +3,6 @@ using System.Threading.Tasks;
 using Disqord;
 using Disqord.Gateway;
 using Disqord.Hosting;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Utili.Features;
 
@@ -12,8 +11,7 @@ namespace Utili.Services
     public class BotService : DiscordClientService
     {
         private readonly ILogger<BotService> _logger;
-        private readonly IConfiguration _config;
-        
+
         private readonly CommunityService _community;
         private readonly GuildCountService _guildCount;
         private readonly MemberCacheService _memberCache;
@@ -36,7 +34,6 @@ namespace Utili.Services
         public BotService(
             
             ILogger<BotService> logger,
-            IConfiguration config,
             DiscordClientBase client, 
             
             CommunityService community,
@@ -61,7 +58,6 @@ namespace Utili.Services
             : base(logger, client)
         {
             _logger = logger;
-            _config = config;
 
             _community = community;
             _guildCount = guildCount;
@@ -85,10 +81,6 @@ namespace Utili.Services
 
         protected override async Task ExecuteAsync(CancellationToken cancellationToken)
         {
-            await Database.Database.InitialiseAsync(false, _config.GetValue<string>("DefaultPrefix"));
-            Database.Status.Start();
-            _logger.LogInformation("Database initialised");
-
             await Client.WaitUntilReadyAsync(cancellationToken);
 
             _memberCache.Start();

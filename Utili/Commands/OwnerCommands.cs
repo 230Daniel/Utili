@@ -1,9 +1,11 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
-using Database.Data;
 using Disqord;
 using Disqord.Bot;
+using Disqord.Gateway;
 using Disqord.Rest;
+using Microsoft.EntityFrameworkCore;
+using NewDatabase;
 using Utili.Extensions;
 using Qmmands;
 
@@ -11,17 +13,25 @@ namespace Utili.Commands
 {
     public class OwnerCommands : DiscordGuildModuleBase
     {
+        private readonly DatabaseContext _dbContext;
+        
+        public OwnerCommands(DatabaseContext dbContext)
+        {
+            _dbContext = dbContext;
+        }
+        
         [Command("UserInfo"), RequireBotOwner]
         public async Task UserInfo(ulong userId)
         {
-            var row = await Users.GetRowAsync(userId);
-            var user = await Context.Bot.FetchUserAsync(userId);
-
-            var subscriptions = await Subscriptions.GetRowsAsync(userId: userId);
-
+            var user = Context.Bot.GetUser(userId) ?? await Context.Bot.FetchUserAsync(userId);
+            
+            var userRow = await _dbContext.Users.FirstOrDefaultAsync(x => x.UserId == userId);
+            var subscriptions = await _dbContext.Subscriptions.Where(x => x.UserId == userId).ToListAsync();
+            var customerDetails = await _dbContext.CustomerDetails.FirstOrDefaultAsync(x => x.UserId == userId);
+            
             var content = $"Id: {user?.Id}\n" +
-                          $"Email: {row.Email}\n" +
-                          $"Customer: {row.CustomerId}\n" +
+                          $"Email: {userRow.Email}\n" +
+                          $"Customer: {customerDetails.CustomerId}\n" +
                           $"Subscriptions: {subscriptions.Count}\n" +
                           $"Premium slots: {subscriptions.Sum(x => x.Slots)}";
 
@@ -37,7 +47,7 @@ namespace Utili.Commands
         public async Task GuildInfo(ulong guildId)
         {
             var guild = await Context.Bot.FetchGuildAsync(guildId, true);
-            var premium = await Premium.IsGuildPremiumAsync(guildId);
+            var premium = await _dbContext.PremiumSlots.AnyAsync(x => x.GuildId == guildId);
 
             var content = $"Id: {guild?.Id}\n" +
                           $"Owner: {guild.OwnerId}\n" +
@@ -84,12 +94,6 @@ namespace Utili.Commands
             else
                 await Context.Channel.SendFailureAsync("Not authorised",
                     $"{member} does not have the manage server permission in {guild}", false);
-        }
-        
-        [Command("DownloadedMembers"), RequireBotOwner]
-        public async Task DownloadedMembers()
-        {
-            await Context.Channel.SendInfoAsync("Downloaded Members", $"{string.Join("\n", Context.Guild.Members.Values.Select(x => x.Mention))}");
         }
     }
 }
