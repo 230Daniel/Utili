@@ -639,7 +639,7 @@ namespace DatabaseMigrator.Services
                 var voteChannelConfiguration = new VoteChannelConfiguration(row.GuildId, row.ChannelId)
                 {
                     Mode = GetMode(row.Mode),
-                    Emotes = row.Emotes
+                    Emojis = row.Emotes
                 };
 
                 _db.VoteChannelConfigurations.Add(voteChannelConfiguration);

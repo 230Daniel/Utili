@@ -64,6 +64,8 @@ namespace UtiliBackend.Mapping
             CreateMap<VoiceLinkConfiguration, VoiceLinkConfigurationModel>();
 
             CreateMap<VoiceRoleConfiguration, VoiceRoleConfigurationModel>();
+
+            CreateMap<VoteChannelConfiguration, VoteChannelConfigurationModel>();
             
             CreateMap<PremiumSlot, PremiumSlotModel>();
             

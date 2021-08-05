@@ -7,7 +7,7 @@ namespace NewDatabase.Entities
     public class VoteChannelConfiguration : GuildChannelEntity
     {
         public VoteChannelMode Mode { get; set; }
-        public List<string> Emotes { get; set; }
+        public List<string> Emojis { get; set; }
 
         public VoteChannelConfiguration(ulong guildId, ulong channelId) : base(guildId, channelId) { }
     }
