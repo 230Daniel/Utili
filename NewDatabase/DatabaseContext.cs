@@ -11,6 +11,7 @@ namespace NewDatabase
         public DbSet<AutopurgeMessage> AutopurgeMessages { get; internal set; }
         public DbSet<ChannelMirroringConfiguration> ChannelMirroringConfigurations { get; set; }
         public DbSet<CoreConfiguration> CoreConfigurations { get; internal set; }
+        public DbSet<CustomerDetails> CustomerDetails { get; internal set; }
         public DbSet<InactiveRoleConfiguration> InactiveRoleConfigurations { get; internal set; }
         public DbSet<JoinMessageConfiguration> JoinMessageConfigurations { get; internal set; }
         public DbSet<JoinRolesConfiguration> JoinRolesConfigurations { get; internal set; }
@@ -52,6 +53,8 @@ namespace NewDatabase
             modelBuilder.ConfigureGuildChannelEntities();
             modelBuilder.ConfigureMemberEntities();
             modelBuilder.ConfigureMessageEntities();
+            modelBuilder.ConfigureUserEntities();
+            modelBuilder.ConfigureCustomerEntities();
             modelBuilder.ConfigureOtherEntities();
             modelBuilder.ConfigureUlongListConverters();
         }

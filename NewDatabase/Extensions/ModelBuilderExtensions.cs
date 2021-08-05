@@ -60,6 +60,30 @@ namespace NewDatabase.Extensions
                 modelBuilder.Entity(type).Property("MessageId").ValueGeneratedNever();
             }
         }
+        
+        public static void ConfigureUserEntities(this ModelBuilder modelBuilder)
+        {
+            var types = Assembly.GetExecutingAssembly().GetTypes()
+                .Where(x => x.IsAssignableTo(typeof(UserEntity)) && !x.IsEquivalentTo(typeof(UserEntity)));
+            
+            foreach (var type in types)
+            {
+                modelBuilder.Entity(type).HasKey("UserId");
+                modelBuilder.Entity(type).Property("UserId").ValueGeneratedNever();
+            }
+        }
+        
+        public static void ConfigureCustomerEntities(this ModelBuilder modelBuilder)
+        {
+            var types = Assembly.GetExecutingAssembly().GetTypes()
+                .Where(x => x.IsAssignableTo(typeof(CustomerEntity)) && !x.IsEquivalentTo(typeof(CustomerEntity)));
+            
+            foreach (var type in types)
+            {
+                modelBuilder.Entity(type).HasKey("CustomerId");
+                modelBuilder.Entity(type).Property("CustomerId").ValueGeneratedNever();
+            }
+        }
 
         public static void ConfigureOtherEntities(this ModelBuilder modelBuilder)
         {

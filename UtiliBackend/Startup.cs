@@ -11,6 +11,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using NewDatabase;
+using Stripe;
 using UtiliBackend.Authorisation;
 using UtiliBackend.Services;
 
@@ -89,6 +90,9 @@ namespace UtiliBackend
             services.AddSingleton<DiscordRestService>();
 
             services.AddDbContext<DatabaseContext>();
+
+            services.AddScoped<Services.CustomerService>();
+            services.AddSingleton(new StripeClient(_configuration["Stripe:SecretKey"]));
             
             services.Configure<IpRateLimitOptions>(_configuration.GetSection("IpRateLimiting"));
             services.Configure<IpRateLimitPolicies>(_configuration.GetSection("IpRateLimitPolicies"));

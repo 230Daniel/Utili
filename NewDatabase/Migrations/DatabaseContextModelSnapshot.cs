@@ -124,6 +124,22 @@ namespace NewDatabase.Migrations
                     b.ToTable("core_configurations");
                 });
 
+            modelBuilder.Entity("NewDatabase.Entities.CustomerDetails", b =>
+                {
+                    b.Property<string>("CustomerId")
+                        .HasColumnType("text")
+                        .HasColumnName("customer_id");
+
+                    b.Property<decimal>("UserId")
+                        .HasColumnType("numeric(20,0)")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("CustomerId")
+                        .HasName("pk_customer_details");
+
+                    b.ToTable("customer_details");
+                });
+
             modelBuilder.Entity("NewDatabase.Entities.InactiveRoleConfiguration", b =>
                 {
                     b.Property<decimal>("GuildId")
@@ -610,13 +626,8 @@ namespace NewDatabase.Migrations
             modelBuilder.Entity("NewDatabase.Entities.User", b =>
                 {
                     b.Property<decimal>("UserId")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)")
                         .HasColumnName("user_id");
-
-                    b.Property<string>("CustomerId")
-                        .HasColumnType("text")
-                        .HasColumnName("customer_id");
 
                     b.Property<string>("Email")
                         .HasColumnType("text")

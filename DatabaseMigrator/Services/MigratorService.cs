@@ -547,9 +547,17 @@ namespace DatabaseMigrator.Services
                 var user = new User(row.UserId)
                 {
                     Email = row.Email,
-                    CustomerId = row.CustomerId
                 };
 
+                if (!string.IsNullOrEmpty(row.CustomerId))
+                {
+                    var customerDetails = new CustomerDetails(row.CustomerId)
+                    {
+                        UserId = row.UserId
+                    };
+                    _db.CustomerDetails.Add(customerDetails);
+                }
+                
                 _db.Users.Add(user);
                 _logger.LogDebug("Migrated user {UserId}", row.UserId);
             }
