@@ -10,21 +10,39 @@ namespace UtiliBackend.Mapping
     {
         public AutoMapperProfile()
         {
-            CreateMap<RestTextChannel, TextChannelModel>();
-            
-            CreateMap<RestVoiceChannel, VoiceChannelModel>();
-            
-            CreateMap<RestRole, RoleModel>();
+            MapDiscordModels();
+            MapDashboardModels();
+            MapPremiumModels();
+        }
 
+        private void MapDiscordModels()
+        {
+            CreateMap<RestTextChannel, TextChannelModel>();
+            CreateMap<RestVoiceChannel, VoiceChannelModel>();
+            CreateMap<RestRole, RoleModel>();
             CreateMap<CoreConfiguration, CoreConfigurationModel>();
+        }
+
+        private void MapDashboardModels()
+        {
+            CreateMap<ChannelMirroringConfiguration, ChannelMirroringConfigurationModel>();
+            CreateMap<JoinRolesConfiguration, JoinRolesConfigurationModel>();
+            CreateMap<MessageFilterConfiguration, MessageFilterConfigurationModel>();
+            CreateMap<MessageLogsConfiguration, MessageLogsConfigurationModel>();
+            CreateMap<MessagePinningConfiguration, MessagePinningConfigurationModel>();
+            CreateMap<ReputationConfiguration, ReputationConfigurationModel>();
+            CreateMap<ReputationConfigurationEmoji, ReputationConfigurationEmojiModel>();
+            CreateMap<RoleLinkingConfiguration, RoleLinkingConfigurationModel>();
+            CreateMap<RolePersistConfiguration, RolePersistConfigurationModel>();
+            CreateMap<VoiceLinkConfiguration, VoiceLinkConfigurationModel>();
+            CreateMap<VoiceRoleConfiguration, VoiceRoleConfigurationModel>();
+            CreateMap<VoteChannelConfiguration, VoteChannelConfigurationModel>();
             
             CreateMap<AutopurgeConfiguration, AutopurgeConfigurationModel>()
                 .ForMember(
                     dest => dest.Timespan, 
                     opt => opt.MapFrom(s => XmlConvert.ToString(s.Timespan)));
             
-            CreateMap<ChannelMirroringConfiguration, ChannelMirroringConfigurationModel>();
-
             CreateMap<InactiveRoleConfiguration, InactiveRoleConfigurationModel>()
                 .ForMember(
                     dest => dest.Threshold,
@@ -37,14 +55,6 @@ namespace UtiliBackend.Mapping
                 .ForMember(
                     dest => dest.Colour,
                     opt => opt.MapFrom(s => s.Colour.ToString("X6")));
-
-            CreateMap<JoinRolesConfiguration, JoinRolesConfigurationModel>();
-
-            CreateMap<MessageFilterConfiguration, MessageFilterConfigurationModel>();
-
-            CreateMap<MessageLogsConfiguration, MessageLogsConfigurationModel>();
-
-            CreateMap<MessagePinningConfiguration, MessagePinningConfigurationModel>();
             
             CreateMap<NoticeConfiguration, NoticeConfigurationModel>()
                 .ForMember(
@@ -53,20 +63,10 @@ namespace UtiliBackend.Mapping
                 .ForMember(
                     dest => dest.Colour,
                     opt => opt.MapFrom(s => s.Colour.ToString("X6")));
+        }
 
-            CreateMap<ReputationConfiguration, ReputationConfigurationModel>();
-            CreateMap<ReputationConfigurationEmoji, ReputationConfigurationEmojiModel>();
-
-            CreateMap<RoleLinkingConfiguration, RoleLinkingConfigurationModel>();
-
-            CreateMap<RolePersistConfiguration, RolePersistConfigurationModel>();
-
-            CreateMap<VoiceLinkConfiguration, VoiceLinkConfigurationModel>();
-
-            CreateMap<VoiceRoleConfiguration, VoiceRoleConfigurationModel>();
-
-            CreateMap<VoteChannelConfiguration, VoteChannelConfigurationModel>();
-            
+        private void MapPremiumModels()
+        {
             CreateMap<PremiumSlot, PremiumSlotModel>();
             
             CreateMap<Subscription, SubscriptionModel>()
