@@ -60,33 +60,12 @@ namespace NewDatabase.Extensions
                 modelBuilder.Entity(type).Property("MessageId").ValueGeneratedNever();
             }
         }
-        
-        public static void ConfigureUserEntities(this ModelBuilder modelBuilder)
-        {
-            var types = Assembly.GetExecutingAssembly().GetTypes()
-                .Where(x => x.IsAssignableTo(typeof(UserEntity)) && !x.IsEquivalentTo(typeof(UserEntity)));
-            
-            foreach (var type in types)
-            {
-                modelBuilder.Entity(type).HasKey("UserId");
-                modelBuilder.Entity(type).Property("UserId").ValueGeneratedNever();
-            }
-        }
-        
-        public static void ConfigureCustomerEntities(this ModelBuilder modelBuilder)
-        {
-            var types = Assembly.GetExecutingAssembly().GetTypes()
-                .Where(x => x.IsAssignableTo(typeof(CustomerEntity)) && !x.IsEquivalentTo(typeof(CustomerEntity)));
-            
-            foreach (var type in types)
-            {
-                modelBuilder.Entity(type).HasKey("CustomerId");
-                modelBuilder.Entity(type).Property("CustomerId").ValueGeneratedNever();
-            }
-        }
 
         public static void ConfigureOtherEntities(this ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<CustomerDetails>().HasKey(e => e.CustomerId);
+            modelBuilder.Entity<CustomerDetails>().Property(e => e.CustomerId).ValueGeneratedNever();
+            
             modelBuilder.Entity<MessageLogsMessage>().HasIndex(e => e.Timestamp);
             
             modelBuilder.Entity<PremiumSlot>().HasKey(e => e.SlotId);
@@ -97,8 +76,14 @@ namespace NewDatabase.Extensions
             modelBuilder.Entity<RoleLinkingConfiguration>().HasKey(e => e.Id);
             modelBuilder.Entity<RoleLinkingConfiguration>().Property(e => e.Id).ValueGeneratedOnAdd();
 
+            modelBuilder.Entity<ShardDetail>().HasKey(e => e.ShardId);
+            modelBuilder.Entity<ShardDetail>().Property(e => e.ShardId).ValueGeneratedNever();
+            
             modelBuilder.Entity<Subscription>().HasKey(e => e.Id);
             modelBuilder.Entity<Subscription>().Property(e => e.Id).ValueGeneratedNever();
+            
+            modelBuilder.Entity<User>().HasKey(e => e.UserId);
+            modelBuilder.Entity<User>().Property(e => e.UserId).ValueGeneratedNever();
         }
         
         public static void ConfigureUlongListConverters(this ModelBuilder modelBuilder)
