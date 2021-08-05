@@ -49,7 +49,7 @@ class PremiumThankYou extends React.Component{
 	componentDidMount(){
 		setTimeout(() => {
 			this.setState({loading: false});
-		}, 2000);
+		}, 3000);
 	}
 }
 
