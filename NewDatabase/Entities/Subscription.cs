@@ -5,16 +5,14 @@ namespace NewDatabase.Entities
     public class Subscription
     {
         public string Id { get; internal set; }
-        public ulong UserId { get; internal set; }
-        public int Slots { get; internal set; }
+        public ulong UserId { get; set; }
+        public int Slots { get; set; }
         public SubscriptionStatus Status { get; set; }
         public DateTime ExpiresAt { get; set; }
 
-        public Subscription(string id, ulong userId, int slots)
+        public Subscription(string id)
         {
             Id = id;
-            UserId = userId;
-            Slots = slots;
         }
 
         internal Subscription() { }

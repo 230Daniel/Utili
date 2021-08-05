@@ -524,8 +524,10 @@ namespace DatabaseMigrator.Services
 
             foreach (var row in rows)
             {
-                var subscription = new Subscription(row.SubscriptionId, row.UserId, row.Slots)
+                var subscription = new Subscription(row.SubscriptionId)
                 {
+                    UserId = row.UserId,
+                    Slots = row.Slots,
                     Status = (NewDatabase.Entities.SubscriptionStatus) (int) row.Status,
                     ExpiresAt = row.EndsAt,
                 };

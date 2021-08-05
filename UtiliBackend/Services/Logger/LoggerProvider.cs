@@ -11,11 +11,7 @@ namespace UtiliBackend.Services
         public ILogger CreateLogger(string categoryName)
         {
             return _loggers.GetOrAdd(categoryName, _ => new Logger(categoryName
-                .Split(".").Last()
-                .Replace("Default", "")
-                .Replace("Discord", "")
-                .Replace("Service", "")
-                .Replace("My", "")));
+                .Split(".").Last()));
         }
 
         public void Dispose()
