@@ -8,7 +8,11 @@ using Database.Data;
 using Disqord;
 using Disqord.Gateway;
 using Disqord.Rest;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using NewDatabase.Entities;
+using NewDatabase.Extensions;
 using Utili.Extensions;
 
 namespace Utili.Services
@@ -26,27 +30,39 @@ namespace Utili.Services
             _haste = haste;
         }
 
-        public async Task MessageReceived(MessageReceivedEventArgs e)
+        public async Task MessageReceived(IServiceScope scope, MessageReceivedEventArgs e)
         {
             try
             {
                 if(e.Message.Author.IsBot || !e.GuildId.HasValue) return;
 
-                var row = await MessageLogs.GetRowAsync(e.GuildId.Value);
-                if ((row.DeletedChannelId == 0 && row.EditedChannelId == 0) || row.ExcludedChannels.Contains(e.ChannelId)) return;
+                var db = scope.GetDbContext();
+                var config = await db.MessageLogsConfigurations.GetForGuildAsync(e.GuildId.Value);
+                if (config is null || (config.DeletedChannelId == 0 && config.EditedChannelId == 0) || config.ExcludedChannels.Contains(e.ChannelId)) return;
 
-                var message = new MessageLogsMessageRow()
+                var message = new MessageLogsMessage(e.MessageId)
                 {
                     GuildId = e.GuildId.Value,
                     ChannelId = e.ChannelId,
-                    MessageId = e.MessageId,
-                    UserId = e.Message.Author.Id,
+                    AuthorId = e.Message.Author.Id,
                     Timestamp = e.Message.CreatedAt().UtcDateTime,
-                    Content = EString.FromDecoded(e.Message.Content)
+                    Content = e.Message.Content
                 };
 
-                await MessageLogs.SaveMessageAsync(message);
-                await MessageLogs.DeleteOldMessagesAsync(e.GuildId.Value, e.ChannelId, await Premium.IsGuildPremiumAsync(e.GuildId.Value));
+                db.MessageLogsMessages.Add(message);
+
+                if (!await db.GetIsGuildPremiumAsync(e.GuildId.Value))
+                {
+                    var messages = await db.MessageLogsMessages
+                        .Where(x => x.GuildId == e.GuildId.Value && x.ChannelId == e.ChannelId)
+                        .OrderByDescending(x => x.Timestamp)
+                        .ToListAsync();
+
+                    var excessMessages = messages.Skip(50);
+                    if(excessMessages.Any()) db.MessageLogsMessages.RemoveRange(excessMessages);
+                }
+                
+                await db.SaveChangesAsync();
             }
             catch (Exception ex)
             {

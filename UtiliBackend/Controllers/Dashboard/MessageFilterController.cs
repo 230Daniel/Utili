@@ -32,6 +32,7 @@ namespace UtiliBackend.Controllers
             foreach (var configuration in configurations)
             {
                 configuration.RegEx ??= "";
+                configuration.DeletionMessage ??= "";
             }
             return Json(_mapper.Map<IEnumerable<MessageFilterConfigurationModel>>(configurations));
         }

@@ -8,7 +8,10 @@ using Disqord;
 using Disqord.Gateway;
 using Disqord.Http;
 using Disqord.Rest;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using NewDatabase.Entities;
+using NewDatabase.Extensions;
 using Utili.Extensions;
 
 namespace Utili.Services
@@ -128,25 +131,27 @@ namespace Utili.Services
             _ = Autopurge.DeleteOldMessagesAsync();
         }
 
-        public async Task MessageReceived(MessageReceivedEventArgs e)
+        public async Task MessageReceived(IServiceScope scope, MessageReceivedEventArgs e)
         {
             try
             {
                 if (!e.GuildId.HasValue) return;
 
-                var row = await Autopurge.GetRowAsync(e.GuildId.Value, e.ChannelId);
-                if (row.Mode == 2) return;
+                var db = scope.GetDbContext();
+                var config = await db.AutopurgeConfigurations.GetForGuildChannelAsync(e.GuildId.Value, e.ChannelId);
+                if (config is null) return;
 
-                var messageRow = new AutopurgeMessageRow()
+                var message = new AutopurgeMessage(e.MessageId)
                 {
                     GuildId = e.GuildId.Value,
                     ChannelId = e.ChannelId,
-                    MessageId = e.MessageId,
                     Timestamp = e.Message.CreatedAt().UtcDateTime,
                     IsBot = e.Message.Author.IsBot,
                     IsPinned = e.Message is IUserMessage {IsPinned: true}
                 };
-                await Autopurge.SaveMessageAsync(messageRow);
+
+                db.AutopurgeMessages.Add(message);
+                await db.SaveChangesAsync();
             }
             catch (Exception ex)
             {

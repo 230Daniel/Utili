@@ -6,7 +6,10 @@ using Database.Data;
 using Disqord;
 using Disqord.Gateway;
 using Disqord.Rest;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using NewDatabase.Entities;
+using NewDatabase.Extensions;
 using Utili.Extensions;
 
 namespace Utili.Services
@@ -32,12 +35,12 @@ namespace Utili.Services
             _timer.Start();
         }
 
-        public async Task MessageReceived(MessageReceivedEventArgs e)
+        public async Task MessageReceived(IServiceScope scope, MessageReceivedEventArgs e)
         {
             try
             {
                 if(!e.GuildId.HasValue || e.Member is null || e.Member.IsBot) return;
-                await MakeUserActiveAsync(e.GuildId.Value, e.Member);
+                await MakeUserActiveAsync(scope, e.GuildId.Value, e.Member);
             }
             catch (Exception ex)
             {
@@ -58,16 +61,32 @@ namespace Utili.Services
             }
         }
 
-        private async Task MakeUserActiveAsync(ulong guildId, IMember member)
+        private async Task MakeUserActiveAsync(IServiceScope scope, Snowflake guildId, IMember member)
         {
-            var row = await InactiveRole.GetRowAsync(guildId);
+            var db = scope.GetDbContext();
+            var config = await db.InactiveRoleConfigurations.GetForGuildAsync(guildId);
             IGuild guild = _client.GetGuild(guildId);
-            var inactiveRole = guild.GetRole(row.RoleId);
+            var inactiveRole = guild.GetRole(config.RoleId);
 
             if(inactiveRole is null) return;
 
-            await InactiveRole.UpdateUserAsync(guild.Id, member.Id);
-
+            var memberRecord = await db.InactiveRoleMembers.GetForMemberAsync(guildId, member.Id);
+            if (memberRecord is null)
+            {
+                memberRecord = new InactiveRoleMember(guildId, member.Id)
+                {
+                    LastAction = DateTime.UtcNow
+                };
+                db.InactiveRoleMembers.Add(memberRecord);
+                await db.SaveChangesAsync();
+            }
+            else
+            {
+                memberRecord.LastAction = DateTime.UtcNow;
+                db.InactiveRoleMembers.Update(memberRecord);
+                await db.SaveChangesAsync();
+            }
+            
             if(member.GetRole(inactiveRole.Id) is not null && inactiveRole.CanBeManaged())
                 await member.RevokeRoleAsync(inactiveRole.Id, new DefaultRestRequestOptions {Reason = "Inactive Role"});
         }

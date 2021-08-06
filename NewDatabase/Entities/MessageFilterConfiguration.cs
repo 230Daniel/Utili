@@ -7,7 +7,8 @@ namespace NewDatabase.Entities
     {
         public MessageFilterMode Mode { get; set; }
         public string RegEx { get; set; }
-        
+        public string DeletionMessage { get; set; }
+
         public MessageFilterConfiguration(ulong guildId, ulong channelId) : base(guildId, channelId) { }
     }
 

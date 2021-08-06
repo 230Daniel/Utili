@@ -6,7 +6,7 @@ namespace Utili.Extensions
 {
     public static class ServiceProviderExtensions
     {
-        public static DatabaseContext GetDatabaseContext(this IServiceProvider serviceProvider)
+        public static DatabaseContext GetDbContext(this IServiceProvider serviceProvider)
         {
             return serviceProvider.GetRequiredService<DatabaseContext>();
         }

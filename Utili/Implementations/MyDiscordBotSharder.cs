@@ -21,7 +21,7 @@ namespace Utili.Implementations
         {
             if (!context.GuildId.HasValue || context.Author.IsBot) return false;
 
-            var db = context.Services.GetDatabaseContext();
+            var db = context.Services.GetDbContext();
             var config = await db.CoreConfigurations.GetForGuildAsync(context.GuildId.Value);
 
             return !config.NonCommandChannels.Contains(context.ChannelId) 

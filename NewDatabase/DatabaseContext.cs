@@ -13,6 +13,7 @@ namespace NewDatabase
         public DbSet<CoreConfiguration> CoreConfigurations { get; internal set; }
         public DbSet<CustomerDetails> CustomerDetails { get; internal set; }
         public DbSet<InactiveRoleConfiguration> InactiveRoleConfigurations { get; internal set; }
+        public DbSet<InactiveRoleMember> InactiveRoleMembers { get; internal set; }
         public DbSet<JoinMessageConfiguration> JoinMessageConfigurations { get; internal set; }
         public DbSet<JoinRolesConfiguration> JoinRolesConfigurations { get; internal set; }
         public DbSet<JoinRolesPendingMember> JoinRolesPendingMembers { get; internal set; }

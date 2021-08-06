@@ -85,7 +85,7 @@ namespace Utili.Extensions
             return message.Attachments.Count > 0;
         }
 
-        public static bool IsUrl(this IUserMessage message)
+        public static bool IsLink(this IUserMessage message)
         {
             foreach (var word in message.Content.Split(' ', '\n'))
                 if (IsUrl(word)) return true;

@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Disqord;
 using Disqord.Gateway;
 using Disqord.Hosting;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Utili.Features;
 
@@ -11,6 +12,7 @@ namespace Utili.Services
     public class BotService : DiscordClientService
     {
         private readonly ILogger<BotService> _logger;
+        private readonly IServiceScopeFactory _scopeFactory;
 
         private readonly CommunityService _community;
         private readonly GuildCountService _guildCount;
@@ -34,7 +36,8 @@ namespace Utili.Services
         public BotService(
             
             ILogger<BotService> logger,
-            DiscordClientBase client, 
+            DiscordClientBase client,
+            IServiceScopeFactory scopeFactory,
             
             CommunityService community,
             GuildCountService guildCount,
@@ -58,7 +61,8 @@ namespace Utili.Services
             : base(logger, client)
         {
             _logger = logger;
-
+            _scopeFactory = scopeFactory;
+            
             _community = community;
             _guildCount = guildCount;
             _memberCache = memberCache;
@@ -107,13 +111,15 @@ namespace Utili.Services
 
         protected override async ValueTask OnMessageReceived(MessageReceivedEventArgs e)
         {
-            await _messageLogs.MessageReceived(e);
-            if(await _messageFilter.MessageReceived(e)) return;
-            _ = _notices.MessageReceived(e);
-            _ = _voteChannels.MessageReceived(e);
-            _ = _channelMirroring.MessageReceived(e);
-            _ = _autopurge.MessageReceived(e);
-            _ = _inactiveRole.MessageReceived(e);
+            using var scope = _scopeFactory.CreateScope();
+            
+            await _messageLogs.MessageReceived(scope, e);
+            if(await _messageFilter.MessageReceived(scope, e)) return;
+            _ = _notices.MessageReceived(scope, e);
+            _ = _voteChannels.MessageReceived(scope, e);
+            _ = _channelMirroring.MessageReceived(scope, e);
+            _ = _autopurge.MessageReceived(scope, e);
+            _ = _inactiveRole.MessageReceived(scope, e);
         }
 
         protected override async ValueTask OnMessageUpdated(MessageUpdatedEventArgs e)

@@ -294,6 +294,10 @@ namespace NewDatabase.Migrations
                         .HasColumnType("numeric(20,0)")
                         .HasColumnName("channel_id");
 
+                    b.Property<string>("DeletionMessage")
+                        .HasColumnType("text")
+                        .HasColumnName("deletion_message");
+
                     b.Property<int>("Mode")
                         .HasColumnType("integer")
                         .HasColumnName("mode");
