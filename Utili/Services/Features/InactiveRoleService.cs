@@ -48,12 +48,12 @@ namespace Utili.Services
             }
         }
 
-        public async Task VoiceStateUpdated(VoiceStateUpdatedEventArgs e)
+        public async Task VoiceStateUpdated(IServiceScope scope, VoiceStateUpdatedEventArgs e)
         {
             try
             {
                 if(e.Member.IsBot) return;
-                await MakeUserActiveAsync(e.GuildId, e.Member);
+                await MakeUserActiveAsync(scope, e.GuildId, e.Member);
             }
             catch (Exception ex)
             {

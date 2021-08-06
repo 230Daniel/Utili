@@ -115,65 +115,83 @@ namespace Utili.Services
             
             await _messageLogs.MessageReceived(scope, e);
             if(await _messageFilter.MessageReceived(scope, e)) return;
-            _ = _notices.MessageReceived(scope, e);
-            _ = _voteChannels.MessageReceived(scope, e);
-            _ = _channelMirroring.MessageReceived(scope, e);
-            _ = _autopurge.MessageReceived(scope, e);
-            _ = _inactiveRole.MessageReceived(scope, e);
+            await _notices.MessageReceived(scope, e);
+            await _voteChannels.MessageReceived(scope, e);
+            await _channelMirroring.MessageReceived(scope, e);
+            await _autopurge.MessageReceived(scope, e);
+            await _inactiveRole.MessageReceived(scope, e);
         }
 
         protected override async ValueTask OnMessageUpdated(MessageUpdatedEventArgs e)
         {
-            _ = _messageLogs.MessageUpdated(e);
-            _ = _autopurge.MessageUpdated(e);
+            using var scope = _scopeFactory.CreateScope();
+            
+            await _messageLogs.MessageUpdated(scope, e);
+            await _autopurge.MessageUpdated(scope, e);
         }
 
         protected override async ValueTask OnMessageDeleted(MessageDeletedEventArgs e)
         {
-            _ = _messageLogs.MessageDeleted(e);
-            _ = _autopurge.MessageDeleted(e);
+            using var scope = _scopeFactory.CreateScope();
+            
+            await _messageLogs.MessageDeleted(scope, e);
+            await _autopurge.MessageDeleted(scope, e);
         }
     
         protected override async ValueTask OnMessagesDeleted(MessagesDeletedEventArgs e)
         {
-            _ = _messageLogs.MessagesDeleted(e);
-            _ = _autopurge.MessagesDeleted(e);
+            using var scope = _scopeFactory.CreateScope();
+            
+            await _messageLogs.MessagesDeleted(scope, e);
+            await _autopurge.MessagesDeleted(scope, e);
         }
 
         protected override async ValueTask OnReactionAdded(ReactionAddedEventArgs e)
         {
-            _ = _reputation.ReactionAdded(e);
+            using var scope = _scopeFactory.CreateScope();
+            
+            await _reputation.ReactionAdded(scope, e);
         }
         
         protected override async ValueTask OnReactionRemoved(ReactionRemovedEventArgs e)
         {
-            _ = _reputation.ReactionRemoved(e);
+            using var scope = _scopeFactory.CreateScope();
+            
+            await _reputation.ReactionRemoved(scope, e);
         }
 
         protected override async ValueTask OnVoiceStateUpdated(VoiceStateUpdatedEventArgs e)
         {
-            _ = _voiceLink.VoiceStateUpdated(e);
-            _ = _voiceRoles.VoiceStateUpdated(e);
-            _ = _inactiveRole.VoiceStateUpdated(e);
+            using var scope = _scopeFactory.CreateScope();
+            
+            await _voiceLink.VoiceStateUpdated(scope, e);
+            await _voiceRoles.VoiceStateUpdated(e);
+            await _inactiveRole.VoiceStateUpdated(scope, e);
         }
 
         protected override async ValueTask OnMemberJoined(MemberJoinedEventArgs e)
         {
-            _ = _joinMessage.MemberJoined(e);
-            await _rolePersist.MemberJoined(e);
-            await _joinRoles.MemberJoined(e);
+            using var scope = _scopeFactory.CreateScope();
+            
+            await _rolePersist.MemberJoined(scope, e);
+            await _joinRoles.MemberJoined(scope, e);
+            await _joinMessage.MemberJoined(scope, e);
         }
 
         protected override async ValueTask OnMemberUpdated(MemberUpdatedEventArgs e)
         {
-            await _joinRoles.MemberUpdated(e);
-            await _roleLinking.MemberUpdated(e);
+            using var scope = _scopeFactory.CreateScope();
+            
+            await _joinRoles.MemberUpdated(scope, e);
+            await _roleLinking.MemberUpdated(scope, e);
         }
 
         protected override async ValueTask OnMemberLeft(MemberLeftEventArgs e)
         {
+            using var scope = _scopeFactory.CreateScope();
             var member = e.User is IMember user ? user : null;
-            await _rolePersist.MemberLeft(e, member);
+            
+            await _rolePersist.MemberLeft(scope, e, member);
         }
     }
 }

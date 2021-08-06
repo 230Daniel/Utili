@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Database;
-using Database.Data;
 using Disqord;
 using Disqord.Gateway;
 using Disqord.Rest;
@@ -70,7 +68,7 @@ namespace Utili.Services
             }
         }
 
-        public async Task MessageUpdated(MessageUpdatedEventArgs e)
+        public async Task MessageUpdated(IServiceScope scope, MessageUpdatedEventArgs e)
         {
             try
             {
@@ -78,20 +76,21 @@ namespace Utili.Services
 
                 ITextChannel channel = _client.GetTextChannel(e.GuildId.Value, e.ChannelId);
 
-                var row = await MessageLogs.GetRowAsync(e.GuildId.Value);
-                if ((row.DeletedChannelId == 0 && row.EditedChannelId == 0) || 
-                    row.ExcludedChannels.Contains(e.ChannelId)) return;
+                var db = scope.GetDbContext();
+                var config = await db.MessageLogsConfigurations.GetForGuildAsync(e.GuildId.Value);
+                if (config is null || (config.DeletedChannelId == 0 && config.EditedChannelId == 0) || config.ExcludedChannels.Contains(e.ChannelId)) return;
 
-                var previousMessage = await MessageLogs.GetMessageAsync(e.GuildId.Value, e.ChannelId, e.MessageId);
-                if (previousMessage is null || !e.Model.Content.HasValue || e.Model.Content.Value == previousMessage.Content.Value) return;
+                var messageRecord = await db.MessageLogsMessages.GetForMessageAsync(e.MessageId);
+                if (messageRecord is null || !e.Model.Content.HasValue || e.Model.Content.Value == messageRecord.Content) return;
 
                 var newMessage = e.NewMessage ?? await channel.FetchMessageAsync(e.MessageId) as IUserMessage;
-                var embed = GetEditedEmbed(newMessage, previousMessage);
+                var embed = GetEditedEmbed(newMessage, messageRecord);
 
-                previousMessage.Content = EString.FromDecoded(e.Model.Content.Value);
-                await MessageLogs.SaveMessageAsync(previousMessage);
+                messageRecord.Content = e.Model.Content.Value;
+                db.MessageLogsMessages.Update(messageRecord);
+                await db.SaveChangesAsync();
 
-                ITextChannel logChannel = _client.GetTextChannel(e.GuildId.Value, row.EditedChannelId);
+                ITextChannel logChannel = _client.GetTextChannel(e.GuildId.Value, config.EditedChannelId);
                 if (logChannel is not null) await logChannel.SendEmbedAsync(embed);
             }
             catch(Exception ex)
@@ -100,28 +99,28 @@ namespace Utili.Services
             }
         }
 
-        public async Task MessageDeleted(MessageDeletedEventArgs e)
+        public async Task MessageDeleted(IServiceScope scope, MessageDeletedEventArgs e)
         {
             try
             {
                 if (!e.GuildId.HasValue) return;
 
-                var row = await MessageLogs.GetRowAsync(e.GuildId.Value);
-                if ((row.DeletedChannelId == 0 && row.EditedChannelId == 0) ||
-                    row.ExcludedChannels.Contains(e.ChannelId)) return;
+                var db = scope.GetDbContext();
+                var config = await db.MessageLogsConfigurations.GetForGuildAsync(e.GuildId.Value);
+                if (config is null || (config.DeletedChannelId == 0 && config.EditedChannelId == 0) || config.ExcludedChannels.Contains(e.ChannelId)) return;
 
-                var message =
-                    await MessageLogs.GetMessageAsync(e.GuildId.Value, e.ChannelId, e.MessageId);
-                if (message is null) return;
+                var messageRecord = await db.MessageLogsMessages.GetForMessageAsync(e.MessageId);
+                if (messageRecord is null) return;
 
-                var member = _client.GetMember(e.GuildId.Value, message.UserId) ?? await _client.FetchMemberAsync(e.GuildId.Value, message.UserId);
+                var member = _client.GetMember(e.GuildId.Value, messageRecord.AuthorId) ?? await _client.FetchMemberAsync(e.GuildId.Value, messageRecord.AuthorId);
                 if (member is not null && member.IsBot) return;
 
-                var embed = GetDeletedEmbed(message, member);
+                var embed = GetDeletedEmbed(messageRecord, member);
 
-                await MessageLogs.DeleteMessagesAsync(e.GuildId.Value, e.ChannelId, new[] {e.MessageId.RawValue});
-
-                ITextChannel logChannel = _client.GetTextChannel(e.GuildId.Value, row.DeletedChannelId);
+                db.MessageLogsMessages.Remove(messageRecord);
+                await db.SaveChangesAsync();
+                
+                ITextChannel logChannel = _client.GetTextChannel(e.GuildId.Value, config.DeletedChannelId);
                 if (logChannel is not null) await logChannel.SendEmbedAsync(embed);
             }
             catch (Exception ex)
@@ -130,21 +129,25 @@ namespace Utili.Services
             }
         }
 
-        public async Task MessagesDeleted(MessagesDeletedEventArgs e)
+        public async Task MessagesDeleted(IServiceScope scope, MessagesDeletedEventArgs e)
         {
             try
             {
-                var row = await MessageLogs.GetRowAsync(e.GuildId);
-                if ((row.DeletedChannelId == 0 && row.EditedChannelId == 0) ||
-                    row.ExcludedChannels.Contains(e.ChannelId)) return;
+                var db = scope.GetDbContext();
+                var config = await db.MessageLogsConfigurations.GetForGuildAsync(e.GuildId);
+                if (config is null || (config.DeletedChannelId == 0 && config.EditedChannelId == 0) || config.ExcludedChannels.Contains(e.ChannelId)) return;
 
-                var messages = await MessageLogs.GetMessagesAsync(e.GuildId, e.ChannelId, e.MessageIds.Select(x => x.RawValue).ToArray());
+                var messages = await db.MessageLogsMessages.Where(x => e.MessageIds.Contains(x.MessageId)).ToListAsync();
 
-                var embed = GetBulkDeletedEmbed(e, await PasteMessagesAsync(messages, e.MessageIds.Count), messages);
+                var embed = GetBulkDeletedEmbed(e, await PasteMessagesAsync(messages, e.MessageIds.Count), messages.Count);
+
+                if (messages.Any())
+                {
+                    db.MessageLogsMessages.RemoveRange(messages);
+                    await db.SaveChangesAsync();
+                }
                 
-                await MessageLogs.DeleteMessagesAsync(e.GuildId, e.ChannelId, e.MessageIds.Select(x => x.RawValue).ToArray());
-
-                ITextChannel logChannel = _client.GetTextChannel(e.GuildId, row.DeletedChannelId);
+                ITextChannel logChannel = _client.GetTextChannel(e.GuildId, config.DeletedChannelId);
                 if (logChannel is not null) await logChannel.SendEmbedAsync(embed);
             }
             catch (Exception ex)
@@ -153,62 +156,62 @@ namespace Utili.Services
             }
         }
 
-        private LocalEmbed GetEditedEmbed(IUserMessage newMessage, MessageLogsMessageRow previousMessage)
+        private LocalEmbed GetEditedEmbed(IUserMessage newMessage, MessageLogsMessage messageRecord)
         {
             var builder = new LocalEmbed()
                 .WithColor(new Color(66, 182, 245))
-                .WithDescription($"**Message by {newMessage.Author.Mention} edited in {Mention.TextChannel(newMessage.ChannelId)}** [Jump]({newMessage.GetJumpUrl(previousMessage.GuildId)})")
+                .WithDescription($"**Message by {newMessage.Author.Mention} edited in {Mention.TextChannel(newMessage.ChannelId)}** [Jump]({newMessage.GetJumpUrl(messageRecord.GuildId)})")
                 .WithAuthor(newMessage.Author)
-                .WithFooter($"Message {previousMessage.MessageId}")
-                .WithTimestamp(DateTime.SpecifyKind(previousMessage.Timestamp, DateTimeKind.Utc));
+                .WithFooter($"Message {messageRecord.MessageId}")
+                .WithTimestamp(DateTime.SpecifyKind(messageRecord.Timestamp, DateTimeKind.Utc));
 
-            if (previousMessage.Content.Value.Length > 1024 || newMessage.Content.Length > 1024)
+            if (messageRecord.Content.Length > 1024 || newMessage.Content.Length > 1024)
             {
-                if (previousMessage.Content.Value.Length < 2024 - builder.Description.Length - 2)
-                    builder.Description += $"\n{previousMessage.Content.Value}";
+                if (messageRecord.Content.Length < 2024 - builder.Description.Length - 2)
+                    builder.Description += $"\n{messageRecord.Content}";
                 else
                     builder.Description += "\nThe message is too large to fit in this embed";
             }
             else
             {
-                builder.AddField("Before", previousMessage.Content.Value);
+                builder.AddField("Before", messageRecord.Content);
                 builder.AddField("After", newMessage.Content);
             }
 
             return builder;
         }
 
-        private LocalEmbed GetDeletedEmbed(MessageLogsMessageRow deletedMessage, IMember member)
+        private LocalEmbed GetDeletedEmbed(MessageLogsMessage deletedMessage, IMember member)
         {
             var builder = new LocalEmbed()
                 .WithColor(new Color(245, 66, 66))
-                .WithDescription($"**Message by {Mention.User(deletedMessage.UserId)} deleted in {Mention.TextChannel(deletedMessage.ChannelId)}**")
+                .WithDescription($"**Message by {Mention.User(deletedMessage.AuthorId)} deleted in {Mention.TextChannel(deletedMessage.ChannelId)}**")
                 .WithFooter($"Message {deletedMessage.MessageId}")
                 .WithTimestamp(DateTime.SpecifyKind(deletedMessage.Timestamp, DateTimeKind.Utc));
 
             if (member is null) builder.WithAuthor("Unknown member");
             else builder.WithAuthor(member);
 
-            if (deletedMessage.Content.Value.Length > 2024 - builder.Description.Length - 2)
+            if (deletedMessage.Content.Length > 2024 - builder.Description.Length - 2)
                 builder.Description += "\nThe message is too large to fit in this embed";
             else
-                builder.Description += $"\n{deletedMessage.Content.Value}";
+                builder.Description += $"\n{deletedMessage.Content}";
 
             return builder;
         }
 
-        private LocalEmbed GetBulkDeletedEmbed(MessagesDeletedEventArgs e, string paste, List<MessageLogsMessageRow> messages)
+        private LocalEmbed GetBulkDeletedEmbed(MessagesDeletedEventArgs e, string paste, int loggedCount)
         {
             var builder = new LocalEmbed()
                 .WithColor(new Color(245, 66, 66))
                 .WithDescription($"**{e.MessageIds.Count} messages bulk deleted in {Mention.TextChannel(e.ChannelId)}**\n" +
-                                 $"[View {messages.Count} logged message{(messages.Count == 1 ? "" : "s")}]({paste})")
+                                 $"[View {loggedCount} logged message{(loggedCount == 1 ? "" : "s")}]({paste})")
                 .WithAuthor("Bulk Deletion");
 
             return builder;
         }
 
-        private async Task<string> PasteMessagesAsync(List<MessageLogsMessageRow> messages, int total)
+        private async Task<string> PasteMessagesAsync(List<MessageLogsMessage> messages, int total)
         {
             try
             {
@@ -223,10 +226,10 @@ namespace Utili.Services
 
                 foreach (var message in messages)
                 {
-                    if (!cachedUsers.TryGetValue(message.UserId, out var user))
+                    if (!cachedUsers.TryGetValue(message.AuthorId, out var user))
                     {
-                        user = await _client.FetchUserAsync(message.UserId);
-                        cachedUsers.Add(message.UserId, user);
+                        user = await _client.FetchUserAsync(message.AuthorId);
+                        cachedUsers.Add(message.AuthorId, user);
                         await Task.Delay(500);
                     }
 
@@ -234,7 +237,7 @@ namespace Utili.Services
                     else sb.AppendLine($"{user} ({user.Id})");
                     sb.AppendLine($" at {message.Timestamp.ToUniversalFormat()} UTC");
 
-                    var messageContent = "    " + message.Content.Value.Replace("\n", "\n    ");
+                    var messageContent = "    " + message.Content.Replace("\n", "\n    ");
 
                     sb.AppendLine($"{messageContent}\n");
                 }

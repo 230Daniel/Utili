@@ -6,7 +6,9 @@ using Database.Data;
 using Disqord;
 using Disqord.Gateway;
 using Disqord.Rest;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using NewDatabase.Extensions;
 using Utili.Extensions;
 
 namespace Utili.Services
@@ -26,19 +28,21 @@ namespace Utili.Services
             _channelsRequiringUpdate = new List<(ulong, ulong)>();
         }
 
-        public async Task VoiceStateUpdated(VoiceStateUpdatedEventArgs e)
+        public async Task VoiceStateUpdated(IServiceScope scope, VoiceStateUpdatedEventArgs e)
         {
             try
             {
-                var row = await VoiceLink.GetRowAsync(e.GuildId);
-                if (!row.Enabled) return;
+                var db = scope.GetDbContext();
+                var config = await db.VoiceLinkConfigurations.GetForGuildAsync(e.GuildId);
+                if (config is null || !config.Enabled) return;
+                
                 lock (_channelsRequiringUpdate)
                 {
                     if (e.NewVoiceState?.ChannelId is not null &&
-                        !row.ExcludedChannels.Contains(e.NewVoiceState.ChannelId.Value))
+                        !config.ExcludedChannels.Contains(e.NewVoiceState.ChannelId.Value))
                         _channelsRequiringUpdate.Add((e.GuildId, e.NewVoiceState.ChannelId.Value));
                     if (e.OldVoiceState?.ChannelId is not null &&
-                        !row.ExcludedChannels.Contains(e.OldVoiceState.ChannelId.Value))
+                        !config.ExcludedChannels.Contains(e.OldVoiceState.ChannelId.Value))
                         _channelsRequiringUpdate.Add((e.GuildId, e.OldVoiceState.ChannelId.Value));
                 }
             }

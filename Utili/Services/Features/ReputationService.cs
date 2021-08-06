@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
-using Database.Data;
 using Disqord;
 using Disqord.Gateway;
 using Disqord.Rest;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using NewDatabase.Extensions;
 using Utili.Extensions;
 
 namespace Utili.Services
@@ -21,7 +22,7 @@ namespace Utili.Services
             _client = client;
         }
 
-        public async Task ReactionAdded(ReactionAddedEventArgs e)
+        public async Task ReactionAdded(IServiceScope scope, ReactionAddedEventArgs e)
         {
             try
             {
@@ -30,9 +31,12 @@ namespace Utili.Services
                 IGuild guild = _client.GetGuild(e.GuildId.Value);
                 ITextChannel channel = guild.GetTextChannel(e.ChannelId);
 
-                var row = await Reputation.GetRowAsync(e.GuildId.Value);
-                if (!row.Emotes.Any(x => guild.GetEmoji(x.Item1).Equals(e.Emoji))) return;
-                var change = row.Emotes.First(x => Equals(x.Item1, e.Emoji.ToString())).Item2;
+                var db = scope.GetDbContext();
+                var config = await db.ReputationConfigurations.GetForGuildAsync(e.GuildId.Value);
+                if (config is null) return;
+
+                var emojiConfig = config.Emojis.FirstOrDefault(x => Equals(x.Emoji, e.Emoji.ToString()));
+                if(emojiConfig is null) return;
 
                 var message = e.Message ?? await channel.FetchMessageAsync(e.MessageId) as IUserMessage;
                 if(message is null || message.Author.IsBot || message.Author.Id == e.UserId) return;
@@ -40,7 +44,8 @@ namespace Utili.Services
                 var reactor = e.Member ?? await guild.FetchMemberAsync(e.UserId);
                 if(reactor is null || reactor.IsBot) return;
 
-                await Reputation.AlterUserReputationAsync(guild.Id, message.Author.Id, change);
+                await db.ReputationMembers.UpdateMemberReputationAsync(e.GuildId.Value, message.Author.Id, emojiConfig.Value);
+                await db.SaveChangesAsync();
             }
             catch (Exception ex)
             {
@@ -48,7 +53,7 @@ namespace Utili.Services
             }
         }
 
-        public async Task ReactionRemoved(ReactionRemovedEventArgs e)
+        public async Task ReactionRemoved(IServiceScope scope, ReactionRemovedEventArgs e)
         {
             try
             {
@@ -57,9 +62,12 @@ namespace Utili.Services
                 IGuild guild = _client.GetGuild(e.GuildId.Value);
                 ITextChannel channel = guild.GetTextChannel(e.ChannelId);
 
-                var row = await Reputation.GetRowAsync(e.GuildId.Value);
-                if (!row.Emotes.Any(x => guild.GetEmoji(x.Item1).Equals(e.Emoji))) return;
-                var change = -1 * row.Emotes.First(x => Equals(x.Item1, e.Emoji.ToString())).Item2;
+                var db = scope.GetDbContext();
+                var config = await db.ReputationConfigurations.GetForGuildAsync(e.GuildId.Value);
+                if (config is null) return;
+
+                var emojiConfig = config.Emojis.FirstOrDefault(x => Equals(x.Emoji, e.Emoji.ToString()));
+                if(emojiConfig is null) return;
 
                 var message = e.Message ?? await channel.FetchMessageAsync(e.MessageId) as IUserMessage;
                 if(message is null || message.Author.IsBot || message.Author.Id == e.UserId) return;
@@ -67,7 +75,8 @@ namespace Utili.Services
                 var reactor = await guild.FetchMemberAsync(e.UserId);
                 if(reactor is null || reactor.IsBot) return;
 
-                await Reputation.AlterUserReputationAsync(guild.Id, message.Author.Id, change);
+                await db.ReputationMembers.UpdateMemberReputationAsync(e.GuildId.Value, message.Author.Id, -emojiConfig.Value);
+                await db.SaveChangesAsync();
             }
             catch (Exception ex)
             {

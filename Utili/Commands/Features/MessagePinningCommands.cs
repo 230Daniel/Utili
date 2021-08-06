@@ -1,7 +1,6 @@
 ﻿using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Database.Data;
 using Disqord;
 using Disqord.Bot;
 using Disqord.Rest;

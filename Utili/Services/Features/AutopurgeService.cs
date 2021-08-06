@@ -8,6 +8,7 @@ using Disqord;
 using Disqord.Gateway;
 using Disqord.Http;
 using Disqord.Rest;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NewDatabase.Entities;
@@ -159,20 +160,24 @@ namespace Utili.Services
             }
         }
 
-        public async Task MessageUpdated(MessageUpdatedEventArgs e)
+        public async Task MessageUpdated(IServiceScope scope, MessageUpdatedEventArgs e)
         {
             try
             {
                 if (!e.GuildId.HasValue || !e.Model.Pinned.HasValue) return;
-                var row = await Autopurge.GetRowAsync(e.GuildId.Value, e.ChannelId);
-                if (row.Mode == 2) return;
 
-                var messageRow = (await Autopurge.GetMessagesAsync(e.GuildId.Value, e.ChannelId, e.MessageId)).FirstOrDefault();
-                if (messageRow is null) return;
-                if (messageRow.IsPinned != e.Model.Pinned.Value)
+                var db = scope.GetDbContext();
+                var config = await db.AutopurgeConfigurations.GetForGuildChannelAsync(e.GuildId.Value, e.ChannelId);
+                if(config is null) return;
+
+                var messageRecord = await db.AutopurgeMessages.GetForMessageAsync(e.MessageId);
+                if (messageRecord is null) return;
+                
+                if (messageRecord.IsPinned != e.Model.Pinned.Value)
                 {
-                    messageRow.IsPinned = e.Model.Pinned.Value;
-                    await Autopurge.SaveMessageAsync(messageRow);
+                    messageRecord.IsPinned = e.Model.Pinned.Value;
+                    db.AutopurgeMessages.Update(messageRecord);
+                    await db.SaveChangesAsync();
                 }
             }
             catch (Exception ex)
@@ -181,19 +186,21 @@ namespace Utili.Services
             }
         }
 
-        public async Task MessageDeleted(MessageDeletedEventArgs e)
+        public async Task MessageDeleted(IServiceScope scope, MessageDeletedEventArgs e)
         {
             try
             {
                 if (!e.GuildId.HasValue) return;
-                var row = await Autopurge.GetRowAsync(e.GuildId.Value, e.ChannelId);
-                if (row.Mode == 2) return;
 
-                var messageRow =
-                    (await Autopurge.GetMessagesAsync(e.GuildId.Value, e.ChannelId, e.MessageId)).FirstOrDefault();
-                if (messageRow is null) return;
-                
-                await Autopurge.DeleteMessageAsync(messageRow);
+                var db = scope.GetDbContext();
+                var config = await db.AutopurgeConfigurations.GetForGuildChannelAsync(e.GuildId.Value, e.ChannelId);
+                if (config is null) return;
+
+                var messageRecord = await db.AutopurgeMessages.GetForMessageAsync(e.MessageId);
+                if (messageRecord is null) return;
+
+                db.AutopurgeMessages.Remove(messageRecord);
+                await db.SaveChangesAsync();
             }
             catch (Exception ex)
             {
@@ -201,14 +208,21 @@ namespace Utili.Services
             }
         }
         
-        public async Task MessagesDeleted(MessagesDeletedEventArgs e)
+        public async Task MessagesDeleted(IServiceScope scope, MessagesDeletedEventArgs e)
         {
             try
             {
-                var row = await Autopurge.GetRowAsync(e.GuildId, e.ChannelId);
-                if (row.Mode == 2) return;
+                var db = scope.GetDbContext();
+                var config = await db.AutopurgeConfigurations.GetForGuildChannelAsync(e.GuildId, e.ChannelId);
+                if(config is null) return;
 
-                await Autopurge.DeleteMessagesAsync(row, e.MessageIds.Select(x => x.RawValue).ToArray());
+                var messages = await db.AutopurgeMessages.Where(x => e.MessageIds.Contains(x.MessageId)).ToListAsync();
+                
+                if (messages.Any())
+                {
+                    db.AutopurgeMessages.RemoveRange(messages);
+                    await db.SaveChangesAsync();
+                }
             }
             catch (Exception ex)
             {

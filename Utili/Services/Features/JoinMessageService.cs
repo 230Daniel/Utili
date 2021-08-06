@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Database.Data;
 using Disqord;
 using Disqord.Gateway;
 using Disqord.Rest;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NewDatabase.Entities;
+using NewDatabase.Extensions;
 using Utili.Extensions;
 
 namespace Utili.Services
@@ -21,22 +22,27 @@ namespace Utili.Services
             _client = client;
         }
 
-        public async Task MemberJoined(MemberJoinedEventArgs e)
+        public async Task MemberJoined(IServiceScope scope, MemberJoinedEventArgs e)
         {
             try
             {
-                var row = await JoinMessage.GetRowAsync(e.GuildId);
-
-                if (row.Enabled)
+                var db = scope.GetDbContext();
+                var config = await db.JoinMessageConfigurations.GetForGuildAsync(e.GuildId);
+                if (config is null || !config.Enabled) return;
+                
+                var message = GetJoinMessage(config, e.Member);
+                if (config.Mode == JoinMessageMode.DirectMessage)
                 {
-                    var message = GetJoinMessage(row, e.Member);
-                    if (row.Direct) try { await e.Member.SendMessageAsync(message); } catch { }
-                    else
+                    try
                     {
-                        ITextChannel channel = _client.GetTextChannel(e.GuildId, row.ChannelId);
-                        if(!channel.BotHasPermissions(Permission.ViewChannel | Permission.SendMessages | Permission.EmbedLinks)) return;
-                        await channel.SendMessageAsync(message);
-                    }
+                        await e.Member.SendMessageAsync(message);
+                    } catch { }
+                }
+                else
+                {
+                    ITextChannel channel = _client.GetTextChannel(e.GuildId, config.ChannelId);
+                    if(!channel.BotHasPermissions(Permission.ViewChannel | Permission.SendMessages | Permission.EmbedLinks)) return;
+                    await channel.SendMessageAsync(message);
                 }
             }
             catch(Exception ex)

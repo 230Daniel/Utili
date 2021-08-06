@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
-using Database.Data;
 using Disqord;
 using Disqord.Gateway;
 using Disqord.Rest;

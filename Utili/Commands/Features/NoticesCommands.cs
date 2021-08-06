@@ -1,10 +1,8 @@
 ﻿using System.Threading.Tasks;
-using Database.Data;
 using Disqord;
 using Disqord.Bot;
 using Disqord.Rest;
 using NewDatabase;
-using NewDatabase.Entities;
 using NewDatabase.Extensions;
 using Qmmands;
 using Utili.Implementations;

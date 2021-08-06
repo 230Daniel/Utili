@@ -7,7 +7,10 @@ using Database.Data;
 using Disqord;
 using Disqord.Gateway;
 using Disqord.Rest;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using NewDatabase.Extensions;
 using Utili.Extensions;
 
 namespace Utili.Services
@@ -16,13 +19,15 @@ namespace Utili.Services
     {
         private readonly ILogger<JoinRolesService> _logger;
         private readonly DiscordClientBase _client;
-
+        private readonly IServiceScopeFactory _scopeFactory;
+        
         private Dictionary<(ulong, ulong), Timer> _pendingTimers = new();
-
-        public JoinRolesService(ILogger<JoinRolesService> logger, DiscordClientBase client)
+        
+        public JoinRolesService(ILogger<JoinRolesService> logger, DiscordClientBase client, IServiceScopeFactory scopeFactory)
         {
             _logger = logger;
             _client = client;
+            _scopeFactory = scopeFactory;
         }
 
         public void Start()
@@ -30,14 +35,15 @@ namespace Utili.Services
             _ = ScheduleAllAddRoles();
         }
 
-        public async Task MemberJoined(MemberJoinedEventArgs e)
+        public async Task MemberJoined(IServiceScope scope, MemberJoinedEventArgs e)
         {
             try
             {
-                var row = await JoinRoles.GetRowAsync(e.GuildId);
+                var db = scope.GetDbContext();
+                var config = await db.JoinRolesConfigurations.GetForGuildAsync(e.GuildId);
                 IGuild guild = _client.GetGuild(e.GuildId);
 
-                if (row.WaitForVerification && (e.Member.IsPending || guild.VerificationLevel >= GuildVerificationLevel.High))
+                if (config.WaitForVerification && (e.Member.IsPending || guild.VerificationLevel >= GuildVerificationLevel.High))
                 {
                     var pendingRow = await JoinRoles.GetPendingRowAsync(e.GuildId, e.Member.Id);
                     pendingRow.IsPending = e.Member.IsPending;
@@ -50,7 +56,7 @@ namespace Utili.Services
                     return;
                 }
 
-                await AddRolesAsync(e.GuildId, e.Member.Id, false, row);
+                await AddRolesAsync(e.GuildId, e.Member.Id, false, config.JoinRoles);
             }
             catch(Exception ex)
             {
@@ -58,38 +64,46 @@ namespace Utili.Services
             }
         }
 
-        public async Task MemberUpdated(MemberUpdatedEventArgs e)
+        public async Task MemberUpdated(IServiceScope scope, MemberUpdatedEventArgs e)
         {
             try
             {
                 var guildId = e.NewMember.GuildId;
 
-                var row = await JoinRoles.GetRowAsync(guildId);
-                var pendingRow = await JoinRoles.GetPendingRowAsync(guildId, e.MemberId);
-                if (pendingRow.New) return;
+                var db = scope.GetDbContext();
+
+                var memberRecord = await db.JoinRolesPendingMembers.GetForMemberAsync(guildId, e.MemberId);
+                if (memberRecord is null) return;
+
+                var record = await db.JoinRolesConfigurations.GetForGuildAsync(guildId);
+                if (record is null) return;
                 
                 if (e.NewMember.RoleIds.Any())
                 {
                     // The member has been given a role, so all delays are now irrelevant
-                    await pendingRow.DeleteAsync();
-                    await AddRolesAsync(guildId, e.NewMember.Id, false, row);
+                    db.JoinRolesPendingMembers.Remove(memberRecord);
+                    await db.SaveChangesAsync();
+                    await AddRolesAsync(guildId, e.NewMember.Id, false, record.JoinRoles);
                 }
                 
-                if (pendingRow.IsPending && !e.NewMember.IsPending)
+                if (memberRecord.IsPending && !e.NewMember.IsPending)
                 {
                     // The member has completed membership screening
 
-                    if (pendingRow.ScheduledFor < DateTime.UtcNow)
+                    if (memberRecord.ScheduledFor < DateTime.UtcNow)
                     {
                         // ... and they have waited for 10 minutes (or the 10 minute wait is disabled)
-                        await pendingRow.DeleteAsync();
-                        await AddRolesAsync(guildId, e.NewMember.Id, false, row);
-                        return;
+                        db.JoinRolesPendingMembers.Remove(memberRecord);
+                        await db.SaveChangesAsync();
+                        await AddRolesAsync(guildId, e.NewMember.Id, false, record.JoinRoles);
                     }
-                    
-                    // ... but they still have to wait for 10 minutes before getting their roles
-                    pendingRow.IsPending = false;
-                    await pendingRow.SaveAsync();
+                    else
+                    {
+                        // ... but they still have to wait for 10 minutes before getting their roles
+                        memberRecord.IsPending = false;
+                        db.JoinRolesPendingMembers.Update(memberRecord);
+                        await db.SaveChangesAsync();
+                    }
                 }
             }
             catch(Exception ex)
@@ -98,20 +112,28 @@ namespace Utili.Services
             }
         }
 
-        private async Task AddRolesAsync(ulong guildId, ulong memberId, bool fromDelay, JoinRolesRow row = null)
+        private async Task AddRolesAsync(ulong guildId, ulong memberId, bool fromDelay, List<ulong> joinRoles = null)
         {
-            if (fromDelay)
+            if (fromDelay || joinRoles is null)
             {
-                var pendingRow = await JoinRoles.GetPendingRowAsync(guildId, memberId);
-                // If the member is yet to complete membership screening they will be granted their roles when they do so.
-                if (pendingRow.IsPending) return;
-                await pendingRow.DeleteAsync();
+                using var scope = _scopeFactory.CreateScope();
+                var db = scope.GetDbContext();
+                
+                if (fromDelay)
+                {
+                    var pendingRecord = await db.JoinRolesPendingMembers.GetForMemberAsync(guildId, memberId);
+                    // If the member is yet to complete membership screening they will be granted their roles when they do so.
+                    if (pendingRecord.IsPending) return;
+                    db.JoinRolesPendingMembers.Remove(pendingRecord);
+                    await db.SaveChangesAsync();
+                }
+                
+                joinRoles ??= (await db.JoinRolesConfigurations.GetForGuildAsync(guildId)).JoinRoles;
             }
-            
-            row ??= await JoinRoles.GetRowAsync(guildId);
+
             IGuild guild = _client.GetGuild(guildId);
 
-            var roles = row.JoinRoles.Select(x => guild.GetRole(x)).ToList();
+            var roles = joinRoles.Select(x => guild.GetRole(x)).ToList();
             roles.RemoveAll(x => x is null || !x.CanBeManaged());
             
             var roleIds = roles.Select(x => x.Id).ToList();
@@ -125,20 +147,23 @@ namespace Utili.Services
 
         private async Task ScheduleAllAddRoles()
         {
-            var rows = await JoinRoles.GetPendingRowsAsync();
-            foreach(var row in rows)
+            using var scope = _scopeFactory.CreateScope();
+            var db = scope.GetDbContext();
+            var records = await db.JoinRolesPendingMembers.ToListAsync();
+            
+            foreach(var record in records)
             {
                 try
                 {
-                    ScheduleAddRoles(row.GuildId, row.UserId, row.ScheduledFor);
+                    ScheduleAddRoles(record.GuildId, record.MemberId, record.ScheduledFor);
                 }
                 catch (Exception e)
                 {
-                    _logger.LogError(e, $"Exception thrown re-scheduling pending join role user {row.GuildId}/{row.GuildId} (for {row.ScheduledFor})");
+                    _logger.LogError(e, $"Exception thrown re-scheduling pending join role user {record.GuildId}/{record.GuildId} (for {record.ScheduledFor})");
                 }
             }
 
-            if(rows.Count > 0) _logger.LogInformation($"Re-scheduled {rows.Count} pending join role user{(rows.Count == 1 ? "" : "s")}");
+            if(records.Count > 0) _logger.LogInformation($"Re-scheduled {records.Count} pending join role user{(records.Count == 1 ? "" : "s")}");
         }
 
         private void ScheduleAddRoles(ulong guildId, ulong memberId, DateTime due)
