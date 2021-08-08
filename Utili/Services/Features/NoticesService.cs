@@ -50,6 +50,8 @@ namespace Utili.Services
 
                 var db = scope.GetDbContext();
                 var config = await db.NoticeConfigurations.GetForGuildChannelAsync(e.GuildId.Value, e.ChannelId);
+                if (config is null) return;
+                
                 if (config.Enabled && e.Message is ISystemMessage && e.Message.Author.Id == _client.CurrentUser.Id)
                 {
                     await e.Message.DeleteAsync();

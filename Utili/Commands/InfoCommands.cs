@@ -128,7 +128,7 @@ namespace Utili.Commands
             embed.WithColor(color);
 
             embed.AddInlineField("Discord", $"Gateway: {gateway}ms\nRest: {rest}ms");
-            embed.AddInlineField("System", $"CPU: {cpu}%\nRAM: {memory}%");
+            embed.AddInlineField("System", $"CPU: {cpu}%\nMemory: {memory}%");
             
             await Context.Channel.SendEmbedAsync(embed);
         }

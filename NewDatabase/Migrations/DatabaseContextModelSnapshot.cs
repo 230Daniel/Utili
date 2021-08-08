@@ -30,6 +30,10 @@ namespace NewDatabase.Migrations
                         .HasColumnType("numeric(20,0)")
                         .HasColumnName("channel_id");
 
+                    b.Property<bool>("AddedFromDashboard")
+                        .HasColumnType("boolean")
+                        .HasColumnName("added_from_dashboard");
+
                     b.Property<int>("Mode")
                         .HasColumnType("integer")
                         .HasColumnName("mode");
@@ -182,6 +186,26 @@ namespace NewDatabase.Migrations
                         .HasName("pk_inactive_role_configurations");
 
                     b.ToTable("inactive_role_configurations");
+                });
+
+            modelBuilder.Entity("NewDatabase.Entities.InactiveRoleMember", b =>
+                {
+                    b.Property<decimal>("GuildId")
+                        .HasColumnType("numeric(20,0)")
+                        .HasColumnName("guild_id");
+
+                    b.Property<decimal>("MemberId")
+                        .HasColumnType("numeric(20,0)")
+                        .HasColumnName("member_id");
+
+                    b.Property<DateTime>("LastAction")
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("last_action");
+
+                    b.HasKey("GuildId", "MemberId")
+                        .HasName("pk_inactive_role_members");
+
+                    b.ToTable("inactive_role_members");
                 });
 
             modelBuilder.Entity("NewDatabase.Entities.JoinMessageConfiguration", b =>
@@ -597,6 +621,26 @@ namespace NewDatabase.Migrations
                         .HasName("pk_role_persist_configurations");
 
                     b.ToTable("role_persist_configurations");
+                });
+
+            modelBuilder.Entity("NewDatabase.Entities.RolePersistMember", b =>
+                {
+                    b.Property<decimal>("GuildId")
+                        .HasColumnType("numeric(20,0)")
+                        .HasColumnName("guild_id");
+
+                    b.Property<decimal>("MemberId")
+                        .HasColumnType("numeric(20,0)")
+                        .HasColumnName("member_id");
+
+                    b.Property<decimal[]>("Roles")
+                        .HasColumnType("numeric(20,0)[]")
+                        .HasColumnName("roles");
+
+                    b.HasKey("GuildId", "MemberId")
+                        .HasName("pk_role_persist_members");
+
+                    b.ToTable("role_persist_members");
                 });
 
             modelBuilder.Entity("NewDatabase.Entities.ShardDetail", b =>

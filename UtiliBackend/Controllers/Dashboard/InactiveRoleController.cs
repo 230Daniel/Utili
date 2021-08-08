@@ -55,11 +55,14 @@ namespace UtiliBackend.Controllers
             {
                 configuration = new InactiveRoleConfiguration(guildId);
                 model.ApplyTo(configuration);
+                configuration.DefaultLastAction = DateTime.UtcNow;
+                configuration.LastUpdate = DateTime.UtcNow.AddMinutes(5);
                 _dbContext.InactiveRoleConfigurations.Add(configuration);
             }
             else
             {
-                model.ApplyTo(configuration);
+                if (configuration.RoleId == 0) configuration.DefaultLastAction = DateTime.UtcNow;
+                    model.ApplyTo(configuration);
                 _dbContext.InactiveRoleConfigurations.Update(configuration);
             }
             

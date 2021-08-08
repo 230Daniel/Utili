@@ -39,7 +39,6 @@ namespace Utili.Services
         public void Start()
         {
             _timer.Start();
-            Timer_Elapsed(null, null);
         }
 
         private void Timer_Elapsed(object sender, ElapsedEventArgs e)

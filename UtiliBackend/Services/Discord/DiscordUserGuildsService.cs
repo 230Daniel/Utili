@@ -46,7 +46,7 @@ namespace UtiliBackend.Services
             lock (_cachedUserGuilds)
             {
                 _cachedUserGuilds.Remove(client.CurrentUser.Id);
-                _cachedUserGuilds.Add(client.CurrentUser.Id, (guilds, DateTime.Now.Add(CacheDuration)));
+                _cachedUserGuilds.Add(client.CurrentUser.Id, (guilds, DateTime.UtcNow.Add(CacheDuration)));
             }
 
             return guilds;

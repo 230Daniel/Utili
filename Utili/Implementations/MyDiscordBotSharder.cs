@@ -23,7 +23,8 @@ namespace Utili.Implementations
 
             var db = context.Services.GetDbContext();
             var config = await db.CoreConfigurations.GetForGuildAsync(context.GuildId.Value);
-
+            if (config is null) return true;
+            
             return !config.NonCommandChannels.Contains(context.ChannelId) 
                 ? config.CommandsEnabled 
                 : !config.CommandsEnabled;

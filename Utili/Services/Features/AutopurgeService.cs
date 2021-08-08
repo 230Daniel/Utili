@@ -117,7 +117,7 @@ namespace Utili.Services
                 var channel = guild.GetTextChannel(config.ChannelId);
                 if(!channel.BotHasPermissions(Permission.ViewChannel | Permission.ReadMessageHistory | Permission.ManageMessages)) return;
 
-                var now = DateTimeOffset.UtcNow;
+                var now = DateTime.UtcNow;
                 var maxTimestamp = now - config.Timespan;
                 var minTimestamp = now - TimeSpan.FromDays(13.9);
                 
@@ -139,10 +139,10 @@ namespace Utili.Services
                 
                 if(messagesToDelete.Count == 0) return;
                 
-                await channel.DeleteMessagesAsync(messagesToDelete.Select(x => new Snowflake(x.MessageId)), new DefaultRestRequestOptions {Reason = "Autopurge"});
-
                 db.AutopurgeMessages.RemoveRange(messagesToDelete);
                 await db.SaveChangesAsync();
+                
+                await channel.DeleteMessagesAsync(messagesToDelete.Select(x => new Snowflake(x.MessageId)), new DefaultRestRequestOptions {Reason = "Autopurge"});
             }
             catch (RestApiException ex) when (ex.StatusCode == HttpResponseStatusCode.NotFound)
             {
@@ -256,8 +256,8 @@ namespace Utili.Services
                 var db = scope.GetDbContext();
                 var config = await db.AutopurgeConfigurations.GetForGuildChannelAsync(e.GuildId, e.ChannelId);
                 if(config is null) return;
-
-                var messages = await db.AutopurgeMessages.Where(x => e.MessageIds.Contains(x.MessageId)).ToListAsync();
+                
+                var messages = await db.AutopurgeMessages.Where(x => e.MessageIds.Select(y => y.RawValue).Contains(x.MessageId)).ToListAsync();
                 
                 if (messages.Any())
                 {

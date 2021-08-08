@@ -60,7 +60,7 @@ namespace Utili
 
         private static void ConfigureServices(HostBuilderContext context, IServiceCollection services)
         {
-            services.AddDbContextFactory<DatabaseContext>();
+            services.AddDbContext<DatabaseContext>();
             
             services.AddInteractivity();
             services.AddPrefixProvider<PrefixProvider>();

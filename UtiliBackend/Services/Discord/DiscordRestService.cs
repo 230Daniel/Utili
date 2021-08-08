@@ -66,7 +66,7 @@ namespace UtiliBackend.Services
             lock (_cachedGuilds)
             {
                 _cachedGuilds.Remove(guildId);
-                _cachedGuilds.Add(guildId, (guild, DateTime.Now.Add(GuildCacheDuration)));
+                _cachedGuilds.Add(guildId, (guild, DateTime.UtcNow.Add(GuildCacheDuration)));
             }
 
             return guild;
@@ -94,7 +94,7 @@ namespace UtiliBackend.Services
             lock (_cachedTextChannels)
             {
                 _cachedTextChannels.Remove(guild.Id);
-                _cachedTextChannels.Add(guild.Id, (channels, DateTime.Now.Add(TextChannelCacheDuration)));
+                _cachedTextChannels.Add(guild.Id, (channels, DateTime.UtcNow.Add(TextChannelCacheDuration)));
             }
 
             return channels;
@@ -122,7 +122,7 @@ namespace UtiliBackend.Services
             lock (_cachedVoiceChannels)
             {
                 _cachedVoiceChannels.Remove(guild.Id);
-                _cachedVoiceChannels.Add(guild.Id, (channels, DateTime.Now.Add(VoiceChannelCacheDuration)));
+                _cachedVoiceChannels.Add(guild.Id, (channels, DateTime.UtcNow.Add(VoiceChannelCacheDuration)));
             }
 
             return channels;

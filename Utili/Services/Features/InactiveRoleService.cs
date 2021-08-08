@@ -119,6 +119,8 @@ namespace Utili.Services
                     db.InactiveRoleConfigurations.Update(config);
                 }
 
+                await db.SaveChangesAsync();
+
                 var tasks = configsRequiringUpdate.Select(UpdateGuildAsync);
                 await Task.WhenAll(tasks);
             }

@@ -46,6 +46,7 @@ namespace UtiliBackend.Controllers
                 {
                     configuration = new AutopurgeConfiguration(guildId, channelId);
                     model.ApplyTo(configuration);
+                    configuration.AddedFromDashboard = true;
                     _dbContext.AutopurgeConfigurations.Add(configuration);
                 }
                 else

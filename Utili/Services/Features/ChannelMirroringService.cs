@@ -40,15 +40,16 @@ namespace Utili.Services
                 if (config is null) return;
                 
                 var guild = _client.GetGuild(e.GuildId.Value);
-                var channel = guild.GetTextChannel(config.ChannelId);
-                if(channel is null) return;
+                var destinationChannel = guild.GetTextChannel(config.DestinationChannelId);
+                if(destinationChannel is null) return;
 
-                if(!channel.BotHasPermissions(Permission.ViewChannel | Permission.ManageWebhooks)) return;
+                if(!destinationChannel.BotHasPermissions(Permission.ViewChannel | Permission.ManageWebhooks)) return;
                 
                 IWebhook webhook;
                 try
                 {
                     webhook = await GetWebhookAsync(config.WebhookId);
+                    if (webhook.ChannelId != destinationChannel.Id) webhook = null;
                 }
                 catch (RestApiException ex) when (ex.StatusCode == HttpResponseStatusCode.NotFound)
                 {
@@ -58,7 +59,7 @@ namespace Utili.Services
                 if (webhook is null)
                 {
                     var avatar = File.OpenRead("Avatar.png");
-                    webhook = await channel.CreateWebhookAsync("Utili Mirroring", x => x.Avatar = avatar);
+                    webhook = await destinationChannel.CreateWebhookAsync("Utili Mirroring", x => x.Avatar = avatar);
                     avatar.Close();
 
                     config.WebhookId = webhook.Id;
