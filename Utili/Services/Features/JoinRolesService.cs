@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Database.Data;
 using Disqord;
 using Disqord.Gateway;
 using Disqord.Rest;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using NewDatabase.Entities;
 using NewDatabase.Extensions;
 using Utili.Extensions;
 
@@ -45,14 +45,32 @@ namespace Utili.Services
 
                 if (config.WaitForVerification && (e.Member.IsPending || guild.VerificationLevel >= GuildVerificationLevel.High))
                 {
-                    var pendingRow = await JoinRoles.GetPendingRowAsync(e.GuildId, e.Member.Id);
-                    pendingRow.IsPending = e.Member.IsPending;
-                    if (guild.VerificationLevel >= GuildVerificationLevel.High)
+                    var memberRecord = await db.JoinRolesPendingMembers.GetForMemberAsync(e.GuildId, e.Member.Id);
+                    if (memberRecord is null)
                     {
-                        pendingRow.ScheduledFor = DateTime.UtcNow.AddMinutes(10);
-                        ScheduleAddRoles(e.GuildId, e.Member.Id, DateTime.UtcNow.AddMinutes(10));
+                        memberRecord = new JoinRolesPendingMember(e.GuildId, e.Member.Id)
+                        {
+                            IsPending = e.Member.IsPending,
+                            ScheduledFor = guild.VerificationLevel >= GuildVerificationLevel.High
+                                ? DateTime.UtcNow.AddMinutes(10)
+                                : DateTime.MinValue
+                        };
+                        db.JoinRolesPendingMembers.Add(memberRecord);
                     }
-                    await pendingRow.SaveAsync();
+                    else
+                    {
+                        memberRecord.IsPending = e.Member.IsPending;
+                        memberRecord.ScheduledFor = guild.VerificationLevel >= GuildVerificationLevel.High
+                            ? DateTime.UtcNow.AddMinutes(10)
+                            : DateTime.MinValue;
+                        db.JoinRolesPendingMembers.Update(memberRecord);
+                    }
+                    
+                    await db.SaveChangesAsync();
+                    
+                    if (guild.VerificationLevel >= GuildVerificationLevel.High)
+                        ScheduleAddRoles(e.GuildId, e.Member.Id, DateTime.UtcNow.AddMinutes(10));
+                    
                     return;
                 }
 

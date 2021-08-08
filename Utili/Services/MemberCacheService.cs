@@ -3,11 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Timers;
-using Database.Data;
 using Disqord;
 using Disqord.Gateway;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Utili.Extensions;
 
 namespace Utili.Services
 {
@@ -16,15 +18,18 @@ namespace Utili.Services
         private readonly ILogger<MemberCacheService> _logger;
         private readonly IConfiguration _configuration;
         private readonly DiscordClientBase _client;
-
+        private readonly IServiceScopeFactory _scopeFactory;
+        
         private List<ulong> _cachedGuilds;
         private Timer _timer;
+        
 
-        public MemberCacheService(ILogger<MemberCacheService> logger, IConfiguration configuration, DiscordClientBase client)
+        public MemberCacheService(ILogger<MemberCacheService> logger, IConfiguration configuration, DiscordClientBase client, IServiceScopeFactory scopeFactory)
         {
             _logger = logger;
             _configuration = configuration;
             _client = client;
+            _scopeFactory = scopeFactory;
 
             _cachedGuilds = new();
             _timer = new(10000);
@@ -79,11 +84,18 @@ namespace Utili.Services
             }
         }
 
-        private static async Task<List<ulong>> GetRequiredDownloadsAsync(IEnumerable<Snowflake> shardGuildIds)
+        private async Task<List<ulong>> GetRequiredDownloadsAsync(IEnumerable<Snowflake> shardGuildIds)
         {
+            using var scope = _scopeFactory.CreateScope();
+            var db = scope.GetDbContext();
             var guildIds = new List<ulong>();
-            guildIds.AddRange((await RolePersist.GetRowsAsync()).Where(x => x.Enabled).Select(x => x.GuildId));
-            guildIds.AddRange((await RoleLinking.GetRowsAsync()).Select(x => x.GuildId));
+
+            var rolePersistConfigs = await db.RolePersistConfigurations.Where(x => x.Enabled).ToListAsync();
+            guildIds.AddRange(rolePersistConfigs.Select(x => x.GuildId));
+
+            var roleLinkingConfigs = await db.RoleLinkingConfigurations.ToListAsync();
+            guildIds.AddRange(roleLinkingConfigs.Select(x => x.GuildId));
+            
             guildIds.RemoveAll(x => !shardGuildIds.Contains(x));
             return guildIds.Distinct().ToList();
         }

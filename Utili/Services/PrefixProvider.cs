@@ -1,20 +1,24 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using Database.Data;
 using Disqord;
 using Disqord.Bot;
 using Disqord.Gateway;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using NewDatabase.Extensions;
+using Utili.Extensions;
 
 namespace Utili.Services
 {
     internal class PrefixProvider : IPrefixProvider
     {
         private IConfiguration _config;
+        private readonly IServiceScopeFactory _scopeFactory;
 
-        public PrefixProvider(IConfiguration config)
+        public PrefixProvider(IConfiguration config, IServiceScopeFactory scopeFactory)
         {
             _config = config;
+            _scopeFactory = scopeFactory;
         }
 
         public async ValueTask<IEnumerable<IPrefix>> GetPrefixesAsync(IGatewayUserMessage message)
@@ -27,11 +31,14 @@ namespace Utili.Services
                     new MentionPrefix((message.Client as DiscordClientBase).CurrentUser.Id)
                 };
             }
+
+            using var scope = _scopeFactory.CreateScope();
+            var db = scope.GetDbContext();
+            var config = await db.CoreConfigurations.GetForGuildAsync(message.GuildId.Value);
             
-            var row = await Core.GetRowAsync(message.GuildId.Value);
             return new IPrefix[]
             {
-                new StringPrefix(string.IsNullOrWhiteSpace(row.Prefix.Value) ? _config.GetValue<string>("defaultPrefix") : row.Prefix.Value),
+                new StringPrefix(string.IsNullOrWhiteSpace(config.Prefix) ? _config.GetValue<string>("defaultPrefix") : config.Prefix),
                 new MentionPrefix((message.Client as DiscordClientBase).CurrentUser.Id)
             };
         }

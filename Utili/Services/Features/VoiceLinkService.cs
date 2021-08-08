@@ -2,12 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Database.Data;
 using Disqord;
 using Disqord.Gateway;
 using Disqord.Rest;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using NewDatabase.Entities;
 using NewDatabase.Extensions;
 using Utili.Extensions;
 
@@ -17,13 +17,15 @@ namespace Utili.Services
     {
         private readonly ILogger<VoiceLinkService> _logger;
         private readonly DiscordClientBase _client;
-
+        private readonly IServiceScopeFactory _scopeFactory;
+        
         private List<(ulong, ulong)> _channelsRequiringUpdate;
-
-        public VoiceLinkService(ILogger<VoiceLinkService> logger, DiscordClientBase client)
+        
+        public VoiceLinkService(ILogger<VoiceLinkService> logger, DiscordClientBase client, IServiceScopeFactory scopeFactory)
         {
             _logger = logger;
             _client = client;
+            _scopeFactory = scopeFactory;
 
             _channelsRequiringUpdate = new List<(ulong, ulong)>();
         }
@@ -89,13 +91,19 @@ namespace Utili.Services
             {
                 try
                 {
+                    using var scope = _scopeFactory.CreateScope();
+                    var db = scope.GetDbContext();
+                    
+                    var config = await db.VoiceLinkConfigurations.GetForGuildAsync(guildId);
+                    if(config is null || !config.Enabled || config.ExcludedChannels.Contains(channelId)) return;
+                    
+                    var channelRecord = await db.VoiceLinkChannels.GetForGuildChannelAsync(guildId, channelId);
+                    
                     var guild = _client.GetGuild(guildId);
                     var voiceChannel = guild.GetVoiceChannel(channelId);
                     if (voiceChannel is null)
                     {
-                        await CloseLinkedChannelAsync(guild, 
-                            await VoiceLink.GetRowAsync(guild.Id), 
-                            await VoiceLink.GetChannelRowAsync(guild.Id, channelId));
+                        await CloseLinkedChannelAsync(scope, guild, config, channelRecord);
                         return;
                     }
                     
@@ -108,20 +116,18 @@ namespace Utili.Services
                     var voiceStates = guild.GetVoiceStates().Where(x => x.Value.ChannelId == voiceChannel.Id).Select(x => x.Value).ToList();
                     var connectedUsers = guild.Members.Values.Where(x => voiceStates.Any(y => y.MemberId == x.Id)).ToList();
 
-                    var channelRow = await VoiceLink.GetChannelRowAsync(guild.Id, voiceChannel.Id);
-                    var metaRow = await VoiceLink.GetRowAsync(guild.Id);
-
-                    ITextChannel textChannel = guild.GetTextChannel(channelRow.TextChannelId);
-
                     if (connectedUsers.All(x => x.IsBot))
                     {
-                        await CloseLinkedChannelAsync(guild, metaRow, channelRow);
+                        await CloseLinkedChannelAsync(scope, guild, config, channelRecord);
                         return;
                     }
-
+                    
+                    ITextChannel textChannel = channelRecord is not null 
+                        ? guild.GetTextChannel(channelRecord.TextChannelId)
+                        : null;
                     if (textChannel is null)
                     {
-                        textChannel = await guild.CreateTextChannelAsync($"{metaRow.Prefix.Value}{voiceChannel.Name}", x =>
+                        textChannel = await guild.CreateTextChannelAsync($"{config.ChannelPrefix}{voiceChannel.Name}", x =>
                         {
                             if (voiceChannel.CategoryId.HasValue) x.ParentId = voiceChannel.CategoryId.Value;
                             x.Topic = $"Users in {voiceChannel.Name} have access - Created by Utili";
@@ -132,8 +138,21 @@ namespace Utili.Services
                             };
                         }, new DefaultRestRequestOptions{Reason = "Voice Link"});
 
-                        channelRow.TextChannelId = textChannel.Id;
-                        await VoiceLink.SaveChannelRowAsync(channelRow);
+                        if (channelRecord is null)
+                        {
+                            channelRecord = new VoiceLinkChannel(guildId, channelId)
+                            {
+                                TextChannelId = textChannel.Id
+                            };
+                            db.VoiceLinkChannels.Add(channelRecord);
+                        }
+                        else
+                        {
+                            channelRecord.TextChannelId = textChannel.Id;
+                            db.VoiceLinkChannels.Update(channelRecord);
+                        }
+                        
+                        await db.SaveChangesAsync();
                     }
                     else
                     {
@@ -186,16 +205,20 @@ namespace Utili.Services
             });
         }
 
-        private static async Task CloseLinkedChannelAsync(IGuild guild, VoiceLinkRow metaRow, VoiceLinkChannelRow channelRow)
+        private static async Task CloseLinkedChannelAsync(IServiceScope scope, IGuild guild, VoiceLinkConfiguration config, VoiceLinkChannel channelRecord)
         {
-            var textChannel = guild.GetTextChannel(channelRow.TextChannelId);
+            if (channelRecord is null) return;
+            var textChannel = guild.GetTextChannel(channelRecord.TextChannelId);
             if (textChannel is null || !textChannel.BotHasPermissions(Permission.ViewChannel | Permission.ManageChannels)) return;
             
-            if (metaRow.DeleteChannels)
+            if (config.DeleteChannels)
             {
                 await textChannel.DeleteAsync(new DefaultRestRequestOptions{Reason = "Voice Link"});
-                channelRow.TextChannelId = 0;
-                await VoiceLink.SaveChannelRowAsync(channelRow);
+                channelRecord.TextChannelId = 0;
+                
+                var db = scope.GetDbContext();
+                db.VoiceLinkChannels.Update(channelRecord);
+                await db.SaveChangesAsync();
             }
             else
             {

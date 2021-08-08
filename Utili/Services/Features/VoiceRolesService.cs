@@ -2,11 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Database.Data;
 using Disqord;
 using Disqord.Gateway;
 using Disqord.Rest;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using NewDatabase.Extensions;
 using Utili.Extensions;
 
 namespace Utili.Services
@@ -15,13 +16,15 @@ namespace Utili.Services
     {
         private readonly ILogger<VoiceRolesService> _logger;
         private readonly DiscordClientBase _client;
-
+        private readonly IServiceScopeFactory _scopeFactory;
+        
         private List<VoiceUpdateRequest> _updateRequests = new();
 
-        public VoiceRolesService(ILogger<VoiceRolesService> logger, DiscordClientBase client)
+        public VoiceRolesService(ILogger<VoiceRolesService> logger, DiscordClientBase client, IServiceScopeFactory scopeFactory)
         {
             _logger = logger;
             _client = client;
+            _scopeFactory = scopeFactory;
         }
 
         public void Start()
@@ -87,24 +90,26 @@ namespace Utili.Services
                     IGuild guild = _client.GetGuild(request.GuildId);
                     IMember member = guild.GetMember(request.MemberId);
 
-                    var rows = await VoiceRoles.GetRowsAsync(request.GuildId);
-                    rows.RemoveAll(x => guild.GetRole(x.RoleId) is null);
+                    using var scope = _scopeFactory.CreateScope();
+                    var db = scope.GetDbContext();
+                    var configs = await db.VoiceRoleConfigurations.GetAllForGuildAsync(request.GuildId);
+                    configs.RemoveAll(x => guild.GetRole(x.RoleId) is null);
 
                     Snowflake? oldRoleId = null;
                     Snowflake? newRoleId = null;
 
                     if (request.OldChannelId.HasValue)
                     {
-                        var row = rows.FirstOrDefault(x => x.ChannelId == request.OldChannelId.Value) ?? 
-                                  rows.FirstOrDefault(x => x.ChannelId == 0);
-                        oldRoleId = row?.RoleId;
+                        var record = configs.FirstOrDefault(x => x.ChannelId == request.OldChannelId.Value) ?? 
+                                  configs.FirstOrDefault(x => x.ChannelId == 0);
+                        oldRoleId = record?.RoleId;
                     }
 
                     if (request.NewChannelId.HasValue)
                     {
-                        var row = rows.FirstOrDefault(x => x.ChannelId == request.NewChannelId.Value) ?? 
-                                  rows.FirstOrDefault(x => x.ChannelId == 0);
-                        newRoleId = row?.RoleId;
+                        var config = configs.FirstOrDefault(x => x.ChannelId == request.NewChannelId.Value) ?? 
+                                  configs.FirstOrDefault(x => x.ChannelId == 0);
+                        newRoleId = config?.RoleId;
                     }
 
                     if(oldRoleId == newRoleId) return;

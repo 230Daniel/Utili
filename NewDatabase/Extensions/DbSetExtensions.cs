@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
@@ -34,7 +35,7 @@ namespace NewDatabase.Extensions
             return dbSet.FirstOrDefaultAsync(x => x.GuildId == guildId && x.MemberId == memberId);
         }
         
-        public static Task<List<T>> GetAllForGuildMembersAsync<T>(this DbSet<T> dbSet, ulong guildId) where T : MemberEntity
+        public static Task<List<T>> GetForAllGuildMembersAsync<T>(this DbSet<T> dbSet, ulong guildId) where T : MemberEntity
         {
             return dbSet.Where(x => x.GuildId == guildId).ToListAsync();
         }
@@ -65,6 +66,12 @@ namespace NewDatabase.Extensions
             repMember.Reputation += change;
             dbSet.Update(repMember);
             return repMember;
+        }
+
+        public static Task<int> GetTotalGuildCountAsync(this DbSet<ShardDetail> dbSet)
+        {
+            var minimumHeartbeat = DateTime.UtcNow.AddSeconds(-30);
+            return dbSet.Where(x => x.Heartbeat >= minimumHeartbeat).SumAsync(x => x.Guilds);
         }
     }
 }

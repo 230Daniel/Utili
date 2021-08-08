@@ -2,11 +2,12 @@
 using System.Linq;
 using System.Threading.Tasks;
 using System.Timers;
-using Database.Data;
 using Disqord;
 using Disqord.Gateway;
 using Disqord.Rest;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Utili.Extensions;
 
@@ -18,17 +19,20 @@ namespace Utili
         private readonly IConfiguration _config;
         private readonly DiscordClientBase _client;
         private readonly Snowflake _communityGuildId;
+        private readonly IServiceScopeFactory _scopeFactory;
         
         private Timer _roleTimer;
 
         public CommunityService(
             ILogger<CommunityService> logger, 
             IConfiguration config, 
-            DiscordClientBase client)
+            DiscordClientBase client,
+            IServiceScopeFactory scopeFactory)
         {
             _logger = logger;
             _config = config;
             _client = client;
+            _scopeFactory = scopeFactory;
 
             _communityGuildId = _config.GetSection("Community").GetValue<ulong>("GuildId");
         }
@@ -65,8 +69,12 @@ namespace Utili
                     
                     if (premiumRole is not null)
                     {
-                        var subscriptionRows = await Subscriptions.GetRowsAsync(onlyValid: true);
-                        var premiumMembers = guild.Members.Select(x => x.Value).Where(x => subscriptionRows.Any(y => y.UserId == x.Id)).ToList();
+                        using var scope = _scopeFactory.CreateScope();
+                        var db = scope.GetDbContext();
+
+                        var activeSubscriptions = await db.Subscriptions.Where(x => x.IsValid()).ToListAsync();
+                        
+                        var premiumMembers = guild.Members.Select(x => x.Value).Where(x => activeSubscriptions.Any(y => y.UserId == x.Id)).ToList();
 
                         foreach (var premiumMember in premiumMembers)
                             if (!premiumMember.RoleIds.Contains(premiumRole.Id))

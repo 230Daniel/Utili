@@ -4,10 +4,10 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
-using Database.Data;
 using Disqord;
 using Disqord.Gateway;
 using Disqord.Rest;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NewDatabase.Entities;
@@ -80,12 +80,17 @@ namespace Utili.Services
         {
             try
             {
-                var fromDashboard = await Misc.GetRowsAsync(type: "RequiresNoticeUpdate");
-                fromDashboard.RemoveAll(x => _client.GetGuilds().All(y => x.GuildId != y.Key));
-                foreach (var miscRow in fromDashboard)
+                using var scope = _scopeFactory.CreateScope();
+                var db = scope.GetDbContext();
+
+                var updatedConfigs = await db.NoticeConfigurations.Where(x => x.UpdatedFromDashboard).ToListAsync();
+                updatedConfigs.RemoveAll(x => _client.GetGuild(x.GuildId) is null);
+
+                foreach (var updatedConfig in updatedConfigs)
                 {
-                    await Misc.DeleteRowAsync(miscRow);
-                    ScheduleNoticeUpdate(miscRow.GuildId, ulong.Parse(miscRow.Value), TimeSpan.FromSeconds(1));
+                    updatedConfig.UpdatedFromDashboard = false;
+                    await db.SaveChangesAsync();
+                    ScheduleNoticeUpdate(updatedConfig.GuildId, updatedConfig.ChannelId, TimeSpan.FromSeconds(1));
                 }
             }
             catch (Exception ex)
@@ -117,7 +122,7 @@ namespace Utili.Services
         {
             try
             {
-                var scope = _scopeFactory.CreateScope();
+                using var scope = _scopeFactory.CreateScope();
                 var db = scope.GetDbContext();
                 var config = await db.NoticeConfigurations.GetForGuildChannelAsync(guildId, channelId);
                 

@@ -51,7 +51,7 @@ namespace Utili.Commands
         [DefaultCooldown(1, 5)]
         public async Task Leaderboard()
         {
-            var repMembers = await _dbContext.ReputationMembers.GetAllForGuildMembersAsync(Context.GuildId);
+            var repMembers = await _dbContext.ReputationMembers.GetForAllGuildMembersAsync(Context.GuildId);
             repMembers = repMembers.OrderBy(x => x.Reputation).ToList();
 
             var position = 1;
@@ -75,7 +75,7 @@ namespace Utili.Commands
         [DefaultCooldown(1, 5)]
         public async Task InvserseLeaderboard()
         {
-            var repMembers = await _dbContext.ReputationMembers.GetAllForGuildMembersAsync(Context.GuildId);
+            var repMembers = await _dbContext.ReputationMembers.GetForAllGuildMembersAsync(Context.GuildId);
             repMembers = repMembers.OrderBy(x => x.Reputation).ToList();
 
             var position = repMembers.Count;
@@ -170,7 +170,7 @@ namespace Utili.Commands
         {
             if (await ConfirmAsync("Are you sure?", "This command will reset reputation for all server members", "Reset all reputation"))
             {
-                _dbContext.ReputationMembers.RemoveRange(await _dbContext.ReputationMembers.GetAllForGuildMembersAsync(Context.GuildId));
+                _dbContext.ReputationMembers.RemoveRange(await _dbContext.ReputationMembers.GetForAllGuildMembersAsync(Context.GuildId));
                 await _dbContext.SaveChangesAsync();
                 
                 await Context.Channel.SendSuccessAsync("Reputation reset", "The reputation of all server members has been set to 0");
