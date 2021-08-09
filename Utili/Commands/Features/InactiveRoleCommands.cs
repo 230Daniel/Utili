@@ -13,6 +13,7 @@ using NewDatabase.Extensions;
 using Qmmands;
 using Utili.Extensions;
 using Utili.Implementations;
+using Utili.Services;
 using Utili.Utils;
 
 namespace Utili.Commands
@@ -21,32 +22,32 @@ namespace Utili.Commands
     public class InactiveRoleCommands : DiscordInteractiveGuildModuleBase
     {
         private readonly DatabaseContext _dbContext;
-        
+        private readonly MemberCacheService _memberCache;
         private static List<ulong> _kickingIn = new();
 
-        public InactiveRoleCommands(DatabaseContext dbContext)
+        public InactiveRoleCommands(DatabaseContext dbContext, MemberCacheService memberCache)
         {
             _dbContext = dbContext;
+            _memberCache = memberCache;
         }
         
         [Command("List")]
-        [Cooldown(1, 10, CooldownMeasure.Seconds, CooldownBucketType.Guild)]
-        public async Task List()
+        public async Task<DiscordCommandResult> List()
         {
             var config = await _dbContext.InactiveRoleConfigurations.GetForGuildAsync(Context.GuildId);
             if (Context.Guild.GetRole(config.RoleId) is null)
             {
                 await Context.Channel.SendFailureAsync("Error", "This server does not have an inactive role set");
-                return; 
+                return null; 
             }
 
-            var members = await Context.Guild.FetchAllMembersAsync();
+            await _memberCache.TemporarilyCacheMembersAsync(Context.GuildId);
             var inactiveMembers = config.Mode == InactiveRoleMode.GrantWhenInactive
-                ? members
+                ? Context.Guild.GetMembers().Values
                     .Where(x => x.GetRole(config.RoleId) is not null && x.GetRole(config.ImmuneRoleId) is null)
                     .OrderBy(x => x.Nick ?? x.Name)
                     .ToList()
-                : members
+                : Context.Guild.GetMembers().Values
                     .Where(x => x.GetRole(config.RoleId) is null && x.GetRole(config.ImmuneRoleId) is null)
                     .OrderBy(x => x.Nick ?? x.Name)
                     .ToList();
@@ -54,13 +55,12 @@ namespace Utili.Commands
             if (inactiveMembers.Count == 0)
             {
                 await Context.Channel.SendInfoAsync("Inactive Users", "None");
-                return;
+                return null;
             }
 
             var pages = new List<Page>();
             var content = "";
-            var embed = MessageUtils.CreateEmbed(EmbedType.Info, "Inactive Users")
-                .WithFooter($"Page 1 of {Math.Ceiling((decimal) inactiveMembers.Count / 30)}");
+            var embed = MessageUtils.CreateEmbed(EmbedType.Info, "Inactive Users");
 
             for (var i = 0; i < inactiveMembers.Count; i++)
             {
@@ -76,8 +76,7 @@ namespace Utili.Commands
                 if ((i + 1) % 30 == 0)
                 {
                     pages.Add(new Page().AddEmbed(embed));
-                    embed = MessageUtils.CreateEmbed(EmbedType.Info, "Inactive Members")
-                        .WithFooter($"Page {Math.Ceiling((decimal) i / 9) + 1} of {Math.Ceiling((decimal) inactiveMembers.Count / 30)}");
+                    embed = MessageUtils.CreateEmbed(EmbedType.Info, "Inactive Members");
                 }
             }
 
@@ -90,10 +89,9 @@ namespace Utili.Commands
             if (embed.Fields.Count > 0)
                 pages.Add(new Page().AddEmbed(embed));
             
-
-            var pageProvider = new PageProvider(pages);
+            var pageProvider = new ListPageProvider(pages);
             var menu = new MyPagedView(pageProvider);
-            await View(menu);
+            return View(menu);
         }
 
         [Command("Kick")]
@@ -124,13 +122,13 @@ namespace Utili.Commands
                 return;
             }
             
-            var members = await Context.Guild.FetchAllMembersAsync();
+            await _memberCache.TemporarilyCacheMembersAsync(Context.GuildId);
             var inactiveMembers = config.Mode == InactiveRoleMode.GrantWhenInactive
-                ? members
+                ? Context.Guild.GetMembers().Values
                     .Where(x => x.GetRole(config.RoleId) is not null && x.GetRole(config.ImmuneRoleId) is null)
                     .OrderBy(x => x.Nick ?? x.Name)
                     .ToList()
-                : members
+                : Context.Guild.GetMembers().Values
                     .Where(x => x.GetRole(config.RoleId) is null && x.GetRole(config.ImmuneRoleId) is null)
                     .OrderBy(x => x.Nick ?? x.Name)
                     .ToList();

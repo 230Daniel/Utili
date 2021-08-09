@@ -22,11 +22,11 @@ namespace Utili.Implementations.Views
                 _clicked = true;
                 Result = false;
                 await Message.DeleteAsync();
-                await Menu.StopAsync();
+                Menu.Stop();
             })
             {
                 Label = "Cancel",
-                Style = ButtonComponentStyle.Secondary
+                Style = LocalButtonComponentStyle.Secondary
             };
 
             var confirmButton = new ButtonViewComponent(async e =>
@@ -35,11 +35,11 @@ namespace Utili.Implementations.Views
                 _clicked = true;
                 Result = true;
                 await Message.DeleteAsync();
-                await Menu.StopAsync();
+                Menu.Stop();
             })
             {
                 Label = confirmButtonLabel,
-                Style = ButtonComponentStyle.Danger
+                Style = LocalButtonComponentStyle.Danger
             };
             
             AddComponent(cancelButton);
@@ -53,7 +53,7 @@ namespace Utili.Implementations.Views
                     _clicked = true;
                     Result = false;
                     await Message.DeleteAsync();
-                    await Menu.StopAsync();
+                    Menu.Stop();
                 }
             });
         }
