@@ -1,6 +1,7 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
 using Disqord;
+using Disqord.Bot;
 using Disqord.Gateway;
 using Disqord.Hosting;
 using Microsoft.Extensions.DependencyInjection;
@@ -36,8 +37,8 @@ namespace Utili.Services
         public BotService(
             
             ILogger<BotService> logger,
-            DiscordClientBase client,
             IServiceScopeFactory scopeFactory,
+            DiscordBotBase client,
             
             CommunityService community,
             GuildCountService guildCount,

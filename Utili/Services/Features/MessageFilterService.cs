@@ -60,11 +60,11 @@ namespace Utili.Services
                         return true;
                     
                     _offenceDictionary.AddOrUpdate(e.ChannelId, DateTime.UtcNow, (_, _) => DateTime.UtcNow);
-
+                    
                     var deletionMessage = string.IsNullOrWhiteSpace(config.DeletionMessage)
                         ? allowedTypes.Contains(",")
-                            ? $"Your message must contain one of `{allowedTypes}` to be allowed in {e.Channel.Mention}"
-                            : $"Your message must contain `{allowedTypes}` to be allowed in {e.Channel.Mention}"
+                            ? $"Your message must contain one of `{allowedTypes}` to be allowed in {(e.Channel as ITextChannel).Mention}"
+                            : $"Your message must contain `{allowedTypes}` to be allowed in {(e.Channel as ITextChannel).Mention}"
                         : config.DeletionMessage;
                     
                     var sent = await e.Channel.SendFailureAsync("Message deleted", deletionMessage);

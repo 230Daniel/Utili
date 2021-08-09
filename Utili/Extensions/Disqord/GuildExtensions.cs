@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using Disqord;
 using Disqord.Gateway;
@@ -35,14 +34,9 @@ namespace Utili.Extensions
 
         public static bool BotHasPermissions(this IGuild guild, Permission permissions)
         {
-            return guild.GetCurrentMember().GetGuildPermissions().Has(permissions);
+            return guild.GetCurrentMember().GetPermissions().Has(permissions);
         }
 
-        public static Task<IReadOnlyList<IMember>> FetchAllMembersAsync(this IGuild guild)
-        {
-            return (guild.Client as DiscordClientBase).FetchAllMembersAsync(guild.Id);
-        }
-        
         public static IEmoji GetEmoji(this IGuild guild, string emojiString)
         {
             var guildEmoji = guild.Emojis.Values.FirstOrDefault(x => x.Tag == emojiString || $":{x.Name}:" == emojiString);

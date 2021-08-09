@@ -38,6 +38,7 @@ namespace Utili.Services
                 var guild = _client.GetGuild(e.GuildId);
                 var roles = memberRecord.Roles.Select(x => guild.GetRole(x)).ToList();
                 roles.RemoveAll(x => x is null || !x.CanBeManaged() || config.ExcludedRoles.Contains(x.Id));
+                if (!roles.Any()) return;
                 
                 IMember member = guild.GetMember(e.Member.Id);
                 member ??= await guild.FetchMemberAsync(e.Member.Id);

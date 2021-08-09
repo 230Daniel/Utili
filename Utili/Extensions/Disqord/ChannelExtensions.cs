@@ -7,7 +7,7 @@ namespace Utili.Extensions
     {
         public static bool BotHasPermissions(this IGuildChannel channel, Permission permissions)
         {
-            return channel.GetGuild().GetCurrentMember().GetChannelPermissions(channel).Has(permissions);
+            return channel.GetGuild().GetCurrentMember().GetPermissions(channel).Has(permissions);
         }
 
         public static IGuild GetGuild(this IGuildChannel channel)

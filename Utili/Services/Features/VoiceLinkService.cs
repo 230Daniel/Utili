@@ -129,7 +129,7 @@ namespace Utili.Services
                     {
                         textChannel = await guild.CreateTextChannelAsync($"{config.ChannelPrefix}{voiceChannel.Name}", x =>
                         {
-                            if (voiceChannel.CategoryId.HasValue) x.ParentId = voiceChannel.CategoryId.Value;
+                            if (voiceChannel.CategoryId.HasValue) x.CategoryId = voiceChannel.CategoryId.Value;
                             x.Topic = $"Users in {voiceChannel.Name} have access - Created by Utili";
                             x.Overwrites = new List<LocalOverwrite>
                             {
@@ -167,7 +167,7 @@ namespace Utili.Services
                         if (x.TargetType == OverwriteTargetType.Member && x.TargetId != _client.CurrentUser.Id)
                         {
                             IMember member = guild.GetMember(x.TargetId);
-                            if (voiceStates.All(y => y.MemberId != member.Id) || voiceStates.First(y => y.MemberId == member.Id).ChannelId == voiceChannel.Id)
+                            if (member is null || voiceStates.All(y => y.MemberId != member.Id) || voiceStates.First(y => y.MemberId == member.Id).ChannelId == voiceChannel.Id)
                             {
                                 overwritesChanged = true;
                                 return true;

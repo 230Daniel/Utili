@@ -9,7 +9,7 @@ namespace Utili.Extensions
 {
     public static class TextChannelExtensions
     {
-        public static async Task<IUserMessage> SendInfoAsync(this ITextChannel channel, string title, string content = null)
+        public static async Task<IUserMessage> SendInfoAsync(this IMessageChannel channel, string title, string content = null)
         {
             var message = new LocalMessage()
                 .AddEmbed(MessageUtils.CreateEmbed(EmbedType.Info, title, content));
@@ -17,7 +17,7 @@ namespace Utili.Extensions
             return await channel.SendMessageAsync(message);
         }
 
-        public static async Task<IUserMessage> SendSuccessAsync(this ITextChannel channel, string title, string content = null)
+        public static async Task<IUserMessage> SendSuccessAsync(this IMessageChannel channel, string title, string content = null)
         {
             var message = new LocalMessage()
                 .AddEmbed(MessageUtils.CreateEmbed(EmbedType.Success, title, content));
@@ -25,7 +25,7 @@ namespace Utili.Extensions
             return await channel.SendMessageAsync(message);
         }
 
-        public static async Task<IUserMessage> SendFailureAsync(this ITextChannel channel, string title, string content = null, bool supportLink = true)
+        public static async Task<IUserMessage> SendFailureAsync(this IMessageChannel channel, string title, string content = null, bool supportLink = true)
         {
             var message = new LocalMessage()
                 .AddEmbed(MessageUtils.CreateEmbed(EmbedType.Failure, title, content));
@@ -33,7 +33,7 @@ namespace Utili.Extensions
             return await channel.SendMessageAsync(message);
         }
 
-        public static async Task<IUserMessage> SendEmbedAsync(this ITextChannel channel, LocalEmbed embed)
+        public static async Task<IUserMessage> SendEmbedAsync(this IMessageChannel channel, LocalEmbed embed)
         {
             var message = new LocalMessage()
                 .AddEmbed(embed);
@@ -41,7 +41,7 @@ namespace Utili.Extensions
             return await channel.SendMessageAsync(message);
         }
 
-        public static async Task<IWebhook> FetchWebhookAsync(this ITextChannel channel, Snowflake webhookId)
+        public static async Task<IWebhook> FetchWebhookAsync(this IMessageChannel channel, Snowflake webhookId)
         {
             IEnumerable<IWebhook> webhooks = await channel.FetchWebhooksAsync();
             return webhooks.FirstOrDefault(x => x.Id == webhookId);
