@@ -142,7 +142,7 @@ namespace Utili.Services
                     var inactiveRole = guild.GetRole(config.RoleId);
                     if(inactiveRole is null || !inactiveRole.CanBeManaged()) return;
 
-                    await _memberCache.TemporarilyCacheMembersAsync(row.GuildId);
+                    await _memberCache.TemporarilyCacheMembersAsync(config.GuildId);
                     var bot = guild.GetCurrentMember();
 
                     using var scope = _scopeFactory.CreateScope();
