@@ -99,7 +99,7 @@ class VoteChannels extends React.Component{
 	}
 
 	renderDescription(){
-		if(this.state.premium && this.state.premium.premium){
+		if(this.state.premium){
 			return(
 				<p>On your server, you can add up to 5 emojis in each vote channel.</p>
 			);
