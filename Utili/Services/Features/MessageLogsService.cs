@@ -137,7 +137,8 @@ namespace Utili.Services
                 var config = await db.MessageLogsConfigurations.GetForGuildAsync(e.GuildId);
                 if (config is null || (config.DeletedChannelId == 0 && config.EditedChannelId == 0) || config.ExcludedChannels.Contains(e.ChannelId)) return;
 
-                var messages = await db.MessageLogsMessages.Where(x => e.MessageIds.Contains(x.MessageId)).ToListAsync();
+                var messageIds = e.MessageIds.Select(x => x.RawValue);
+                var messages = await db.MessageLogsMessages.Where(x => messageIds.Contains(x.MessageId)).ToListAsync();
 
                 var embed = GetBulkDeletedEmbed(e, await PasteMessagesAsync(messages, e.MessageIds.Count), messages.Count);
 

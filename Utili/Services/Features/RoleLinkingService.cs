@@ -18,12 +18,14 @@ namespace Utili.Services
         private readonly ILogger<RoleLinkingService> _logger;
         private readonly DiscordClientBase _client;
 
-        private List<RoleLinkAction> _actions = new();
+        private List<RoleLinkAction> _actions;
 
         public RoleLinkingService(ILogger<RoleLinkingService> logger, DiscordClientBase client)
         {
             _logger = logger;
             _client = client;
+
+            _actions = new List<RoleLinkAction>();
         }
 
         public async Task MemberUpdated(IServiceScope scope, MemberUpdatedEventArgs e)

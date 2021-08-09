@@ -63,6 +63,17 @@ namespace NewDatabase.Extensions
         public static async Task<ReputationMember> UpdateMemberReputationAsync(this DbSet<ReputationMember> dbSet, ulong guildId, ulong memberId, long change)
         {
             var repMember = await dbSet.GetForMemberAsync(guildId, memberId);
+            
+            if (repMember is null)
+            {
+                repMember = new ReputationMember(guildId, memberId)
+                {
+                    Reputation = change
+                };
+                dbSet.Add(repMember);
+                return repMember;
+            }
+            
             repMember.Reputation += change;
             dbSet.Update(repMember);
             return repMember;

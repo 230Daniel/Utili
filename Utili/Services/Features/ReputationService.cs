@@ -32,7 +32,7 @@ namespace Utili.Services
                 ITextChannel channel = guild.GetTextChannel(e.ChannelId);
 
                 var db = scope.GetDbContext();
-                var config = await db.ReputationConfigurations.GetForGuildAsync(e.GuildId.Value);
+                var config = await db.ReputationConfigurations.GetForGuildWithEmojisAsync(e.GuildId.Value);
                 if (config is null) return;
 
                 var emojiConfig = config.Emojis.FirstOrDefault(x => Equals(x.Emoji, e.Emoji.ToString()));
@@ -63,7 +63,7 @@ namespace Utili.Services
                 ITextChannel channel = guild.GetTextChannel(e.ChannelId);
 
                 var db = scope.GetDbContext();
-                var config = await db.ReputationConfigurations.GetForGuildAsync(e.GuildId.Value);
+                var config = await db.ReputationConfigurations.GetForGuildWithEmojisAsync(e.GuildId.Value);
                 if (config is null) return;
 
                 var emojiConfig = config.Emojis.FirstOrDefault(x => Equals(x.Emoji, e.Emoji.ToString()));

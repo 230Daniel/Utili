@@ -53,17 +53,17 @@ namespace Utili.Features
             }
 
             var config = await _dbContext.MessagePinningConfigurations.GetForGuildAsync(Context.GuildId);
-            if (config.PinMessages) await message.PinAsync(new DefaultRestRequestOptions {Reason = $"Message Pinning (manual by {Context.Message.Author} {Context.Message.Author.Id})"});
+            if (config is not null && config.PinMessages) await message.PinAsync(new DefaultRestRequestOptions {Reason = $"Message Pinning (manual by {Context.Message.Author} {Context.Message.Author.Id})"});
 
-            pinChannel ??= Context.Guild.GetTextChannel(config.PinChannelId);
+            pinChannel ??= config is null ? null : Context.Guild.GetTextChannel(config.PinChannelId);
             
-            if (pinChannel is null && config.PinMessages)
+            if (pinChannel is null && (config is not null && config.PinMessages))
             {
                 await Context.Channel.SendSuccessAsync("Message pinned",
                     "Set a pin channel on the dashboard or specify one in the command if you want the message to be copied to another channel as well.");
                 return;
             }
-            if (pinChannel is null && !config.PinMessages)
+            if (pinChannel is null && (config is null || !config.PinMessages))
             {
                 await Context.Channel.SendFailureAsync("Error",
                     "Message pinning is not enabled on this server.");
@@ -74,7 +74,7 @@ namespace Utili.Features
             var webhookInfo = await _dbContext.MessagePinningWebhooks.GetForGuildChannelAsync(Context.Guild.Id, pinChannel.Id);
             if(webhookInfo is not null) webhook = await pinChannel.FetchWebhookAsync(webhookInfo.WebhookId);
             
-            if (webhook is null)
+            if (webhook is null || webhook.ChannelId != pinChannel.Id)
             {
                 var avatar = File.OpenRead("Avatar.png");
                 webhook = await pinChannel.CreateWebhookAsync("Utili Message Pinning", x =>
@@ -85,7 +85,7 @@ namespace Utili.Features
 
                 if (webhookInfo is null)
                 {
-                    webhookInfo = new MessagePinningWebhook(Context.GuildId, Context.ChannelId)
+                    webhookInfo = new MessagePinningWebhook(Context.GuildId, pinChannel.Id)
                     {
                         WebhookId = webhook.Id
                     };

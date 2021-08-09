@@ -168,6 +168,10 @@ namespace Utili.Services
             var iconUrl = config.Icon;
             var thumbnailUrl = config.Thumbnail;
             var imageUrl = config.Image;
+            
+            if (!Uri.TryCreate(iconUrl, UriKind.Absolute, out var uriResult1) || uriResult1.Scheme is not ("http" or "https")) iconUrl = null;
+            if (!Uri.TryCreate(thumbnailUrl, UriKind.Absolute, out var uriResult2) || uriResult2.Scheme is not ("http" or "https")) thumbnailUrl = null;
+            if (!Uri.TryCreate(imageUrl, UriKind.Absolute, out var uriResult3) || uriResult3.Scheme is not ("http" or "https")) imageUrl = null;
 
             if (string.IsNullOrWhiteSpace(title) && !string.IsNullOrWhiteSpace(iconUrl))
                 title = "Title";

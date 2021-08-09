@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Disqord;
 using Disqord.Bot;
@@ -32,8 +33,9 @@ namespace Utili.Commands
             member ??= Context.Message.Author as IMember;
 
             var repMember = await _dbContext.ReputationMembers.GetForMemberAsync(Context.GuildId, member.Id);
-
-            var colour = repMember.Reputation switch
+            var reputation = repMember?.Reputation ?? 0;
+            
+            var colour = reputation switch
             {
                 0 => new Color(195, 195, 195),
                 > 0 => new Color(67, 181, 129),
@@ -41,7 +43,7 @@ namespace Utili.Commands
             };
 
             var embed = MessageUtils
-                .CreateEmbed(EmbedType.Info, "", $"{member.Mention}'s reputation: {repMember.Reputation}")
+                .CreateEmbed(EmbedType.Info, "", $"{member.Mention}'s reputation: {reputation}")
                 .WithColor(colour);
 
             await Context.Channel.SendEmbedAsync(embed);
@@ -132,8 +134,21 @@ namespace Utili.Commands
             long amount)
         {
             var repMember = await _dbContext.ReputationMembers.GetForMemberAsync(Context.GuildId, member.Id);
-            repMember.Reputation = amount;
-            _dbContext.ReputationMembers.Update(repMember);
+            
+            if (repMember is null)
+            {
+                repMember = new ReputationMember(Context.GuildId, member.Id)
+                {
+                    Reputation = amount
+                };
+                _dbContext.ReputationMembers.Add(repMember);
+            }
+            else
+            {
+                repMember.Reputation = amount;
+                _dbContext.ReputationMembers.Update(repMember);
+            }
+            
             await _dbContext.SaveChangesAsync();
             
             await Context.Channel.SendSuccessAsync("Reputation set", $"Set {member.Mention}'s reputation to {amount}");
@@ -144,7 +159,8 @@ namespace Utili.Commands
         [RequireAuthorGuildPermissions(Permission.ManageGuild)]
         public async Task AddEmoji(IEmoji emoji, int value = 0)
         {
-            var config = await _dbContext.ReputationConfigurations.GetForGuildAsync(Context.GuildId);
+            var config = await _dbContext.ReputationConfigurations.GetForGuildWithEmojisAsync(Context.GuildId);
+            config.Emojis ??= new List<ReputationConfigurationEmoji>();
             
             if (config.Emojis.Any(x => Equals(x.Emoji, emoji.ToString())))
             {

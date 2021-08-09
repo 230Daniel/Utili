@@ -205,7 +205,7 @@ namespace Utili.Services
             });
         }
 
-        private static async Task CloseLinkedChannelAsync(IServiceScope scope, IGuild guild, VoiceLinkConfiguration config, VoiceLinkChannel channelRecord)
+        private async Task CloseLinkedChannelAsync(IServiceScope scope, IGuild guild, VoiceLinkConfiguration config, VoiceLinkChannel channelRecord)
         {
             if (channelRecord is null) return;
             var textChannel = guild.GetTextChannel(channelRecord.TextChannelId);
@@ -217,14 +217,14 @@ namespace Utili.Services
                 channelRecord.TextChannelId = 0;
                 
                 var db = scope.GetDbContext();
-                db.VoiceLinkChannels.Update(channelRecord);
+                db.VoiceLinkChannels.Remove(channelRecord);
                 await db.SaveChangesAsync();
             }
             else
             {
-                // Remove all permission overwrites except @everyone
+                // Remove all permission overwrites except @everyone and utili
                 var overwrites = textChannel.Overwrites.Select(x => new LocalOverwrite(x.TargetId, x.TargetType, x.Permissions)).ToList();
-                overwrites.RemoveAll(x => x.TargetId != guild.Id);
+                overwrites.RemoveAll(x => x.TargetId != guild.Id && x.TargetId != _client.CurrentUser.Id);
                 await textChannel.ModifyAsync(x => x.Overwrites = new Optional<IEnumerable<LocalOverwrite>>(overwrites), new DefaultRestRequestOptions {Reason = "Voice Link"});
             }
         }
