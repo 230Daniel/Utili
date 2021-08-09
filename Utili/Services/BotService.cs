@@ -2,17 +2,15 @@
 using System.Threading.Tasks;
 using Disqord;
 using Disqord.Bot;
-using Disqord.Bot.Hosting;
 using Disqord.Gateway;
 using Disqord.Hosting;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Utili.Features;
 
 namespace Utili.Services
 {
-    public class BotService : DiscordBotService
+    public class BotService : DiscordClientService
     {
         private readonly ILogger<BotService> _logger;
         private readonly IServiceScopeFactory _scopeFactory;
@@ -112,7 +110,7 @@ namespace Utili.Services
             _ = _community.GuildAvailable(e);
         }
 
-        protected override async ValueTask OnMessageReceived(BotMessageReceivedEventArgs e)
+        protected override async ValueTask OnMessageReceived(MessageReceivedEventArgs e)
         {
             using var scope = _scopeFactory.CreateScope();
             
