@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using NewDatabase;
+using NewDatabase.Entities;
 using NewDatabase.Extensions;
 using UtiliBackend.Authorisation;
 using UtiliBackend.Extensions;
@@ -38,6 +39,19 @@ namespace UtiliBackend.Controllers
         {
             var user = HttpContext.GetDiscordUser();
             var slots = await _databaseContext.PremiumSlots.GetAllForUserAsync(user.Id);
+            var subscriptions = await _databaseContext.Subscriptions.GetAllForUserAsync(user.Id);
+
+            if (slots.Count < subscriptions.Sum(x => x.Slots))
+            {
+                while (slots.Count < subscriptions.Sum(x => x.Slots))
+                {
+                    var slot = new PremiumSlot(user.Id);
+                    _databaseContext.PremiumSlots.Add(slot);
+                    slots.Add(slot);
+                }
+                await _databaseContext.SaveChangesAsync();
+            }
+            
             return Json(_mapper.Map<IEnumerable<PremiumSlotModel>>(slots));
         }
         

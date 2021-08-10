@@ -96,6 +96,8 @@ namespace UtiliBackend
             
             services.Configure<IpRateLimitOptions>(_configuration.GetSection("IpRateLimiting"));
             services.Configure<IpRateLimitPolicies>(_configuration.GetSection("IpRateLimitPolicies"));
+
+            services.AddHostedService<SlotDeletionService>();
         }
         
         public static void Configure(IApplicationBuilder app, IWebHostEnvironment env)
