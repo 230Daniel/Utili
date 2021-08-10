@@ -92,9 +92,14 @@ namespace Utili.Services
                 db.InactiveRoleMembers.Update(memberRecord);
                 await db.SaveChangesAsync();
             }
-            
-            if(member.GetRole(inactiveRole.Id) is not null && inactiveRole.CanBeManaged())
-                await member.RevokeRoleAsync(inactiveRole.Id, new DefaultRestRequestOptions {Reason = "Inactive Role"});
+
+            if (inactiveRole.CanBeManaged())
+            {
+                if (config.Mode == InactiveRoleMode.GrantWhenInactive && member.GetRole(inactiveRole.Id) is not null)
+                    await member.RevokeRoleAsync(inactiveRole.Id, new DefaultRestRequestOptions {Reason = "Inactive Role"});
+                else if (config.Mode == InactiveRoleMode.RevokeWhenInactive && member.GetRole(inactiveRole.Id) is null)
+                    await member.GrantRoleAsync(inactiveRole.Id, new DefaultRestRequestOptions {Reason = "Inactive Role"});
+            }
         }
 
         private void Timer_Elapsed(object sender, ElapsedEventArgs e)
