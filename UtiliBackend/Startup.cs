@@ -13,6 +13,7 @@ using Microsoft.Extensions.Hosting;
 using NewDatabase;
 using Stripe;
 using UtiliBackend.Authorisation;
+using UtiliBackend.Extensions;
 using UtiliBackend.Services;
 
 namespace UtiliBackend
@@ -96,7 +97,8 @@ namespace UtiliBackend
             
             services.Configure<IpRateLimitOptions>(_configuration.GetSection("IpRateLimiting"));
             services.Configure<IpRateLimitPolicies>(_configuration.GetSection("IpRateLimitPolicies"));
-
+            DatabaseContextExtensions.DefaultPrefix = _configuration["Other:DefaultPrefix"];
+            
             services.AddHostedService<SlotDeletionService>();
         }
         

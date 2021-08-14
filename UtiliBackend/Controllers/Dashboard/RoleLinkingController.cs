@@ -8,6 +8,7 @@ using NewDatabase;
 using NewDatabase.Entities;
 using NewDatabase.Extensions;
 using UtiliBackend.Authorisation;
+using UtiliBackend.Extensions;
 using UtiliBackend.Models;
 
 namespace UtiliBackend.Controllers
@@ -61,6 +62,7 @@ namespace UtiliBackend.Controllers
             }
 
             _dbContext.RoleLinkingConfigurations.RemoveRange(configurations.Where(x => models.All(y => y.Id != x.Id)));
+            await _dbContext.SetHasFeatureAsync(guildId, BotFeatures.RoleLinking, models.Any());
             await _dbContext.SaveChangesAsync();
             return Ok();
         }

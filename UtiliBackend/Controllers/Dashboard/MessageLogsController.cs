@@ -6,6 +6,7 @@ using NewDatabase;
 using NewDatabase.Entities;
 using NewDatabase.Extensions;
 using UtiliBackend.Authorisation;
+using UtiliBackend.Extensions;
 using UtiliBackend.Models;
 
 namespace UtiliBackend.Controllers
@@ -51,6 +52,7 @@ namespace UtiliBackend.Controllers
                 _dbContext.MessageLogsConfigurations.Update(configuration);
             }
             
+            await _dbContext.SetHasFeatureAsync(guildId, BotFeatures.MessageLogs, configuration.DeletedChannelId != 0 || configuration.EditedChannelId != 0);
             await _dbContext.SaveChangesAsync();
             return Ok();
         }

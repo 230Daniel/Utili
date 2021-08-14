@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
@@ -6,6 +7,7 @@ using NewDatabase;
 using NewDatabase.Entities;
 using NewDatabase.Extensions;
 using UtiliBackend.Authorisation;
+using UtiliBackend.Extensions;
 using UtiliBackend.Models;
 
 namespace UtiliBackend.Controllers
@@ -48,6 +50,7 @@ namespace UtiliBackend.Controllers
                 _dbContext.ReputationConfigurations.Update(configuration);
             }
             
+            await _dbContext.SetHasFeatureAsync(guildId, BotFeatures.Reputation, model.Emojis.Any());
             await _dbContext.SaveChangesAsync();
             return Ok();
         }

@@ -8,6 +8,7 @@ using NewDatabase;
 using NewDatabase.Entities;
 using NewDatabase.Extensions;
 using UtiliBackend.Authorisation;
+using UtiliBackend.Extensions;
 using UtiliBackend.Models;
 
 namespace UtiliBackend.Controllers
@@ -56,6 +57,7 @@ namespace UtiliBackend.Controllers
             }
 
             _dbContext.ChannelMirroringConfigurations.RemoveRange(configurations.Where(x => models.All(y => y.ChannelId != x.ChannelId.ToString())));
+            await _dbContext.SetHasFeatureAsync(guildId, BotFeatures.ChannelMirroring, models.Any());
             await _dbContext.SaveChangesAsync();
             return Ok();
         }

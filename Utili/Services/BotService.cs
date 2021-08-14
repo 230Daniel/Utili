@@ -6,6 +6,7 @@ using Disqord.Gateway;
 using Disqord.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using NewDatabase.Entities;
 using Utili.Extensions;
 using Utili.Features;
 
@@ -119,25 +120,25 @@ namespace Utili.Services
             var config = await scope.GetCoreConfigurationAsync(e.GuildId.Value);
             if (config is null) return;
             
-            if(config.HasMessageLogs) 
+            if(config.HasFeature(BotFeatures.MessageLogs)) 
                 await _messageLogs.MessageReceived(scope, e);
             
-            if(config.HasMessageFilter) 
+            if(config.HasFeature(BotFeatures.MessageFilter)) 
                 if(await _messageFilter.MessageReceived(scope, e)) return;
             
-            if(config.HasNotices)
+            if(config.HasFeature(BotFeatures.Notices))
                 await _notices.MessageReceived(scope, e);
             
-            if(config.HasVoteChannels)
+            if(config.HasFeature(BotFeatures.VoteChannels))
                 await _voteChannels.MessageReceived(scope, e);
             
-            if(config.HasChannelMirroring)
+            if(config.HasFeature(BotFeatures.ChannelMirroring))
                 await _channelMirroring.MessageReceived(scope, e);
             
-            if(config.HasAutopurge)
+            if(config.HasFeature(BotFeatures.Autopurge))
                 await _autopurge.MessageReceived(scope, e);
             
-            if(config.HasInactiveRole)
+            if(config.HasFeature(BotFeatures.InactiveRole))
                 await _inactiveRole.MessageReceived(scope, e);
         }
 
@@ -149,10 +150,10 @@ namespace Utili.Services
             var config = await scope.GetCoreConfigurationAsync(e.GuildId.Value);
             if (config is null) return;
             
-            if(config.HasMessageLogs)
+            if(config.HasFeature(BotFeatures.MessageLogs))
                 await _messageLogs.MessageUpdated(scope, e);
             
-            if(config.HasAutopurge)
+            if(config.HasFeature(BotFeatures.Autopurge))
                 await _autopurge.MessageUpdated(scope, e);
         }
 
@@ -164,10 +165,10 @@ namespace Utili.Services
             var config = await scope.GetCoreConfigurationAsync(e.GuildId.Value);
             if (config is null) return;
             
-            if(config.HasMessageLogs)
+            if(config.HasFeature(BotFeatures.MessageLogs))
                 await _messageLogs.MessageDeleted(scope, e);
             
-            if(config.HasAutopurge)
+            if(config.HasFeature(BotFeatures.Autopurge))
                 await _autopurge.MessageDeleted(scope, e);
         }
     
@@ -177,10 +178,10 @@ namespace Utili.Services
             var config = await scope.GetCoreConfigurationAsync(e.GuildId);
             if (config is null) return;
             
-            if(config.HasMessageLogs)
+            if(config.HasFeature(BotFeatures.MessageLogs))
                 await _messageLogs.MessagesDeleted(scope, e);
             
-            if(config.HasAutopurge)
+            if(config.HasFeature(BotFeatures.Autopurge))
                 await _autopurge.MessagesDeleted(scope, e);
         }
 
@@ -192,7 +193,7 @@ namespace Utili.Services
             var config = await scope.GetCoreConfigurationAsync(e.GuildId.Value);
             if (config is null) return;
             
-            if(config.HasReputation)
+            if(config.HasFeature(BotFeatures.Reputation))
                 await _reputation.ReactionAdded(scope, e);
         }
         
@@ -204,7 +205,7 @@ namespace Utili.Services
             var config = await scope.GetCoreConfigurationAsync(e.GuildId.Value);
             if (config is null) return;
             
-            if(config.HasReputation)
+            if(config.HasFeature(BotFeatures.Reputation))
                 await _reputation.ReactionRemoved(scope, e);
         }
 
@@ -214,13 +215,13 @@ namespace Utili.Services
             var config = await scope.GetCoreConfigurationAsync(e.GuildId);
             if (config is null) return;
             
-            if(config.HasVoiceLink)
+            if(config.HasFeature(BotFeatures.VoiceLink))
                 await _voiceLink.VoiceStateUpdated(scope, e);
             
-            if(config.HasVoiceRoles)
+            if(config.HasFeature(BotFeatures.VoiceRoles))
                 await _voiceRoles.VoiceStateUpdated(e);
             
-            if(config.HasInactiveRole)
+            if(config.HasFeature(BotFeatures.InactiveRole))
                 await _inactiveRole.VoiceStateUpdated(scope, e);
         }
 
@@ -230,13 +231,13 @@ namespace Utili.Services
             var config = await scope.GetCoreConfigurationAsync(e.GuildId);
             if (config is null) return;
             
-            if(config.HasRolePersist)
+            if(config.HasFeature(BotFeatures.RolePersist))
                 await _rolePersist.MemberJoined(scope, e);
             
-            if(config.HasJoinRoles)
+            if(config.HasFeature(BotFeatures.JoinRoles))
                 await _joinRoles.MemberJoined(scope, e);
             
-            if(config.HasJoinMessage)
+            if(config.HasFeature(BotFeatures.JoinMessage))
                 await _joinMessage.MemberJoined(scope, e);
         }
 
@@ -246,10 +247,10 @@ namespace Utili.Services
             var config = await scope.GetCoreConfigurationAsync(e.NewMember.GuildId);
             if (config is null) return;
             
-            if(config.HasJoinRoles)
+            if(config.HasFeature(BotFeatures.JoinRoles))
                 await _joinRoles.MemberUpdated(scope, e);
             
-            if(config.HasRoleLinking)
+            if(config.HasFeature(BotFeatures.RoleLinking))
                 await _roleLinking.MemberUpdated(scope, e);
         }
 
@@ -261,7 +262,7 @@ namespace Utili.Services
             
             var member = e.User is IMember user ? user : null;
             
-            if(config.HasRolePersist)
+            if(config.HasFeature(BotFeatures.RolePersist))
                 await _rolePersist.MemberLeft(scope, e, member);
         }
     }

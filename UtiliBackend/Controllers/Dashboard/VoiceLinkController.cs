@@ -6,6 +6,7 @@ using NewDatabase;
 using NewDatabase.Entities;
 using NewDatabase.Extensions;
 using UtiliBackend.Authorisation;
+using UtiliBackend.Extensions;
 using UtiliBackend.Models;
 
 namespace UtiliBackend.Controllers
@@ -54,6 +55,7 @@ namespace UtiliBackend.Controllers
                 _dbContext.VoiceLinkConfigurations.Update(configuration);
             }
             
+            await _dbContext.SetHasFeatureAsync(guildId, BotFeatures.VoiceLink, model.Enabled);
             await _dbContext.SaveChangesAsync();
             return Ok();
         }

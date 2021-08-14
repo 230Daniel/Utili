@@ -8,6 +8,7 @@ using NewDatabase;
 using NewDatabase.Entities;
 using NewDatabase.Extensions;
 using UtiliBackend.Authorisation;
+using UtiliBackend.Extensions;
 using UtiliBackend.Models;
 
 namespace UtiliBackend.Controllers
@@ -66,6 +67,7 @@ namespace UtiliBackend.Controllers
                 _dbContext.InactiveRoleConfigurations.Update(configuration);
             }
             
+            await _dbContext.SetHasFeatureAsync(guildId, BotFeatures.InactiveRole, configuration.RoleId != 0);
             await _dbContext.SaveChangesAsync();
             return Ok();
         }

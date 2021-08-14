@@ -13,21 +13,16 @@ namespace NewDatabase.Entities
 
         public CoreConfiguration(ulong guildId) : base(guildId) { }
 
-        public bool HasAutopurge => (BotFeatures & BotFeatures.Autopurge) != 0;
-        public bool HasChannelMirroring => (BotFeatures & BotFeatures.ChannelMirroring) != 0;
-        public bool HasInactiveRole => (BotFeatures & BotFeatures.InactiveRole) != 0;
-        public bool HasJoinMessage => (BotFeatures & BotFeatures.JoinMessage) != 0;
-        public bool HasJoinRoles => (BotFeatures & BotFeatures.JoinRoles) != 0;
-        public bool HasMessageFilter => (BotFeatures & BotFeatures.MessageFilter) != 0;
-        public bool HasMessageLogs => (BotFeatures & BotFeatures.MessageLogs) != 0;
-        public bool HasMessagePinning => (BotFeatures & BotFeatures.MessagePinning) != 0;
-        public bool HasNotices => (BotFeatures & BotFeatures.Notices) != 0;
-        public bool HasReputation => (BotFeatures & BotFeatures.Reputation) != 0;
-        public bool HasRoleLinking => (BotFeatures & BotFeatures.RoleLinking) != 0;
-        public bool HasRolePersist => (BotFeatures & BotFeatures.RolePersist) != 0;
-        public bool HasVoiceLink => (BotFeatures & BotFeatures.VoiceLink) != 0;
-        public bool HasVoiceRoles => (BotFeatures & BotFeatures.VoiceRoles) != 0;
-        public bool HasVoteChannels => (BotFeatures & BotFeatures.VoteChannels) != 0;
+        public bool HasFeature(BotFeatures feature)
+        {
+            return (BotFeatures & feature) != 0;
+        }
+
+        public void SetHasFeature(BotFeatures feature, bool enabled)
+        {
+            if (enabled) BotFeatures |= feature;
+            else BotFeatures &= ~feature;
+        }
     }
 
     [Flags]
