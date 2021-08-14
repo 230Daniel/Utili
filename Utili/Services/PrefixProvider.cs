@@ -5,7 +5,6 @@ using Disqord.Bot;
 using Disqord.Gateway;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using NewDatabase.Extensions;
 using Utili.Extensions;
 
 namespace Utili.Services
@@ -33,8 +32,7 @@ namespace Utili.Services
             }
 
             using var scope = _scopeFactory.CreateScope();
-            var db = scope.GetDbContext();
-            var config = await db.CoreConfigurations.GetForGuildAsync(message.GuildId.Value);
+            var config = await scope.GetCoreConfigurationAsync(message.GuildId.Value);
             
             return new IPrefix[]
             {

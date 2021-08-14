@@ -6,6 +6,7 @@ using Disqord.Gateway;
 using Disqord.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Utili.Extensions;
 using Utili.Features;
 
 namespace Utili.Services
@@ -112,87 +113,156 @@ namespace Utili.Services
 
         protected override async ValueTask OnMessageReceived(MessageReceivedEventArgs e)
         {
-            using var scope = _scopeFactory.CreateScope();
+            if (!e.GuildId.HasValue) return;
             
-            await _messageLogs.MessageReceived(scope, e);
-            if(await _messageFilter.MessageReceived(scope, e)) return;
-            await _notices.MessageReceived(scope, e);
-            await _voteChannels.MessageReceived(scope, e);
-            await _channelMirroring.MessageReceived(scope, e);
-            await _autopurge.MessageReceived(scope, e);
-            await _inactiveRole.MessageReceived(scope, e);
+            using var scope = _scopeFactory.CreateScope();
+            var config = await scope.GetCoreConfigurationAsync(e.GuildId.Value);
+            if (config is null) return;
+            
+            if(config.HasMessageLogs) 
+                await _messageLogs.MessageReceived(scope, e);
+            
+            if(config.HasMessageFilter) 
+                if(await _messageFilter.MessageReceived(scope, e)) return;
+            
+            if(config.HasNotices)
+                await _notices.MessageReceived(scope, e);
+            
+            if(config.HasVoteChannels)
+                await _voteChannels.MessageReceived(scope, e);
+            
+            if(config.HasChannelMirroring)
+                await _channelMirroring.MessageReceived(scope, e);
+            
+            if(config.HasAutopurge)
+                await _autopurge.MessageReceived(scope, e);
+            
+            if(config.HasInactiveRole)
+                await _inactiveRole.MessageReceived(scope, e);
         }
 
         protected override async ValueTask OnMessageUpdated(MessageUpdatedEventArgs e)
         {
-            using var scope = _scopeFactory.CreateScope();
+            if (!e.GuildId.HasValue) return;
             
-            await _messageLogs.MessageUpdated(scope, e);
-            await _autopurge.MessageUpdated(scope, e);
+            using var scope = _scopeFactory.CreateScope();
+            var config = await scope.GetCoreConfigurationAsync(e.GuildId.Value);
+            if (config is null) return;
+            
+            if(config.HasMessageLogs)
+                await _messageLogs.MessageUpdated(scope, e);
+            
+            if(config.HasAutopurge)
+                await _autopurge.MessageUpdated(scope, e);
         }
 
         protected override async ValueTask OnMessageDeleted(MessageDeletedEventArgs e)
         {
-            using var scope = _scopeFactory.CreateScope();
+            if (!e.GuildId.HasValue) return;
             
-            await _messageLogs.MessageDeleted(scope, e);
-            await _autopurge.MessageDeleted(scope, e);
+            using var scope = _scopeFactory.CreateScope();
+            var config = await scope.GetCoreConfigurationAsync(e.GuildId.Value);
+            if (config is null) return;
+            
+            if(config.HasMessageLogs)
+                await _messageLogs.MessageDeleted(scope, e);
+            
+            if(config.HasAutopurge)
+                await _autopurge.MessageDeleted(scope, e);
         }
     
         protected override async ValueTask OnMessagesDeleted(MessagesDeletedEventArgs e)
         {
             using var scope = _scopeFactory.CreateScope();
+            var config = await scope.GetCoreConfigurationAsync(e.GuildId);
+            if (config is null) return;
             
-            await _messageLogs.MessagesDeleted(scope, e);
-            await _autopurge.MessagesDeleted(scope, e);
+            if(config.HasMessageLogs)
+                await _messageLogs.MessagesDeleted(scope, e);
+            
+            if(config.HasAutopurge)
+                await _autopurge.MessagesDeleted(scope, e);
         }
 
         protected override async ValueTask OnReactionAdded(ReactionAddedEventArgs e)
         {
-            using var scope = _scopeFactory.CreateScope();
+            if (!e.GuildId.HasValue) return;
             
-            await _reputation.ReactionAdded(scope, e);
+            using var scope = _scopeFactory.CreateScope();
+            var config = await scope.GetCoreConfigurationAsync(e.GuildId.Value);
+            if (config is null) return;
+            
+            if(config.HasReputation)
+                await _reputation.ReactionAdded(scope, e);
         }
         
         protected override async ValueTask OnReactionRemoved(ReactionRemovedEventArgs e)
         {
-            using var scope = _scopeFactory.CreateScope();
+            if (!e.GuildId.HasValue) return;
             
-            await _reputation.ReactionRemoved(scope, e);
+            using var scope = _scopeFactory.CreateScope();
+            var config = await scope.GetCoreConfigurationAsync(e.GuildId.Value);
+            if (config is null) return;
+            
+            if(config.HasReputation)
+                await _reputation.ReactionRemoved(scope, e);
         }
 
         protected override async ValueTask OnVoiceStateUpdated(VoiceStateUpdatedEventArgs e)
         {
             using var scope = _scopeFactory.CreateScope();
+            var config = await scope.GetCoreConfigurationAsync(e.GuildId);
+            if (config is null) return;
             
-            await _voiceLink.VoiceStateUpdated(scope, e);
-            await _voiceRoles.VoiceStateUpdated(e);
-            await _inactiveRole.VoiceStateUpdated(scope, e);
+            if(config.HasVoiceLink)
+                await _voiceLink.VoiceStateUpdated(scope, e);
+            
+            if(config.HasVoiceRoles)
+                await _voiceRoles.VoiceStateUpdated(e);
+            
+            if(config.HasInactiveRole)
+                await _inactiveRole.VoiceStateUpdated(scope, e);
         }
 
         protected override async ValueTask OnMemberJoined(MemberJoinedEventArgs e)
         {
             using var scope = _scopeFactory.CreateScope();
+            var config = await scope.GetCoreConfigurationAsync(e.GuildId);
+            if (config is null) return;
             
-            await _rolePersist.MemberJoined(scope, e);
-            await _joinRoles.MemberJoined(scope, e);
-            await _joinMessage.MemberJoined(scope, e);
+            if(config.HasRolePersist)
+                await _rolePersist.MemberJoined(scope, e);
+            
+            if(config.HasJoinRoles)
+                await _joinRoles.MemberJoined(scope, e);
+            
+            if(config.HasJoinMessage)
+                await _joinMessage.MemberJoined(scope, e);
         }
 
         protected override async ValueTask OnMemberUpdated(MemberUpdatedEventArgs e)
         {
             using var scope = _scopeFactory.CreateScope();
+            var config = await scope.GetCoreConfigurationAsync(e.NewMember.GuildId);
+            if (config is null) return;
             
-            await _joinRoles.MemberUpdated(scope, e);
-            await _roleLinking.MemberUpdated(scope, e);
+            if(config.HasJoinRoles)
+                await _joinRoles.MemberUpdated(scope, e);
+            
+            if(config.HasRoleLinking)
+                await _roleLinking.MemberUpdated(scope, e);
         }
 
         protected override async ValueTask OnMemberLeft(MemberLeftEventArgs e)
         {
             using var scope = _scopeFactory.CreateScope();
+            var config = await scope.GetCoreConfigurationAsync(e.GuildId);
+            if (config is null) return;
+            
             var member = e.User is IMember user ? user : null;
             
-            await _rolePersist.MemberLeft(scope, e, member);
+            if(config.HasRolePersist)
+                await _rolePersist.MemberLeft(scope, e, member);
         }
     }
 }

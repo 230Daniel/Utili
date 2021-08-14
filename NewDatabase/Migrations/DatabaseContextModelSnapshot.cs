@@ -110,6 +110,10 @@ namespace NewDatabase.Migrations
                         .HasColumnType("numeric(20,0)")
                         .HasColumnName("guild_id");
 
+                    b.Property<int>("BotFeatures")
+                        .HasColumnType("integer")
+                        .HasColumnName("bot_features");
+
                     b.Property<bool>("CommandsEnabled")
                         .HasColumnType("boolean")
                         .HasColumnName("commands_enabled");

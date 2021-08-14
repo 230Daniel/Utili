@@ -9,7 +9,6 @@ using Disqord.Sharding;
 using Utili.Extensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using NewDatabase.Extensions;
 using Qmmands;
 using Utili.Commands.TypeParsers;
 
@@ -21,8 +20,7 @@ namespace Utili.Implementations
         {
             if (!context.GuildId.HasValue || context.Author.IsBot) return false;
 
-            var db = context.Services.GetDbContext();
-            var config = await db.CoreConfigurations.GetForGuildAsync(context.GuildId.Value);
+            var config = await context.Services.GetCoreConfigurationAsync(context.GuildId.Value);
             if (config is null) return true;
             
             return !config.NonCommandChannels.Contains(context.ChannelId) 

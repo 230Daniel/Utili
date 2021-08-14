@@ -1,6 +1,10 @@
 ﻿using System;
+using System.Threading.Tasks;
+using Disqord;
 using Microsoft.Extensions.DependencyInjection;
 using NewDatabase;
+using NewDatabase.Entities;
+using Utili.Services;
 
 namespace Utili.Extensions
 {
@@ -9,6 +13,12 @@ namespace Utili.Extensions
         public static DatabaseContext GetDbContext(this IServiceProvider serviceProvider)
         {
             return serviceProvider.GetRequiredService<DatabaseContext>();
+        }
+        
+        public static Task<CoreConfiguration> GetCoreConfigurationAsync(this IServiceProvider serviceProvider, Snowflake guildId)
+        {
+            var service = serviceProvider.GetRequiredService<CoreConfigurationCacheService>();
+            return service.GetCoreConfigurationAsync(guildId);
         }
     }
 }
