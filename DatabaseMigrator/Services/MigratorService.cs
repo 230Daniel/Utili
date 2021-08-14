@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using NewDatabase;
 using Database.Data;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using NewDatabase.Entities;
 
 namespace DatabaseMigrator.Services
@@ -12,15 +14,20 @@ namespace DatabaseMigrator.Services
     
     public class MigratorService
     {
-        private static readonly bool UseProdDb = true;
+        private static readonly bool UseProdDb = false;
         
         private readonly ILogger<MigratorService> _logger;
+        private readonly IConfiguration _configuration;
         private readonly DatabaseContext _db;
 
-        public MigratorService(ILogger<MigratorService> logger, DatabaseContext db)
+        private List<CoreConfiguration> _coreConfigurations;
+
+        public MigratorService(ILogger<MigratorService> logger, IConfiguration configuration, DatabaseContext db)
         {
             _logger = logger;
+            _configuration = configuration;
             _db = db;
+            _coreConfigurations = new();
         }
 
         public async Task RunAsync()
@@ -30,14 +37,16 @@ namespace DatabaseMigrator.Services
                 await Database.Database.InitialiseAsync(false, ".", UseProdDb);
                 _logger.LogInformation("Old database initialised - Prod: {Prod}", UseProdDb);
 
+                _logger.LogInformation("Migrating core...");
+                await MigrateCoreAsync();
+                
+                _coreConfigurations = await _db.CoreConfigurations.ToListAsync();
+                
                 _logger.LogInformation("Migrating autopurge...");
                 await MigrateAutopurgeAsync();
                 
                 _logger.LogInformation("Migrating channel mirroring...");
                 await MigrateChannelMirroringAsync();
-                
-                _logger.LogInformation("Migrating core...");
-                await MigrateCoreAsync();
                 
                 _logger.LogInformation("Migrating inactive role...");
                 await MigrateInactiveRoleAsync();
@@ -94,6 +103,30 @@ namespace DatabaseMigrator.Services
                 _logger.LogError(ex, "Exception thrown while running");
             }
         }
+        
+        private void SetHasFeature(ulong guildId, BotFeatures feature, bool enabled)
+        {
+            var coreConfig = _coreConfigurations.FirstOrDefault(x => x.GuildId == guildId);
+            if (coreConfig is not null && coreConfig.HasFeature(feature) == enabled) return;
+            
+            if (coreConfig is null)
+            {
+                coreConfig = new CoreConfiguration(guildId)
+                {
+                    Prefix = _configuration["Other:DefaultPrefix"],
+                    CommandsEnabled = true,
+                    NonCommandChannels = new()
+                };
+                coreConfig.SetHasFeature(feature, enabled);
+                _db.CoreConfigurations.Add(coreConfig);
+                _coreConfigurations.Add(coreConfig);
+            }
+            else
+            {
+                coreConfig.SetHasFeature(feature, enabled);
+                _db.CoreConfigurations.Update(coreConfig);
+            }
+        }
 
         private async Task MigrateAutopurgeAsync()
         {
@@ -122,6 +155,8 @@ namespace DatabaseMigrator.Services
                 };
                 _db.AutopurgeConfigurations.Add(autopurgeConfiguration);
                 _logger.LogDebug("Migrated autopurge configuration {GuildId}/{ChannelId}", row.GuildId, row.ChannelId);
+                
+                SetHasFeature(row.GuildId, BotFeatures.Autopurge, true);
             }
             
             /*var messageRows = await Autopurge.GetMessagesAsync();
@@ -158,6 +193,8 @@ namespace DatabaseMigrator.Services
                 };
                 _db.ChannelMirroringConfigurations.Add(channelMirroringConfiguration);
                 _logger.LogDebug("Migrated channel mirroring configuration {GuildId}/{ChannelId}", row.GuildId, row.FromChannelId);
+                
+                SetHasFeature(row.GuildId, BotFeatures.ChannelMirroring, true);
             }
             
             await _db.SaveChangesAsync();
@@ -203,6 +240,8 @@ namespace DatabaseMigrator.Services
                 };
                 _db.InactiveRoleConfigurations.Add(inactiveRoleConfiguration);
                 _logger.LogDebug("Migrated inactive role configuration {GuildId}", row.GuildId);
+                
+                SetHasFeature(row.GuildId, BotFeatures.InactiveRole, inactiveRoleConfiguration.RoleId != 0);
             }
 
             await _db.SaveChangesAsync();
@@ -231,6 +270,8 @@ namespace DatabaseMigrator.Services
                 };
                 _db.JoinMessageConfigurations.Add(joinMessageConfiguration);
                 _logger.LogDebug("Migrated join message configuration {GuildId}", row.GuildId);
+                
+                SetHasFeature(row.GuildId, BotFeatures.JoinMessage, joinMessageConfiguration.Enabled);
             }
 
             await _db.SaveChangesAsync();
@@ -251,6 +292,8 @@ namespace DatabaseMigrator.Services
 
                 _db.JoinRolesConfigurations.Add(joinRolesConfiguration);
                 _logger.LogDebug("Migrated join roles configuration {GuildId}", row.GuildId);
+                
+                SetHasFeature(row.GuildId, BotFeatures.JoinRoles, joinRolesConfiguration.JoinRoles.Any());
             }
 
             var pendingRows = await JoinRoles.GetPendingRowsAsync();
@@ -303,6 +346,8 @@ namespace DatabaseMigrator.Services
 
                 _db.MessageFilterConfigurations.Add(messageFilterConfiguration);
                 _logger.LogDebug("Migrated message filter configuration {GuildId}/{ChannelId}", row.GuildId, row.ChannelId);
+                
+                SetHasFeature(row.GuildId, BotFeatures.MessageFilter, true);
             }
 
             await _db.SaveChangesAsync();
@@ -324,6 +369,8 @@ namespace DatabaseMigrator.Services
 
                 _db.MessageLogsConfigurations.Add(messageLogsConfiguration);
                 _logger.LogDebug("Migrated message logs configuration {GuildId}", row.GuildId);
+                
+                SetHasFeature(row.GuildId, BotFeatures.MessageLogs, messageLogsConfiguration.DeletedChannelId != 0 || messageLogsConfiguration.EditedChannelId != 0);
             }
 
             /*var messageRows = await MessageLogs.GetMessagesAsync();
@@ -363,7 +410,9 @@ namespace DatabaseMigrator.Services
                 
                 _db.MessagePinningConfigurations.Add(messagePinningConfiguration);
                 _logger.LogDebug("Migrated message pinning configuration {GuildId}", row.GuildId);
-
+                
+                SetHasFeature(row.GuildId, BotFeatures.MessagePinning, true);
+                
                 foreach (var rowWebhookId in row.WebhookIds)
                 {
                     var messagePinningWebhook = new MessagePinningWebhook(row.GuildId, rowWebhookId.Item1)
@@ -404,6 +453,8 @@ namespace DatabaseMigrator.Services
 
                 _db.NoticeConfigurations.Add(noticeConfiguration);
                 _logger.LogDebug("Migrated notice configuration {GuildId}/{ChannelId}", row.GuildId, row.ChannelId);
+                
+                SetHasFeature(row.GuildId, BotFeatures.Notices, true);
             }
 
             await _db.SaveChangesAsync();
@@ -431,7 +482,7 @@ namespace DatabaseMigrator.Services
         private async Task MigrateReputationAsync()
         {
             var rows = await Reputation.GetRowsAsync();
-            _db.ReputationConfigurations.RemoveRange(await _db.ReputationConfigurations.ToListAsync());
+            _db.ReputationConfigurations.RemoveRange(await _db.ReputationConfigurations.Include(x => x.Emojis).ToListAsync());
 
             foreach (var row in rows)
             {
@@ -442,9 +493,11 @@ namespace DatabaseMigrator.Services
                         Value = x.Item2
                     }).ToList()
                 };
-
+                
                 _db.ReputationConfigurations.Add(reputationConfiguration);
                 _logger.LogDebug("Migrated reputation configuration {GuildId}", row.GuildId);
+                
+                SetHasFeature(row.GuildId, BotFeatures.Reputation, reputationConfiguration.Emojis.Any());
             }
 
             var memberRows = await Reputation.GetUserRowsAsync();
@@ -492,6 +545,8 @@ namespace DatabaseMigrator.Services
 
                 _db.RoleLinkingConfigurations.Add(roleLinkingConfiguration);
                 _logger.LogDebug("Migrated role linking configuration {GuildId}/{RoleId} ({LinkId})", row.GuildId, row.RoleId, row.LinkId);
+                
+                SetHasFeature(row.GuildId, BotFeatures.RoleLinking, true);
             }
 
             await _db.SaveChangesAsync();
@@ -512,6 +567,8 @@ namespace DatabaseMigrator.Services
 
                 _db.RolePersistConfigurations.Add(rolePersistConfiguration);
                 _logger.LogDebug("Migrated role persist configuration {GuildId}", row.GuildId);
+                
+                SetHasFeature(row.GuildId, BotFeatures.RolePersist, rolePersistConfiguration.Enabled);
             }
 
             await _db.SaveChangesAsync();
@@ -543,6 +600,7 @@ namespace DatabaseMigrator.Services
         {
             var rows = await Users.GetRowsAsync();
             _db.Users.RemoveRange(await _db.Users.ToListAsync());
+            _db.CustomerDetails.RemoveRange(await _db.CustomerDetails.ToListAsync());
 
             foreach (var row in rows)
             {
@@ -584,6 +642,8 @@ namespace DatabaseMigrator.Services
 
                 _db.VoiceLinkConfigurations.Add(voiceLinkConfiguration);
                 _logger.LogDebug("Migrated voice link configuration {GuildId}", row.GuildId);
+                
+                SetHasFeature(row.GuildId, BotFeatures.VoiceLink, voiceLinkConfiguration.Enabled);
             }
 
             var channelRows = await VoiceLink.GetChannelRowsAsync();
@@ -617,6 +677,8 @@ namespace DatabaseMigrator.Services
 
                 _db.VoiceRoleConfigurations.Add(voiceRoleConfiguration);
                 _logger.LogDebug("Migrated voice role configuration {GuildId}/{ChannelId}", row.GuildId, row.ChannelId);
+                
+                SetHasFeature(row.GuildId, BotFeatures.VoiceRoles, true);
             }
 
             await _db.SaveChangesAsync();
@@ -654,6 +716,8 @@ namespace DatabaseMigrator.Services
 
                 _db.VoteChannelConfigurations.Add(voteChannelConfiguration);
                 _logger.LogDebug("Migrated vote channel configuration {GuildId}/{ChannelId}", row.GuildId, row.ChannelId);
+                
+                SetHasFeature(row.GuildId, BotFeatures.VoteChannels, true);
             }
 
             await _db.SaveChangesAsync();
