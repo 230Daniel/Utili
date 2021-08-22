@@ -54,7 +54,7 @@ namespace Utili.Commands
         public async Task Leaderboard()
         {
             var repMembers = await _dbContext.ReputationMembers.GetForAllGuildMembersAsync(Context.GuildId);
-            repMembers = repMembers.OrderBy(x => x.Reputation).ToList();
+            repMembers = repMembers.OrderByDescending(x => x.Reputation).ToList();
 
             var position = 1;
             var content = "";
