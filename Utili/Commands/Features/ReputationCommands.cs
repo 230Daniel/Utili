@@ -40,7 +40,7 @@ namespace Utili.Commands
         public async Task Leaderboard()
         {
             var rows = await Database.Data.Reputation.GetUserRowsAsync(Context.Guild.Id);
-            rows = rows.OrderBy(x => x.Reputation).ToList();
+            rows = rows.OrderByDescending(x => x.Reputation).ToList();
 
             var position = 1;
             var content = "";
