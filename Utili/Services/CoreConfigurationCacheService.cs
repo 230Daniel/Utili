@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -14,7 +15,7 @@ namespace Utili.Services
         private static readonly TimeSpan CacheDuration = TimeSpan.FromSeconds(5);
         
         private static Dictionary<Snowflake, SemaphoreSlim> _semaphores = new();
-        private static Dictionary<Snowflake, (DateTime, CoreConfiguration)> _cachedConfigurations = new();
+        private static ConcurrentDictionary<Snowflake, CachedCoreConfiguration> _cachedConfigurations = new();
         
         private readonly DatabaseContext _dbContext;
 
@@ -43,21 +44,33 @@ namespace Utili.Services
                 var now = DateTime.UtcNow;
                 if (_cachedConfigurations.TryGetValue(guildId, out var cachedConfiguration))
                 {
-                    if (cachedConfiguration.Item1 > now)
+                    if (cachedConfiguration.ExpiresAt >= now)
                     {
-                        return cachedConfiguration.Item2;
+                        return cachedConfiguration.Configuration;
                     }
-                    _cachedConfigurations.Remove(guildId);
+                    _cachedConfigurations.TryRemove(guildId, out _);
                 }
-                
+
                 var config = await _dbContext.CoreConfigurations.GetForGuildAsync(guildId);
-                _cachedConfigurations.Add(config.GuildId, (now + CacheDuration, config));
+                _cachedConfigurations.TryAdd(guildId, new CachedCoreConfiguration(config, now + CacheDuration));
                 
                 return config;
             }
             finally
             {
                 semaphore.Release();
+            }
+        }
+
+        private class CachedCoreConfiguration
+        {
+            public CoreConfiguration Configuration { get; }
+            public DateTime ExpiresAt { get; }
+
+            public CachedCoreConfiguration(CoreConfiguration configuration, DateTime expiresAt)
+            {
+                Configuration = configuration;
+                ExpiresAt = expiresAt;
             }
         }
     }
