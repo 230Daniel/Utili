@@ -18,7 +18,7 @@ namespace Utili.Services
 {
     public class MemberCacheService
     {
-        private static readonly TimeSpan TemporaryCacheLength = TimeSpan.FromSeconds(20); // TimeSpan.FromMinutes(10);
+        private static readonly TimeSpan TemporaryCacheLength = TimeSpan.FromMinutes(10);
         
         private readonly ILogger<MemberCacheService> _logger;
         private readonly IConfiguration _configuration;
@@ -94,7 +94,6 @@ namespace Utili.Services
                 {
                     // The expiry time is in the future, renew the expiry time
                     _tempCachedGuilds[guildId] = DateTime.UtcNow.Add(TemporaryCacheLength);
-                    _logger.LogInformation("Extended expiry time for {Guild}", guildId);
                     return;
                 }
                 
