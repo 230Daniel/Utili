@@ -179,10 +179,13 @@ namespace Utili.Services
 
                         if (lastAction <= minimumLastAction && !member.RoleIds.Contains(config.ImmuneRoleId))
                         {
-                            if (premium && config.AutoKick && lastAction <= minimumKickLastAction)
+                            if (premium 
+                                && config.AutoKick 
+                                && lastAction <= minimumKickLastAction 
+                                && guild.BotHasPermissions(Permission.KickMembers) 
+                                && member.CanBeManaged())
                             {
-                                if(guild.BotHasPermissions(Permission.KickMembers) && member.CanBeManaged())
-                                    await member.KickAsync(new DefaultRestRequestOptions {Reason = "Inactive Role (auto-kick)"});
+                                await member.KickAsync(new DefaultRestRequestOptions {Reason = "Inactive Role (auto-kick)"});
                                 await Task.Delay(500);
                                 continue;
                             }
