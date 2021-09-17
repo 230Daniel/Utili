@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
 using Disqord;
@@ -10,23 +12,23 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Utili.Extensions;
+using Timer = System.Timers.Timer;
 
 namespace Utili.Services
 {
     public class MemberCacheService
     {
-        private static readonly TimeSpan TemporaryCacheLength = TimeSpan.FromMinutes(10);
+        private static readonly TimeSpan TemporaryCacheLength = TimeSpan.FromSeconds(20); // TimeSpan.FromMinutes(10);
         
         private readonly ILogger<MemberCacheService> _logger;
         private readonly IConfiguration _configuration;
         private readonly DiscordClientBase _client;
         private readonly IServiceScopeFactory _scopeFactory;
         
-        private List<ulong> _cachedGuilds;
-        private Dictionary<ulong, DateTime> _tempCachedGuilds;
-        private Dictionary<ulong, ValueTask<bool>> _tempCachedGuildTasks;
+        private List<Snowflake> _cachedGuilds;
+        private ConcurrentDictionary<Snowflake, DateTime> _tempCachedGuilds;
+        private Dictionary<Snowflake, SemaphoreSlim> _semaphores;
         private Timer _timer;
-        
 
         public MemberCacheService(ILogger<MemberCacheService> logger, IConfiguration configuration, DiscordClientBase client, IServiceScopeFactory scopeFactory)
         {
@@ -37,7 +39,7 @@ namespace Utili.Services
 
             _cachedGuilds = new();
             _tempCachedGuilds = new();
-            _tempCachedGuildTasks = new();
+            _semaphores = new();
             _timer = new(10000);
             _timer.Elapsed += TimerElapsed;
         }
@@ -53,7 +55,8 @@ namespace Utili.Services
             {
                 var guildIds = await GetRequiredDownloadsAsync(e.GuildIds);
                 _logger.LogInformation("Caching members for {Guilds} guilds on {ShardId}", guildIds.Count, e.ShardId);
-                await CacheMembersAsync(guildIds);
+                await PermanentlyCacheMembersAsync(guildIds);
+                
                 _logger.LogInformation("Finished caching members for {Shard}", e.ShardId);
                 await e.CurrentUser.GetGatewayClient().SetPresenceAsync(new LocalActivity($"{_configuration.GetValue<string>("Domain")} | {_configuration.GetValue<string>("DefaultPrefix")}help", ActivityType.Playing));
             }
@@ -63,82 +66,89 @@ namespace Utili.Services
             }
         }
 
-        public async Task TemporarilyCacheMembersAsync(ulong guildId)
+        public async Task TemporarilyCacheMembersAsync(Snowflake guildId)
         {
             lock (_cachedGuilds)
             {
-                if (_cachedGuilds.Contains(guildId)) return;
+                if (_cachedGuilds.Contains(guildId))
+                    // The guild is cached permanently
+                    return;
             }
             
-            ValueTask<bool> task = default;
-            var alreadyCached = false;
+            SemaphoreSlim semaphore;
             
-            lock (_tempCachedGuilds)
+            lock (_semaphores)
             {
-                if (_tempCachedGuilds.TryGetValue(guildId, out var expiryTime))
+                if (!_semaphores.TryGetValue(guildId, out semaphore))
                 {
-                    if (expiryTime > DateTime.UtcNow)
+                    semaphore = new SemaphoreSlim(1, 1);
+                    _semaphores.Add(guildId, semaphore);
+                }
+            }
+
+            await semaphore.WaitAsync();
+
+            try
+            {
+                if (_tempCachedGuilds.TryGetValue(guildId, out var expiryTime) && expiryTime > DateTime.UtcNow)
+                {
+                    // The expiry time is in the future, renew the expiry time
+                    _tempCachedGuilds[guildId] = DateTime.UtcNow.Add(TemporaryCacheLength);
+                    _logger.LogInformation("Extended expiry time for {Guild}", guildId);
+                    return;
+                }
+                
+                // The expiry time is in the past, chunk members now and set expiry time
+                await _client.Chunker.ChunkAsync(_client.GetGuild(guildId));
+                _tempCachedGuilds[guildId] = DateTime.UtcNow.Add(TemporaryCacheLength);
+                _logger.LogInformation("Temporarily cached members for {Guild}", guildId);
+            }
+            finally
+            {
+                semaphore.Release();
+            }
+        }
+        
+        private async Task UncacheExpiredTemporaryMembersAsync()
+        {
+            var guildIds = _tempCachedGuilds.Keys.ToArray();
+            foreach (var guildId in guildIds)
+            {
+                lock (_cachedGuilds)
+                {
+                    if (_cachedGuilds.Contains(guildId))
+                        // The guild is cached permanently
+                        continue;
+                }
+                
+                SemaphoreSlim semaphore;
+            
+                lock (_semaphores)
+                {
+                    if (!_semaphores.TryGetValue(guildId, out semaphore))
                     {
-                        alreadyCached = true;
-                        lock (_tempCachedGuildTasks)
-                        {
-                            _tempCachedGuildTasks.TryGetValue(guildId, out task);
-                        }
+                        semaphore = new SemaphoreSlim(1, 1);
+                        _semaphores.Add(guildId, semaphore);
                     }
                 }
-            
-                _tempCachedGuilds[guildId] = DateTime.UtcNow.Add(TemporaryCacheLength);
-            }
 
-            if (alreadyCached)
-            {
-                await task;
-                return;
-            }
-            
-            var newTask = _client.Chunker.ChunkAsync(_client.GetGuild(guildId));
-            
-            lock (_tempCachedGuildTasks)
-            {
-                _tempCachedGuildTasks[guildId] = newTask;
-            }
-            
-            await newTask;
-            
-            lock (_tempCachedGuildTasks)
-            {
-                _tempCachedGuildTasks.Remove(guildId);
-            }
-            
-            _logger.LogInformation("Temporarily cached members for {Guild}", guildId);
-        }
+                await semaphore.WaitAsync();
 
-        private void UncacheTemporaryMembersAsync()
-        {
-            lock (_tempCachedGuilds)
-            {
-                foreach (var tempCachedGuild in _tempCachedGuilds)
+                try
                 {
-                    var (guildId, expiry) = tempCachedGuild;
-                
-                    if (expiry < DateTimeOffset.UtcNow)
+                    if (_tempCachedGuilds.TryGetValue(guildId, out var expiryTime) && expiryTime < DateTime.UtcNow)
                     {
-                        _tempCachedGuilds.Remove(guildId);
-                    
-                        lock (_cachedGuilds)
-                        {
-                            if (_cachedGuilds.Contains(guildId))
-                                continue;
-                        }
-
+                        // The expiry time is in the past, remove it and un-cache
+                        _tempCachedGuilds.TryRemove(guildId, out _);
+                        
                         if(!_client.CacheProvider.TryGetMembers(guildId, out var cache))
                             continue;
 
                         var toRemove = cache.Where(x =>
                             {
-                                var (userId, member) = x;
+                                var (memberId, member) = x;
                             
-                                if (userId == _client.CurrentUser.Id)
+                                if (memberId == _client.CurrentUser.Id)
                                     return false;
 
                                 if (member.IsPending)
@@ -157,6 +167,10 @@ namespace Utili.Services
                         _logger.LogInformation("Uncached members for guild {GuildId}", guildId);
                     }
                 }
+                finally
+                {
+                    semaphore.Release();
+                }
             }
         }
 
@@ -168,14 +182,13 @@ namespace Utili.Services
                 guildIdsToCheck.RemoveAll(x => _cachedGuilds.Contains(x));
 
                 var guildIds = await GetRequiredDownloadsAsync(guildIdsToCheck);
-                await CacheMembersAsync(guildIds);
-                UncacheTemporaryMembersAsync();
+                await PermanentlyCacheMembersAsync(guildIds);
+                await UncacheExpiredTemporaryMembersAsync();
             });
         }
 
-        private async Task CacheMembersAsync(IEnumerable<ulong> guildIds)
+        private async Task PermanentlyCacheMembersAsync(IEnumerable<Snowflake> guildIds)
         {
-            guildIds = guildIds.Distinct();
             lock (_cachedGuilds)
             {
                 _cachedGuilds.AddRange(guildIds);
@@ -188,7 +201,7 @@ namespace Utili.Services
             }
         }
 
-        private async Task<List<ulong>> GetRequiredDownloadsAsync(IEnumerable<Snowflake> shardGuildIds)
+        private async Task<List<Snowflake>> GetRequiredDownloadsAsync(IEnumerable<Snowflake> shardGuildIds)
         {
             using var scope = _scopeFactory.CreateScope();
             var db = scope.GetDbContext();
@@ -201,7 +214,7 @@ namespace Utili.Services
             guildIds.AddRange(roleLinkingConfigs.Select(x => x.GuildId));
             
             guildIds.RemoveAll(x => !shardGuildIds.Contains(x));
-            return guildIds.Distinct().ToList();
+            return guildIds.Distinct().Select(x => new Snowflake(x)).ToList();
         }
     }
 }
