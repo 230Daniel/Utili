@@ -34,12 +34,14 @@ namespace Utili.Services
                 if(!e.GuildId.HasValue) return false;
 
                 if(!e.Channel.BotHasPermissions(Permission.ViewChannel | Permission.ManageMessages)) return false;
-                if (e.Message is IUserMessage userMessage && 
+                var userMessage = e.Message as IUserMessage;
+                if (userMessage is not null && 
                     e.Member is not null &&
                     e.Member.Id == _client.CurrentUser.Id &&
                     userMessage.Embeds.Count > 0 && 
                     userMessage.Embeds[0].Author?.Name == "Message deleted")
                     return false;
+                if (userMessage.WebhookId.HasValue) return false;
 
                 var db = scope.GetDbContext();
                 var config = await db.MessageFilterConfigurations.GetForGuildChannelAsync(e.GuildId.Value, e.ChannelId);
