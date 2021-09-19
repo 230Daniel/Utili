@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -34,6 +35,7 @@ namespace UtiliBackend.Controllers
         {
             var user = HttpContext.GetDiscordUser();
             var customerId = await _customerService.GetOrCreateCustomerIdAsync(user.Id);
+            if (customerId is null) throw new Exception("Customer ID was null");
             
             var options = new SessionCreateOptions
             {
@@ -70,6 +72,7 @@ namespace UtiliBackend.Controllers
         {
             var user = HttpContext.GetDiscordUser();
             var customerId = await _customerService.GetOrCreateCustomerIdAsync(user.Id);
+            if (customerId is null) throw new Exception("Customer ID was null");
             
             var options = new Stripe.BillingPortal.SessionCreateOptions
             {
