@@ -34,7 +34,8 @@ namespace Utili.Services
                 if (config is null || !config.Enabled) return;
 
                 var memberRecord = await db.RolePersistMembers.GetForMemberAsync(e.GuildId, e.Member.Id);
-
+                if (memberRecord is null) return;
+                
                 var guild = _client.GetGuild(e.GuildId);
                 var roles = memberRecord.Roles.Select(x => guild.GetRole(x)).ToList();
                 roles.RemoveAll(x => x is null || !x.CanBeManaged() || config.ExcludedRoles.Contains(x.Id));

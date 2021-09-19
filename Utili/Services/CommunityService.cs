@@ -72,7 +72,7 @@ namespace Utili
                         using var scope = _scopeFactory.CreateScope();
                         var db = scope.GetDbContext();
 
-                        var activeSubscriptions = await db.Subscriptions.Where(x => x.IsValid()).ToListAsync();
+                        var activeSubscriptions = (await db.Subscriptions.ToListAsync()).Where(x => x.IsValid());
                         
                         var premiumMembers = guild.Members.Select(x => x.Value).Where(x => activeSubscriptions.Any(y => y.UserId == x.Id)).ToList();
 

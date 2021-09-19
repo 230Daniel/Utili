@@ -52,7 +52,7 @@ namespace Utili.Services
                 if (!await db.GetIsGuildPremiumAsync(e.GuildId.Value))
                 {
                     var messages = await db.MessageLogsMessages
-                        .Where(x => x.GuildId == e.GuildId.Value && x.ChannelId == e.ChannelId)
+                        .Where(x => x.GuildId == e.GuildId.Value.RawValue && x.ChannelId == e.ChannelId.RawValue)
                         .OrderByDescending(x => x.Timestamp)
                         .ToListAsync();
 

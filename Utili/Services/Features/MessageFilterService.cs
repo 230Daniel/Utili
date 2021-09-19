@@ -41,7 +41,7 @@ namespace Utili.Services
                     userMessage.Embeds.Count > 0 && 
                     userMessage.Embeds[0].Author?.Name == "Message deleted")
                     return false;
-                if (userMessage.WebhookId.HasValue) return false;
+                if (userMessage?.WebhookId is not null) return false;
 
                 var db = scope.GetDbContext();
                 var config = await db.MessageFilterConfigurations.GetForGuildChannelAsync(e.GuildId.Value, e.ChannelId);
