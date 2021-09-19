@@ -44,10 +44,11 @@ namespace UtiliBackend.Controllers
                 _configuration["Stripe:WebhookSecret"]);
             
             await _semaphore.WaitAsync();
-            _logger.LogInformation("Stripe webhook of type {Type} received", stripeEvent.Type);
 
             try
             {
+                _logger.LogInformation("Stripe webhook of type {Type} received", stripeEvent.Type);
+                
                 switch (stripeEvent.Type)
                 {
                     case "customer.subscription.created":

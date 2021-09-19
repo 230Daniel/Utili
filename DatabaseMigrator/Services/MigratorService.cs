@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Database;
 using Microsoft.Extensions.Logging;
 using NewDatabase;
 using Database.Data;
@@ -14,7 +15,7 @@ namespace DatabaseMigrator.Services
     
     public class MigratorService
     {
-        private static readonly bool UseProdDb = false;
+        private static readonly bool UseProdDb = true;
         
         private readonly ILogger<MigratorService> _logger;
         private readonly IConfiguration _configuration;
@@ -232,7 +233,7 @@ namespace DatabaseMigrator.Services
                     RoleId = row.RoleId,
                     ImmuneRoleId = row.ImmuneRoleId,
                     Threshold = row.Threshold,
-                    Mode = row.Inverse ? InactiveRoleMode.GrantWhenInactive : InactiveRoleMode.RevokeWhenInactive,
+                    Mode = row.Inverse ? InactiveRoleMode.RevokeWhenInactive : InactiveRoleMode.GrantWhenInactive,
                     AutoKick = row.AutoKick,
                     AutoKickThreshold = row.AutoKickThreshold,
                     DefaultLastAction = row.DefaultLastAction,
@@ -373,25 +374,67 @@ namespace DatabaseMigrator.Services
                 SetHasFeature(row.GuildId, BotFeatures.MessageLogs, messageLogsConfiguration.DeletedChannelId != 0 || messageLogsConfiguration.EditedChannelId != 0);
             }
 
-            /*var messageRows = await MessageLogs.GetMessagesAsync();
-            _db.MessageLogsMessages.RemoveRange(await _db.MessageLogsMessages.ToListAsync());
+            await _db.Database.ExecuteSqlRawAsync("TRUNCATE TABLE message_logs_messages;");
+            
+            var reader = await Sql.ExecuteReaderAsync("SELECT COUNT(*) FROM MessageLogsMessages");
+            reader.Read();
+            var rowCount = reader.GetInt32(0) + 1000;
+            var chunkCount = rowCount / 1000;
 
-            foreach (var messageRow in messageRows)
+            var tasks = new List<Task<IEnumerable<MessageLogsMessage>>>();
+            for (var chunkNum = 0; chunkNum < chunkCount; chunkNum++)
             {
-                var messageLogsMessage = new MessageLogsMessage(messageRow.MessageId)
-                {
-                    GuildId = messageRow.GuildId,
-                    ChannelId = messageRow.ChannelId,
-                    AuthorId = messageRow.UserId,
-                    Timestamp = messageRow.Timestamp,
-                    Content = messageRow.Content.Value
-                };
+                while (tasks.Count(x => !x.IsCompleted) >= 8)
+                    await Task.Delay(1000);
 
-                _db.MessageLogsMessages.Add(messageLogsMessage);
-                _logger.LogDebug("Migrated message logs message {MessageId}", messageRow.MessageId);
-            }*/
+                tasks.Add(MigrateMessageLogsMessagesChunkAsync(chunkNum));
+            }
 
+            await Task.WhenAll(tasks);
+
+            var messages = new List<MessageLogsMessage>();
+            foreach (var task in tasks)
+            {
+                messages.AddRange(await task);
+            }
+
+            messages = messages
+                .GroupBy(x => x.MessageId)
+                .Select(x => x.First())
+                .ToList();
+
+            _db.MessageLogsMessages.AddRange(messages);
             await _db.SaveChangesAsync();
+        }
+
+        private async Task<IEnumerable<MessageLogsMessage>> MigrateMessageLogsMessagesChunkAsync(int chunkNumber)
+        {
+            var messageRows = new MessageLogsMessageRow[1000];
+            var reader = await Sql.ExecuteReaderAsync($"SELECT * FROM MessageLogsMessages ORDER BY MessageId LIMIT 1000 OFFSET {chunkNumber * 1000}");
+
+            var i = 0;
+            while (reader.Read())
+            {
+                messageRows[i] = MessageLogsMessageRow.FromDatabase(
+                    reader.GetUInt64(0),
+                    reader.GetUInt64(1),
+                    reader.GetUInt64(2),
+                    reader.GetUInt64(3),
+                    reader.GetDateTime(4),
+                    reader.GetString(5));
+                i++;
+            }
+
+            _logger.LogDebug("Fetched message logs messages for chunk {ChunkNumber}", chunkNumber);
+            
+            return messageRows.Where(x => x is not null).Select(messageRow => new MessageLogsMessage(messageRow.MessageId)
+            {
+                GuildId = messageRow.GuildId,
+                ChannelId = messageRow.ChannelId,
+                AuthorId = messageRow.UserId,
+                Timestamp = messageRow.Timestamp,
+                Content = messageRow.Content.Value
+            });
         }
 
         private async Task MigrateMessgePinningAsync()

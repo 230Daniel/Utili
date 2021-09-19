@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Threading.Tasks;
 using Disqord;
 using Disqord.Bot;
 using Disqord.Bot.Hosting;
@@ -7,6 +8,7 @@ using Disqord.Extensions.Interactivity;
 using Disqord.Gateway;
 using Disqord.Gateway.Api;
 using Disqord.Gateway.Default;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Utili.Implementations;
 using Microsoft.Extensions.DependencyInjection;
@@ -20,7 +22,7 @@ namespace Utili
 {
     internal static class Program
     {
-        private static void Main()
+        private static async Task Main()
         {
             var host = Host.CreateDefaultBuilder()
                 .ConfigureLogging(builder =>
@@ -46,10 +48,13 @@ namespace Utili
 
             try
             {
-                using (host)
+                using (var scope = host.Services.CreateScope())
                 {
-                    host.Run();
+                    var db = scope.ServiceProvider.GetRequiredService<DatabaseContext>();
+                    await db.Database.MigrateAsync();
                 }
+                    
+                await host.RunAsync();
             }
             catch (Exception ex)
             {
