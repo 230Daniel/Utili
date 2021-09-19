@@ -2,12 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Database.Data;
 using Disqord;
 using Disqord.Bot;
 using Disqord.Extensions.Interactivity.Menus.Paged;
 using Disqord.Gateway;
 using Disqord.Rest;
+using NewDatabase;
+using NewDatabase.Entities;
+using NewDatabase.Extensions;
 using Qmmands;
 using Utili.Extensions;
 using Utili.Implementations;
@@ -19,29 +21,36 @@ namespace Utili.Commands
     [Group("Inactive", "InactiveRole")]
     public class InactiveRoleCommands : DiscordInteractiveGuildModuleBase
     {
+        private readonly DatabaseContext _dbContext;
         private readonly MemberCacheService _memberCache;
         private static List<ulong> _kickingIn = new();
 
-        public InactiveRoleCommands(MemberCacheService memberCache)
+        public InactiveRoleCommands(DatabaseContext dbContext, MemberCacheService memberCache)
         {
+            _dbContext = dbContext;
             _memberCache = memberCache;
         }
         
         [Command("List")]
         public async Task<DiscordCommandResult> List()
         {
-            var row = await InactiveRole.GetRowAsync(Context.Guild.Id);
-            if (Context.Guild.GetRole(row.RoleId) is null)
+            var config = await _dbContext.InactiveRoleConfigurations.GetForGuildAsync(Context.GuildId);
+            if (Context.Guild.GetRole(config.RoleId) is null)
             {
                 await Context.Channel.SendFailureAsync("Error", "This server does not have an inactive role set");
                 return null; 
             }
 
             await _memberCache.TemporarilyCacheMembersAsync(Context.GuildId);
-            var inactiveMembers = Context.Guild.GetMembers().Values
-                .Where(x => x.GetRole(row.RoleId) is not null && x.GetRole(row.ImmuneRoleId) is null)
-                .OrderBy(x => x.Nick ?? x.Name)
-                .ToList();
+            var inactiveMembers = config.Mode == InactiveRoleMode.GrantWhenInactive
+                ? Context.Guild.GetMembers().Values
+                    .Where(x => x.GetRole(config.RoleId) is not null && x.GetRole(config.ImmuneRoleId) is null)
+                    .OrderBy(x => x.Nick ?? x.Name)
+                    .ToList()
+                : Context.Guild.GetMembers().Values
+                    .Where(x => x.GetRole(config.RoleId) is null && x.GetRole(config.ImmuneRoleId) is null)
+                    .OrderBy(x => x.Nick ?? x.Name)
+                    .ToList();
 
             if (inactiveMembers.Count == 0)
             {
@@ -92,8 +101,15 @@ namespace Utili.Commands
         [Cooldown(1, 10, CooldownMeasure.Seconds, CooldownBucketType.Guild)]
         public async Task Kick()
         {
-            var cancelCommand = false;
+            var config = await _dbContext.InactiveRoleConfigurations.GetForGuildAsync(Context.GuildId);
+            if (Context.Guild.GetRole(config.RoleId) is null)
+            {
+                await Context.Channel.SendFailureAsync("Error", "This server does not have an inactive role set");
+                return; 
+            }
 
+            var cancelCommand = false;
+            
             lock (_kickingIn)
             {
                 if (_kickingIn.Contains(Context.GuildId)) cancelCommand = true;
@@ -105,19 +121,17 @@ namespace Utili.Commands
                 await Context.Channel.SendFailureAsync("Error", "This command is already being executed in this server.");
                 return;
             }
-
-            var row = await InactiveRole.GetRowAsync(Context.Guild.Id);
-            if (Context.Guild.GetRole(row.RoleId) is null)
-            {
-                await Context.Channel.SendFailureAsync("Error", "This server does not have an inactive role set");
-                return; 
-            }
-
+            
             await _memberCache.TemporarilyCacheMembersAsync(Context.GuildId);
-            var inactiveMembers = Context.Guild.GetMembers().Values
-                .Where(x => x.GetRole(row.RoleId) is not null && x.GetRole(row.ImmuneRoleId) is null)
-                .OrderBy(x => x.Nick ?? x.Name)
-                .ToList();
+            var inactiveMembers = config.Mode == InactiveRoleMode.GrantWhenInactive
+                ? Context.Guild.GetMembers().Values
+                    .Where(x => x.GetRole(config.RoleId) is not null && x.GetRole(config.ImmuneRoleId) is null)
+                    .OrderBy(x => x.Nick ?? x.Name)
+                    .ToList()
+                : Context.Guild.GetMembers().Values
+                    .Where(x => x.GetRole(config.RoleId) is null && x.GetRole(config.ImmuneRoleId) is null)
+                    .OrderBy(x => x.Nick ?? x.Name)
+                    .ToList();
 
             if (await ConfirmAsync("Are you sure?", $"This command will kick {inactiveMembers.Count} inactive members - View them with {Context.Prefix}inactive list", $"Kick {inactiveMembers.Count} inactive members"))
             {

@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
-using Database.Data;
 using Disqord;
 using Disqord.Gateway;
 using Disqord.Rest;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using NewDatabase.Entities;
+using NewDatabase.Extensions;
 using Utili.Extensions;
 
 namespace Utili.Services
@@ -21,20 +23,22 @@ namespace Utili.Services
             _client = client;
         }
 
-        public async Task MemberJoined(MemberJoinedEventArgs e)
+        public async Task MemberJoined(IServiceScope scope, MemberJoinedEventArgs e)
         {
             try
             {
                 if (e.Member.IsBot) return;
 
-                IGuild guild = _client.GetGuild(e.GuildId);
-                var row = await RolePersist.GetRowAsync(e.GuildId);
-                if (!row.Enabled) return;
+                var db = scope.GetDbContext();
+                var config = await db.RolePersistConfigurations.GetForGuildAsync(e.GuildId);
+                if (config is null || !config.Enabled) return;
 
-                var persistRow = await RolePersist.GetPersistRowAsync(e.GuildId, e.Member.Id);
-
-                var roles = persistRow.Roles.Select(x => guild.GetRole(x)).ToList();
-                roles.RemoveAll(x => x is null || !x.CanBeManaged() || row.ExcludedRoles.Contains(x.Id));
+                var memberRecord = await db.RolePersistMembers.GetForMemberAsync(e.GuildId, e.Member.Id);
+                if (memberRecord is null) return;
+                
+                var guild = _client.GetGuild(e.GuildId);
+                var roles = memberRecord.Roles.Select(x => guild.GetRole(x)).ToList();
+                roles.RemoveAll(x => x is null || !x.CanBeManaged() || config.ExcludedRoles.Contains(x.Id));
                 if (!roles.Any()) return;
                 
                 IMember member = guild.GetMember(e.Member.Id);
@@ -45,8 +49,9 @@ namespace Utili.Services
                 roleIds = roleIds.Distinct().ToList();
             
                 await e.Member.ModifyAsync(x => x.RoleIds = roleIds, new DefaultRestRequestOptions{Reason = "Role Persist"});
-                
-                await RolePersist.DeletePersistRowAsync(persistRow);
+
+                db.RolePersistMembers.Remove(memberRecord);
+                await db.SaveChangesAsync();
             }
             catch (Exception ex)
             {
@@ -54,7 +59,7 @@ namespace Utili.Services
             }
         }
 
-        public async Task MemberLeft(MemberLeftEventArgs e, IMember member)
+        public async Task MemberLeft(IServiceScope scope, MemberLeftEventArgs e, IMember member)
         {
             try
             {
@@ -62,17 +67,29 @@ namespace Utili.Services
                 
                 IGuild guild = _client.GetGuild(e.GuildId);
 
-                var row = await RolePersist.GetRowAsync(e.GuildId);
-                if(!row.Enabled) return;
+                var db = scope.GetDbContext();
+                var config = await db.RolePersistConfigurations.GetForGuildAsync(e.GuildId);
+                if(config is null || !config.Enabled) return;
                 
                 if (member is null) throw new Exception($"Member {e.User.Id} was not cached in guild {e.GuildId}");
 
-                var persistRow = await RolePersist.GetPersistRowAsync(guild.Id, e.User.Id);
-                
-                persistRow.Roles.AddRange(member.RoleIds.Select(x => x.RawValue));
-                persistRow.Roles = persistRow.Roles.Distinct().ToList();
-
-                await RolePersist.SavePersistRowAsync(persistRow);
+                var memberRecord = await db.RolePersistMembers.GetForMemberAsync(guild.Id, e.User.Id);
+                if (memberRecord is null)
+                {
+                    memberRecord = new RolePersistMember(guild.Id, e.User.Id)
+                    {
+                        Roles = member.RoleIds.Select(x => x.RawValue).ToList()
+                    };
+                    db.RolePersistMembers.Add(memberRecord);
+                    await db.SaveChangesAsync();
+                }
+                else
+                {
+                    memberRecord.Roles.AddRange(member.RoleIds.Select(x => x.RawValue));
+                    memberRecord.Roles = memberRecord.Roles.Distinct().ToList();
+                    db.RolePersistMembers.Update(memberRecord);
+                    await db.SaveChangesAsync();
+                }
             }
             catch (Exception ex)
             {

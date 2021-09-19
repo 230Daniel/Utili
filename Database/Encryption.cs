@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using System.Security.Cryptography;
+using System.Text;
 
 namespace Database
 {
@@ -43,17 +44,17 @@ namespace Database
 
         public static string GeneratePassword(ulong[] ids)
         {
-            var password = "";
+            var passwordBuilder = new StringBuilder();
 
             var amountTake = 16;
             foreach (var id in ids)
             {
-                password += id.ToString().Substring(0, amountTake);
+                passwordBuilder.Append(id.ToString().Substring(0, amountTake));
 
                 if (amountTake > 2) amountTake -= 2;
             }
 
-            return password;
+            return passwordBuilder.ToString();
         }
     }
 }

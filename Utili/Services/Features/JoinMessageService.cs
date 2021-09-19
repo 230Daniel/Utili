@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Database.Data;
 using Disqord;
 using Disqord.Gateway;
 using Disqord.Rest;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using NewDatabase.Entities;
+using NewDatabase.Extensions;
 using Utili.Extensions;
 
 namespace Utili.Services
@@ -20,22 +22,27 @@ namespace Utili.Services
             _client = client;
         }
 
-        public async Task MemberJoined(MemberJoinedEventArgs e)
+        public async Task MemberJoined(IServiceScope scope, MemberJoinedEventArgs e)
         {
             try
             {
-                var row = await JoinMessage.GetRowAsync(e.GuildId);
-
-                if (row.Enabled)
+                var db = scope.GetDbContext();
+                var config = await db.JoinMessageConfigurations.GetForGuildAsync(e.GuildId);
+                if (config is null || !config.Enabled) return;
+                
+                var message = GetJoinMessage(config, e.Member);
+                if (config.Mode == JoinMessageMode.DirectMessage)
                 {
-                    var message = GetJoinMessage(row, e.Member);
-                    if (row.Direct) try { await e.Member.SendMessageAsync(message); } catch { }
-                    else
+                    try
                     {
-                        ITextChannel channel = _client.GetTextChannel(e.GuildId, row.ChannelId);
-                        if(!channel.BotHasPermissions(Permission.ViewChannel | Permission.SendMessages | Permission.EmbedLinks)) return;
-                        await channel.SendMessageAsync(message);
-                    }
+                        await e.Member.SendMessageAsync(message);
+                    } catch { }
+                }
+                else
+                {
+                    ITextChannel channel = _client.GetTextChannel(e.GuildId, config.ChannelId);
+                    if(!channel.BotHasPermissions(Permission.ViewChannel | Permission.SendMessages | Permission.EmbedLinks)) return;
+                    await channel.SendMessageAsync(message);
                 }
             }
             catch(Exception ex)
@@ -44,21 +51,25 @@ namespace Utili.Services
             }
         }
 
-        public static LocalMessage GetJoinMessage(JoinMessageRow row, IMember member)
+        public static LocalMessage GetJoinMessage(JoinMessageConfiguration config, IMember member)
         {
-            var text = row.Text.Value.Replace(@"\n", "\n").Replace("%user%", member.Mention);
-            var title = row.Title.Value.Replace("%user%", member.ToString());
-            var content = row.Content.Value.Replace(@"\n", "\n").Replace("%user%", member.Mention);
-            var footer = row.Footer.Value.Replace(@"\n", "\n").Replace("%user%", member.ToString());
+            var text = config.Text.Replace(@"\n", "\n").Replace("%user%", member.Mention);
+            var title = config.Title.Replace("%user%", member.ToString());
+            var content = config.Content.Replace(@"\n", "\n").Replace("%user%", member.Mention);
+            var footer = config.Footer.Replace(@"\n", "\n").Replace("%user%", member.ToString());
             
-            var iconUrl = row.Icon.Value;
-            var thumbnailUrl = row.Thumbnail.Value;
-            var imageUrl = row.Image.Value;
+            var iconUrl = config.Icon;
+            var thumbnailUrl = config.Thumbnail;
+            var imageUrl = config.Image;
 
             if (iconUrl.ToLower() == "user") iconUrl = member.GetAvatarUrl();
             if (thumbnailUrl.ToLower() == "user") thumbnailUrl = member.GetAvatarUrl();
             if (imageUrl.ToLower() == "user") imageUrl = member.GetAvatarUrl();
 
+            if (!Uri.TryCreate(iconUrl, UriKind.Absolute, out var uriResult1) || uriResult1.Scheme is not ("http" or "https")) iconUrl = null;
+            if (!Uri.TryCreate(thumbnailUrl, UriKind.Absolute, out var uriResult2) || uriResult2.Scheme is not ("http" or "https")) thumbnailUrl = null;
+            if (!Uri.TryCreate(imageUrl, UriKind.Absolute, out var uriResult3) || uriResult3.Scheme is not ("http" or "https")) imageUrl = null;
+            
             if (string.IsNullOrWhiteSpace(title) && !string.IsNullOrWhiteSpace(iconUrl))
                 title = "Title";
             
@@ -81,7 +92,7 @@ namespace Utili.Services
                     .WithOptionalFooter(footer)
                     .WithThumbnailUrl(thumbnailUrl)
                     .WithImageUrl(imageUrl)
-                    .WithColor(new Color((int) row.Colour)));
+                    .WithColor(new Color((int) config.Colour)));
         }
     }
 }

@@ -1,10 +1,12 @@
 ﻿using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Database.Data;
 using Disqord;
 using Disqord.Bot;
 using Disqord.Rest;
+using NewDatabase;
+using NewDatabase.Entities;
+using NewDatabase.Extensions;
 using Qmmands;
 using Utili.Extensions;
 using Utili.Implementations;
@@ -13,6 +15,13 @@ namespace Utili.Features
 {
     public class MessagePinningCommands : DiscordGuildModuleBase
     {
+        private readonly DatabaseContext _dbContext;
+        
+        public MessagePinningCommands(DatabaseContext dbContext)
+        {
+            _dbContext = dbContext;
+        }
+        
         [Command("Pin")]
         [DefaultCooldown(2, 5)]
         [RequireAuthorChannelPermissions(Permission.ManageMessages)]
@@ -42,29 +51,30 @@ namespace Utili.Features
                     $"No message was found in {channel.Mention} with ID {messageId}\n[How do I get a message ID?](https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID-)");
                 return;
             }
-            
-            var row = await MessagePinning.GetRowAsync(Context.Guild.Id);
-            if (row.Pin) await message.PinAsync(new DefaultRestRequestOptions {Reason = $"Message Pinning (manual by {Context.Message.Author} {Context.Message.Author.Id})"});
 
-            pinChannel ??= Context.Guild.GetTextChannel(row.PinChannelId);
+            var config = await _dbContext.MessagePinningConfigurations.GetForGuildAsync(Context.GuildId);
+            if (config is not null && config.PinMessages) await message.PinAsync(new DefaultRestRequestOptions {Reason = $"Message Pinning (manual by {Context.Message.Author} {Context.Message.Author.Id})"});
+
+            pinChannel ??= config is null ? null : Context.Guild.GetTextChannel(config.PinChannelId);
             
-            if (pinChannel is null && row.Pin)
+            if (pinChannel is null && (config is not null && config.PinMessages))
             {
                 await Context.Channel.SendSuccessAsync("Message pinned",
                     "Set a pin channel on the dashboard or specify one in the command if you want the message to be copied to another channel as well.");
                 return;
             }
-            if (pinChannel is null && !row.Pin)
+            if (pinChannel is null && (config is null || !config.PinMessages))
             {
                 await Context.Channel.SendFailureAsync("Error",
                     "Message pinning is not enabled on this server.");
                 return;
             }
+
+            IWebhook webhook = null;
+            var webhookInfo = await _dbContext.MessagePinningWebhooks.GetForGuildChannelAsync(Context.Guild.Id, pinChannel.Id);
+            if(webhookInfo is not null) webhook = await pinChannel.FetchWebhookAsync(webhookInfo.WebhookId);
             
-            var webhookId = row.WebhookIds.FirstOrDefault(x => x.Item1 == pinChannel.Id).Item2;
-            var webhook = await pinChannel.FetchWebhookAsync(webhookId);
-            
-            if (webhook is null)
+            if (webhook is null || webhook.ChannelId != pinChannel.Id)
             {
                 var avatar = File.OpenRead("Avatar.png");
                 webhook = await pinChannel.CreateWebhookAsync("Utili Message Pinning", x =>
@@ -73,12 +83,21 @@ namespace Utili.Features
                 }, new DefaultRestRequestOptions {Reason = "Message Pinning"});
                 avatar.Close();
 
-                if (row.WebhookIds.Any(x => x.Item1 == pinChannel.Id))
+                if (webhookInfo is null)
                 {
-                    row.WebhookIds[row.WebhookIds.FindIndex(x => x.Item1 == pinChannel.Id)] = (pinChannel.Id, webhook.Id);
+                    webhookInfo = new MessagePinningWebhook(Context.GuildId, pinChannel.Id)
+                    {
+                        WebhookId = webhook.Id
+                    };
+                    _dbContext.MessagePinningWebhooks.Add(webhookInfo);
+                    await _dbContext.SaveChangesAsync();
                 }
-                else row.WebhookIds.Add((pinChannel.Id, webhook.Id));
-                await MessagePinning.SaveRowAsync(row);
+                else
+                {
+                    webhookInfo.WebhookId = webhook.Id;
+                    _dbContext.MessagePinningWebhooks.Update(webhookInfo);
+                    await _dbContext.SaveChangesAsync();
+                }
             }
             
             var username = $"{message.Author} in {channel.Name}";

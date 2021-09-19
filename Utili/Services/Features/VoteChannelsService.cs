@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
-using Database.Data;
 using Disqord;
 using Disqord.Gateway;
 using Disqord.Rest;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using NewDatabase.Entities;
+using NewDatabase.Extensions;
 using Utili.Extensions;
 
 namespace Utili.Features
@@ -21,22 +23,25 @@ namespace Utili.Features
             _client = client;
         }
         
-        public async Task MessageReceived(MessageReceivedEventArgs e)
+        public async Task MessageReceived(IServiceScope scope, MessageReceivedEventArgs e)
         {
             try
             {
                 if (!e.GuildId.HasValue) return;
-                    
                 if (!e.Channel.BotHasPermissions(Permission.ViewChannel | Permission.ReadMessageHistory | Permission.AddReactions)) return;
 
-                var row = (await VoteChannels.GetRowsAsync(e.GuildId.Value, e.ChannelId)).FirstOrDefault();
-                if (row is null || !DoesMessageObeyRule(e.Message, row)) return;
+                var db = scope.GetDbContext();
+                var config = await db.VoteChannelConfigurations.GetForGuildChannelAsync(e.GuildId.Value, e.ChannelId);
+                if (config is null || !DoesMessageObeyRule(e.Message as IUserMessage, config.Mode)) return;
 
-                if (await Premium.IsGuildPremiumAsync(e.GuildId.Value)) row.Emotes = row.Emotes.Take(5).ToList();
-                else row.Emotes = row.Emotes.Take(2).ToList();
+                if (config.Emojis.Count > 2)
+                {
+                    var premium = await db.GetIsGuildPremiumAsync(e.GuildId.Value);
+                    config.Emojis = config.Emojis.Take(premium ? 5 : 2).ToList();
+                }
 
                 var guild = _client.GetGuild(e.GuildId.Value);
-                foreach (var emojiString in row.Emotes)
+                foreach (var emojiString in config.Emojis)
                 {
                     var emoji = guild.GetEmoji(emojiString);
                     if (emoji is null) continue;
@@ -49,30 +54,19 @@ namespace Utili.Features
             }
         }
 
-        private static bool DoesMessageObeyRule(IMessage msg, VoteChannelsRow row)
+        private static bool DoesMessageObeyRule(IUserMessage message, VoteChannelMode mode)
         {
-            return row.Mode switch
-            {
-                0 => // All
-                    true,
-                1 => // Images
-                    msg is IUserMessage message && message.IsImage(),
-                2 => // Videos
-                    msg is IUserMessage message && message.IsVideo(),
-                3 => // Media
-                    msg is IUserMessage message && (message.IsImage() || message.IsVideo()),
-                4 => // Music
-                    msg is IUserMessage message && (message.IsMusic() || message.IsVideo()),
-                5 => // Attachments
-                    msg is IUserMessage message && message.IsAttachment(),
-                6 => // URLs
-                    msg is IUserMessage message && message.IsUrl(),
-                7 => // URLs or Media
-                    msg is IUserMessage message && (message.IsImage() || message.IsVideo() || message.IsUrl()),
-                8 => // Embeds
-                    msg is IUserMessage message && message.IsEmbed(),
-                _ => false
-            };
+            if (message is null) return (mode & VoteChannelMode.All) != 0;
+            
+            if ((mode & VoteChannelMode.All) != 0) return true;
+            if ((mode & VoteChannelMode.Images) != 0 && message.IsImage()) return true;
+            if ((mode & VoteChannelMode.Videos) != 0 && message.IsVideo()) return true;
+            if ((mode & VoteChannelMode.Music) != 0 && message.IsMusic()) return true;
+            if ((mode & VoteChannelMode.Attachments) != 0 && message.IsAttachment()) return true;
+            if ((mode & VoteChannelMode.Links) != 0 && message.IsLink()) return true;
+            if ((mode & VoteChannelMode.Embeds) != 0 && message.IsEmbed()) return true;
+            
+            return false;
         }
     }
 }

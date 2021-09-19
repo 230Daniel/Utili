@@ -2,19 +2,21 @@
 using System.Threading.Tasks;
 using Disqord;
 using Disqord.Bot;
-using Disqord.Bot.Hosting;
 using Disqord.Gateway;
-using Microsoft.Extensions.Configuration;
+using Disqord.Hosting;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using NewDatabase.Entities;
+using Utili.Extensions;
 using Utili.Features;
 
 namespace Utili.Services
 {
-    public class BotService : DiscordBotService
+    public class BotService : DiscordClientService
     {
         private readonly ILogger<BotService> _logger;
-        private readonly IConfiguration _config;
-        
+        private readonly IServiceScopeFactory _scopeFactory;
+
         private readonly CommunityService _community;
         private readonly GuildCountService _guildCount;
         private readonly MemberCacheService _memberCache;
@@ -37,8 +39,8 @@ namespace Utili.Services
         public BotService(
             
             ILogger<BotService> logger,
-            IConfiguration config,
-            DiscordBotBase client, 
+            IServiceScopeFactory scopeFactory,
+            DiscordBotBase client,
             
             CommunityService community,
             GuildCountService guildCount,
@@ -62,8 +64,8 @@ namespace Utili.Services
             : base(logger, client)
         {
             _logger = logger;
-            _config = config;
-
+            _scopeFactory = scopeFactory;
+            
             _community = community;
             _guildCount = guildCount;
             _memberCache = memberCache;
@@ -86,10 +88,6 @@ namespace Utili.Services
 
         protected override async Task ExecuteAsync(CancellationToken cancellationToken)
         {
-            await Database.Database.InitialiseAsync(false, _config.GetValue<string>("DefaultPrefix"));
-            Database.Status.Start();
-            _logger.LogInformation("Database initialised");
-
             await Client.WaitUntilReadyAsync(cancellationToken);
 
             _memberCache.Start();
@@ -114,69 +112,158 @@ namespace Utili.Services
             _ = _community.GuildAvailable(e);
         }
 
-        protected override async ValueTask OnMessageReceived(BotMessageReceivedEventArgs e)
+        protected override async ValueTask OnMessageReceived(MessageReceivedEventArgs e)
         {
-            await _messageLogs.MessageReceived(e);
-            if(await _messageFilter.MessageReceived(e)) return;
-            _ = _notices.MessageReceived(e);
-            _ = _voteChannels.MessageReceived(e);
-            _ = _channelMirroring.MessageReceived(e);
-            _ = _autopurge.MessageReceived(e);
-            _ = _inactiveRole.MessageReceived(e);
+            if (!e.GuildId.HasValue) return;
+            
+            using var scope = _scopeFactory.CreateScope();
+            var config = await scope.GetCoreConfigurationAsync(e.GuildId.Value);
+            if (config is null) return;
+            
+            if(config.HasFeature(BotFeatures.MessageLogs)) 
+                await _messageLogs.MessageReceived(scope, e);
+            
+            if(config.HasFeature(BotFeatures.MessageFilter)) 
+                if(await _messageFilter.MessageReceived(scope, e)) return;
+            
+            if(config.HasFeature(BotFeatures.Notices))
+                await _notices.MessageReceived(scope, e);
+            
+            if(config.HasFeature(BotFeatures.VoteChannels))
+                await _voteChannels.MessageReceived(scope, e);
+            
+            if(config.HasFeature(BotFeatures.ChannelMirroring))
+                await _channelMirroring.MessageReceived(scope, e);
+            
+            if(config.HasFeature(BotFeatures.Autopurge))
+                await _autopurge.MessageReceived(scope, e);
+            
+            if(config.HasFeature(BotFeatures.InactiveRole))
+                await _inactiveRole.MessageReceived(scope, e);
         }
 
         protected override async ValueTask OnMessageUpdated(MessageUpdatedEventArgs e)
         {
-            _ = _messageLogs.MessageUpdated(e);
-            _ = _autopurge.MessageUpdated(e);
+            if (!e.GuildId.HasValue) return;
+            
+            using var scope = _scopeFactory.CreateScope();
+            var config = await scope.GetCoreConfigurationAsync(e.GuildId.Value);
+            if (config is null) return;
+            
+            if(config.HasFeature(BotFeatures.MessageLogs))
+                await _messageLogs.MessageUpdated(scope, e);
+            
+            if(config.HasFeature(BotFeatures.Autopurge))
+                await _autopurge.MessageUpdated(scope, e);
         }
 
         protected override async ValueTask OnMessageDeleted(MessageDeletedEventArgs e)
         {
-            _ = _messageLogs.MessageDeleted(e);
-            _ = _autopurge.MessageDeleted(e);
+            if (!e.GuildId.HasValue) return;
+            
+            using var scope = _scopeFactory.CreateScope();
+            var config = await scope.GetCoreConfigurationAsync(e.GuildId.Value);
+            if (config is null) return;
+            
+            if(config.HasFeature(BotFeatures.MessageLogs))
+                await _messageLogs.MessageDeleted(scope, e);
+            
+            if(config.HasFeature(BotFeatures.Autopurge))
+                await _autopurge.MessageDeleted(scope, e);
         }
     
         protected override async ValueTask OnMessagesDeleted(MessagesDeletedEventArgs e)
         {
-            _ = _messageLogs.MessagesDeleted(e);
-            _ = _autopurge.MessagesDeleted(e);
+            using var scope = _scopeFactory.CreateScope();
+            var config = await scope.GetCoreConfigurationAsync(e.GuildId);
+            if (config is null) return;
+            
+            if(config.HasFeature(BotFeatures.MessageLogs))
+                await _messageLogs.MessagesDeleted(scope, e);
+            
+            if(config.HasFeature(BotFeatures.Autopurge))
+                await _autopurge.MessagesDeleted(scope, e);
         }
 
         protected override async ValueTask OnReactionAdded(ReactionAddedEventArgs e)
         {
-            _ = _reputation.ReactionAdded(e);
+            if (!e.GuildId.HasValue) return;
+            
+            using var scope = _scopeFactory.CreateScope();
+            var config = await scope.GetCoreConfigurationAsync(e.GuildId.Value);
+            if (config is null) return;
+            
+            if(config.HasFeature(BotFeatures.Reputation))
+                await _reputation.ReactionAdded(scope, e);
         }
         
         protected override async ValueTask OnReactionRemoved(ReactionRemovedEventArgs e)
         {
-            _ = _reputation.ReactionRemoved(e);
+            if (!e.GuildId.HasValue) return;
+            
+            using var scope = _scopeFactory.CreateScope();
+            var config = await scope.GetCoreConfigurationAsync(e.GuildId.Value);
+            if (config is null) return;
+            
+            if(config.HasFeature(BotFeatures.Reputation))
+                await _reputation.ReactionRemoved(scope, e);
         }
 
         protected override async ValueTask OnVoiceStateUpdated(VoiceStateUpdatedEventArgs e)
         {
-            _ = _voiceLink.VoiceStateUpdated(e);
-            _ = _voiceRoles.VoiceStateUpdated(e);
-            _ = _inactiveRole.VoiceStateUpdated(e);
+            using var scope = _scopeFactory.CreateScope();
+            var config = await scope.GetCoreConfigurationAsync(e.GuildId);
+            if (config is null) return;
+            
+            if(config.HasFeature(BotFeatures.VoiceLink))
+                await _voiceLink.VoiceStateUpdated(scope, e);
+            
+            if(config.HasFeature(BotFeatures.VoiceRoles))
+                await _voiceRoles.VoiceStateUpdated(e);
+            
+            if(config.HasFeature(BotFeatures.InactiveRole))
+                await _inactiveRole.VoiceStateUpdated(scope, e);
         }
 
         protected override async ValueTask OnMemberJoined(MemberJoinedEventArgs e)
         {
-            _ = _joinMessage.MemberJoined(e);
-            await _rolePersist.MemberJoined(e);
-            await _joinRoles.MemberJoined(e);
+            using var scope = _scopeFactory.CreateScope();
+            var config = await scope.GetCoreConfigurationAsync(e.GuildId);
+            if (config is null) return;
+            
+            if(config.HasFeature(BotFeatures.RolePersist))
+                await _rolePersist.MemberJoined(scope, e);
+            
+            if(config.HasFeature(BotFeatures.JoinRoles))
+                await _joinRoles.MemberJoined(scope, e);
+            
+            if(config.HasFeature(BotFeatures.JoinMessage))
+                await _joinMessage.MemberJoined(scope, e);
         }
 
         protected override async ValueTask OnMemberUpdated(MemberUpdatedEventArgs e)
         {
-            await _joinRoles.MemberUpdated(e);
-            await _roleLinking.MemberUpdated(e);
+            using var scope = _scopeFactory.CreateScope();
+            var config = await scope.GetCoreConfigurationAsync(e.NewMember.GuildId);
+            if (config is null) return;
+            
+            if(config.HasFeature(BotFeatures.JoinRoles))
+                await _joinRoles.MemberUpdated(scope, e);
+            
+            if(config.HasFeature(BotFeatures.RoleLinking))
+                await _roleLinking.MemberUpdated(scope, e);
         }
 
         protected override async ValueTask OnMemberLeft(MemberLeftEventArgs e)
         {
+            using var scope = _scopeFactory.CreateScope();
+            var config = await scope.GetCoreConfigurationAsync(e.GuildId);
+            if (config is null) return;
+            
             var member = e.User is IMember user ? user : null;
-            await _rolePersist.MemberLeft(e, member);
+            
+            if(config.HasFeature(BotFeatures.RolePersist))
+                await _rolePersist.MemberLeft(scope, e, member);
         }
     }
 }

@@ -13,13 +13,11 @@ namespace Utili.Features
 {
     public class RoslynCommands : DiscordGuildModuleBase
     {
-        private IServiceProvider _services;
         private ILogger<RoslynCommands> _logger;
         private IConfiguration _config;
 
-        public RoslynCommands(IServiceProvider services, ILogger<RoslynCommands> logger, IConfiguration config)
+        public RoslynCommands(ILogger<RoslynCommands> logger, IConfiguration config)
         {
-            _services = services;
             _logger = logger;
             _config = config;
         }
@@ -58,7 +56,7 @@ namespace Utili.Features
                     typeof(DiscordClientBase).Assembly,
                     typeof(Program).Assembly);
 
-            RoslynGlobals globals = new(_services, Context);
+            RoslynGlobals globals = new(Context.Services, Context);
             try
             {
                 var result = await CSharpScript.EvaluateAsync(code, options, globals);

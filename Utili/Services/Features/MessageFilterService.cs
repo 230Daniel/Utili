@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
-using Database.Data;
 using Disqord;
 using Disqord.Gateway;
 using Disqord.Rest;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using NewDatabase.Entities;
+using NewDatabase.Extensions;
 using Utili.Extensions;
 
 namespace Utili.Services
@@ -25,22 +27,25 @@ namespace Utili.Services
         }
         
         /// <returns>True if the message was deleted by the filter</returns>
-        public async Task<bool> MessageReceived(MessageReceivedEventArgs e)
+        public async Task<bool> MessageReceived(IServiceScope scope, MessageReceivedEventArgs e)
         {
             try
             {
                 if(!e.GuildId.HasValue) return false;
 
                 if(!e.Channel.BotHasPermissions(Permission.ViewChannel | Permission.ManageMessages)) return false;
-                if (e.Message is IUserMessage userMessage && 
+                var userMessage = e.Message as IUserMessage;
+                if (userMessage is not null && 
                     e.Member is not null &&
                     e.Member.Id == _client.CurrentUser.Id &&
                     userMessage.Embeds.Count > 0 && 
                     userMessage.Embeds[0].Author?.Name == "Message deleted")
                     return false;
+                if (userMessage?.WebhookId is not null) return false;
 
-                var row = await MessageFilter.GetRowAsync(e.GuildId.Value, e.ChannelId);
-                if(row.New) return false;
+                var db = scope.GetDbContext();
+                var config = await db.MessageFilterConfigurations.GetForGuildChannelAsync(e.GuildId.Value, e.ChannelId);
+                if (config is null) return false;
 
                 if (e.Message is not IUserMessage message)
                 {
@@ -48,7 +53,7 @@ namespace Utili.Services
                     return false;
                 }
 
-                if (!DoesMessageObeyRule(message, row, out var allowedTypes))
+                if (!DoesMessageObeyRule(message, config.Mode, config.RegEx, out var allowedTypes))
                 {
                     await e.Message.DeleteAsync(new DefaultRestRequestOptions {Reason = "Message Filter"});
                     if(e.Member is null || e.Member.IsBot) return true;
@@ -57,9 +62,14 @@ namespace Utili.Services
                         return true;
                     
                     _offenceDictionary.AddOrUpdate(e.ChannelId, DateTime.UtcNow, (_, _) => DateTime.UtcNow);
-
-                    var sent = await e.Channel.SendFailureAsync("Message deleted",
-                        $"Only messages {allowedTypes} are allowed in {(e.Channel as ITextChannel).Mention}");
+                    
+                    var deletionMessage = string.IsNullOrWhiteSpace(config.DeletionMessage)
+                        ? allowedTypes.Contains(",")
+                            ? $"Your message must contain one of `{allowedTypes}` to be allowed in {(e.Channel as ITextChannel).Mention}"
+                            : $"Your message must contain `{allowedTypes}` to be allowed in {(e.Channel as ITextChannel).Mention}"
+                        : config.DeletionMessage;
+                    
+                    var sent = await e.Channel.SendFailureAsync("Message deleted", deletionMessage);
                     await Task.Delay(8000);
                     await sent.DeleteAsync();
                     return true;
@@ -72,50 +82,19 @@ namespace Utili.Services
             return false;
         }
 
-        private static bool DoesMessageObeyRule(IUserMessage message, MessageFilterRow row, out string allowedTypes)
+        private static bool DoesMessageObeyRule(IUserMessage message, MessageFilterMode mode, string regEx, out string allowedTypes)
         {
-            switch (row.Mode)
-            {
-                case 0: // All
-                    allowedTypes = "with anything";
-                    return true;
+            allowedTypes = mode.ToString();
+            
+            if ((mode & MessageFilterMode.All) != 0) return true;
+            if ((mode & MessageFilterMode.Images) != 0 && message.IsImage()) return true;
+            if ((mode & MessageFilterMode.Videos) != 0 && message.IsVideo()) return true;
+            if ((mode & MessageFilterMode.Music) != 0 && message.IsMusic()) return true;
+            if ((mode & MessageFilterMode.Attachments) != 0 && message.IsAttachment()) return true;
+            if ((mode & MessageFilterMode.Links) != 0 && message.IsLink()) return true;
+            if ((mode & MessageFilterMode.RegEx) != 0 && message.IsRegex(regEx)) return true;
 
-                case 1: // Images
-                    allowedTypes = "with images";
-                    return message.IsImage();
-
-                case 2: // Videos
-                    allowedTypes = "with videos";
-                    return message.IsVideo();
-
-                case 3: // Media
-                    allowedTypes = "with images or videos";
-                    return message.IsImage() || message.IsVideo();
-
-                case 4: // Music
-                    allowedTypes = "with music";
-                    return message.IsMusic() || message.IsVideo();
-
-                case 5: // Attachments
-                    allowedTypes = "with attachments";
-                    return message.IsAttachment();
-
-                case 6: // URLs
-                    allowedTypes = "with valid urls";
-                    return message.IsUrl();
-
-                case 7: // URLs or Media
-                    allowedTypes = "with images, videos or valid urls";
-                    return message.IsImage() || message.IsVideo() || message.IsUrl();
-
-                case 8: // RegEx
-                    allowedTypes = "which match a custom expression";
-                    return message.IsRegex(row.Complex.Value);
-
-                default:
-                    allowedTypes = "";
-                    return true;
-            }
+            return false;
         }
     }
 }

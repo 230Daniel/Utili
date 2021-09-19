@@ -1,8 +1,9 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
-using Database.Data;
 using Disqord;
 using Disqord.Bot;
+using NewDatabase;
+using NewDatabase.Extensions;
 using Qmmands;
 using Utili.Extensions;
 using Utili.Implementations;
@@ -12,6 +13,13 @@ namespace Utili.Commands
     [Group("VoteChannels", "VoteChannel", "Votes")]
     public class VoteChannelsCommands : DiscordGuildModuleBase
     {
+        private readonly DatabaseContext _dbContext;
+        
+        public VoteChannelsCommands(DatabaseContext dbContext)
+        {
+            _dbContext = dbContext;
+        }
+        
         [Command("AddEmoji", "AddEmote")]
         [RequireAuthorGuildPermissions(Permission.ManageGuild)]
         [RequireBotChannelPermissions(Permission.AddReactions)]
@@ -23,30 +31,31 @@ namespace Utili.Commands
         {
             channel ??= Context.Channel as ITextChannel;
 
-            var row = (await VoteChannels.GetRowsAsync(Context.Guild.Id, channel.Id)).FirstOrDefault();
-            if (row is null)
+            var config = await _dbContext.VoteChannelConfigurations.GetForGuildChannelAsync(Context.GuildId, channel.Id);
+            if (config is null)
             {
                 await Context.Channel.SendFailureAsync("Error", $"{channel.Mention} is not a votes channel");
                 return;
             }
 
-            var emojiLimit = await Premium.IsGuildPremiumAsync(Context.Guild.Id) ? 5 : 2;
+            var emojiLimit = await _dbContext.GetIsGuildPremiumAsync(Context.GuildId) ? 5 : 2;
 
-            if (row.Emotes.Count >= emojiLimit)
+            if (config.Emojis.Count >= emojiLimit)
             {
                 await Context.Channel.SendFailureAsync("Error",
                     $"Your server can only have up to {emojiLimit} emojis per votes channel\nRemove emojis with the removeEmoji command");
                 return;
             }
 
-            if (row.Emotes.Contains(emoji.ToString()))
+            if (config.Emojis.Contains(emoji.ToString()))
             {
                 await Context.Channel.SendFailureAsync("Error", $"That emoji is already added to {channel.Mention}");
                 return;
             }
 
-            row.Emotes.Add(emoji.ToString());
-            await VoteChannels.SaveRowAsync(row);
+            config.Emojis.Add(emoji.ToString());
+            _dbContext.VoteChannelConfigurations.Update(config);
+            await _dbContext.SaveChangesAsync();
 
             await Context.Channel.SendSuccessAsync("Emote added", $"The {emoji} emoji was added to {channel.Mention}");
         }
@@ -69,23 +78,24 @@ namespace Utili.Commands
         {
             channel ??= Context.Channel as ITextChannel;
             
-            var row = (await VoteChannels.GetRowsAsync(Context.Guild.Id, channel.Id)).FirstOrDefault();
-            if (row is null)
+            var config = await _dbContext.VoteChannelConfigurations.GetForGuildChannelAsync(Context.GuildId, channel.Id);
+            if (config is null)
             {
                 await Context.Channel.SendFailureAsync("Error", $"{channel.Mention} is not a votes channel");
                 return;
             }
 
-            if (row.Emotes.Count < emojiNumber)
+            if (config.Emojis.Count < emojiNumber)
             {
-                await Context.Channel.SendFailureAsync("Error", $"There are only {row.Emotes.Count} emojis for {channel.Mention}");
+                await Context.Channel.SendFailureAsync("Error", $"There are only {config.Emojis.Count} emojis for {channel.Mention}");
                 return;
             }
 
-            var removedEmoji = Context.Guild.GetEmoji(row.Emotes[emojiNumber - 1]);
+            var removedEmoji = Context.Guild.GetEmoji(config.Emojis[emojiNumber - 1]);
             
-            row.Emotes.RemoveAt(emojiNumber - 1);
-            await VoteChannels.SaveRowAsync(row);
+            config.Emojis.RemoveAt(emojiNumber - 1);
+            _dbContext.VoteChannelConfigurations.Update(config);
+            await _dbContext.SaveChangesAsync();
             
             await Context.Channel.SendSuccessAsync("Emoji removed", 
             $"The {removedEmoji} emoji was removed successfully");
@@ -99,15 +109,15 @@ namespace Utili.Commands
         {
             channel ??= Context.Channel as ITextChannel;
             
-            var row = (await VoteChannels.GetRowsAsync(Context.Guild.Id, channel.Id)).FirstOrDefault();
-            if (row is null)
+            var config = await _dbContext.VoteChannelConfigurations.GetForGuildChannelAsync(Context.GuildId, channel.Id);
+            if (config is null)
             {
                 await Context.Channel.SendFailureAsync("Error", $"{channel.Mention} is not a votes channel");
                 return;
             }
             
-            if (row.Emotes.Any(x => x.ToString() == emoji.ToString()))
-                await RemoveEmoji(row.Emotes.IndexOf(emoji.ToString()) + 1, channel);
+            if (config.Emojis.Any(x => x.ToString() == emoji.ToString()))
+                await RemoveEmoji(config.Emojis.IndexOf(emoji.ToString()) + 1, channel);
             else
                 await Context.Channel.SendFailureAsync("Error", $"{emoji} is not added to {channel.Mention}" +
                                                                 "\nIf you can't specify the emoji, use its number found in the listEmoji command");
@@ -133,18 +143,18 @@ namespace Utili.Commands
         {
             channel ??= Context.Channel as ITextChannel;
 
-            var row = (await VoteChannels.GetRowsAsync(Context.Guild.Id, channel.Id)).FirstOrDefault();
-            if (row is null)
+            var config = await _dbContext.VoteChannelConfigurations.GetForGuildChannelAsync(Context.GuildId, channel.Id);
+            if (config is null)
             {
                 await Context.Channel.SendFailureAsync("Error", $"{channel.Mention} is not a votes channel");
                 return;
             }
             
             var content = "";
-            for (var i = 0; i < row.Emotes.Count; i++)
-                content += $"{i + 1}: {row.Emotes[i]}\n";
+            for (var i = 0; i < config.Emojis.Count; i++)
+                content += $"{i + 1}: {config.Emojis[i]}\n";
             
-            await Context.Channel.SendInfoAsync("Emojis", $"There are {row.Emotes.Count} emojis for {channel.Mention}\n\n{content}");
+            await Context.Channel.SendInfoAsync("Emojis", $"There are {config.Emojis.Count} emojis for {channel.Mention}\n\n{content}");
         }
     }
 }

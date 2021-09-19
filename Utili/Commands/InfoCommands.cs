@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading.Tasks;
 using Disqord;
 using Disqord.Bot;
@@ -9,26 +10,31 @@ using Qmmands;
 using Utili.Extensions;
 using Utili.Utils;
 using LinuxSystemStats;
+using Microsoft.EntityFrameworkCore;
+using NewDatabase;
 
 namespace Utili.Commands
 {
     public class InfoCommands : DiscordGuildModuleBase
     {
         private readonly IConfiguration _config;
+        private readonly DatabaseContext _dbContext;
 
-        public InfoCommands(IConfiguration config)
+        public InfoCommands(IConfiguration config, DatabaseContext dbContext)
         {
             _config = config;
+            _dbContext = dbContext;
         }
 
         [Command("About", "Info")]
         public async Task About()
         {
             var domain = _config.GetValue<string>("Domain");
-
+            var guilds = _dbContext.ShardDetails.Where(x => x.Heartbeat > DateTime.UtcNow.AddSeconds(-30)).SumAsync(x => x.Guilds);
+            
             var about = string.Concat(
                 "Created by 230Daniel#1920\n",
-                $"In {await Database.Sharding.GetGuildCountAsync()} servers\n\n",
+                $"In {guilds} servers\n\n",
 
                 $"[Dashboard](https://{domain}/dashboard)\n",
                 "[Discord Server](https://discord.gg/WsxqABZ)\n",
@@ -90,10 +96,6 @@ namespace Utili.Commands
             var rest = (int)sw.ElapsedMilliseconds;
             if (rest > largestLatency) largestLatency = rest;
 
-            var database = Database.Status.Latency;
-            if (database > largestLatency) largestLatency = database;
-            var databaseQueries = Math.Round(Database.Status.QueriesPerSecond, 2);
-
             double cpu = 0;
             double memory = 0;
             try
@@ -113,9 +115,6 @@ namespace Utili.Commands
             if(status < PingStatus.Poor && cpu > 50) status = PingStatus.Poor;
             if(status < PingStatus.Critical && cpu > 90 || memory > 95) status = PingStatus.Critical;
 
-            //DateTime upSince = Handlers.ShardHandler.ShardRegister.First(x => x.Item1 == shard.ShardId).Item2;
-            //TimeSpan uptime = DateTime.Now - upSince;
-            
             var color = status switch
             {
                 PingStatus.Excellent => new Color(67, 181, 129),
@@ -128,11 +127,9 @@ namespace Utili.Commands
             var embed = MessageUtils.CreateEmbed(EmbedType.Info, $"Pong! Status: {status}");
             embed.WithColor(color);
 
-            embed.AddField("Discord", $"Api: {gateway}ms\nRest: {rest}ms", true);
-            embed.AddField("Database", $"Latency: {database}ms\nQueries: {databaseQueries}/s", true);
-            embed.AddField("System", $"CPU: {cpu}%\nMem: {memory}%", true);
-
-            //embed.WithFooter($"Shard {shard.ShardId} uptime: {uptime.ToShortString()}");
+            embed.AddInlineField("Discord", $"Gateway: {gateway}ms\nRest: {rest}ms");
+            embed.AddInlineField("System", $"CPU: {cpu}%\nMemory: {memory}%");
+            
             await Context.Channel.SendEmbedAsync(embed);
         }
 

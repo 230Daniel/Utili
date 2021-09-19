@@ -12,11 +12,11 @@ namespace Database
         public string Password { get; set; } = "";
         public string DefaultPrefix { get; set; } = "";
 
-        public void Load()
+        public void Load(bool prod)
         {
             try
             {
-                var json = File.ReadAllText("DatabaseCredentials.json");
+                var json = prod ? File.ReadAllText("DatabaseCredentialsProd.json") : File.ReadAllText("DatabaseCredentials.json");
 
                 var config = JsonSerializer.Deserialize<Config>(json);
 

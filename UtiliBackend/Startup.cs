@@ -2,6 +2,7 @@ using System;
 using AspNetCoreRateLimit;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -9,91 +10,103 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using NewDatabase;
+using Stripe;
+using UtiliBackend.Authorisation;
+using UtiliBackend.Extensions;
+using UtiliBackend.Services;
 
 namespace UtiliBackend
 {
     public class Startup
     {
+        private readonly IConfiguration _configuration;
+        
         public Startup(IConfiguration configuration)
         {
-            Configuration = configuration;
-            Main.InitialiseAsync().GetAwaiter().GetResult();
+            _configuration = configuration;
         }
-
-        public IConfiguration Configuration { get; }
-
-        // This method gets called by the runtime. Use this method to add services to the container.
+        
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddCors(options => 
+                options.AddPolicy("CorsPolicy", 
+                    builder => builder
+                        .WithOrigins(_configuration["Frontend:Origin"])
+                        .AllowAnyMethod()
+                        .AllowAnyHeader()
+                        .AllowCredentials()));
+            
+            services.AddSingleton<IAuthorizationPolicyProvider, PolicyProvider>();
+            services.AddSingleton<IAuthorizationHandler, DiscordAuthorisationHandler>();
+            services.AddSingleton<IAuthorizationHandler, DiscordGuildAuthorisationHandler>();
+            services.AddSingleton<IAuthorizationMiddlewareResultHandler, ResultHandler>();
+            
             services.AddHsts(options =>
             {
                 options.MaxAge = TimeSpan.FromDays(30);
                 options.IncludeSubDomains = true;
             });
-
-            // https://github.com/stefanprodan/AspNetCoreRateLimit/wiki/IpRateLimitMiddleware#setup
-
+            
+            services.AddMvc(options => options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute()));
+            services.AddControllers();
+            services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+            services.AddHttpContextAccessor();
             services.AddOptions();
             services.AddMemoryCache();
-            services.AddMvc(options => options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute()));
-            
-            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
-
-            services.AddCors(options =>
-            {
-                options.AddPolicy("frontend",
-                    builder =>
-                    {
-                        builder.WithOrigins(Main.Config.Frontend)
-                            .AllowAnyMethod()
-                            .AllowAnyHeader()
-                            .AllowCredentials();
-                    });
-            });
-
-            services.AddAntiforgery(options =>
-            {
-                options.HeaderName = "X-XSRF-TOKEN";
-            });
-
-            services.AddAuthentication().AddCookie(options =>
-            {
-                options.Cookie.SameSite = SameSiteMode.None;
-            });
 
             services.AddAuthentication(options =>
             {
                 options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
             })
+            .AddCookie(options =>
+            {
+                // Same-site none is safe because the cookie is http-only
+                options.Cookie.SameSite = SameSiteMode.None;
+            })
             .AddDiscord(options =>
             {
-                options.ClientId = Main.Config.DiscordClientId;
-                options.ClientSecret = Main.Config.DiscordClientSecret;
+                options.ClientId = _configuration["Discord:ClientId"];
+                options.ClientSecret = _configuration["Discord:ClientSecret"];
                 options.AccessDeniedPath = "/";
                 options.Scope.Add("email");
                 options.Scope.Add("guilds");
                 options.SaveTokens = true;
                 options.ClaimActions.MapAll();
             });
-
-            services.AddControllers();
             
-            services.Configure<IpRateLimitOptions>(Configuration.GetSection("IpRateLimiting"));
-            services.Configure<IpRateLimitPolicies>(Configuration.GetSection("IpRateLimitPolicies"));
+            services.AddAntiforgery(options =>
+            {
+                options.HeaderName = "X-XSRF-TOKEN";
+                options.Cookie.SameSite = SameSiteMode.None;
+                options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+            });
+            
             services.AddSingleton<IIpPolicyStore, MemoryCacheIpPolicyStore>();
             services.AddSingleton<IRateLimitCounterStore, MemoryCacheRateLimitCounterStore>();
             services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();
-            services.AddHttpContextAccessor();
-        }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+            services.AddSingleton<DiscordClientService>();
+            services.AddSingleton<DiscordUserGuildsService>();
+            services.AddSingleton<DiscordRestService>();
+
+            services.AddDbContext<DatabaseContext>();
+
+            services.AddScoped<Services.CustomerService>();
+            services.AddSingleton(new StripeClient(_configuration["Stripe:SecretKey"]));
+            
+            services.Configure<IpRateLimitOptions>(_configuration.GetSection("IpRateLimiting"));
+            services.Configure<IpRateLimitPolicies>(_configuration.GetSection("IpRateLimitPolicies"));
+            DatabaseContextExtensions.DefaultPrefix = _configuration["Other:DefaultPrefix"];
+            
+            services.AddHostedService<SlotDeletionService>();
+        }
+        
+        public static void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             app.UseIpRateLimiting();
 
-            if (env.IsDevelopment()) 
-                app.UseDeveloperExceptionPage();
-            else
+            if (!env.IsDevelopment())
             {
                 app.Use((ctx, next) =>
                 {
@@ -102,7 +115,7 @@ namespace UtiliBackend
                 });
                 app.UseHsts();
             }
-            
+
             app.Use((ctx, next) =>
             {
                 ctx.Response.Headers.Add("cache-control", "no-cache");
@@ -111,10 +124,10 @@ namespace UtiliBackend
             
             app.UseHttpsRedirection();
             app.UseRouting();
-            app.UseCors("frontend");
+            app.UseCors("CorsPolicy");
             app.UseAuthentication();
             app.UseAuthorization();
-            
+
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();

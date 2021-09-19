@@ -2,7 +2,6 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Database.Data;
 using Disqord;
 using Disqord.Bot;
 using Disqord.Bot.Sharding;
@@ -21,12 +20,14 @@ namespace Utili.Implementations
         {
             if (!context.GuildId.HasValue || context.Author.IsBot) return false;
 
-            var row = await Core.GetRowAsync(context.GuildId.Value);
-            var excluded = row.ExcludedChannels.Contains(context.ChannelId);
-            if (!row.EnableCommands) excluded = !excluded;
-            return !excluded;
+            var config = await context.Services.GetCoreConfigurationAsync(context.GuildId.Value);
+            if (config is null) return true;
+            
+            return !config.NonCommandChannels.Contains(context.ChannelId) 
+                ? config.CommandsEnabled 
+                : !config.CommandsEnabled;
         }
-
+        
         protected override LocalMessage FormatFailureMessage(DiscordCommandContext context, FailedResult result)
         {
             static string FormatParameter(Parameter parameter)

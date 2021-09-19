@@ -2,11 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Database.Data;
 using Disqord;
 using Disqord.Gateway;
 using Disqord.Rest;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using NewDatabase.Entities;
+using NewDatabase.Extensions;
 using Utili.Extensions;
 
 namespace Utili.Services
@@ -16,26 +18,30 @@ namespace Utili.Services
         private readonly ILogger<RoleLinkingService> _logger;
         private readonly DiscordClientBase _client;
 
-        private List<RoleLinkAction> _actions = new();
+        private List<RoleLinkAction> _actions;
 
         public RoleLinkingService(ILogger<RoleLinkingService> logger, DiscordClientBase client)
         {
             _logger = logger;
             _client = client;
+
+            _actions = new List<RoleLinkAction>();
         }
 
-        public async Task MemberUpdated(MemberUpdatedEventArgs e)
+        public async Task MemberUpdated(IServiceScope scope, MemberUpdatedEventArgs e)
         {
             try
             {
                 IGuild guild = _client.GetGuild(e.NewMember.GuildId);
-                var rows = await RoleLinking.GetRowsAsync(guild.Id);
-                if(rows.Count == 0) return;
 
-                if (rows.Count > 2)
+                var db = scope.GetDbContext();
+                var configs = await db.RoleLinkingConfigurations.GetAllForGuildAsync(guild.Id);
+                if(configs.Count == 0) return;
+                
+                if (configs.Count > 2)
                 {
-                    var premium = await Premium.IsGuildPremiumAsync(guild.Id);
-                    if (!premium) rows = rows.Take(2).ToList();
+                    var premium = await db.GetIsGuildPremiumAsync(guild.Id);
+                    if (!premium) configs = configs.Take(2).ToList();
                 }
 
                 if (e.OldMember is null) throw new Exception($"Member {e.MemberId} was not cached in guild {e.NewMember.GuildId}");
@@ -65,11 +71,11 @@ namespace Utili.Services
                         }
                     }
 
-                    rolesToAdd = rows.Where(x => addedRoles.Contains(x.RoleId) && x.Mode == 0).Select(x => x.LinkedRoleId).ToList();
-                    rolesToAdd.AddRange(rows.Where(x => removedRoles.Contains(x.RoleId) && x.Mode == 2).Select(x => x.LinkedRoleId));
+                    rolesToAdd = configs.Where(x => addedRoles.Contains(x.RoleId) && x.Mode == RoleLinkingMode.GrantOnGrant).Select(x => x.LinkedRoleId).ToList();
+                    rolesToAdd.AddRange(configs.Where(x => removedRoles.Contains(x.RoleId) && x.Mode == RoleLinkingMode.GrantOnRevoke).Select(x => x.LinkedRoleId));
 
-                    rolesToRemove = rows.Where(x => addedRoles.Contains(x.RoleId) && x.Mode == 1).Select(x => x.LinkedRoleId).ToList();
-                    rolesToRemove.AddRange(rows.Where(x => removedRoles.Contains(x.RoleId) && x.Mode == 3).Select(x => x.LinkedRoleId));
+                    rolesToRemove = configs.Where(x => addedRoles.Contains(x.RoleId) && x.Mode == RoleLinkingMode.RevokeOnGrant).Select(x => x.LinkedRoleId).ToList();
+                    rolesToRemove.AddRange(configs.Where(x => removedRoles.Contains(x.RoleId) && x.Mode == RoleLinkingMode.RevokeOnRevoke).Select(x => x.LinkedRoleId));
 
                     rolesToAdd.RemoveAll(x =>
                     {

@@ -4,11 +4,14 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
-using Database.Data;
 using Disqord;
 using Disqord.Gateway;
 using Disqord.Rest;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using NewDatabase.Entities;
+using NewDatabase.Extensions;
 using Utili.Extensions;
 using RepeatingTimer = System.Timers.Timer;
 using Timer = System.Threading.Timer;
@@ -19,14 +22,16 @@ namespace Utili.Services
     {
         private readonly ILogger<NoticesService> _logger;
         private readonly DiscordClientBase _client;
-
+        private readonly IServiceScopeFactory _scopeFactory;
+        
         private Dictionary<Snowflake, Timer> _channelUpdateTimers = new();
         private RepeatingTimer _dashboardNoticeUpdateTimer;
 
-        public NoticesService(ILogger<NoticesService> logger, DiscordClientBase client)
+        public NoticesService(ILogger<NoticesService> logger, DiscordClientBase client, IServiceScopeFactory scopeFactory)
         {
             _logger = logger;
             _client = client;
+            _scopeFactory = scopeFactory;
             
             _dashboardNoticeUpdateTimer = new RepeatingTimer(3000);
             _dashboardNoticeUpdateTimer.Elapsed += DashboardNoticeUpdateTimer_Elapsed;
@@ -37,21 +42,24 @@ namespace Utili.Services
             _dashboardNoticeUpdateTimer.Start();
         }
 
-        public async Task MessageReceived(MessageReceivedEventArgs e)
+        public async Task MessageReceived(IServiceScope scope, MessageReceivedEventArgs e)
         {
             try
             {
                 if (!e.GuildId.HasValue) return;
 
-                var row = await Notices.GetRowAsync(e.GuildId.Value, e.ChannelId);
-                if (row.Enabled && e.Message is ISystemMessage && e.Message.Author.Id == _client.CurrentUser.Id)
+                var db = scope.GetDbContext();
+                var config = await db.NoticeConfigurations.GetForGuildChannelAsync(e.GuildId.Value, e.ChannelId);
+                if (config is null) return;
+                
+                if (config.Enabled && e.Message is ISystemMessage && e.Message.Author.Id == _client.CurrentUser.Id)
                 {
                     await e.Message.DeleteAsync();
                     return;
                 }
-                if (!row.Enabled || e.Message.Author.Id == _client.CurrentUser.Id) return;
+                if (!config.Enabled || e.Message.Author.Id == _client.CurrentUser.Id) return;
                 
-                var delay = row.Delay;
+                var delay = config.Delay;
                 var minimumDelay = e.Member is null || e.Member.IsBot
                     ? TimeSpan.FromSeconds(10)
                     : TimeSpan.FromSeconds(5);
@@ -74,12 +82,17 @@ namespace Utili.Services
         {
             try
             {
-                var fromDashboard = await Misc.GetRowsAsync(type: "RequiresNoticeUpdate");
-                fromDashboard.RemoveAll(x => _client.GetGuilds().All(y => x.GuildId != y.Key));
-                foreach (var miscRow in fromDashboard)
+                using var scope = _scopeFactory.CreateScope();
+                var db = scope.GetDbContext();
+
+                var updatedConfigs = await db.NoticeConfigurations.Where(x => x.UpdatedFromDashboard).ToListAsync();
+                updatedConfigs.RemoveAll(x => _client.GetGuild(x.GuildId) is null);
+
+                foreach (var updatedConfig in updatedConfigs)
                 {
-                    await Misc.DeleteRowAsync(miscRow);
-                    ScheduleNoticeUpdate(miscRow.GuildId, ulong.Parse(miscRow.Value), TimeSpan.FromSeconds(1));
+                    updatedConfig.UpdatedFromDashboard = false;
+                    await db.SaveChangesAsync();
+                    ScheduleNoticeUpdate(updatedConfig.GuildId, updatedConfig.ChannelId, TimeSpan.FromSeconds(1));
                 }
             }
             catch (Exception ex)
@@ -111,8 +124,11 @@ namespace Utili.Services
         {
             try
             {
-                var row = await Notices.GetRowAsync(guildId, channelId);
-                if (row is null || !row.Enabled) return;
+                using var scope = _scopeFactory.CreateScope();
+                var db = scope.GetDbContext();
+                var config = await db.NoticeConfigurations.GetForGuildChannelAsync(guildId, channelId);
+                
+                if (config is null || !config.Enabled) return;
 
                 IGuild guild = _client.GetGuild(guildId);
                 ITextChannel channel = guild.GetTextChannel(channelId);
@@ -125,12 +141,15 @@ namespace Utili.Services
                     Permission.EmbedLinks |
                     Permission.AttachFiles)) return;
 
-                var previousMessage = await channel.FetchMessageAsync(row.MessageId);
+                var previousMessage = await channel.FetchMessageAsync(config.MessageId);
                 if(previousMessage is not null) await previousMessage.DeleteAsync();
 
-                var message = await channel.SendMessageAsync(GetNotice(row));
-                row.MessageId = message.Id;
-                await Notices.SaveMessageIdAsync(row);
+                var message = await channel.SendMessageAsync(GetNotice(config));
+                
+                config.MessageId = message.Id;
+                db.NoticeConfigurations.Update(config);
+                await db.SaveChangesAsync();
+                
                 await message.PinAsync(new DefaultRestRequestOptions {Reason = "Sticky Notices"});
             }
             catch (Exception ex)
@@ -139,16 +158,20 @@ namespace Utili.Services
             }
         }
 
-        public static LocalMessage GetNotice(NoticesRow row)
+        public static LocalMessage GetNotice(NoticeConfiguration config)
         {
-            var text = row.Text.Value.Replace(@"\n", "\n");
-            var title = row.Title.Value;
-            var content = row.Content.Value.Replace(@"\n", "\n");
-            var footer = row.Footer.Value.Replace(@"\n", "\n");
+            var text = config.Text.Replace(@"\n", "\n");
+            var title = config.Title;
+            var content = config.Content.Replace(@"\n", "\n");
+            var footer = config.Footer.Replace(@"\n", "\n");
 
-            var iconUrl = row.Icon.Value;
-            var thumbnailUrl = row.Thumbnail.Value;
-            var imageUrl = row.Image.Value;
+            var iconUrl = config.Icon;
+            var thumbnailUrl = config.Thumbnail;
+            var imageUrl = config.Image;
+            
+            if (!Uri.TryCreate(iconUrl, UriKind.Absolute, out var uriResult1) || uriResult1.Scheme is not ("http" or "https")) iconUrl = null;
+            if (!Uri.TryCreate(thumbnailUrl, UriKind.Absolute, out var uriResult2) || uriResult2.Scheme is not ("http" or "https")) thumbnailUrl = null;
+            if (!Uri.TryCreate(imageUrl, UriKind.Absolute, out var uriResult3) || uriResult3.Scheme is not ("http" or "https")) imageUrl = null;
 
             if (string.IsNullOrWhiteSpace(title) && !string.IsNullOrWhiteSpace(iconUrl))
                 title = "Title";
@@ -172,7 +195,7 @@ namespace Utili.Services
                     .WithOptionalFooter(footer)
                     .WithThumbnailUrl(thumbnailUrl)
                     .WithImageUrl(imageUrl)
-                    .WithColor(new Color((int) row.Colour)));
+                    .WithColor(new Color((int) config.Colour)));
         }
     }
 }
