@@ -49,7 +49,7 @@ namespace Utili.Services
                 try
                 {
                     webhook = await GetWebhookAsync(config.WebhookId);
-                    if (webhook.ChannelId != destinationChannel.Id) webhook = null;
+                    if (webhook?.ChannelId is null || webhook.ChannelId != destinationChannel.Id) webhook = null;
                 }
                 catch (RestApiException ex) when (ex.StatusCode == HttpResponseStatusCode.NotFound)
                 {
