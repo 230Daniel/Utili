@@ -30,7 +30,7 @@ namespace Utili.Commands
         public async Task About()
         {
             var domain = _config.GetValue<string>("Domain");
-            var guilds = _dbContext.ShardDetails.Where(x => x.Heartbeat > DateTime.UtcNow.AddSeconds(-30)).SumAsync(x => x.Guilds);
+            var guilds = await _dbContext.ShardDetails.Where(x => x.Heartbeat > DateTime.UtcNow.AddSeconds(-30)).SumAsync(x => x.Guilds);
             
             var about = string.Concat(
                 "Created by 230Daniel#1920\n",
