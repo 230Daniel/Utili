@@ -2,9 +2,9 @@
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
-using NewDatabase;
-using NewDatabase.Entities;
-using NewDatabase.Extensions;
+using Database;
+using Database.Entities;
+using Database.Extensions;
 using UtiliBackend.Authorisation;
 using UtiliBackend.Extensions;
 using UtiliBackend.Models;

@@ -1,7 +1,7 @@
 ﻿using System.Threading.Tasks;
-using NewDatabase;
-using NewDatabase.Entities;
-using NewDatabase.Extensions;
+using Database;
+using Database.Entities;
+using Database.Extensions;
 
 namespace UtiliBackend.Extensions
 {

@@ -2,8 +2,8 @@
 using Disqord;
 using Disqord.Bot;
 using Disqord.Rest;
-using NewDatabase;
-using NewDatabase.Extensions;
+using Database;
+using Database.Extensions;
 using Qmmands;
 using Utili.Implementations;
 using Utili.Services;

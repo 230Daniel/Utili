@@ -6,7 +6,7 @@ using Disqord.Gateway;
 using Disqord.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using NewDatabase.Entities;
+using Database.Entities;
 using Utili.Extensions;
 using Utili.Features;
 

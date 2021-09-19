@@ -13,7 +13,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UtiliBackend", "UtiliBackend\UtiliBackend.csproj", "{3A324468-1DA5-4743-A057-A39A604293AD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NewDatabase", "NewDatabase\NewDatabase.csproj", "{93ECB1EC-F789-41CD-B1AA-FAF720DD34A4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Database", "Database\Database.csproj", "{93ECB1EC-F789-41CD-B1AA-FAF720DD34A4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

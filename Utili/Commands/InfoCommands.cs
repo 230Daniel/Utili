@@ -11,7 +11,7 @@ using Utili.Extensions;
 using Utili.Utils;
 using LinuxSystemStats;
 using Microsoft.EntityFrameworkCore;
-using NewDatabase;
+using Database;
 
 namespace Utili.Commands
 {

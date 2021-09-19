@@ -5,7 +5,7 @@ using Disqord.Bot;
 using Disqord.Gateway;
 using Disqord.Rest;
 using Microsoft.EntityFrameworkCore;
-using NewDatabase;
+using Database;
 using Utili.Extensions;
 using Qmmands;
 

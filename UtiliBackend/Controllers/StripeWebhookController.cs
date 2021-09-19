@@ -6,8 +6,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using NewDatabase;
-using NewDatabase.Entities;
+using Database;
+using Database.Entities;
 using Stripe;
 using Subscription = Stripe.Subscription;
 
@@ -67,7 +67,7 @@ namespace UtiliBackend.Controllers
                         var dbSubscription = await _dbContext.Subscriptions.FirstOrDefaultAsync(x => x.Id == subscription.Id);
                         if (dbSubscription is null)
                         {
-                            dbSubscription = new NewDatabase.Entities.Subscription(subscription.Id)
+                            dbSubscription = new Database.Entities.Subscription(subscription.Id)
                             {
                                 UserId = customerDetails.UserId,
                                 Slots = premiumSlots,

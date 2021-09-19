@@ -1,7 +1,7 @@
 ﻿using System.Xml;
 using AutoMapper;
 using Discord.Rest;
-using NewDatabase.Entities;
+using Database.Entities;
 using UtiliBackend.Models;
 
 namespace UtiliBackend.Mapping

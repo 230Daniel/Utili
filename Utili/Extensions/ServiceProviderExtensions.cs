@@ -2,8 +2,8 @@
 using System.Threading.Tasks;
 using Disqord;
 using Microsoft.Extensions.DependencyInjection;
-using NewDatabase;
-using NewDatabase.Entities;
+using Database;
+using Database.Entities;
 using Utili.Services;
 
 namespace Utili.Extensions

@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using NewDatabase.Entities;
+using Database.Entities;
 
 namespace UtiliBackend.Models
 {

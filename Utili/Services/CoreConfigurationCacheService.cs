@@ -4,9 +4,9 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Disqord;
-using NewDatabase;
-using NewDatabase.Entities;
-using NewDatabase.Extensions;
+using Database;
+using Database.Entities;
+using Database.Extensions;
 
 namespace Utili.Services
 {

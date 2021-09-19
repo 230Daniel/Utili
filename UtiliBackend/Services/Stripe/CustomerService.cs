@@ -4,8 +4,8 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using NewDatabase;
-using NewDatabase.Entities;
+using Database;
+using Database.Entities;
 using Stripe;
 
 namespace UtiliBackend.Services

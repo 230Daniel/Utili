@@ -9,8 +9,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using NewDatabase.Entities;
-using NewDatabase.Extensions;
+using Database.Entities;
+using Database.Extensions;
 using Utili.Extensions;
 
 namespace Utili.Services

@@ -1,5 +1,5 @@
 ﻿using System.Xml;
-using NewDatabase.Entities;
+using Database.Entities;
 
 namespace UtiliBackend.Models
 {

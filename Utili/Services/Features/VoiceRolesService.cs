@@ -7,7 +7,7 @@ using Disqord.Gateway;
 using Disqord.Rest;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using NewDatabase.Extensions;
+using Database.Extensions;
 using Utili.Extensions;
 
 namespace Utili.Services
