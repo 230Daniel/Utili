@@ -5,11 +5,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using Disqord;
 using Disqord.Gateway;
-using Disqord.Http;
 using Disqord.Rest;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Database.Extensions;
+using Microsoft.EntityFrameworkCore;
 using Utili.Extensions;
 
 namespace Utili.Services
@@ -44,29 +44,37 @@ namespace Utili.Services
                 if(destinationChannel is null) return;
 
                 if(!destinationChannel.BotHasPermissions(Permission.ViewChannel | Permission.ManageWebhooks)) return;
-                
-                IWebhook webhook;
-                try
-                {
-                    webhook = await GetWebhookAsync(config.WebhookId);
-                    if (webhook?.ChannelId is null || webhook.ChannelId != destinationChannel.Id) webhook = null;
-                }
-                catch (RestApiException ex) when (ex.StatusCode == HttpResponseStatusCode.NotFound)
-                {
-                    webhook = null;
-                }
+
+                var webhook = await GetWebhookAsync(config.WebhookId);
+                if (webhook?.ChannelId is null || webhook.ChannelId != destinationChannel.Id) webhook = null;
 
                 if (webhook is null)
                 {
-                    var avatar = File.OpenRead("Avatar.png");
-                    webhook = await destinationChannel.CreateWebhookAsync("Utili Mirroring", x => x.Avatar = avatar);
-                    avatar.Close();
+                    var otherConfigs = await db.ChannelMirroringConfigurations.Where(x => x.DestinationChannelId == config.DestinationChannelId).ToListAsync();
+                    foreach (var otherConfig in otherConfigs)
+                    {
+                        webhook = await GetWebhookAsync(otherConfig.WebhookId);
+                        if (webhook?.ChannelId is null || webhook.ChannelId != destinationChannel.Id) webhook = null;
+                    }
 
-                    config.WebhookId = webhook.Id;
-                    db.ChannelMirroringConfigurations.Update(config);
-                    await db.SaveChangesAsync();
+                    if (webhook is not null)
+                    {
+                        config.WebhookId = webhook.Id;
+                        db.ChannelMirroringConfigurations.Update(config);
+                        await db.SaveChangesAsync();
+                    }
+                    else
+                    {
+                        var avatar = File.OpenRead("Avatar.png");
+                        webhook = await destinationChannel.CreateWebhookAsync("Utili Mirroring", x => x.Avatar = avatar);
+                        avatar.Close();
+
+                        config.WebhookId = webhook.Id;
+                        db.ChannelMirroringConfigurations.Update(config);
+                        await db.SaveChangesAsync();
+                    }
                 }
-
+                
                 var username = $"{e.Message.Author} in {e.Channel.Name}";
                 var avatarUrl = e.Message.Author.GetAvatarUrl();
                 
