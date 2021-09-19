@@ -158,73 +158,76 @@ namespace Utili.Services
 
                     foreach (var member in guild.GetMembers().Values.Where(x => !x.IsBot).OrderBy(x => x.Id))
                     {
-                        // DefaultLastAction is set to the time when the activity data started being recorded
-                        var lastAction = config.DefaultLastAction;
-
-                        // If the bot joined after activity data started being recorded, we know our data before the bot joined is invalid
-                        if (bot.JoinedAt.HasValue && bot.JoinedAt.Value.UtcDateTime > lastAction)
-                            lastAction = bot.JoinedAt.Value.UtcDateTime;
-
-                        // If the member did something since the default last action, their last action is more recent
-                        var userRow = userRows.FirstOrDefault(x => x.MemberId == member.Id);
-                        if (userRow is not null && userRow.LastAction > lastAction)
-                            lastAction = userRow.LastAction;
-                        
-                        // If the member joined since the default (or their) last action, their last action is more recent
-                        if (member.JoinedAt.HasValue && member.JoinedAt.Value.UtcDateTime > lastAction)
-                            lastAction = member.JoinedAt.Value.UtcDateTime;
-
-                        var minimumLastAction = DateTime.UtcNow - config.Threshold;
-                        var minimumKickLastAction = DateTime.UtcNow - (config.Threshold + config.AutoKickThreshold);
-
-                        if (lastAction <= minimumLastAction && !member.RoleIds.Contains(config.ImmuneRoleId))
+                        try
                         {
-                            if (premium 
-                                && config.AutoKick 
-                                && lastAction <= minimumKickLastAction 
-                                && guild.BotHasPermissions(Permission.KickMembers) 
-                                && member.CanBeManaged())
-                            {
-                                await member.KickAsync(new DefaultRestRequestOptions {Reason = "Inactive Role (auto-kick)"});
-                                await Task.Delay(500);
-                                continue;
-                            }
+                            // DefaultLastAction is set to the time when the activity data started being recorded
+                            var lastAction = config.DefaultLastAction;
 
-                            if (config.Mode == InactiveRoleMode.GrantWhenInactive)
+                            // If the bot joined after activity data started being recorded, we know our data before the bot joined is invalid
+                            if (bot.JoinedAt.HasValue && bot.JoinedAt.Value.UtcDateTime > lastAction)
+                                lastAction = bot.JoinedAt.Value.UtcDateTime;
+
+                            // If the member did something since the default last action, their last action is more recent
+                            var userRow = userRows.FirstOrDefault(x => x.MemberId == member.Id);
+                            if (userRow is not null && userRow.LastAction > lastAction)
+                                lastAction = userRow.LastAction;
+
+                            // If the member joined since the default (or their) last action, their last action is more recent
+                            if (member.JoinedAt.HasValue && member.JoinedAt.Value.UtcDateTime > lastAction)
+                                lastAction = member.JoinedAt.Value.UtcDateTime;
+
+                            var minimumLastAction = DateTime.UtcNow - config.Threshold;
+                            var minimumKickLastAction = DateTime.UtcNow - (config.Threshold + config.AutoKickThreshold);
+
+                            if (lastAction <= minimumLastAction && !member.RoleIds.Contains(config.ImmuneRoleId))
                             {
-                                if (!member.RoleIds.Contains(inactiveRole.Id))
+                                if (premium && config.AutoKick && lastAction <= minimumKickLastAction && guild.BotHasPermissions(Permission.KickMembers) && member.CanBeManaged())
                                 {
-                                    await member.GrantRoleAsync(inactiveRole.Id, new DefaultRestRequestOptions {Reason = "Inactive Role"});
+                                    await member.KickAsync(new DefaultRestRequestOptions {Reason = "Inactive Role (auto-kick)"});
                                     await Task.Delay(500);
+                                    continue;
+                                }
+
+                                if (config.Mode == InactiveRoleMode.GrantWhenInactive)
+                                {
+                                    if (!member.RoleIds.Contains(inactiveRole.Id))
+                                    {
+                                        await member.GrantRoleAsync(inactiveRole.Id, new DefaultRestRequestOptions {Reason = "Inactive Role"});
+                                        await Task.Delay(500);
+                                    }
+                                }
+                                else
+                                {
+                                    if (member.RoleIds.Contains(inactiveRole.Id))
+                                    {
+                                        await member.RevokeRoleAsync(inactiveRole.Id, new DefaultRestRequestOptions {Reason = "Inactive Role"});
+                                        await Task.Delay(500);
+                                    }
                                 }
                             }
                             else
                             {
-                                if (member.RoleIds.Contains(inactiveRole.Id))
+                                if (config.Mode == InactiveRoleMode.GrantWhenInactive)
                                 {
-                                    await member.RevokeRoleAsync(inactiveRole.Id, new DefaultRestRequestOptions {Reason = "Inactive Role"});
-                                    await Task.Delay(500);
+                                    if (member.RoleIds.Contains(inactiveRole.Id))
+                                    {
+                                        await member.RevokeRoleAsync(inactiveRole.Id, new DefaultRestRequestOptions {Reason = "Inactive Role"});
+                                        await Task.Delay(500);
+                                    }
+                                }
+                                else
+                                {
+                                    if (!member.RoleIds.Contains(inactiveRole.Id))
+                                    {
+                                        await member.GrantRoleAsync(inactiveRole.Id, new DefaultRestRequestOptions {Reason = "Inactive Role"});
+                                        await Task.Delay(500);
+                                    }
                                 }
                             }
                         }
-                        else
+                        catch (Exception ex)
                         {
-                            if (config.Mode == InactiveRoleMode.GrantWhenInactive)
-                            {
-                                if (member.RoleIds.Contains(inactiveRole.Id))
-                                {
-                                    await member.RevokeRoleAsync(inactiveRole.Id, new DefaultRestRequestOptions {Reason = "Inactive Role"});
-                                    await Task.Delay(500);
-                                }
-                            }
-                            else
-                            {
-                                if (!member.RoleIds.Contains(inactiveRole.Id))
-                                {
-                                    await member.GrantRoleAsync(inactiveRole.Id, new DefaultRestRequestOptions {Reason = "Inactive Role"});
-                                    await Task.Delay(500);
-                                }
-                            }
+                            _logger.LogError(ex, $"Exception thrown updating member {config.GuildId}/{member.Id}");
                         }
                     }
                 }
