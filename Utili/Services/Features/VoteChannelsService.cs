@@ -28,7 +28,7 @@ namespace Utili.Features
             try
             {
                 if (!e.GuildId.HasValue) return;
-                if (!e.Channel.BotHasPermissions(Permission.ViewChannel | Permission.ReadMessageHistory | Permission.AddReactions)) return;
+                if (!e.Channel.BotHasPermissions(Permission.ViewChannels | Permission.ReadMessageHistory | Permission.AddReactions)) return;
 
                 var db = scope.GetDbContext();
                 var config = await db.VoteChannelConfigurations.GetForGuildChannelAsync(e.GuildId.Value, e.ChannelId);

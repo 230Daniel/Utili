@@ -23,7 +23,7 @@ namespace Utili.Commands
         [Command("UserInfo"), RequireBotOwner]
         public async Task UserInfo(ulong userId)
         {
-            var user = Context.Bot.GetUser(userId) ?? await Context.Bot.FetchUserAsync(userId);
+            var user = Context.Bot.GetUser(userId) as IUser ?? await Context.Bot.FetchUserAsync(userId);
             
             var userRow = await _dbContext.Users.FirstOrDefaultAsync(x => x.UserId == userId);
             var subscriptions = await _dbContext.Subscriptions.Where(x => x.UserId == userId).ToListAsync();

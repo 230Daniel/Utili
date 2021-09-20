@@ -8,7 +8,7 @@
 
   <ItemGroup>
     <PackageReference Include="BotlistStatsPoster" Version="1.2.0" />
-    <PackageReference Include="Disqord.Bot" Version="1.0.0-07202021-75" />
+    <PackageReference Include="Disqord.Bot" Version="1.0.0-09202021-122" />
     <PackageReference Include="LinuxSystemStats" Version="1.0.0" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="3.9.0" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="3.9.0" />

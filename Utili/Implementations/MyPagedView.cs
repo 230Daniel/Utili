@@ -115,8 +115,8 @@ namespace Utili.Implementations
         
         protected ValueTask OnStopButtonAsync(ButtonEventArgs e)
         {
-            if (Menu is InteractiveMenu interactiveMenu)
-                _ = interactiveMenu.Message.DeleteAsync();
+            if (Menu is DefaultMenu defaultMenu)
+                _ = defaultMenu.Message.DeleteAsync();
 
             Menu.Stop();
             

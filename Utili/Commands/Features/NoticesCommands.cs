@@ -21,9 +21,9 @@ namespace Utili.Commands.Features
         }
         
         [Command("Preview", "Send")]
-        [RequireBotChannelPermissions(Permission.SendMessages | Permission.EmbedLinks | Permission.AttachFiles)]
+        [RequireBotChannelPermissions(Permission.SendMessages | Permission.SendEmbeds | Permission.SendAttachments)]
         public async Task Preview(
-            [RequireAuthorParameterChannelPermissions(Permission.ViewChannel | Permission.ReadMessageHistory)]
+            [RequireAuthorParameterChannelPermissions(Permission.ViewChannels | Permission.ReadMessageHistory)]
             ITextChannel channel = null)
         {
             channel ??= Context.Channel as ITextChannel;

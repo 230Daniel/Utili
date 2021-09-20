@@ -33,7 +33,7 @@ namespace Utili.Services
             {
                 if(!e.GuildId.HasValue) return false;
 
-                if(!e.Channel.BotHasPermissions(Permission.ViewChannel | Permission.ManageMessages)) return false;
+                if(!e.Channel.BotHasPermissions(Permission.ViewChannels | Permission.ManageMessages)) return false;
                 var userMessage = e.Message as IUserMessage;
                 if (userMessage is not null && 
                     e.Member is not null &&

@@ -134,12 +134,12 @@ namespace Utili.Services
                 ITextChannel channel = guild.GetTextChannel(channelId);
 
                 if (!channel.BotHasPermissions(
-                    Permission.ViewChannel |
+                    Permission.ViewChannels |
                     Permission.ReadMessageHistory |
                     Permission.ManageMessages |
                     Permission.SendMessages |
-                    Permission.EmbedLinks |
-                    Permission.AttachFiles)) return;
+                    Permission.SendEmbeds |
+                    Permission.SendAttachments)) return;
 
                 var previousMessage = await channel.FetchMessageAsync(config.MessageId);
                 if(previousMessage is not null) await previousMessage.DeleteAsync();

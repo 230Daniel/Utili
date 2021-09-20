@@ -27,17 +27,17 @@ namespace Utili.Features
         [RequireAuthorChannelPermissions(Permission.ManageMessages)]
         public async Task Pin(
             ulong messageId,
-            [RequireBotParameterChannelPermissions(Permission.ViewChannel | Permission.ManageWebhooks)]
+            [RequireBotParameterChannelPermissions(Permission.ViewChannels | Permission.ManageWebhooks)]
             ITextChannel pinChannel = null)
             => await Pin(messageId, pinChannel, Context.Channel as ITextChannel);
         
         [Command("Pin")]
         [DefaultCooldown(2, 5)]
         public async Task Pin(
-            [RequireAuthorParameterChannelPermissions(Permission.ViewChannel | Permission.ManageMessages)]
+            [RequireAuthorParameterChannelPermissions(Permission.ViewChannels | Permission.ManageMessages)]
             ITextChannel channel,
             ulong messageId,
-            [RequireBotParameterChannelPermissions(Permission.ViewChannel | Permission.ManageWebhooks)]
+            [RequireBotParameterChannelPermissions(Permission.ViewChannels | Permission.ManageWebhooks)]
             ITextChannel pinChannel = null)
             => await Pin(messageId, pinChannel, channel);
 

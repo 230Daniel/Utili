@@ -10,7 +10,7 @@ namespace Utili.Implementations.Views
     {
         public bool Result;
 
-        private IUserMessage Message => (Menu as InteractiveMenu).Message;
+        private IUserMessage Message => (Menu as DefaultMenu).Message;
         private bool _clicked;
 
         public ConfirmView(Snowflake memberId, string title, string content, string confirmButtonLabel)

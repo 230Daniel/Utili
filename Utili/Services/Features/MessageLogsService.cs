@@ -161,7 +161,7 @@ namespace Utili.Services
         {
             var builder = new LocalEmbed()
                 .WithColor(new Color(66, 182, 245))
-                .WithDescription($"**Message by {newMessage.Author.Mention} edited in {Mention.TextChannel(newMessage.ChannelId)}** [Jump]({newMessage.GetJumpUrl(messageRecord.GuildId)})")
+                .WithDescription($"**Message by {newMessage.Author.Mention} edited in {Mention.Channel(newMessage.ChannelId)}** [Jump]({newMessage.GetJumpUrl(messageRecord.GuildId)})")
                 .WithAuthor(newMessage.Author)
                 .WithFooter($"Message {messageRecord.MessageId}")
                 .WithTimestamp(DateTime.SpecifyKind(messageRecord.Timestamp, DateTimeKind.Utc));
@@ -186,7 +186,7 @@ namespace Utili.Services
         {
             var builder = new LocalEmbed()
                 .WithColor(new Color(245, 66, 66))
-                .WithDescription($"**Message by {Mention.User(deletedMessage.AuthorId)} deleted in {Mention.TextChannel(deletedMessage.ChannelId)}**")
+                .WithDescription($"**Message by {Mention.User(deletedMessage.AuthorId)} deleted in {Mention.Channel(deletedMessage.ChannelId)}**")
                 .WithFooter($"Message {deletedMessage.MessageId}")
                 .WithTimestamp(DateTime.SpecifyKind(deletedMessage.Timestamp, DateTimeKind.Utc));
 
@@ -205,7 +205,7 @@ namespace Utili.Services
         {
             var builder = new LocalEmbed()
                 .WithColor(new Color(245, 66, 66))
-                .WithDescription($"**{e.MessageIds.Count} messages bulk deleted in {Mention.TextChannel(e.ChannelId)}**\n" +
+                .WithDescription($"**{e.MessageIds.Count} messages bulk deleted in {Mention.Channel(e.ChannelId)}**\n" +
                                  $"[View {loggedCount} logged message{(loggedCount == 1 ? "" : "s")}]({paste})")
                 .WithAuthor("Bulk Deletion");
 

@@ -67,8 +67,8 @@ namespace Utili
         {
             services.AddDbContext<DatabaseContext>();
             services.AddScoped<CoreConfigurationCacheService>();
-            
-            services.AddInteractivity();
+
+            services.AddInteractivityExtension();
             services.AddPrefixProvider<PrefixProvider>();
 
             services.AddSingleton<MemberCacheService>();
