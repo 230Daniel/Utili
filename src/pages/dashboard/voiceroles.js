@@ -65,7 +65,7 @@ class VoiceRoles extends React.Component{
 	async componentDidMount(){
 		var response = await get(`dashboard/${this.guildId}/voice-roles`);
 		this.state.voiceRoles = await response?.json();
-		response = await get(`discord/${this.guildId}/voice-channels`);
+		response = await get(`discord/${this.guildId}/vocal-channels`);
 		this.state.voiceChannels = await response?.json();
 		this.state.voiceChannels.push({name:"Any other channel", id:"0"});
 		response = await get(`discord/${this.guildId}/roles`);

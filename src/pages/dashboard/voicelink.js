@@ -59,7 +59,7 @@ class VoiceLink extends React.Component{
 	async componentDidMount(){
 		var response = await get(`dashboard/${this.guildId}/voice-link`);
 		this.state.voiceLink = await response?.json();
-		response = await get(`discord/${this.guildId}/voice-channels`);
+		response = await get(`discord/${this.guildId}/vocal-channels`);
 		this.state.voiceChannels = await response?.json();
 		this.state.voiceLink.excludedChannels = this.state.voiceLink.excludedChannels.filter(x => this.state.voiceChannels.some(y => x == y.id));
 		this.setState({});
