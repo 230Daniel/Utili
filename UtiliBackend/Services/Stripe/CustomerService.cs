@@ -25,96 +25,36 @@ namespace UtiliBackend.Services
             _stripeClient = stripeClient;
         }
 
-        public async Task<Customer> GetOrCreateCustomerAsync(ulong userId)
+        public async Task<string> GetOrCreateCustomerIdAsync(User user)
         {
             await _semaphore.WaitAsync();
-            _logger.LogInformation("Getting or creating a customer for {UserId}", userId);
+            _logger.LogInformation("Getting or creating a customer id for {UserId}", user.UserId);
 
             try
             {
                 var stripeCustomerService = new Stripe.CustomerService(_stripeClient);
-                var customerDetails = await _dbContext.CustomerDetails.FirstOrDefaultAsync(x => x.UserId == userId);
+                var customerDetails = await _dbContext.CustomerDetails.FirstOrDefaultAsync(x => x.UserId == user.UserId);
 
                 if (customerDetails is null)
                 {
-                    _logger.LogInformation("Creating a customer for {UserId}", userId);
-
-                    var user = await _dbContext.Users.FirstOrDefaultAsync(x => x.UserId == userId);
+                    _logger.LogInformation("Creating a customer for {UserId}", user.UserId);
 
                     var options = new CustomerCreateOptions
                     {
-                        Description = $"User Id: {userId}",
+                        Description = $"User Id: {user.UserId}",
                         Email = user.Email,
                         Metadata = new Dictionary<string, string>
                         {
-                            {"user_id", userId.ToString()}
+                            {"user_id", user.UserId.ToString()}
                         }
                     };
 
                     var customer = await stripeCustomerService.CreateAsync(options);
-                    _logger.LogInformation("Created customer {CustomerId} for {UserId}", customer.Id, userId);
+                    _logger.LogInformation("Created customer {CustomerId} for {UserId}", customer.Id, user.UserId);
 
                     customerDetails = new CustomerDetails(customer.Id)
                     {
-                        UserId = userId
-                    };
-                    _dbContext.CustomerDetails.Add(customerDetails);
-                    await _dbContext.SaveChangesAsync();
-                    
-                    return customer;
-                }
-                else
-                {
-                    _logger.LogInformation("Getting customer {CustomerId} for {UserId}", customerDetails.CustomerId, userId);
-
-                    var customer = await stripeCustomerService.GetAsync(customerDetails.CustomerId);
-                    return customer;
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error thrown while getting or creating customer for user {UserId}", userId);
-            }
-            finally
-            {
-                _logger.LogInformation("Released semaphore");
-                _semaphore.Release();
-            }
-            return null;
-        }
-        
-        public async Task<string> GetOrCreateCustomerIdAsync(ulong userId)
-        {
-            await _semaphore.WaitAsync();
-            _logger.LogInformation("Getting or creating a customer id for {UserId}", userId);
-
-            try
-            {
-                var stripeCustomerService = new Stripe.CustomerService(_stripeClient);
-                var customerDetails = await AsyncEnumerable.FirstOrDefaultAsync(_dbContext.CustomerDetails, x => x.UserId == userId);
-
-                if (customerDetails is null)
-                {
-                    _logger.LogInformation("Creating a customer for {UserId}", userId);
-
-                    var user = await AsyncEnumerable.FirstOrDefaultAsync(_dbContext.Users, x => x.UserId == userId);
-
-                    var options = new CustomerCreateOptions
-                    {
-                        Description = $"User Id: {userId}",
-                        Email = user.Email,
-                        Metadata = new Dictionary<string, string>
-                        {
-                            {"user_id", userId.ToString()}
-                        }
-                    };
-
-                    var customer = await stripeCustomerService.CreateAsync(options);
-                    _logger.LogInformation("Created customer {CustomerId} for {UserId}", customer.Id, userId);
-
-                    customerDetails = new CustomerDetails(customer.Id)
-                    {
-                        UserId = userId
+                        UserId = user.UserId
                     };
                     _dbContext.CustomerDetails.Add(customerDetails);
                     await _dbContext.SaveChangesAsync();
@@ -123,13 +63,13 @@ namespace UtiliBackend.Services
                 }
                 else
                 {
-                    _logger.LogInformation("Returned customer id {CustomerId} for {UserId}", customerDetails.CustomerId, userId);
+                    _logger.LogInformation("Returned customer id {CustomerId} for {UserId}", customerDetails.CustomerId, user.UserId);
                     return customerDetails.CustomerId;
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error thrown while getting or creating customer id for user {UserId}", userId);
+                _logger.LogError(ex, "Error thrown while getting or creating customer id for user {UserId}", user.UserId);
             }
             finally
             {
@@ -139,25 +79,27 @@ namespace UtiliBackend.Services
             return null;
         }
 
-        public async Task<Customer> GetCustomerAsync(ulong userId)
+        public async Task<Customer> GetCustomerAsync(User user)
         {
+            if (user is null) return null;
+            
             await _semaphore.WaitAsync();
-            _logger.LogInformation("Getting a customer for {UserId}", userId);
+            _logger.LogInformation("Getting a customer for {UserId}", user.UserId);
 
             try
             {
                 var stripeCustomerService = new Stripe.CustomerService(_stripeClient);
-                var customerDetails = await AsyncEnumerable.FirstOrDefaultAsync(_dbContext.CustomerDetails, x => x.UserId == userId);
+                var customerDetails = await _dbContext.CustomerDetails.FirstOrDefaultAsync(x => x.UserId == user.UserId);
 
                 if (customerDetails is null)
                 {
-                    _logger.LogInformation("No customer found for {UserId}", userId);
+                    _logger.LogInformation("No customer found for {UserId}", user.UserId);
                     
                     return null;
                 }
                 else
                 {
-                    _logger.LogInformation("Getting customer {CustomerId} for {UserId}", customerDetails.CustomerId, userId);
+                    _logger.LogInformation("Getting customer {CustomerId} for {UserId}", customerDetails.CustomerId, user.UserId);
 
                     var customer = await stripeCustomerService.GetAsync(customerDetails.CustomerId);
                     return customer;
@@ -165,7 +107,7 @@ namespace UtiliBackend.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error thrown while getting customer for user {UserId}", userId);
+                _logger.LogError(ex, "Exception thrown while getting customer for user {UserId}", user.UserId);
             }
             finally
             {

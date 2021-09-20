@@ -14,6 +14,7 @@ using Database;
 using Stripe;
 using UtiliBackend.Authorisation;
 using UtiliBackend.Extensions;
+using UtiliBackend.Middleware;
 using UtiliBackend.Services;
 
 namespace UtiliBackend
@@ -108,19 +109,11 @@ namespace UtiliBackend
 
             if (!env.IsDevelopment())
             {
-                app.Use((ctx, next) =>
-                {
-                    ctx.Request.Scheme = "https";
-                    return next();
-                });
+                app.UseMiddleware<AlwaysHttpsMiddleware>();
                 app.UseHsts();
             }
 
-            app.Use((ctx, next) =>
-            {
-                ctx.Response.Headers.Add("cache-control", "no-cache");
-                return next();
-            });
+            app.UseMiddleware<NoCacheMiddleware>();
             
             app.UseHttpsRedirection();
             app.UseRouting();
@@ -128,6 +121,8 @@ namespace UtiliBackend
             app.UseAuthentication();
             app.UseAuthorization();
 
+            app.UseMiddleware<UserAccountsMiddleware>();
+            
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();

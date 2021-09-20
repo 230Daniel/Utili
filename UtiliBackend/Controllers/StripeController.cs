@@ -33,8 +33,7 @@ namespace UtiliBackend.Controllers
         [HttpPost("create-checkout-session")]
         public async Task<IActionResult> CreateCheckoutSessionAsync([FromBody] CreateCheckoutSessionModel model)
         {
-            var user = HttpContext.GetDiscordUser();
-            var customerId = await _customerService.GetOrCreateCustomerIdAsync(user.Id);
+            var customerId = await _customerService.GetOrCreateCustomerIdAsync(HttpContext.GetUser());
             if (customerId is null) throw new Exception("Customer ID was null");
             
             var options = new SessionCreateOptions
@@ -70,8 +69,7 @@ namespace UtiliBackend.Controllers
         [HttpGet("customer-portal")]
         public async Task<IActionResult> CustomerPortalAsync()
         {
-            var user = HttpContext.GetDiscordUser();
-            var customerId = await _customerService.GetOrCreateCustomerIdAsync(user.Id);
+            var customerId = await _customerService.GetOrCreateCustomerIdAsync(HttpContext.GetUser());
             if (customerId is null) throw new Exception("Customer ID was null");
             
             var options = new Stripe.BillingPortal.SessionCreateOptions
@@ -89,8 +87,7 @@ namespace UtiliBackend.Controllers
         [HttpGet("currency")]
         public async Task<IActionResult> CurrencyAsync()
         {
-            var user = HttpContext.GetDiscordUser();
-            var customer = await _customerService.GetCustomerAsync(user.Id);
+            var customer = await _customerService.GetCustomerAsync(HttpContext.GetUser());
             
             if (customer is not null && !string.IsNullOrEmpty(customer.Currency))
             {
