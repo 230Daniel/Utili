@@ -1,6 +1,8 @@
 using System;
 using System.Threading.Tasks;
+using Database;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -28,6 +30,12 @@ namespace UtiliBackend
             {
                 var discordRestService = host.Services.GetRequiredService<DiscordRestService>();
                 await discordRestService.InitialiseAsync();
+                
+                using (var scope = host.Services.CreateScope())
+                {
+                    var db = scope.ServiceProvider.GetRequiredService<DatabaseContext>();
+                    await db.Database.MigrateAsync();
+                }
                 
                 await host.RunAsync();
             }
