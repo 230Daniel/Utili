@@ -47,12 +47,18 @@ namespace Utili.Services
                     Content = e.Message.Content
                 };
 
+                if (e.Channel is IThreadChannel threadChannel)
+                {
+                    if (!config.LogThreads || config.ExcludedChannels.Contains(threadChannel.ChannelId)) return;
+                    message.TextChannelId = threadChannel.ChannelId;
+                }
+
                 db.MessageLogsMessages.Add(message);
 
                 if (!await db.GetIsGuildPremiumAsync(e.GuildId.Value))
                 {
                     var messages = await db.MessageLogsMessages
-                        .Where(x => x.GuildId == e.GuildId.Value.RawValue && x.ChannelId == e.ChannelId.RawValue)
+                        .Where(x => x.GuildId == e.GuildId.Value.RawValue && x.ChannelId == message.ChannelId)
                         .OrderByDescending(x => x.Timestamp)
                         .ToListAsync();
 
@@ -73,12 +79,14 @@ namespace Utili.Services
             try
             {
                 if (!e.GuildId.HasValue) return;
-
-                ITextChannel channel = _client.GetTextChannel(e.GuildId.Value, e.ChannelId);
-
+                
                 var db = scope.GetDbContext();
                 var config = await db.MessageLogsConfigurations.GetForGuildAsync(e.GuildId.Value);
                 if (config is null || (config.DeletedChannelId == 0 && config.EditedChannelId == 0) || config.ExcludedChannels.Contains(e.ChannelId)) return;
+
+                IMessageGuildChannel channel = _client.GetMessageGuildChannel(e.GuildId.Value, e.ChannelId);
+                if (channel is IThreadChannel threadChannel && (!config.LogThreads || config.ExcludedChannels.Contains(threadChannel.ChannelId)))
+                    return;
 
                 var messageRecord = await db.MessageLogsMessages.GetForMessageAsync(e.MessageId);
                 if (messageRecord is null || !e.Model.Content.HasValue || e.Model.Content.Value == messageRecord.Content) return;
@@ -104,11 +112,15 @@ namespace Utili.Services
             try
             {
                 if (!e.GuildId.HasValue) return;
-
+                
                 var db = scope.GetDbContext();
                 var config = await db.MessageLogsConfigurations.GetForGuildAsync(e.GuildId.Value);
                 if (config is null || (config.DeletedChannelId == 0 && config.EditedChannelId == 0) || config.ExcludedChannels.Contains(e.ChannelId)) return;
 
+                IMessageGuildChannel channel = _client.GetMessageGuildChannel(e.GuildId.Value, e.ChannelId);
+                if (channel is IThreadChannel threadChannel && (!config.LogThreads || config.ExcludedChannels.Contains(threadChannel.ChannelId)))
+                    return;
+                
                 var messageRecord = await db.MessageLogsMessages.GetForMessageAsync(e.MessageId);
                 if (messageRecord is null) return;
 
@@ -136,11 +148,15 @@ namespace Utili.Services
                 var db = scope.GetDbContext();
                 var config = await db.MessageLogsConfigurations.GetForGuildAsync(e.GuildId);
                 if (config is null || (config.DeletedChannelId == 0 && config.EditedChannelId == 0) || config.ExcludedChannels.Contains(e.ChannelId)) return;
-
+                
+                IMessageGuildChannel channel = _client.GetMessageGuildChannel(e.GuildId, e.ChannelId);
+                if (channel is IThreadChannel threadChannel && (!config.LogThreads || config.ExcludedChannels.Contains(threadChannel.ChannelId)))
+                    return;
+                
                 var messageIds = e.MessageIds.Select(x => x.RawValue);
                 var messages = await db.MessageLogsMessages.Where(x => messageIds.Contains(x.MessageId)).ToListAsync();
 
-                var embed = GetBulkDeletedEmbed(e, await PasteMessagesAsync(messages, e.MessageIds.Count), messages.Count);
+                var embed = await GetBulkDeletedEmbedAsync(messages, e.MessageIds.Count);
 
                 if (messages.Any())
                 {
@@ -159,67 +175,72 @@ namespace Utili.Services
 
         private LocalEmbed GetEditedEmbed(IUserMessage newMessage, MessageLogsMessage messageRecord)
         {
-            var builder = new LocalEmbed()
+            var embed = new LocalEmbed()
                 .WithColor(new Color(66, 182, 245))
-                .WithDescription($"**Message by {newMessage.Author.Mention} edited in {Mention.Channel(newMessage.ChannelId)}** [Jump]({newMessage.GetJumpUrl(messageRecord.GuildId)})")
+                .WithDescription($"**Message by {newMessage.Author.Mention} edited in {Mention.Channel(messageRecord.ChannelId)}** [Jump]({newMessage.GetJumpUrl(messageRecord.GuildId)})")
                 .WithAuthor(newMessage.Author)
                 .WithFooter($"Message {messageRecord.MessageId}")
                 .WithTimestamp(DateTime.SpecifyKind(messageRecord.Timestamp, DateTimeKind.Utc));
 
             if (messageRecord.Content.Length > 1024 || newMessage.Content.Length > 1024)
             {
-                if (messageRecord.Content.Length < 2024 - builder.Description.Length - 2)
-                    builder.Description += $"\n{messageRecord.Content}";
+                if (messageRecord.Content.Length < 2024 - embed.Description.Length - 2)
+                    embed.Description += $"\n{messageRecord.Content}";
                 else
-                    builder.Description += "\nThe message is too large to fit in this embed";
+                    embed.Description += "\nThe message is too large to fit in this embed";
             }
             else
             {
-                builder.AddField("Before", messageRecord.Content);
-                builder.AddField("After", newMessage.Content);
+                embed.AddField("Before", messageRecord.Content);
+                embed.AddField("After", newMessage.Content);
             }
 
-            return builder;
+            return embed;
         }
 
-        private LocalEmbed GetDeletedEmbed(MessageLogsMessage deletedMessage, IMember member)
+        private LocalEmbed GetDeletedEmbed(MessageLogsMessage messageRecord, IMember member)
         {
-            var builder = new LocalEmbed()
+            var embed = new LocalEmbed()
                 .WithColor(new Color(245, 66, 66))
-                .WithDescription($"**Message by {Mention.User(deletedMessage.AuthorId)} deleted in {Mention.Channel(deletedMessage.ChannelId)}**")
-                .WithFooter($"Message {deletedMessage.MessageId}")
-                .WithTimestamp(DateTime.SpecifyKind(deletedMessage.Timestamp, DateTimeKind.Utc));
+                .WithDescription($"**Message by {Mention.User(messageRecord.AuthorId)} deleted in {Mention.Channel(messageRecord.ChannelId)}**")
+                .WithFooter($"Message {messageRecord.MessageId}")
+                .WithTimestamp(DateTime.SpecifyKind(messageRecord.Timestamp, DateTimeKind.Utc));
 
-            if (member is null) builder.WithAuthor("Unknown member");
-            else builder.WithAuthor(member);
+            if (member is null) embed.WithAuthor("Unknown member");
+            else embed.WithAuthor(member);
 
-            if (deletedMessage.Content.Length > 2024 - builder.Description.Length - 2)
-                builder.Description += "\nThe message is too large to fit in this embed";
+            if (messageRecord.Content.Length > 2024 - embed.Description.Length - 2)
+                embed.Description += "\nThe message is too large to fit in this embed";
             else
-                builder.Description += $"\n{deletedMessage.Content}";
+                embed.Description += $"\n{messageRecord.Content}";
 
-            return builder;
+            return embed;
         }
 
-        private LocalEmbed GetBulkDeletedEmbed(MessagesDeletedEventArgs e, string paste, int loggedCount)
+        private async Task<LocalEmbed> GetBulkDeletedEmbedAsync(List<MessageLogsMessage> messageRecords, int count)
         {
-            var builder = new LocalEmbed()
+            var paste = await PasteMessagesAsync(messageRecords, count);
+
+            var link = paste is not null
+                ? $"[View {messageRecords.Count} logged message{(messageRecords.Count == 1 ? "" : "s")}]({paste})"
+                : "Exception thrown uploading messages to Haste server";
+            
+            var embed = new LocalEmbed()
                 .WithColor(new Color(245, 66, 66))
-                .WithDescription($"**{e.MessageIds.Count} messages bulk deleted in {Mention.Channel(e.ChannelId)}**\n" +
-                                 $"[View {loggedCount} logged message{(loggedCount == 1 ? "" : "s")}]({paste})")
+                .WithDescription($"**{count} messages bulk deleted in {Mention.Channel(messageRecords[0].ChannelId)}**\n" +
+                                 link)
                 .WithAuthor("Bulk Deletion");
 
-            return builder;
+            return embed;
         }
 
-        private async Task<string> PasteMessagesAsync(List<MessageLogsMessage> messages, int total)
+        private async Task<string> PasteMessagesAsync(List<MessageLogsMessage> messages, int count)
         {
             try
             {
                 var sb = new StringBuilder();
 
-                sb.AppendLine($"Messages {total}");
-                sb.AppendLine($"Logged   {messages.Count}");
+                sb.AppendLine($"Logged {messages.Count} of {count} deleted messages");
                 sb.AppendLine();
                 sb.AppendLine();
 
@@ -229,7 +250,7 @@ namespace Utili.Services
                 {
                     if (!cachedUsers.TryGetValue(message.AuthorId, out var user))
                     {
-                        user = await _client.FetchUserAsync(message.AuthorId);
+                        user = _client.GetUser(message.AuthorId) as IUser ?? await _client.FetchUserAsync(message.AuthorId);
                         cachedUsers.Add(message.AuthorId, user);
                         await Task.Delay(500);
                     }
@@ -249,7 +270,7 @@ namespace Utili.Services
             catch (Exception e)
             {
                 _logger.LogError(e, "Exception thrown uploading messages to Haste server");
-                return "Failed to upload messages to haste server";
+                return null;
             }
         }
     }

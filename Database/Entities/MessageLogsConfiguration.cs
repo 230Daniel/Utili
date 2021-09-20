@@ -8,6 +8,7 @@ namespace Database.Entities
         public ulong DeletedChannelId { get; set; }
         public ulong EditedChannelId { get; set; }
         public List<ulong> ExcludedChannels { get; set; }
+        public bool LogThreads { get; set; }
 
         public MessageLogsConfiguration(ulong guildId) : base(guildId) { }
     }
