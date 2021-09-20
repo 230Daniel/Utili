@@ -45,18 +45,16 @@ namespace UtiliBackend.Controllers
         [HttpGet("{GuildId}/text-channels")]
         public async Task<IActionResult> TextChannelsAsync([Required] ulong guildId)
         {
-            var guild = HttpContext.GetDiscordGuild();
-            var channels = await _discordRestService.GetTextChannelsAsync(guild);
+            var channels = await _discordRestService.GetTextChannelsAsync(guildId);
             return Json(_mapper.Map<IEnumerable<TextChannelModel>>(channels));
         }
         
         [DiscordGuildAuthorise]
-        [HttpGet("{GuildId}/voice-channels")]
-        public async Task<IActionResult> VoiceChannelsAsync([Required] ulong guildId)
+        [HttpGet("{GuildId}/vocal-channels")]
+        public async Task<IActionResult> VocalChannelsAsync([Required] ulong guildId)
         {
-            var guild = HttpContext.GetDiscordGuild();
-            var channels = await _discordRestService.GetVoiceChannelsAsync(guild);
-            return Json(_mapper.Map<IEnumerable<VoiceChannelModel>>(channels));
+            var channels = await _discordRestService.GetVocalChannelsAsync(guildId);
+            return Json(_mapper.Map<IEnumerable<VocalChannelModel>>(channels));
         }
         
         [DiscordGuildAuthorise]
@@ -64,7 +62,7 @@ namespace UtiliBackend.Controllers
         public IActionResult Roles([Required] ulong guildId)
         {
             var guild = HttpContext.GetDiscordGuild();
-            var roles = guild.Roles.Where(x => !x.IsManaged && !x.IsEveryone);
+            var roles = guild.Roles.Values.Where(x => !x.IsManaged && x.Id != guildId);
             return Json(_mapper.Map<IEnumerable<RoleModel>>(roles));
         }
     }
