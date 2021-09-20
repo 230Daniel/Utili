@@ -100,7 +100,7 @@ namespace Utili.Services
                     var channelRecord = await db.VoiceLinkChannels.GetForGuildChannelAsync(guildId, channelId);
                     
                     var guild = _client.GetGuild(guildId);
-                    var voiceChannel = guild.GetVoiceChannel(channelId);
+                    var voiceChannel = guild.GetAudioChannel(channelId);
                     if (voiceChannel is null)
                     {
                         await CloseLinkedChannelAsync(scope, guild, config, channelRecord);
