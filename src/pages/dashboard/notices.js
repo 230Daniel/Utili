@@ -27,7 +27,7 @@ class Notices extends React.Component{
 
 	render(){
 		var channels = this.state.textChannels?.map(x => {return {id: x.id, value: x.name}});
-		var noticesChannels = channels?.filter(x => this.state.notices?.rows.some(y => y.channelId == x.id));
+		var noticesChannels = channels?.filter(x => this.state.notices?.some(y => y.channelId == x.id));
 		return(
 			<>
 				<Helmet>
@@ -57,7 +57,7 @@ class Notices extends React.Component{
 								ref={this.settings.channelAdder}/>
 						</Card>
 						<div className="inline">
-							{this.state.notices?.rows.map((row, i) =>{
+							{this.state.notices?.map((row, i) =>{
 								return(
 									<Card title={row.channelName} size={600} titleSize={200} inputSize={400} key={row.channelId} onChanged={() => this.onCardChanged(i)} onRemoved={() => this.onChannelRemoved(row.channelId)}>
 										<CardComponent type="checkbox" title="Enabled" value={row.enabled} ref={this.settings.channels[i].enabled}/>
@@ -83,11 +83,11 @@ class Notices extends React.Component{
 	async componentDidMount(){
 		var response = await get(`dashboard/${this.guildId}/notices`);
 		this.state.notices = await response?.json();
-		response = await get(`discord/${this.guildId}/channels/text`);
+		response = await get(`discord/${this.guildId}/text-channels`);
 		this.state.textChannels = await response?.json();
 
-		this.state.notices.rows = this.state.notices.rows.filter(x => this.state.textChannels.some(y => y.id == x.channelId))
-		for(var i = 0; i < this.state.notices.rows.length; i++){
+		this.state.notices = this.state.notices.filter(x => this.state.textChannels.some(y => y.id == x.channelId))
+		for(var i = 0; i < this.state.notices.length; i++){
 			this.settings.channels.push({ 
 				enabled: React.createRef(),
 				delay: React.createRef(),
@@ -100,14 +100,14 @@ class Notices extends React.Component{
 				icon: React.createRef(),
 				colour: React.createRef()
 			});
-			this.state.notices.rows[i]["channelName"] = this.getChannelName(this.state.notices.rows[i].channelId);
+			this.state.notices[i]["channelName"] = this.getChannelName(this.state.notices[i].channelId);
 		}
-		this.state.notices.rows.orderBy(x => x.channelName);
+		this.state.notices.orderBy(x => x.channelName);
 		this.setState({});
 	}
 
 	onCardChanged(i){
-		this.state.notices.rows[i].changed = true;
+		this.state.notices[i].changed = true;
 		this.props.onChanged();
 	}
 
@@ -124,7 +124,7 @@ class Notices extends React.Component{
 			icon: React.createRef(),
 			colour: React.createRef()
 		 });
-		this.state.notices.rows.push({
+		this.state.notices.push({
 			channelId: channel.id,
 			enabled: false,
 			delay: "PT5M",
@@ -138,19 +138,19 @@ class Notices extends React.Component{
 			colour: "43b581",
 			channelName: this.getChannelName(channel.id)
 		});
-		this.state.notices.rows.orderBy(x => x.channelName);
+		this.state.notices.orderBy(x => x.channelName);
 		this.setState({});
 	}
 
 	onChannelRemoved(id){
 		this.settings.channels.pop();
-		this.state.notices.rows = this.state.notices.rows.filter(x => x.channelId != id);
+		this.state.notices = this.state.notices.filter(x => x.channelId != id);
 		this.setState({});
 		this.props.onChanged();
 	}
 
 	getInput(){
-		var rows = this.state.notices.rows;
+		var rows = this.state.notices;
 		for(var i = 0; i < rows.length; i++){
 			var card = this.settings.channels[i];
 			rows[i].enabled = card.enabled.current.getValue();
@@ -164,15 +164,15 @@ class Notices extends React.Component{
 			rows[i].icon = card.icon.current.getValue();
 			rows[i].colour = card.colour.current.getValue();
 		}
-		this.state.notices.rows = rows;
+		this.state.notices = rows;
 		this.setState({});
 	}
 
 	async save(){
 		this.getInput();
 		var response = await post(`dashboard/${this.guildId}/notices`, this.state.notices);
-		for(var i = 0; i < this.state.notices.rows.length; i++){
-			this.state.notices.rows[i].changed = false;
+		for(var i = 0; i < this.state.notices.length; i++){
+			this.state.notices[i].changed = false;
 		}
 		return response.ok;
 	}

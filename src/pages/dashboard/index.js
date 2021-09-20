@@ -27,9 +27,9 @@ class Index extends React.Component{
 					<Load loaded={this.state.guilds !== null}>
 						<div className="guild-container">
 							<div className="guilds">
-								{this.state.guilds?.map((guild, i) =>{
+								{this.state.guilds?.filter(x => x.isManageable).map((guild, i) =>{
 									return(
-										<Link className="guild" to={guild.dashboardUrl} key={i}>
+										<Link className="guild" to={`dashboard/${guild.id}`} key={i}>
 											<div className="guild-icon">
 												<img width="200px" src={guild.iconUrl}/>
 											</div>
@@ -48,7 +48,7 @@ class Index extends React.Component{
 	}
 
 	async componentDidMount(){
-		var response = await get(`dashboard/guilds`);
+		var response = await get(`discord/guilds`);
 		var json = await response.json();
 		this.setState({guilds: json});
 	}

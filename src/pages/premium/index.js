@@ -80,7 +80,7 @@ class PremiumIndex extends React.Component{
 	async componentDidMount(){
 		var response = await get(`stripe/currency`);
 		var currency = await response.json();
-		this.state.currency = currency.currencyCode;
+		this.state.currency = currency.currency.toUpperCase();
 		this.state.currencyLocked = currency.locked;
 		this.setState({loading: false});
 	}

@@ -114,4 +114,29 @@ function defineExtensions(){
 		writable: true,
 		configurable: true
 	});
+
+	Object.defineProperty(Array.prototype, "orderByInt", {
+		value: function orderByInt(selector){
+
+			var sorted = []
+			var count = this.length;
+			for(var i = 0; i < count; i++)
+				sorted.push(+selector(this[i]));
+			sorted = sorted.sort((a, b) => a - b);
+			
+			var reconstructed = []
+			for(var i = 0; i < count; i++){
+				var index = this.findIndex(x => +selector(x) == sorted[i]);
+				reconstructed.push(this[index]);
+				this.splice(index, 1);
+			}
+			
+			for(var i = 0; i < count; i++){
+				this.push(reconstructed[i]);
+			}
+			return reconstructed;
+		},
+		writable: true,
+		configurable: true
+	});
 }

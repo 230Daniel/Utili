@@ -56,7 +56,7 @@ class JoinRoles extends React.Component{
 	}
 	
 	async componentDidMount(){
-		var response = await get(`dashboard/${this.guildId}/joinroles`);
+		var response = await get(`dashboard/${this.guildId}/join-roles`);
 		this.state.joinRoles = await response?.json();
 		response = await get(`discord/${this.guildId}/roles`);
 		this.state.roles = await response?.json();
@@ -74,7 +74,7 @@ class JoinRoles extends React.Component{
 
 	async save(){
 		this.getInput();
-		var response = await post(`dashboard/${this.guildId}/joinroles`, this.state.joinRoles);
+		var response = await post(`dashboard/${this.guildId}/join-roles`, this.state.joinRoles);
 		return response.ok;
 	}
 }

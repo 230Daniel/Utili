@@ -20,7 +20,7 @@ class JoinMessage extends React.Component{
 		};
 		this.settings = {
 			enabled: React.createRef(),
-			direct: React.createRef(),
+			mode: React.createRef(),
 			channelId: React.createRef(),
 			title: React.createRef(),
 			content: React.createRef(),
@@ -57,8 +57,8 @@ class JoinMessage extends React.Component{
 					<Load loaded={this.state.joinMessage !== null}>
 						<Card title="Join Message Settings" size={600} titleSize={200} inputSize={400} onChanged={() => this.onChanged()}>
 							<CardComponent type="checkbox" title="Enabled" value={this.state.joinMessage?.enabled} ref={this.settings.enabled}/>
-							<CardComponent type="checkbox" title="Direct Message" value={this.state.joinMessage?.direct} ref={this.settings.direct}/>
-							<CardComponent type="select-value" title="Channel" visible={!this.state.joinMessage?.direct} values={channels} value={this.state.joinMessage?.channelId} ref={this.settings.channelId}/>
+							<CardComponent type="select" title="Mode" options={["Send in channel", "Send in direct message"]} value={this.state.joinMessage?.mode} ref={this.settings.mode}/>
+							<CardComponent type="select-value" title="Channel" visible={this.state.joinMessage?.mode == 0} values={channels} value={this.state.joinMessage?.channelId} ref={this.settings.channelId}/>
 							<CardComponent type="text" title="Title" value={this.state.joinMessage?.title} ref={this.settings.title}/>
 							<CardComponent type="text-multiline" title="Content" height={80} padding={16} value={this.state.joinMessage?.content} ref={this.settings.content}/>
 							<CardComponent type="text" title="Footer" value={this.state.joinMessage?.footer} ref={this.settings.footer}/>
@@ -75,9 +75,9 @@ class JoinMessage extends React.Component{
 	}
 	
 	async componentDidMount(){
-		var response = await get(`dashboard/${this.guildId}/joinmessage`);
+		var response = await get(`dashboard/${this.guildId}/join-message`);
 		this.state.joinMessage = await response?.json();
-		response = await get(`discord/${this.guildId}/channels/text`);
+		response = await get(`discord/${this.guildId}/text-channels`);
 		this.state.textChannels = await response?.json();
 
 		this.setState({});
@@ -91,7 +91,7 @@ class JoinMessage extends React.Component{
 	getInput(){
 		this.state.joinMessage = {
 			enabled: this.settings.enabled.current.getValue(),
-			direct: this.settings.direct.current.getValue(),
+			mode: this.settings.mode.current.getValue(),
 			channelId: this.settings.channelId.current.getValue(),
 			title: this.settings.title.current.getValue(),
 			content: this.settings.content.current.getValue(),
@@ -107,7 +107,7 @@ class JoinMessage extends React.Component{
 
 	async save(){
 		this.getInput();
-		var response = await post(`dashboard/${this.guildId}/joinmessage`, this.state.joinMessage);
+		var response = await post(`dashboard/${this.guildId}/join-message`, this.state.joinMessage);
 		return response.ok;
 	}
 }

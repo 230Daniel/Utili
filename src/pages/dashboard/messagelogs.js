@@ -53,7 +53,7 @@ class MessageLogs extends React.Component{
 	}
 
 	renderDescription(){
-		if(this.state.premium && this.state.premium.premium){
+		if(this.state.premium){
 			return(
 				<p>On your server, messages will be stored for 30 days.<br/>The 30 day limit is required by Discord.</p>
 			);
@@ -68,9 +68,9 @@ class MessageLogs extends React.Component{
 	}
 	
 	async componentDidMount(){
-		var response = await get(`dashboard/${this.guildId}/messagelogs`);
+		var response = await get(`dashboard/${this.guildId}/message-logs`);
 		this.state.messageLogs = await response?.json();
-		response = await get(`discord/${this.guildId}/channels/text`);
+		response = await get(`discord/${this.guildId}/text-channels`);
 		this.state.textChannels = await response?.json();
 		this.state.messageLogs.excludedChannels = this.state.messageLogs.excludedChannels.filter(x => this.state.textChannels.some(y => x == y.id));
 		response = await get(`premium/guild/${this.guildId}`);
@@ -90,7 +90,7 @@ class MessageLogs extends React.Component{
 
 	async save(){
 		this.getInput();
-		var response = await post(`dashboard/${this.guildId}/messagelogs`, this.state.messageLogs);
+		var response = await post(`dashboard/${this.guildId}/message-logs`, this.state.messageLogs);
 		return response.ok;
 	}
 }

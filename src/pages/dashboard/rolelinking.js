@@ -1,6 +1,5 @@
 import React from "react";
 import Helmet from "react-helmet";
-import { Duration } from "luxon";
 
 import Fade from "../../components/effects/fade";
 import Load from "../../components/load";
@@ -46,14 +45,15 @@ class RoleLinking extends React.Component{
 								values={roles} 
 								selected={[]}
 								onSelected={(id) => this.onLinkAdded(id)} 
-								ref={this.settings.linkAdder}/>
+								ref={this.settings.linkAdder}
+								disabled={!this.state.premium && this.state.roleLinking?.length >= 2}/>
 						</Card>
 						<div className="inline">
-							{this.state.roleLinking?.rows.map((row, i) =>{
+							{this.state.roleLinking?.map((row, i) =>{
 								var m1 = row.mode == 0 || row.mode == 1 ? 0 : 1;
 								var m2 = row.mode == 0 || row.mode == 2 ? 0 : 1;
 								return(
-									<Card title={this.getRoleName(row.roleId)} size={400} titleSize={200} inputSize={200} key={row.linkId} onChanged={this.props.onChanged} onRemoved={() => this.onLinkRemoved(row.linkId)}>
+									<Card title={this.getRoleName(row.roleId)} size={400} titleSize={200} inputSize={200} key={row.id} onChanged={this.props.onChanged} onRemoved={() => this.onLinkRemoved(row.id)}>
 										<CardComponent type="select" title={`When ${this.getRoleName(row.roleId)} is`} value={m1} options={["Added", "Removed"]} ref={this.settings.links[i].m1}></CardComponent>
 										<div className="inline">
 											<CardComponent type="select" forceWidth={200} onChanged={this.props.onChanged} value={m2} options={["Add", "Remove"]} ref={this.settings.links[i].m2}></CardComponent>
@@ -71,7 +71,7 @@ class RoleLinking extends React.Component{
 	}
 
 	renderDescription(){
-		if(this.state.premium && this.state.premium.premium){
+		if(this.state.premium){
 			return null;
 		} else {
 			return(
@@ -84,15 +84,18 @@ class RoleLinking extends React.Component{
 	}
 	
 	async componentDidMount(){
-		var response = await get(`dashboard/${this.guildId}/rolelinking`);
+		var response = await get(`dashboard/${this.guildId}/role-linking`);
 		this.state.roleLinking = await response?.json();
+		console.log(this.state.roleLinking);
 		response = await get(`discord/${this.guildId}/roles`);
 		this.state.roles = await response?.json();
 		response = await get(`premium/guild/${this.guildId}`);
 		this.state.premium = await response?.json();
 
-		this.state.roleLinking.rows = this.state.roleLinking.rows.filter(x => this.state.roles.some(y => y.id == x.roleId))
-		for(var i = 0; i < this.state.roleLinking.rows.length; i++){
+		if(!this.state.premium) this.state.roleLinking = this.state.roleLinking.orderBy(x => x.linkId).slice(0, 2);
+
+		this.state.roleLinking = this.state.roleLinking.filter(x => this.state.roles.some(y => y.id == x.roleId))
+		for(var i = 0; i < this.state.roleLinking.length; i++){
 			this.settings.links.push({ m1: React.createRef(), m2: React.createRef(), linkedRoleId: React.createRef() });
 		}
 
@@ -100,9 +103,12 @@ class RoleLinking extends React.Component{
 	}
 
 	onLinkAdded(role){
+		var id = 0;
+		while(this.state.roleLinking.some(x => x.id == id)) id++;
+
 		this.settings.links.push({ m1: React.createRef(), m2: React.createRef(), linkedRoleId: React.createRef() });
-		this.state.roleLinking.rows.push({
-			linkId: this.getRandomId().toString(),
+		this.state.roleLinking.push({
+			id: id,
 			roleId: role.id,
 			linkedRoleId: "0",
 			mode: 0
@@ -110,23 +116,15 @@ class RoleLinking extends React.Component{
 		this.setState({});
 	}
 
-	getRandomId(){
-		var id = Math.floor(Math.random()*10000000);
-		while(this.state.roleLinking.rows.some(x => x.linkId == id)){
-			id = Math.floor(Math.random()*10000000);
-		}
-		return id;
-	}
-
 	onLinkRemoved(id){
 		this.settings.links.pop();
-		this.state.roleLinking.rows = this.state.roleLinking.rows.filter(x => x.linkId != id);
+		this.state.roleLinking = this.state.roleLinking.filter(x => x.id != id);
 		this.setState({});
 		this.props.onChanged();
 	}
 
 	getInput(){
-		var rows = this.state.roleLinking.rows;
+		var rows = this.state.roleLinking;
 		for(var i = 0; i < rows.length; i++){
 			var card = this.settings.links[i];
 			rows[i].linkedRoleId = card.linkedRoleId.current.getValue();
@@ -138,13 +136,13 @@ class RoleLinking extends React.Component{
 			if(m1 == 1 && m2 == 0) rows[i].mode = 2;
 			if(m1 == 1 && m2 == 1) rows[i].mode = 3;
 		}
-		this.state.roleLinking.rows = rows;
+		this.state.roleLinking = rows;
 		this.setState({});
 	}
 
 	async save(){
 		this.getInput();
-		var response = await post(`dashboard/${this.guildId}/roleLinking`, this.state.roleLinking);
+		var response = await post(`dashboard/${this.guildId}/role-linking`, this.state.roleLinking);
 		return response.ok;
 	}
 

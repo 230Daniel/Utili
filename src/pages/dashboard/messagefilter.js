@@ -27,7 +27,35 @@ class MessageFilter extends React.Component{
 
 	render(){
 		var channels = this.state.textChannels?.map(x => {return {id: x.id, value: x.name}});
-		var filterChannels = channels?.filter(x => this.state.messageFilter?.rows.some(y => y.channelId == x.id));
+		var filterChannels = channels?.filter(x => this.state.messageFilter?.some(y => y.channelId == x.id));
+
+		// Mode is a flags enum
+		/*
+			[Flags]
+    		public enum MessageFilterMode
+    		{
+    		    All = 1,
+    		    Images = 2,
+    		    Videos = 4,
+    		    Music = 8,
+    		    Attachments = 16,
+    		    Links = 32,
+    		    RegEx = 64
+    		}
+		*/
+		// At some point I want to properly allow multi-selection instead of these premade presets
+		var modeValues = [
+			{id: 1, value: "Unrestricted"},
+			{id: 2, value: "Images"},
+			{id: 4, value: "Videos"},
+			{id: 2 + 4, value: "Media"},
+			{id: 8, value: "Music"},
+			{id: 16, value: "Attachments"},
+			{id: 32, value: "URLs"},
+			{id: 32 + 2 + 4, value: "URLs and Media"},
+			{id: 64, value: "RegEx (advanced)"}
+		]
+
 		return(
 			<>
 				<Helmet>
@@ -39,6 +67,7 @@ class MessageFilter extends React.Component{
 					<div className="dashboard-description">
 						<p>Utili will delete any message that doesn't fit the rule for its channel.</p>
 						<p><b>RegEx:</b> A regular expression in C# style which every message must match. (advanced)</p>
+						<p><b>Message:</b> The message that will be sent if someone's message is deleted - Leave blank for a default message</p>
 					</div>
 					<Load loaded={this.state.messageFilter !== null}>
 						<Card onChanged={this.props.onChanged}>
@@ -51,11 +80,12 @@ class MessageFilter extends React.Component{
 								ref={this.settings.channelAdder}/>
 						</Card>
 						<div className="inline">
-							{this.state.messageFilter?.rows.map((row, i) =>{
+							{this.state.messageFilter?.map((row, i) =>{
 								return(
 									<Card title={row.channelName} size={350} titleSize={150} inputSize={200} key={row.channelId} onChanged={() => this.onChanged()} onRemoved={() => this.onChannelRemoved(row.channelId)}>
-										<CardComponent title="Mode" type="select" value={row.mode} options={["Unrestricted", "Images", "Videos", "Media", "Music", "Attachments", "URLs", "URLs and Media", "RegEx (advanced)"]} ref={this.settings.channels[i].mode}/>
-										<CardComponent title="RegEx (C#)" type="text" value={row.complex} visible={row.mode == 8} ref={this.settings.channels[i].complex}/>
+										<CardComponent title="Mode" type="select-value" value={row.mode} values={modeValues} hideNone ref={this.settings.channels[i].mode}/>
+										<CardComponent title="RegEx (C#)" type="text" value={row.regEx} visible={row.mode & 64} ref={this.settings.channels[i].regEx}/>
+										<CardComponent title="Message" type="text" value={row.deletionMessage} ref={this.settings.channels[i].deletionMessage}/>
 									</Card>
 								);
 							})}
@@ -67,17 +97,17 @@ class MessageFilter extends React.Component{
 	}
 	
 	async componentDidMount(){
-		var response = await get(`dashboard/${this.guildId}/messagefilter`);
+		var response = await get(`dashboard/${this.guildId}/message-filter`);
 		this.state.messageFilter = await response?.json();
-		response = await get(`discord/${this.guildId}/channels/text`);
+		response = await get(`discord/${this.guildId}/text-channels`);
 		this.state.textChannels = await response?.json();
 
-		this.state.messageFilter.rows = this.state.messageFilter.rows.filter(x => this.state.textChannels.some(y => y.id == x.channelId))
-		for(var i = 0; i < this.state.messageFilter.rows.length; i++){
-			this.settings.channels.push({ mode: React.createRef(), complex: React.createRef() });
-			this.state.messageFilter.rows[i]["channelName"] = this.getChannelName(this.state.messageFilter.rows[i].channelId);
+		this.state.messageFilter = this.state.messageFilter.filter(x => this.state.textChannels.some(y => y.id == x.channelId))
+		for(var i = 0; i < this.state.messageFilter.length; i++){
+			this.settings.channels.push({ mode: React.createRef(), regEx: React.createRef(), deletionMessage: React.createRef() });
+			this.state.messageFilter[i]["channelName"] = this.getChannelName(this.state.messageFilter[i].channelId);
 		}
-		this.state.messageFilter.rows.orderBy(x => x.channelName);
+		this.state.messageFilter.orderBy(x => x.channelName);
 		this.setState({});
 	}
 
@@ -88,38 +118,40 @@ class MessageFilter extends React.Component{
 	}
 
 	onChannelAdded(channel){
-		this.settings.channels.push({ mode: React.createRef(), complex: React.createRef() });
-		this.state.messageFilter.rows.push({
+		this.settings.channels.push({ mode: React.createRef(), regEx: React.createRef(), deletionMessage: React.createRef() });
+		this.state.messageFilter.push({
 			channelId: channel.id,
-			mode: -1,
-			complex: "",
+			mode: 1,
+			regEx: "",
+			deletionMessage: "",
 			channelName: this.getChannelName(channel.id)
 		});
-		this.state.messageFilter.rows.orderBy(x => x.channelName);
+		this.state.messageFilter.orderBy(x => x.channelName);
 		this.setState({});
 	}
 
 	onChannelRemoved(id){
 		this.settings.channels.pop();
-		this.state.messageFilter.rows = this.state.messageFilter.rows.filter(x => x.channelId != id);
+		this.state.messageFilter = this.state.messageFilter.filter(x => x.channelId != id);
 		this.setState({});
 		this.props.onChanged();
 	}
 
 	getInput(){
-		var rows = this.state.messageFilter.rows;
+		var rows = this.state.messageFilter;
 		for(var i = 0; i < rows.length; i++){
 			var card = this.settings.channels[i];
 			rows[i].mode = card.mode.current.getValue();
-			rows[i].complex = card.complex.current.getValue();
+			rows[i].regEx = card.regEx.current.getValue();
+			rows[i].deletionMessage = card.deletionMessage.current.getValue();
 		}
-		this.state.messageFilter.rows = rows;
+		this.state.messageFilter = rows;
 		this.setState({});
 	}
 
 	async save(){
 		this.getInput();
-		var response = await post(`dashboard/${this.guildId}/messagefilter`, this.state.messageFilter);
+		var response = await post(`dashboard/${this.guildId}/message-filter`, this.state.messageFilter);
 		return response.ok;
 	}
 

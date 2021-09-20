@@ -38,7 +38,7 @@ class PremiumServers extends React.Component{
 							<Subscriptions alwaysDisplay={true}/>
 							<Divider top={25} bottom={25}>Premium Slots</Divider>
 							<div className="inline" style={{justifyContent: "center"}}>
-								{this.state.slots?.slots.map((slot, i) =>{
+								{this.state.slots?.map((slot, i) =>{
 									return(
 										<Card title={`Slot ${i + 1}`} size={300} titleSize={0} inputSize={300} key={slot.slotId} onChanged={() => this.requireSave()}>
 											<CardComponent type="select-value" value={slot.guildId} values={values} ref={this.settings.slots[i].guildId}/>
@@ -57,13 +57,16 @@ class PremiumServers extends React.Component{
 	async componentDidMount(){
 		window.addEventListener("beforeunload", this.onUnload);
 		var response = await get("premium/slots");
-		this.state.slots = await response.json();
-		this.state.slots.slots.orderBy(x => x.slotId);
+		var slots = await response.json();
+		
+		slots.orderByInt(x => x.slotId);
 
-		response = await get("premium/guilds");
+		this.state.slots = slots;
+
+		response = await get("discord/guilds");
 		this.state.guilds = await response.json();
 
-		for(var i = 0; i < this.state.slots.slots.length; i++){
+		for(var i = 0; i < this.state.slots.length; i++){
 			this.settings.slots.push({ guildId: React.createRef() });
 		}
 
@@ -71,12 +74,12 @@ class PremiumServers extends React.Component{
 	}
 
 	getInput(){
-		var slots = this.state.slots.slots;
+		var slots = this.state.slots;
 		for(var i = 0; i < slots.length; i++){
 			var card = this.settings.slots[i];
 			slots[i].guildId = card.guildId.current.getValue();
 		}
-		this.state.slots.slots = slots;
+		this.state.slots = slots;
 		this.setState({});
 	}
 

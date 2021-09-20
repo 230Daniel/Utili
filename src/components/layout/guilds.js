@@ -19,9 +19,9 @@ class Guilds extends React.Component{
 		if(guild == null) return null;
 		return(
 			<NavDropdown className="guild-dropdown" title={<><img src={guild.iconUrl}/>{guild.name}</>}>
-				{this.state.guilds/*.filter(x => x.id != this.guildId)*/.map(guild =>{
+				{this.state.guilds.filter(x => x.isManageable).map(guild =>{
 					return(
-						<NavDropdown.Item href={guild.dashboardUrl} className={`guild-dropdown-link-mutual`}><img src={guild.iconUrl}/>{guild.name}</NavDropdown.Item>
+						<NavDropdown.Item href={`/dashboard/${guild.id}`} className={`guild-dropdown-link-mutual`} key={guild.id}><img src={guild.iconUrl}/>{guild.name}</NavDropdown.Item>
 					);
 				})}
 			</NavDropdown>
@@ -29,7 +29,7 @@ class Guilds extends React.Component{
 	}
 
 	async componentDidMount(){
-		var response = await get(`dashboard/guilds`);
+		var response = await get(`discord/guilds`);
 		var json = await response.json();
 		this.setState({guilds: json});
 	}

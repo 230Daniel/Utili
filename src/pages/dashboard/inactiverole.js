@@ -23,6 +23,7 @@ class InactiveRole extends React.Component{
 			role: React.createRef(),
 			immuneRole: React.createRef(),
 			threshold: React.createRef(),
+			mode: React.createRef(),
 			autoKick: React.createRef(),
 			autoKickThreshold: React.createRef()
 		}
@@ -52,10 +53,11 @@ class InactiveRole extends React.Component{
 					<Load loaded={this.state.inactiveRole !== null}>
 						<Card title="Inactive Role Settings" size={400} titleSize={200} inputSize={200} onChanged={this.props.onChanged}>
 							<CardComponent type="select-value" title="Inactive Role" values={values} value={this.state.inactiveRole?.roleId} ref={this.settings.role}></CardComponent>
+							<CardComponent type="select" title="Mode" options={["Grant when inactive", "Revoke when inactive"]} value={this.state.inactiveRole?.mode} ref={this.settings.mode}></CardComponent>
 							<CardComponent type="select-value" title="Immune Role" values={values} value={this.state.inactiveRole?.immuneRoleId} ref={this.settings.immuneRole}></CardComponent>
 							<CardComponent type="timespan" title="Threshold" value={Duration.fromISO(this.state.inactiveRole?.threshold)} ref={this.settings.threshold}></CardComponent>
 						</Card>
-						<div style={{display: this.state.premium && this.state.premium.premium ? "flex" : "none"}}>
+						<div style={{display: this.state.premium ? "flex" : "none"}}>
 							<Card title="Auto-Kick Settings" size={400} titleSize={200} inputSize={200} onChanged={this.props.onChanged}>
 								<CardComponent type="checkbox" title="Enabled" value={this.state.inactiveRole?.autoKick} ref={this.settings.autoKick}></CardComponent>
 								<CardComponent type="timespan" title="Additional Threshold" value={Duration.fromISO(this.state.inactiveRole?.autoKickThreshold)} ref={this.settings.autoKickThreshold}></CardComponent>
@@ -69,7 +71,7 @@ class InactiveRole extends React.Component{
 	}
 
 	renderDescription(){
-		if(!this.state.premium || !this.state.premium.premium){
+		if(!this.state.premium){
 			return(
 				<p><b>Premium:</b> Adds the option to automatically kick inactive users after an additional threshold.</p>
 			);
@@ -77,7 +79,7 @@ class InactiveRole extends React.Component{
 	}
 	
 	async componentDidMount(){
-		var response = await get(`dashboard/${this.guildId}/inactiverole`);
+		var response = await get(`dashboard/${this.guildId}/inactive-role`);
 		this.state.inactiveRole = await response?.json();
 		response = await get(`discord/${this.guildId}/roles`);
 		this.state.roles = await response?.json();
@@ -92,6 +94,7 @@ class InactiveRole extends React.Component{
 			roleId: this.settings.role.current.getValue(),
 			immuneRoleId: this.settings.immuneRole.current.getValue(),
 			threshold: this.settings.threshold.current.getValue(),
+			mode: this.settings.mode.current.getValue(),
 			autoKick: this.settings.autoKick.current.getValue(),
 			autoKickThreshold: this.settings.autoKickThreshold.current.getValue()
 		};
@@ -100,7 +103,7 @@ class InactiveRole extends React.Component{
 
 	async save(){
 		this.getInput();
-		var response = await post(`dashboard/${this.guildId}/inactiverole`, this.state.inactiveRole);
+		var response = await post(`dashboard/${this.guildId}/inactive-role`, this.state.inactiveRole);
 		return response.ok;
 	}
 }

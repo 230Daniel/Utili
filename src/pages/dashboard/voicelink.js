@@ -21,7 +21,7 @@ class VoiceLink extends React.Component{
 		this.settings = {
 			enabled: React.createRef(),
 			deleteChannels: React.createRef(),
-			prefix: React.createRef(),
+			channelPrefix: React.createRef(),
 			excludedChannels: React.createRef()
 		}
 	}
@@ -45,7 +45,7 @@ class VoiceLink extends React.Component{
 						<Card title="Voice Link Settings" size={400} titleSize={200} inputSize={200} onChanged={this.props.onChanged}>
 							<CardComponent type="checkbox" title="Enabled" value={this.state.voiceLink?.enabled} ref={this.settings.enabled}></CardComponent>
 							<CardComponent type="checkbox" title="Delete Channels" value={this.state.voiceLink?.deleteChannels} ref={this.settings.deleteChannels}></CardComponent>
-							<CardComponent type="text" title="Channel Prefix" value={this.state.voiceLink?.prefix} ref={this.settings.prefix}></CardComponent>
+							<CardComponent type="text" title="Channel Prefix" value={this.state.voiceLink?.channelPrefix} ref={this.settings.channelPrefix}></CardComponent>
 						</Card>
 						<Card title="Excluded Channels" size={400} onChanged={this.props.onChanged}>
 							<CardListComponent prompt="Exclude a channel..." values={values} selected={this.state.voiceLink?.excludedChannels} ref={this.settings.excludedChannels}></CardListComponent>
@@ -57,9 +57,9 @@ class VoiceLink extends React.Component{
 	}
 	
 	async componentDidMount(){
-		var response = await get(`dashboard/${this.guildId}/voicelink`);
+		var response = await get(`dashboard/${this.guildId}/voice-link`);
 		this.state.voiceLink = await response?.json();
-		response = await get(`discord/${this.guildId}/channels/voice`);
+		response = await get(`discord/${this.guildId}/voice-channels`);
 		this.state.voiceChannels = await response?.json();
 		this.state.voiceLink.excludedChannels = this.state.voiceLink.excludedChannels.filter(x => this.state.voiceChannels.some(y => x == y.id));
 		this.setState({});
@@ -69,7 +69,7 @@ class VoiceLink extends React.Component{
 		this.state.voiceLink = {
 			enabled: this.settings.enabled.current.getValue(),
 			deleteChannels: this.settings.deleteChannels.current.getValue(),
-			prefix: this.settings.prefix.current.getValue(),
+			channelPrefix: this.settings.channelPrefix.current.getValue(),
 			excludedChannels: this.settings.excludedChannels.current.getSelected()
 		};
 		this.setState({});
@@ -77,7 +77,7 @@ class VoiceLink extends React.Component{
 
 	async save(){
 		this.getInput();
-		var response = await post(`dashboard/${this.guildId}/voicelink`, this.state.voiceLink);
+		var response = await post(`dashboard/${this.guildId}/voice-link`, this.state.voiceLink);
 		return response.ok;
 	}
 }

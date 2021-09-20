@@ -13,9 +13,6 @@ class User extends React.Component{
 
 	render(){
 		if(!this.state.user){
-			return null;
-		}
-		if(!this.state.user.authenticated){
 			return(
 				<Nav.Link onClick={() => this.signIn()}>Sign in</Nav.Link>
 			);
