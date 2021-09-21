@@ -31,9 +31,8 @@ namespace Utili.Services
         {
             try
             {
-                if(!e.GuildId.HasValue
-                || (e.Message as IUserMessage)?.Type == UserMessageType.ThreadStarterMessage
-                || !e.Channel.BotHasPermissions(Permission.ViewChannels | Permission.ManageMessages)) 
+                if((e.Message as IUserMessage)?.Type == UserMessageType.ThreadStarterMessage
+                   || !e.Channel.BotHasPermissions(Permission.ViewChannels | Permission.ManageMessages)) 
                     return false;
 
                 var userMessage = e.Message as IUserMessage;

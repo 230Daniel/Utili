@@ -45,7 +45,7 @@ namespace Utili.Services
         {
             try
             {
-                if(!e.GuildId.HasValue || e.Member is null || e.Member.IsBot) return;
+                if(e.Member is null || e.Member.IsBot) return;
                 await MakeUserActiveAsync(scope, e.GuildId.Value, e.Member);
             }
             catch (Exception ex)

@@ -32,7 +32,7 @@ namespace Utili.Services
         {
             try
             {
-                if(e.Message.Author.IsBot || !e.GuildId.HasValue) return;
+                if(e.Message.Author.IsBot) return;
 
                 var db = scope.GetDbContext();
                 var config = await db.MessageLogsConfigurations.GetForGuildAsync(e.GuildId.Value);
@@ -111,8 +111,6 @@ namespace Utili.Services
         {
             try
             {
-                if (!e.GuildId.HasValue) return;
-                
                 var db = scope.GetDbContext();
                 var config = await db.MessageLogsConfigurations.GetForGuildAsync(e.GuildId.Value);
                 if (config is null || (config.DeletedChannelId == 0 && config.EditedChannelId == 0) || config.ExcludedChannels.Contains(e.ChannelId)) return;

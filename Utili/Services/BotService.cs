@@ -125,18 +125,21 @@ namespace Utili.Services
             
             if(config.HasFeature(BotFeatures.MessageFilter)) 
                 if(await _messageFilter.MessageReceived(scope, e)) return;
+
+            if (e.Channel is not IThreadChannel)
+            {
+                if(config.HasFeature(BotFeatures.Notices))
+                    await _notices.MessageReceived(scope, e);
             
-            if(config.HasFeature(BotFeatures.Notices))
-                await _notices.MessageReceived(scope, e);
+                if(config.HasFeature(BotFeatures.VoteChannels))
+                    await _voteChannels.MessageReceived(scope, e);
             
-            if(config.HasFeature(BotFeatures.VoteChannels))
-                await _voteChannels.MessageReceived(scope, e);
+                if(config.HasFeature(BotFeatures.ChannelMirroring))
+                    await _channelMirroring.MessageReceived(scope, e);
             
-            if(config.HasFeature(BotFeatures.ChannelMirroring))
-                await _channelMirroring.MessageReceived(scope, e);
-            
-            if(config.HasFeature(BotFeatures.Autopurge))
-                await _autopurge.MessageReceived(scope, e);
+                if(config.HasFeature(BotFeatures.Autopurge))
+                    await _autopurge.MessageReceived(scope, e);
+            }
             
             if(config.HasFeature(BotFeatures.InactiveRole))
                 await _inactiveRole.MessageReceived(scope, e);
@@ -152,9 +155,12 @@ namespace Utili.Services
             
             if(config.HasFeature(BotFeatures.MessageLogs))
                 await _messageLogs.MessageUpdated(scope, e);
-            
-            if(config.HasFeature(BotFeatures.Autopurge))
-                await _autopurge.MessageUpdated(scope, e);
+
+            if (Client.GetMessageGuildChannel(e.GuildId.Value, e.ChannelId) is not IThreadChannel)
+            {
+                if(config.HasFeature(BotFeatures.Autopurge))
+                    await _autopurge.MessageUpdated(scope, e);
+            }
         }
 
         protected override async ValueTask OnMessageDeleted(MessageDeletedEventArgs e)
@@ -168,8 +174,11 @@ namespace Utili.Services
             if(config.HasFeature(BotFeatures.MessageLogs))
                 await _messageLogs.MessageDeleted(scope, e);
             
-            if(config.HasFeature(BotFeatures.Autopurge))
-                await _autopurge.MessageDeleted(scope, e);
+            if (Client.GetMessageGuildChannel(e.GuildId.Value, e.ChannelId) is not IThreadChannel)
+            {
+                if(config.HasFeature(BotFeatures.Autopurge))
+                    await _autopurge.MessageDeleted(scope, e);
+            }
         }
     
         protected override async ValueTask OnMessagesDeleted(MessagesDeletedEventArgs e)
@@ -180,9 +189,12 @@ namespace Utili.Services
             
             if(config.HasFeature(BotFeatures.MessageLogs))
                 await _messageLogs.MessagesDeleted(scope, e);
-            
-            if(config.HasFeature(BotFeatures.Autopurge))
-                await _autopurge.MessagesDeleted(scope, e);
+
+            if (Client.GetMessageGuildChannel(e.GuildId, e.ChannelId) is not IThreadChannel)
+            {
+                if(config.HasFeature(BotFeatures.Autopurge))
+                    await _autopurge.MessagesDeleted(scope, e);
+            }
         }
 
         protected override async ValueTask OnReactionAdded(ReactionAddedEventArgs e)

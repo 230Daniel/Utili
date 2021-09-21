@@ -177,8 +177,6 @@ namespace Utili.Services
         {
             try
             {
-                if (!e.GuildId.HasValue) return;
-
                 var db = scope.GetDbContext();
                 var config = await db.AutopurgeConfigurations.GetForGuildChannelAsync(e.GuildId.Value, e.ChannelId);
                 if (config is null) return;
@@ -205,7 +203,7 @@ namespace Utili.Services
         {
             try
             {
-                if (!e.GuildId.HasValue || !e.Model.Pinned.HasValue) return;
+                if (!e.Model.Pinned.HasValue) return;
 
                 var db = scope.GetDbContext();
                 var config = await db.AutopurgeConfigurations.GetForGuildChannelAsync(e.GuildId.Value, e.ChannelId);
@@ -231,8 +229,6 @@ namespace Utili.Services
         {
             try
             {
-                if (!e.GuildId.HasValue) return;
-
                 var db = scope.GetDbContext();
                 var config = await db.AutopurgeConfigurations.GetForGuildChannelAsync(e.GuildId.Value, e.ChannelId);
                 if (config is null) return;

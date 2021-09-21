@@ -46,8 +46,6 @@ namespace Utili.Services
         {
             try
             {
-                if (!e.GuildId.HasValue) return;
-
                 var db = scope.GetDbContext();
                 var config = await db.NoticeConfigurations.GetForGuildChannelAsync(e.GuildId.Value, e.ChannelId);
                 if (config is null) return;

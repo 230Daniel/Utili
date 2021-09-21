@@ -27,7 +27,6 @@ namespace Utili.Features
         {
             try
             {
-                if (!e.GuildId.HasValue) return;
                 if (!e.Channel.BotHasPermissions(Permission.ViewChannels | Permission.ReadMessageHistory | Permission.AddReactions)) return;
 
                 var db = scope.GetDbContext();
