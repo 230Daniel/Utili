@@ -42,7 +42,7 @@ namespace Utili.Services
                     userMessage.Embeds.Count > 0 && 
                     userMessage.Embeds[0].Author?.Name == "Message deleted")
                     return false;
-                if (userMessage?.WebhookId is not null) return false;
+                if (userMessage?.WebhookId is not null) return true;
                 
                 var db = scope.GetDbContext();
                 var configChannelId = (e.Channel as IThreadChannel)?.ChannelId ?? e.ChannelId;
