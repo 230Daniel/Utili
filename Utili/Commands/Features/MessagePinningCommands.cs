@@ -8,8 +8,8 @@ using Database;
 using Database.Entities;
 using Database.Extensions;
 using Qmmands;
+using Utili.Commands;
 using Utili.Extensions;
-using Utili.Implementations;
 
 namespace Utili.Features
 {
@@ -29,19 +29,19 @@ namespace Utili.Features
             ulong messageId,
             [RequireBotParameterChannelPermissions(Permission.ViewChannels | Permission.ManageWebhooks)]
             ITextChannel pinChannel = null)
-            => await Pin(messageId, pinChannel, Context.Channel as ITextChannel);
+            => await Pin(messageId, pinChannel, Context.Channel);
         
         [Command("Pin")]
         [DefaultCooldown(2, 5)]
         public async Task Pin(
             [RequireAuthorParameterChannelPermissions(Permission.ViewChannels | Permission.ManageMessages)]
-            ITextChannel channel,
+            IMessageGuildChannel channel,
             ulong messageId,
             [RequireBotParameterChannelPermissions(Permission.ViewChannels | Permission.ManageWebhooks)]
             ITextChannel pinChannel = null)
             => await Pin(messageId, pinChannel, channel);
 
-        private async Task Pin(ulong messageId, ITextChannel pinChannel, ITextChannel channel)
+        private async Task Pin(ulong messageId, ITextChannel pinChannel, IMessageGuildChannel channel)
         {
             var message = await channel.FetchMessageAsync(messageId) as IUserMessage;
 

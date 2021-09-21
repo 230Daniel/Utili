@@ -98,7 +98,7 @@ namespace Utili.Services
                 db.MessageLogsMessages.Update(messageRecord);
                 await db.SaveChangesAsync();
 
-                ITextChannel logChannel = _client.GetTextChannel(e.GuildId.Value, config.EditedChannelId);
+                var logChannel = _client.GetTextChannel(e.GuildId.Value, config.EditedChannelId);
                 if (logChannel is not null) await logChannel.SendEmbedAsync(embed);
             }
             catch(Exception ex)
@@ -132,7 +132,7 @@ namespace Utili.Services
                 db.MessageLogsMessages.Remove(messageRecord);
                 await db.SaveChangesAsync();
                 
-                ITextChannel logChannel = _client.GetTextChannel(e.GuildId.Value, config.DeletedChannelId);
+                var logChannel = _client.GetTextChannel(e.GuildId.Value, config.DeletedChannelId);
                 if (logChannel is not null) await logChannel.SendEmbedAsync(embed);
             }
             catch (Exception ex)
@@ -164,7 +164,7 @@ namespace Utili.Services
                     await db.SaveChangesAsync();
                 }
                 
-                ITextChannel logChannel = _client.GetTextChannel(e.GuildId, config.DeletedChannelId);
+                var logChannel = _client.GetTextChannel(e.GuildId, config.DeletedChannelId);
                 if (logChannel is not null) await logChannel.SendEmbedAsync(embed);
             }
             catch (Exception ex)

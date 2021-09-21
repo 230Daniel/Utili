@@ -130,10 +130,11 @@ namespace Utili.Services
                 
                 if (config is null || !config.Enabled) return;
 
-                IGuild guild = _client.GetGuild(guildId);
-                ITextChannel channel = guild.GetTextChannel(channelId);
+                var guild = _client.GetGuild(guildId);
+                var channel = guild.GetTextChannel(channelId);
 
-                if (!channel.BotHasPermissions(
+                if (channel is null || 
+                    !channel.BotHasPermissions(
                     Permission.ViewChannels |
                     Permission.ReadMessageHistory |
                     Permission.ManageMessages |

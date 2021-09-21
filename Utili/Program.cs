@@ -15,6 +15,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Database;
+using Utili.Extensions;
 using Utili.Features;
 using Utili.Services;
 
@@ -92,6 +93,7 @@ namespace Utili
             services.AddSingleton<VoteChannelsService>();
             
             services.Configure<DefaultGatewayCacheProviderConfiguration>(x => x.MessagesPerChannel = 1);
+            DatabaseContextExtensions.DefaultPrefix = context.Configuration["DefaultPrefix"];
         }
     }
 }
