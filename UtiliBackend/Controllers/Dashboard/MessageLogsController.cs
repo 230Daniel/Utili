@@ -30,7 +30,8 @@ namespace UtiliBackend.Controllers
             var configuration = await _dbContext.MessageLogsConfigurations.GetForGuildAsync(guildId);
             configuration ??= new MessageLogsConfiguration(guildId)
             {
-                ExcludedChannels = new()
+                ExcludedChannels = new(),
+                LogThreads = true
             };
             return Json(_mapper.Map<MessageLogsConfigurationModel>(configuration));
         }
