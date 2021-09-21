@@ -6,13 +6,13 @@
 
     <ItemGroup>
         <PackageReference Include="EFCore.NamingConventions" Version="5.0.2" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.7">
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.10">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
         <PackageReference Include="Microsoft.Extensions.Configuration" Version="5.0.0" />
         <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="5.0.0" />
-        <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="5.0.7" />
+        <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="5.0.10" />
     </ItemGroup>
 
     <ItemGroup>

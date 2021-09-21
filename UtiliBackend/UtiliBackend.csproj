@@ -5,15 +5,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AspNet.Security.OAuth.Discord" Version="5.0.9" />
+    <PackageReference Include="AspNet.Security.OAuth.Discord" Version="5.0.12" />
     <PackageReference Include="AspNetCoreRateLimit" Version="3.2.2" />
     <PackageReference Include="AutoMapper" Version="10.1.1" />
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="8.1.1" />
     <PackageReference Include="Discord.Net" Version="2.4.0" />
     <PackageReference Include="Disqord.Rest" Version="1.0.0-09212021-124" />
-    <PackageReference Include="Stripe.net" Version="39.62.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.8" />
-    <PackageReference Include="System.Runtime.Caching" Version="5.0.0" />
+    <PackageReference Include="Stripe.net" Version="39.68.0" />
   </ItemGroup>
 
   <ItemGroup>
