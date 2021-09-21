@@ -1,7 +1,7 @@
 ﻿using Disqord.Bot;
 using Qmmands;
 
-namespace Utili.Implementations
+namespace Utili.Commands
 {
     internal class DefaultCooldown : CooldownAttribute
     {
