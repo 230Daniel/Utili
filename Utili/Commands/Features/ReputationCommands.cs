@@ -160,21 +160,41 @@ namespace Utili.Commands
         public async Task AddEmoji(IEmoji emoji, int value = 0)
         {
             var config = await _dbContext.ReputationConfigurations.GetForGuildWithEmojisAsync(Context.GuildId);
-            config.Emojis ??= new List<ReputationConfigurationEmoji>();
-            
-            if (config.Emojis.Any(x => Equals(x.Emoji, emoji.ToString())))
+            if (config is null)
             {
-                await Context.Channel.SendFailureAsync("Error", "That emoji is already added");
-                return;
+                config = new ReputationConfiguration(Context.GuildId)
+                {
+                    Emojis = new List<ReputationConfigurationEmoji>
+                    {
+                        new (emoji.ToString())
+                        {
+                            Value = value
+                        }
+                    }
+                };
+
+                _dbContext.ReputationConfigurations.Add(config);
+                await _dbContext.SetHasFeatureAsync(Context.GuildId, BotFeatures.Reputation, true);
             }
-
-            config.Emojis.Add(new ReputationConfigurationEmoji(emoji.ToString())
+            else
             {
-                Value = value
-            });
-            _dbContext.ReputationConfigurations.Update(config);
-            await _dbContext.SaveChangesAsync();
+                config.Emojis ??= new List<ReputationConfigurationEmoji>();
+            
+                if (config.Emojis.Any(x => Equals(x.Emoji, emoji.ToString())))
+                {
+                    await Context.Channel.SendFailureAsync("Error", "That emoji is already added");
+                    return;
+                }
 
+                config.Emojis.Add(new ReputationConfigurationEmoji(emoji.ToString())
+                {
+                    Value = value
+                });
+                
+                _dbContext.ReputationConfigurations.Update(config);
+            }
+            
+            await _dbContext.SaveChangesAsync();
             await Context.Channel.SendSuccessAsync("Emoji added",
                 $"The {emoji} emoji was added successfully with value {value}\nYou can change its value or remove it on the dashboard");
         }
