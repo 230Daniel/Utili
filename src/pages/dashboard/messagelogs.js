@@ -62,8 +62,8 @@ class MessageLogs extends React.Component{
 		} else {
 			return(
 				<div>
-					<p>On your server, up to 50 messages will be stored per channel for 30 days.<br/>The 30 day limit is required by Discord.</p>
-					<p><b>Premium:</b> Removes the 50 messages per channel limit</p>
+					<p>On your server, up to 30 messages per text channel and up to 15 messages per thread will be stored for 30 days.<br/>The 30 day limit is required by Discord.</p>
+					<p><b>Premium:</b> Removes the message storage count limits</p>
 				</div>
 			);
 		}
