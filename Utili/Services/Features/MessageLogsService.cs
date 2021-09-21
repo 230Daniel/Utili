@@ -62,7 +62,7 @@ namespace Utili.Services
                         .OrderByDescending(x => x.Timestamp)
                         .ToListAsync();
 
-                    var excessMessages = messages.Skip(50);
+                    var excessMessages = messages.Skip(e.Channel is IThreadChannel ? 15 : 30);
                     if(excessMessages.Any()) db.MessageLogsMessages.RemoveRange(excessMessages);
                 }
                 
