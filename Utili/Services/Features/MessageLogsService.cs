@@ -154,7 +154,7 @@ namespace Utili.Services
                 var messageIds = e.MessageIds.Select(x => x.RawValue);
                 var messages = await db.MessageLogsMessages.Where(x => messageIds.Contains(x.MessageId)).ToListAsync();
 
-                var embed = await GetBulkDeletedEmbedAsync(messages, e.MessageIds.Count);
+                var embed = await GetBulkDeletedEmbedAsync(messages, e.MessageIds.Count, channel);
 
                 if (messages.Any())
                 {
@@ -215,21 +215,28 @@ namespace Utili.Services
             return embed;
         }
 
-        private async Task<LocalEmbed> GetBulkDeletedEmbedAsync(List<MessageLogsMessage> messageRecords, int count)
+        private async Task<LocalEmbed> GetBulkDeletedEmbedAsync(List<MessageLogsMessage> messageRecords, int count, IMessageGuildChannel channel)
         {
+            if (messageRecords.Count == 0)
+            {
+                return new LocalEmbed()
+                    .WithColor(new Color(245, 66, 66))
+                    .WithDescription($"**{count} messages bulk deleted in {channel.Mention}**\n" +
+                                     "No messages were logged")
+                    .WithAuthor("Bulk Deletion");
+            }
+            
             var paste = await PasteMessagesAsync(messageRecords, count);
 
             var link = paste is not null
                 ? $"[View {messageRecords.Count} logged message{(messageRecords.Count == 1 ? "" : "s")}]({paste})"
                 : "Exception thrown uploading messages to Haste server";
             
-            var embed = new LocalEmbed()
+            return new LocalEmbed()
                 .WithColor(new Color(245, 66, 66))
                 .WithDescription($"**{count} messages bulk deleted in {Mention.Channel(messageRecords[0].ChannelId)}**\n" +
                                  link)
                 .WithAuthor("Bulk Deletion");
-
-            return embed;
         }
 
         private async Task<string> PasteMessagesAsync(List<MessageLogsMessage> messages, int count)
