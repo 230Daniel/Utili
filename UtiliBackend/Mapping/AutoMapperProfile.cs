@@ -1,7 +1,7 @@
 ﻿using System.Xml;
 using AutoMapper;
-using Discord.Rest;
 using Database.Entities;
+using Disqord;
 using UtiliBackend.Models;
 
 namespace UtiliBackend.Mapping
@@ -17,14 +17,14 @@ namespace UtiliBackend.Mapping
 
         private void MapDiscordModels()
         {
-            CreateMap<RestTextChannel, TextChannelModel>();
-            CreateMap<RestVoiceChannel, VoiceChannelModel>();
-            CreateMap<RestRole, RoleModel>();
-            CreateMap<CoreConfiguration, CoreConfigurationModel>();
+            CreateMap<ITextChannel, TextChannelModel>();
+            CreateMap<IVocalGuildChannel, VocalChannelModel>();
+            CreateMap<IRole, RoleModel>();
         }
 
         private void MapDashboardModels()
         {
+            CreateMap<CoreConfiguration, CoreConfigurationModel>();
             CreateMap<ChannelMirroringConfiguration, ChannelMirroringConfigurationModel>();
             CreateMap<JoinRolesConfiguration, JoinRolesConfigurationModel>();
             CreateMap<MessageFilterConfiguration, MessageFilterConfigurationModel>();

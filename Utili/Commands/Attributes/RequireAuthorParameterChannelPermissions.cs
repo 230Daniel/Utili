@@ -5,7 +5,7 @@ using Disqord.Bot;
 using Disqord.Gateway;
 using Qmmands;
 
-namespace Utili.Implementations
+namespace Utili.Commands
 {
     public class RequireAuthorParameterChannelPermissionsAttribute : DiscordGuildParameterCheckAttribute
     {

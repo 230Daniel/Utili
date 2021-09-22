@@ -8,9 +8,9 @@ namespace Utili.Extensions
 {
     public static class MessageExtensions
     {
-        public static ITextChannel GetChannel(this IMessage message, ulong guildId)
+        public static IMessageGuildChannel GetChannel(this IMessage message, ulong guildId)
         {
-            return (message.Client as DiscordClientBase).GetTextChannel(guildId, message.ChannelId);
+            return (message.Client as DiscordClientBase).GetMessageGuildChannel(guildId, message.ChannelId);
         }
 
         public static string GetJumpUrl(this IMessage message, ulong guildId)

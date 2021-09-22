@@ -33,7 +33,7 @@ namespace Utili.Services
         {
             try
             {
-                if(!e.GuildId.HasValue || e.Message is not IUserMessage {WebhookId: null} userMessage) return;
+                if(e.Message is not IUserMessage {WebhookId: null} userMessage) return;
 
                 var db = scope.GetDbContext();
                 var config = await db.ChannelMirroringConfigurations.GetForGuildChannelAsync(e.GuildId.Value, e.ChannelId);
@@ -43,7 +43,7 @@ namespace Utili.Services
                 var destinationChannel = guild.GetTextChannel(config.DestinationChannelId);
                 if(destinationChannel is null) return;
 
-                if(!destinationChannel.BotHasPermissions(Permission.ViewChannel | Permission.ManageWebhooks)) return;
+                if(!destinationChannel.BotHasPermissions(Permission.ViewChannels | Permission.ManageWebhooks)) return;
 
                 var webhook = await GetWebhookAsync(config.WebhookId);
                 if (webhook?.ChannelId is null || webhook.ChannelId != destinationChannel.Id) webhook = null;

@@ -11,6 +11,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Database;
+using Disqord;
+using Disqord.Rest;
 using Stripe;
 using UtiliBackend.Authorisation;
 using UtiliBackend.Extensions;
@@ -42,7 +44,9 @@ namespace UtiliBackend
             services.AddSingleton<IAuthorizationHandler, DiscordAuthorisationHandler>();
             services.AddSingleton<IAuthorizationHandler, DiscordGuildAuthorisationHandler>();
             services.AddSingleton<IAuthorizationMiddlewareResultHandler, ResultHandler>();
-            
+            services.AddRestClient();
+            services.AddToken(Disqord.Token.Bot(_configuration["Discord:Token"]));
+
             services.AddHsts(options =>
             {
                 options.MaxAge = TimeSpan.FromDays(30);

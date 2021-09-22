@@ -1,5 +1,6 @@
 ﻿using Database.Entities;
 using Discord.Rest;
+using Disqord;
 using Microsoft.AspNetCore.Http;
 
 namespace UtiliBackend.Extensions
@@ -16,9 +17,9 @@ namespace UtiliBackend.Extensions
             return httpContext.GetDiscordClient()?.CurrentUser;
         }
         
-        public static RestGuild GetDiscordGuild(this HttpContext httpContext)
+        public static IGuild GetDiscordGuild(this HttpContext httpContext)
         {
-            return (RestGuild) httpContext.Items["DiscordGuild"];
+            return (IGuild) httpContext.Items["DiscordGuild"];
         }
 
         public static User GetUser(this HttpContext httpContext)

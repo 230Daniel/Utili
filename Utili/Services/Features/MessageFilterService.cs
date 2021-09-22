@@ -31,9 +31,10 @@ namespace Utili.Services
         {
             try
             {
-                if(!e.GuildId.HasValue) return false;
+                if((e.Message as IUserMessage)?.Type == UserMessageType.ThreadStarterMessage
+                   || !e.Channel.BotHasPermissions(Permission.ViewChannels | Permission.ManageMessages)) 
+                    return false;
 
-                if(!e.Channel.BotHasPermissions(Permission.ViewChannel | Permission.ManageMessages)) return false;
                 var userMessage = e.Message as IUserMessage;
                 if (userMessage is not null && 
                     e.Member is not null &&
@@ -41,16 +42,17 @@ namespace Utili.Services
                     userMessage.Embeds.Count > 0 && 
                     userMessage.Embeds[0].Author?.Name == "Message deleted")
                     return false;
-                if (userMessage?.WebhookId is not null) return false;
-
+                if (userMessage?.WebhookId is not null) return true;
+                
                 var db = scope.GetDbContext();
-                var config = await db.MessageFilterConfigurations.GetForGuildChannelAsync(e.GuildId.Value, e.ChannelId);
-                if (config is null) return false;
+                var configChannelId = (e.Channel as IThreadChannel)?.ChannelId ?? e.ChannelId;
+                var config = await db.MessageFilterConfigurations.GetForGuildChannelAsync(e.GuildId.Value, configChannelId);
+                if (config is null || config.Mode == MessageFilterMode.All || e.Channel is IThreadChannel && !config.EnforceInThreads) return false;
 
                 if (e.Message is not IUserMessage message)
                 {
                     await e.Message.DeleteAsync(new DefaultRestRequestOptions {Reason = "Message Filter"});
-                    return false;
+                    return true;
                 }
 
                 if (!DoesMessageObeyRule(message, config.Mode, config.RegEx, out var allowedTypes))
@@ -65,8 +67,8 @@ namespace Utili.Services
                     
                     var deletionMessage = string.IsNullOrWhiteSpace(config.DeletionMessage)
                         ? allowedTypes.Contains(",")
-                            ? $"Your message must contain one of `{allowedTypes}` to be allowed in {(e.Channel as ITextChannel).Mention}"
-                            : $"Your message must contain `{allowedTypes}` to be allowed in {(e.Channel as ITextChannel).Mention}"
+                            ? $"Your message must contain one of `{allowedTypes}` to be allowed in {e.Channel.Mention}"
+                            : $"Your message must contain `{allowedTypes}` to be allowed in {e.Channel.Mention}"
                         : config.DeletionMessage;
                     
                     var sent = await e.Channel.SendFailureAsync("Message deleted", deletionMessage);

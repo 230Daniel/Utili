@@ -26,7 +26,7 @@ namespace Utili.Services
             {
                 return new IPrefix[]
                 {
-                    new StringPrefix(_config.GetValue<string>("defaultPrefix")),
+                    new StringPrefix(_config["DefaultPrefix"]),
                     new MentionPrefix((message.Client as DiscordClientBase).CurrentUser.Id)
                 };
             }
@@ -36,7 +36,7 @@ namespace Utili.Services
             
             return new IPrefix[]
             {
-                new StringPrefix(string.IsNullOrWhiteSpace(config?.Prefix) ? _config.GetValue<string>("defaultPrefix") : config.Prefix),
+                new StringPrefix(string.IsNullOrWhiteSpace(config?.Prefix) ? _config["DefaultPrefix"] : config.Prefix),
                 new MentionPrefix((message.Client as DiscordClientBase).CurrentUser.Id)
             };
         }

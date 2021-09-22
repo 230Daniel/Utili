@@ -28,9 +28,6 @@ namespace UtiliBackend
             
             try
             {
-                var discordRestService = host.Services.GetRequiredService<DiscordRestService>();
-                await discordRestService.InitialiseAsync();
-                
                 using (var scope = host.Services.CreateScope())
                 {
                     var db = scope.ServiceProvider.GetRequiredService<DatabaseContext>();

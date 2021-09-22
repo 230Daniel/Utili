@@ -40,8 +40,8 @@ namespace Utili.Services
                 }
                 else
                 {
-                    ITextChannel channel = _client.GetTextChannel(e.GuildId, config.ChannelId);
-                    if(!channel.BotHasPermissions(Permission.ViewChannel | Permission.SendMessages | Permission.EmbedLinks)) return;
+                    var channel = _client.GetTextChannel(e.GuildId, config.ChannelId);
+                    if(!channel.BotHasPermissions(Permission.ViewChannels | Permission.SendMessages | Permission.SendEmbeds)) return;
                     await channel.SendMessageAsync(message);
                 }
             }

@@ -115,7 +115,7 @@ namespace Utili.Services
 
                 var guild = _client.GetGuild(config.GuildId);
                 var channel = guild.GetTextChannel(config.ChannelId);
-                if(!channel.BotHasPermissions(Permission.ViewChannel | Permission.ReadMessageHistory | Permission.ManageMessages)) return;
+                if(!channel.BotHasPermissions(Permission.ViewChannels | Permission.ReadMessageHistory | Permission.ManageMessages)) return;
 
                 var now = DateTime.UtcNow;
                 var maxTimestamp = now - config.Timespan;
@@ -177,8 +177,6 @@ namespace Utili.Services
         {
             try
             {
-                if (!e.GuildId.HasValue) return;
-
                 var db = scope.GetDbContext();
                 var config = await db.AutopurgeConfigurations.GetForGuildChannelAsync(e.GuildId.Value, e.ChannelId);
                 if (config is null) return;
@@ -205,7 +203,7 @@ namespace Utili.Services
         {
             try
             {
-                if (!e.GuildId.HasValue || !e.Model.Pinned.HasValue) return;
+                if (!e.Model.Pinned.HasValue) return;
 
                 var db = scope.GetDbContext();
                 var config = await db.AutopurgeConfigurations.GetForGuildChannelAsync(e.GuildId.Value, e.ChannelId);
@@ -231,8 +229,6 @@ namespace Utili.Services
         {
             try
             {
-                if (!e.GuildId.HasValue) return;
-
                 var db = scope.GetDbContext();
                 var config = await db.AutopurgeConfigurations.GetForGuildChannelAsync(e.GuildId.Value, e.ChannelId);
                 if (config is null) return;
@@ -342,7 +338,7 @@ namespace Utili.Services
                     var guild = _client.GetGuild(config.GuildId);
                     var channel = guild.GetTextChannel(config.ChannelId);
 
-                    if(!channel.BotHasPermissions(Permission.ViewChannel | Permission.ReadMessageHistory)) return;
+                    if(!channel.BotHasPermissions(Permission.ViewChannels | Permission.ReadMessageHistory)) return;
 
                     using var scope = _scopeFactory.CreateScope();
                     var db = scope.GetDbContext();

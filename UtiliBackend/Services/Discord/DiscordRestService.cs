@@ -1,42 +1,31 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
-using Discord;
-using Discord.Rest;
-using Microsoft.Extensions.Configuration;
+using Disqord;
+using Disqord.Rest;
 
 namespace UtiliBackend.Services
 {
     public class DiscordRestService
     {
-        private readonly IConfiguration _configuration;
-        private readonly DiscordRestClient _client;
+        private readonly IRestClient _client;
         
         private static readonly TimeSpan GuildCacheDuration = TimeSpan.FromSeconds(20);
-        private readonly Dictionary<ulong, (RestGuild, DateTime)> _cachedGuilds;
+        private readonly Dictionary<ulong, (IGuild, DateTime)> _cachedGuilds;
         
-        private static readonly TimeSpan TextChannelCacheDuration = TimeSpan.FromSeconds(20);
-        private readonly Dictionary<ulong, (IEnumerable<RestTextChannel>, DateTime)> _cachedTextChannels;
+        private static readonly TimeSpan ChannelCacheDuration = TimeSpan.FromSeconds(20);
+        private readonly Dictionary<ulong, (IEnumerable<IGuildChannel>, DateTime)> _cachedChannels;
         
-        private static readonly TimeSpan VoiceChannelCacheDuration = TimeSpan.FromSeconds(20);
-        private readonly Dictionary<ulong, (IEnumerable<RestVoiceChannel>, DateTime)> _cachedVoiceChannels;
-
-        public DiscordRestService(IConfiguration configuration)
+        public DiscordRestService(IRestClient restClient)
         {
-            _configuration = configuration;
+            _client = restClient;
             
-            _client = new();
             _cachedGuilds = new();
-            _cachedTextChannels = new();
-            _cachedVoiceChannels = new();
+            _cachedChannels = new();
         }
 
-        public async Task InitialiseAsync()
-        {
-            await _client.LoginAsync(TokenType.Bot, _configuration["Discord:Token"]);
-        }
-
-        public async Task<RestGuild> GetGuildAsync(ulong guildId)
+        public async Task<IGuild> GetGuildAsync(ulong guildId)
         {
             lock (_cachedGuilds)
             {
@@ -53,10 +42,10 @@ namespace UtiliBackend.Services
                 }
             }
 
-            RestGuild guild;
+            IGuild guild;
             try
             {
-                guild = await _client.GetGuildAsync(guildId);
+                guild = await _client.FetchGuildAsync(guildId);
             }
             catch
             {
@@ -71,61 +60,43 @@ namespace UtiliBackend.Services
 
             return guild;
         }
-        
-        public async Task<IEnumerable<RestTextChannel>> GetTextChannelsAsync(RestGuild guild)
+
+        public async Task<IEnumerable<IGuildChannel>> GetChannelsAsync(ulong guildId)
         {
-            lock (_cachedTextChannels)
+            lock (_cachedChannels)
             {
                 var now = DateTime.UtcNow;
-                foreach (var cachedValue in _cachedTextChannels)
+                foreach (var cachedValue in _cachedChannels)
                 {
                     if (cachedValue.Value.Item2 <= now)
-                        _cachedTextChannels.Remove(cachedValue.Key);
+                        _cachedChannels.Remove(cachedValue.Key);
                 }
 
-                if (_cachedTextChannels.TryGetValue(guild.Id, out var tuple))
+                if (_cachedChannels.TryGetValue(guildId, out var tuple))
                 {
                     return tuple.Item1;
                 }
             }
 
-            var channels = await guild.GetTextChannelsAsync();
+            var channels = await _client.FetchChannelsAsync(guildId);
 
-            lock (_cachedTextChannels)
+            lock (_cachedChannels)
             {
-                _cachedTextChannels.Remove(guild.Id);
-                _cachedTextChannels.Add(guild.Id, (channels, DateTime.UtcNow.Add(TextChannelCacheDuration)));
+                _cachedChannels.Remove(guildId);
+                _cachedChannels.Add(guildId, (channels, DateTime.UtcNow.Add(ChannelCacheDuration)));
             }
 
             return channels;
         }
-        
-        public async Task<IEnumerable<RestVoiceChannel>> GetVoiceChannelsAsync(RestGuild guild)
+
+        public async Task<IEnumerable<ITextChannel>> GetTextChannelsAsync(ulong guildId)
         {
-            lock (_cachedVoiceChannels)
-            {
-                var now = DateTime.UtcNow;
-                foreach (var cachedValue in _cachedVoiceChannels)
-                {
-                    if (cachedValue.Value.Item2 <= now)
-                        _cachedVoiceChannels.Remove(cachedValue.Key);
-                }
+            return (await GetChannelsAsync(guildId)).OfType<ITextChannel>();
+        }
 
-                if (_cachedVoiceChannels.TryGetValue(guild.Id, out var tuple))
-                {
-                    return tuple.Item1;
-                }
-            }
-
-            var channels = await guild.GetVoiceChannelsAsync();
-
-            lock (_cachedVoiceChannels)
-            {
-                _cachedVoiceChannels.Remove(guild.Id);
-                _cachedVoiceChannels.Add(guild.Id, (channels, DateTime.UtcNow.Add(VoiceChannelCacheDuration)));
-            }
-
-            return channels;
+        public async Task<IEnumerable<IVocalGuildChannel>> GetVocalChannelsAsync(ulong guildId)
+        {
+            return (await GetChannelsAsync(guildId)).OfType<IVocalGuildChannel>();
         }
     }
 }

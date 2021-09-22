@@ -8,12 +8,14 @@ namespace UtiliBackend.Models
         public int Mode { get; set; }
         public string RegEx { get; set; }
         public string DeletionMessage { get; set; }
+        public bool EnforceInThreads { get; set; }
 
         public void ApplyTo(MessageFilterConfiguration configuration)
         {
             configuration.Mode = (MessageFilterMode) Mode;
             configuration.RegEx = RegEx;
             configuration.DeletionMessage = DeletionMessage;
+            configuration.EnforceInThreads = EnforceInThreads;
         }
     }
 }

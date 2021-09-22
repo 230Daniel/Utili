@@ -28,8 +28,8 @@ namespace Utili.Services
             {
                 if(!e.GuildId.HasValue) return;
 
-                IGuild guild = _client.GetGuild(e.GuildId.Value);
-                ITextChannel channel = guild.GetTextChannel(e.ChannelId);
+                var guild = _client.GetGuild(e.GuildId.Value);
+                var channel = guild.GetMessageGuildChannel(e.ChannelId);
 
                 var db = scope.GetDbContext();
                 var config = await db.ReputationConfigurations.GetForGuildWithEmojisAsync(e.GuildId.Value);
@@ -59,8 +59,8 @@ namespace Utili.Services
             {
                 if(!e.GuildId.HasValue) return;
 
-                IGuild guild = _client.GetGuild(e.GuildId.Value);
-                ITextChannel channel = guild.GetTextChannel(e.ChannelId);
+                var guild = _client.GetGuild(e.GuildId.Value);
+                var channel = guild.GetMessageGuildChannel(e.ChannelId);
 
                 var db = scope.GetDbContext();
                 var config = await db.ReputationConfigurations.GetForGuildWithEmojisAsync(e.GuildId.Value);

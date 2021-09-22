@@ -5,7 +5,7 @@ using Disqord.Rest;
 using Database;
 using Database.Extensions;
 using Qmmands;
-using Utili.Implementations;
+using Utili.Extensions;
 using Utili.Services;
 
 namespace Utili.Commands.Features
@@ -21,14 +21,24 @@ namespace Utili.Commands.Features
         }
         
         [Command("Preview", "Send")]
-        [RequireBotChannelPermissions(Permission.SendMessages | Permission.EmbedLinks | Permission.AttachFiles)]
-        public async Task Preview(
-            [RequireAuthorParameterChannelPermissions(Permission.ViewChannel | Permission.ReadMessageHistory)]
-            ITextChannel channel = null)
+        [RequireNotThread]
+        [RequireBotChannelPermissions(Permission.SendMessages | Permission.SendEmbeds | Permission.SendAttachments)]
+        public async Task Preview()
         {
-            channel ??= Context.Channel as ITextChannel;
+            var config = await _dbContext.NoticeConfigurations.GetForGuildChannelAsync(Context.GuildId, Context.Channel.Id);
+            if (config is null) await Context.Channel.SendFailureAsync("Error", "This channel does not have a notice.");
+            else await Context.Channel.SendMessageAsync(NoticesService.GetNotice(config));
+        }
+        
+        [Command("Preview", "Send")]
+        [RequireBotChannelPermissions(Permission.SendMessages | Permission.SendEmbeds | Permission.SendAttachments)]
+        public async Task Preview(
+            [RequireAuthorParameterChannelPermissions(Permission.ViewChannels | Permission.ReadMessageHistory)]
+            ITextChannel channel)
+        {
             var config = await _dbContext.NoticeConfigurations.GetForGuildChannelAsync(Context.GuildId, channel.Id);
-            await Context.Channel.SendMessageAsync(NoticesService.GetNotice(config));
+            if (config is null) await Context.Channel.SendFailureAsync("Error", $"{channel.Mention} does not have a notice.");
+            else await Context.Channel.SendMessageAsync(NoticesService.GetNotice(config));
         }
     }
 }

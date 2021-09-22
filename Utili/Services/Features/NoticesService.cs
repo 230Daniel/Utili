@@ -46,8 +46,6 @@ namespace Utili.Services
         {
             try
             {
-                if (!e.GuildId.HasValue) return;
-
                 var db = scope.GetDbContext();
                 var config = await db.NoticeConfigurations.GetForGuildChannelAsync(e.GuildId.Value, e.ChannelId);
                 if (config is null) return;
@@ -130,16 +128,17 @@ namespace Utili.Services
                 
                 if (config is null || !config.Enabled) return;
 
-                IGuild guild = _client.GetGuild(guildId);
-                ITextChannel channel = guild.GetTextChannel(channelId);
+                var guild = _client.GetGuild(guildId);
+                var channel = guild.GetTextChannel(channelId);
 
-                if (!channel.BotHasPermissions(
-                    Permission.ViewChannel |
+                if (channel is null || 
+                    !channel.BotHasPermissions(
+                    Permission.ViewChannels |
                     Permission.ReadMessageHistory |
                     Permission.ManageMessages |
                     Permission.SendMessages |
-                    Permission.EmbedLinks |
-                    Permission.AttachFiles)) return;
+                    Permission.SendEmbeds |
+                    Permission.SendAttachments)) return;
 
                 var previousMessage = await channel.FetchMessageAsync(config.MessageId);
                 if(previousMessage is not null) await previousMessage.DeleteAsync();

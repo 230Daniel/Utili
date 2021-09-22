@@ -4,15 +4,17 @@ using System.Collections.Generic;
 using Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace Database.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    partial class DatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20210920231029_MessageLogsThreadSupport")]
+    partial class MessageLogsThreadSupport
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -325,10 +327,6 @@ namespace Database.Migrations
                     b.Property<string>("DeletionMessage")
                         .HasColumnType("text")
                         .HasColumnName("deletion_message");
-
-                    b.Property<bool>("EnforceInThreads")
-                        .HasColumnType("boolean")
-                        .HasColumnName("enforce_in_threads");
 
                     b.Property<int>("Mode")
                         .HasColumnType("integer")
