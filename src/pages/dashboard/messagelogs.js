@@ -21,7 +21,8 @@ class MessageLogs extends React.Component{
 		this.settings = {
 			deletedChannel: React.createRef(),
 			editedChannel: React.createRef(),
-			excludedChannels: React.createRef()
+			excludedChannels: React.createRef(),
+			logThreads: React.createRef()
 		}
 	}
 
@@ -42,6 +43,7 @@ class MessageLogs extends React.Component{
 						<Card title="Message Logging Settings" size={400} titleSize={200} inputSize={200} onChanged={this.props.onChanged}>
 							<CardComponent type="select-value" title="Deleted messages" values={values} value={this.state.messageLogs?.deletedChannelId} ref={this.settings.deletedChannel}></CardComponent>
 							<CardComponent type="select-value" title="Edited messages" values={values} value={this.state.messageLogs?.editedChannelId} ref={this.settings.editedChannel}></CardComponent>
+							<CardComponent type="checkbox" title="Log threads" value={this.state.messageLogs?.logThreads} ref={this.settings.logThreads}></CardComponent>
 						</Card>
 						<Card title="Excluded Channels" size={400} onChanged={this.props.onChanged}>
 							<CardListComponent prompt="Exclude a channel..." values={values} selected={this.state.messageLogs?.excludedChannels} ref={this.settings.excludedChannels}></CardListComponent>
@@ -60,8 +62,8 @@ class MessageLogs extends React.Component{
 		} else {
 			return(
 				<div>
-					<p>On your server, up to 50 messages will be stored per channel for 30 days.<br/>The 30 day limit is required by Discord.</p>
-					<p><b>Premium:</b> Removes the 50 messages per channel limit</p>
+					<p>On your server, up to 30 messages per text channel and up to 15 messages per thread will be stored for 30 days.<br/>The 30 day limit is required by Discord.</p>
+					<p><b>Premium:</b> Removes the message storage count limits</p>
 				</div>
 			);
 		}
@@ -83,7 +85,8 @@ class MessageLogs extends React.Component{
 		this.state.messageLogs = {
 			deletedChannelId: this.settings.deletedChannel.current.getValue(),
 			editedChannelId: this.settings.editedChannel.current.getValue(),
-			excludedChannels: this.settings.excludedChannels.current.getSelected()
+			excludedChannels: this.settings.excludedChannels.current.getSelected(),
+			logThreads: this.settings.logThreads.current.getValue()
 		};
 		this.setState({});
 	}
