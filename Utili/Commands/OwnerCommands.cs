@@ -6,6 +6,7 @@ using Disqord.Gateway;
 using Disqord.Rest;
 using Microsoft.EntityFrameworkCore;
 using Database;
+using Database.Extensions;
 using Utili.Extensions;
 using Qmmands;
 
@@ -26,13 +27,13 @@ namespace Utili.Commands
             var user = Context.Bot.GetUser(userId) as IUser ?? await Context.Bot.FetchUserAsync(userId);
             
             var userRow = await _dbContext.Users.FirstOrDefaultAsync(x => x.UserId == userId);
-            var subscriptions = await _dbContext.Subscriptions.Where(x => x.UserId == userId).ToListAsync();
+            var subscriptions = await _dbContext.Subscriptions.GetValidForUserAsync(userId);
             var customerDetails = await _dbContext.CustomerDetails.FirstOrDefaultAsync(x => x.UserId == userId);
             
             var content = $"Id: {user?.Id}\n" +
                           $"Email: {userRow.Email}\n" +
                           $"Customer: {customerDetails.CustomerId}\n" +
-                          $"Subscriptions: {subscriptions.Count}\n" +
+                          $"Valid subscriptions: {subscriptions.Count}\n" +
                           $"Premium slots: {subscriptions.Sum(x => x.Slots)}";
 
             var embed = Utils.MessageUtils.CreateEmbed(Utils.EmbedType.Info, user?.ToString(), content);

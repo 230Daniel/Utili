@@ -59,6 +59,11 @@ namespace Database.Extensions
         {
             return dbSet.Where(x => x.UserId == userId).ToListAsync();
         }
+        
+        public static async Task<List<Subscription>> GetValidForUserAsync(this DbSet<Subscription> dbSet, ulong userId)
+        {
+            return (await dbSet.Where(x => x.UserId == userId).ToListAsync()).Where(x => x.IsValid()).ToList();
+        }
 
         public static async Task<ReputationMember> UpdateMemberReputationAsync(this DbSet<ReputationMember> dbSet, ulong guildId, ulong memberId, long change)
         {

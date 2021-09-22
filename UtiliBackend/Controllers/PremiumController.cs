@@ -39,7 +39,7 @@ namespace UtiliBackend.Controllers
         {
             var user = HttpContext.GetDiscordUser();
             var slots = await _databaseContext.PremiumSlots.GetAllForUserAsync(user.Id);
-            var subscriptions = await _databaseContext.Subscriptions.GetAllForUserAsync(user.Id);
+            var subscriptions = await _databaseContext.Subscriptions.GetValidForUserAsync(user.Id);
 
             if (slots.Count < subscriptions.Sum(x => x.Slots))
             {
