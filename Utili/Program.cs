@@ -13,8 +13,8 @@ using Microsoft.Extensions.Configuration;
 using Utili.Implementations;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Database;
+using Serilog;
 using Utili.Extensions;
 using Utili.Features;
 using Utili.Services;
@@ -27,11 +27,7 @@ namespace Utili
         {
             var host = Host.CreateDefaultBuilder()
                 .UseSystemd()
-                .ConfigureLogging(builder =>
-                {
-                    builder.ClearProviders();
-                    builder.AddProvider(new LoggerProvider());
-                })
+                .UseSerilog()
                 .ConfigureServices(ConfigureServices)
                 .ConfigureDiscordBotSharder<MyDiscordBotSharder>((context, bot) =>
                 {
@@ -48,25 +44,36 @@ namespace Utili
                 })
                 .Build();
 
+            Log.Logger = new LoggerConfiguration()
+                .ReadFrom.Configuration(host.Services.GetRequiredService<IConfiguration>())
+                .CreateLogger();
+            
             try
             {
+                Log.Information("Migrating database");
                 using (var scope = host.Services.CreateScope())
                 {
                     var db = scope.ServiceProvider.GetRequiredService<DatabaseContext>();
                     await db.Database.MigrateAsync();
                 }
-                    
+
+                Log.Information("Running host");
                 await host.RunAsync();
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex);
-                Console.ReadLine();
+                Log.Fatal(ex, "Crashed");
+            }
+            finally
+            {
+                Log.CloseAndFlush();
             }
         }
 
         private static void ConfigureServices(HostBuilderContext context, IServiceCollection services)
         {
+            services.AddSingleton(typeof(Microsoft.Extensions.Logging.ILogger<>), typeof(Logger<>));
+
             services.AddDbContext<DatabaseContext>();
             services.AddScoped<CoreConfigurationCacheService>();
 

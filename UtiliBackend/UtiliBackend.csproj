@@ -13,6 +13,7 @@
     <PackageReference Include="Disqord.Rest" Version="1.0.0-09212021-124" />
     <PackageReference Include="Microsoft.Extensions.Hosting.Systemd" Version="5.0.1" />
     <PackageReference Include="Stripe.net" Version="39.68.0" />
+    <PackageReference Include="Serilog.AspNetCore" Version="4.1.0" />
   </ItemGroup>
 
   <ItemGroup>

@@ -3,10 +3,10 @@ using System.Threading.Tasks;
 using Database;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using UtiliBackend.Services;
+using Serilog;
 
 namespace UtiliBackend
 {
@@ -16,32 +16,36 @@ namespace UtiliBackend
         {
             var host = Host.CreateDefaultBuilder(args)
                 .UseSystemd()
+                .UseSerilog()
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();
                 })
-                .ConfigureLogging(builder =>
-                {
-                    builder.ClearProviders();
-                    builder.AddProvider(new LoggerProvider());
-                })
                 .Build();
             
+            Log.Logger = new LoggerConfiguration()
+                            .ReadFrom.Configuration(host.Services.GetRequiredService<IConfiguration>())
+                            .CreateLogger();
+
             try
             {
+                Log.Information("Migrating database");
                 using (var scope = host.Services.CreateScope())
                 {
                     var db = scope.ServiceProvider.GetRequiredService<DatabaseContext>();
                     await db.Database.MigrateAsync();
                 }
-                
+
+                Log.Information("Running host");
                 await host.RunAsync();
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Critical failure");
-                Console.WriteLine(ex);
-                Console.ReadLine();
+                Log.Fatal(ex, "Crashed");
+            }
+            finally
+            {
+                Log.CloseAndFlush();
             }
         }
     }
