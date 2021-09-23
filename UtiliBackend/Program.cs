@@ -15,6 +15,7 @@ namespace UtiliBackend
         public static async Task Main(string[] args)
         {
             var host = Host.CreateDefaultBuilder(args)
+                .UseSystemd()
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();

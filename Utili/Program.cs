@@ -26,6 +26,7 @@ namespace Utili
         private static async Task Main()
         {
             var host = Host.CreateDefaultBuilder()
+                .UseSystemd()
                 .ConfigureLogging(builder =>
                 {
                     builder.ClearProviders();
