@@ -23,6 +23,7 @@ import RolePersist from "./rolepersist";
 import VoiceLink from "./voicelink";
 import VoiceRoles from "./voiceroles";
 import VoteChannels from "./votechannels";
+import LoadAntiForgery from "../../components/loadAntiForgery";
 
 class Layout extends React.Component{
 	constructor(props){
@@ -46,7 +47,7 @@ class Layout extends React.Component{
 			<>
 				<main>
 					<Navbar buttonLeft={true} guilds={true} onButtonLeftClick={() => this.toggleSidebar()}/>
-					<CheckBackend>
+					<LoadAntiForgery>
 						<div className={`dashboard-container${this.state.sidebarCollapsed ? "" : " collapsed"}`}>
 							<Sidebar ref={this.sidebar} collapsed={this.state.sidebarCollapsed} collapseSidebar={() => this.toggleSidebar(true)}/>
 							<div className="dashboard">
@@ -73,7 +74,7 @@ class Layout extends React.Component{
 							</div>
 							<Prompt when={this.doesRequireSave()} message="You have unsaved changes, are you sure you want to leave this page?"/>
 						</div>
-					</CheckBackend>
+					</LoadAntiForgery>
 				</main>
 				<footer>
 					{this.renderSaveButton()}
