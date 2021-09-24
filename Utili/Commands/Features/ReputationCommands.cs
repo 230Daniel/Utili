@@ -8,6 +8,7 @@ using Disqord.Rest;
 using Database;
 using Database.Entities;
 using Database.Extensions;
+using Microsoft.EntityFrameworkCore;
 using Qmmands;
 using Utili.Extensions;
 using Utili.Implementations;
@@ -206,9 +207,7 @@ namespace Utili.Commands
         {
             if (await ConfirmAsync("Are you sure?", "This command will reset reputation for all server members", "Reset all reputation"))
             {
-                _dbContext.ReputationMembers.RemoveRange(await _dbContext.ReputationMembers.GetForAllGuildMembersAsync(Context.GuildId));
-                await _dbContext.SaveChangesAsync();
-                
+                await _dbContext.Database.ExecuteSqlInterpolatedAsync($"DELETE FROM reputation_members WHERE guild_id = {Context.GuildId.RawValue};");
                 await Context.Channel.SendSuccessAsync("Reputation reset", "The reputation of all server members has been set to 0");
             }
             else

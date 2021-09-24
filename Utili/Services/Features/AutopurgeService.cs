@@ -156,14 +156,18 @@ namespace Utili.Services
 
         private async Task DeleteOldMessagesAsync()
         {
-            using var scope = _scopeFactory.CreateScope();
-            var db = scope.GetDbContext();
-            
-            var minTimestamp = DateTime.UtcNow - TimeSpan.FromDays(14);
-            var oldMessages = await db.AutopurgeMessages.Where(x => x.Timestamp <= minTimestamp).ToListAsync();
-            
-            db.AutopurgeMessages.RemoveRange(oldMessages);
-            await db.SaveChangesAsync();
+            try
+            {
+                using var scope = _scopeFactory.CreateScope();
+                var db = scope.GetDbContext();
+
+                var minTimestamp = DateTime.UtcNow - TimeSpan.FromDays(14);
+                await db.Database.ExecuteSqlInterpolatedAsync($"DELETE FROM autopurge_messages WHERE timestamp < {minTimestamp};");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Exception thrown deleting old messages");
+            }
         }
 
         private void Timer_Elapsed(object sender, ElapsedEventArgs e)

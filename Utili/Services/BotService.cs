@@ -94,6 +94,7 @@ namespace Utili.Services
             _autopurge.Start();
             _inactiveRole.Start();
             _joinRoles.Start();
+            _messageLogs.Start();
             _notices.Start();
             _voiceLink.Start();
             _voiceRoles.Start();

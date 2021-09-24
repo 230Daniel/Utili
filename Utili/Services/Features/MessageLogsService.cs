@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Timers;
 using Disqord;
 using Disqord.Gateway;
 using Disqord.Rest;
@@ -17,15 +18,27 @@ namespace Utili.Services
 {
     public class MessageLogsService
     {
+        private readonly IServiceScopeFactory _scopeFactory;
         private readonly ILogger<MessageLogsService> _logger;
         private readonly DiscordClientBase _client;
         private readonly HasteService _haste;
+        
+        private readonly Timer _timer;
 
-        public MessageLogsService(ILogger<MessageLogsService> logger, DiscordClientBase client, HasteService haste)
+        public MessageLogsService(IServiceScopeFactory scopeFactory, ILogger<MessageLogsService> logger, DiscordClientBase client, HasteService haste)
         {
+            _scopeFactory = scopeFactory;
             _logger = logger;
             _client = client;
             _haste = haste;
+            
+            _timer = new Timer(60000);
+            _timer.Elapsed += (_, _) => _ = Delete30DayMessagesAsync();
+        }
+
+        public void Start()
+        {
+            _timer.Start();
         }
 
         public async Task MessageReceived(IServiceScope scope, MessageReceivedEventArgs e)
@@ -276,6 +289,22 @@ namespace Utili.Services
             {
                 _logger.LogError(e, "Exception thrown uploading messages to Haste server");
                 return null;
+            }
+        }
+
+        private async Task Delete30DayMessagesAsync()
+        {
+            try
+            {
+                using var scope = _scopeFactory.CreateScope();
+                var db = scope.GetDbContext();
+
+                var minTimestamp = DateTime.UtcNow - TimeSpan.FromDays(30);
+                await db.Database.ExecuteSqlInterpolatedAsync($"DELETE FROM message_logs_messages WHERE timestamp < {minTimestamp};");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Exception thrown deleting 30 day messages");
             }
         }
     }
