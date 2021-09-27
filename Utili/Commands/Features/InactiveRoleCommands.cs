@@ -91,7 +91,7 @@ namespace Utili.Commands
             
             var pageProvider = new ListPageProvider(pages);
             var menu = new MyPagedView(pageProvider);
-            return View(menu);
+            return View(menu, TimeSpan.FromMinutes(5));
         }
 
         [Command("Kick")]

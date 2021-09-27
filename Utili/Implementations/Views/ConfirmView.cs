@@ -11,7 +11,6 @@ namespace Utili.Implementations.Views
         public bool Result;
 
         private IUserMessage Message => (Menu as DefaultMenu).Message;
-        private bool _clicked;
 
         public ConfirmView(Snowflake memberId, string title, string content, string confirmButtonLabel)
         : base(new LocalMessage().AddEmbed(MessageUtils.CreateEmbed(EmbedType.Info, title, content)))
@@ -19,9 +18,7 @@ namespace Utili.Implementations.Views
             var cancelButton = new ButtonViewComponent(async e =>
             {
                 if (e.Member.Id != memberId) return;
-                _clicked = true;
                 Result = false;
-                await Message.DeleteAsync();
                 Menu.Stop();
             })
             {
@@ -32,9 +29,7 @@ namespace Utili.Implementations.Views
             var confirmButton = new ButtonViewComponent(async e =>
             {
                 if (e.Member.Id != memberId) return;
-                _clicked = true;
                 Result = true;
-                await Message.DeleteAsync();
                 Menu.Stop();
             })
             {
@@ -44,18 +39,11 @@ namespace Utili.Implementations.Views
             
             AddComponent(cancelButton);
             AddComponent(confirmButton);
+        }
 
-            _ = Task.Run(async () =>
-            {
-                await Task.Delay(60000);
-                if (!_clicked)
-                {
-                    _clicked = true;
-                    Result = false;
-                    await Message.DeleteAsync();
-                    Menu.Stop();
-                }
-            });
+        public override async ValueTask DisposeAsync()
+        {
+            await Message.DeleteAsync();
         }
     }
 }

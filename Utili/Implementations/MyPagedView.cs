@@ -3,11 +3,9 @@ using System.Threading.Tasks;
 using Disqord;
 using Disqord.Extensions.Interactivity.Menus;
 using Disqord.Extensions.Interactivity.Menus.Paged;
-using Disqord.Rest;
 
 namespace Utili.Implementations
 {
-    // Was I meant to override PagedView? Oh well.
     public class MyPagedView : PagedViewBase
     {
         public ButtonViewComponent PreviousPageButton { get; }
@@ -88,13 +86,7 @@ namespace Utili.Implementations
                 NextPageButton.IsDisabled = true;
             }
         }
-        
-        protected ValueTask OnFirstPageButtonAsync(ButtonEventArgs e)
-        {
-            CurrentPageIndex = 0;
-            return default;
-        }
-        
+
         protected ValueTask OnPreviousPageButtonAsync(ButtonEventArgs e)
         {
             CurrentPageIndex--;
@@ -104,22 +96,6 @@ namespace Utili.Implementations
         protected ValueTask OnNextPageButtonAsync(ButtonEventArgs e)
         {
             CurrentPageIndex++;
-            return default;
-        }
-        
-        protected ValueTask OnLastPageButtonAsync(ButtonEventArgs e)
-        {
-            CurrentPageIndex = PageProvider.PageCount - 1;
-            return default;
-        }
-        
-        protected ValueTask OnStopButtonAsync(ButtonEventArgs e)
-        {
-            if (Menu is DefaultMenu defaultMenu)
-                _ = defaultMenu.Message.DeleteAsync();
-
-            Menu.Stop();
-            
             return default;
         }
     }
