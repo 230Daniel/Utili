@@ -8,7 +8,7 @@ using Utili.Services;
 
 namespace Utili.Commands
 {
-    [Group("JoinMessage", "JoinMessages")]
+    [Group("joinmessage", "joinmessages")]
     public class JoinMessageCommands : DiscordGuildModuleBase
     {
         private readonly DatabaseContext _dbContext;
@@ -18,12 +18,12 @@ namespace Utili.Commands
             _dbContext = dbContext;
         }
         
-        [Command("Preview")]
-        public async Task Preview()
+        [Command("preview")]
+        public async Task<DiscordCommandResult> PreviewAsync()
         {
             var config = await _dbContext.JoinMessageConfigurations.GetForGuildAsync(Context.GuildId);
             var message = JoinMessageService.GetJoinMessage(config, Context.Message.Author as IMember);
-            await Response(message);
+            return Response(message);
         }
     }
 }

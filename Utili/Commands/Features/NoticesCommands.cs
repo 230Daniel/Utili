@@ -1,17 +1,16 @@
 ﻿using System.Threading.Tasks;
 using Disqord;
 using Disqord.Bot;
-using Disqord.Rest;
 using Database;
 using Database.Extensions;
 using Qmmands;
-using Utili.Extensions;
+using Utili.Implementations;
 using Utili.Services;
 
 namespace Utili.Commands.Features
 {
-    [Group("Notice", "Notices")]
-    public class NoticesCommands : DiscordGuildModuleBase
+    [Group("notice", "notices")]
+    public class NoticesCommands : MyDiscordGuildModuleBase
     {
         private readonly DatabaseContext _dbContext;
         
@@ -20,25 +19,25 @@ namespace Utili.Commands.Features
             _dbContext = dbContext;
         }
         
-        [Command("Preview", "Send")]
+        [Command("preview", "send")]
         [RequireNotThread]
         [RequireBotChannelPermissions(Permission.SendMessages | Permission.SendEmbeds | Permission.SendAttachments)]
-        public async Task Preview()
+        public async Task<DiscordCommandResult> PreviewAsync()
         {
             var config = await _dbContext.NoticeConfigurations.GetForGuildChannelAsync(Context.GuildId, Context.Channel.Id);
-            if (config is null) await Context.Channel.SendFailureAsync("Error", "This channel does not have a notice.");
-            else await Context.Channel.SendMessageAsync(NoticesService.GetNotice(config));
+            if (config is null) return Failure("Error", "This channel does not have a notice.");
+            return Response(NoticesService.GetNotice(config));
         }
         
-        [Command("Preview", "Send")]
+        [Command("preview", "send")]
         [RequireBotChannelPermissions(Permission.SendMessages | Permission.SendEmbeds | Permission.SendAttachments)]
-        public async Task Preview(
+        public async Task<DiscordCommandResult> PreviewAsync(
             [RequireAuthorParameterChannelPermissions(Permission.ViewChannels | Permission.ReadMessageHistory)]
             ITextChannel channel)
         {
             var config = await _dbContext.NoticeConfigurations.GetForGuildChannelAsync(Context.GuildId, channel.Id);
-            if (config is null) await Context.Channel.SendFailureAsync("Error", $"{channel.Mention} does not have a notice.");
-            else await Context.Channel.SendMessageAsync(NoticesService.GetNotice(config));
+            if (config is null) return Failure("Error", $"{channel.Mention} does not have a notice.");
+            return Response(NoticesService.GetNotice(config));
         }
     }
 }

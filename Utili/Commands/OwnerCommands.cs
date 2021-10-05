@@ -7,12 +7,12 @@ using Disqord.Rest;
 using Microsoft.EntityFrameworkCore;
 using Database;
 using Database.Extensions;
-using Utili.Extensions;
 using Qmmands;
+using Utili.Implementations;
 
 namespace Utili.Commands
 {
-    public class OwnerCommands : DiscordGuildModuleBase
+    public class OwnerCommands : MyDiscordGuildModuleBase
     {
         private readonly DatabaseContext _dbContext;
         
@@ -21,8 +21,8 @@ namespace Utili.Commands
             _dbContext = dbContext;
         }
         
-        [Command("UserInfo"), RequireBotOwner]
-        public async Task UserInfo(ulong userId)
+        [Command("userinfo"), RequireBotOwner]
+        public async Task<DiscordCommandResult> UserInfoAsync(ulong userId)
         {
             var user = Context.Bot.GetUser(userId) as IUser ?? await Context.Bot.FetchUserAsync(userId);
             
@@ -40,12 +40,12 @@ namespace Utili.Commands
             embed.WithThumbnailUrl(user.GetAvatarUrl());
 
             await Context.Author.SendMessageAsync(new LocalMessage().AddEmbed(embed));
-            await Context.Channel.SendSuccessAsync("User info sent",
+            return Success("User info sent",
                 $"Information about {user} was sent in a direct message");
         }
 
-        [Command("GuildInfo"), RequireBotOwner]
-        public async Task GuildInfo(ulong guildId)
+        [Command("guildinfo"), RequireBotOwner]
+        public async Task<DiscordCommandResult> GuildInfoAsync(ulong guildId)
         {
             var guild = await Context.Bot.FetchGuildAsync(guildId, true);
             var premium = await _dbContext.PremiumSlots.AnyAsync(x => x.GuildId == guildId);
@@ -59,12 +59,12 @@ namespace Utili.Commands
             embed.WithThumbnailUrl(guild.GetIconUrl());
 
             await Context.Author.SendMessageAsync(new LocalMessage().AddEmbed(embed));
-            await Context.Channel.SendSuccessAsync("Guild info sent",
+            return Success("Guild info sent",
                 $"Information about {guild} was sent in a direct message");
         }
 
-        [Command("Authorise"), RequireBotOwner]
-        public async Task Authorise(ulong guildId, ulong userId)
+        [Command("authorise"), RequireBotOwner]
+        public async Task<DiscordCommandResult> AuthoriseAsync(ulong guildId, ulong userId)
         {
             IGuild guild = null;
             IMember member = null;
@@ -75,26 +75,21 @@ namespace Utili.Commands
             }
             catch
             {
-                if (guild is null) await Context.Channel.SendFailureAsync("Error", "I'm not in that server", false);
-                else if (member is null)
-                    await Context.Channel.SendFailureAsync("Not authorised", $"The user is not a member of {guild}",
-                        false);
-                return;
+                if (guild is null) return Failure("Error", "I'm not in that server");
+                if (member is null)
+                    return Failure("Not authorised", $"The user is not a member of {guild}");
             }
 
             var roles = member.RoleIds.Select(x => guild.Roles.First(y => y.Key == x).Value);
             var perms = Discord.Permissions.CalculatePermissions(guild, member, roles);
 
             if (guild.OwnerId == userId)
-                await Context.Channel.SendSuccessAsync("Authorised", $"{member} is the owner of {guild}");
-            else if (perms.Administrator)
-                await Context.Channel.SendSuccessAsync("Authorised", $"{member} an administrator of {guild}");
-            else if (perms.ManageGuild)
-                await Context.Channel.SendSuccessAsync("Authorised",
-                    $"{member} has the manage server permission in {guild}");
-            else
-                await Context.Channel.SendFailureAsync("Not authorised",
-                    $"{member} does not have the manage server permission in {guild}", false);
+                return Success("Authorised", $"{member} is the owner of {guild}");
+            if (perms.Administrator)
+                return Success("Authorised", $"{member} an administrator of {guild}");
+            if (perms.ManageGuild)
+                return Success("Authorised", $"{member} has the manage server permission in {guild}");
+            return Failure("Not authorised", $"{member} does not have the manage server permission in {guild}");
         }
     }
 }

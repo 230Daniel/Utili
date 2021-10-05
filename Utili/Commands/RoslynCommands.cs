@@ -7,11 +7,11 @@ using Microsoft.CodeAnalysis.Scripting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Qmmands;
-using Utili.Extensions;
+using Utili.Implementations;
 
 namespace Utili.Features
 {
-    public class RoslynCommands : DiscordGuildModuleBase
+    public class RoslynCommands : MyDiscordGuildModuleBase
     {
         private ILogger<RoslynCommands> _logger;
         private IConfiguration _config;
@@ -22,14 +22,14 @@ namespace Utili.Features
             _config = config;
         }
 
-        [Command("Evaluate", "Eval", "E")]
+        [Command("evaluate", "eval", "e")]
         [RequireBotOwner]
-        public async Task Evaluate([Remainder] string code)
+        public async Task<DiscordCommandResult> EvaluateAsync([Remainder] string code)
         {
             if (Context.Message.Author.Id != _config.GetValue<ulong>("OwnerId"))
             {
                 _logger.LogWarning("The bot owner check allowed a non-owner through - The eval command was not executed");
-                return;
+                return null;
             }
 
             _logger.LogInformation($"Executing code: {code}");
@@ -61,13 +61,13 @@ namespace Utili.Features
             {
                 var result = await CSharpScript.EvaluateAsync(code, options, globals);
                 _logger.LogInformation($"Roslyn result: {result}");
-                if (result is null) await Context.Channel.SendSuccessAsync("Evaluated result", "null");
-                else await Context.Channel.SendSuccessAsync("Evaluated result", result.ToString());
+                if (result is null) return Success("Evaluated result", "null");
+                return Success("Evaluated result", result.ToString());
             }
             catch(Exception e)
             {
                 _logger.LogError(e, "Exception thrown executing evaluate command");
-                await Context.Channel.SendFailureAsync("An exception occurred", e.ToString());
+                return Failure("An exception occurred", e.ToString());
             }
         }
     }

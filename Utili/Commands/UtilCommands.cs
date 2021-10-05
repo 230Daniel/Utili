@@ -17,7 +17,7 @@ using Utili.Utils;
 
 namespace Utili.Commands
 {
-    public class UtilCommands : DiscordGuildModuleBase
+    public class UtilCommands : MyDiscordGuildModuleBase
     {
         private readonly DatabaseContext _dbContext;
         private readonly MemberCacheService _memberCache;
@@ -28,12 +28,12 @@ namespace Utili.Commands
             _memberCache = memberCache;
         }
         
-        [Command("Prune", "Purge", "Clear")]
+        [Command("prune", "purge", "clear")]
         [RequireAuthorChannelPermissions(Permission.ManageMessages)]
         [RequireBotChannelPermissions(Permission.ManageMessages | Permission.ReadMessageHistory)]
-        public async Task Prune()
+        public DiscordCommandResult Prune()
         {
-            await Context.Channel.SendInfoAsync("Prune",
+            return Info("Prune",
                 "Add one or more of the following arguments in any order to delete messages\n" +
                 "[amount] - The amount of messages to delete (default 100)\n" +
                 "before [message id] - Only messages before a particular message\n" +
@@ -41,11 +41,11 @@ namespace Utili.Commands
                 "[How do I get a message ID?](https://support.discord.com/hc/en-us/articles/206346498)");
         }
         
-        [Command("Prune", "Purge", "Clear")]
+        [Command("prune", "purge", "clear")]
         [DefaultCooldown(1, 10)]
         [RequireAuthorChannelPermissions(Permission.ManageMessages)]
         [RequireBotChannelPermissions(Permission.ManageMessages | Permission.ReadMessageHistory)]
-        public async Task Prune(
+        public async Task<DiscordCommandResult> PruneAsync(
             [Remainder]
             string arguments)
         {
@@ -84,8 +84,7 @@ namespace Utili.Commands
                             }
                             catch
                             {
-                                await Context.Channel.SendFailureAsync("Error", $"Invalid message id \"{args[i].ToLower()}\"\n[How do I get a message ID?](https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID-)");
-                                return;
+                                return Failure("Error", $"Invalid message id \"{args[i].ToLower()}\"\n[How do I get a message ID?](https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID-)");
                             }
 
                         case "after" when !afterSet:
@@ -100,33 +99,28 @@ namespace Utili.Commands
                             }
                             catch
                             {
-                                await Context.Channel.SendFailureAsync("Error", $"Invalid message id \"{args[i].ToLower()}\"\n[How do I get a message ID?](https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID-)");
-                                return;
+                                return Failure("Error", $"Invalid message id \"{args[i].ToLower()}\"\n[How do I get a message ID?](https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID-)");
                             }
                             
                         default:
-                            await Context.Channel.SendFailureAsync("Error", $"Invalid argument \"{args[i].ToLower()}\"");
-                            return;
+                            return Failure("Error", $"Invalid argument \"{args[i].ToLower()}\"");
                     }
                 }
             }
 
             if (!countSet && !beforeSet && !afterSet)
             {
-                await Context.Channel.SendInfoAsync("Prune",
+                return Info("Prune",
                     "Add one or more of the following arguments in any order to delete messages\n" +
                     "[amount] - The amount of messages to delete (default 100)\n" +
                     "before [message id] - Only messages before a particular message\n" +
                     "after [message id] - Only messages after a particular message\n\n" +
                     "[How do I get a message ID?](https://support.discord.com/hc/en-us/articles/206346498)");
-
-                return;
             }
 
             if(afterMessage is not null && beforeMessage is not null && afterMessage.CreatedAt() >= beforeMessage.CreatedAt())
             {
-                await Context.Channel.SendFailureAsync("Error", "There are no messages between the after and before messages");
-                return;
+                return Failure("Error", "There are no messages between the after and before messages");
             }
 
             var content = "";
@@ -188,32 +182,31 @@ namespace Utili.Commands
             var sentMessage = await Context.Channel.SendSuccessAsync(title, content);
             await Task.Delay(5000);
             await Context.Channel.DeleteMessagesAsync(new[] {sentMessage.Id, Context.Message.Id});
+
+            return null;
         }
 
-        [Command("React", "AddReaction", "AddEmoji")]
+        [Command("react", "addreaction", "addemoji")]
         [DefaultCooldown(2, 5)]
         [RequireAuthorChannelPermissions(Permission.AddReactions | Permission.ManageMessages)]
         [RequireBotChannelPermissions(Permission.AddReactions | Permission.ReadMessageHistory)]
-        public async Task React(
+        public async Task<DiscordCommandResult> ReactAsync(
             ulong messageId,
             IEmoji emoji)
         {
             var message = await Context.Channel.FetchMessageAsync(messageId);
 
             if (message is null)
-            {
-                await Context.Channel.SendFailureAsync("Error", $"No message was found in <#{Context.Channel.Id}> with ID {messageId}\n[How do I get a message ID?](https://support.discord.com/hc/en-us/articles/206346498)");
-                return;
-            }
-            
+                return Failure("Error", $"No message was found in <#{Context.Channel.Id}> with ID {messageId}\n[How do I get a message ID?](https://support.discord.com/hc/en-us/articles/206346498)");
+
             await message.AddReactionAsync(LocalEmoji.FromEmoji(emoji));
-            await Context.Channel.SendSuccessAsync("Reaction added",
+            return Success("Reaction added",
                 $"The {emoji} reaction was added to a message sent by {message.Author.Mention}");
         }
 
-        [Command("React", "AddReaction", "AddEmoji")]
+        [Command("react", "addreaction", "addemoji")]
         [DefaultCooldown(2, 5)]
-        public async Task React(
+        public async Task<DiscordCommandResult> ReactAsync(
             [RequireAuthorParameterChannelPermissions(Permission.AddReactions | Permission.ManageMessages)]
             [RequireBotParameterChannelPermissions(Permission.AddReactions | Permission.ReadMessageHistory)]
             IMessageGuildChannel channel, 
@@ -223,20 +216,17 @@ namespace Utili.Commands
             var message = await channel.FetchMessageAsync(messageId);
 
             if (message is null)
-            {
-                await Context.Channel.SendFailureAsync("Error",
+                return Failure("Error",
                     $"No message was found in <#{channel.Id}> with ID {messageId}\n[How do I get a message ID?](https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID-)");
-                return;
-            }
 
             await message.AddReactionAsync(LocalEmoji.FromEmoji(emoji));
 
-            await Context.Channel.SendSuccessAsync("Reaction added",
+            return Success("Reaction added",
                 $"The {emoji} reaction was added to a message sent by {message.Author.Mention} in {channel.Mention}");
         }
 
-        [Command("Random", "Pick")]
-        public async Task Random()
+        [Command("random", "pick")]
+        public async Task<DiscordCommandResult> RandomAsync()
         {
             await _memberCache.TemporarilyCacheMembersAsync(Context.Guild.Id);
             
@@ -244,13 +234,13 @@ namespace Utili.Commands
             var members = Context.Guild.GetMembers().Values.ToList();
             var member = members[random.Next(0, members.Count)];
 
-            await Context.Channel.SendInfoAsync("Random member",
+            return Info("Random member",
                 $"{member.Mention} ({member})\n" +
                 $"This member was picked randomly from {members.Count} server member{(members.Count == 1 ? "" : "s")}");
         }
         
-        [Command("Random", "Pick")]
-        public async Task Random(
+        [Command("random", "pick")]
+        public async Task<DiscordCommandResult> RandomAsync(
             [Remainder]
             IRole role)
         {
@@ -262,51 +252,46 @@ namespace Utili.Commands
                 .ToList();
             var member = members[random.Next(0, members.Count)];
 
-            await Context.Channel.SendInfoAsync("Random member",
+            return Info("Random member",
                 $"{member.Mention} ({member})\n" +
                 $"This member was picked randomly from {members.Count} server member{(members.Count == 1 ? "" : "s")} with the {role.Mention} role");
         }
         
-        [Command("Random", "Pick")]
+        [Command("random", "pick")]
         [DefaultCooldown(2, 5)]
-        public async Task Random(IMessageGuildChannel channel, ulong messageId, IEmoji emoji)
+        public async Task<DiscordCommandResult> RandomAsync(IMessageGuildChannel channel, ulong messageId, IEmoji emoji)
         {
             var message = await channel.FetchMessageAsync(messageId);
             
             if (message is null || !message.Reactions.HasValue)
-            {
-                await Context.Channel.SendFailureAsync("Error",
+                return Failure("Error",
                     $"No message was found in {channel.Mention} with ID {messageId}\n[How do I get a message ID?](https://support.discord.com/hc/en-us/articles/206346498)");
-                return;
-            }
-            
+
             if(message.Reactions.Value.TryGetValue(emoji, out _))
             {
                 var reactedMembers = await message.FetchReactionsAsync(LocalEmoji.FromEmoji(emoji), int.MaxValue);
                 var random = new Random();
                 var member = reactedMembers[random.Next(0, reactedMembers.Count)];
 
-                await Context.Channel.SendInfoAsync("Random member",
+                return Info("Random member",
                     $"{member.Mention} ({member})\n" +
                     $"This member was picked randomly from {reactedMembers.Count} member{(reactedMembers.Count == 1 ? "" : "s")} " +
                     $"that reacted to [this message]({message.GetJumpUrl(Context.GuildId)}) with {emoji}.");
             }
-            else
-            {
-                await Context.Channel.SendFailureAsync("Error",
-                    $"That message doesn't have the {emoji} reaction");
-            }
+            
+            return Failure("Error",
+                $"That message doesn't have the {emoji} reaction");
         }
         
-        [Command("Random", "Pick")]
+        [Command("random", "pick")]
         [DefaultCooldown(2, 5)]
-        public async Task Random(ulong messageId, IEmoji emoji)
+        public Task<DiscordCommandResult> RandomAsync(ulong messageId, IEmoji emoji)
         {
-            await Random(Context.Channel, messageId, emoji);
+            return RandomAsync(Context.Channel, messageId, emoji);
         }
         
-        [Command("WhoHas")]
-        public async Task<DiscordCommandResult> WhoHas(
+        [Command("whohas")]
+        public async Task<DiscordCommandResult> WhoHasAsync(
             [Remainder]
             IRole[] roles)
         {
@@ -325,10 +310,7 @@ namespace Utili.Commands
             var roleString = string.Join(", ", roles.Select(x => x.Name));
             
             if (members.Count == 0)
-            {
-                await Context.Channel.SendFailureAsync($"Members with {roleString}", "There are no members with those roles.");
-                return null;
-            }
+                return Failure($"Members with {roleString}", "There are no members with those roles.");
 
             var pages = new List<Page>();
             var content = "";
@@ -348,7 +330,7 @@ namespace Utili.Commands
                 if ((i + 1) % 30 == 0)
                 {
                     pages.Add(new Page().AddEmbed(embed));
-                    embed = MessageUtils.CreateEmbed(EmbedType.Info, "Inactive Members");
+                    embed = MessageUtils.CreateEmbed(EmbedType.Info, $"Members with {roleString}");
                 }
             }
 
@@ -366,25 +348,22 @@ namespace Utili.Commands
             return View(menu, TimeSpan.FromMinutes(5));
         }
 
-        [Command("B64Encode")]
-        public async Task B64Encode([Remainder] string input)
+        [Command("b64encode")]
+        public DiscordCommandResult B64Encode([Remainder] string input)
         {
             var output = input.ToEncoded();
-            await Context.Channel.SendSuccessAsync("Encoded string to base 64", output);
+            return Success("Encoded string to base 64", output);
         }
 
-        [Command("B64Decode")]
-        public async Task B64Decode([Remainder] string input)
+        [Command("b64decode")]
+        public DiscordCommandResult B64Decode([Remainder] string input)
         {
             var output = input.ToDecoded();
 
             if (output == input)
-            {
-                await Context.Channel.SendFailureAsync("Failed to decode string", "The input string is not valid base 64");
-                return;
-            }
+                return Failure("Failed to decode string", "The input string is not valid base 64");
 
-            await Context.Channel.SendSuccessAsync("Decoded string from base 64", output);
+            return Success("Decoded string from base 64", output);
         }
     }
 }

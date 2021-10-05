@@ -12,10 +12,11 @@ using Utili.Utils;
 using LinuxSystemStats;
 using Microsoft.EntityFrameworkCore;
 using Database;
+using Utili.Implementations;
 
 namespace Utili.Commands
 {
-    public class InfoCommands : DiscordGuildModuleBase
+    public class InfoCommands : MyDiscordGuildModuleBase
     {
         private readonly IConfiguration _config;
         private readonly DatabaseContext _dbContext;
@@ -26,8 +27,8 @@ namespace Utili.Commands
             _dbContext = dbContext;
         }
 
-        [Command("About", "Info")]
-        public async Task About()
+        [Command("about", "info")]
+        public async Task<DiscordCommandResult> AboutAsync()
         {
             var domain = _config.GetValue<string>("Domain");
             var guilds = await _dbContext.ShardDetails.Where(x => x.Heartbeat > DateTime.UtcNow.AddSeconds(-30)).SumAsync(x => x.Guilds);
@@ -41,11 +42,11 @@ namespace Utili.Commands
                 $"[Contact Us](https://{domain}/contact)\n",
                 $"[Get Premium](https://{domain}/premium)\n");
 
-            await Context.Channel.SendInfoAsync("Utili", about);
+            return Info("Utili", about);
         }
 
-        [Command("Help", "Commands")]
-        public async Task Help()
+        [Command("help", "commands")]
+        public DiscordCommandResult Help()
         {
             var domain = _config.GetValue<string>("Domain");
             var dashboardUrl = $"https://{domain}/dashboard/{Context.Guild.Id}";
@@ -77,11 +78,11 @@ namespace Utili.Commands
                 .AddInlineField("**Voice Channels**", $"[Voice Link]({dashboardUrl}/voicelink)\n" +
                                                       $"[Voice Roles]({dashboardUrl}/voiceroles)");
 
-            await Context.Channel.SendEmbedAsync(embed);
+            return Response(embed);
         }
 
-        [Command("Ping")]
-        public async Task Ping()
+        [Command("ping")]
+        public async Task<DiscordCommandResult> PingAsync()
         {
             var largestLatency = 0;
 
@@ -130,7 +131,7 @@ namespace Utili.Commands
             embed.AddInlineField("Discord", $"Gateway: {gateway}ms\nRest: {rest}ms");
             embed.AddInlineField("System", $"CPU: {cpu}%\nMemory: {memory}%");
             
-            await Context.Channel.SendEmbedAsync(embed);
+            return Response(embed);
         }
 
         private enum PingStatus

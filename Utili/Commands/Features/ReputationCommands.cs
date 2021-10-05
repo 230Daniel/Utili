@@ -16,8 +16,8 @@ using Utili.Utils;
 
 namespace Utili.Commands
 {
-    [Group("Reputation", "Rep")]
-    public class RepuatationCommands : DiscordInteractiveGuildModuleBase
+    [Group("reputation", "rep")]
+    public class RepuatationCommands : MyDiscordGuildModuleBase
     {
         private readonly DatabaseContext _dbContext;
         
@@ -27,7 +27,7 @@ namespace Utili.Commands
         }
         
         [Command("")]
-        public async Task Reputation(
+        public async Task<DiscordCommandResult> ReputationAsync(
             [RequireNotBot]
             IMember member = null)
         {
@@ -47,12 +47,12 @@ namespace Utili.Commands
                 .CreateEmbed(EmbedType.Info, "", $"{member.Mention}'s reputation: {reputation}")
                 .WithColor(colour);
 
-            await Context.Channel.SendEmbedAsync(embed);
+            return Response(embed);
         }
 
-        [Command("Leaderboard", "Top")]
+        [Command("leaderboard", "top")]
         [DefaultCooldown(1, 5)]
-        public async Task Leaderboard()
+        public async Task<DiscordCommandResult> LeaderboardAsync()
         {
             var repMembers = await _dbContext.ReputationMembers.GetForAllGuildMembersAsync(Context.GuildId);
             repMembers = repMembers.OrderByDescending(x => x.Reputation).ToList();
@@ -71,12 +71,12 @@ namespace Utili.Commands
                 }
             }
 
-            await Context.Channel.SendInfoAsync("Reputation Leaderboard", content);
+            return Info("Reputation Leaderboard", content);
         }
 
-        [Command("InverseLeaderboard", "Bottom")]
+        [Command("inverseleaderboard", "bottom")]
         [DefaultCooldown(1, 5)]
-        public async Task InvserseLeaderboard()
+        public async Task<DiscordCommandResult> InvserseLeaderboardAsync()
         {
             var repMembers = await _dbContext.ReputationMembers.GetForAllGuildMembersAsync(Context.GuildId);
             repMembers = repMembers.OrderBy(x => x.Reputation).ToList();
@@ -95,13 +95,13 @@ namespace Utili.Commands
                 }
             }
 
-            await Context.Channel.SendInfoAsync("Inverse Reputation Leaderboard", content);
+            return Info("Inverse Reputation Leaderboard", content);
         }
 
-        [Command("Give", "Add")]
+        [Command("give", "add")]
         [DefaultCooldown(1, 2)]
         [RequireAuthorGuildPermissions(Permission.ManageGuild)]
-        public async Task Give(
+        public async Task<DiscordCommandResult> GiveAsync(
             [RequireNotBot] 
             IMember member, 
             ulong change)
@@ -109,13 +109,13 @@ namespace Utili.Commands
             await _dbContext.ReputationMembers.UpdateMemberReputationAsync(Context.GuildId, member.Id, (long)change);
             await _dbContext.SaveChangesAsync();
             
-            await Context.Channel.SendSuccessAsync("Reputation given", $"Gave {change} reputation to {member.Mention}");
+            return Success("Reputation given", $"Gave {change} reputation to {member.Mention}");
         }
 
-        [Command("Revoke", "Take")]
+        [Command("revoke", "take")]
         [DefaultCooldown(1, 2)]
         [RequireAuthorGuildPermissions(Permission.ManageGuild)]
-        public async Task Take(
+        public async Task<DiscordCommandResult> RevokeAsync(
             [RequireNotBot] 
             IMember member, 
             ulong change)
@@ -123,13 +123,13 @@ namespace Utili.Commands
             await _dbContext.ReputationMembers.UpdateMemberReputationAsync(Context.GuildId, member.Id, -(long)change);
             await _dbContext.SaveChangesAsync();
             
-            await Context.Channel.SendSuccessAsync("Reputation given", $"Took {change} reputation from {member.Mention}");
+            return Success("Reputation given", $"Took {change} reputation from {member.Mention}");
         }
 
-        [Command("Set")]
+        [Command("set")]
         [DefaultCooldown(1, 2)]
         [RequireAuthorGuildPermissions(Permission.ManageGuild)]
-        public async Task Give(
+        public async Task<DiscordCommandResult> SetAsync(
             [RequireNotBot] 
             IMember member, 
             long amount)
@@ -152,13 +152,13 @@ namespace Utili.Commands
             
             await _dbContext.SaveChangesAsync();
             
-            await Context.Channel.SendSuccessAsync("Reputation set", $"Set {member.Mention}'s reputation to {amount}");
+            return Success("Reputation set", $"Set {member.Mention}'s reputation to {amount}");
         }
 
-        [Command("AddEmoji")]
+        [Command("addemoji")]
         [DefaultCooldown(2, 5)]
         [RequireAuthorGuildPermissions(Permission.ManageGuild)]
-        public async Task AddEmoji(IEmoji emoji, int value = 0)
+        public async Task<DiscordCommandResult> AddEmojiAsync(IEmoji emoji, int value = 0)
         {
             var config = await _dbContext.ReputationConfigurations.GetForGuildWithEmojisAsync(Context.GuildId);
             if (config is null)
@@ -182,10 +182,7 @@ namespace Utili.Commands
                 config.Emojis ??= new List<ReputationConfigurationEmoji>();
             
                 if (config.Emojis.Any(x => Equals(x.Emoji, emoji.ToString())))
-                {
-                    await Context.Channel.SendFailureAsync("Error", "That emoji is already added");
-                    return;
-                }
+                    return Failure("Error", "That emoji is already added");
 
                 config.Emojis.Add(new ReputationConfigurationEmoji(emoji.ToString())
                 {
@@ -196,24 +193,25 @@ namespace Utili.Commands
             }
             
             await _dbContext.SaveChangesAsync();
-            await Context.Channel.SendSuccessAsync("Emoji added",
+            return Success("Emoji added",
                 $"The {emoji} emoji was added successfully with value {value}\nYou can change its value or remove it on the dashboard");
         }
 
-        [Command("Reset")]
+        [Command("reset")]
         [DefaultCooldown(1, 10)]
         [RequireAuthorGuildPermissions(Permission.ManageGuild)]
-        public async Task Reset()
+        public async Task<DiscordCommandResult> ResetAsync()
         {
+            if (Context.Author.Id != 218613903653863427)
+                return Failure("Command disabled", "Sorry, this command is currently disabled due to a stability issue. Please check back later.");
+
             if (await ConfirmAsync("Are you sure?", "This command will reset reputation for all server members", "Reset all reputation"))
             {
                 await _dbContext.Database.ExecuteSqlInterpolatedAsync($"DELETE FROM reputation_members WHERE guild_id = {Context.GuildId.RawValue};");
-                await Context.Channel.SendSuccessAsync("Reputation reset", "The reputation of all server members has been set to 0");
+                return Success("Reputation reset", "The reputation of all server members has been set to 0");
             }
-            else
-            {
-                await Context.Channel.SendFailureAsync("Action canceled", "No action was performed");
-            }
+            
+            return Failure("Action canceled", "No action was performed");
         }
     }
 }

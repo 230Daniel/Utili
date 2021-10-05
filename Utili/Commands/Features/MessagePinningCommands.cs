@@ -10,10 +10,11 @@ using Database.Extensions;
 using Qmmands;
 using Utili.Commands;
 using Utili.Extensions;
+using Utili.Implementations;
 
 namespace Utili.Features
 {
-    public class MessagePinningCommands : DiscordGuildModuleBase
+    public class MessagePinningCommands : MyDiscordGuildModuleBase
     {
         private readonly DatabaseContext _dbContext;
         
@@ -22,34 +23,33 @@ namespace Utili.Features
             _dbContext = dbContext;
         }
         
-        [Command("Pin")]
+        [Command("pin")]
         [DefaultCooldown(2, 5)]
         [RequireAuthorChannelPermissions(Permission.ManageMessages)]
-        public async Task Pin(
+        public Task<DiscordCommandResult> PinAsync(
             ulong messageId,
             [RequireBotParameterChannelPermissions(Permission.ViewChannels | Permission.ManageWebhooks)]
             ITextChannel pinChannel = null)
-            => await Pin(messageId, pinChannel, Context.Channel);
+            => PinAsync(messageId, pinChannel, Context.Channel);
         
-        [Command("Pin")]
+        [Command("pin")]
         [DefaultCooldown(2, 5)]
-        public async Task Pin(
+        public Task<DiscordCommandResult> PinAsync(
             [RequireAuthorParameterChannelPermissions(Permission.ViewChannels | Permission.ManageMessages)]
             IMessageGuildChannel channel,
             ulong messageId,
             [RequireBotParameterChannelPermissions(Permission.ViewChannels | Permission.ManageWebhooks)]
             ITextChannel pinChannel = null)
-            => await Pin(messageId, pinChannel, channel);
+            => PinAsync(messageId, pinChannel, channel);
 
-        private async Task Pin(ulong messageId, ITextChannel pinChannel, IMessageGuildChannel channel)
+        private async Task<DiscordCommandResult> PinAsync(ulong messageId, ITextChannel pinChannel, IMessageGuildChannel channel)
         {
             var message = await channel.FetchMessageAsync(messageId) as IUserMessage;
 
             if (message is null)
             {
-                await Context.Channel.SendFailureAsync("Error",
+                return Failure("Error",
                     $"No message was found in {channel.Mention} with ID {messageId}\n[How do I get a message ID?](https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID-)");
-                return;
             }
 
             var config = await _dbContext.MessagePinningConfigurations.GetForGuildAsync(Context.GuildId);
@@ -59,15 +59,13 @@ namespace Utili.Features
             
             if (pinChannel is null && (config is not null && config.PinMessages))
             {
-                await Context.Channel.SendSuccessAsync("Message pinned",
+                return Success("Message pinned",
                     "Set a pin channel on the dashboard or specify one in the command if you want the message to be copied to another channel as well.");
-                return;
             }
             if (pinChannel is null && (config is null || !config.PinMessages))
             {
-                await Context.Channel.SendFailureAsync("Error",
+                return Failure("Error",
                     "Message pinning is not enabled on this server.");
-                return;
             }
 
             IWebhook webhook = null;
@@ -124,7 +122,7 @@ namespace Utili.Features
                 await Context.Bot.ExecuteWebhookAsync(webhook.Id, webhook.Token, attachmentMessage);
             }
 
-            await Context.Channel.SendSuccessAsync("Message pinned",
+            return Success("Message pinned",
                 $"The message was sent to {pinChannel.Mention}");
         }
     }
