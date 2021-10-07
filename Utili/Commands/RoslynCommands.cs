@@ -59,6 +59,7 @@ namespace Utili.Features
             RoslynGlobals globals = new(Context.Services, Context);
             try
             {
+                await using var yield = Context.BeginYield();
                 var result = await CSharpScript.EvaluateAsync(code, options, globals);
                 _logger.LogInformation($"Roslyn result: {result}");
                 if (result is null) return Success("Evaluated result", "null");

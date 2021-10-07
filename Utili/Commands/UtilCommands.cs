@@ -151,6 +151,8 @@ namespace Utili.Commands
                 }
             }
 
+            await using var yield = Context.BeginYield();
+            
             List<IMessage> messages;
             if(afterMessage is not null) messages = (await Context.Channel.FetchMessagesAsync((int)count, RetrievalDirection.After, afterMessage.Id)).ToList();
             else if (beforeMessage is not null) messages = (await Context.Channel.FetchMessagesAsync((int)count,RetrievalDirection.Before, beforeMessage.Id)).ToList();

@@ -12,6 +12,7 @@ using Microsoft.EntityFrameworkCore;
 using Qmmands;
 using Utili.Extensions;
 using Utili.Implementations;
+using Utili.Implementations.Views;
 using Utili.Utils;
 
 namespace Utili.Commands
@@ -198,20 +199,21 @@ namespace Utili.Commands
         }
 
         [Command("reset")]
-        [DefaultCooldown(1, 10)]
         [RequireAuthorGuildPermissions(Permission.ManageGuild)]
         public async Task<DiscordCommandResult> ResetAsync()
         {
-            if (Context.Author.Id != 218613903653863427)
-                return Failure("Command disabled", "Sorry, this command is currently disabled due to a stability issue. Please check back later.");
-
-            if (await ConfirmAsync("Are you sure?", "This command will reset reputation for all server members", "Reset all reputation"))
+            if (await ConfirmAsync(new ConfirmViewOptions
+            {
+                PromptDescription = "This command will reset reputation for all server members",
+                PromptConfirmButtonLabel = "Reset all reputation",
+                ConfirmTitle = "Reputation reset",
+                ConfirmDescription = "The reputation of all server members has been set to 0"
+            }))
             {
                 await _dbContext.Database.ExecuteSqlInterpolatedAsync($"DELETE FROM reputation_members WHERE guild_id = {Context.GuildId.RawValue};");
-                return Success("Reputation reset", "The reputation of all server members has been set to 0");
             }
-            
-            return Failure("Action canceled", "No action was performed");
+
+            return null;
         }
     }
 }

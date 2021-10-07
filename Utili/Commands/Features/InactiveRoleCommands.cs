@@ -13,6 +13,7 @@ using Database.Extensions;
 using Qmmands;
 using Utili.Extensions;
 using Utili.Implementations;
+using Utili.Implementations.Views;
 using Utili.Services;
 using Utili.Utils;
 
@@ -95,9 +96,6 @@ namespace Utili.Commands
         [Cooldown(1, 10, CooldownMeasure.Seconds, CooldownBucketType.Guild)]
         public async Task<DiscordCommandResult> KickAsync()
         {
-            if (Context.Author.Id != 218613903653863427)
-                return Failure("Command disabled", "Sorry, this command is currently disabled due to a stability issue. Please check back later.");
-
             var config = await _dbContext.InactiveRoleConfigurations.GetForGuildAsync(Context.GuildId);
             if (Context.Guild.GetRole(config.RoleId) is null)
                 return Failure("Error", "This server does not have an inactive role set");
@@ -123,10 +121,16 @@ namespace Utili.Commands
                         .OrderBy(x => x.Nick ?? x.Name)
                         .ToList();
 
-                if (await ConfirmAsync("Are you sure?", $"This command will kick {inactiveMembers.Count} inactive members - View them with {Context.Prefix}inactive list", $"Kick {inactiveMembers.Count} inactive members"))
+                if (await ConfirmAsync(new ConfirmViewOptions
                 {
-                    await Context.Channel.SendSuccessAsync($"Kicking {inactiveMembers.Count} inactive members", $"Under ideal conditions, this action will take {TimeSpan.FromSeconds(inactiveMembers.Count * 1.1).ToLongString()}");
-
+                    PromptDescription = $"This command will kick {inactiveMembers.Count} inactive members - View them with {Context.Prefix}inactive list",
+                    PromptConfirmButtonLabel = $"Kick {inactiveMembers.Count} inactive members",
+                    ConfirmTitle = $"Kicking {inactiveMembers.Count} inactive members",
+                    ConfirmDescription = $"Under ideal conditions, this action will take {TimeSpan.FromSeconds(inactiveMembers.Count * 1.1).ToLongString()}"
+                }))
+                {
+                    await using var yield = Context.BeginYield();
+                    
                     var failed = 0;
                     foreach (var member in inactiveMembers)
                     {
@@ -146,10 +150,8 @@ namespace Utili.Commands
                         "Inactive members kicked", 
                         $"{inactiveMembers.Count - failed} inactive members were kicked {(failed > 0 ? $"\nFailed to kick {failed} members" : "")}");
                 }
-                else
-                {
-                    return Failure("Action canceled", "No action was performed");
-                }
+                
+                return null;
             }
             finally
             {

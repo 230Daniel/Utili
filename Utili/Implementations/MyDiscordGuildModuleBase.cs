@@ -17,9 +17,11 @@ namespace Utili.Implementations
         protected DiscordCommandResult Failure(string title, string content = null)
             => Response(MessageUtils.CreateEmbed(EmbedType.Failure, title, content));
 
-        protected async Task<bool> ConfirmAsync(string title, string content = null, string confirmButtonLabel = "Confirm")
+        protected async Task<bool> ConfirmAsync(ConfirmViewOptions options)
         {
-            var view = new ConfirmView(Context.Author.Id, title, content, confirmButtonLabel);
+            await using var yield = Context.BeginYield();
+            var view = new ConfirmView(Context.Author.Id, options);
+            
             try
             {
                 await View(view, TimeSpan.FromSeconds(30));
@@ -28,6 +30,7 @@ namespace Utili.Implementations
             {
                 return false;
             }
+            
             return view.Result;
         }
     }
