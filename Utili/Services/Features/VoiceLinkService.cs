@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Disqord;
 using Disqord.Gateway;
@@ -73,7 +74,7 @@ namespace Utili.Services
                         _channelsRequiringUpdate.Clear();
                     }
 
-                    var tasks = channelsToUpdate.Select(x => UpdateLinkedChannelAsync(x.Item1, x.Item2)).ToList();
+                    var tasks = channelsToUpdate.Select(x => UpdateLinkedChannelWithTimeoutAsync(x.Item1, x.Item2)).ToList();
                     await Task.WhenAll(tasks);
                 }
                 catch (Exception e)
@@ -85,127 +86,143 @@ namespace Utili.Services
             }
         }
 
-        private Task UpdateLinkedChannelAsync(ulong guildId, ulong channelId)
+        private async Task UpdateLinkedChannelWithTimeoutAsync(ulong guildId, ulong channelId)
         {
-            return Task.Run(async () =>
+            var tcs = new CancellationTokenSource();
+            var task = UpdateLinkedChannelAsync(guildId, channelId, tcs.Token);
+            var timeout = Task.Delay(5000, tcs.Token);
+            
+            if (await Task.WhenAny(task, timeout) == task)
             {
-                try
+                await task;
+            }
+            else
+            {
+                _logger.LogWarning("Update for channel {GuildId}/{ChannelId} timed out", guildId, channelId);
+                tcs.Cancel();
+            }
+        }
+
+        private async Task UpdateLinkedChannelAsync(ulong guildId, ulong channelId, CancellationToken cancellationToken)
+        {
+            try
+            {
+                using var scope = _scopeFactory.CreateScope();
+                var db = scope.GetDbContext();
+                    
+                var config = await db.VoiceLinkConfigurations.GetForGuildAsync(guildId);
+                if(config is null || !config.Enabled || config.ExcludedChannels.Contains(channelId)) return;
+                    
+                var channelRecord = await db.VoiceLinkChannels.GetForGuildChannelAsync(guildId, channelId);
+                    
+                var guild = _client.GetGuild(guildId);
+                var voiceChannel = guild.GetAudioChannel(channelId);
+                if (voiceChannel is null)
                 {
-                    using var scope = _scopeFactory.CreateScope();
-                    var db = scope.GetDbContext();
+                    await CloseLinkedChannelAsync(scope, guild, config, channelRecord, cancellationToken);
+                    return;
+                }
+                
+                var category = voiceChannel.CategoryId.HasValue ? guild.GetCategoryChannel(voiceChannel.CategoryId.Value) : null;
+
+                if(!voiceChannel.BotHasPermissions(Permission.ViewChannels)) return;
+                if (category is not null && !category.BotHasPermissions(Permission.ViewChannels | Permission.ManageChannels | Permission.ManageRoles)) return;
+                if (category is null && !guild.BotHasPermissions(Permission.ViewChannels | Permission.ManageChannels | Permission.ManageRoles)) return;
+
+                var voiceStates = guild.GetVoiceStates().Where(x => x.Value.ChannelId == voiceChannel.Id).Select(x => x.Value).ToList();
+                var connectedUsers = guild.Members.Values.Where(x => voiceStates.Any(y => y.MemberId == x.Id)).ToList();
+
+                if (connectedUsers.All(x => x.IsBot))
+                {
+                    await CloseLinkedChannelAsync(scope, guild, config, channelRecord, cancellationToken);
+                    return;
+                }
                     
-                    var config = await db.VoiceLinkConfigurations.GetForGuildAsync(guildId);
-                    if(config is null || !config.Enabled || config.ExcludedChannels.Contains(channelId)) return;
-                    
-                    var channelRecord = await db.VoiceLinkChannels.GetForGuildChannelAsync(guildId, channelId);
-                    
-                    var guild = _client.GetGuild(guildId);
-                    var voiceChannel = guild.GetAudioChannel(channelId);
-                    if (voiceChannel is null)
+                ITextChannel textChannel = channelRecord is not null 
+                    ? guild.GetTextChannel(channelRecord.TextChannelId)
+                    : null;
+                if (textChannel is null)
+                {
+                    textChannel = await guild.CreateTextChannelAsync($"{config.ChannelPrefix}{voiceChannel.Name}", x =>
                     {
-                        await CloseLinkedChannelAsync(scope, guild, config, channelRecord);
-                        return;
-                    }
-                    
-                    var category = voiceChannel.CategoryId.HasValue ? guild.GetCategoryChannel(voiceChannel.CategoryId.Value) : null;
+                        if (voiceChannel.CategoryId.HasValue) x.CategoryId = voiceChannel.CategoryId.Value;
+                        x.Topic = $"Users in {voiceChannel.Name} have access - Created by Utili";
+                        x.Overwrites = new List<LocalOverwrite>
+                        {
+                            LocalOverwrite.Member(_client.CurrentUser.Id, new OverwritePermissions().Allow(Permission.ViewChannels)),
+                            LocalOverwrite.Role(guildId, new OverwritePermissions().Deny(Permission.ViewChannels)) // @everyone
+                        };
+                    }, new DefaultRestRequestOptions{Reason = "Voice Link"}, cancellationToken);
 
-                    if(!voiceChannel.BotHasPermissions(Permission.ViewChannels)) return;
-                    if (category is not null && !category.BotHasPermissions(Permission.ViewChannels | Permission.ManageChannels | Permission.ManageRoles)) return;
-                    if (category is null && !guild.BotHasPermissions(Permission.ViewChannels | Permission.ManageChannels | Permission.ManageRoles)) return;
-
-                    var voiceStates = guild.GetVoiceStates().Where(x => x.Value.ChannelId == voiceChannel.Id).Select(x => x.Value).ToList();
-                    var connectedUsers = guild.Members.Values.Where(x => voiceStates.Any(y => y.MemberId == x.Id)).ToList();
-
-                    if (connectedUsers.All(x => x.IsBot))
+                    if (channelRecord is null)
                     {
-                        await CloseLinkedChannelAsync(scope, guild, config, channelRecord);
-                        return;
-                    }
-                    
-                    ITextChannel textChannel = channelRecord is not null 
-                        ? guild.GetTextChannel(channelRecord.TextChannelId)
-                        : null;
-                    if (textChannel is null)
-                    {
-                        textChannel = await guild.CreateTextChannelAsync($"{config.ChannelPrefix}{voiceChannel.Name}", x =>
+                        channelRecord = new VoiceLinkChannel(guildId, channelId)
                         {
-                            if (voiceChannel.CategoryId.HasValue) x.CategoryId = voiceChannel.CategoryId.Value;
-                            x.Topic = $"Users in {voiceChannel.Name} have access - Created by Utili";
-                            x.Overwrites = new List<LocalOverwrite>
-                            {
-                                LocalOverwrite.Member(_client.CurrentUser.Id, new OverwritePermissions().Allow(Permission.ViewChannels)),
-                                LocalOverwrite.Role(guildId, new OverwritePermissions().Deny(Permission.ViewChannels)) // @everyone
-                            };
-                        }, new DefaultRestRequestOptions{Reason = "Voice Link"});
-
-                        if (channelRecord is null)
-                        {
-                            channelRecord = new VoiceLinkChannel(guildId, channelId)
-                            {
-                                TextChannelId = textChannel.Id
-                            };
-                            db.VoiceLinkChannels.Add(channelRecord);
-                        }
-                        else
-                        {
-                            channelRecord.TextChannelId = textChannel.Id;
-                            db.VoiceLinkChannels.Update(channelRecord);
-                        }
-                        
-                        await db.SaveChangesAsync();
+                            TextChannelId = textChannel.Id
+                        };
+                        db.VoiceLinkChannels.Add(channelRecord);
                     }
                     else
                     {
-                        if(!textChannel.BotHasPermissions(Permission.ViewChannels | Permission.ManageChannels | Permission.ManageRoles)) return;
+                        channelRecord.TextChannelId = textChannel.Id;
+                        db.VoiceLinkChannels.Update(channelRecord);
                     }
+                        
+                    await db.SaveChangesAsync(cancellationToken);
+                }
+                else
+                {
+                    if(!textChannel.BotHasPermissions(Permission.ViewChannels | Permission.ManageChannels | Permission.ManageRoles)) return;
+                }
 
-                    var overwrites = textChannel.Overwrites.Select(x => new LocalOverwrite(x.TargetId, x.TargetType, x.Permissions)).ToList();
-                    var overwritesChanged = false;
+                var overwrites = textChannel.Overwrites.Select(x => new LocalOverwrite(x.TargetId, x.TargetType, x.Permissions)).ToList();
+                var overwritesChanged = false;
 
-                    overwrites.RemoveAll(x =>
+                overwrites.RemoveAll(x =>
+                {
+                    if (x.TargetType == OverwriteTargetType.Member && x.TargetId != _client.CurrentUser.Id)
                     {
-                        if (x.TargetType == OverwriteTargetType.Member && x.TargetId != _client.CurrentUser.Id)
-                        {
-                            IMember member = guild.GetMember(x.TargetId);
-                            if (member is null || voiceStates.All(y => y.MemberId != member.Id) || voiceStates.First(y => y.MemberId == member.Id).ChannelId == voiceChannel.Id)
-                            {
-                                overwritesChanged = true;
-                                return true;
-                            }
-                        }
-                        return false;
-                    });
-
-                    foreach (var member in connectedUsers)
-                    {
-                        if (!overwrites.Any(x => x.TargetId == member.Id && x.TargetType == OverwriteTargetType.Member))
+                        IMember member = guild.GetMember(x.TargetId);
+                        if (member is null || voiceStates.All(y => y.MemberId != member.Id) || voiceStates.First(y => y.MemberId == member.Id).ChannelId == voiceChannel.Id)
                         {
                             overwritesChanged = true;
-                            overwrites.Add(LocalOverwrite.Member(member.Id, new OverwritePermissions().Allow(Permission.ViewChannels)));
+                            return true;
                         }
                     }
+                    return false;
+                });
 
-                    var everyoneOverwrite = overwrites.FirstOrDefault(x => x.TargetId == guildId && x.TargetType == OverwriteTargetType.Role);
-                    if (everyoneOverwrite is null || everyoneOverwrite.Permissions.Denied.ViewChannels)
+                foreach (var member in connectedUsers)
+                {
+                    if (!overwrites.Any(x => x.TargetId == member.Id && x.TargetType == OverwriteTargetType.Member))
                     {
                         overwritesChanged = true;
-                        overwrites.Remove(everyoneOverwrite);
-                        overwrites.Add(new LocalOverwrite(guildId, OverwriteTargetType.Role, new OverwritePermissions().Deny(Permission.ViewChannels)));
+                        overwrites.Add(LocalOverwrite.Member(member.Id, new OverwritePermissions().Allow(Permission.ViewChannels)));
                     }
+                }
 
-                    if (overwritesChanged)
-                    {
-                        await textChannel.ModifyAsync(x => x.Overwrites = new Optional<IEnumerable<LocalOverwrite>>(overwrites), new DefaultRestRequestOptions{Reason = "Voice Link"});
-                    }
-                }
-                catch (Exception e)
+                var everyoneOverwrite = overwrites.FirstOrDefault(x => x.TargetId == guildId && x.TargetType == OverwriteTargetType.Role);
+                if (everyoneOverwrite is null || everyoneOverwrite.Permissions.Denied.ViewChannels)
                 {
-                    _logger.LogError(e, $"Exception thrown updating linked channel {guildId}/{channelId}");
+                    overwritesChanged = true;
+                    overwrites.Remove(everyoneOverwrite);
+                    overwrites.Add(new LocalOverwrite(guildId, OverwriteTargetType.Role, new OverwritePermissions().Deny(Permission.ViewChannels)));
                 }
-            });
+
+                if (overwritesChanged)
+                {
+                    await textChannel.ModifyAsync(x => x.Overwrites = new Optional<IEnumerable<LocalOverwrite>>(overwrites), new DefaultRestRequestOptions{Reason = "Voice Link"}, cancellationToken);
+                }
+
+                _logger.LogInformation("Updated linked channel {GuildId}/{ChannelId}", guildId, channelId);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Exception thrown updating linked channel {GuildId}/{ChannelId}", guildId, channelId);
+            }
         }
 
-        private async Task CloseLinkedChannelAsync(IServiceScope scope, IGuild guild, VoiceLinkConfiguration config, VoiceLinkChannel channelRecord)
+        private async Task CloseLinkedChannelAsync(IServiceScope scope, IGuild guild, VoiceLinkConfiguration config, VoiceLinkChannel channelRecord, CancellationToken cancellationToken)
         {
             if (channelRecord is null) return;
             var textChannel = guild.GetTextChannel(channelRecord.TextChannelId);
@@ -213,20 +230,22 @@ namespace Utili.Services
             
             if (config.DeleteChannels)
             {
-                await textChannel.DeleteAsync(new DefaultRestRequestOptions{Reason = "Voice Link"});
+                await textChannel.DeleteAsync(new DefaultRestRequestOptions{Reason = "Voice Link"}, cancellationToken);
                 channelRecord.TextChannelId = 0;
                 
                 var db = scope.GetDbContext();
                 db.VoiceLinkChannels.Remove(channelRecord);
-                await db.SaveChangesAsync();
+                await db.SaveChangesAsync(cancellationToken);
             }
             else
             {
                 // Remove all permission overwrites except @everyone and utili
                 var overwrites = textChannel.Overwrites.Select(x => new LocalOverwrite(x.TargetId, x.TargetType, x.Permissions)).ToList();
                 overwrites.RemoveAll(x => x.TargetId != guild.Id && x.TargetId != _client.CurrentUser.Id);
-                await textChannel.ModifyAsync(x => x.Overwrites = new Optional<IEnumerable<LocalOverwrite>>(overwrites), new DefaultRestRequestOptions {Reason = "Voice Link"});
+                await textChannel.ModifyAsync(x => x.Overwrites = new Optional<IEnumerable<LocalOverwrite>>(overwrites), new DefaultRestRequestOptions {Reason = "Voice Link"}, cancellationToken);
             }
+            
+            _logger.LogInformation("Closed linked channel {GuildId}/{ChannelId}", config.GuildId, channelRecord.ChannelId);
         }
     }
 }
