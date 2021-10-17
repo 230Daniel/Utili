@@ -49,7 +49,7 @@ namespace UtiliBackend.Services
             }
             catch
             {
-                guild = null;
+                return null;
             }
 
             lock (_cachedGuilds)
