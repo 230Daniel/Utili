@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Disqord;
 using Disqord.Bot;
@@ -7,14 +8,18 @@ using Disqord.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Database.Entities;
+using Disqord.Rest;
+using Microsoft.Extensions.Configuration;
 using Utili.Extensions;
 using Utili.Features;
+using Utili.Utils;
 
 namespace Utili.Services
 {
     public class BotService : DiscordClientService
     {
         private readonly ILogger<BotService> _logger;
+        private readonly IConfiguration _configuration;
         private readonly IServiceScopeFactory _scopeFactory;
 
         private readonly CommunityService _community;
@@ -39,6 +44,7 @@ namespace Utili.Services
         public BotService(
             
             ILogger<BotService> logger,
+            IConfiguration configuration,
             IServiceScopeFactory scopeFactory,
             DiscordBotBase client,
             
@@ -64,6 +70,7 @@ namespace Utili.Services
             : base(logger, client)
         {
             _logger = logger;
+            _configuration = configuration;
             _scopeFactory = scopeFactory;
             
             _community = community;
@@ -277,6 +284,44 @@ namespace Utili.Services
             
             if(config.HasFeature(BotFeatures.RolePersist))
                 await _rolePersist.MemberLeft(scope, e, member);
+        }
+
+        protected override async ValueTask OnJoinedGuild(JoinedGuildEventArgs e)
+        {
+            ITextChannel idealChannel = null;
+            
+            foreach (var channelId in new []
+            {
+                e.Guild.PublicUpdatesChannelId,
+                e.Guild.SystemChannelId
+            })
+            {
+                if(!channelId.HasValue) continue;
+                var channel = e.Guild.GetTextChannel(channelId.Value);
+                if(!channel.BotHasPermissions(Permission.ViewChannels | Permission.SendMessages | Permission.SendEmbeds)) continue;
+                idealChannel = channel;
+                break;
+            }
+
+            idealChannel ??= e.Guild.Channels.Values
+                .OfType<ITextChannel>()
+                .Where(x => x.BotHasPermissions(Permission.ViewChannels | Permission.SendMessages | Permission.SendEmbeds))
+                .OrderBy(x => x.CreatedAt())
+                .FirstOrDefault();
+            
+            if (idealChannel is null) return;
+
+            var baseUrl = $"https://{_configuration["Domain"]}";
+            await idealChannel.SendMessageAsync(
+                new LocalMessage()
+                    .AddEmbed(
+                        MessageUtils.CreateEmbed(
+                            EmbedType.Info, 
+                            "Hello! Thanks for choosing Utili.", 
+                            $"Head to the [dashboard]({baseUrl}/dashboard/{e.GuildId}) to configure the bot.\n" +
+                            $"If you need any help, you should [contact us]({baseUrl}/contact).\n" +
+                            $"And if you want to help support the bot, you can [get premium]({baseUrl}/premium).\n\n" +
+                            $"[Invite]({baseUrl}/invite) • [Terms]({baseUrl}/terms) • [Privacy]({baseUrl}/privacy) • [Contact]({baseUrl}/contact)")));
         }
     }
 }
