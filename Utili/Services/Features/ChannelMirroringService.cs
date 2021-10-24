@@ -78,13 +78,13 @@ namespace Utili.Services
                 var username = $"{e.Message.Author} in {e.Channel.Name}";
                 var avatarUrl = e.Message.Author.GetAvatarUrl();
                 
-                if (!string.IsNullOrWhiteSpace(userMessage.Content) || userMessage.Embeds.Any(x => x.IsRich))
+                if (!string.IsNullOrWhiteSpace(userMessage.Content) || userMessage.Embeds.Any(x => x.IsRich()))
                 {
                     var message = new LocalWebhookMessage()
                         .WithName(username)
                         .WithAvatarUrl(avatarUrl)
                         .WithOptionalContent(userMessage.Content)
-                        .WithEmbeds(userMessage.Embeds.Where(x => x.IsRich).Select(LocalEmbed.FromEmbed))
+                        .WithEmbeds(userMessage.Embeds.Where(x => x.IsRich()).Select(LocalEmbed.FromEmbed))
                         .WithAllowedMentions(LocalAllowedMentions.None);
 
                     await _client.ExecuteWebhookAsync(webhook.Id, webhook.Token, message);
