@@ -12,6 +12,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Database;
 using Disqord;
+using Disqord.OAuth2;
 using Disqord.Rest;
 using Stripe;
 using UtiliBackend.Authorisation;
@@ -91,6 +92,7 @@ namespace UtiliBackend
             services.AddSingleton<IRateLimitCounterStore, MemoryCacheRateLimitCounterStore>();
             services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();
 
+            services.AddBearerClientFactory();
             services.AddSingleton<DiscordClientService>();
             services.AddSingleton<DiscordUserGuildsService>();
             services.AddSingleton<DiscordRestService>();

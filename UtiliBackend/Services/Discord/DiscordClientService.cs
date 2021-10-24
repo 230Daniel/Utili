@@ -1,9 +1,10 @@
-﻿using System.Collections.Generic;
-using System.Net;
+﻿using System;
+using System.Collections.Concurrent;
+using System.Security.Claims;
+using System.Threading;
 using System.Threading.Tasks;
-using Discord;
-using Discord.Net;
-using Discord.Rest;
+using Disqord;
+using Disqord.OAuth2;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 
@@ -11,43 +12,62 @@ namespace UtiliBackend.Services
 {
     public class DiscordClientService
     {
-        private readonly Dictionary<string, DiscordRestClient> _clients;
-        
-        public DiscordClientService()
+        private readonly IBearerClientFactory _bearerClientFactory;
+        private readonly ConcurrentDictionary<Snowflake, BearerClient> _clients;
+        private readonly SemaphoreSlim _semaphore;
+
+        public DiscordClientService(IBearerClientFactory bearerClientFactory)
         {
+            _bearerClientFactory = bearerClientFactory;
             _clients = new();
+            _semaphore = new(1, 1);
         }
 
-        public async ValueTask<DiscordRestClient> GetClientAsync(HttpContext httpContext)
+        public async ValueTask<BearerClient> GetClientAsync(HttpContext httpContext)
         {
             var token = await httpContext.GetTokenAsync("Discord", "access_token");
             
             if (!httpContext.User.Identity.IsAuthenticated || string.IsNullOrWhiteSpace(token))
                 return null;
             
-            lock (_clients)
-            {
-                if (_clients.TryGetValue(token, out var client) && client.LoginState == LoginState.LoggedIn)
-                    return client;
-            }
+            var userId = Snowflake.Parse(httpContext.User.FindFirstValue("id"));
+
+            await _semaphore.WaitAsync();
             
-            var newClient = new DiscordRestClient();
             try
             {
-                await newClient.LoginAsync(TokenType.Bearer, token);
-            }
-            catch (HttpException ex) when (ex.HttpCode == HttpStatusCode.Unauthorized)
-            {
-                return null;
-            }
+                if (_clients.TryGetValue(userId, out var cachedClient))
+                {
+                    if (cachedClient.Authorization.ExpiresAt > DateTimeOffset.Now)
+                        return cachedClient;
+                    _clients.TryRemove(userId, out _);
+                }
+                
+                var newClient = _bearerClientFactory.CreateClient(Token.Bearer(token));
+                var authorisation = await newClient.FetchCurrentAuthorizationAsync();
+                var user = await newClient.FetchCurrentUserAsync();
 
-            lock (_clients)
-            {
-                _clients.Remove(token);
-                _clients.Add(token, newClient);
-            }
+                var client = new BearerClient
+                {
+                    Client = newClient,
+                    Authorization = authorisation,
+                    User = user
+                };
 
-            return newClient;
+                _clients.TryAdd(userId, client);
+                return client;
+            }
+            finally
+            {
+                _semaphore.Release();
+            }
+        }
+
+        public class BearerClient
+        {
+            public IBearerClient Client { get; set; }
+            public IBearerAuthorization Authorization { get; set; }
+            public ICurrentUser User { get; set; }
         }
     }
 }

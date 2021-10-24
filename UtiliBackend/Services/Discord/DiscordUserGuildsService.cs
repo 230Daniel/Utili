@@ -1,61 +1,72 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
-using Discord;
-using Discord.Rest;
+using Disqord;
+using Disqord.OAuth2;
 using Microsoft.AspNetCore.Http;
 
 namespace UtiliBackend.Services
 {
     public class DiscordUserGuildsService
     {
-        private static readonly TimeSpan CacheDuration = TimeSpan.FromSeconds(15);
-        
         private readonly DiscordClientService _discordClientService;
-        private readonly Dictionary<ulong, (IEnumerable<RestUserGuild>, DateTime)> _cachedUserGuilds;
+        private readonly ConcurrentDictionary<Snowflake, UserGuilds> _guilds;
+        private readonly SemaphoreSlim _semaphore;
         
         public DiscordUserGuildsService(DiscordClientService discordClientService)
         {
             _discordClientService = discordClientService;
-            _cachedUserGuilds = new();
+            _guilds = new();
+            _semaphore = new(1, 1);
         }
 
-        public async Task<IEnumerable<RestUserGuild>> GetGuildsAsync(HttpContext httpContext)
+        public async Task<UserGuilds> GetGuildsAsync(HttpContext httpContext)
         {
             var client = await _discordClientService.GetClientAsync(httpContext);
-            if (client is null) return Array.Empty<RestUserGuild>();
-
-            lock (_cachedUserGuilds)
-            {
-                var now = DateTime.UtcNow;
-                foreach (var cachedValue in _cachedUserGuilds)
-                {
-                    if (cachedValue.Value.Item2 <= now)
-                        _cachedUserGuilds.Remove(cachedValue.Key);
-                }
-
-                if (_cachedUserGuilds.TryGetValue(client.CurrentUser.Id, out var tuple))
-                {
-                    return tuple.Item1;
-                }
-            }
-
-            var guilds = (await client.GetGuildSummariesAsync().FlattenAsync());
+            var userId = client.Authorization.User.Id;
             
-            lock (_cachedUserGuilds)
+            await _semaphore.WaitAsync();
+            
+            try
             {
-                _cachedUserGuilds.Remove(client.CurrentUser.Id);
-                _cachedUserGuilds.Add(client.CurrentUser.Id, (guilds, DateTime.UtcNow.Add(CacheDuration)));
-            }
+                if (_guilds.TryGetValue(userId, out var cachedGuilds))
+                {
+                    if (cachedGuilds.ExpiresAt > DateTimeOffset.Now)
+                        return cachedGuilds;
+                    _guilds.TryRemove(userId, out _);
+                }
 
+                var newGuilds = await client.Client.FetchGuildsAsync();
+                var guilds = new UserGuilds()
+                {
+                    Guilds = newGuilds.ToList(),
+                    ExpiresAt = DateTimeOffset.Now.AddSeconds(15)
+                };
+
+                _guilds.TryAdd(userId, guilds);
+                return guilds;
+            }
+            finally
+            {
+                _semaphore.Release();
+            }
+        }
+        
+        public async Task<UserGuilds> GetManagedGuildsAsync(HttpContext httpContext)
+        {
+            var guilds = await GetGuildsAsync(httpContext);
+            if (guilds is null) return null;
+            guilds.Guilds.RemoveAll(x => !x.Permissions.ManageGuild);
             return guilds;
         }
         
-        public async Task<IEnumerable<RestUserGuild>> GetManagedGuildsAsync(HttpContext httpContext)
+        public class UserGuilds
         {
-            var guilds = await GetGuildsAsync(httpContext);
-            return guilds.Where(x => x.Permissions.ManageGuild);
+            public List<IPartialGuild> Guilds { get; set; }
+            public DateTimeOffset ExpiresAt { get; set; }
         }
     }
 }

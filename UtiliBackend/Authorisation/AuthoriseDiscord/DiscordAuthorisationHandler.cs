@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -25,7 +26,7 @@ namespace UtiliBackend.Authorisation
                 var client = await _discordClientService.GetClientAsync(httpContext);
                 httpContext.Items["DiscordClient"] ??= client;
                 
-                if (client is not null)
+                if (client.Authorization.ExpiresAt > DateTimeOffset.Now)
                 {
                     requirement.DiscordAuthenticated = true;
                     context.Succeed(requirement);

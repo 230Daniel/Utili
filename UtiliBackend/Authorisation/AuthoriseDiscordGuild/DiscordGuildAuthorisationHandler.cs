@@ -28,7 +28,7 @@ namespace UtiliBackend.Authorisation
 
                 var guildId = ulong.Parse((string) httpContext.Request.RouteValues["GuildId"] ?? "0");
 
-                if (managedGuilds.Any(x => x.Id == guildId))
+                if (managedGuilds.Guilds.Any(x => x.Id == guildId))
                 {
                     requirement.GuildManageable = true;
                     

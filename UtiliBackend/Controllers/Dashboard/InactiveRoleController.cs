@@ -1,12 +1,12 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Database;
 using Database.Entities;
 using Database.Extensions;
+using Microsoft.EntityFrameworkCore;
 using UtiliBackend.Authorisation;
 using UtiliBackend.Extensions;
 using UtiliBackend.Models;

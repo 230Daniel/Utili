@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Database;
 using Database.Entities;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using UtiliBackend.Extensions;
 
@@ -40,7 +40,7 @@ namespace UtiliBackend.Middleware
 
                 try
                 {
-                    var user = await db.Users.FirstOrDefaultAsync(x => x.UserId == discordUser.Id);
+                    var user = await db.Users.FirstOrDefaultAsync(x => x.UserId == discordUser.Id.RawValue);
 
                     if (user is null)
                     {

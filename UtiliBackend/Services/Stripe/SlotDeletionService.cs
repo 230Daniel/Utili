@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Database;
+using Microsoft.EntityFrameworkCore;
 
 namespace UtiliBackend.Services
 {

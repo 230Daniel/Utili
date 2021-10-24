@@ -30,14 +30,12 @@ namespace UtiliBackend.Controllers
         public async Task<IActionResult> GuildsAsync()
         {
             var guilds = await _discordUserGuildsService.GetGuildsAsync(HttpContext);
-            return Json(guilds.Select(guild => new GuildModel
+            return Json(guilds.Guilds.Select(guild => new GuildModel
             {
                 Id = guild.Id.ToString(),
                 Name = guild.Name,
                 IsManageable = guild.Permissions.ManageGuild,
-                IconUrl = string.IsNullOrEmpty(guild.IconUrl)
-                    ? "https://cdn.discordapp.com/embed/avatars/1.png" 
-                    : guild.IconUrl.Remove(guild.IconUrl.Length - 4) + ".png?size=256"
+                IconUrl = guild.GetIconUrl()
             }));
         }
         

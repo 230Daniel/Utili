@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Antiforgery;
+﻿using Disqord;
+using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -46,7 +47,7 @@ namespace UtiliBackend.Controllers
             var user = HttpContext.GetDiscordUser();
             return Json(new AuthenticationInfoModel
             {
-                Username = user.Username,
+                Username = user.Name,
                 AvatarUrl = user.GetAvatarUrl()
             });
         }
