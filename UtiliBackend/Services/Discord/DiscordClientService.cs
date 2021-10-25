@@ -38,7 +38,7 @@ namespace UtiliBackend.Services
             {
                 if (_clients.TryGetValue(userId, out var cachedClient))
                 {
-                    if (cachedClient.Authorization.ExpiresAt > DateTimeOffset.Now)
+                    if (cachedClient.Token == token && cachedClient.Authorization.ExpiresAt > DateTimeOffset.Now)
                         return cachedClient;
                     _clients.TryRemove(userId, out _);
                 }
@@ -65,9 +65,10 @@ namespace UtiliBackend.Services
 
         public class BearerClient
         {
-            public IBearerClient Client { get; set; }
-            public IBearerAuthorization Authorization { get; set; }
-            public ICurrentUser User { get; set; }
+            public IBearerClient Client { get; init; }
+            public IBearerAuthorization Authorization { get; init; }
+            public ICurrentUser User { get; init;  }
+            public string Token => Client.RestClient.ApiClient.Token.RawValue;
         }
     }
 }
