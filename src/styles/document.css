@@ -30,3 +30,16 @@
 .document > p > a:hover{
 	color: var(--colour-link-hover) !important;
 }
+
+.document > table > * > * > th, 
+.document > table > * > * > td {
+	border: 1px solid var(--colour-text-muted);
+	color: var(--colour-text-muted);
+	padding: 10px;
+	font-size: 14px;
+}
+
+.document > table{
+	margin-top: 25px;
+	margin-bottom: 25px;
+}

@@ -2,29 +2,38 @@
 
 ## Overview
 
-This Privacy Policy describes how your personal information is collected, used, and shared when you visit or make a purchase from https://utili.xyz (the “Site”).
+This Privacy Policy describes how your personal information is collected, used, and shared when you visit or make a purchase from https://utili.xyz (the "Site"), and how any sensitive information is processed and stored by the associated Discord bot Utili#5921 (the "Bot").
 
-## Personal Information we collect
+## Sensitive Information we collect
 
-As you browse the Site, we collect information about the individual web pages or products that you view and information about how you interact with the Site. We refer to this automatically-collected information as “Device Information.”
+When you log in to the Site via Discord, we store your unique Discord account ID and its associated email address. We refer to this information as "Account Information".
 
-Additionally when you make a purchase or attempt to make a purchase through the Site, we collect certain information from you, including your name, billing address, shipping address, email address, and phone number. We refer to this information as “Order Information.”
+The Site will also retrieve information about the Discord guilds which you are a member of, however this data will not be stored permanently.
 
-Information about your Discord account may also be recorded. This includes your Discord User ID, the email address on your Discord account, and the Discord servers (guilds) which you are a member of.
+When you add the Bot to a Discord guild it will begin retrieving information about that guild and its members in order to function properly. By default, no data is stored for a guild which the Bot is added to.
 
-When we talk about “Personal Information” in this Privacy Policy, we are talking both about Device Information and Order Information.
+Some features of the Bot require the storage of sensitive information to function. When these features are enabled via the Site, the Bot will begin collecting and storing the information described in the table below. If the feature can be enabled within a smaller scope than the entire guild, only the information within the smaller scope will be stored. If the feature is disabled again via the Site, no more data will be collected and stored. We refer to this infromation as "Sensitive Discord Information".
 
-## How we use your Personal Information
+| Feature       | Scope                               | Sensitive information stored if this feature is enabled within the scope                                         | Why this information is required for the feature to function                                                                                                                                                                              |
+|---------------|-------------------------------------|------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Autopurge     | Per-Channel                         | The metadata of messages sent within the last 14 days (timestamp, is message pinned, is sender a bot)            | To avoid requesting information on a channel's messages from Discord every time the Bot checks for messages which are due for deletion, metadata about messages is fetched once and then updated whenever necessary                       |
+| Inactive Role | Per-Guild                           | A timestamp for each member in the guild which describes when they last sent a message or joined a voice channel | To determine which users haven't been active for long enough to be marked as inactive                                                                                                                                                     |
+| Message Logs  | Per-Guild with Per-Channel override | The content and metadata of messages sent within the last 30 days (author id, timestamp, content)                | Once a message has been edited or deleted its previous state is not accessible, so information must be stored about messages before they are edited or deleted in order for it to be possible to retrieve the previous state of a message |
+| Role Persist  | Per-Guild with Per-Role override    | The IDs of the roles that a member had when they left the guild                                                  | To add the roles back once the member rejoins                                                                                                                                                                                             |
 
-We use the Order Information that we collect generally to fulfil any orders placed through the Site (such as providing you with invoices and/or order confirmations and granting you access to the products you have purchased). Additionally, we may use this Order Information to: Communicate with you; Screen our orders for potential risk or fraud; and When in line with the preferences you have shared with us, provide you with information or advertising relating to our products or services.
+When we talk about "Sensitive Information" in this Privacy Policy, we are talking both about Account Information and Sensitive Discord Information.
 
-We use the Device Information that we collect to help us screen for potential risk and fraud (in particular, your IP address), and more generally to improve and optimize our Site (for example, by generating analytics about how our customers browse and interact with the Site, and to assess the success of our marketing and advertising campaigns).
+## How we use your Sensitive Information
 
-## Sharing your Personal Information
+We use the Account Information that we collect to communicate with you if necessary. We do not use your Account Information for marketing purposes.
 
-We share your Personal Information with third parties to help us use your Personal Information, as described above. For example, we use Stripe to power our payments and subscriptions. You can read more about how Stripe uses your Personal Information here: https://stripe.com/privacy.
+Sensitive Discord Information is used autonomously by the Bot to provide our features to applicable Discord guilds.
 
-Finally, we may also share your Personal Information to comply with applicable laws and regulations, to respond to a subpoena, search warrant or other lawful request for information we receive, or to otherwise protect our rights.
+## Sharing your Sensitive Information
+
+Your Account Information is shared with our billing partner Stripe so that they can power our payments and subscriptions. You can read more about how Stripe uses your Account Information here: https://stripe.com/privacy.
+
+We may also share your Sensitive Information to comply with applicable laws and regulations, to respond to a subpoena, search warrant or other lawful request for information we receive, or to otherwise protect our rights.
 
 ## Do not track
 
@@ -38,11 +47,11 @@ Additionally, if you are a European resident we note that we are processing your
 
 ## Data Retention
 
-When you place an order through the Site, we will maintain your Order Information for our records unless and until you ask us to delete this information.
+All Sensitive Information is retained unless and until you ask us to delete the information, or if the particular piece of Sensitive Information is only to be stored for a specific time period (as described in "Sensitive Information we collect") it will be deleted as soon as that time period has allotted.
 
 ## Minors
 
-Persons under the age of 13 are not permitted to use this site.
+Persons under the age of 13 are not permitted to use the Site or the Bot.
 
 Utili does not knowingly collect any Personal Identifiable Information from children under the age of 13. If you think that your child provided this kind of information on our website, we strongly encourage you to contact us immediately and we will remove such information from our records as promptly as possible.
 
