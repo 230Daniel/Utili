@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Linq;
 using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
 using Disqord;
+using Disqord.Http;
 using Disqord.OAuth2;
+using Disqord.Rest;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 
@@ -25,15 +28,16 @@ namespace UtiliBackend.Services
 
         public async ValueTask<BearerClient> GetClientAsync(HttpContext httpContext)
         {
+            var identity = httpContext.User.Identities.FirstOrDefault(x => x.AuthenticationType == "Discord");
             var token = await httpContext.GetTokenAsync("Discord", "access_token");
             
-            if (!httpContext.User.Identity.IsAuthenticated || string.IsNullOrWhiteSpace(token))
+            if (identity is null || !identity.IsAuthenticated || string.IsNullOrWhiteSpace(token))
                 return null;
             
             var userId = Snowflake.Parse(httpContext.User.FindFirstValue("id"));
 
             await _semaphore.WaitAsync();
-            
+
             try
             {
                 if (_clients.TryGetValue(userId, out var cachedClient))
@@ -42,7 +46,7 @@ namespace UtiliBackend.Services
                         return cachedClient;
                     _clients.TryRemove(userId, out _);
                 }
-                
+
                 var newClient = _bearerClientFactory.CreateClient(Token.Bearer(token));
                 var authorisation = await newClient.FetchCurrentAuthorizationAsync();
                 var user = await newClient.FetchCurrentUserAsync();
@@ -56,6 +60,10 @@ namespace UtiliBackend.Services
 
                 _clients.TryAdd(userId, client);
                 return client;
+            }
+            catch (RestApiException ex) when (ex.StatusCode == HttpResponseStatusCode.Unauthorized)
+            {
+                return null;
             }
             finally
             {

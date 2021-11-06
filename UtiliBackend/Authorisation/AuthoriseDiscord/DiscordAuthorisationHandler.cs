@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -18,12 +17,11 @@ namespace UtiliBackend.Authorisation
 
         protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context, DiscordRequirement requirement)
         {
-            var identity = context.User.Identities.FirstOrDefault(x => x.AuthenticationType == "Discord");
-            
-            if (identity is not null && identity.IsAuthenticated)
+            var httpContext = (HttpContext) context.Resource;
+            var client = await _discordClientService.GetClientAsync(httpContext);
+                
+            if (client is not null)
             {
-                var httpContext = (HttpContext) context.Resource;
-                var client = await _discordClientService.GetClientAsync(httpContext);
                 httpContext.Items["DiscordClient"] ??= client;
                 
                 if (client.Authorization.ExpiresAt > DateTimeOffset.Now)

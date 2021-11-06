@@ -7,25 +7,24 @@ using System.Threading.Tasks;
 using Disqord;
 using Disqord.OAuth2;
 using Microsoft.AspNetCore.Http;
+using UtiliBackend.Extensions;
 
 namespace UtiliBackend.Services
 {
     public class DiscordUserGuildsService
     {
-        private readonly DiscordClientService _discordClientService;
         private readonly ConcurrentDictionary<Snowflake, UserGuilds> _guilds;
         private readonly SemaphoreSlim _semaphore;
         
-        public DiscordUserGuildsService(DiscordClientService discordClientService)
+        public DiscordUserGuildsService()
         {
-            _discordClientService = discordClientService;
             _guilds = new();
             _semaphore = new(1, 1);
         }
 
         public async Task<UserGuilds> GetGuildsAsync(HttpContext httpContext)
         {
-            var client = await _discordClientService.GetClientAsync(httpContext);
+            var client = httpContext.GetDiscordClient();
             var userId = client.Authorization.User.Id;
             
             await _semaphore.WaitAsync();
