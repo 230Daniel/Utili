@@ -12,7 +12,7 @@ namespace UtiliBackend.Controllers
             _configuration = configuration;
         }
 
-        [HttpGet]
+        [HttpGet("/")]
         public IActionResult Get()
         {
             return Redirect($"{_configuration["Frontend:Origin"]}");
