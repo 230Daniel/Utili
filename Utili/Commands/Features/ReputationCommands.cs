@@ -99,7 +99,7 @@ namespace Utili.Commands
             return Info("Inverse Reputation Leaderboard", content);
         }
 
-        [Command("give", "add")]
+        [Command("give", "add", "grant")]
         [DefaultCooldown(1, 2)]
         [RequireAuthorGuildPermissions(Permission.ManageGuild)]
         public async Task<DiscordCommandResult> GiveAsync(
@@ -113,10 +113,10 @@ namespace Utili.Commands
             return Success("Reputation given", $"Gave {change} reputation to {member.Mention}");
         }
 
-        [Command("revoke", "take")]
+        [Command("take", "revoke")]
         [DefaultCooldown(1, 2)]
         [RequireAuthorGuildPermissions(Permission.ManageGuild)]
-        public async Task<DiscordCommandResult> RevokeAsync(
+        public async Task<DiscordCommandResult> TakeAsync(
             [RequireNotBot] 
             IMember member, 
             ulong change)
@@ -124,7 +124,7 @@ namespace Utili.Commands
             await _dbContext.ReputationMembers.UpdateMemberReputationAsync(Context.GuildId, member.Id, -(long)change);
             await _dbContext.SaveChangesAsync();
             
-            return Success("Reputation given", $"Took {change} reputation from {member.Mention}");
+            return Success("Reputation taken", $"Took {change} reputation from {member.Mention}");
         }
 
         [Command("set")]
