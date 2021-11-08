@@ -8,7 +8,7 @@
 
   <ItemGroup>
     <PackageReference Include="BotlistStatsPoster" Version="1.2.0" />
-    <PackageReference Include="Disqord.Bot" Version="1.0.0-10242021-142" />
+    <PackageReference Include="Disqord.Bot" Version="1.0.0-11042021-146" />
     <PackageReference Include="LinuxSystemStats" Version="1.0.0" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="3.11.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="5.0.0" />
@@ -17,7 +17,7 @@
     <PackageReference Include="Microsoft.Extensions.Hosting.Systemd" Version="5.0.1" />
     <PackageReference Include="Serilog" Version="2.10.0" />
     <PackageReference Include="Serilog.Extensions.Hosting" Version="4.1.2" />
-    <PackageReference Include="Serilog.Settings.Configuration" Version="3.2.0" />
+    <PackageReference Include="Serilog.Settings.Configuration" Version="3.3.0" />
     <PackageReference Include="Serilog.Sinks.Console" Version="4.0.0" />
     <PackageReference Include="Serilog.Sinks.Debug" Version="2.0.0" />
     <PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
