@@ -9,8 +9,8 @@
     <PackageReference Include="AspNetCoreRateLimit" Version="3.2.2" />
     <PackageReference Include="AutoMapper" Version="10.1.1" />
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="8.1.1" />
-    <PackageReference Include="Disqord.OAuth2" Version="1.0.0-11042021-146" />
-    <PackageReference Include="Disqord.Rest" Version="1.0.0-11042021-146" />
+    <PackageReference Include="Disqord.OAuth2" Version="1.0.0-11112021-148" />
+    <PackageReference Include="Disqord.Rest" Version="1.0.0-11112021-148" />
     <PackageReference Include="Microsoft.Extensions.Hosting.Systemd" Version="5.0.1" />
     <PackageReference Include="Stripe.net" Version="39.76.0" />
     <PackageReference Include="Serilog.AspNetCore" Version="4.1.0" />
