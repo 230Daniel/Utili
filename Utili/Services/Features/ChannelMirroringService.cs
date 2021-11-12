@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Database.Entities;
 using Disqord;
 using Disqord.Gateway;
 using Disqord.Rest;
@@ -75,15 +76,33 @@ namespace Utili.Services
                     }
                 }
                 
-                var username = $"{e.Message.Author} in {e.Channel.Name}";
-                var avatarUrl = e.Message.Author.GetAvatarUrl();
                 
+
+                string username;
+                string avatarUrl;
+                string content;
+
+                if (config.AuthorDisplayMode == ChannelMirroringAuthorDisplayMode.WebhookName)
+                {
+                    username = $"{e.Message.Author} in #{e.Channel.Name}";
+                    avatarUrl = e.Message.Author.GetAvatarUrl();
+                    content = e.Message.Content;
+                }
+                else
+                {
+                    username = $"#{e.Channel.Name}";
+                    avatarUrl = null;
+                    content = e.Message.Content.Contains('\n') 
+                        ? $"{e.Message.Author.Mention}:\n{e.Message.Content}"
+                        : $"{e.Message.Author.Mention}: {e.Message.Content}";
+                }
+
                 if (!string.IsNullOrWhiteSpace(userMessage.Content) || userMessage.Embeds.Any(x => x.IsRich()))
                 {
                     var message = new LocalWebhookMessage()
                         .WithName(username)
                         .WithAvatarUrl(avatarUrl)
-                        .WithOptionalContent(userMessage.Content)
+                        .WithOptionalContent(content)
                         .WithEmbeds(userMessage.Embeds.Where(x => x.IsRich()).Select(LocalEmbed.FromEmbed))
                         .WithAllowedMentions(LocalAllowedMentions.None);
 
