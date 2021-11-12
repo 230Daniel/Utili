@@ -7,7 +7,8 @@ namespace Database.Entities
     {
         public bool WaitForVerification { get; set; }
         public List<ulong> JoinRoles { get; set; }
-        
+        public bool CancelOnRolePersist { get; set; }
+
         public JoinRolesConfiguration(ulong guildId) : base(guildId) { }
     }
 }

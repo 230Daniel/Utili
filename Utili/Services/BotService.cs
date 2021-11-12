@@ -250,12 +250,13 @@ namespace Utili.Services
             using var scope = _scopeFactory.CreateScope();
             var config = await scope.GetCoreConfigurationAsync(e.GuildId);
             if (config is null) return;
-            
+
+            var rolePersistAddedRoles = false;
             if(config.HasFeature(BotFeatures.RolePersist))
-                await _rolePersist.MemberJoined(scope, e);
+                rolePersistAddedRoles = await _rolePersist.MemberJoined(scope, e);
             
             if(config.HasFeature(BotFeatures.JoinRoles))
-                await _joinRoles.MemberJoined(scope, e);
+                await _joinRoles.MemberJoined(scope, e, rolePersistAddedRoles);
             
             if(config.HasFeature(BotFeatures.JoinMessage))
                 await _joinMessage.MemberJoined(scope, e);

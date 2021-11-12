@@ -23,23 +23,24 @@ namespace Utili.Services
             _client = client;
         }
 
-        public async Task MemberJoined(IServiceScope scope, MemberJoinedEventArgs e)
+        // Returns true if it granted any roles to the new member
+        public async Task<bool> MemberJoined(IServiceScope scope, MemberJoinedEventArgs e)
         {
             try
             {
-                if (e.Member.IsBot) return;
+                if (e.Member.IsBot) return false;
 
                 var db = scope.GetDbContext();
                 var config = await db.RolePersistConfigurations.GetForGuildAsync(e.GuildId);
-                if (config is null || !config.Enabled) return;
+                if (config is null || !config.Enabled) return false;
 
                 var memberRecord = await db.RolePersistMembers.GetForMemberAsync(e.GuildId, e.Member.Id);
-                if (memberRecord is null) return;
+                if (memberRecord is null) return false;
                 
                 var guild = _client.GetGuild(e.GuildId);
                 var roles = memberRecord.Roles.Select(x => guild.GetRole(x)).ToList();
                 roles.RemoveAll(x => x is null || !x.CanBeManaged() || config.ExcludedRoles.Contains(x.Id));
-                if (!roles.Any()) return;
+                if (!roles.Any()) return false;
                 
                 IMember member = guild.GetMember(e.Member.Id);
                 member ??= await guild.FetchMemberAsync(e.Member.Id);
@@ -52,10 +53,12 @@ namespace Utili.Services
 
                 db.RolePersistMembers.Remove(memberRecord);
                 await db.SaveChangesAsync();
+                return true;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Exception thrown on member joined");
+                return false;
             }
         }
 

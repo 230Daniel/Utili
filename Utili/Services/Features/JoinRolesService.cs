@@ -35,7 +35,7 @@ namespace Utili.Services
             _ = ScheduleAllAddRoles();
         }
 
-        public async Task MemberJoined(IServiceScope scope, MemberJoinedEventArgs e)
+        public async Task MemberJoined(IServiceScope scope, MemberJoinedEventArgs e, bool rolePersistAddedRoles)
         {
             try
             {
@@ -43,6 +43,9 @@ namespace Utili.Services
                 var config = await db.JoinRolesConfigurations.GetForGuildAsync(e.GuildId);
                 IGuild guild = _client.GetGuild(e.GuildId);
 
+                if (rolePersistAddedRoles && config.CancelOnRolePersist) 
+                    return;
+                
                 if (config.WaitForVerification && (e.Member.IsPending || guild.VerificationLevel >= GuildVerificationLevel.High))
                 {
                     var memberRecord = await db.JoinRolesPendingMembers.GetForMemberAsync(e.GuildId, e.Member.Id);
