@@ -77,7 +77,7 @@ class ChannelMirroring extends React.Component {
 	}
 
 	onChannelAdded(channel) {
-		this.settings.channels.push({ destinationChannelId: React.createRef() });
+		this.settings.channels.push({ destinationChannelId: React.createRef(), authorDisplayMode: React.createRef() });
 		this.state.channelMirroring.push({
 			channelId: channel.id,
 			destinationChannelId: 0,
