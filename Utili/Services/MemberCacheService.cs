@@ -195,7 +195,9 @@ namespace Utili.Services
             
             foreach (var guildId in guildIds)
             {
-                await _client.Chunker.ChunkAsync(_client.GetGuild(guildId));
+                var guild = _client.GetGuild(guildId);
+                if(guild is null) continue;
+                await _client.Chunker.ChunkAsync(guild);
                 _logger.LogDebug("Cached members for {Guild}", guildId);
             }
         }
