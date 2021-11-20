@@ -57,7 +57,6 @@ namespace Database
             modelBuilder.ConfigureMemberEntities();
             modelBuilder.ConfigureMessageEntities();
             modelBuilder.ConfigureOtherEntities();
-            modelBuilder.ConfigureUlongListConverters();
         }
     }
 }

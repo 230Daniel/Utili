@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Reflection;
 using Database.Entities;
 using Database.Entities.Base;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Database.Extensions
 {
@@ -84,25 +81,6 @@ namespace Database.Extensions
             
             modelBuilder.Entity<User>().HasKey(e => e.UserId);
             modelBuilder.Entity<User>().Property(e => e.UserId).ValueGeneratedNever();
-        }
-        
-        public static void ConfigureUlongListConverters(this ModelBuilder modelBuilder)
-        {
-            var ulongListConverter = new ValueConverter<List<ulong>, decimal[]>(
-                ulongs => ulongs.Select(Convert.ToDecimal).ToArray(),
-                decimals => decimals.Select(Convert.ToUInt64).ToList());
-
-            foreach (var type in modelBuilder.Model.GetEntityTypes())
-            {
-                foreach (var property in type.GetProperties())
-                {
-                    if (property.ClrType == typeof(List<ulong>))
-                    {
-                        property.SetValueConverter(ulongListConverter);
-                        property.SetColumnType("numeric(20,0)[]");
-                    }
-                }
-            }
         }
     }
 }
