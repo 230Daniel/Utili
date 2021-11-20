@@ -213,8 +213,6 @@ namespace Utili.Services
                 {
                     await textChannel.ModifyAsync(x => x.Overwrites = new Optional<IEnumerable<LocalOverwrite>>(overwrites), new DefaultRestRequestOptions{Reason = "Voice Link"}, cancellationToken);
                 }
-
-                _logger.LogInformation("Updated linked channel {GuildId}/{ChannelId}", guildId, channelId);
             }
             catch (Exception e)
             {
@@ -244,8 +242,6 @@ namespace Utili.Services
                 overwrites.RemoveAll(x => x.TargetId != guild.Id && x.TargetId != _client.CurrentUser.Id);
                 await textChannel.ModifyAsync(x => x.Overwrites = new Optional<IEnumerable<LocalOverwrite>>(overwrites), new DefaultRestRequestOptions {Reason = "Voice Link"}, cancellationToken);
             }
-            
-            _logger.LogInformation("Closed linked channel {GuildId}/{ChannelId}", config.GuildId, channelRecord.ChannelId);
         }
     }
 }
