@@ -81,12 +81,14 @@ namespace Utili.Services
                 string username;
                 string avatarUrl;
                 string content;
+                string attachmentContent;
 
                 if (config.AuthorDisplayMode == ChannelMirroringAuthorDisplayMode.WebhookName)
                 {
                     username = $"{e.Message.Author} in #{e.Channel.Name}";
                     avatarUrl = e.Message.Author.GetAvatarUrl();
                     content = e.Message.Content;
+                    attachmentContent = null;
                 }
                 else
                 {
@@ -95,8 +97,9 @@ namespace Utili.Services
                     content = e.Message.Content.Contains('\n') 
                         ? $"{e.Message.Author.Mention}:\n{e.Message.Content}"
                         : $"{e.Message.Author.Mention}: {e.Message.Content}";
+                    attachmentContent = $"{e.Message.Author.Mention}\n";
                 }
-
+                
                 if (!string.IsNullOrWhiteSpace(userMessage.Content) || userMessage.Embeds.Any(x => x.IsRich()))
                 {
                     var message = new LocalWebhookMessage()
@@ -108,13 +111,13 @@ namespace Utili.Services
 
                     await _client.ExecuteWebhookAsync(webhook.Id, webhook.Token, message);
                 }
-                    
+                
                 foreach (var attachment in userMessage.Attachments)
                 {
                     var attachmentMessage = new LocalWebhookMessage()
                         .WithName(username)
                         .WithAvatarUrl(avatarUrl)
-                        .WithContent(attachment.Url);
+                        .WithContent($"{attachmentContent}{attachment.Url}");
                     await _client.ExecuteWebhookAsync(webhook.Id, webhook.Token, attachmentMessage);
                 }
             }
