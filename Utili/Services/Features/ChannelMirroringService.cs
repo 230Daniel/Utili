@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Database.Entities;
 using Disqord;
@@ -81,44 +82,82 @@ namespace Utili.Services
                 string username;
                 string avatarUrl;
                 string content;
-                string attachmentContent;
 
                 if (config.AuthorDisplayMode == ChannelMirroringAuthorDisplayMode.WebhookName)
                 {
                     username = $"{e.Message.Author} in #{e.Channel.Name}";
                     avatarUrl = e.Message.Author.GetAvatarUrl();
                     content = e.Message.Content;
-                    attachmentContent = null;
                 }
                 else
                 {
-                    username = $"#{e.Channel.Name}";
+                    var bot = _client.GetGuild(e.GuildId.Value).GetCurrentMember();
+                    username = bot.Nick ?? bot.Name;
                     avatarUrl = null;
                     content = e.Message.Content.Contains('\n') 
-                        ? $"{e.Message.Author.Mention}:\n{e.Message.Content}"
-                        : $"{e.Message.Author.Mention}: {e.Message.Content}";
-                    attachmentContent = $"{e.Message.Author.Mention}\n";
+                        ? $"{e.Message.Author.Mention} in {e.Channel.Mention}:\n{e.Message.Content}"
+                        : $"{e.Message.Author.Mention} in {e.Channel.Mention}: {e.Message.Content}";
+                }
+
+                using var httpClient = new HttpClient();
+                
+                var attachmentChunks = new List<LocalAttachment[]>();
+                var currentAttachmentChunk = new List<LocalAttachment>();
+                var currentAttachmentChunkSize = 0;
+                
+                foreach (var attachment in userMessage.Attachments.Where(x => x.FileSize < 8000000))
+                {
+                    var stream = await httpClient.GetStreamAsync(attachment.ProxyUrl);
+                    if (currentAttachmentChunkSize + attachment.FileSize >= 8000000)
+                    {
+                        attachmentChunks.Add(currentAttachmentChunk.ToArray());
+                        currentAttachmentChunk = new();
+                        currentAttachmentChunkSize = 0;
+                    }
+                    
+                    currentAttachmentChunk.Add(new LocalAttachment(stream, attachment.FileName));
+                    currentAttachmentChunkSize += attachment.FileSize;
                 }
                 
-                if (!string.IsNullOrWhiteSpace(userMessage.Content) || userMessage.Embeds.Any(x => x.IsRich()))
+                if(currentAttachmentChunk.Any())
+                    attachmentChunks.Add(currentAttachmentChunk.ToArray());
+
+                var message = new LocalWebhookMessage()
+                    .WithName(username)
+                    .WithAvatarUrl(avatarUrl)
+                    .WithOptionalContent(content)
+                    .WithEmbeds(userMessage.Embeds.Where(x => x.IsRich()).Select(LocalEmbed.FromEmbed))
+                    .WithAllowedMentions(LocalAllowedMentions.None);
+                
+                if(attachmentChunks.Any())
+                    message.WithAttachments(attachmentChunks[0]);
+
+                await _client.ExecuteWebhookAsync(webhook.Id, webhook.Token, message);
+                
+                foreach (var attachmentChunk in attachmentChunks.Skip(1))
                 {
-                    var message = new LocalWebhookMessage()
+                    message = new LocalWebhookMessage()
                         .WithName(username)
                         .WithAvatarUrl(avatarUrl)
-                        .WithOptionalContent(content)
-                        .WithEmbeds(userMessage.Embeds.Where(x => x.IsRich()).Select(LocalEmbed.FromEmbed))
-                        .WithAllowedMentions(LocalAllowedMentions.None);
-
+                        .WithAllowedMentions(LocalAllowedMentions.None)
+                        .WithAttachments(attachmentChunk);
+                    
                     await _client.ExecuteWebhookAsync(webhook.Id, webhook.Token, message);
                 }
                 
-                foreach (var attachment in userMessage.Attachments)
+                foreach (var attachmentChunk in attachmentChunks)
+                    foreach (var attachment in attachmentChunk)
+                        attachment.Dispose();
+
+                if (userMessage.Attachments.Any(x => x.FileSize >= 8000000))
                 {
-                    var attachmentMessage = new LocalWebhookMessage()
+                    message = new LocalWebhookMessage()
                         .WithName(username)
                         .WithAvatarUrl(avatarUrl)
-                        .WithContent($"{attachmentContent}{attachment.Url}");
-                    await _client.ExecuteWebhookAsync(webhook.Id, webhook.Token, attachmentMessage);
+                        .WithContent(string.Concat(userMessage.Attachments.Where(x => x.FileSize >= 8000000).Select(x => x.ProxyUrl + "\n")))
+                        .WithAllowedMentions(LocalAllowedMentions.None);
+                    
+                    await _client.ExecuteWebhookAsync(webhook.Id, webhook.Token, message);
                 }
             }
             catch(Exception ex)
