@@ -15,7 +15,7 @@ namespace Utili.Extensions
             // The higher the position the higher the role in the hierarchy
 
             return guild.BotHasPermissions(Permission.ManageRoles) && 
-                   roles.Any(x => x.Position > role.Position);
+                   roles.Max(x => x.Position) > role.Position;
         }
     }
 }

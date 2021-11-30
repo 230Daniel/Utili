@@ -57,6 +57,7 @@ namespace Utili.Services
                     {
                         webhook = await GetWebhookAsync(otherConfig.WebhookId);
                         if (webhook?.ChannelId is null || webhook.ChannelId != destinationChannel.Id) webhook = null;
+                        else break;
                     }
 
                     if (webhook is not null)
@@ -77,8 +78,6 @@ namespace Utili.Services
                     }
                 }
                 
-                
-
                 string username;
                 string avatarUrl;
                 string content;
