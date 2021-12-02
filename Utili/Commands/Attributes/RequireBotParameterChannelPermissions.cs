@@ -28,7 +28,7 @@ namespace Utili.Commands
 
             return permissions.Has(Permissions) ? 
                 Success() : 
-                Failure($"The bot lacks the necessary channel permissions in {channel} ({Permissions - permissions}) to execute this.");
+                Failure($"The bot lacks the necessary channel permissions in {channel} ({Permissions & ~permissions}) to execute this.");
         }
     }
 }

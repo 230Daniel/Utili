@@ -9,13 +9,16 @@ namespace Utili.Extensions
         public static bool CanBeManaged(this IRole role)
         {
             IGuild guild = (role.Client as DiscordClientBase).GetGuild(role.GuildId);
-            var bot = guild.GetCurrentMember();
-            var roles = bot.GetRoles().Values;
-
+            if (!guild.BotHasPermissions(Permission.ManageRoles)) return false;
+            if (role.IsManaged) return false;
+            
             // The higher the position the higher the role in the hierarchy
+            var bot = guild.GetCurrentMember();
+            var botRoles = bot.GetRoles().Values;
+            var botHighestPosition = botRoles.Max(x => x.Position);
+            var botHighestRole = botRoles.Where(x => x.Position == botHighestPosition).OrderByDescending(x => x.Id).First();
 
-            return guild.BotHasPermissions(Permission.ManageRoles) && 
-                   roles.Max(x => x.Position) > role.Position;
+            return botHighestRole.Position > role.Position || botHighestRole.Position == role.Position && botHighestRole.Id > role.Id;
         }
     }
 }
