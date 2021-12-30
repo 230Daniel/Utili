@@ -107,71 +107,6 @@ namespace Utili.Services
                 semaphore.Release();
             }
         }
-        
-        private async Task UncacheExpiredTemporaryMembersAsync()
-        {
-            var guildIds = _tempCachedGuilds.Keys.ToArray();
-            foreach (var guildId in guildIds)
-            {
-                lock (_cachedGuilds)
-                {
-                    if (_cachedGuilds.Contains(guildId))
-                        // The guild is cached permanently
-                        continue;
-                }
-                
-                SemaphoreSlim semaphore;
-            
-                lock (_semaphores)
-                {
-                    if (!_semaphores.TryGetValue(guildId, out semaphore))
-                    {
-                        semaphore = new SemaphoreSlim(1, 1);
-                        _semaphores.Add(guildId, semaphore);
-                    }
-                }
-
-                await semaphore.WaitAsync();
-
-                try
-                {
-                    if (_tempCachedGuilds.TryGetValue(guildId, out var expiryTime) && expiryTime < DateTime.UtcNow)
-                    {
-                        // The expiry time is in the past, remove it and un-cache
-                        _tempCachedGuilds.TryRemove(guildId, out _);
-                        
-                        if(!_client.CacheProvider.TryGetMembers(guildId, out var cache))
-                            continue;
-
-                        var toRemove = cache.Where(x =>
-                            {
-                                var (memberId, member) = x;
-                            
-                                if (memberId == _client.CurrentUser.Id)
-                                    return false;
-
-                                if (member.IsPending)
-                                    return false;
-
-                                var voiceState = member.GetVoiceState();
-                                return voiceState?.ChannelId is null;
-                            })
-                            .Select(x => x.Key);
-
-                        foreach (var userId in toRemove)
-                        {
-                            cache.TryRemove(userId, out _);
-                        }
-
-                        _logger.LogInformation("Uncached members for guild {GuildId}", guildId);
-                    }
-                }
-                finally
-                {
-                    semaphore.Release();
-                }
-            }
-        }
 
         private void TimerElapsed(object sender, ElapsedEventArgs e)
         {
@@ -188,17 +123,25 @@ namespace Utili.Services
 
         private async Task PermanentlyCacheMembersAsync(IEnumerable<Snowflake> guildIds)
         {
-            lock (_cachedGuilds)
+            try
             {
-                _cachedGuilds.AddRange(guildIds);
+                lock (_cachedGuilds)
+                {
+                    _cachedGuilds.AddRange(guildIds);
+                }
+
+                foreach (var guildId in guildIds)
+                {
+                    var guild = _client.GetGuild(guildId);
+                    if (guild is null) continue;
+                    await _client.Chunker.ChunkAsync(guild);
+                    _logger.LogDebug("Cached members for {Guild}", guildId);
+                }
             }
-            
-            foreach (var guildId in guildIds)
+            catch (Exception ex)
             {
-                var guild = _client.GetGuild(guildId);
-                if(guild is null) continue;
-                await _client.Chunker.ChunkAsync(guild);
-                _logger.LogDebug("Cached members for {Guild}", guildId);
+                _logger.LogError(ex, "Exception thrown while permanently caching members");
+                throw;
             }
         }
 
@@ -216,6 +159,78 @@ namespace Utili.Services
             
             guildIds.RemoveAll(x => !shardGuildIds.Contains(x));
             return guildIds.Distinct().Select(x => new Snowflake(x)).ToList();
+        }
+        
+        private async Task UncacheExpiredTemporaryMembersAsync()
+        {
+            try
+            {
+                var guildIds = _tempCachedGuilds.Keys.ToArray();
+                foreach (var guildId in guildIds)
+                {
+                    lock (_cachedGuilds)
+                    {
+                        if (_cachedGuilds.Contains(guildId))
+                            // The guild is cached permanently
+                            continue;
+                    }
+
+                    SemaphoreSlim semaphore;
+
+                    lock (_semaphores)
+                    {
+                        if (!_semaphores.TryGetValue(guildId, out semaphore))
+                        {
+                            semaphore = new SemaphoreSlim(1, 1);
+                            _semaphores.Add(guildId, semaphore);
+                        }
+                    }
+
+                    await semaphore.WaitAsync();
+
+                    try
+                    {
+                        if (_tempCachedGuilds.TryGetValue(guildId, out var expiryTime) && expiryTime < DateTime.UtcNow)
+                        {
+                            // The expiry time is in the past, remove it and un-cache
+                            _tempCachedGuilds.TryRemove(guildId, out _);
+
+                            if (!_client.CacheProvider.TryGetMembers(guildId, out var cache))
+                                continue;
+
+                            var toRemove = cache.Where(x =>
+                                {
+                                    var (memberId, member) = x;
+
+                                    if (memberId == _client.CurrentUser.Id)
+                                        return false;
+
+                                    if (member.IsPending)
+                                        return false;
+
+                                    var voiceState = member.GetVoiceState();
+                                    return voiceState?.ChannelId is null;
+                                })
+                                .Select(x => x.Key);
+
+                            foreach (var userId in toRemove)
+                            {
+                                cache.TryRemove(userId, out _);
+                            }
+
+                            _logger.LogInformation("Uncached members for guild {GuildId}", guildId);
+                        }
+                    }
+                    finally
+                    {
+                        semaphore.Release();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Exception thrown while uncaching expired temporary members");
+            }
         }
     }
 }
