@@ -16,7 +16,7 @@
 	color: var(--colour-text-muted);
 }
 
-.your-subscriptions > span, a{
+.your-subscriptions > span, .your-subscriptions > a {
 	font-size: 16px;
 }
 
