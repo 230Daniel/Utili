@@ -21,7 +21,7 @@ namespace Utili.Services
         private readonly ILogger<AutopurgeService> _logger;
         private readonly DiscordClientBase _client;
         private readonly IServiceScopeFactory _scopeFactory;
-        
+
         private int _purgeNumber;
         private Timer _timer;
         private List<ulong> _downloadingFor = new();
@@ -73,7 +73,7 @@ namespace Utili.Services
 
             var configs = await db.AutopurgeConfigurations.Where(x => x.Mode != AutopurgeMode.None).ToListAsync();
             var premiumSlots = await db.PremiumSlots.ToListAsync();
-            
+
             var premiumConfigs = configs.Where(x => premiumSlots.Any(y => y.GuildId == x.GuildId)).ToList();
             configs.RemoveAll(x => premiumSlots.Any(y => y.GuildId == x.GuildId));
 
@@ -87,7 +87,7 @@ namespace Utili.Services
                         .Where(x => x.GuildId == guild.Id && guild.GetTextChannel(x.ChannelId) is not null)
                         .OrderBy(x => x.ChannelId)
                         .ToList();
-                    
+
                     if (guildConfigs.Count > 0)
                     {
                         var config = guildConfigs[(_purgeNumber / 3) % guildConfigs.Count];
@@ -111,7 +111,7 @@ namespace Utili.Services
                 using var scope = _scopeFactory.CreateScope();
                 var db = scope.GetDbContext();
                 var config = await db.AutopurgeConfigurations.GetForGuildChannelAsync(staleConfig.GuildId, staleConfig.ChannelId);
-                if(config is null || config.Mode == AutopurgeMode.None) return;
+                if(config is null || config.Mode == AutopurgeMode.None || config.Timespan > TimeSpan.FromDays(14)) return;
 
                 var guild = _client.GetGuild(config.GuildId);
                 var channel = guild.GetTextChannel(config.ChannelId);
@@ -120,12 +120,12 @@ namespace Utili.Services
                 var now = DateTime.UtcNow;
                 var maxTimestamp = now - config.Timespan;
                 var minTimestamp = now - TimeSpan.FromDays(13.9);
-                
+
                 var query = db.AutopurgeMessages.Where(
-                    x => x.GuildId == config.GuildId 
-                         && x.ChannelId == config.ChannelId 
-                         && x.Timestamp <= maxTimestamp 
-                         && x.Timestamp >= minTimestamp 
+                    x => x.GuildId == config.GuildId
+                         && x.ChannelId == config.ChannelId
+                         && x.Timestamp <= maxTimestamp
+                         && x.Timestamp >= minTimestamp
                          && !x.IsPinned);
 
                 var messagesToDelete = config.Mode switch
@@ -136,12 +136,12 @@ namespace Utili.Services
                     AutopurgeMode.None => new List<AutopurgeMessage>(),
                     _ => throw new Exception($"Unknown autopurge mode {config.Mode}")
                 };
-                
+
                 if(messagesToDelete.Count == 0) return;
-                
+
                 db.AutopurgeMessages.RemoveRange(messagesToDelete);
                 await db.SaveChangesAsync();
-                
+
                 await channel.DeleteMessagesAsync(messagesToDelete.Select(x => new Snowflake(x.MessageId)), new DefaultRestRequestOptions {Reason = "Autopurge"});
             }
             catch (RestApiException ex) when (ex.StatusCode == HttpResponseStatusCode.NotFound)
@@ -215,7 +215,7 @@ namespace Utili.Services
 
                 var messageRecord = await db.AutopurgeMessages.GetForMessageAsync(e.MessageId);
                 if (messageRecord is null) return;
-                
+
                 if (messageRecord.IsPinned != e.Model.Pinned.Value)
                 {
                     messageRecord.IsPinned = e.Model.Pinned.Value;
@@ -248,7 +248,7 @@ namespace Utili.Services
                 _logger.LogError(ex, "Exception thrown on message deleted");
             }
         }
-        
+
         public async Task MessagesDeleted(IServiceScope scope, MessagesDeletedEventArgs e)
         {
             try
@@ -256,9 +256,9 @@ namespace Utili.Services
                 var db = scope.GetDbContext();
                 var config = await db.AutopurgeConfigurations.GetForGuildChannelAsync(e.GuildId, e.ChannelId);
                 if(config is null) return;
-                
+
                 var messages = await db.AutopurgeMessages.Where(x => e.MessageIds.Select(y => y.RawValue).Contains(x.MessageId)).ToListAsync();
-                
+
                 if (messages.Any())
                 {
                     db.AutopurgeMessages.RemoveRange(messages);
@@ -309,16 +309,16 @@ namespace Utili.Services
             {
                 using var scope = _scopeFactory.CreateScope();
                 var db = scope.GetDbContext();
-                
+
                 var newConfigs = await db.AutopurgeConfigurations.Where(x => x.AddedFromDashboard).ToListAsync();
-                
+
                 foreach (var newConfig in newConfigs)
                 {
                     _ = FetchForChannelAsync(newConfig);
                     newConfig.AddedFromDashboard = false;
                     db.AutopurgeConfigurations.Update(newConfig);
                 }
-                
+
                 await db.SaveChangesAsync();
             }
             catch (Exception ex)
@@ -372,7 +372,7 @@ namespace Utili.Services
 
                     var messageRows = await db.AutopurgeMessages
                         .Where(x => x.GuildId == config.GuildId && x.ChannelId == config.ChannelId).ToListAsync();
-                    
+
                     foreach (var message in messages)
                     {
                         var messageRow = messageRows.FirstOrDefault(x => x.MessageId == message.Id);
