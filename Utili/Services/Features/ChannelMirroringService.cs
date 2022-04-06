@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using Database.Entities;
 using Disqord;
@@ -21,14 +22,16 @@ namespace Utili.Services
         private readonly ILogger<ChannelMirroringService> _logger;
         private readonly DiscordClientBase _client;
 
-        private Dictionary<ulong, IWebhook> _webhookCache;
+        private Dictionary<ulong, CachedWebhook> _webhookCache;
+        private SemaphoreSlim _webhookCacheSemaphore;
 
         public ChannelMirroringService(ILogger<ChannelMirroringService> logger, DiscordClientBase client)
         {
             _logger = logger;
             _client = client;
 
-            _webhookCache = new Dictionary<ulong, IWebhook>();
+            _webhookCache = new Dictionary<ulong, CachedWebhook>();
+            _webhookCacheSemaphore = new SemaphoreSlim(1, 1);
         }
 
         public async Task MessageReceived(IServiceScope scope, MessageReceivedEventArgs e)
@@ -40,10 +43,10 @@ namespace Utili.Services
                 var db = scope.GetDbContext();
                 var config = await db.ChannelMirroringConfigurations.GetForGuildChannelAsync(e.GuildId.Value, e.ChannelId);
                 if (config is null) return;
-                
+
                 var guild = _client.GetGuild(e.GuildId.Value);
                 var destinationChannel = guild.GetTextChannel(config.DestinationChannelId);
-                if(destinationChannel is null) return;
+                if (destinationChannel is null) return;
 
                 if(!destinationChannel.BotHasPermissions(Permission.ViewChannels | Permission.ManageWebhooks)) return;
 
@@ -77,7 +80,7 @@ namespace Utili.Services
                         await db.SaveChangesAsync();
                     }
                 }
-                
+
                 string username;
                 string avatarUrl;
                 string content;
@@ -93,17 +96,17 @@ namespace Utili.Services
                     var bot = _client.GetGuild(e.GuildId.Value).GetCurrentMember();
                     username = bot.Nick ?? bot.Name;
                     avatarUrl = null;
-                    content = e.Message.Content.Contains('\n') 
+                    content = e.Message.Content.Contains('\n')
                         ? $"{e.Message.Author.Mention} in {e.Channel.Mention}:\n{e.Message.Content}"
                         : $"{e.Message.Author.Mention} in {e.Channel.Mention}: {e.Message.Content}";
                 }
 
                 using var httpClient = new HttpClient();
-                
+
                 var attachmentChunks = new List<LocalAttachment[]>();
                 var currentAttachmentChunk = new List<LocalAttachment>();
                 var currentAttachmentChunkSize = 0;
-                
+
                 foreach (var attachment in userMessage.Attachments.Where(x => x.FileSize < 8000000))
                 {
                     var stream = await httpClient.GetStreamAsync(attachment.ProxyUrl);
@@ -113,11 +116,11 @@ namespace Utili.Services
                         currentAttachmentChunk = new();
                         currentAttachmentChunkSize = 0;
                     }
-                    
+
                     currentAttachmentChunk.Add(new LocalAttachment(stream, attachment.FileName));
                     currentAttachmentChunkSize += attachment.FileSize;
                 }
-                
+
                 if(currentAttachmentChunk.Any())
                     attachmentChunks.Add(currentAttachmentChunk.ToArray());
 
@@ -127,12 +130,12 @@ namespace Utili.Services
                     .WithOptionalContent(content)
                     .WithEmbeds(userMessage.Embeds.Where(x => x.IsRich()).Select(LocalEmbed.FromEmbed))
                     .WithAllowedMentions(LocalAllowedMentions.None);
-                
+
                 if(attachmentChunks.Any())
                     message.WithAttachments(attachmentChunks[0]);
 
                 await _client.ExecuteWebhookAsync(webhook.Id, webhook.Token, message);
-                
+
                 foreach (var attachmentChunk in attachmentChunks.Skip(1))
                 {
                     message = new LocalWebhookMessage()
@@ -140,10 +143,10 @@ namespace Utili.Services
                         .WithAvatarUrl(avatarUrl)
                         .WithAllowedMentions(LocalAllowedMentions.None)
                         .WithAttachments(attachmentChunk);
-                    
+
                     await _client.ExecuteWebhookAsync(webhook.Id, webhook.Token, message);
                 }
-                
+
                 foreach (var attachmentChunk in attachmentChunks)
                     foreach (var attachment in attachmentChunk)
                         attachment.Dispose();
@@ -155,7 +158,7 @@ namespace Utili.Services
                         .WithAvatarUrl(avatarUrl)
                         .WithContent(string.Concat(userMessage.Attachments.Where(x => x.FileSize >= 8000000).Select(x => x.ProxyUrl + "\n")))
                         .WithAllowedMentions(LocalAllowedMentions.None);
-                    
+
                     await _client.ExecuteWebhookAsync(webhook.Id, webhook.Token, message);
                 }
             }
@@ -167,17 +170,43 @@ namespace Utili.Services
 
         private async Task<IWebhook> GetWebhookAsync(ulong webhookId)
         {
-            if (_webhookCache.TryGetValue(webhookId, out var cachedWebhook)) return cachedWebhook;
+            await _webhookCacheSemaphore.WaitAsync();
+
             try
             {
+                if (_webhookCache.TryGetValue(webhookId, out var cachedWebhook))
+                {
+                    if (cachedWebhook.ExpiresAt >= DateTime.UtcNow) return cachedWebhook.Webhook;
+                    _webhookCache.Remove(webhookId);
+                }
+
                 var webhook = await _client.FetchWebhookAsync(webhookId);
-                _webhookCache.TryAdd(webhookId, webhook);
+                _webhookCache.TryAdd(webhookId, new CachedWebhook
+                {
+                    Webhook = webhook,
+                    ExpiresAt = DateTime.UtcNow.AddMinutes(1)
+                });
                 return webhook;
             }
             catch
             {
+                _webhookCache.TryAdd(webhookId, new CachedWebhook
+                {
+                    Webhook = null,
+                    ExpiresAt = DateTime.UtcNow.AddMinutes(1)
+                });
                 return null;
             }
+            finally
+            {
+                _webhookCacheSemaphore.Release();
+            }
+        }
+
+        private class CachedWebhook
+        {
+            public IWebhook Webhook { get; init; }
+            public DateTime ExpiresAt { get; init; }
         }
     }
 }
