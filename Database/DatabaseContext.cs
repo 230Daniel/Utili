@@ -21,7 +21,6 @@ namespace Database
         public DbSet<MessageLogsConfiguration> MessageLogsConfigurations { get; internal set; }
         public DbSet<MessageLogsMessage> MessageLogsMessages { get; internal set; }
         public DbSet<MessagePinningConfiguration> MessagePinningConfigurations { get; internal set; }
-        public DbSet<MessagePinningWebhook> MessagePinningWebhooks { get; internal set; }
         public DbSet<NoticeConfiguration> NoticeConfigurations { get; internal set; }
         public DbSet<PremiumSlot> PremiumSlots { get; internal set; }
         public DbSet<ReputationConfiguration> ReputationConfigurations { get; internal set; }
@@ -38,7 +37,7 @@ namespace Database
         public DbSet<VoteChannelConfiguration> VoteChannelConfigurations { get; internal set; }
 
         private readonly string _connectionString;
-        
+
         public DatabaseContext(IConfiguration configuration)
         {
             _connectionString = configuration["Database:Connection"];
@@ -49,7 +48,7 @@ namespace Database
             options.UseNpgsql(_connectionString);
             options.UseSnakeCaseNamingConvention();
         }
-        
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.ConfigureGuildEntities();

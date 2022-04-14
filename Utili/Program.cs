@@ -47,7 +47,7 @@ namespace Utili
             Log.Logger = new LoggerConfiguration()
                 .ReadFrom.Configuration(host.Services.GetRequiredService<IConfiguration>())
                 .CreateLogger();
-            
+
             try
             {
                 Log.Information("Migrating database");
@@ -84,7 +84,8 @@ namespace Utili
             services.AddSingleton<HasteService>();
             services.AddSingleton<CommunityService>();
             services.AddSingleton<GuildCountService>();
-            
+            services.AddSingleton<WebhookService>();
+
             services.AddSingleton<AutopurgeService>();
             services.AddSingleton<ChannelMirroringService>();
             services.AddSingleton<InactiveRoleService>();
@@ -99,7 +100,7 @@ namespace Utili
             services.AddSingleton<VoiceLinkService>();
             services.AddSingleton<VoiceRolesService>();
             services.AddSingleton<VoteChannelsService>();
-            
+
             services.Configure<DefaultGatewayCacheProviderConfiguration>(x => x.MessagesPerChannel = 1);
             DatabaseContextExtensions.DefaultPrefix = context.Configuration["DefaultPrefix"];
         }

@@ -6,7 +6,6 @@ namespace Database.Entities
     {
         public ulong DestinationChannelId { get; set; }
         public ChannelMirroringAuthorDisplayMode AuthorDisplayMode { get; set; }
-        public ulong WebhookId { get; set; }
 
         public ChannelMirroringConfiguration(ulong guildId, ulong channelId) : base(guildId, channelId) { }
     }

@@ -1,28 +1,30 @@
-﻿using System.IO;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using Disqord;
 using Disqord.Bot;
 using Disqord.Rest;
 using Database;
-using Database.Entities;
 using Database.Extensions;
+using Disqord.Http;
 using Qmmands;
 using Utili.Commands;
 using Utili.Extensions;
 using Utili.Implementations;
+using Utili.Services;
 
 namespace Utili.Features
 {
     public class MessagePinningCommands : MyDiscordGuildModuleBase
     {
         private readonly DatabaseContext _dbContext;
-        
-        public MessagePinningCommands(DatabaseContext dbContext)
+        private readonly WebhookService _webhookService;
+
+        public MessagePinningCommands(DatabaseContext dbContext, WebhookService webhookService)
         {
             _dbContext = dbContext;
+            _webhookService = webhookService;
         }
-        
+
         [Command("pin")]
         [DefaultCooldown(2, 5)]
         [RequireAuthorChannelPermissions(Permission.ManageMessages)]
@@ -31,7 +33,7 @@ namespace Utili.Features
             [RequireBotParameterChannelPermissions(Permission.ViewChannels | Permission.ManageWebhooks)]
             ITextChannel pinChannel = null)
             => PinAsync(messageId, pinChannel, Context.Channel);
-        
+
         [Command("pin")]
         [DefaultCooldown(2, 5)]
         public Task<DiscordCommandResult> PinAsync(
@@ -53,10 +55,11 @@ namespace Utili.Features
             }
 
             var config = await _dbContext.MessagePinningConfigurations.GetForGuildAsync(Context.GuildId);
-            if (config is not null && config.PinMessages) await message.PinAsync(new DefaultRestRequestOptions {Reason = $"Message Pinning (manual by {Context.Message.Author} {Context.Message.Author.Id})"});
+            if (config is not null && config.PinMessages)
+                await message.PinAsync(new DefaultRestRequestOptions {Reason = $"Message Pinning (manual by {Context.Message.Author} {Context.Message.Author.Id})"});
 
             pinChannel ??= config is null ? null : Context.Guild.GetTextChannel(config.PinChannelId);
-            
+
             if (pinChannel is null && (config is not null && config.PinMessages))
             {
                 return Success("Message pinned",
@@ -68,58 +71,43 @@ namespace Utili.Features
                     "Message pinning is not enabled on this server.");
             }
 
-            IWebhook webhook = null;
-            var webhookInfo = await _dbContext.MessagePinningWebhooks.GetForGuildChannelAsync(Context.Guild.Id, pinChannel.Id);
-            if(webhookInfo is not null) webhook = await pinChannel.FetchWebhookAsync(webhookInfo.WebhookId);
-            
-            if (webhook is null || webhook.ChannelId != pinChannel.Id)
-            {
-                var avatar = File.OpenRead("Avatar.png");
-                webhook = await pinChannel.CreateWebhookAsync("Utili Message Pinning", x =>
-                {
-                    x.Avatar = avatar;
-                }, new DefaultRestRequestOptions {Reason = "Message Pinning"});
-                avatar.Close();
-
-                if (webhookInfo is null)
-                {
-                    webhookInfo = new MessagePinningWebhook(Context.GuildId, pinChannel.Id)
-                    {
-                        WebhookId = webhook.Id
-                    };
-                    _dbContext.MessagePinningWebhooks.Add(webhookInfo);
-                    await _dbContext.SaveChangesAsync();
-                }
-                else
-                {
-                    webhookInfo.WebhookId = webhook.Id;
-                    _dbContext.MessagePinningWebhooks.Update(webhookInfo);
-                    await _dbContext.SaveChangesAsync();
-                }
-            }
-            
             var username = $"{message.Author} in {channel.Name}";
             var avatarUrl = message.Author.GetAvatarUrl();
 
-            if (!string.IsNullOrWhiteSpace(message.Content) || message.Embeds.Count > 0)
+            for (var i = 0; i < 2; i++)
             {
-                var messageBuilder = new LocalWebhookMessage()
-                    .WithName(username)
-                    .WithAvatarUrl(avatarUrl)
-                    .WithOptionalContent(message.Content)
-                    .WithEmbeds(message.Embeds.Select(LocalEmbed.FromEmbed))
-                    .WithAllowedMentions(LocalAllowedMentions.None);
+                var webhook = await _webhookService.GetWebhookAsync(config.PinChannelId);
 
-                await Context.Bot.ExecuteWebhookAsync(webhook.Id, webhook.Token, messageBuilder);
-            }
-            
-            foreach (var attachment in message.Attachments)
-            {
-                var attachmentMessage = new LocalWebhookMessage()
-                    .WithName(username)
-                    .WithAvatarUrl(avatarUrl)
-                    .WithContent(attachment.Url);
-                await Context.Bot.ExecuteWebhookAsync(webhook.Id, webhook.Token, attachmentMessage);
+                try
+                {
+                    if (!string.IsNullOrWhiteSpace(message.Content) || message.Embeds.Count > 0)
+                    {
+                        var messageBuilder = new LocalWebhookMessage()
+                            .WithName(username)
+                            .WithAvatarUrl(avatarUrl)
+                            .WithOptionalContent(message.Content)
+                            .WithEmbeds(message.Embeds.Select(LocalEmbed.FromEmbed))
+                            .WithAllowedMentions(LocalAllowedMentions.None);
+
+                        await Context.Bot.ExecuteWebhookAsync(webhook.Id, webhook.Token, messageBuilder);
+                    }
+
+                    foreach (var attachment in message.Attachments)
+                    {
+                        var attachmentMessage = new LocalWebhookMessage()
+                            .WithName(username)
+                            .WithAvatarUrl(avatarUrl)
+                            .WithContent(attachment.Url);
+                        await Context.Bot.ExecuteWebhookAsync(webhook.Id, webhook.Token, attachmentMessage);
+                    }
+
+                    break;
+                }
+                catch (RestApiException ex) when (ex.StatusCode == HttpResponseStatusCode.NotFound)
+                {
+                    await _webhookService.ReportInvalidWebhookAsync(config.PinChannelId, webhook.Id);
+                    if (i == 1) throw;
+                }
             }
 
             return Success("Message pinned",

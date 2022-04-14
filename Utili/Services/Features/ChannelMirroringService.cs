@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Net.Http;
-using System.Threading;
 using System.Threading.Tasks;
 using Database.Entities;
 using Disqord;
@@ -12,7 +10,7 @@ using Disqord.Rest;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Database.Extensions;
-using Microsoft.EntityFrameworkCore;
+using Disqord.Http;
 using Utili.Extensions;
 
 namespace Utili.Services
@@ -21,17 +19,13 @@ namespace Utili.Services
     {
         private readonly ILogger<ChannelMirroringService> _logger;
         private readonly DiscordClientBase _client;
+        private readonly WebhookService _webhookService;
 
-        private Dictionary<ulong, CachedWebhook> _webhookCache;
-        private SemaphoreSlim _webhookCacheSemaphore;
-
-        public ChannelMirroringService(ILogger<ChannelMirroringService> logger, DiscordClientBase client)
+        public ChannelMirroringService(ILogger<ChannelMirroringService> logger, DiscordClientBase client, WebhookService webhookService)
         {
             _logger = logger;
             _client = client;
-
-            _webhookCache = new Dictionary<ulong, CachedWebhook>();
-            _webhookCacheSemaphore = new SemaphoreSlim(1, 1);
+            _webhookService = webhookService;
         }
 
         public async Task MessageReceived(IServiceScope scope, MessageReceivedEventArgs e)
@@ -49,37 +43,6 @@ namespace Utili.Services
                 if (destinationChannel is null) return;
 
                 if(!destinationChannel.BotHasPermissions(Permission.ViewChannels | Permission.ManageWebhooks)) return;
-
-                var webhook = await GetWebhookAsync(config.WebhookId);
-                if (webhook?.ChannelId is null || webhook.ChannelId != destinationChannel.Id) webhook = null;
-
-                if (webhook is null)
-                {
-                    var otherConfigs = await db.ChannelMirroringConfigurations.Where(x => x.DestinationChannelId == config.DestinationChannelId).ToListAsync();
-                    foreach (var otherConfig in otherConfigs)
-                    {
-                        webhook = await GetWebhookAsync(otherConfig.WebhookId);
-                        if (webhook?.ChannelId is null || webhook.ChannelId != destinationChannel.Id) webhook = null;
-                        else break;
-                    }
-
-                    if (webhook is not null)
-                    {
-                        config.WebhookId = webhook.Id;
-                        db.ChannelMirroringConfigurations.Update(config);
-                        await db.SaveChangesAsync();
-                    }
-                    else
-                    {
-                        var avatar = File.OpenRead("Avatar.png");
-                        webhook = await destinationChannel.CreateWebhookAsync("Utili Mirroring", x => x.Avatar = avatar);
-                        avatar.Close();
-
-                        config.WebhookId = webhook.Id;
-                        db.ChannelMirroringConfigurations.Update(config);
-                        await db.SaveChangesAsync();
-                    }
-                }
 
                 string username;
                 string avatarUrl;
@@ -134,79 +97,58 @@ namespace Utili.Services
                 if(attachmentChunks.Any())
                     message.WithAttachments(attachmentChunks[0]);
 
-                await _client.ExecuteWebhookAsync(webhook.Id, webhook.Token, message);
-
-                foreach (var attachmentChunk in attachmentChunks.Skip(1))
+                try
                 {
-                    message = new LocalWebhookMessage()
-                        .WithName(username)
-                        .WithAvatarUrl(avatarUrl)
-                        .WithAllowedMentions(LocalAllowedMentions.None)
-                        .WithAttachments(attachmentChunk);
+                    for(var i = 0; i < 2; i++)
+                    {
+                        var webhook = await _webhookService.GetWebhookAsync(destinationChannel.Id);
 
-                    await _client.ExecuteWebhookAsync(webhook.Id, webhook.Token, message);
+                        try
+                        {
+                            await _client.ExecuteWebhookAsync(webhook.Id, webhook.Token, message);
+
+                            foreach (var attachmentChunk in attachmentChunks.Skip(1))
+                            {
+                                message = new LocalWebhookMessage()
+                                    .WithName(username)
+                                    .WithAvatarUrl(avatarUrl)
+                                    .WithAllowedMentions(LocalAllowedMentions.None)
+                                    .WithAttachments(attachmentChunk);
+
+                                await _client.ExecuteWebhookAsync(webhook.Id, webhook.Token, message);
+
+                                if (userMessage.Attachments.Any(x => x.FileSize >= 8000000))
+                                {
+                                    message = new LocalWebhookMessage()
+                                        .WithName(username)
+                                        .WithAvatarUrl(avatarUrl)
+                                        .WithContent(string.Concat(userMessage.Attachments.Where(x => x.FileSize >= 8000000).Select(x => x.ProxyUrl + "\n")))
+                                        .WithAllowedMentions(LocalAllowedMentions.None);
+
+                                    await _client.ExecuteWebhookAsync(webhook.Id, webhook.Token, message);
+                                }
+                            }
+
+                            break;
+                        }
+                        catch (RestApiException ex) when (ex.StatusCode == HttpResponseStatusCode.NotFound)
+                        {
+                            await _webhookService.ReportInvalidWebhookAsync(destinationChannel.Id, webhook.Id);
+                            if (i == 1) throw;
+                        }
+                    }
                 }
-
-                foreach (var attachmentChunk in attachmentChunks)
-                    foreach (var attachment in attachmentChunk)
-                        attachment.Dispose();
-
-                if (userMessage.Attachments.Any(x => x.FileSize >= 8000000))
+                finally
                 {
-                    message = new LocalWebhookMessage()
-                        .WithName(username)
-                        .WithAvatarUrl(avatarUrl)
-                        .WithContent(string.Concat(userMessage.Attachments.Where(x => x.FileSize >= 8000000).Select(x => x.ProxyUrl + "\n")))
-                        .WithAllowedMentions(LocalAllowedMentions.None);
-
-                    await _client.ExecuteWebhookAsync(webhook.Id, webhook.Token, message);
+                    foreach (var attachmentChunk in attachmentChunks)
+                        foreach (var attachment in attachmentChunk)
+                            attachment.Dispose();
                 }
             }
             catch(Exception ex)
             {
                 _logger.LogError(ex, "Exception thrown on message received ({Guild}/{Channel}/{Message})", e.GuildId, e.ChannelId, e.MessageId);
             }
-        }
-
-        private async Task<IWebhook> GetWebhookAsync(ulong webhookId)
-        {
-            await _webhookCacheSemaphore.WaitAsync();
-
-            try
-            {
-                if (_webhookCache.TryGetValue(webhookId, out var cachedWebhook))
-                {
-                    if (cachedWebhook.ExpiresAt >= DateTime.UtcNow) return cachedWebhook.Webhook;
-                    _webhookCache.Remove(webhookId);
-                }
-
-                var webhook = await _client.FetchWebhookAsync(webhookId);
-                _webhookCache.TryAdd(webhookId, new CachedWebhook
-                {
-                    Webhook = webhook,
-                    ExpiresAt = DateTime.UtcNow.AddMinutes(1)
-                });
-                return webhook;
-            }
-            catch
-            {
-                _webhookCache.TryAdd(webhookId, new CachedWebhook
-                {
-                    Webhook = null,
-                    ExpiresAt = DateTime.UtcNow.AddMinutes(1)
-                });
-                return null;
-            }
-            finally
-            {
-                _webhookCacheSemaphore.Release();
-            }
-        }
-
-        private class CachedWebhook
-        {
-            public IWebhook Webhook { get; init; }
-            public DateTime ExpiresAt { get; init; }
         }
     }
 }
