@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -13,9 +12,9 @@ namespace UtiliBackend.Services
 {
     public class DiscordUserGuildsService
     {
-        private readonly ConcurrentDictionary<Snowflake, UserGuilds> _guilds;
+        private readonly Dictionary<Snowflake, UserGuilds> _guilds;
         private readonly SemaphoreSlim _semaphore;
-        
+
         public DiscordUserGuildsService()
         {
             _guilds = new();
@@ -26,16 +25,16 @@ namespace UtiliBackend.Services
         {
             var client = httpContext.GetDiscordClient();
             var userId = client.Authorization.User.Id;
-            
+
             await _semaphore.WaitAsync();
-            
+
             try
             {
                 if (_guilds.TryGetValue(userId, out var cachedGuilds))
                 {
                     if (cachedGuilds.ExpiresAt > DateTimeOffset.Now)
                         return cachedGuilds;
-                    _guilds.TryRemove(userId, out _);
+                    _guilds.Remove(userId, out _);
                 }
 
                 var newGuilds = await client.Client.FetchGuildsAsync();
@@ -53,7 +52,7 @@ namespace UtiliBackend.Services
                 _semaphore.Release();
             }
         }
-        
+
         public async Task<UserGuilds> GetManagedGuildsAsync(HttpContext httpContext)
         {
             var guilds = await GetGuildsAsync(httpContext);
@@ -61,7 +60,7 @@ namespace UtiliBackend.Services
             guilds.Guilds.RemoveAll(x => !x.Permissions.ManageGuild);
             return guilds;
         }
-        
+
         public class UserGuilds
         {
             public List<IPartialGuild> Guilds { get; set; }
