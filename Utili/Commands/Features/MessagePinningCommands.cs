@@ -71,12 +71,12 @@ namespace Utili.Features
                     "Message pinning is not enabled on this server.");
             }
 
-            var username = $"{message.Author} in {channel.Name}";
+            var username = $"{message.Author} in #{channel.Name}";
             var avatarUrl = message.Author.GetAvatarUrl();
 
             for (var i = 0; i < 2; i++)
             {
-                var webhook = await _webhookService.GetWebhookAsync(config.PinChannelId);
+                var webhook = await _webhookService.GetWebhookAsync(pinChannel.Id);
 
                 try
                 {
@@ -105,7 +105,7 @@ namespace Utili.Features
                 }
                 catch (RestApiException ex) when (ex.StatusCode == HttpResponseStatusCode.NotFound)
                 {
-                    await _webhookService.ReportInvalidWebhookAsync(config.PinChannelId, webhook.Id);
+                    await _webhookService.ReportInvalidWebhookAsync(pinChannel.Id, webhook.Id);
                     if (i == 1) throw;
                 }
             }
