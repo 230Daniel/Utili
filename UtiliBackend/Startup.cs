@@ -55,8 +55,25 @@ namespace UtiliBackend
                 options.IncludeSubDomains = true;
             });
 
-            services.AddMvc(options => options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute()));
-            services.AddControllers();
+            services.AddMvc(options =>
+            {
+                options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute());
+                options.Filters.Add(new ResponseCacheAttribute
+                {
+                    Location = ResponseCacheLocation.None,
+                    NoStore = true
+                });
+            });
+
+            services.AddControllers(options =>
+            {
+                options.Filters.Add(new ResponseCacheAttribute
+                {
+                    Location = ResponseCacheLocation.None,
+                    NoStore = true
+                });
+            });
+
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             services.AddHttpContextAccessor();
             services.AddOptions();

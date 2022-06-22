@@ -10,6 +10,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Database.Entities;
 using Database.Extensions;
+using Qommon;
 using Utili.Extensions;
 
 namespace Utili.Services
@@ -19,9 +20,9 @@ namespace Utili.Services
         private readonly ILogger<VoiceLinkService> _logger;
         private readonly DiscordClientBase _client;
         private readonly IServiceScopeFactory _scopeFactory;
-        
+
         private List<(ulong, ulong)> _channelsRequiringUpdate;
-        
+
         public VoiceLinkService(ILogger<VoiceLinkService> logger, DiscordClientBase client, IServiceScopeFactory scopeFactory)
         {
             _logger = logger;
@@ -38,7 +39,7 @@ namespace Utili.Services
                 var db = scope.GetDbContext();
                 var config = await db.VoiceLinkConfigurations.GetForGuildAsync(e.GuildId);
                 if (config is null || !config.Enabled) return;
-                
+
                 lock (_channelsRequiringUpdate)
                 {
                     if (e.NewVoiceState?.ChannelId is not null &&
@@ -91,7 +92,7 @@ namespace Utili.Services
             var tcs = new CancellationTokenSource();
             var task = UpdateLinkedChannelAsync(guildId, channelId, tcs.Token);
             var timeout = Task.Delay(5000, tcs.Token);
-            
+
             if (await Task.WhenAny(task, timeout) == task)
             {
                 await task;
@@ -109,12 +110,12 @@ namespace Utili.Services
             {
                 using var scope = _scopeFactory.CreateScope();
                 var db = scope.GetDbContext();
-                    
+
                 var config = await db.VoiceLinkConfigurations.GetForGuildAsync(guildId);
                 if(config is null || !config.Enabled || config.ExcludedChannels.Contains(channelId)) return;
-                    
+
                 var channelRecord = await db.VoiceLinkChannels.GetForGuildChannelAsync(guildId, channelId);
-                    
+
                 var guild = _client.GetGuild(guildId);
                 var voiceChannel = guild.GetAudioChannel(channelId);
                 if (voiceChannel is null)
@@ -122,7 +123,7 @@ namespace Utili.Services
                     await CloseLinkedChannelAsync(scope, guild, config, channelRecord, cancellationToken);
                     return;
                 }
-                
+
                 var category = voiceChannel.CategoryId.HasValue ? guild.GetCategoryChannel(voiceChannel.CategoryId.Value) : null;
 
                 if(!voiceChannel.BotHasPermissions(Permission.ViewChannels)) return;
@@ -137,8 +138,8 @@ namespace Utili.Services
                     await CloseLinkedChannelAsync(scope, guild, config, channelRecord, cancellationToken);
                     return;
                 }
-                    
-                ITextChannel textChannel = channelRecord is not null 
+
+                ITextChannel textChannel = channelRecord is not null
                     ? guild.GetTextChannel(channelRecord.TextChannelId)
                     : null;
                 if (textChannel is null)
@@ -167,7 +168,7 @@ namespace Utili.Services
                         channelRecord.TextChannelId = textChannel.Id;
                         db.VoiceLinkChannels.Update(channelRecord);
                     }
-                        
+
                     await db.SaveChangesAsync(cancellationToken);
                 }
                 else
@@ -225,12 +226,12 @@ namespace Utili.Services
             if (channelRecord is null) return;
             var textChannel = guild.GetTextChannel(channelRecord.TextChannelId);
             if (textChannel is null || !textChannel.BotHasPermissions(Permission.ViewChannels | Permission.ManageChannels)) return;
-            
+
             if (config.DeleteChannels)
             {
                 await textChannel.DeleteAsync(new DefaultRestRequestOptions{Reason = "Voice Link"}, cancellationToken);
                 channelRecord.TextChannelId = 0;
-                
+
                 var db = scope.GetDbContext();
                 db.VoiceLinkChannels.Remove(channelRecord);
                 await db.SaveChangesAsync(cancellationToken);

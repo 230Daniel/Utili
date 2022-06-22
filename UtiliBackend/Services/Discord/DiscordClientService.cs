@@ -30,11 +30,13 @@ namespace UtiliBackend.Services
         {
             var identity = httpContext.User.Identities.FirstOrDefault(x => x.AuthenticationType == "Discord");
             var token = await httpContext.GetTokenAsync("Discord", "access_token");
-            
+
             if (identity is null || !identity.IsAuthenticated || string.IsNullOrWhiteSpace(token))
                 return null;
-            
-            var userId = Snowflake.Parse(httpContext.User.FindFirstValue("id"));
+
+            // Workaround Snowflake.Parse broken in v191
+            // TODO: Replace with Snowflake.Parse when fixed
+            var userId = new Snowflake(ulong.Parse(httpContext.User.FindFirstValue("id")));
 
             await _semaphore.WaitAsync();
 
