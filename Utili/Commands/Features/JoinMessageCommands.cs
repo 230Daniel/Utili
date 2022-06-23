@@ -28,7 +28,9 @@ namespace Utili.Commands
             var sentMessage = await Context.Channel.SendMessageAsync(message);
 
             if (!config.CreateThread || !Context.Channel.BotHasPermissions(Permission.CreatePublicThreads)) return;
-            var threadTitle = config.ThreadTitle.Replace("%user%", Context.Author.Name);
+            var threadTitle = config.ThreadTitle;
+            if (string.IsNullOrWhiteSpace(threadTitle)) threadTitle = "Welcome %user%";
+            threadTitle = threadTitle.Replace("%user%", Context.Author.Name);
             await Bot.CreatePublicThreadAsync(Context.ChannelId, threadTitle, sentMessage.Id, options: new DefaultRestRequestOptions { Reason = "Join message" });
         }
     }

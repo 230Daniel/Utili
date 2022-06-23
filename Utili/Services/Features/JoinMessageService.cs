@@ -45,7 +45,9 @@ namespace Utili.Services
                     var sentMessage = await channel.SendMessageAsync(message);
 
                     if (!config.CreateThread || !channel.BotHasPermissions(Permission.CreatePublicThreads)) return;
-                    var threadTitle = config.ThreadTitle.Replace("%user%", e.Member.Name);
+                    var threadTitle = config.ThreadTitle;
+                    if (string.IsNullOrWhiteSpace(threadTitle)) threadTitle = "Welcome %user%";
+                    threadTitle = threadTitle.Replace("%user%", e.Member.Name);
                     await channel.CreatePublicThreadAsync(threadTitle, sentMessage.Id, options: new DefaultRestRequestOptions { Reason = "Join message" });
                 }
             }
