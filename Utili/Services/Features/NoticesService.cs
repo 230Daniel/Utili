@@ -23,7 +23,7 @@ namespace Utili.Services
         private readonly ILogger<NoticesService> _logger;
         private readonly DiscordClientBase _client;
         private readonly IServiceScopeFactory _scopeFactory;
-        
+
         private Dictionary<Snowflake, Timer> _channelUpdateTimers = new();
         private RepeatingTimer _dashboardNoticeUpdateTimer;
 
@@ -32,7 +32,7 @@ namespace Utili.Services
             _logger = logger;
             _client = client;
             _scopeFactory = scopeFactory;
-            
+
             _dashboardNoticeUpdateTimer = new RepeatingTimer(3000);
             _dashboardNoticeUpdateTimer.Elapsed += DashboardNoticeUpdateTimer_Elapsed;
         }
@@ -49,14 +49,14 @@ namespace Utili.Services
                 var db = scope.GetDbContext();
                 var config = await db.NoticeConfigurations.GetForGuildChannelAsync(e.GuildId.Value, e.ChannelId);
                 if (config is null) return;
-                
+
                 if (config.Enabled && e.Message is ISystemMessage && e.Message.Author.Id == _client.CurrentUser.Id)
                 {
                     await e.Message.DeleteAsync();
                     return;
                 }
                 if (!config.Enabled || e.Message.Author.Id == _client.CurrentUser.Id) return;
-                
+
                 var delay = config.Delay;
                 var minimumDelay = e.Member is null || e.Member.IsBot
                     ? TimeSpan.FromSeconds(10)
@@ -125,13 +125,13 @@ namespace Utili.Services
                 using var scope = _scopeFactory.CreateScope();
                 var db = scope.GetDbContext();
                 var config = await db.NoticeConfigurations.GetForGuildChannelAsync(guildId, channelId);
-                
+
                 if (config is null || !config.Enabled) return;
 
                 var guild = _client.GetGuild(guildId);
                 var channel = guild.GetTextChannel(channelId);
 
-                if (channel is null || 
+                if (channel is null ||
                     !channel.BotHasPermissions(
                     Permission.ViewChannels |
                     Permission.ReadMessageHistory |
@@ -144,12 +144,13 @@ namespace Utili.Services
                 if(previousMessage is not null) await previousMessage.DeleteAsync();
 
                 var message = await channel.SendMessageAsync(GetNotice(config));
-                
+
                 config.MessageId = message.Id;
                 db.NoticeConfigurations.Update(config);
                 await db.SaveChangesAsync();
-                
-                await message.PinAsync(new DefaultRestRequestOptions {Reason = "Sticky Notices"});
+
+                if(config.Pin)
+                    await message.PinAsync(new DefaultRestRequestOptions {Reason = "Sticky Notices"});
             }
             catch (Exception ex)
             {
@@ -167,7 +168,7 @@ namespace Utili.Services
             var iconUrl = config.Icon;
             var thumbnailUrl = config.Thumbnail;
             var imageUrl = config.Image;
-            
+
             if (!Uri.TryCreate(iconUrl, UriKind.Absolute, out var uriResult1) || uriResult1.Scheme is not ("http" or "https")) iconUrl = null;
             if (!Uri.TryCreate(thumbnailUrl, UriKind.Absolute, out var uriResult2) || uriResult2.Scheme is not ("http" or "https")) thumbnailUrl = null;
             if (!Uri.TryCreate(imageUrl, UriKind.Absolute, out var uriResult3) || uriResult3.Scheme is not ("http" or "https")) imageUrl = null;
@@ -185,7 +186,7 @@ namespace Utili.Services
                 return new LocalMessage()
                     .WithRequiredContent(text);
             }
-            
+
             return new LocalMessage()
                 .WithOptionalContent(text)
                 .AddEmbed(new LocalEmbed()

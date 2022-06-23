@@ -7,6 +7,7 @@ namespace Database.Entities
     {
         public bool Enabled { get; set; }
         public TimeSpan Delay { get; set; }
+        public bool Pin { get; set; }
         public string Title { get; set; }
         public string Footer { get; set; }
         public string Content { get; set; }
@@ -17,7 +18,7 @@ namespace Database.Entities
         public uint Colour { get; set; }
         public ulong MessageId { get; set; }
         public bool UpdatedFromDashboard { get; set; }
-        
+
         public NoticeConfiguration(ulong guildId, ulong channelId) : base(guildId, channelId) { }
     }
 }

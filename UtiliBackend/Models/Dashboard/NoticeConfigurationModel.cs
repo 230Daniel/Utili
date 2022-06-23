@@ -7,6 +7,7 @@ namespace UtiliBackend.Models
     public class NoticeConfigurationModel
     {
         public string ChannelId { get; set; }
+        public bool Pin { get; set; }
         public bool Enabled { get; set; }
         public string Delay { get; set; }
         public string Title { get; set; }
@@ -23,6 +24,7 @@ namespace UtiliBackend.Models
         {
             configuration.Enabled = Enabled;
             configuration.Delay = XmlConvert.ToTimeSpan(Delay);
+            configuration.Pin = Pin;
             configuration.Title = Title;
             configuration.Footer = Footer;
             configuration.Content = Content;
@@ -31,7 +33,7 @@ namespace UtiliBackend.Models
             configuration.Thumbnail = Thumbnail;
             configuration.Icon = Icon;
             configuration.Colour = uint.Parse(Colour.Replace("#", ""), NumberStyles.HexNumber);
-            
+
             // Don't set this to false from the web side
             // The bot will set it to false once it updates the notice
             if(Changed) configuration.UpdatedFromDashboard = true;
