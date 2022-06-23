@@ -29,7 +29,7 @@ namespace Utili.Services
                 var db = scope.GetDbContext();
                 var config = await db.JoinMessageConfigurations.GetForGuildAsync(e.GuildId);
                 if (config is null || !config.Enabled) return;
-                
+
                 var message = GetJoinMessage(config, e.Member);
                 if (config.Mode == JoinMessageMode.DirectMessage)
                 {
@@ -42,7 +42,11 @@ namespace Utili.Services
                 {
                     var channel = _client.GetTextChannel(e.GuildId, config.ChannelId);
                     if(!channel.BotHasPermissions(Permission.ViewChannels | Permission.SendMessages | Permission.SendEmbeds)) return;
-                    await channel.SendMessageAsync(message);
+                    var sentMessage = await channel.SendMessageAsync(message);
+
+                    if (!config.CreateThread || !channel.BotHasPermissions(Permission.CreatePublicThreads)) return;
+                    var threadTitle = config.ThreadTitle.Replace("%user%", e.Member.Name);
+                    await channel.CreatePublicThreadAsync(threadTitle, sentMessage.Id, options: new DefaultRestRequestOptions { Reason = "Join message" });
                 }
             }
             catch(Exception ex)
@@ -54,10 +58,10 @@ namespace Utili.Services
         public static LocalMessage GetJoinMessage(JoinMessageConfiguration config, IMember member)
         {
             var text = config.Text.Replace(@"\n", "\n").Replace("%user%", member.Mention);
-            var title = config.Title.Replace("%user%", member.ToString());
+            var title = config.Title.Replace("%user%", member.Name);
             var content = config.Content.Replace(@"\n", "\n").Replace("%user%", member.Mention);
-            var footer = config.Footer.Replace(@"\n", "\n").Replace("%user%", member.ToString());
-            
+            var footer = config.Footer.Replace(@"\n", "\n").Replace("%user%", member.Name);
+
             var iconUrl = config.Icon;
             var thumbnailUrl = config.Thumbnail;
             var imageUrl = config.Image;
@@ -69,10 +73,10 @@ namespace Utili.Services
             if (!Uri.TryCreate(iconUrl, UriKind.Absolute, out var uriResult1) || uriResult1.Scheme is not ("http" or "https")) iconUrl = null;
             if (!Uri.TryCreate(thumbnailUrl, UriKind.Absolute, out var uriResult2) || uriResult2.Scheme is not ("http" or "https")) thumbnailUrl = null;
             if (!Uri.TryCreate(imageUrl, UriKind.Absolute, out var uriResult3) || uriResult3.Scheme is not ("http" or "https")) imageUrl = null;
-            
+
             if (string.IsNullOrWhiteSpace(title) && !string.IsNullOrWhiteSpace(iconUrl))
                 title = "Title";
-            
+
             if (string.IsNullOrWhiteSpace(title) &&
                 string.IsNullOrWhiteSpace(content) &&
                 string.IsNullOrWhiteSpace(footer) &&

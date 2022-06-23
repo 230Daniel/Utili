@@ -7,6 +7,8 @@ namespace Database.Entities
         public bool Enabled { get; set; }
         public JoinMessageMode Mode { get; set; }
         public ulong ChannelId { get; set; }
+        public bool CreateThread { get; set; }
+        public string ThreadTitle { get; set; }
         public string Title { get; set; }
         public string Footer { get; set; }
         public string Content { get; set; }

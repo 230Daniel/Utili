@@ -30,6 +30,7 @@ namespace UtiliBackend.Controllers
             var configuration = await _dbContext.JoinMessageConfigurations.GetForGuildAsync(guildId);
             configuration ??= new JoinMessageConfiguration(guildId)
             {
+                ThreadTitle = "Welcome %user%",
                 Title = "",
                 Footer = "",
                 Content = "",
@@ -46,7 +47,7 @@ namespace UtiliBackend.Controllers
         public async Task<IActionResult> PostAsync([Required] ulong guildId, [FromBody] JoinMessageConfigurationModel model)
         {
             var configuration = await _dbContext.JoinMessageConfigurations.GetForGuildAsync(guildId);
-            
+
             if (configuration is null)
             {
                 configuration = new JoinMessageConfiguration(guildId);

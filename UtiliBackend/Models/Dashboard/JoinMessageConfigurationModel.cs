@@ -8,6 +8,8 @@ namespace UtiliBackend.Models
         public bool Enabled { get; set; }
         public int Mode { get; set; }
         public string ChannelId { get; set; }
+        public bool CreateThread { get; set; }
+        public string ThreadTitle { get; set; }
         public string Title { get; set; }
         public string Footer { get; set; }
         public string Content { get; set; }
@@ -22,6 +24,8 @@ namespace UtiliBackend.Models
             configuration.Enabled = Enabled;
             configuration.Mode = (JoinMessageMode) Mode;
             configuration.ChannelId = ulong.Parse(ChannelId);
+            configuration.CreateThread = CreateThread;
+            configuration.ThreadTitle = ThreadTitle;
             configuration.Title = Title;
             configuration.Footer = Footer;
             configuration.Content = Content;
