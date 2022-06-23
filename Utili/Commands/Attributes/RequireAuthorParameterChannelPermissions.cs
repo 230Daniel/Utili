@@ -21,11 +21,11 @@ namespace Utili.Commands
 
         public override ValueTask<CheckResult> CheckAsync(object argument, DiscordGuildCommandContext context)
         {
-            var channel = (IGuildChannel) argument;
+            var channel = (IGuildChannel)argument;
             var permissions = context.Author.GetPermissions(channel);
 
-            return permissions.Has(Permissions) ? 
-                Success() : 
+            return permissions.Has(Permissions) ?
+                Success() :
                 Failure($"You lack the necessary channel permissions in {channel} ({Permissions & ~permissions}) to execute this.");
         }
     }

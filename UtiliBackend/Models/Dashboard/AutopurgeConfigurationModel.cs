@@ -12,7 +12,7 @@ namespace UtiliBackend.Models
         public void ApplyTo(AutopurgeConfiguration configuration)
         {
             configuration.Timespan = XmlConvert.ToTimeSpan(Timespan);
-            configuration.Mode = (AutopurgeMode) Mode;
+            configuration.Mode = (AutopurgeMode)Mode;
         }
     }
 }

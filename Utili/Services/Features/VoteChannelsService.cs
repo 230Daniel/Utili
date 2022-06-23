@@ -22,13 +22,12 @@ namespace Utili.Features
             _logger = logger;
             _client = client;
         }
-        
+
         public async Task MessageReceived(IServiceScope scope, MessageReceivedEventArgs e)
         {
             try
             {
-                if (!e.Channel.BotHasPermissions(Permission.ViewChannels | Permission.ReadMessageHistory | Permission.AddReactions)
-                || e.Message is ISystemMessage && e.Message.Author.Id == _client.CurrentUser.Id) return;
+                if (!e.Channel.BotHasPermissions(Permission.ViewChannels | Permission.ReadMessageHistory | Permission.AddReactions) || e.Message is ISystemMessage && e.Message.Author.Id == _client.CurrentUser.Id) return;
 
                 var db = scope.GetDbContext();
                 var config = await db.VoteChannelConfigurations.GetForGuildChannelAsync(e.GuildId.Value, e.ChannelId);
@@ -57,7 +56,7 @@ namespace Utili.Features
         private static bool DoesMessageObeyRule(IUserMessage message, VoteChannelMode mode)
         {
             if (message is null) return (mode & VoteChannelMode.All) != 0;
-            
+
             if ((mode & VoteChannelMode.All) != 0) return true;
             if ((mode & VoteChannelMode.Images) != 0 && message.IsImage()) return true;
             if ((mode & VoteChannelMode.Videos) != 0 && message.IsVideo()) return true;
@@ -65,7 +64,7 @@ namespace Utili.Features
             if ((mode & VoteChannelMode.Attachments) != 0 && message.IsAttachment()) return true;
             if ((mode & VoteChannelMode.Links) != 0 && message.IsLink()) return true;
             if ((mode & VoteChannelMode.Embeds) != 0 && message.IsEmbed()) return true;
-            
+
             return false;
         }
     }

@@ -36,8 +36,8 @@ namespace Utili.Services
 
                 var db = scope.GetDbContext();
                 var configs = await db.RoleLinkingConfigurations.GetAllForGuildAsync(guild.Id);
-                if(configs.Count == 0) return;
-                
+                if (configs.Count == 0) return;
+
                 if (configs.Count > 2)
                 {
                     var premium = await db.GetIsGuildPremiumAsync(guild.Id);
@@ -52,8 +52,8 @@ namespace Utili.Services
                 var removedRoles = oldRoles.Where(x => newRoles.All(y => y != x)).ToList();
 
                 List<ulong> rolesToAdd;
-                List<ulong> rolesToRemove; 
-                    
+                List<ulong> rolesToRemove;
+
                 lock (_actions)
                 {
                     var actionsPerformedByBot = _actions.Where(x => x.GuildId == guild.Id && x.UserId == e.NewMember.Id).ToList();
@@ -82,25 +82,25 @@ namespace Utili.Services
                         var role = guild.GetRole(x);
                         return role is null || !role.CanBeManaged();
                     });
-                    
+
                     rolesToRemove.RemoveAll(x =>
                     {
                         var role = guild.GetRole(x);
                         return role is null || !role.CanBeManaged();
                     });
-                    
+
                     _actions.AddRange(rolesToAdd.Select(x => new RoleLinkAction(guild.Id, e.NewMember.Id, x, RoleLinkActionType.Added)));
                     _actions.AddRange(rolesToRemove.Select(x => new RoleLinkAction(guild.Id, e.NewMember.Id, x, RoleLinkActionType.Removed)));
                 }
 
                 foreach (var roleId in rolesToAdd)
                 {
-                    await e.NewMember.GrantRoleAsync(roleId, new DefaultRestRequestOptions{Reason = "Role Linking"});
+                    await e.NewMember.GrantRoleAsync(roleId, new DefaultRestRequestOptions { Reason = "Role Linking" });
                     await Task.Delay(1000);
                 }
                 foreach (var roleId in rolesToRemove)
                 {
-                    await e.NewMember.RevokeRoleAsync(roleId, new DefaultRestRequestOptions{ Reason = "Role Linking" });
+                    await e.NewMember.RevokeRoleAsync(roleId, new DefaultRestRequestOptions { Reason = "Role Linking" });
                     await Task.Delay(1000);
                 }
             }
@@ -128,7 +128,7 @@ namespace Utili.Services
 
         private enum RoleLinkActionType
         {
-            Added, 
+            Added,
             Removed
         }
     }

@@ -25,24 +25,24 @@ namespace UtiliBackend.Controllers
             _mapper = mapper;
             _dbContext = dbContext;
         }
-        
+
         [HttpGet]
         public async Task<IActionResult> GetAsync([Required] ulong guildId)
         {
             var configurations = await _dbContext.VoiceRoleConfigurations.GetAllForGuildAsync(guildId);
             return Json(_mapper.Map<IEnumerable<VoiceRoleConfigurationModel>>(configurations));
         }
-        
+
         [HttpPost]
         public async Task<IActionResult> PostAsync([Required] ulong guildId, [FromBody] List<VoiceRoleConfigurationModel> models)
         {
             var configurations = await _dbContext.VoiceRoleConfigurations.GetAllForGuildAsync(guildId);
-            
+
             foreach (var model in models)
             {
                 var channelId = ulong.Parse(model.ChannelId);
                 var configuration = configurations.FirstOrDefault(x => x.ChannelId == channelId);
-                
+
                 if (configuration is null)
                 {
                     configuration = new VoiceRoleConfiguration(guildId, channelId);

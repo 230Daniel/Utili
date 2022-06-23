@@ -14,19 +14,19 @@ namespace UtiliBackend.Middleware
     {
         private readonly RequestDelegate _next;
         private static Dictionary<ulong, SemaphoreSlim> _semaphores = new();
-        
+
         public UserAccountsMiddleware(RequestDelegate next)
         {
             _next = next;
         }
-        
+
         public async Task InvokeAsync(HttpContext context, ILogger<UserAccountsMiddleware> logger, DatabaseContext db)
         {
             var discordUser = context.GetDiscordUser();
             if (discordUser is not null)
             {
                 SemaphoreSlim semaphore;
-            
+
                 lock (_semaphores)
                 {
                     if (!_semaphores.TryGetValue(discordUser.Id, out semaphore))
@@ -48,7 +48,7 @@ namespace UtiliBackend.Middleware
                         {
                             Email = discordUser.Email
                         };
-                    
+
                         db.Users.Add(user);
                         await db.SaveChangesAsync();
                         logger.LogInformation("Created user for {UserId} with email {Email}", discordUser.Id, user.Email);
@@ -68,7 +68,7 @@ namespace UtiliBackend.Middleware
                     semaphore.Release();
                 }
             }
-            
+
             await _next(context);
         }
     }

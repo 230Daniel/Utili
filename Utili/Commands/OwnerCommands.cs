@@ -15,21 +15,21 @@ namespace Utili.Commands
     public class OwnerCommands : MyDiscordGuildModuleBase
     {
         private readonly DatabaseContext _dbContext;
-        
+
         public OwnerCommands(DatabaseContext dbContext)
         {
             _dbContext = dbContext;
         }
-        
+
         [Command("userinfo"), RequireBotOwner]
         public async Task<DiscordCommandResult> UserInfoAsync(ulong userId)
         {
             var user = Context.Bot.GetUser(userId) as IUser ?? await Context.Bot.FetchUserAsync(userId);
-            
+
             var userRow = await _dbContext.Users.FirstOrDefaultAsync(x => x.UserId == userId);
             var subscriptions = await _dbContext.Subscriptions.GetValidForUserAsync(userId);
             var customerDetails = await _dbContext.CustomerDetails.FirstOrDefaultAsync(x => x.UserId == userId);
-            
+
             var content = $"Id: {user?.Id}\n" +
                           $"Email: {userRow.Email}\n" +
                           $"Customer: {customerDetails.CustomerId}\n" +

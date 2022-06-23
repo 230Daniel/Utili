@@ -20,12 +20,12 @@ namespace Utili
         private readonly DiscordClientBase _client;
         private readonly Snowflake _communityGuildId;
         private readonly IServiceScopeFactory _scopeFactory;
-        
+
         private Timer _roleTimer;
 
         public CommunityService(
-            ILogger<CommunityService> logger, 
-            IConfiguration config, 
+            ILogger<CommunityService> logger,
+            IConfiguration config,
             DiscordClientBase client,
             IServiceScopeFactory scopeFactory)
         {
@@ -46,7 +46,7 @@ namespace Utili
                     _roleTimer?.Dispose();
                     await _client.Chunker.ChunkAsync(e.Guild);
                     _logger.LogDebug($"Finished chunking members for community guild ({e.Guild.Name})");
-                    
+
                     _roleTimer = new Timer(60000);
                     _roleTimer.Elapsed += RoleTimer_Elapsed;
                     _roleTimer.Start();
@@ -66,25 +66,25 @@ namespace Utili
                 {
                     var guild = _client.GetGuild(_communityGuildId);
                     var premiumRole = guild.GetRole(_config.GetSection("Community").GetValue<ulong>("PremiumRoleId"));
-                    
+
                     if (premiumRole is not null)
                     {
                         using var scope = _scopeFactory.CreateScope();
                         var db = scope.GetDbContext();
 
                         var activeSubscriptions = (await db.Subscriptions.ToListAsync()).Where(x => x.IsValid());
-                        
+
                         var premiumMembers = guild.Members.Select(x => x.Value).Where(x => activeSubscriptions.Any(y => y.UserId == x.Id)).ToList();
 
                         foreach (var premiumMember in premiumMembers)
                             if (!premiumMember.RoleIds.Contains(premiumRole.Id))
-                                await premiumMember.GrantRoleAsync(premiumRole.Id, new DefaultRestRequestOptions {Reason = "Premium"});
+                                await premiumMember.GrantRoleAsync(premiumRole.Id, new DefaultRestRequestOptions { Reason = "Premium" });
 
                         var markedPremiumMembers = guild.Members.Select(x => x.Value).Where(x => x.RoleIds.Contains(premiumRole.Id)).ToList();
-                        
+
                         foreach (var premiumMember in markedPremiumMembers)
                             if (premiumMembers.All(x => x.Id != premiumMember.Id))
-                                await premiumMember.RevokeRoleAsync(premiumRole.Id, new DefaultRestRequestOptions {Reason = "Premium"});
+                                await premiumMember.RevokeRoleAsync(premiumRole.Id, new DefaultRestRequestOptions { Reason = "Premium" });
                     }
                 }
                 catch (Exception ex)

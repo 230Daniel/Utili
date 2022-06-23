@@ -108,7 +108,7 @@ namespace Utili.Services
 
             lock (_channelUpdateTimers)
             {
-                if(_channelUpdateTimers.TryGetValue(channelId, out var timer))
+                if (_channelUpdateTimers.TryGetValue(channelId, out var timer))
                 {
                     timer.Dispose();
                     _channelUpdateTimers.Remove(channelId);
@@ -133,15 +133,15 @@ namespace Utili.Services
 
                 if (channel is null ||
                     !channel.BotHasPermissions(
-                    Permission.ViewChannels |
-                    Permission.ReadMessageHistory |
-                    Permission.ManageMessages |
-                    Permission.SendMessages |
-                    Permission.SendEmbeds |
-                    Permission.SendAttachments)) return;
+                        Permission.ViewChannels |
+                        Permission.ReadMessageHistory |
+                        Permission.ManageMessages |
+                        Permission.SendMessages |
+                        Permission.SendEmbeds |
+                        Permission.SendAttachments)) return;
 
                 var previousMessage = await channel.FetchMessageAsync(config.MessageId);
-                if(previousMessage is not null) await previousMessage.DeleteAsync();
+                if (previousMessage is not null) await previousMessage.DeleteAsync();
 
                 var message = await channel.SendMessageAsync(GetNotice(config));
 
@@ -149,8 +149,8 @@ namespace Utili.Services
                 db.NoticeConfigurations.Update(config);
                 await db.SaveChangesAsync();
 
-                if(config.Pin)
-                    await message.PinAsync(new DefaultRestRequestOptions {Reason = "Sticky Notices"});
+                if (config.Pin)
+                    await message.PinAsync(new DefaultRestRequestOptions { Reason = "Sticky Notices" });
             }
             catch (Exception ex)
             {
@@ -195,7 +195,7 @@ namespace Utili.Services
                     .WithOptionalFooter(footer)
                     .WithThumbnailUrl(thumbnailUrl)
                     .WithImageUrl(imageUrl)
-                    .WithColor(new Color((int) config.Colour)));
+                    .WithColor(new Color((int)config.Colour)));
         }
     }
 }

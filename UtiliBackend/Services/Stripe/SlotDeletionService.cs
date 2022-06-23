@@ -14,7 +14,7 @@ namespace UtiliBackend.Services
     {
         private readonly ILogger<SlotDeletionService> _logger;
         private readonly IServiceScopeFactory _scopeFactory;
-        
+
         private Task _task;
         private CancellationTokenSource _tokenSource;
 
@@ -30,13 +30,13 @@ namespace UtiliBackend.Services
             _task = RunAsync(_tokenSource.Token);
             return Task.CompletedTask;
         }
-        
+
         public Task StopAsync(CancellationToken cancellationToken)
         {
             _tokenSource.Cancel();
             return _task;
         }
-        
+
         private async Task RunAsync(CancellationToken cancellationToken)
         {
             try
@@ -47,10 +47,11 @@ namespace UtiliBackend.Services
                     await Task.Delay(30000, cancellationToken);
                 }
             }
-            catch (TaskCanceledException) 
-            { }
+            catch (TaskCanceledException)
+            {
+            }
         }
-        
+
         private async Task DeleteAdditionalSlotsAsync(CancellationToken cancellationToken)
         {
             try

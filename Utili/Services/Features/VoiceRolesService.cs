@@ -17,7 +17,7 @@ namespace Utili.Services
         private readonly ILogger<VoiceRolesService> _logger;
         private readonly DiscordClientBase _client;
         private readonly IServiceScopeFactory _scopeFactory;
-        
+
         private List<VoiceUpdateRequest> _updateRequests = new();
 
         public VoiceRolesService(ILogger<VoiceRolesService> logger, DiscordClientBase client, IServiceScopeFactory scopeFactory)
@@ -31,7 +31,7 @@ namespace Utili.Services
         {
             _ = UpdateMembersAsync();
         }
-        
+
         public async Task VoiceStateUpdated(VoiceStateUpdatedEventArgs e)
         {
             try
@@ -41,7 +41,7 @@ namespace Utili.Services
                     _updateRequests.Add(new VoiceUpdateRequest(e.GuildId, e.MemberId, e.OldVoiceState?.ChannelId, e.NewVoiceState?.ChannelId));
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 _logger.LogError(ex, "Exception thrown in voice state updated");
             }
@@ -72,7 +72,7 @@ namespace Utili.Services
 
                     await Task.Delay(250);
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     _logger.LogError(ex, "Exception thrown starting member updates");
                 }
@@ -85,7 +85,7 @@ namespace Utili.Services
             {
                 try
                 {
-                    if(request.NewChannelId == request.OldChannelId) return;
+                    if (request.NewChannelId == request.OldChannelId) return;
 
                     IGuild guild = _client.GetGuild(request.GuildId);
                     IMember member = guild.GetMember(request.MemberId);
@@ -100,27 +100,27 @@ namespace Utili.Services
 
                     if (request.OldChannelId.HasValue)
                     {
-                        var record = configs.FirstOrDefault(x => x.ChannelId == request.OldChannelId.Value) ?? 
-                                  configs.FirstOrDefault(x => x.ChannelId == 0);
+                        var record = configs.FirstOrDefault(x => x.ChannelId == request.OldChannelId.Value) ??
+                                     configs.FirstOrDefault(x => x.ChannelId == 0);
                         oldRoleId = record?.RoleId;
                     }
 
                     if (request.NewChannelId.HasValue)
                     {
-                        var config = configs.FirstOrDefault(x => x.ChannelId == request.NewChannelId.Value) ?? 
-                                  configs.FirstOrDefault(x => x.ChannelId == 0);
+                        var config = configs.FirstOrDefault(x => x.ChannelId == request.NewChannelId.Value) ??
+                                     configs.FirstOrDefault(x => x.ChannelId == 0);
                         newRoleId = config?.RoleId;
                     }
 
-                    if(oldRoleId == newRoleId) return;
+                    if (oldRoleId == newRoleId) return;
 
                     if (oldRoleId.HasValue && guild.GetRole(oldRoleId.Value).CanBeManaged())
-                        await member.RevokeRoleAsync(oldRoleId.Value, new DefaultRestRequestOptions{Reason = "Voice Roles"});
+                        await member.RevokeRoleAsync(oldRoleId.Value, new DefaultRestRequestOptions { Reason = "Voice Roles" });
 
                     if (newRoleId.HasValue && guild.GetRole(newRoleId.Value).CanBeManaged())
-                        await member.GrantRoleAsync(newRoleId.Value, new DefaultRestRequestOptions{Reason = "Voice Roles"});
+                        await member.GrantRoleAsync(newRoleId.Value, new DefaultRestRequestOptions { Reason = "Voice Roles" });
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     _logger.LogError(ex, "Exception thrown updating member");
                 }
@@ -144,5 +144,5 @@ namespace Utili.Services
         }
     }
 
-    
+
 }

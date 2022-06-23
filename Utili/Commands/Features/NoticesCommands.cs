@@ -13,12 +13,12 @@ namespace Utili.Commands.Features
     public class NoticesCommands : MyDiscordGuildModuleBase
     {
         private readonly DatabaseContext _dbContext;
-        
+
         public NoticesCommands(DatabaseContext dbContext)
         {
             _dbContext = dbContext;
         }
-        
+
         [Command("preview", "send")]
         [RequireNotThread]
         [RequireBotChannelPermissions(Permission.SendMessages | Permission.SendEmbeds | Permission.SendAttachments)]
@@ -28,7 +28,7 @@ namespace Utili.Commands.Features
             if (config is null) return Failure("Error", "This channel does not have a notice.");
             return Response(NoticesService.GetNotice(config));
         }
-        
+
         [Command("preview", "send")]
         [RequireBotChannelPermissions(Permission.SendMessages | Permission.SendEmbeds | Permission.SendAttachments)]
         public async Task<DiscordCommandResult> PreviewAsync(

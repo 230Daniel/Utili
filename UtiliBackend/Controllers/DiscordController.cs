@@ -38,7 +38,7 @@ namespace UtiliBackend.Controllers
                 IconUrl = guild.GetIconUrl()
             }));
         }
-        
+
         [DiscordGuildAuthorise]
         [HttpGet("{GuildId}/text-channels")]
         public async Task<IActionResult> TextChannelsAsync([Required] ulong guildId)
@@ -46,7 +46,7 @@ namespace UtiliBackend.Controllers
             var channels = await _discordRestService.GetTextChannelsAsync(guildId);
             return Json(_mapper.Map<IEnumerable<TextChannelModel>>(channels));
         }
-        
+
         [DiscordGuildAuthorise]
         [HttpGet("{GuildId}/vocal-channels")]
         public async Task<IActionResult> VocalChannelsAsync([Required] ulong guildId)
@@ -54,7 +54,7 @@ namespace UtiliBackend.Controllers
             var channels = await _discordRestService.GetVocalChannelsAsync(guildId);
             return Json(_mapper.Map<IEnumerable<VocalChannelModel>>(channels));
         }
-        
+
         [DiscordGuildAuthorise]
         [HttpGet("{GuildId}/roles")]
         public IActionResult Roles([Required] ulong guildId)

@@ -56,7 +56,7 @@ namespace Utili.Features
 
             var config = await _dbContext.MessagePinningConfigurations.GetForGuildAsync(Context.GuildId);
             if (config is not null && config.PinMessages)
-                await message.PinAsync(new DefaultRestRequestOptions {Reason = $"Message Pinning (manual by {Context.Message.Author} {Context.Message.Author.Id})"});
+                await message.PinAsync(new DefaultRestRequestOptions { Reason = $"Message Pinning (manual by {Context.Message.Author} {Context.Message.Author.Id})" });
 
             pinChannel ??= config is null ? null : Context.Guild.GetTextChannel(config.PinChannelId);
 

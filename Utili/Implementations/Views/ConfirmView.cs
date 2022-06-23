@@ -9,15 +9,15 @@ namespace Utili.Implementations.Views
     public class ConfirmView : ViewBase
     {
         public bool Result;
-        
+
         private readonly ConfirmViewOptions _options;
         private IUserMessage Message => (Menu as DefaultMenu).Message;
 
         public ConfirmView(Snowflake memberId, ConfirmViewOptions options)
-        : base(new LocalMessage().AddEmbed(MessageUtils.CreateEmbed(EmbedType.Info, options.PromptTitle, options.PromptDescription)))
+            : base(new LocalMessage().AddEmbed(MessageUtils.CreateEmbed(EmbedType.Info, options.PromptTitle, options.PromptDescription)))
         {
             _options = options;
-            
+
             var cancelButton = new ButtonViewComponent(async e =>
             {
                 if (e.Member.Id != memberId) return;
@@ -39,7 +39,7 @@ namespace Utili.Implementations.Views
                 Label = _options.PromptConfirmButtonLabel,
                 Style = LocalButtonComponentStyle.Danger
             };
-            
+
             AddComponent(cancelButton);
             AddComponent(confirmButton);
         }
@@ -49,14 +49,14 @@ namespace Utili.Implementations.Views
             if (Result)
                 await Message.ModifyAsync(x =>
                 {
-                    x.Embeds = new[] {MessageUtils.CreateEmbed(EmbedType.Success, _options.ConfirmTitle, _options.ConfirmDescription)};
-                    x.Components = new LocalRowComponent[]{ };
+                    x.Embeds = new[] { MessageUtils.CreateEmbed(EmbedType.Success, _options.ConfirmTitle, _options.ConfirmDescription) };
+                    x.Components = new LocalRowComponent[] { };
                 });
             else
                 await Message.ModifyAsync(x =>
                 {
-                    x.Embeds = new[] {MessageUtils.CreateEmbed(EmbedType.Failure, _options.CancelTitle, _options.CancelDescription)};
-                    x.Components = new LocalRowComponent[]{ };
+                    x.Embeds = new[] { MessageUtils.CreateEmbed(EmbedType.Failure, _options.CancelTitle, _options.CancelDescription) };
+                    x.Components = new LocalRowComponent[] { };
                 });
         }
     }

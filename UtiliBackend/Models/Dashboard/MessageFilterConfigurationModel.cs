@@ -12,7 +12,7 @@ namespace UtiliBackend.Models
 
         public void ApplyTo(MessageFilterConfiguration configuration)
         {
-            configuration.Mode = (MessageFilterMode) Mode;
+            configuration.Mode = (MessageFilterMode)Mode;
             configuration.RegEx = RegEx;
             configuration.DeletionMessage = DeletionMessage;
             configuration.EnforceInThreads = EnforceInThreads;

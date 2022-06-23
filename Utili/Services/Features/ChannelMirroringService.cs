@@ -32,7 +32,7 @@ namespace Utili.Services
         {
             try
             {
-                if(e.Message is not IUserMessage {WebhookId: null} userMessage) return;
+                if (e.Message is not IUserMessage { WebhookId: null } userMessage) return;
 
                 var db = scope.GetDbContext();
                 var config = await db.ChannelMirroringConfigurations.GetForGuildChannelAsync(e.GuildId.Value, e.ChannelId);
@@ -42,7 +42,7 @@ namespace Utili.Services
                 var destinationChannel = guild.GetTextChannel(config.DestinationChannelId);
                 if (destinationChannel is null) return;
 
-                if(!destinationChannel.BotHasPermissions(Permission.ViewChannels | Permission.ManageWebhooks)) return;
+                if (!destinationChannel.BotHasPermissions(Permission.ViewChannels | Permission.ManageWebhooks)) return;
 
                 string username;
                 string avatarUrl;
@@ -84,7 +84,7 @@ namespace Utili.Services
                     currentAttachmentChunkSize += attachment.FileSize;
                 }
 
-                if(currentAttachmentChunk.Any())
+                if (currentAttachmentChunk.Any())
                     attachmentChunks.Add(currentAttachmentChunk.ToArray());
 
                 var message = new LocalWebhookMessage()
@@ -94,12 +94,12 @@ namespace Utili.Services
                     .WithEmbeds(userMessage.Embeds.Where(x => x.IsRich()).Select(LocalEmbed.FromEmbed))
                     .WithAllowedMentions(LocalAllowedMentions.None);
 
-                if(attachmentChunks.Any())
+                if (attachmentChunks.Any())
                     message.WithAttachments(attachmentChunks[0]);
 
                 try
                 {
-                    for(var i = 0; i < 2; i++)
+                    for (var i = 0; i < 2; i++)
                     {
                         var webhook = await _webhookService.GetWebhookAsync(destinationChannel.Id);
 
@@ -141,11 +141,11 @@ namespace Utili.Services
                 finally
                 {
                     foreach (var attachmentChunk in attachmentChunks)
-                        foreach (var attachment in attachmentChunk)
-                            attachment.Dispose();
+                    foreach (var attachment in attachmentChunk)
+                        attachment.Dispose();
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 _logger.LogError(ex, "Exception thrown on message received ({Guild}/{Channel}/{Message})", e.GuildId, e.ChannelId, e.MessageId);
             }

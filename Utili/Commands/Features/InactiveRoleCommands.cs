@@ -31,7 +31,7 @@ namespace Utili.Commands
             _dbContext = dbContext;
             _memberCache = memberCache;
         }
-        
+
         [Command("list")]
         public async Task<DiscordCommandResult> ListAsync()
         {
@@ -83,7 +83,7 @@ namespace Utili.Commands
 
             if (embed.Fields.Count > 0)
                 pages.Add(new Page().AddEmbed(embed));
-            
+
             var pageProvider = new ListPageProvider(pages);
             var menu = new MyPagedView(pageProvider);
             return View(menu, TimeSpan.FromMinutes(5));
@@ -99,12 +99,12 @@ namespace Utili.Commands
             var config = await _dbContext.InactiveRoleConfigurations.GetForGuildAsync(Context.GuildId);
             if (Context.Guild.GetRole(config.RoleId) is null)
                 return Failure("Error", "This server does not have an inactive role set");
-            
+
             lock (_kickingIn)
             {
-                if (_kickingIn.Contains(Context.GuildId)) 
+                if (_kickingIn.Contains(Context.GuildId))
                     return Failure("Error", "This command is already being executed in this server.");
-                
+
                 _kickingIn.Add(Context.GuildId);
             }
 
@@ -122,22 +122,22 @@ namespace Utili.Commands
                         .ToList();
 
                 if (await ConfirmAsync(new ConfirmViewOptions
-                {
-                    PromptDescription = $"This command will kick {inactiveMembers.Count} inactive members - View them with {Context.Prefix}inactive list",
-                    PromptConfirmButtonLabel = $"Kick {inactiveMembers.Count} inactive members",
-                    ConfirmTitle = $"Kicking {inactiveMembers.Count} inactive members",
-                    ConfirmDescription = $"Under ideal conditions, this action will take {TimeSpan.FromSeconds(inactiveMembers.Count * 1.1).ToLongString()}"
-                }))
+                    {
+                        PromptDescription = $"This command will kick {inactiveMembers.Count} inactive members - View them with {Context.Prefix}inactive list",
+                        PromptConfirmButtonLabel = $"Kick {inactiveMembers.Count} inactive members",
+                        ConfirmTitle = $"Kicking {inactiveMembers.Count} inactive members",
+                        ConfirmDescription = $"Under ideal conditions, this action will take {TimeSpan.FromSeconds(inactiveMembers.Count * 1.1).ToLongString()}"
+                    }))
                 {
                     await using var yield = Context.BeginYield();
-                    
+
                     var failed = 0;
                     foreach (var member in inactiveMembers)
                     {
                         try
                         {
                             var delay = Task.Delay(1100);
-                            var kick = member.KickAsync(new DefaultRestRequestOptions {Reason = $"Inactive Kick (manual by {Context.Message.Author} {Context.Message.Author.Id})"});
+                            var kick = member.KickAsync(new DefaultRestRequestOptions { Reason = $"Inactive Kick (manual by {Context.Message.Author} {Context.Message.Author.Id})" });
                             await Task.WhenAll(delay, kick);
                         }
                         catch
@@ -147,10 +147,10 @@ namespace Utili.Commands
                     }
 
                     return Success(
-                        "Inactive members kicked", 
+                        "Inactive members kicked",
                         $"{inactiveMembers.Count - failed} inactive members were kicked {(failed > 0 ? $"\nFailed to kick {failed} members" : "")}");
                 }
-                
+
                 return null;
             }
             finally

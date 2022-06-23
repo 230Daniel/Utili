@@ -22,7 +22,7 @@ namespace Utili.Services
         private readonly ILogger<MessageLogsService> _logger;
         private readonly DiscordClientBase _client;
         private readonly HasteService _haste;
-        
+
         private readonly Timer _timer;
 
         public MessageLogsService(IServiceScopeFactory scopeFactory, ILogger<MessageLogsService> logger, DiscordClientBase client, HasteService haste)
@@ -31,7 +31,7 @@ namespace Utili.Services
             _logger = logger;
             _client = client;
             _haste = haste;
-            
+
             _timer = new Timer(60000);
             _timer.Elapsed += (_, _) => _ = Delete30DayMessagesAsync();
         }
@@ -45,7 +45,7 @@ namespace Utili.Services
         {
             try
             {
-                if(e.Message.Author.IsBot) return;
+                if (e.Message.Author.IsBot) return;
 
                 var db = scope.GetDbContext();
                 var config = await db.MessageLogsConfigurations.GetForGuildAsync(e.GuildId.Value);
@@ -76,9 +76,9 @@ namespace Utili.Services
                         .ToListAsync();
 
                     var excessMessages = messages.Skip(e.Channel is IThreadChannel ? 15 : 30);
-                    if(excessMessages.Any()) db.MessageLogsMessages.RemoveRange(excessMessages);
+                    if (excessMessages.Any()) db.MessageLogsMessages.RemoveRange(excessMessages);
                 }
-                
+
                 await db.SaveChangesAsync();
             }
             catch (Exception ex)
@@ -92,7 +92,7 @@ namespace Utili.Services
             try
             {
                 if (!e.GuildId.HasValue) return;
-                
+
                 var db = scope.GetDbContext();
                 var config = await db.MessageLogsConfigurations.GetForGuildAsync(e.GuildId.Value);
                 if (config is null || (config.DeletedChannelId == 0 && config.EditedChannelId == 0) || config.ExcludedChannels.Contains(e.ChannelId)) return;
@@ -114,7 +114,7 @@ namespace Utili.Services
                 var logChannel = _client.GetTextChannel(e.GuildId.Value, config.EditedChannelId);
                 if (logChannel is not null) await logChannel.SendEmbedAsync(embed);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 _logger.LogError(ex, "Exception thrown on message updated");
             }
@@ -131,7 +131,7 @@ namespace Utili.Services
                 IMessageGuildChannel channel = _client.GetMessageGuildChannel(e.GuildId.Value, e.ChannelId);
                 if (channel is IThreadChannel threadChannel && (!config.LogThreads || config.ExcludedChannels.Contains(threadChannel.ChannelId)))
                     return;
-                
+
                 var messageRecord = await db.MessageLogsMessages.GetForMessageAsync(e.MessageId);
                 if (messageRecord is null) return;
 
@@ -142,7 +142,7 @@ namespace Utili.Services
 
                 db.MessageLogsMessages.Remove(messageRecord);
                 await db.SaveChangesAsync();
-                
+
                 var logChannel = _client.GetTextChannel(e.GuildId.Value, config.DeletedChannelId);
                 if (logChannel is not null) await logChannel.SendEmbedAsync(embed);
             }
@@ -159,11 +159,11 @@ namespace Utili.Services
                 var db = scope.GetDbContext();
                 var config = await db.MessageLogsConfigurations.GetForGuildAsync(e.GuildId);
                 if (config is null || (config.DeletedChannelId == 0 && config.EditedChannelId == 0) || config.ExcludedChannels.Contains(e.ChannelId)) return;
-                
+
                 IMessageGuildChannel channel = _client.GetMessageGuildChannel(e.GuildId, e.ChannelId);
                 if (channel is IThreadChannel threadChannel && (!config.LogThreads || config.ExcludedChannels.Contains(threadChannel.ChannelId)))
                     return;
-                
+
                 var messageIds = e.MessageIds.Select(x => x.RawValue);
                 var messages = await db.MessageLogsMessages.Where(x => messageIds.Contains(x.MessageId)).ToListAsync();
 
@@ -174,7 +174,7 @@ namespace Utili.Services
                     db.MessageLogsMessages.RemoveRange(messages);
                     await db.SaveChangesAsync();
                 }
-                
+
                 var logChannel = _client.GetTextChannel(e.GuildId, config.DeletedChannelId);
                 if (logChannel is not null) await logChannel.SendEmbedAsync(embed);
             }
@@ -238,13 +238,13 @@ namespace Utili.Services
                                      "No messages were logged")
                     .WithAuthor("Bulk Deletion");
             }
-            
+
             var paste = await PasteMessagesAsync(messageRecords, count);
 
             var link = paste is not null
                 ? $"[View {messageRecords.Count} logged message{(messageRecords.Count == 1 ? "" : "s")}]({paste})"
                 : "Exception thrown uploading messages to Haste server";
-            
+
             return new LocalEmbed()
                 .WithColor(new Color(245, 66, 66))
                 .WithDescription($"**{count} messages bulk deleted in {Mention.Channel(messageRecords[0].ChannelId)}**\n" +

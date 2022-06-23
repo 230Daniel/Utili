@@ -40,7 +40,7 @@ namespace UtiliBackend.Controllers
         public async Task<IActionResult> PostAsync([Required] ulong guildId, [FromBody] JoinRolesConfigurationModel model)
         {
             var configuration = await _dbContext.JoinRolesConfigurations.GetForGuildAsync(guildId);
-            
+
             if (configuration is null)
             {
                 configuration = new JoinRolesConfiguration(guildId);
@@ -52,7 +52,7 @@ namespace UtiliBackend.Controllers
                 model.ApplyTo(configuration);
                 _dbContext.JoinRolesConfigurations.Update(configuration);
             }
-            
+
             await _dbContext.SetHasFeatureAsync(guildId, BotFeatures.JoinRoles, model.JoinRoles.Any());
             await _dbContext.SaveChangesAsync();
             return Ok();

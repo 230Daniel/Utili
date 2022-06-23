@@ -20,9 +20,9 @@ namespace Utili.Services
         private readonly ILogger<JoinRolesService> _logger;
         private readonly DiscordClientBase _client;
         private readonly IServiceScopeFactory _scopeFactory;
-        
+
         private Dictionary<(ulong, ulong), Timer> _pendingTimers = new();
-        
+
         public JoinRolesService(ILogger<JoinRolesService> logger, DiscordClientBase client, IServiceScopeFactory scopeFactory)
         {
             _logger = logger;
@@ -43,9 +43,9 @@ namespace Utili.Services
                 var config = await db.JoinRolesConfigurations.GetForGuildAsync(e.GuildId);
                 IGuild guild = _client.GetGuild(e.GuildId);
 
-                if (rolePersistAddedRoles && config.CancelOnRolePersist) 
+                if (rolePersistAddedRoles && config.CancelOnRolePersist)
                     return;
-                
+
                 if (config.WaitForVerification && (e.Member.IsPending || guild.VerificationLevel >= GuildVerificationLevel.High))
                 {
                     var memberRecord = await db.JoinRolesPendingMembers.GetForMemberAsync(e.GuildId, e.Member.Id);
@@ -68,18 +68,18 @@ namespace Utili.Services
                             : DateTime.MinValue;
                         db.JoinRolesPendingMembers.Update(memberRecord);
                     }
-                    
+
                     await db.SaveChangesAsync();
-                    
+
                     if (guild.VerificationLevel >= GuildVerificationLevel.High)
                         ScheduleAddRoles(e.GuildId, e.Member.Id, DateTime.UtcNow.AddMinutes(10));
-                    
+
                     return;
                 }
 
                 await AddRolesAsync(e.GuildId, e.Member.Id, false, config.JoinRoles);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 _logger.LogError(ex, "Exception thrown on member joined");
             }
@@ -98,7 +98,7 @@ namespace Utili.Services
 
                 var record = await db.JoinRolesConfigurations.GetForGuildAsync(guildId);
                 if (record is null) return;
-                
+
                 if (e.NewMember.RoleIds.Any())
                 {
                     // The member has been given a role, so all delays are now irrelevant
@@ -106,7 +106,7 @@ namespace Utili.Services
                     await db.SaveChangesAsync();
                     await AddRolesAsync(guildId, e.NewMember.Id, false, record.JoinRoles);
                 }
-                
+
                 if (memberRecord.IsPending && !e.NewMember.IsPending)
                 {
                     // The member has completed membership screening
@@ -127,7 +127,7 @@ namespace Utili.Services
                     }
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 _logger.LogError(ex, "Exception thrown on member updated");
             }
@@ -139,7 +139,7 @@ namespace Utili.Services
             {
                 using var scope = _scopeFactory.CreateScope();
                 var db = scope.GetDbContext();
-                
+
                 if (fromDelay)
                 {
                     var pendingRecord = await db.JoinRolesPendingMembers.GetForMemberAsync(guildId, memberId);
@@ -148,7 +148,7 @@ namespace Utili.Services
                     db.JoinRolesPendingMembers.Remove(pendingRecord);
                     await db.SaveChangesAsync();
                 }
-                
+
                 joinRoles ??= (await db.JoinRolesConfigurations.GetForGuildAsync(guildId)).JoinRoles;
             }
 
@@ -156,13 +156,13 @@ namespace Utili.Services
 
             var roles = joinRoles.Select(x => guild.GetRole(x)).ToList();
             roles.RemoveAll(x => x is null || !x.CanBeManaged());
-            
+
             var roleIds = roles.Select(x => x.Id).ToList();
             roleIds = roleIds.Distinct().ToList();
 
             foreach (var roleId in roleIds)
             {
-                await guild.GrantRoleAsync(memberId, roleId, new DefaultRestRequestOptions{Reason = "Join Roles"});
+                await guild.GrantRoleAsync(memberId, roleId, new DefaultRestRequestOptions { Reason = "Join Roles" });
             }
         }
 
@@ -171,8 +171,8 @@ namespace Utili.Services
             using var scope = _scopeFactory.CreateScope();
             var db = scope.GetDbContext();
             var records = await db.JoinRolesPendingMembers.ToListAsync();
-            
-            foreach(var record in records)
+
+            foreach (var record in records)
             {
                 try
                 {
@@ -184,7 +184,7 @@ namespace Utili.Services
                 }
             }
 
-            if(records.Count > 0) _logger.LogInformation($"Re-scheduled {records.Count} pending join role user{(records.Count == 1 ? "" : "s")}");
+            if (records.Count > 0) _logger.LogInformation($"Re-scheduled {records.Count} pending join role user{(records.Count == 1 ? "" : "s")}");
         }
 
         private void ScheduleAddRoles(ulong guildId, ulong memberId, DateTime due)

@@ -25,7 +25,7 @@ namespace UtiliBackend.Controllers
             _mapper = mapper;
             _databaseContext = databaseContext;
         }
-        
+
         [DiscordGuildAuthorise]
         [HttpGet("guild/{GuildId}")]
         public async Task<IActionResult> GuildIsPremiumAsync([Required] ulong guildId)
@@ -52,10 +52,10 @@ namespace UtiliBackend.Controllers
                 }
                 await _databaseContext.SaveChangesAsync();
             }
-            
+
             return Json(_mapper.Map<IEnumerable<PremiumSlotModel>>(slots));
         }
-        
+
         [DiscordAuthorise]
         [HttpPost("slots")]
         public async Task<IActionResult> SlotsAsync([FromBody] List<PremiumSlotModel> models)
@@ -66,8 +66,8 @@ namespace UtiliBackend.Controllers
             foreach (var slot in slots)
             {
                 var model = models.FirstOrDefault(x => x.SlotId == slot.SlotId);
-                if(model is null) continue;
-                
+                if (model is null) continue;
+
                 model.ApplyTo(slot);
                 _databaseContext.PremiumSlots.Update(slot);
             }

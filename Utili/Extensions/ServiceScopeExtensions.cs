@@ -12,7 +12,7 @@ namespace Utili.Extensions
         {
             return scope.ServiceProvider.GetCoreConfigurationAsync(guildId);
         }
-        
+
         public static DatabaseContext GetDbContext(this IServiceScope scope)
         {
             return scope.ServiceProvider.GetDbContext();

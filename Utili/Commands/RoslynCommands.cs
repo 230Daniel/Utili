@@ -65,7 +65,7 @@ namespace Utili.Features
                 if (result is null) return Success("Evaluated result", "null");
                 return Success("Evaluated result", result.ToString());
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 _logger.LogError(e, "Exception thrown executing evaluate command");
                 return Failure("An exception occurred", e.ToString());

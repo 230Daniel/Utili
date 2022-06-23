@@ -40,7 +40,7 @@ namespace UtiliBackend.Controllers
         public async Task<IActionResult> PostAsync([Required] ulong guildId, [FromBody] MessageLogsConfigurationModel model)
         {
             var configuration = await _dbContext.MessageLogsConfigurations.GetForGuildAsync(guildId);
-            
+
             if (configuration is null)
             {
                 configuration = new MessageLogsConfiguration(guildId);
@@ -52,7 +52,7 @@ namespace UtiliBackend.Controllers
                 model.ApplyTo(configuration);
                 _dbContext.MessageLogsConfigurations.Update(configuration);
             }
-            
+
             await _dbContext.SetHasFeatureAsync(guildId, BotFeatures.MessageLogs, configuration.DeletedChannelId != 0 || configuration.EditedChannelId != 0);
             await _dbContext.SaveChangesAsync();
             return Ok();

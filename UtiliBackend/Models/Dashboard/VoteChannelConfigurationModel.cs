@@ -11,7 +11,7 @@ namespace UtiliBackend.Models
 
         public void ApplyTo(VoteChannelConfiguration configuration)
         {
-            configuration.Mode = (VoteChannelMode) Mode;
+            configuration.Mode = (VoteChannelMode)Mode;
             configuration.Emojis = Emojis;
         }
     }

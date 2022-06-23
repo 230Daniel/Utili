@@ -35,7 +35,7 @@ namespace Utili
                     bot.ReadyEventDelayMode = ReadyEventDelayMode.Guilds;
                     bot.Intents |= GatewayIntent.Members;
                     bot.Intents |= GatewayIntent.VoiceStates;
-                    bot.Activities = new[] { new LocalActivity($"{context.Configuration.GetValue<string>("Domain")} | Starting up...", ActivityType.Playing)};
+                    bot.Activities = new[] { new LocalActivity($"{context.Configuration.GetValue<string>("Domain")} | Starting up...", ActivityType.Playing) };
                     bot.OwnerIds = new[] { new Snowflake(context.Configuration.GetValue<ulong>("OwnerId")) };
 
                     var shardIds = context.Configuration.GetSection("ShardIds").Get<int[]>();

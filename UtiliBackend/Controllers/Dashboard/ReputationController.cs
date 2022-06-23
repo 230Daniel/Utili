@@ -37,7 +37,7 @@ namespace UtiliBackend.Controllers
         public async Task<IActionResult> PostAsync([Required] ulong guildId, [FromBody] ReputationConfigurationModel model)
         {
             var configuration = await _dbContext.ReputationConfigurations.GetForGuildWithEmojisAsync(guildId);
-            
+
             if (configuration is null)
             {
                 configuration = new ReputationConfiguration(guildId);
@@ -49,7 +49,7 @@ namespace UtiliBackend.Controllers
                 model.ApplyTo(configuration);
                 _dbContext.ReputationConfigurations.Update(configuration);
             }
-            
+
             await _dbContext.SetHasFeatureAsync(guildId, BotFeatures.Reputation, model.Emojis.Any());
             await _dbContext.SaveChangesAsync();
             return Ok();

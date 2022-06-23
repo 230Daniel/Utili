@@ -19,18 +19,18 @@ namespace Utili.Commands.TypeParsers
             using JsonTextReader reader = new(sr);
             _emojis = serializer.Deserialize<HashSet<string>>(reader);
         }
-        
+
         public override ValueTask<TypeParserResult<IEmoji>> ParseAsync(Parameter parameter, string value, DiscordGuildCommandContext context)
         {
             if (LocalCustomEmoji.TryParse(value, out var emoji))
             {
-                return context.Guild.Emojis.TryGetValue(emoji.Id, out var guildEmoji) ? 
-                    Success(guildEmoji) : 
+                return context.Guild.Emojis.TryGetValue(emoji.Id, out var guildEmoji) ?
+                    Success(guildEmoji) :
                     Failure("The provided custom emoji is not from this guild.");
             }
 
-            return _emojis.Contains(value) ? 
-                Success(new LocalEmoji(value)) : 
+            return _emojis.Contains(value) ?
+                Success(new LocalEmoji(value)) :
                 Failure("The provided value is not an emoji");
         }
     }

@@ -13,7 +13,7 @@ namespace UtiliBackend.Models
         {
             configuration.RoleId = ulong.Parse(RoleId);
             configuration.LinkedRoleId = ulong.Parse(LinkedRoleId);
-            configuration.Mode = (RoleLinkingMode) Mode;
+            configuration.Mode = (RoleLinkingMode)Mode;
         }
     }
 }

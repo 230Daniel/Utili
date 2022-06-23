@@ -11,7 +11,7 @@ namespace UtiliBackend.Models
         public void ApplyTo(ChannelMirroringConfiguration configuration)
         {
             configuration.DestinationChannelId = ulong.Parse(DestinationChannelId);
-            configuration.AuthorDisplayMode = (ChannelMirroringAuthorDisplayMode) AuthorDisplayMode;
+            configuration.AuthorDisplayMode = (ChannelMirroringAuthorDisplayMode)AuthorDisplayMode;
         }
     }
 }

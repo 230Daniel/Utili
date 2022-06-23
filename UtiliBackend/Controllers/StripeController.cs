@@ -29,13 +29,13 @@ namespace UtiliBackend.Controllers
             _customerService = customerService;
             _stripeClient = stripeClient;
         }
-        
+
         [HttpPost("create-checkout-session")]
         public async Task<IActionResult> CreateCheckoutSessionAsync([FromBody] CreateCheckoutSessionModel model)
         {
             var customerId = await _customerService.GetOrCreateCustomerIdAsync(HttpContext.GetUser());
             if (customerId is null) throw new Exception("Customer ID was null");
-            
+
             var options = new SessionCreateOptions
             {
                 SuccessUrl = $"{_configuration["Frontend:Origin"]}/premium/thankyou",
@@ -59,19 +59,19 @@ namespace UtiliBackend.Controllers
 
             var sessionService = new SessionService(_stripeClient);
             var session = await sessionService.CreateAsync(options);
-            
+
             return Json(new CheckoutSessionModel
             {
                 SessionId = session.Id
             });
         }
-        
+
         [HttpGet("customer-portal")]
         public async Task<IActionResult> CustomerPortalAsync()
         {
             var customerId = await _customerService.GetOrCreateCustomerIdAsync(HttpContext.GetUser());
             if (customerId is null) throw new Exception("Customer ID was null");
-            
+
             var options = new Stripe.BillingPortal.SessionCreateOptions
             {
                 Customer = customerId,
@@ -80,15 +80,15 @@ namespace UtiliBackend.Controllers
 
             var sessionService = new Stripe.BillingPortal.SessionService(_stripeClient);
             var session = await sessionService.CreateAsync(options);
-            
+
             return Json(session);
         }
-        
+
         [HttpGet("currency")]
         public async Task<IActionResult> CurrencyAsync()
         {
             var customer = await _customerService.GetCustomerAsync(HttpContext.GetUser());
-            
+
             if (customer is not null && !string.IsNullOrEmpty(customer.Currency))
             {
                 return Json(new CustomerCurrencyModel
@@ -99,26 +99,29 @@ namespace UtiliBackend.Controllers
             }
 
             var currency = await GetCustomerCurrencyByIpAsync();
-            
+
             return Json(new CustomerCurrencyModel
             {
                 Locked = false,
                 Currency = currency
             });
         }
-        
+
         private async Task<string> GetCustomerCurrencyByIpAsync()
         {
-            var gbp = new [] {
+            var gbp = new[]
+            {
                 "GB", "IM", "JE", "GG"
             };
-            var eur = new [] {
+            var eur = new[]
+            {
                 "AX", "EU", "AD", "AT", "BE", "CY", "EE", "FI", "FR", "TF", "DE", "GR", "GP", "IE", "IT", "LV", "LT",
                 "LU", "MT", "GF", "MQ", "YT", "MC", "ME", "NL", "PT", "RE", "BL", "MF", "PM", "SM", "SK", "SI", "ES",
                 "VA"
             };
-            var usd = new [] {
-                "US", "AS", "IO", "VG", "BQ", "EC", "SV", "GU", "HT", "MH", "FM", "MP", "PW", "PA", "PR", "TL", "TC", 
+            var usd = new[]
+            {
+                "US", "AS", "IO", "VG", "BQ", "EC", "SV", "GU", "HT", "MH", "FM", "MP", "PW", "PA", "PR", "TL", "TC",
                 "VI", "UM"
             };
 

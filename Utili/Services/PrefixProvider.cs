@@ -33,7 +33,7 @@ namespace Utili.Services
 
             using var scope = _scopeFactory.CreateScope();
             var config = await scope.GetCoreConfigurationAsync(message.GuildId.Value);
-            
+
             return new IPrefix[]
             {
                 new StringPrefix(string.IsNullOrWhiteSpace(config?.Prefix) ? _config["DefaultPrefix"] : config.Prefix),

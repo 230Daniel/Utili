@@ -11,7 +11,7 @@ namespace Utili.Extensions
         {
             return guild.GetChannel(channelId) as CachedTextChannel;
         }
-        
+
         public static CachedMessageGuildChannel GetMessageGuildChannel(this IGuild guild, Snowflake channelId)
         {
             return guild.GetChannel(channelId) as CachedMessageGuildChannel;
@@ -21,7 +21,7 @@ namespace Utili.Extensions
         {
             return guild.GetChannel(channelId) as CachedVoiceChannel;
         }
-        
+
         public static CachedVocalGuildChannel GetAudioChannel(this IGuild guild, Snowflake channelId)
         {
             return guild.GetChannel(channelId) as CachedVocalGuildChannel;

@@ -21,22 +21,21 @@ namespace Utili.Commands
     public class RepuatationCommands : MyDiscordGuildModuleBase
     {
         private readonly DatabaseContext _dbContext;
-        
+
         public RepuatationCommands(DatabaseContext dbContext)
         {
             _dbContext = dbContext;
         }
-        
+
         [Command("")]
         public async Task<DiscordCommandResult> ReputationAsync(
-            [RequireNotBot]
-            IMember member = null)
+            [RequireNotBot] IMember member = null)
         {
             member ??= Context.Message.Author as IMember;
 
             var repMember = await _dbContext.ReputationMembers.GetForMemberAsync(Context.GuildId, member.Id);
             var reputation = repMember?.Reputation ?? 0;
-            
+
             var colour = reputation switch
             {
                 0 => new Color(195, 195, 195),
@@ -103,13 +102,12 @@ namespace Utili.Commands
         [DefaultCooldown(1, 2)]
         [RequireAuthorGuildPermissions(Permission.ManageGuild)]
         public async Task<DiscordCommandResult> GiveAsync(
-            [RequireNotBot] 
-            IMember member, 
+            [RequireNotBot] IMember member,
             ulong change)
         {
             await _dbContext.ReputationMembers.UpdateMemberReputationAsync(Context.GuildId, member.Id, (long)change);
             await _dbContext.SaveChangesAsync();
-            
+
             return Success("Reputation given", $"Gave {change} reputation to {member.Mention}");
         }
 
@@ -117,13 +115,12 @@ namespace Utili.Commands
         [DefaultCooldown(1, 2)]
         [RequireAuthorGuildPermissions(Permission.ManageGuild)]
         public async Task<DiscordCommandResult> TakeAsync(
-            [RequireNotBot] 
-            IMember member, 
+            [RequireNotBot] IMember member,
             ulong change)
         {
             await _dbContext.ReputationMembers.UpdateMemberReputationAsync(Context.GuildId, member.Id, -(long)change);
             await _dbContext.SaveChangesAsync();
-            
+
             return Success("Reputation taken", $"Took {change} reputation from {member.Mention}");
         }
 
@@ -131,12 +128,11 @@ namespace Utili.Commands
         [DefaultCooldown(1, 2)]
         [RequireAuthorGuildPermissions(Permission.ManageGuild)]
         public async Task<DiscordCommandResult> SetAsync(
-            [RequireNotBot] 
-            IMember member, 
+            [RequireNotBot] IMember member,
             long amount)
         {
             var repMember = await _dbContext.ReputationMembers.GetForMemberAsync(Context.GuildId, member.Id);
-            
+
             if (repMember is null)
             {
                 repMember = new ReputationMember(Context.GuildId, member.Id)
@@ -150,9 +146,9 @@ namespace Utili.Commands
                 repMember.Reputation = amount;
                 _dbContext.ReputationMembers.Update(repMember);
             }
-            
+
             await _dbContext.SaveChangesAsync();
-            
+
             return Success("Reputation set", $"Set {member.Mention}'s reputation to {amount}");
         }
 
@@ -168,7 +164,7 @@ namespace Utili.Commands
                 {
                     Emojis = new List<ReputationConfigurationEmoji>
                     {
-                        new (emoji.ToString())
+                        new(emoji.ToString())
                         {
                             Value = value
                         }
@@ -181,7 +177,7 @@ namespace Utili.Commands
             else
             {
                 config.Emojis ??= new List<ReputationConfigurationEmoji>();
-            
+
                 if (config.Emojis.Any(x => Equals(x.Emoji, emoji.ToString())))
                     return Failure("Error", "That emoji is already added");
 
@@ -189,10 +185,10 @@ namespace Utili.Commands
                 {
                     Value = value
                 });
-                
+
                 _dbContext.ReputationConfigurations.Update(config);
             }
-            
+
             await _dbContext.SaveChangesAsync();
             return Success("Emoji added",
                 $"The {emoji} emoji was added successfully with value {value}\nYou can change its value or remove it on the dashboard");
@@ -203,12 +199,12 @@ namespace Utili.Commands
         public async Task<DiscordCommandResult> ResetAsync()
         {
             if (await ConfirmAsync(new ConfirmViewOptions
-            {
-                PromptDescription = "This command will reset reputation for all server members",
-                PromptConfirmButtonLabel = "Reset all reputation",
-                ConfirmTitle = "Reputation reset",
-                ConfirmDescription = "The reputation of all server members has been set to 0"
-            }))
+                {
+                    PromptDescription = "This command will reset reputation for all server members",
+                    PromptConfirmButtonLabel = "Reset all reputation",
+                    ConfirmTitle = "Reputation reset",
+                    ConfirmDescription = "The reputation of all server members has been set to 0"
+                }))
             {
                 await _dbContext.Database.ExecuteSqlInterpolatedAsync($"DELETE FROM reputation_members WHERE guild_id = {Context.GuildId.RawValue};");
             }

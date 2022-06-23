@@ -19,12 +19,12 @@ namespace Utili.Services
     public class MemberCacheService
     {
         private static readonly TimeSpan TemporaryCacheLength = TimeSpan.FromMinutes(10);
-        
+
         private readonly ILogger<MemberCacheService> _logger;
         private readonly IConfiguration _configuration;
         private readonly DiscordClientBase _client;
         private readonly IServiceScopeFactory _scopeFactory;
-        
+
         private List<Snowflake> _cachedGuilds;
         private ConcurrentDictionary<Snowflake, DateTime> _tempCachedGuilds;
         private Dictionary<Snowflake, SemaphoreSlim> _semaphores;
@@ -56,7 +56,7 @@ namespace Utili.Services
                 var guildIds = await GetRequiredDownloadsAsync(e.GuildIds);
                 _logger.LogInformation("Caching members for {Guilds} guilds on {ShardId}", guildIds.Count, e.ShardId);
                 await PermanentlyCacheMembersAsync(guildIds);
-                
+
                 _logger.LogInformation("Finished caching members for {Shard}", e.ShardId);
                 await e.CurrentUser.GetGatewayClient().SetPresenceAsync(new LocalActivity($"{_configuration.GetValue<string>("Domain")} | {_configuration.GetValue<string>("DefaultPrefix")}help", ActivityType.Playing));
             }
@@ -74,9 +74,9 @@ namespace Utili.Services
                     // The guild is cached permanently
                     return;
             }
-            
+
             SemaphoreSlim semaphore;
-            
+
             lock (_semaphores)
             {
                 if (!_semaphores.TryGetValue(guildId, out semaphore))
@@ -96,7 +96,7 @@ namespace Utili.Services
                     _tempCachedGuilds[guildId] = DateTime.UtcNow.Add(TemporaryCacheLength);
                     return;
                 }
-                
+
                 // The expiry time is in the past, chunk members now and set expiry time
                 await _client.Chunker.ChunkAsync(_client.GetGuild(guildId));
                 _tempCachedGuilds[guildId] = DateTime.UtcNow.Add(TemporaryCacheLength);
@@ -156,11 +156,11 @@ namespace Utili.Services
 
             var roleLinkingConfigs = await db.RoleLinkingConfigurations.ToListAsync();
             guildIds.AddRange(roleLinkingConfigs.Select(x => x.GuildId));
-            
+
             guildIds.RemoveAll(x => !shardGuildIds.Contains(x));
             return guildIds.Distinct().Select(x => new Snowflake(x)).ToList();
         }
-        
+
         private async Task UncacheExpiredTemporaryMembersAsync()
         {
             try

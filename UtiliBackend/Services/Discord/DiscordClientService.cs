@@ -77,7 +77,7 @@ namespace UtiliBackend.Services
         {
             public IBearerClient Client { get; init; }
             public IBearerAuthorization Authorization { get; init; }
-            public ICurrentUser User { get; init;  }
+            public ICurrentUser User { get; init; }
             public string Token => Client.RestClient.ApiClient.Token.RawValue;
         }
     }

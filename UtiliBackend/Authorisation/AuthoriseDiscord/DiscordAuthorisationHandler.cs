@@ -17,13 +17,13 @@ namespace UtiliBackend.Authorisation
 
         protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context, DiscordRequirement requirement)
         {
-            var httpContext = (HttpContext) context.Resource;
+            var httpContext = (HttpContext)context.Resource;
             var client = await _discordClientService.GetClientAsync(httpContext);
-                
+
             if (client is not null)
             {
                 httpContext.Items["DiscordClient"] ??= client;
-                
+
                 if (client.Authorization.ExpiresAt > DateTimeOffset.Now)
                 {
                     requirement.DiscordAuthenticated = true;

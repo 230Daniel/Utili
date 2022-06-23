@@ -22,12 +22,12 @@ namespace Utili.Implementations
 
             var config = await context.Services.GetCoreConfigurationAsync(context.GuildId.Value);
             if (config is null) return true;
-            
-            return !config.NonCommandChannels.Contains(context.ChannelId) 
-                ? config.CommandsEnabled 
+
+            return !config.NonCommandChannels.Contains(context.ChannelId)
+                ? config.CommandsEnabled
                 : !config.CommandsEnabled;
         }
-        
+
         protected override LocalMessage FormatFailureMessage(DiscordCommandContext context, FailedResult result)
         {
             static string FormatParameter(Parameter parameter)
@@ -72,7 +72,7 @@ namespace Utili.Implementations
             else if (result is CommandOnCooldownResult cooldownResult)
             {
                 var cooldown = cooldownResult.Cooldowns.OrderBy(x => x.RetryAfter).Last();
-                var seconds = (int) Math.Round(cooldown.Item2.TotalSeconds);
+                var seconds = (int)Math.Round(cooldown.Item2.TotalSeconds);
                 embed.WithDescription($"You're doing that too fast, try again in {seconds} {(seconds == 1 ? "second" : "seconds")}");
                 embed.WithFooter($"{cooldown.Item1.BucketType.ToString().Title()} cooldown");
             }
@@ -85,7 +85,7 @@ namespace Utili.Implementations
                 .AddEmbed(embed)
                 .WithAllowedMentions(LocalAllowedMentions.None);
         }
-        
+
         protected override ValueTask AddTypeParsersAsync(CancellationToken cancellationToken = default)
         {
             Commands.AddTypeParser(new EmojiTypeParser());
@@ -94,13 +94,15 @@ namespace Utili.Implementations
         }
 
         public MyDiscordBotSharder(
-            IOptions<DiscordBotSharderConfiguration> options, 
+            IOptions<DiscordBotSharderConfiguration> options,
             ILogger<MyDiscordBotSharder> logger,
-            IServiceProvider services, 
-            DiscordClientSharder client) 
-            : base(options, 
+            IServiceProvider services,
+            DiscordClientSharder client)
+            : base(options,
                 logger,
-                services, 
-                client) { }
+                services,
+                client)
+        {
+        }
     }
 }

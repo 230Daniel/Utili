@@ -25,7 +25,7 @@ namespace UtiliBackend.Controllers
             _mapper = mapper;
             _dbContext = dbContext;
         }
-        
+
         [HttpGet]
         public async Task<IActionResult> GetAsync([Required] ulong guildId)
         {
@@ -38,12 +38,12 @@ namespace UtiliBackend.Controllers
             };
             return Json(_mapper.Map<CoreConfigurationModel>(configuration));
         }
-        
+
         [HttpPost]
         public async Task<IActionResult> PostAsync([Required] ulong guildId, [FromBody] CoreConfigurationModel model)
         {
             var configuration = await _dbContext.CoreConfigurations.GetForGuildAsync(guildId);
-            
+
             if (configuration is null)
             {
                 configuration = new CoreConfiguration(guildId);
@@ -55,7 +55,7 @@ namespace UtiliBackend.Controllers
                 model.ApplyTo(configuration);
                 _dbContext.CoreConfigurations.Update(configuration);
             }
-            
+
             await _dbContext.SaveChangesAsync();
             return Ok();
         }

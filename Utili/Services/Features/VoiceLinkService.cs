@@ -112,7 +112,7 @@ namespace Utili.Services
                 var db = scope.GetDbContext();
 
                 var config = await db.VoiceLinkConfigurations.GetForGuildAsync(guildId);
-                if(config is null || !config.Enabled || config.ExcludedChannels.Contains(channelId)) return;
+                if (config is null || !config.Enabled || config.ExcludedChannels.Contains(channelId)) return;
 
                 var channelRecord = await db.VoiceLinkChannels.GetForGuildChannelAsync(guildId, channelId);
 
@@ -126,7 +126,7 @@ namespace Utili.Services
 
                 var category = voiceChannel.CategoryId.HasValue ? guild.GetCategoryChannel(voiceChannel.CategoryId.Value) : null;
 
-                if(!voiceChannel.BotHasPermissions(Permission.ViewChannels)) return;
+                if (!voiceChannel.BotHasPermissions(Permission.ViewChannels)) return;
                 if (category is not null && !category.BotHasPermissions(Permission.ViewChannels | Permission.ManageChannels | Permission.ManageRoles)) return;
                 if (category is null && !guild.BotHasPermissions(Permission.ViewChannels | Permission.ManageChannels | Permission.ManageRoles)) return;
 
@@ -153,7 +153,7 @@ namespace Utili.Services
                             LocalOverwrite.Member(_client.CurrentUser.Id, new OverwritePermissions().Allow(Permission.ViewChannels)),
                             LocalOverwrite.Role(guildId, new OverwritePermissions().Deny(Permission.ViewChannels)) // @everyone
                         };
-                    }, new DefaultRestRequestOptions{Reason = "Voice Link"}, cancellationToken);
+                    }, new DefaultRestRequestOptions { Reason = "Voice Link" }, cancellationToken);
 
                     if (channelRecord is null)
                     {
@@ -173,7 +173,7 @@ namespace Utili.Services
                 }
                 else
                 {
-                    if(!textChannel.BotHasPermissions(Permission.ViewChannels | Permission.ManageChannels | Permission.ManageRoles)) return;
+                    if (!textChannel.BotHasPermissions(Permission.ViewChannels | Permission.ManageChannels | Permission.ManageRoles)) return;
                 }
 
                 var overwrites = textChannel.Overwrites.Select(x => new LocalOverwrite(x.TargetId, x.TargetType, x.Permissions)).ToList();
@@ -212,7 +212,7 @@ namespace Utili.Services
 
                 if (overwritesChanged)
                 {
-                    await textChannel.ModifyAsync(x => x.Overwrites = new Optional<IEnumerable<LocalOverwrite>>(overwrites), new DefaultRestRequestOptions{Reason = "Voice Link"}, cancellationToken);
+                    await textChannel.ModifyAsync(x => x.Overwrites = new Optional<IEnumerable<LocalOverwrite>>(overwrites), new DefaultRestRequestOptions { Reason = "Voice Link" }, cancellationToken);
                 }
             }
             catch (Exception e)
@@ -229,7 +229,7 @@ namespace Utili.Services
 
             if (config.DeleteChannels)
             {
-                await textChannel.DeleteAsync(new DefaultRestRequestOptions{Reason = "Voice Link"}, cancellationToken);
+                await textChannel.DeleteAsync(new DefaultRestRequestOptions { Reason = "Voice Link" }, cancellationToken);
                 channelRecord.TextChannelId = 0;
 
                 var db = scope.GetDbContext();
@@ -241,7 +241,7 @@ namespace Utili.Services
                 // Remove all permission overwrites except @everyone and utili
                 var overwrites = textChannel.Overwrites.Select(x => new LocalOverwrite(x.TargetId, x.TargetType, x.Permissions)).ToList();
                 overwrites.RemoveAll(x => x.TargetId != guild.Id && x.TargetId != _client.CurrentUser.Id);
-                await textChannel.ModifyAsync(x => x.Overwrites = new Optional<IEnumerable<LocalOverwrite>>(overwrites), new DefaultRestRequestOptions {Reason = "Voice Link"}, cancellationToken);
+                await textChannel.ModifyAsync(x => x.Overwrites = new Optional<IEnumerable<LocalOverwrite>>(overwrites), new DefaultRestRequestOptions { Reason = "Voice Link" }, cancellationToken);
             }
         }
     }

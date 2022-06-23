@@ -10,17 +10,17 @@ namespace UtiliBackend.Services
     public class DiscordRestService
     {
         private readonly IRestClient _client;
-        
+
         private static readonly TimeSpan GuildCacheDuration = TimeSpan.FromSeconds(20);
         private readonly Dictionary<ulong, (IGuild, DateTime)> _cachedGuilds;
-        
+
         private static readonly TimeSpan ChannelCacheDuration = TimeSpan.FromSeconds(20);
         private readonly Dictionary<ulong, (IEnumerable<IGuildChannel>, DateTime)> _cachedChannels;
-        
+
         public DiscordRestService(IRestClient restClient)
         {
             _client = restClient;
-            
+
             _cachedGuilds = new();
             _cachedChannels = new();
         }

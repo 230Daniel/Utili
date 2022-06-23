@@ -18,12 +18,12 @@ namespace UtiliBackend.Controllers
     public class StripeWebhookController : Controller
     {
         private static SemaphoreSlim _semaphore = new(1, 1);
-        
+
         private readonly IConfiguration _configuration;
         private readonly ILogger<StripeWebhookController> _logger;
         private readonly DatabaseContext _dbContext;
         private readonly IStripeClient _stripeClient;
-        
+
         public StripeWebhookController(ILogger<StripeWebhookController> logger, IConfiguration configuration, DatabaseContext dbContext, StripeClient stripeClient)
         {
             _logger = logger;
@@ -31,7 +31,7 @@ namespace UtiliBackend.Controllers
             _dbContext = dbContext;
             _stripeClient = stripeClient;
         }
-        
+
         // Webhooks are retried once an hour for up to 3 days or until a 200 status code is returned.
 
         [HttpPost]
@@ -42,13 +42,13 @@ namespace UtiliBackend.Controllers
                 json,
                 Request.Headers["Stripe-Signature"],
                 _configuration["Stripe:WebhookSecret"]);
-            
+
             await _semaphore.WaitAsync();
 
             try
             {
                 _logger.LogInformation("Stripe webhook of type {Type} received", stripeEvent.Type);
-                
+
                 switch (stripeEvent.Type)
                 {
                     case "customer.subscription.created":
@@ -84,7 +84,7 @@ namespace UtiliBackend.Controllers
                                 },
                                 ExpiresAt = subscription.CurrentPeriodEnd.AddHours(2)
                             };
-                            
+
                             _dbContext.Subscriptions.Add(dbSubscription);
                             await _dbContext.SaveChangesAsync();
                             return Ok();
@@ -98,7 +98,7 @@ namespace UtiliBackend.Controllers
                             _logger.LogWarning("Received customer.subscription.created for pre-existing subscription {Id}", subscription.Id);
                             return Ok();
                         }
-                        
+
                         dbSubscription.Status = subscription.Status switch
                         {
                             "active" => SubscriptionStatus.Active,
@@ -116,7 +116,7 @@ namespace UtiliBackend.Controllers
                         await _dbContext.SaveChangesAsync();
                         break;
                 }
-                
+
                 return Ok();
             }
             catch (Exception ex)

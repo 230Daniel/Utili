@@ -7,6 +7,7 @@ namespace Utili.Commands
     {
         public DefaultCooldown(int amount, int per)
             : base(amount, per, CooldownMeasure.Seconds, CooldownBucketType.Channel)
-        { }
+        {
+        }
     }
 }

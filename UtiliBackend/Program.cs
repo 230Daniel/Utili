@@ -22,10 +22,10 @@ namespace UtiliBackend
                     webBuilder.UseStartup<Startup>();
                 })
                 .Build();
-            
+
             Log.Logger = new LoggerConfiguration()
-                            .ReadFrom.Configuration(host.Services.GetRequiredService<IConfiguration>())
-                            .CreateLogger();
+                .ReadFrom.Configuration(host.Services.GetRequiredService<IConfiguration>())
+                .CreateLogger();
 
             try
             {

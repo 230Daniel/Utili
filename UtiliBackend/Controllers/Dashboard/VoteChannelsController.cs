@@ -26,19 +26,19 @@ namespace UtiliBackend.Controllers
             _mapper = mapper;
             _dbContext = dbContext;
         }
-        
+
         [HttpGet]
         public async Task<IActionResult> GetAsync([Required] ulong guildId)
         {
             var configurations = await _dbContext.VoteChannelConfigurations.GetAllForGuildAsync(guildId);
             return Json(_mapper.Map<IEnumerable<VoteChannelConfigurationModel>>(configurations));
         }
-        
+
         [HttpPost]
         public async Task<IActionResult> PostAsync([Required] ulong guildId, [FromBody] List<VoteChannelConfigurationModel> models)
         {
             var configurations = await _dbContext.VoteChannelConfigurations.GetAllForGuildAsync(guildId);
-            
+
             if (models.Any(x => x.Emojis.Count > 2))
             {
                 var premium = await _dbContext.PremiumSlots.AnyAsync(x => x.GuildId == guildId);
@@ -48,12 +48,12 @@ namespace UtiliBackend.Controllers
                     model.Emojis = model.Emojis.Take(amountOfEmojis).ToList();
                 }
             }
-            
+
             foreach (var model in models)
             {
                 var channelId = ulong.Parse(model.ChannelId);
                 var configuration = configurations.FirstOrDefault(x => x.ChannelId == channelId);
-                
+
                 if (configuration is null)
                 {
                     configuration = new VoteChannelConfiguration(guildId, channelId);

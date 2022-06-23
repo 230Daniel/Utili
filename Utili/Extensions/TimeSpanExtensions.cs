@@ -4,7 +4,7 @@ namespace Utili.Extensions
 {
     public static class TimeSpanExtensions
     {
-        public static string ToLongString (this TimeSpan span)
+        public static string ToLongString(this TimeSpan span)
         {
             var formatted =
                 $"{(span.Duration().Days > 0 ? $"{span.Days:0} day{(span.Days == 1 ? string.Empty : "s")}, " : string.Empty)}" +
@@ -19,7 +19,7 @@ namespace Utili.Extensions
             return formatted;
         }
 
-        public static string ToShortString (this TimeSpan span)
+        public static string ToShortString(this TimeSpan span)
         {
             var formatted =
                 $"{(span.Duration().Days > 0 ? $"{span.Days:00}:" : string.Empty)}{span.Hours:00}:{span.Minutes:00}:{span.Seconds:00}";

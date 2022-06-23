@@ -26,14 +26,14 @@ namespace UtiliBackend.Controllers
             _mapper = mapper;
             _dbContext = dbContext;
         }
-        
+
         [HttpGet]
         public async Task<IActionResult> GetAsync([Required] ulong guildId)
         {
             var configurations = await _dbContext.RoleLinkingConfigurations.GetAllForGuildAsync(guildId);
             return Json(_mapper.Map<IEnumerable<RoleLinkingConfigurationModel>>(configurations));
         }
-        
+
         [HttpPost]
         public async Task<IActionResult> PostAsync([Required] ulong guildId, [FromBody] List<RoleLinkingConfigurationModel> models)
         {
@@ -44,11 +44,11 @@ namespace UtiliBackend.Controllers
                 var premium = await _dbContext.PremiumSlots.AnyAsync(x => x.GuildId == guildId);
                 if (!premium) models = models.OrderBy(x => x.Id).Take(2).ToList();
             }
-            
+
             foreach (var model in models)
             {
                 var configuration = configurations.FirstOrDefault(x => x.Id == model.Id);
-                
+
                 if (configuration is null)
                 {
                     configuration = new RoleLinkingConfiguration(guildId);

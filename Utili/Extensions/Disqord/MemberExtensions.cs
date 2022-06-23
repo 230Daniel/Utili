@@ -16,7 +16,7 @@ namespace Utili.Extensions
             var guild = member.GetGuild();
             var bot = guild.GetCurrentMember();
 
-            return guild.OwnerId != member.Id && 
+            return guild.OwnerId != member.Id &&
                    member.GetHighestRolePosition() < bot.GetHighestRolePosition();
         }
     }

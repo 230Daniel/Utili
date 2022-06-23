@@ -36,12 +36,13 @@ namespace Utili.Services
                     try
                     {
                         await e.Member.SendMessageAsync(message);
-                    } catch { }
+                    }
+                    catch { }
                 }
                 else
                 {
                     var channel = _client.GetTextChannel(e.GuildId, config.ChannelId);
-                    if(!channel.BotHasPermissions(Permission.ViewChannels | Permission.SendMessages | Permission.SendEmbeds)) return;
+                    if (!channel.BotHasPermissions(Permission.ViewChannels | Permission.SendMessages | Permission.SendEmbeds)) return;
                     var sentMessage = await channel.SendMessageAsync(message);
 
                     if (!config.CreateThread || !channel.BotHasPermissions(Permission.CreatePublicThreads)) return;
@@ -51,7 +52,7 @@ namespace Utili.Services
                     await channel.CreatePublicThreadAsync(threadTitle, sentMessage.Id, options: new DefaultRestRequestOptions { Reason = "Join message" });
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 _logger.LogError(ex, "Exception thrown on member joined");
             }
@@ -98,7 +99,7 @@ namespace Utili.Services
                     .WithOptionalFooter(footer)
                     .WithThumbnailUrl(thumbnailUrl)
                     .WithImageUrl(imageUrl)
-                    .WithColor(new Color((int) config.Colour)));
+                    .WithColor(new Color((int)config.Colour)));
         }
     }
 }

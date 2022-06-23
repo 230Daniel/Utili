@@ -25,7 +25,7 @@ namespace Utili.Services
         private readonly CommunityService _community;
         private readonly GuildCountService _guildCount;
         private readonly MemberCacheService _memberCache;
-        
+
         private readonly AutopurgeService _autopurge;
         private readonly ChannelMirroringService _channelMirroring;
         private readonly InactiveRoleService _inactiveRole;
@@ -40,18 +40,15 @@ namespace Utili.Services
         private readonly VoiceLinkService _voiceLink;
         private readonly VoiceRolesService _voiceRoles;
         private readonly VoteChannelsService _voteChannels;
-        
+
         public BotService(
-            
             ILogger<BotService> logger,
             IConfiguration configuration,
             IServiceScopeFactory scopeFactory,
             DiscordBotBase client,
-            
             CommunityService community,
             GuildCountService guildCount,
             MemberCacheService memberCache,
-            
             AutopurgeService autopurge,
             ChannelMirroringService channelMirroring,
             InactiveRoleService inactiveRole,
@@ -66,17 +63,16 @@ namespace Utili.Services
             VoiceLinkService voiceLink,
             VoiceRolesService voiceRoles,
             VoteChannelsService voteChannels)
-        
             : base(logger, client)
         {
             _logger = logger;
             _configuration = configuration;
             _scopeFactory = scopeFactory;
-            
+
             _community = community;
             _guildCount = guildCount;
             _memberCache = memberCache;
-            
+
             _autopurge = autopurge;
             _channelMirroring = channelMirroring;
             _inactiveRole = inactiveRole;
@@ -123,50 +119,51 @@ namespace Utili.Services
         protected override async ValueTask OnMessageReceived(MessageReceivedEventArgs e)
         {
             if (!e.GuildId.HasValue) return;
-            
+
             using var scope = _scopeFactory.CreateScope();
             var config = await scope.GetCoreConfigurationAsync(e.GuildId.Value);
             if (config is null) return;
-            
-            if(config.HasFeature(BotFeatures.MessageLogs)) 
+
+            if (config.HasFeature(BotFeatures.MessageLogs))
                 await _messageLogs.MessageReceived(scope, e);
-            
-            if(config.HasFeature(BotFeatures.MessageFilter)) 
-                if(await _messageFilter.MessageReceived(scope, e)) return;
+
+            if (config.HasFeature(BotFeatures.MessageFilter))
+                if (await _messageFilter.MessageReceived(scope, e))
+                    return;
 
             if (e.Channel is not IThreadChannel)
             {
-                if(config.HasFeature(BotFeatures.Notices))
+                if (config.HasFeature(BotFeatures.Notices))
                     await _notices.MessageReceived(scope, e);
-            
-                if(config.HasFeature(BotFeatures.VoteChannels))
+
+                if (config.HasFeature(BotFeatures.VoteChannels))
                     await _voteChannels.MessageReceived(scope, e);
-            
-                if(config.HasFeature(BotFeatures.ChannelMirroring))
+
+                if (config.HasFeature(BotFeatures.ChannelMirroring))
                     await _channelMirroring.MessageReceived(scope, e);
-            
-                if(config.HasFeature(BotFeatures.Autopurge))
+
+                if (config.HasFeature(BotFeatures.Autopurge))
                     await _autopurge.MessageReceived(scope, e);
             }
-            
-            if(config.HasFeature(BotFeatures.InactiveRole))
+
+            if (config.HasFeature(BotFeatures.InactiveRole))
                 await _inactiveRole.MessageReceived(scope, e);
         }
 
         protected override async ValueTask OnMessageUpdated(MessageUpdatedEventArgs e)
         {
             if (!e.GuildId.HasValue) return;
-            
+
             using var scope = _scopeFactory.CreateScope();
             var config = await scope.GetCoreConfigurationAsync(e.GuildId.Value);
             if (config is null) return;
-            
-            if(config.HasFeature(BotFeatures.MessageLogs))
+
+            if (config.HasFeature(BotFeatures.MessageLogs))
                 await _messageLogs.MessageUpdated(scope, e);
 
             if (Client.GetMessageGuildChannel(e.GuildId.Value, e.ChannelId) is not IThreadChannel)
             {
-                if(config.HasFeature(BotFeatures.Autopurge))
+                if (config.HasFeature(BotFeatures.Autopurge))
                     await _autopurge.MessageUpdated(scope, e);
             }
         }
@@ -174,33 +171,33 @@ namespace Utili.Services
         protected override async ValueTask OnMessageDeleted(MessageDeletedEventArgs e)
         {
             if (!e.GuildId.HasValue) return;
-            
+
             using var scope = _scopeFactory.CreateScope();
             var config = await scope.GetCoreConfigurationAsync(e.GuildId.Value);
             if (config is null) return;
-            
-            if(config.HasFeature(BotFeatures.MessageLogs))
+
+            if (config.HasFeature(BotFeatures.MessageLogs))
                 await _messageLogs.MessageDeleted(scope, e);
-            
+
             if (Client.GetMessageGuildChannel(e.GuildId.Value, e.ChannelId) is not IThreadChannel)
             {
-                if(config.HasFeature(BotFeatures.Autopurge))
+                if (config.HasFeature(BotFeatures.Autopurge))
                     await _autopurge.MessageDeleted(scope, e);
             }
         }
-    
+
         protected override async ValueTask OnMessagesDeleted(MessagesDeletedEventArgs e)
         {
             using var scope = _scopeFactory.CreateScope();
             var config = await scope.GetCoreConfigurationAsync(e.GuildId);
             if (config is null) return;
-            
-            if(config.HasFeature(BotFeatures.MessageLogs))
+
+            if (config.HasFeature(BotFeatures.MessageLogs))
                 await _messageLogs.MessagesDeleted(scope, e);
 
             if (Client.GetMessageGuildChannel(e.GuildId, e.ChannelId) is not IThreadChannel)
             {
-                if(config.HasFeature(BotFeatures.Autopurge))
+                if (config.HasFeature(BotFeatures.Autopurge))
                     await _autopurge.MessagesDeleted(scope, e);
             }
         }
@@ -208,24 +205,24 @@ namespace Utili.Services
         protected override async ValueTask OnReactionAdded(ReactionAddedEventArgs e)
         {
             if (!e.GuildId.HasValue) return;
-            
+
             using var scope = _scopeFactory.CreateScope();
             var config = await scope.GetCoreConfigurationAsync(e.GuildId.Value);
             if (config is null) return;
-            
-            if(config.HasFeature(BotFeatures.Reputation))
+
+            if (config.HasFeature(BotFeatures.Reputation))
                 await _reputation.ReactionAdded(scope, e);
         }
-        
+
         protected override async ValueTask OnReactionRemoved(ReactionRemovedEventArgs e)
         {
             if (!e.GuildId.HasValue) return;
-            
+
             using var scope = _scopeFactory.CreateScope();
             var config = await scope.GetCoreConfigurationAsync(e.GuildId.Value);
             if (config is null) return;
-            
-            if(config.HasFeature(BotFeatures.Reputation))
+
+            if (config.HasFeature(BotFeatures.Reputation))
                 await _reputation.ReactionRemoved(scope, e);
         }
 
@@ -234,14 +231,14 @@ namespace Utili.Services
             using var scope = _scopeFactory.CreateScope();
             var config = await scope.GetCoreConfigurationAsync(e.GuildId);
             if (config is null) return;
-            
-            if(config.HasFeature(BotFeatures.VoiceLink))
+
+            if (config.HasFeature(BotFeatures.VoiceLink))
                 await _voiceLink.VoiceStateUpdated(scope, e);
-            
-            if(config.HasFeature(BotFeatures.VoiceRoles))
+
+            if (config.HasFeature(BotFeatures.VoiceRoles))
                 await _voiceRoles.VoiceStateUpdated(e);
-            
-            if(config.HasFeature(BotFeatures.InactiveRole))
+
+            if (config.HasFeature(BotFeatures.InactiveRole))
                 await _inactiveRole.VoiceStateUpdated(scope, e);
         }
 
@@ -252,13 +249,13 @@ namespace Utili.Services
             if (config is null) return;
 
             var rolePersistAddedRoles = false;
-            if(config.HasFeature(BotFeatures.RolePersist))
+            if (config.HasFeature(BotFeatures.RolePersist))
                 rolePersistAddedRoles = await _rolePersist.MemberJoined(scope, e);
-            
-            if(config.HasFeature(BotFeatures.JoinRoles))
+
+            if (config.HasFeature(BotFeatures.JoinRoles))
                 await _joinRoles.MemberJoined(scope, e, rolePersistAddedRoles);
-            
-            if(config.HasFeature(BotFeatures.JoinMessage))
+
+            if (config.HasFeature(BotFeatures.JoinMessage))
                 await _joinMessage.MemberJoined(scope, e);
         }
 
@@ -267,11 +264,11 @@ namespace Utili.Services
             using var scope = _scopeFactory.CreateScope();
             var config = await scope.GetCoreConfigurationAsync(e.NewMember.GuildId);
             if (config is null) return;
-            
-            if(config.HasFeature(BotFeatures.JoinRoles))
+
+            if (config.HasFeature(BotFeatures.JoinRoles))
                 await _joinRoles.MemberUpdated(scope, e);
-            
-            if(config.HasFeature(BotFeatures.RoleLinking))
+
+            if (config.HasFeature(BotFeatures.RoleLinking))
                 await _roleLinking.MemberUpdated(scope, e);
         }
 
@@ -280,26 +277,26 @@ namespace Utili.Services
             using var scope = _scopeFactory.CreateScope();
             var config = await scope.GetCoreConfigurationAsync(e.GuildId);
             if (config is null) return;
-            
+
             var member = e.User is IMember user ? user : null;
-            
-            if(config.HasFeature(BotFeatures.RolePersist))
+
+            if (config.HasFeature(BotFeatures.RolePersist))
                 await _rolePersist.MemberLeft(scope, e, member);
         }
 
         protected override async ValueTask OnJoinedGuild(JoinedGuildEventArgs e)
         {
             ITextChannel idealChannel = null;
-            
-            foreach (var channelId in new []
+
+            foreach (var channelId in new[]
+                     {
+                         e.Guild.PublicUpdatesChannelId,
+                         e.Guild.SystemChannelId
+                     })
             {
-                e.Guild.PublicUpdatesChannelId,
-                e.Guild.SystemChannelId
-            })
-            {
-                if(!channelId.HasValue) continue;
+                if (!channelId.HasValue) continue;
                 var channel = e.Guild.GetTextChannel(channelId.Value);
-                if(!channel.BotHasPermissions(Permission.ViewChannels | Permission.SendMessages | Permission.SendEmbeds)) continue;
+                if (!channel.BotHasPermissions(Permission.ViewChannels | Permission.SendMessages | Permission.SendEmbeds)) continue;
                 idealChannel = channel;
                 break;
             }
@@ -309,7 +306,7 @@ namespace Utili.Services
                 .Where(x => x.BotHasPermissions(Permission.ViewChannels | Permission.SendMessages | Permission.SendEmbeds))
                 .OrderBy(x => x.CreatedAt())
                 .FirstOrDefault();
-            
+
             if (idealChannel is null) return;
 
             var baseUrl = $"https://{_configuration["Domain"]}";
@@ -317,8 +314,8 @@ namespace Utili.Services
                 new LocalMessage()
                     .AddEmbed(
                         MessageUtils.CreateEmbed(
-                            EmbedType.Info, 
-                            "Hello! Thanks for choosing Utili.", 
+                            EmbedType.Info,
+                            "Hello! Thanks for choosing Utili.",
                             $"Head to the [dashboard]({baseUrl}/dashboard/{e.GuildId}) to configure the bot.\n" +
                             $"If you need any help, you should [contact us]({baseUrl}/contact).\n" +
                             $"And if you want to help support the bot, you can [get premium]({baseUrl}/premium).\n\n" +

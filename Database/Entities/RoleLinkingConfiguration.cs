@@ -12,7 +12,7 @@
         {
             GuildId = guildId;
         }
-        
+
         internal RoleLinkingConfiguration() { }
     }
 

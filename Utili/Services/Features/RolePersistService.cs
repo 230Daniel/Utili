@@ -36,20 +36,20 @@ namespace Utili.Services
 
                 var memberRecord = await db.RolePersistMembers.GetForMemberAsync(e.GuildId, e.Member.Id);
                 if (memberRecord is null) return false;
-                
+
                 var guild = _client.GetGuild(e.GuildId);
                 var roles = memberRecord.Roles.Select(x => guild.GetRole(x)).ToList();
                 roles.RemoveAll(x => x is null || !x.CanBeManaged() || config.ExcludedRoles.Contains(x.Id));
                 if (!roles.Any()) return false;
-                
+
                 IMember member = guild.GetMember(e.Member.Id);
                 member ??= await guild.FetchMemberAsync(e.Member.Id);
-                
+
                 var roleIds = roles.Select(x => x.Id).ToList();
                 roleIds.AddRange(member.RoleIds);
                 roleIds = roleIds.Distinct().ToList();
-            
-                await e.Member.ModifyAsync(x => x.RoleIds = roleIds, new DefaultRestRequestOptions{Reason = "Role Persist"});
+
+                await e.Member.ModifyAsync(x => x.RoleIds = roleIds, new DefaultRestRequestOptions { Reason = "Role Persist" });
 
                 db.RolePersistMembers.Remove(memberRecord);
                 await db.SaveChangesAsync();
@@ -67,13 +67,13 @@ namespace Utili.Services
             try
             {
                 if (e.User.IsBot) return;
-                
+
                 IGuild guild = _client.GetGuild(e.GuildId);
 
                 var db = scope.GetDbContext();
                 var config = await db.RolePersistConfigurations.GetForGuildAsync(e.GuildId);
-                if(config is null || !config.Enabled) return;
-                
+                if (config is null || !config.Enabled) return;
+
                 if (member is null) throw new Exception($"Member {e.User.Id} was not cached in guild {e.GuildId}");
 
                 var memberRecord = await db.RolePersistMembers.GetForMemberAsync(guild.Id, e.User.Id);

@@ -36,7 +36,7 @@ namespace UtiliBackend.Models
 
             // Don't set this to false from the web side
             // The bot will set it to false once it updates the notice
-            if(Changed) configuration.UpdatedFromDashboard = true;
+            if (Changed) configuration.UpdatedFromDashboard = true;
         }
     }
 }

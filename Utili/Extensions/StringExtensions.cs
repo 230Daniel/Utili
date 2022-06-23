@@ -13,7 +13,7 @@ namespace Utili.Extensions
                 "" => throw new ArgumentException($"{nameof(input)} cannot be empty", nameof(input)),
                 _ => input.First().ToString().ToUpper() + input.Substring(1)
             };
-        
+
         public static string ToEncoded(this string input)
         {
             var bytes = Encoding.UTF8.GetBytes(input);

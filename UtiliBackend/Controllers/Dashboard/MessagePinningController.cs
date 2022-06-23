@@ -36,7 +36,7 @@ namespace UtiliBackend.Controllers
         public async Task<IActionResult> PostAsync([Required] ulong guildId, [FromBody] MessagePinningConfigurationModel model)
         {
             var configuration = await _dbContext.MessagePinningConfigurations.GetForGuildAsync(guildId);
-            
+
             if (configuration is null)
             {
                 configuration = new MessagePinningConfiguration(guildId);
@@ -48,7 +48,7 @@ namespace UtiliBackend.Controllers
                 model.ApplyTo(configuration);
                 _dbContext.MessagePinningConfigurations.Update(configuration);
             }
-            
+
             await _dbContext.SetHasFeatureAsync(guildId, BotFeatures.MessagePinning, true);
             await _dbContext.SaveChangesAsync();
             return Ok();

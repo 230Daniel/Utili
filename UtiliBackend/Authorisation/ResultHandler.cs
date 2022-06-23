@@ -15,19 +15,19 @@ namespace UtiliBackend.Authorisation
         {
             _defaultHandler = new();
         }
-        
+
         public async Task HandleAsync(
             RequestDelegate requestDelegate,
             HttpContext httpContext,
             AuthorizationPolicy authorisationPolicy,
             PolicyAuthorizationResult policyAuthorisationResult)
         {
-            if (authorisationPolicy.Requirements.Any(x => x is DiscordRequirement {DiscordAuthenticated: false}))
+            if (authorisationPolicy.Requirements.Any(x => x is DiscordRequirement { DiscordAuthenticated: false }))
             {
                 httpContext.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
                 return;
             }
-            
+
             if (authorisationPolicy.Requirements.FirstOrDefault(x => x is DiscordGuildRequirement) is DiscordGuildRequirement guildRequirement)
             {
                 if (!guildRequirement.GuildManageable)
@@ -35,7 +35,7 @@ namespace UtiliBackend.Authorisation
                     httpContext.Response.StatusCode = (int)HttpStatusCode.Forbidden;
                     return;
                 }
-                
+
                 if (!guildRequirement.GuildHasBot)
                 {
                     httpContext.Response.StatusCode = (int)HttpStatusCode.NotFound;

@@ -11,7 +11,7 @@ namespace Database.Entities
 
         public VoteChannelConfiguration(ulong guildId, ulong channelId) : base(guildId, channelId) { }
     }
-    
+
     [Flags]
     public enum VoteChannelMode
     {

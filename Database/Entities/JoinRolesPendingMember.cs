@@ -7,7 +7,7 @@ namespace Database.Entities
     {
         public bool IsPending { get; set; }
         public DateTime ScheduledFor { get; set; }
-        
+
         public JoinRolesPendingMember(ulong guildId, ulong memberId) : base(guildId, memberId) { }
     }
 }

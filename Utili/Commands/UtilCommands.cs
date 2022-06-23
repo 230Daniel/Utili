@@ -21,13 +21,13 @@ namespace Utili.Commands
     {
         private readonly DatabaseContext _dbContext;
         private readonly MemberCacheService _memberCache;
-        
+
         public UtilCommands(DatabaseContext dbContext, MemberCacheService memberCache)
         {
             _dbContext = dbContext;
             _memberCache = memberCache;
         }
-        
+
         [Command("prune", "purge", "clear")]
         [RequireAuthorChannelPermissions(Permission.ManageMessages)]
         [RequireBotChannelPermissions(Permission.ManageMessages | Permission.ReadMessageHistory)]
@@ -40,14 +40,13 @@ namespace Utili.Commands
                 "after [message id] - Only messages after a particular message\n\n" +
                 "[How do I get a message ID?](https://support.discord.com/hc/en-us/articles/206346498)");
         }
-        
+
         [Command("prune", "purge", "clear")]
         [DefaultCooldown(1, 10)]
         [RequireAuthorChannelPermissions(Permission.ManageMessages)]
         [RequireBotChannelPermissions(Permission.ManageMessages | Permission.ReadMessageHistory)]
         public async Task<DiscordCommandResult> PruneAsync(
-            [Remainder]
-            string arguments)
+            [Remainder] string arguments)
         {
             var args = arguments is not null
                 ? arguments.Split(" ")
@@ -101,7 +100,7 @@ namespace Utili.Commands
                             {
                                 return Failure("Error", $"Invalid message id \"{args[i].ToLower()}\"\n[How do I get a message ID?](https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID-)");
                             }
-                            
+
                         default:
                             return Failure("Error", $"Invalid argument \"{args[i].ToLower()}\"");
                     }
@@ -118,7 +117,7 @@ namespace Utili.Commands
                     "[How do I get a message ID?](https://support.discord.com/hc/en-us/articles/206346498)");
             }
 
-            if(afterMessage is not null && beforeMessage is not null && afterMessage.CreatedAt() >= beforeMessage.CreatedAt())
+            if (afterMessage is not null && beforeMessage is not null && afterMessage.CreatedAt() >= beforeMessage.CreatedAt())
             {
                 return Failure("Error", "There are no messages between the after and before messages");
             }
@@ -137,7 +136,7 @@ namespace Utili.Commands
                 count = 1000;
                 premium ??= await _dbContext.GetIsGuildPremiumAsync(Context.GuildId);
                 content = premium.Value
-                    ? "For premium servers, you can delete up to 1000 messages at once\n" 
+                    ? "For premium servers, you can delete up to 1000 messages at once\n"
                     : "For non-premium servers, you can delete up to 100 messages at once\n";
             }
 
@@ -152,10 +151,10 @@ namespace Utili.Commands
             }
 
             await using var yield = Context.BeginYield();
-            
+
             List<IMessage> messages;
-            if(afterMessage is not null) messages = (await Context.Channel.FetchMessagesAsync((int)count, RetrievalDirection.After, afterMessage.Id)).ToList();
-            else if (beforeMessage is not null) messages = (await Context.Channel.FetchMessagesAsync((int)count,RetrievalDirection.Before, beforeMessage.Id)).ToList();
+            if (afterMessage is not null) messages = (await Context.Channel.FetchMessagesAsync((int)count, RetrievalDirection.After, afterMessage.Id)).ToList();
+            else if (beforeMessage is not null) messages = (await Context.Channel.FetchMessagesAsync((int)count, RetrievalDirection.Before, beforeMessage.Id)).ToList();
             else messages = (await Context.Channel.FetchMessagesAsync((int)count)).ToList();
 
             messages = messages.OrderBy(x => x.CreatedAt().UtcDateTime).ToList();
@@ -168,7 +167,7 @@ namespace Utili.Commands
                 }
             }
 
-            var pinned = messages.RemoveAll(x => x is IUserMessage {IsPinned: true});
+            var pinned = messages.RemoveAll(x => x is IUserMessage { IsPinned: true });
             var outdated = messages.RemoveAll(x => x.CreatedAt().UtcDateTime < DateTime.UtcNow - TimeSpan.FromDays(13.9));
 
             if (pinned == 1) content += $"{pinned} message was not deleted because it is pinned\n";
@@ -176,14 +175,14 @@ namespace Utili.Commands
             if (outdated == 1) content += $"{outdated} message was not deleted because it is older than 14 days\n";
             else if (outdated > 1) content += $"{outdated} messages were not deleted because they are older than 14 days\n";
 
-            await Context.Channel.DeleteMessagesAsync(messages.Select(x => x.Id), new DefaultRestRequestOptions {Reason = $"Prune (manual by {Context.Message.Author} {Context.Message.Author.Id})"});
+            await Context.Channel.DeleteMessagesAsync(messages.Select(x => x.Id), new DefaultRestRequestOptions { Reason = $"Prune (manual by {Context.Message.Author} {Context.Message.Author.Id})" });
 
             var title = $"{messages.Count} messages deleted";
             if (messages.Count == 1) title = $"{messages.Count} message deleted";
 
             var sentMessage = await Context.Channel.SendSuccessAsync(title, content);
             await Task.Delay(5000);
-            await Context.Channel.DeleteMessagesAsync(new[] {sentMessage.Id, Context.Message.Id});
+            await Context.Channel.DeleteMessagesAsync(new[] { sentMessage.Id, Context.Message.Id });
 
             return null;
         }
@@ -209,10 +208,9 @@ namespace Utili.Commands
         [Command("react", "addreaction", "addemoji")]
         [DefaultCooldown(2, 5)]
         public async Task<DiscordCommandResult> ReactAsync(
-            [RequireAuthorParameterChannelPermissions(Permission.AddReactions | Permission.ManageMessages)]
-            [RequireBotParameterChannelPermissions(Permission.AddReactions | Permission.ReadMessageHistory)]
-            IMessageGuildChannel channel, 
-            ulong messageId, 
+            [RequireAuthorParameterChannelPermissions(Permission.AddReactions | Permission.ManageMessages)] [RequireBotParameterChannelPermissions(Permission.AddReactions | Permission.ReadMessageHistory)]
+            IMessageGuildChannel channel,
+            ulong messageId,
             IEmoji emoji)
         {
             var message = await channel.FetchMessageAsync(messageId);
@@ -231,7 +229,7 @@ namespace Utili.Commands
         public async Task<DiscordCommandResult> RandomAsync()
         {
             await _memberCache.TemporarilyCacheMembersAsync(Context.Guild.Id);
-            
+
             var random = new Random();
             var members = Context.Guild.GetMembers().Values.ToList();
             var member = members[random.Next(0, members.Count)];
@@ -240,14 +238,13 @@ namespace Utili.Commands
                 $"{member.Mention} ({member})\n" +
                 $"This member was picked randomly from {members.Count} server member{(members.Count == 1 ? "" : "s")}");
         }
-        
+
         [Command("random", "pick")]
         public async Task<DiscordCommandResult> RandomAsync(
-            [Remainder]
-            IRole role)
+            [Remainder] IRole role)
         {
             await _memberCache.TemporarilyCacheMembersAsync(Context.Guild.Id);
-            
+
             var random = new Random();
             var members = Context.Guild.GetMembers().Values
                 .Where(x => x.RoleIds.Contains(role.Id))
@@ -258,18 +255,18 @@ namespace Utili.Commands
                 $"{member.Mention} ({member})\n" +
                 $"This member was picked randomly from {members.Count} server member{(members.Count == 1 ? "" : "s")} with the {role.Mention} role");
         }
-        
+
         [Command("random", "pick")]
         [DefaultCooldown(2, 5)]
         public async Task<DiscordCommandResult> RandomAsync(IMessageGuildChannel channel, ulong messageId, IEmoji emoji)
         {
             var message = await channel.FetchMessageAsync(messageId);
-            
+
             if (message is null || !message.Reactions.HasValue)
                 return Failure("Error",
                     $"No message was found in {channel.Mention} with ID {messageId}\n[How do I get a message ID?](https://support.discord.com/hc/en-us/articles/206346498)");
 
-            if(message.Reactions.Value.TryGetValue(emoji, out _))
+            if (message.Reactions.Value.TryGetValue(emoji, out _))
             {
                 var reactedMembers = await message.FetchReactionsAsync(LocalEmoji.FromEmoji(emoji), int.MaxValue);
                 var random = new Random();
@@ -280,37 +277,37 @@ namespace Utili.Commands
                     $"This member was picked randomly from {reactedMembers.Count} member{(reactedMembers.Count == 1 ? "" : "s")} " +
                     $"that reacted to [this message]({message.GetJumpUrl(Context.GuildId)}) with {emoji}.");
             }
-            
+
             return Failure("Error",
                 $"That message doesn't have the {emoji} reaction");
         }
-        
+
         [Command("random", "pick")]
         [DefaultCooldown(2, 5)]
         public Task<DiscordCommandResult> RandomAsync(ulong messageId, IEmoji emoji)
         {
             return RandomAsync(Context.Channel, messageId, emoji);
         }
-        
+
         [Command("whohas")]
         public async Task<DiscordCommandResult> WhoHasAsync(
-            [Remainder]
-            IRole[] roles)
+            [Remainder] IRole[] roles)
         {
             await _memberCache.TemporarilyCacheMembersAsync(Context.GuildId);
-            
+
             var members = Context.Guild.GetMembers().Values
                 .Where(x =>
                 {
                     foreach (var role in roles.Where(y => y.Id != Context.Guild.Id))
-                        if(!x.RoleIds.Contains(role.Id)) return false;
+                        if (!x.RoleIds.Contains(role.Id))
+                            return false;
                     return true;
                 })
                 .OrderBy(x => x.Nick ?? x.Name)
                 .ToList();
 
             var roleString = string.Join(", ", roles.Select(x => x.Name));
-            
+
             if (members.Count == 0)
                 return Failure($"Members with {roleString}", "There are no members with those roles.");
 
@@ -344,7 +341,7 @@ namespace Utili.Commands
 
             if (embed.Fields.Count > 0)
                 pages.Add(new Page().AddEmbed(embed));
-            
+
             var pageProvider = new ListPageProvider(pages);
             var menu = new MyPagedView(pageProvider);
             return View(menu, TimeSpan.FromMinutes(5));

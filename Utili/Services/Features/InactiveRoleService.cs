@@ -17,7 +17,7 @@ namespace Utili.Services
     public class InactiveRoleService
     {
         private static readonly TimeSpan GapBetweenUpdates = TimeSpan.FromMinutes(60);
-        
+
         private readonly ILogger<InactiveRoleService> _logger;
         private readonly DiscordClientBase _client;
         private readonly IServiceScopeFactory _scopeFactory;
@@ -31,7 +31,7 @@ namespace Utili.Services
             _client = client;
             _scopeFactory = scopeFactory;
             _memberCache = memberCache;
-            
+
             _timer = new Timer(30000);
             _timer.Elapsed += Timer_Elapsed;
         }
@@ -45,7 +45,7 @@ namespace Utili.Services
         {
             try
             {
-                if(e.Member is null || e.Member.IsBot) return;
+                if (e.Member is null || e.Member.IsBot) return;
                 await MakeUserActiveAsync(scope, e.GuildId.Value, e.Member);
             }
             catch (Exception ex)
@@ -58,7 +58,7 @@ namespace Utili.Services
         {
             try
             {
-                if(e.Member.IsBot) return;
+                if (e.Member.IsBot) return;
                 await MakeUserActiveAsync(scope, e.GuildId, e.Member);
             }
             catch (Exception ex)
@@ -74,7 +74,7 @@ namespace Utili.Services
             IGuild guild = _client.GetGuild(guildId);
             var inactiveRole = guild.GetRole(config.RoleId);
 
-            if(inactiveRole is null) return;
+            if (inactiveRole is null) return;
 
             var memberRecord = await db.InactiveRoleMembers.GetForMemberAsync(guildId, member.Id);
             if (memberRecord is null)
@@ -96,9 +96,9 @@ namespace Utili.Services
             if (inactiveRole.CanBeManaged())
             {
                 if (config.Mode == InactiveRoleMode.GrantWhenInactive && member.GetRole(inactiveRole.Id) is not null)
-                    await member.RevokeRoleAsync(inactiveRole.Id, new DefaultRestRequestOptions {Reason = "Inactive Role"});
+                    await member.RevokeRoleAsync(inactiveRole.Id, new DefaultRestRequestOptions { Reason = "Inactive Role" });
                 else if (config.Mode == InactiveRoleMode.RevokeWhenInactive && member.GetRole(inactiveRole.Id) is null)
-                    await member.GrantRoleAsync(inactiveRole.Id, new DefaultRestRequestOptions {Reason = "Inactive Role"});
+                    await member.GrantRoleAsync(inactiveRole.Id, new DefaultRestRequestOptions { Reason = "Inactive Role" });
             }
         }
 
@@ -145,7 +145,7 @@ namespace Utili.Services
                 {
                     IGuild guild = _client.GetGuild(config.GuildId);
                     var inactiveRole = guild.GetRole(config.RoleId);
-                    if(inactiveRole is null || !inactiveRole.CanBeManaged()) return;
+                    if (inactiveRole is null || !inactiveRole.CanBeManaged()) return;
 
                     await _memberCache.TemporarilyCacheMembersAsync(config.GuildId);
                     var bot = guild.GetCurrentMember();
@@ -183,7 +183,7 @@ namespace Utili.Services
                             {
                                 if (premium && config.AutoKick && lastAction <= minimumKickLastAction && guild.BotHasPermissions(Permission.KickMembers) && member.CanBeManaged())
                                 {
-                                    await member.KickAsync(new DefaultRestRequestOptions {Reason = "Inactive Role (auto-kick)"});
+                                    await member.KickAsync(new DefaultRestRequestOptions { Reason = "Inactive Role (auto-kick)" });
                                     await Task.Delay(500);
                                     continue;
                                 }
@@ -192,7 +192,7 @@ namespace Utili.Services
                                 {
                                     if (!member.RoleIds.Contains(inactiveRole.Id))
                                     {
-                                        await member.GrantRoleAsync(inactiveRole.Id, new DefaultRestRequestOptions {Reason = "Inactive Role"});
+                                        await member.GrantRoleAsync(inactiveRole.Id, new DefaultRestRequestOptions { Reason = "Inactive Role" });
                                         await Task.Delay(500);
                                     }
                                 }
@@ -200,7 +200,7 @@ namespace Utili.Services
                                 {
                                     if (member.RoleIds.Contains(inactiveRole.Id))
                                     {
-                                        await member.RevokeRoleAsync(inactiveRole.Id, new DefaultRestRequestOptions {Reason = "Inactive Role"});
+                                        await member.RevokeRoleAsync(inactiveRole.Id, new DefaultRestRequestOptions { Reason = "Inactive Role" });
                                         await Task.Delay(500);
                                     }
                                 }
@@ -211,7 +211,7 @@ namespace Utili.Services
                                 {
                                     if (member.RoleIds.Contains(inactiveRole.Id))
                                     {
-                                        await member.RevokeRoleAsync(inactiveRole.Id, new DefaultRestRequestOptions {Reason = "Inactive Role"});
+                                        await member.RevokeRoleAsync(inactiveRole.Id, new DefaultRestRequestOptions { Reason = "Inactive Role" });
                                         await Task.Delay(500);
                                     }
                                 }
@@ -219,7 +219,7 @@ namespace Utili.Services
                                 {
                                     if (!member.RoleIds.Contains(inactiveRole.Id))
                                     {
-                                        await member.GrantRoleAsync(inactiveRole.Id, new DefaultRestRequestOptions {Reason = "Inactive Role"});
+                                        await member.GrantRoleAsync(inactiveRole.Id, new DefaultRestRequestOptions { Reason = "Inactive Role" });
                                         await Task.Delay(500);
                                     }
                                 }

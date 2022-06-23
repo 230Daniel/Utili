@@ -17,7 +17,7 @@ namespace UtiliBackend.Models
             configuration.RoleId = ulong.Parse(RoleId);
             configuration.ImmuneRoleId = ulong.Parse(ImmuneRoleId);
             configuration.Threshold = XmlConvert.ToTimeSpan(Threshold);
-            configuration.Mode = (InactiveRoleMode) Mode;
+            configuration.Mode = (InactiveRoleMode)Mode;
             configuration.AutoKick = AutoKick;
             configuration.AutoKickThreshold = XmlConvert.ToTimeSpan(AutoKickThreshold);
         }

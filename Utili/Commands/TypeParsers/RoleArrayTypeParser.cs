@@ -15,12 +15,12 @@ namespace Utili.Commands.TypeParsers
             singleRole ??= context.Guild.Roles.Values.FirstOrDefault(x => x.Id.ToString() == value);
             singleRole ??= context.Guild.Roles.Values.FirstOrDefault(x => x.Name == value);
             singleRole ??= context.Guild.Roles.Values.FirstOrDefault(x => x.Name.ToLower() == value.ToLower());
-            
-            if(singleRole is not null) return Success(new []{ singleRole });
-            
+
+            if (singleRole is not null) return Success(new[] { singleRole });
+
             var seperator = value.Contains(",") ? "," : " ";
             var roleStrings = value.Split(seperator);
-            
+
             List<IRole> roles = new();
             foreach (var roleString in roleStrings)
             {
@@ -33,7 +33,7 @@ namespace Utili.Commands.TypeParsers
                     return Failure($"Could not find a role matching '{roleStringTrimmed}'");
                 roles.Add(role);
             }
-            
+
             return Success(roles.ToArray());
         }
     }

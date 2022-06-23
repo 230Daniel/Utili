@@ -37,12 +37,12 @@ namespace UtiliBackend.Mapping
             CreateMap<VoiceLinkConfiguration, VoiceLinkConfigurationModel>();
             CreateMap<VoiceRoleConfiguration, VoiceRoleConfigurationModel>();
             CreateMap<VoteChannelConfiguration, VoteChannelConfigurationModel>();
-            
+
             CreateMap<AutopurgeConfiguration, AutopurgeConfigurationModel>()
                 .ForMember(
-                    dest => dest.Timespan, 
+                    dest => dest.Timespan,
                     opt => opt.MapFrom(s => XmlConvert.ToString(s.Timespan)));
-            
+
             CreateMap<InactiveRoleConfiguration, InactiveRoleConfigurationModel>()
                 .ForMember(
                     dest => dest.Threshold,
@@ -55,7 +55,7 @@ namespace UtiliBackend.Mapping
                 .ForMember(
                     dest => dest.Colour,
                     opt => opt.MapFrom(s => s.Colour.ToString("X6")));
-            
+
             CreateMap<NoticeConfiguration, NoticeConfigurationModel>()
                 .ForMember(
                     dest => dest.Delay,
@@ -68,10 +68,10 @@ namespace UtiliBackend.Mapping
         private void MapPremiumModels()
         {
             CreateMap<PremiumSlot, PremiumSlotModel>();
-            
+
             CreateMap<Subscription, SubscriptionModel>()
                 .ForMember(
-                    dest => dest.ExpiresAt, 
+                    dest => dest.ExpiresAt,
                     opt => opt.MapFrom(s => XmlConvert.ToString(s.ExpiresAt, XmlDateTimeSerializationMode.Utc)));
         }
     }

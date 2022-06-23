@@ -9,7 +9,7 @@ namespace Utili.Extensions
             builder.Content = string.IsNullOrWhiteSpace(content) ? null : content;
             return builder;
         }
-        
+
         public static LocalMessage WithRequiredContent(this LocalMessage builder, string content)
         {
             builder.Content = string.IsNullOrWhiteSpace(content) ? "\u200b" : content;
@@ -29,7 +29,7 @@ namespace Utili.Extensions
                 builder.Author = new LocalEmbedAuthor()
                     .WithName(name);
             }
-            
+
             return builder;
         }
 
@@ -41,7 +41,7 @@ namespace Utili.Extensions
                     .WithName(name)
                     .WithIconUrl(iconUrl);
             }
-            
+
             return builder;
         }
 
@@ -52,10 +52,10 @@ namespace Utili.Extensions
                 builder.Footer = new LocalEmbedFooter()
                     .WithText(text);
             }
-            
+
             return builder;
         }
-        
+
         public static LocalEmbed AddInlineField(this LocalEmbed builder, string name, string value)
         {
             builder.AddField(name, value, true);

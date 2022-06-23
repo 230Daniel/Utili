@@ -13,7 +13,7 @@ namespace UtiliBackend.Services
     public class CustomerService
     {
         private static SemaphoreSlim _semaphore = new(1, 1);
-        
+
         private readonly ILogger<CustomerService> _logger;
         private readonly DatabaseContext _dbContext;
         private readonly IStripeClient _stripeClient;
@@ -45,7 +45,7 @@ namespace UtiliBackend.Services
                         Email = user.Email,
                         Metadata = new Dictionary<string, string>
                         {
-                            {"user_id", user.UserId.ToString()}
+                            { "user_id", user.UserId.ToString() }
                         }
                     };
 
@@ -58,7 +58,7 @@ namespace UtiliBackend.Services
                     };
                     _dbContext.CustomerDetails.Add(customerDetails);
                     await _dbContext.SaveChangesAsync();
-                    
+
                     return customer.Id;
                 }
                 else
@@ -82,7 +82,7 @@ namespace UtiliBackend.Services
         public async Task<Customer> GetCustomerAsync(User user)
         {
             if (user is null) return null;
-            
+
             await _semaphore.WaitAsync();
             _logger.LogInformation("Getting a customer for {UserId}", user.UserId);
 
@@ -94,7 +94,7 @@ namespace UtiliBackend.Services
                 if (customerDetails is null)
                 {
                     _logger.LogInformation("No customer found for {UserId}", user.UserId);
-                    
+
                     return null;
                 }
                 else

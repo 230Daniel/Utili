@@ -30,7 +30,7 @@ namespace UtiliBackend.Models
             configuration.Emojis.RemoveAll(x => Emojis.All(y => x.Emoji != y.Emoji));
         }
     }
-    
+
     public class ReputationConfigurationEmojiModel
     {
         public string Emoji { get; set; }

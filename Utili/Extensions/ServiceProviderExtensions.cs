@@ -14,7 +14,7 @@ namespace Utili.Extensions
         {
             return serviceProvider.GetRequiredService<DatabaseContext>();
         }
-        
+
         public static Task<CoreConfiguration> GetCoreConfigurationAsync(this IServiceProvider serviceProvider, Snowflake guildId)
         {
             var service = serviceProvider.GetRequiredService<CoreConfigurationCacheService>();

@@ -25,24 +25,24 @@ namespace UtiliBackend.Controllers
             _mapper = mapper;
             _dbContext = dbContext;
         }
-        
+
         [HttpGet]
         public async Task<IActionResult> GetAsync([Required] ulong guildId)
         {
             var configurations = await _dbContext.AutopurgeConfigurations.GetAllForGuildAsync(guildId);
             return Json(_mapper.Map<IEnumerable<AutopurgeConfigurationModel>>(configurations));
         }
-        
+
         [HttpPost]
         public async Task<IActionResult> PostAsync([Required] ulong guildId, [FromBody] List<AutopurgeConfigurationModel> models)
         {
             var configurations = await _dbContext.AutopurgeConfigurations.GetAllForGuildAsync(guildId);
-            
+
             foreach (var model in models)
             {
                 var channelId = ulong.Parse(model.ChannelId);
                 var configuration = configurations.FirstOrDefault(x => x.ChannelId == channelId);
-                
+
                 if (configuration is null)
                 {
                     configuration = new AutopurgeConfiguration(guildId, channelId);

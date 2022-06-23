@@ -24,7 +24,7 @@ namespace Utili.Implementations
                 Label = "─>",
                 Style = LocalButtonComponentStyle.Secondary
             };
-            
+
             AddComponent(PreviousPageButton);
             AddComponent(NextPageButton);
         }
@@ -92,7 +92,7 @@ namespace Utili.Implementations
             CurrentPageIndex--;
             return default;
         }
-        
+
         protected ValueTask OnNextPageButtonAsync(ButtonEventArgs e)
         {
             CurrentPageIndex++;

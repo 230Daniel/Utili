@@ -20,18 +20,18 @@ namespace UtiliBackend.Authorisation
         protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context, DiscordGuildRequirement requirement)
         {
             var identity = context.User.Identities.FirstOrDefault(x => x.AuthenticationType == "Discord");
-            
+
             if (identity is not null && identity.IsAuthenticated)
             {
-                var httpContext = (HttpContext) context.Resource;
+                var httpContext = (HttpContext)context.Resource;
                 var managedGuilds = await _discordUserGuildsService.GetManagedGuildsAsync(httpContext);
 
-                var guildId = ulong.Parse((string) httpContext.Request.RouteValues["GuildId"] ?? "0");
+                var guildId = ulong.Parse((string)httpContext.Request.RouteValues["GuildId"] ?? "0");
 
                 if (managedGuilds.Guilds.Any(x => x.Id == guildId))
                 {
                     requirement.GuildManageable = true;
-                    
+
                     var guild = await _discordRestService.GetGuildAsync(guildId);
                     if (guild is not null)
                     {

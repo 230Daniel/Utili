@@ -49,9 +49,9 @@ namespace UtiliBackend.Controllers
                 var premium = await _dbContext.PremiumSlots.AnyAsync(x => x.GuildId == guildId);
                 if (!premium) model.AutoKick = false;
             }
-            
+
             var configuration = await _dbContext.InactiveRoleConfigurations.GetForGuildAsync(guildId);
-            
+
             if (configuration is null)
             {
                 configuration = new InactiveRoleConfiguration(guildId);
@@ -63,10 +63,10 @@ namespace UtiliBackend.Controllers
             else
             {
                 if (configuration.RoleId == 0) configuration.DefaultLastAction = DateTime.UtcNow;
-                    model.ApplyTo(configuration);
+                model.ApplyTo(configuration);
                 _dbContext.InactiveRoleConfigurations.Update(configuration);
             }
-            
+
             await _dbContext.SetHasFeatureAsync(guildId, BotFeatures.InactiveRole, configuration.RoleId != 0);
             await _dbContext.SaveChangesAsync();
             return Ok();

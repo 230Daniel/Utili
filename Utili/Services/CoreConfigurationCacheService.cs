@@ -13,10 +13,10 @@ namespace Utili.Services
     public class CoreConfigurationCacheService
     {
         private static readonly TimeSpan CacheDuration = TimeSpan.FromSeconds(5);
-        
+
         private static Dictionary<Snowflake, SemaphoreSlim> _semaphores = new();
         private static ConcurrentDictionary<Snowflake, CachedCoreConfiguration> _cachedConfigurations = new();
-        
+
         private readonly DatabaseContext _dbContext;
 
         public CoreConfigurationCacheService(DatabaseContext dbContext)
@@ -27,7 +27,7 @@ namespace Utili.Services
         public async Task<CoreConfiguration> GetCoreConfigurationAsync(Snowflake guildId)
         {
             SemaphoreSlim semaphore;
-            
+
             lock (_semaphores)
             {
                 if (!_semaphores.TryGetValue(guildId, out semaphore))
@@ -53,7 +53,7 @@ namespace Utili.Services
 
                 var config = await _dbContext.CoreConfigurations.GetForGuildAsync(guildId);
                 _cachedConfigurations.TryAdd(guildId, new CachedCoreConfiguration(config, now + CacheDuration));
-                
+
                 return config;
             }
             finally

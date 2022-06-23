@@ -11,7 +11,7 @@ namespace Utili.Extensions
             IGuild guild = (role.Client as DiscordClientBase).GetGuild(role.GuildId);
             if (!guild.BotHasPermissions(Permission.ManageRoles)) return false;
             if (role.IsManaged) return false;
-            
+
             // The higher the position the higher the role in the hierarchy
             var bot = guild.GetCurrentMember();
             var botRoles = bot.GetRoles().Values;

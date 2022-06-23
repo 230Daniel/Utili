@@ -22,7 +22,7 @@ namespace UtiliBackend.Models
         public void ApplyTo(JoinMessageConfiguration configuration)
         {
             configuration.Enabled = Enabled;
-            configuration.Mode = (JoinMessageMode) Mode;
+            configuration.Mode = (JoinMessageMode)Mode;
             configuration.ChannelId = ulong.Parse(ChannelId);
             configuration.CreateThread = CreateThread;
             configuration.ThreadTitle = ThreadTitle;

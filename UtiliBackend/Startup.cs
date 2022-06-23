@@ -80,24 +80,24 @@ namespace UtiliBackend
             services.AddMemoryCache();
 
             services.AddAuthentication(options =>
-            {
-                options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-            })
-            .AddCookie(options =>
-            {
-                // Same-site none is safe because the cookie is http-only
-                options.Cookie.SameSite = SameSiteMode.None;
-            })
-            .AddDiscord(options =>
-            {
-                options.ClientId = _configuration["Discord:ClientId"];
-                options.ClientSecret = _configuration["Discord:ClientSecret"];
-                options.AccessDeniedPath = "/";
-                options.Scope.Add("email");
-                options.Scope.Add("guilds");
-                options.SaveTokens = true;
-                options.ClaimActions.MapAll();
-            });
+                {
+                    options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                })
+                .AddCookie(options =>
+                {
+                    // Same-site none is safe because the cookie is http-only
+                    options.Cookie.SameSite = SameSiteMode.None;
+                })
+                .AddDiscord(options =>
+                {
+                    options.ClientId = _configuration["Discord:ClientId"];
+                    options.ClientSecret = _configuration["Discord:ClientSecret"];
+                    options.AccessDeniedPath = "/";
+                    options.Scope.Add("email");
+                    options.Scope.Add("guilds");
+                    options.SaveTokens = true;
+                    options.ClaimActions.MapAll();
+                });
 
             services.AddAntiforgery(options =>
             {

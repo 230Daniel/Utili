@@ -23,7 +23,7 @@ namespace UtiliBackend.Controllers
             _mapper = mapper;
             _dbContext = dbContext;
         }
-        
+
         [HttpGet]
         public async Task<IActionResult> GetAsync([Required] ulong guildId)
         {
@@ -37,12 +37,12 @@ namespace UtiliBackend.Controllers
             configuration.ChannelPrefix ??= "vc-";
             return Json(_mapper.Map<VoiceLinkConfigurationModel>(configuration));
         }
-        
+
         [HttpPost]
         public async Task<IActionResult> PostAsync([Required] ulong guildId, [FromBody] VoiceLinkConfigurationModel model)
         {
             var configuration = await _dbContext.VoiceLinkConfigurations.GetForGuildAsync(guildId);
-            
+
             if (configuration is null)
             {
                 configuration = new VoiceLinkConfiguration(guildId);
@@ -54,7 +54,7 @@ namespace UtiliBackend.Controllers
                 model.ApplyTo(configuration);
                 _dbContext.VoiceLinkConfigurations.Update(configuration);
             }
-            
+
             await _dbContext.SetHasFeatureAsync(guildId, BotFeatures.VoiceLink, model.Enabled);
             await _dbContext.SaveChangesAsync();
             return Ok();

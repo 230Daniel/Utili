@@ -30,7 +30,7 @@ namespace Utili.Extensions
 
             var filenames = message.Attachments.Select(x => x.FileName).ToList();
             filenames.AddRange(message.Content.Split(' ', '\n').Where(x => IsUrl(x) && x.Split("/").Last().Contains(".")));
-            return filenames.Any(x => validAttachmentExtensions.Contains(x.Split(".").Last().ToLower())) || 
+            return filenames.Any(x => validAttachmentExtensions.Contains(x.Split(".").Last().ToLower())) ||
                    message.Embeds.Any(x => x.Image is not null);
         }
 
@@ -52,7 +52,8 @@ namespace Utili.Extensions
 
             Regex youtubeRegex = new(@"^((?:https?:)?\/\/)?((?:www|m)\.)?((?:youtube\.com|youtu.be))(\/(?:[\w\-]+\?v=|embed\/|v\/)?)([\w\-]+)(\S+)?$");
             foreach (var word in message.Content.Split(' ', '\n'))
-                if (IsUrl(word) && youtubeRegex.IsMatch(word)) return true;
+                if (IsUrl(word) && youtubeRegex.IsMatch(word))
+                    return true;
 
             return false;
         }
@@ -88,7 +89,8 @@ namespace Utili.Extensions
         public static bool IsLink(this IUserMessage message)
         {
             foreach (var word in message.Content.Split(' ', '\n'))
-                if (IsUrl(word)) return true;
+                if (IsUrl(word))
+                    return true;
 
             return false;
         }

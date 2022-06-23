@@ -23,7 +23,7 @@ namespace UtiliBackend.Controllers
             _mapper = mapper;
             _dbContext = dbContext;
         }
-        
+
         [HttpGet]
         public async Task<IActionResult> GetAsync([Required] ulong guildId)
         {
@@ -35,12 +35,12 @@ namespace UtiliBackend.Controllers
             };
             return Json(_mapper.Map<RolePersistConfigurationModel>(configuration));
         }
-        
+
         [HttpPost]
         public async Task<IActionResult> PostAsync([Required] ulong guildId, [FromBody] RolePersistConfigurationModel model)
         {
             var configuration = await _dbContext.RolePersistConfigurations.GetForGuildAsync(guildId);
-            
+
             if (configuration is null)
             {
                 configuration = new RolePersistConfiguration(guildId);
@@ -52,7 +52,7 @@ namespace UtiliBackend.Controllers
                 model.ApplyTo(configuration);
                 _dbContext.RolePersistConfigurations.Update(configuration);
             }
-            
+
             await _dbContext.SetHasFeatureAsync(guildId, BotFeatures.RolePersist, model.Enabled);
             await _dbContext.SaveChangesAsync();
             return Ok();

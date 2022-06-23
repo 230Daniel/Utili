@@ -30,16 +30,16 @@ namespace UtiliBackend.Controllers
                 IsPersistent = true,
                 RedirectUri = $"{_configuration["Frontend:Origin"]}/return"
             };
-            
+
             return Challenge(authProperties, "Discord");
         }
-        
+
         [HttpPost("signout")]
         public new IActionResult SignOut()
         {
             return SignOut("Cookies");
         }
-        
+
         [DiscordAuthorise]
         [HttpGet("me")]
         public IActionResult Me()
@@ -51,7 +51,7 @@ namespace UtiliBackend.Controllers
                 AvatarUrl = user.GetAvatarUrl()
             });
         }
-        
+
         [IgnoreAntiforgeryToken]
         [HttpGet("antiforgery")]
         public IActionResult Antiforgery()

@@ -12,7 +12,7 @@ namespace Database.Extensions
         {
             var types = Assembly.GetExecutingAssembly().GetTypes()
                 .Where(x => x.IsAssignableTo(typeof(GuildEntity)) && !x.IsEquivalentTo(typeof(GuildEntity)));
-            
+
             foreach (var type in types)
             {
                 modelBuilder.Entity(type).HasKey("GuildId");
@@ -24,7 +24,7 @@ namespace Database.Extensions
         {
             var types = Assembly.GetExecutingAssembly().GetTypes()
                 .Where(x => x.IsAssignableTo(typeof(GuildChannelEntity)) && !x.IsEquivalentTo(typeof(GuildChannelEntity)));
-            
+
             foreach (var type in types)
             {
                 modelBuilder.Entity(type).HasKey("GuildId", "ChannelId");
@@ -32,12 +32,12 @@ namespace Database.Extensions
                 modelBuilder.Entity(type).Property("ChannelId").ValueGeneratedNever();
             }
         }
-        
+
         public static void ConfigureMemberEntities(this ModelBuilder modelBuilder)
         {
             var types = Assembly.GetExecutingAssembly().GetTypes()
                 .Where(x => x.IsAssignableTo(typeof(MemberEntity)) && !x.IsEquivalentTo(typeof(MemberEntity)));
-            
+
             foreach (var type in types)
             {
                 modelBuilder.Entity(type).HasKey("GuildId", "MemberId");
@@ -45,12 +45,12 @@ namespace Database.Extensions
                 modelBuilder.Entity(type).Property("MemberId").ValueGeneratedNever();
             }
         }
-        
+
         public static void ConfigureMessageEntities(this ModelBuilder modelBuilder)
         {
             var types = Assembly.GetExecutingAssembly().GetTypes()
                 .Where(x => x.IsAssignableTo(typeof(MessageEntity)) && !x.IsEquivalentTo(typeof(MessageEntity)));
-            
+
             foreach (var type in types)
             {
                 modelBuilder.Entity(type).HasKey("MessageId");
@@ -62,9 +62,9 @@ namespace Database.Extensions
         {
             modelBuilder.Entity<CustomerDetails>().HasKey(e => e.CustomerId);
             modelBuilder.Entity<CustomerDetails>().Property(e => e.CustomerId).ValueGeneratedNever();
-            
+
             modelBuilder.Entity<MessageLogsMessage>().HasIndex(e => e.Timestamp);
-            
+
             modelBuilder.Entity<PremiumSlot>().HasKey(e => e.SlotId);
             modelBuilder.Entity<PremiumSlot>().Property(e => e.SlotId).ValueGeneratedOnAdd();
 
@@ -75,10 +75,10 @@ namespace Database.Extensions
 
             modelBuilder.Entity<ShardDetail>().HasKey(e => e.ShardId);
             modelBuilder.Entity<ShardDetail>().Property(e => e.ShardId).ValueGeneratedNever();
-            
+
             modelBuilder.Entity<Subscription>().HasKey(e => e.Id);
             modelBuilder.Entity<Subscription>().Property(e => e.Id).ValueGeneratedNever();
-            
+
             modelBuilder.Entity<User>().HasKey(e => e.UserId);
             modelBuilder.Entity<User>().Property(e => e.UserId).ValueGeneratedNever();
         }
