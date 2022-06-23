@@ -32,7 +32,7 @@ namespace Utili.Bot.Services
             _ = UpdateMembersAsync();
         }
 
-        public async Task VoiceStateUpdated(VoiceStateUpdatedEventArgs e)
+        public void VoiceStateUpdated(VoiceStateUpdatedEventArgs e)
         {
             try
             {

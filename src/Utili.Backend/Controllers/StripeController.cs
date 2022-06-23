@@ -10,7 +10,6 @@ using Stripe.Checkout;
 using Utili.Backend.Authorisation;
 using Utili.Backend.Models.Stripe;
 using Utili.Backend.Extensions;
-using CustomerService = Utili.Backend.Services.CustomerService;
 using IConfiguration = Microsoft.Extensions.Configuration.IConfiguration;
 
 namespace Utili.Backend.Controllers

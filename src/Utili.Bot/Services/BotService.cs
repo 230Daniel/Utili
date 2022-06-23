@@ -106,14 +106,16 @@ namespace Utili.Bot.Services
             _logger.LogInformation("Services started");
         }
 
-        protected override async ValueTask OnReady(ReadyEventArgs e)
+        protected override ValueTask OnReady(ReadyEventArgs e)
         {
             _ = _memberCache.Ready(e);
+            return ValueTask.CompletedTask;
         }
 
-        protected override async ValueTask OnGuildAvailable(GuildAvailableEventArgs e)
+        protected override ValueTask OnGuildAvailable(GuildAvailableEventArgs e)
         {
             _ = _community.GuildAvailable(e);
+            return ValueTask.CompletedTask;
         }
 
         protected override async ValueTask OnMessageReceived(MessageReceivedEventArgs e)
@@ -236,7 +238,7 @@ namespace Utili.Bot.Services
                 await _voiceLink.VoiceStateUpdated(scope, e);
 
             if (config.HasFeature(BotFeatures.VoiceRoles))
-                await _voiceRoles.VoiceStateUpdated(e);
+                _voiceRoles.VoiceStateUpdated(e);
 
             if (config.HasFeature(BotFeatures.InactiveRole))
                 await _inactiveRole.VoiceStateUpdated(scope, e);

@@ -18,22 +18,28 @@ namespace Utili.Bot.Implementations.Views
         {
             _options = options;
 
-            var cancelButton = new ButtonViewComponent(async e =>
+            var cancelButton = new ButtonViewComponent(e =>
             {
-                if (e.Member.Id != memberId) return;
-                Result = false;
-                Menu.Stop();
+                if (e.Member.Id == memberId)
+                {
+                    Result = false;
+                    Menu.Stop();
+                }
+                return ValueTask.CompletedTask;
             })
             {
                 Label = _options.PromptCancelButtonLabel,
                 Style = LocalButtonComponentStyle.Secondary
             };
 
-            var confirmButton = new ButtonViewComponent(async e =>
+            var confirmButton = new ButtonViewComponent(e =>
             {
-                if (e.Member.Id != memberId) return;
-                Result = true;
-                Menu.Stop();
+                if (e.Member.Id == memberId)
+                {
+                    Result = true;
+                    Menu.Stop();
+                }
+                return ValueTask.CompletedTask;
             })
             {
                 Label = _options.PromptConfirmButtonLabel,
