@@ -1,6 +1,5 @@
 import React from "react";
 import Helmet from "react-helmet";
-import { Duration } from "luxon";
 
 import Fade from "../../components/effects/fade";
 import Load from "../../components/load";
@@ -8,10 +7,9 @@ import { get, post } from "../../api/auth";
 
 import Card from "../../components/dashboard/card";
 import CardComponent from "../../components/dashboard/cardComponent";
-import CardListComponent from "../../components/dashboard/cardListComponent";
 
-class JoinMessage extends React.Component{
-	constructor(props){
+class JoinMessage extends React.Component {
+	constructor(props) {
 		super(props);
 		this.guildId = this.props.match.params.guildId;
 		this.state = {
@@ -21,6 +19,8 @@ class JoinMessage extends React.Component{
 		this.settings = {
 			enabled: React.createRef(),
 			mode: React.createRef(),
+			createThread: React.createRef(),
+			threadTitle: React.createRef(),
 			channelId: React.createRef(),
 			title: React.createRef(),
 			content: React.createRef(),
@@ -30,12 +30,12 @@ class JoinMessage extends React.Component{
 			thumbnail: React.createRef(),
 			icon: React.createRef(),
 			colour: React.createRef()
-		}
+		};
 	}
 
-	render(){
-		var channels = this.state.textChannels?.map(x => {return {id: x.id, value: x.name}});
-		return(
+	render() {
+		var channels = this.state.textChannels?.map(x => { return { id: x.id, value: x.name }; });
+		return (
 			<>
 				<Helmet>
 					<title>Join Message - Utili Dashboard</title>
@@ -56,25 +56,27 @@ class JoinMessage extends React.Component{
 					</div>
 					<Load loaded={this.state.joinMessage !== null}>
 						<Card title="Join Message Settings" size={600} titleSize={200} inputSize={400} onChanged={() => this.onChanged()}>
-							<CardComponent type="checkbox" title="Enabled" value={this.state.joinMessage?.enabled} ref={this.settings.enabled}/>
-							<CardComponent type="select" title="Mode" options={["Send in channel", "Send in direct message"]} value={this.state.joinMessage?.mode} ref={this.settings.mode}/>
-							<CardComponent type="select-value" title="Channel" visible={this.state.joinMessage?.mode == 0} values={channels} value={this.state.joinMessage?.channelId} ref={this.settings.channelId}/>
-							<CardComponent type="text" title="Title" value={this.state.joinMessage?.title} ref={this.settings.title}/>
-							<CardComponent type="text-multiline" title="Content" height={80} padding={16} value={this.state.joinMessage?.content} ref={this.settings.content}/>
-							<CardComponent type="text" title="Footer" value={this.state.joinMessage?.footer} ref={this.settings.footer}/>
-							<CardComponent type="text-multiline" title="Plain Text" height={80} padding={16} value={this.state.joinMessage?.text} ref={this.settings.text}/>
-							<CardComponent type="text" title="Image Url" value={this.state.joinMessage?.image} ref={this.settings.image}/>
-							<CardComponent type="text" title="Thumbnail Url" value={this.state.joinMessage?.thumbnail} ref={this.settings.thumbnail}/>
-							<CardComponent type="text" title="Icon Url" value={this.state.joinMessage?.icon} ref={this.settings.icon}/>
-							<CardComponent type="colour" title="Colour" value={this.state.joinMessage?.colour} ref={this.settings.colour}/>
+							<CardComponent type="checkbox" title="Enabled" value={this.state.joinMessage?.enabled} ref={this.settings.enabled} />
+							<CardComponent type="select" title="Mode" options={["Send in channel", "Send in direct message"]} value={this.state.joinMessage?.mode} ref={this.settings.mode} />
+							<CardComponent type="select-value" title="Channel" visible={this.state.joinMessage?.mode == 0} values={channels} value={this.state.joinMessage?.channelId} ref={this.settings.channelId} />
+							<CardComponent type="checkbox" title="Create thread" visible={this.state.joinMessage?.mode == 0} value={this.state.joinMessage?.createThread} ref={this.settings.createThread} />
+							<CardComponent type="text" title="Thread title" visible={this.state.joinMessage?.mode == 0 && this.state.joinMessage?.createThread === true} value={this.state.joinMessage?.threadTitle} ref={this.settings.threadTitle} />
+							<CardComponent type="text" title="Title" value={this.state.joinMessage?.title} ref={this.settings.title} />
+							<CardComponent type="text-multiline" title="Content" height={80} padding={16} value={this.state.joinMessage?.content} ref={this.settings.content} />
+							<CardComponent type="text" title="Footer" value={this.state.joinMessage?.footer} ref={this.settings.footer} />
+							<CardComponent type="text-multiline" title="Plain Text" height={80} padding={16} value={this.state.joinMessage?.text} ref={this.settings.text} />
+							<CardComponent type="text" title="Image Url" value={this.state.joinMessage?.image} ref={this.settings.image} />
+							<CardComponent type="text" title="Thumbnail Url" value={this.state.joinMessage?.thumbnail} ref={this.settings.thumbnail} />
+							<CardComponent type="text" title="Icon Url" value={this.state.joinMessage?.icon} ref={this.settings.icon} />
+							<CardComponent type="colour" title="Colour" value={this.state.joinMessage?.colour} ref={this.settings.colour} />
 						</Card>
 					</Load>
 				</Fade>
 			</>
 		);
 	}
-	
-	async componentDidMount(){
+
+	async componentDidMount() {
 		var response = await get(`dashboard/${this.guildId}/join-message`);
 		this.state.joinMessage = await response?.json();
 		response = await get(`discord/${this.guildId}/text-channels`);
@@ -83,16 +85,18 @@ class JoinMessage extends React.Component{
 		this.setState({});
 	}
 
-	onChanged(){
+	onChanged() {
 		this.getInput();
 		this.props.onChanged();
 	}
 
-	getInput(){
+	getInput() {
 		this.state.joinMessage = {
 			enabled: this.settings.enabled.current.getValue(),
 			mode: this.settings.mode.current.getValue(),
 			channelId: this.settings.channelId.current.getValue(),
+			createThread: this.settings.createThread.current.getValue(),
+			threadTitle: this.settings.threadTitle.current.getValue(),
 			title: this.settings.title.current.getValue(),
 			content: this.settings.content.current.getValue(),
 			footer: this.settings.footer.current.getValue(),
@@ -105,7 +109,7 @@ class JoinMessage extends React.Component{
 		this.setState({});
 	}
 
-	async save(){
+	async save() {
 		this.getInput();
 		var response = await post(`dashboard/${this.guildId}/join-message`, this.state.joinMessage);
 		return response.ok;
