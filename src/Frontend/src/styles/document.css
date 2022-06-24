@@ -1,0 +1,45 @@
+.document > h1 {
+	font-size: 50px;
+	text-align: center;
+	font-weight: 100;
+	margin-top: 40px;
+}
+
+.document > h2 {
+	text-align: left !important;
+	font-weight: 350 !important;
+	margin-top: 40px;
+	margin-bottom: 12px;
+}
+
+.document > h3 {
+	font-size: 20px;
+	font-weight: 400;
+}
+
+.document > p {
+	font-size: 14px;
+	color: var(--colour-text-muted);
+	margin-bottom: 8px;
+}
+
+.document > p > a{
+	color: var(--colour-link) !important;
+}
+
+.document > p > a:hover{
+	color: var(--colour-link-hover) !important;
+}
+
+.document > table > * > * > th, 
+.document > table > * > * > td {
+	border: 1px solid var(--colour-text-muted);
+	color: var(--colour-text-muted);
+	padding: 10px;
+	font-size: 14px;
+}
+
+.document > table{
+	margin-top: 25px;
+	margin-bottom: 25px;
+}

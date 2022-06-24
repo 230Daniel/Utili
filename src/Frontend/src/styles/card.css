@@ -1,0 +1,351 @@
+.dashboard-card{
+	width: 300px;
+	overflow: auto;
+	border-radius: 20px;
+	background-color: var(--colour-card);
+	box-shadow: 5px 5px 5px var(--colour-shadow-invert);
+	margin-bottom: 30px;
+	margin-right: 30px;	
+}
+
+.dashboard-card-info-content {
+	font-size: 16px;
+	padding: 15px 20px 10px 20px;
+}
+
+.dashboard-card-title{
+	width: 100%;
+	padding-left: 20px;
+	padding-right: 20px;
+	height: 50px;
+	background-color: var(--colour-card-title);
+
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 20px;
+}
+
+.dashboard-card-component{
+	width: 100%;
+	padding-left: 20px;
+	padding-right: 20px;
+	height: 50px;
+	background-color: var(--colour-card);
+
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+}
+
+.dashboard-card-component:hover{
+	background-color: var(--colour-card-hover);
+}
+
+.dashboard-card-component-title{
+	font-size: 16px;
+	padding-right: 20px;
+}
+
+.dashboard-card-component-text{
+	font-size: 16px;
+	height: 100%;
+}
+
+.dashboard-card-component-text > input{
+	background-color: initial;
+	border: none;
+	outline: none;
+	height: 100%;
+	width: 100%;
+	color: var(--colour-text);
+	font-size: 16px;
+	padding: 0;
+}
+
+.dashboard-card-component-text-multiline{
+	font-size: 16px;
+	height: 100%;
+}
+
+.dashboard-card-component-text-multiline > textarea::-webkit-scrollbar-thumb{
+	background-color: var(--colour-scrollbar);
+	display: none;
+}
+
+.dashboard-card-component-text-multiline > textarea::-webkit-scrollbar{
+	background-color: var(--colour-scrollbar-thumb);
+	display: none;
+}
+
+.dashboard-card-component-text-multiline > textarea{
+	background-color: initial;
+	border: none;
+	outline: none;
+	height: 100%;
+	width: 100%;
+	color: var(--colour-text);
+	font-size: 16px;
+	padding: 0;
+	resize: none;
+	scrollbar-width: none;
+}
+
+.dashboard-card-component-checkbox{
+	height: 100%;
+}
+
+.dashboard-card-component-checkbox > div {
+	height: 100%;
+	width: 100%;
+	display: flex;
+	align-items: center;
+}
+
+.dashboard-card-component-select{
+	height: 100%;
+	width: 100%;
+}
+
+.dashboard-card-component-select > select{
+	height: 100%;
+	width: 100%;
+	display: flex;
+	align-items: center;
+	font-size: 16px;
+	color: var(--colour-text);
+	background-color: initial;
+	border: none;
+	outline: none;
+}
+
+.dashboard-card-component-select > select > option{
+	height: 100%;
+	width: 100%;
+	display: flex;
+	align-items: center;
+	font-size: 16px;
+	color: var(--colour-text);
+	background-color: var(--colour-dropdown);
+	border: none;
+	outline: none;
+}
+
+.dashboard-card-component-select-value{
+	height: 100%;
+	width: 100%;
+}
+
+.dashboard-card-component-select-value > select{
+	height: 100%;
+	width: 100%;
+	display: flex;
+	align-items: center;
+	font-size: 16px;
+	color: var(--colour-text);
+	background-color: initial;
+	border: none;
+	outline: none;
+}
+
+.dashboard-card-component-select-value > select > option{
+	height: 100%;
+	width: 100%;
+	display: flex;
+	align-items: center;
+	font-size: 16px;
+	color: var(--colour-text);
+	background-color: var(--colour-dropdown);
+	border: none;
+	outline: none;
+}
+
+.dashboard-card-component-timespan > div {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	height: 100%;
+	width: 100%;
+}
+
+.dashboard-card-component-timespan > div > input {
+	background-color: inherit;
+	border: none;
+	outline: none;
+	height: 100%;
+	width: 40px;
+	color: var(--colour-text);
+	font-size: 16px;
+	padding: 0;
+	text-align: center;
+}
+
+.dashboard-card-component-timespan > div > span {
+	margin-bottom: 2px;
+	font-size: 16px;
+}
+
+.dashboard-card-component-colour{
+	font-size: 16px;
+	height: 100%;
+	display: flex;
+	align-items: center;
+}
+
+.dashboard-card-component-colour > input{
+	background-color: initial;
+	border: none;
+	outline: none;
+	height: 32px;
+	width: 100%;
+	color: var(--colour-text);
+	font-size: 16px;
+	padding: 0;
+	border-radius: 5px;
+}
+
+.dashboard-card-list-component{
+	flex-direction: column;
+	overflow-y: auto;
+	height: initial;
+}
+
+.dashboard-card-list-component-search{
+	width: 100%;
+	min-height: 50px;
+	display: flex;
+	align-items: center;
+	padding-left: 20px;
+	padding-right: 20px;
+}
+
+.dashboard-card-list-component-search > input {
+	background-color: var(--colour-card-input-important);
+	border: none;
+	outline: none;
+	color: var(--colour-text);
+	width: 100%;
+	height: 30px;
+	font-size: 16px;
+	padding-left: 10px;
+	padding-right: 10px;
+	border-radius: 5px;
+}
+
+.dashboard-card-list-component-search > input:disabled {
+	background-color: var(--colour-nav);
+}
+
+.dashboard-card-adder-component-search{
+	width: 100%;
+	min-height: 50px;
+	display: flex;
+	align-items: center;
+	padding-left: 12px;
+	padding-right: 12px;
+}
+
+.dashboard-card-adder-component-search > input {
+	background-color: var(--colour-card-input-important);
+	border: none;
+	outline: none;
+	color: var(--colour-text);
+	width: 100%;
+	height: 30px;
+	font-size: 16px;
+	padding-left: 10px;
+	padding-right: 10px;
+	border-radius: 8px;
+}
+
+.dashboard-card-adder-component-search > input:disabled {
+	background-color: var(--colour-nav);
+}
+
+.dashboard-card-list-component-options{
+	height: 150px;
+	overflow-y: auto;
+}
+
+.dashboard-card-list-component-options.collapsed{
+	height: 0px;
+	overflow-y: hidden;
+}
+
+.dashboard-card-list-component-options::-webkit-scrollbar{
+	background-color: var(--colour-card);
+}
+
+.dashboard-card-list-component-options::-webkit-scrollbar-thumb{
+	background-color: var(--colour-background);
+}
+
+.dashboard-card-list-component-options{
+	scrollbar-color: var(--colour-background) var(--colour-card);
+}
+
+.dashboard-card-list-component-option{
+	height: 50px;
+	display: flex;
+	align-items: center;
+	padding-left: 20px;
+	padding-right: 20px;
+	font-size: 16px;
+}
+
+.dashboard-card-list-component-option:hover{
+	background-color: var(--colour-card-hover);
+}
+
+.dashboard-card-list-component-selected{
+	max-height: 50px;
+	height: 50px;
+	opacity: 1;
+	display: flex;
+	align-items: center;
+	padding-left: 20px;
+	padding-right: 20px;
+	font-size: 16px;
+}
+
+.dashboard-card-list-component-selected-remove{
+	background-color: #b55043;
+	width: 30px;
+	height: 30px;
+	border-radius: 5px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	margin-left: auto;
+	transform: scale(1);
+}
+
+.dashboard-card-list-component-selected-remove:hover{
+	transform: scale(1.1);
+}
+
+.dashboard-card-list-component-selected-remove > img {
+	filter: invert(100%) sepia(0%) saturate(7500%) hue-rotate(191deg) brightness(113%) contrast(101%);
+}
+
+.collapsed > .dashboard-card-list-component-selected{
+	max-height: 0px;
+	opacity: 0;
+	overflow: hidden;
+}
+
+input::placeholder{
+	color: var(--colour-text-muted);
+}
+
+/* Chrome, Safari, Edge, Opera */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+input[type=number] {
+  -moz-appearance: textfield;
+}
