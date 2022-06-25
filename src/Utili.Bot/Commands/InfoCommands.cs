@@ -41,7 +41,7 @@ namespace Utili.Bot.Commands
                 $"[Contact Us](https://{domain}/contact)\n",
                 $"[Get Premium](https://{domain}/premium)\n");
 
-            return Info("Utili.Bot", about);
+            return Info("Utili", about);
         }
 
         [Command("help", "commands")]
@@ -50,8 +50,8 @@ namespace Utili.Bot.Commands
             var domain = _config.GetValue<string>("Services:WebsiteDomain");
             var dashboardUrl = $"https://{domain}/dashboard/{Context.Guild.Id}";
 
-            var embed = MessageUtils.CreateEmbed(EmbedType.Info, "Utili.Bot",
-                    $"You can configure Utili.Bot on the [dashboard]({dashboardUrl}).\n" +
+            var embed = MessageUtils.CreateEmbed(EmbedType.Info, "Utili",
+                    $"You can configure Utili on the [dashboard]({dashboardUrl}).\n" +
                     $"If you need help, you should [contact us](https://{domain}/contact).\n⠀")
                 .AddInlineField("**Core**", $"[Command List](https://{domain}/commands)\n" +
                                             $"[Core Settings]({dashboardUrl})")

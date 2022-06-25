@@ -84,7 +84,7 @@ public class WebhookService
         }
 
         var avatar = File.OpenRead("Avatar.png");
-        var newWebhook = await _client.CreateWebhookAsync(channelId, "Utili.Bot", x => x.Avatar = avatar);
+        var newWebhook = await _client.CreateWebhookAsync(channelId, "Utili", x => x.Avatar = avatar);
         avatar.Close();
 
         return newWebhook;

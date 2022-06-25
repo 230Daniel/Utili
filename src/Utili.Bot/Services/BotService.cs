@@ -317,7 +317,7 @@ namespace Utili.Bot.Services
                     .AddEmbed(
                         MessageUtils.CreateEmbed(
                             EmbedType.Info,
-                            "Hello! Thanks for choosing Utili.Bot.",
+                            "Hello! Thanks for choosing Utili.",
                             $"Head to the [dashboard]({baseUrl}/dashboard/{e.GuildId}) to configure the bot.\n" +
                             $"If you need any help, you should [contact us]({baseUrl}/contact).\n" +
                             $"And if you want to help support the bot, you can [get premium]({baseUrl}/premium).\n\n" +

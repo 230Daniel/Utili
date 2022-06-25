@@ -147,7 +147,7 @@ namespace Utili.Bot.Services
                     textChannel = await guild.CreateTextChannelAsync($"{config.ChannelPrefix}{voiceChannel.Name}", x =>
                     {
                         if (voiceChannel.CategoryId.HasValue) x.CategoryId = voiceChannel.CategoryId.Value;
-                        x.Topic = $"Users in {voiceChannel.Name} have access - Created by Utili.Bot";
+                        x.Topic = $"Users in {voiceChannel.Name} have access - Created by Utili";
                         x.Overwrites = new List<LocalOverwrite>
                         {
                             LocalOverwrite.Member(_client.CurrentUser.Id, new OverwritePermissions().Allow(Permission.ViewChannels)),
