@@ -10,6 +10,7 @@ using Stripe.Checkout;
 using Utili.Backend.Authorisation;
 using Utili.Backend.Models.Stripe;
 using Utili.Backend.Extensions;
+using Utili.Backend.Services;
 using IConfiguration = Microsoft.Extensions.Configuration.IConfiguration;
 
 namespace Utili.Backend.Controllers
@@ -21,17 +22,25 @@ namespace Utili.Backend.Controllers
         private readonly IConfiguration _configuration;
         private readonly Services.CustomerService _customerService;
         private readonly IStripeClient _stripeClient;
+        private readonly IsPremiumService _isPremiumService;
 
-        public StripeController(IConfiguration configuration, Services.CustomerService customerService, StripeClient stripeClient)
+        public StripeController(
+            IConfiguration configuration,
+            Services.CustomerService customerService,
+            StripeClient stripeClient,
+            IsPremiumService isPremiumService)
         {
             _configuration = configuration;
             _customerService = customerService;
             _stripeClient = stripeClient;
+            _isPremiumService = isPremiumService;
         }
 
         [HttpPost("create-checkout-session")]
         public async Task<IActionResult> CreateCheckoutSessionAsync([FromBody] CreateCheckoutSessionModel model)
         {
+            if (_isPremiumService.IsFree) return NotFound();
+
             var customerId = await _customerService.GetOrCreateCustomerIdAsync(HttpContext.GetUser());
             if (customerId is null) throw new Exception("Customer ID was null");
 
@@ -68,6 +77,8 @@ namespace Utili.Backend.Controllers
         [HttpGet("customer-portal")]
         public async Task<IActionResult> CustomerPortalAsync()
         {
+            if (_isPremiumService.IsFree) return NotFound();
+
             var customerId = await _customerService.GetOrCreateCustomerIdAsync(HttpContext.GetUser());
             if (customerId is null) throw new Exception("Customer ID was null");
 
@@ -86,6 +97,8 @@ namespace Utili.Backend.Controllers
         [HttpGet("currency")]
         public async Task<IActionResult> CurrencyAsync()
         {
+            if (_isPremiumService.IsFree) return NotFound();
+
             var customer = await _customerService.GetCustomerAsync(HttpContext.GetUser());
 
             if (customer is not null && !string.IsNullOrEmpty(customer.Currency))

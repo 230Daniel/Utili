@@ -1,6 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom";
-import { BrowserRouter as Router, Switch, Route, useParams } from "react-router-dom";
+import { BrowserRouter as Router, Switch, Route, useParams, Redirect } from "react-router-dom";
 import Cookies from "universal-cookie";
 
 import Layout from "./pages/_layout";
@@ -40,7 +40,7 @@ ReactDOM.render(
 							<Route exact path="/premium/customerportal" component={CustomerPortal} />
 							<Route exact path="/premium/checkout/:currency/:slots" component={Checkout} />
 							<Route exact path="/contact/" component={Contact} />
-							<Route exact path="/return/" render={() => Return()} />
+							<Route exact path="/return/" component={Return} />
 							<Route exact path="/invite/" component={Invite} />
 							<Route exact path="/invite/:guildId" component={Invite} />
 							<Route path="/:document" component={Document} />
@@ -55,25 +55,22 @@ ReactDOM.render(
 
 function Return() {
 	const cookies = new Cookies();
-	window.location.search = "";
 	if (!window.location.href.includes("error")) {
 		var returnPath = cookies.get("return_path");
 		if (returnPath) {
-			window.location.href = `${window.location.origin}${returnPath}`;
-			return;
+			return (<Redirect to={returnPath} />);
 		}
 	}
 	else {
 		var returnPath = cookies.get("return_path_error");
 		if (returnPath) {
-			window.location.href = `${window.location.origin}${returnPath}`;
-			return;
+			return (<Redirect to={returnPath} />);
 		}
 	}
-	window.location.href = `${window.location.origin}`;
+	return (<Redirect to="/" />);
 }
 
-function Invite(props) {
+function Invite() {
 	var { guildId } = useParams();
 
 	const cookies = new Cookies();
