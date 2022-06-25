@@ -47,8 +47,8 @@ namespace Utili.Bot.Services
             {
                 try
                 {
-                    var shardIds = _config.GetSection("ShardIds").Get<int[]>();
-                    var totalShards = (ulong)_config.GetSection("TotalShards").Get<int>();
+                    var shardIds = _config.GetSection("Discord:ShardIds").Get<int[]>();
+                    var totalShards = (ulong) _config.GetValue<int>("Discord:TotalShards");
 
                     using var scope = _scopeFactory.CreateScope();
                     var db = scope.GetDbContext();
@@ -79,15 +79,15 @@ namespace Utili.Bot.Services
                     if (_counter <= 30) return;
 
                     _counter = 0;
-                    if (!_config.GetValue<bool>("PostToBotlist")) return;
+                    if (!_config.GetValue<bool>("BotList:Enable")) return;
 
                     var guilds = await db.ShardDetails.GetTotalGuildCountAsync();
 
-                    var tokenConfiguration = _config.GetSection("BotlistTokens").Get<TokenConfiguration>();
+                    var tokenConfiguration = _config.GetSection("BotList:Tokens").Get<TokenConfiguration>();
                     StatsPoster poster = new(_client.CurrentUser.Id, tokenConfiguration);
                     await poster.PostGuildCountAsync(guilds);
 
-                    _logger.LogDebug($"Successfully posted {guilds} guilds to the botlists");
+                    _logger.LogDebug("Successfully posted {Guilds} guilds to the botlists", guilds);
                 }
                 catch (Exception ex)
                 {

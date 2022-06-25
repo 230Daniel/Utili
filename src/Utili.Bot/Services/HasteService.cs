@@ -22,7 +22,7 @@ namespace Utili.Bot.Services
 
         public HasteService(IConfiguration config)
         {
-            _baseUrl = config.GetValue<string>("HasteServer");
+            _baseUrl = config.GetValue<string>("Services:HasteAddress");
         }
 
         private class PasteResponse

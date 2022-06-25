@@ -30,7 +30,7 @@ namespace Utili.Bot.Commands
         [Command("about", "info")]
         public async Task<DiscordCommandResult> AboutAsync()
         {
-            var domain = _config.GetValue<string>("Domain");
+            var domain = _config.GetValue<string>("Services:WebsiteDomain");
             var guilds = await _dbContext.ShardDetails.Where(x => x.Heartbeat > DateTime.UtcNow.AddSeconds(-30)).SumAsync(x => x.Guilds);
 
             var about = string.Concat(
@@ -47,7 +47,7 @@ namespace Utili.Bot.Commands
         [Command("help", "commands")]
         public DiscordCommandResult Help()
         {
-            var domain = _config.GetValue<string>("Domain");
+            var domain = _config.GetValue<string>("Services:WebsiteDomain");
             var dashboardUrl = $"https://{domain}/dashboard/{Context.Guild.Id}";
 
             var embed = MessageUtils.CreateEmbed(EmbedType.Info, "Utili.Bot",

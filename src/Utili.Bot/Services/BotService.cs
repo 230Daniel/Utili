@@ -311,7 +311,7 @@ namespace Utili.Bot.Services
 
             if (idealChannel is null) return;
 
-            var baseUrl = $"https://{_configuration["Domain"]}";
+            var baseUrl = $"https://{_configuration["Services:WebsiteDomain"]}";
             await idealChannel.SendMessageAsync(
                 new LocalMessage()
                     .AddEmbed(

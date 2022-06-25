@@ -7,6 +7,7 @@ using Utili.Database.Extensions;
 using Qmmands;
 using Utili.Bot.Implementations;
 using Utili.Bot.Extensions;
+using Utili.Bot.Services;
 
 namespace Utili.Bot.Commands
 {
@@ -14,10 +15,12 @@ namespace Utili.Bot.Commands
     public class VoteChannelsCommands : MyDiscordGuildModuleBase
     {
         private readonly DatabaseContext _dbContext;
+        private readonly IsPremiumService _isPremiumService;
 
-        public VoteChannelsCommands(DatabaseContext dbContext)
+        public VoteChannelsCommands(DatabaseContext dbContext, IsPremiumService isPremiumService)
         {
             _dbContext = dbContext;
+            _isPremiumService = isPremiumService;
         }
 
         [Command("addemoji", "addemote")]
@@ -34,7 +37,7 @@ namespace Utili.Bot.Commands
             if (config is null)
                 return Failure("Error", $"{channel.Mention} is not a votes channel");
 
-            var emojiLimit = await _dbContext.GetIsGuildPremiumAsync(Context.GuildId) ? 5 : 2;
+            var emojiLimit = await _isPremiumService.GetIsGuildPremiumAsync(Context.GuildId) ? 5 : 2;
 
             if (config.Emojis.Count >= emojiLimit)
                 return Failure("Error",

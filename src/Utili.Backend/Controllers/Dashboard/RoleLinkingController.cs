@@ -7,10 +7,10 @@ using Microsoft.AspNetCore.Mvc;
 using Utili.Database;
 using Utili.Database.Entities;
 using Utili.Database.Extensions;
-using Microsoft.EntityFrameworkCore;
 using Utili.Backend.Authorisation;
 using Utili.Backend.Models;
 using Utili.Backend.Extensions;
+using Utili.Backend.Services;
 
 namespace Utili.Backend.Controllers
 {
@@ -20,11 +20,13 @@ namespace Utili.Backend.Controllers
     {
         private readonly IMapper _mapper;
         private readonly DatabaseContext _dbContext;
+        private readonly IsPremiumService _isPremiumService;
 
-        public RoleLinkingController(IMapper mapper, DatabaseContext dbContext)
+        public RoleLinkingController(IMapper mapper, DatabaseContext dbContext, IsPremiumService isPremiumService)
         {
             _mapper = mapper;
             _dbContext = dbContext;
+            _isPremiumService = isPremiumService;
         }
 
         [HttpGet]
@@ -39,11 +41,9 @@ namespace Utili.Backend.Controllers
         {
             var configurations = await _dbContext.RoleLinkingConfigurations.GetAllForGuildAsync(guildId);
 
-            if (models.Count > 2)
-            {
-                var premium = await _dbContext.PremiumSlots.AnyAsync(x => x.GuildId == guildId);
-                if (!premium) models = models.OrderBy(x => x.Id).Take(2).ToList();
-            }
+            if (models.Count > 2 &&
+                !await _isPremiumService.GetIsGuildPremiumAsync(guildId))
+                models = models.OrderBy(x => x.Id).Take(2).ToList();
 
             foreach (var model in models)
             {

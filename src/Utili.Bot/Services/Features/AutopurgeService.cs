@@ -21,16 +21,22 @@ namespace Utili.Bot.Services
         private readonly ILogger<AutopurgeService> _logger;
         private readonly DiscordClientBase _client;
         private readonly IServiceScopeFactory _scopeFactory;
+        private readonly IsPremiumService _isPremiumService;
 
         private int _purgeNumber;
         private Timer _timer;
         private List<ulong> _downloadingFor = new();
 
-        public AutopurgeService(ILogger<AutopurgeService> logger, DiscordClientBase client, IServiceScopeFactory scopeFactory)
+        public AutopurgeService(
+            ILogger<AutopurgeService> logger,
+            DiscordClientBase client,
+            IServiceScopeFactory scopeFactory,
+            IsPremiumService isPremiumService)
         {
             _logger = logger;
             _client = client;
             _scopeFactory = scopeFactory;
+            _isPremiumService = isPremiumService;
 
             _purgeNumber = 0;
             _timer = new Timer(10000);
@@ -72,10 +78,21 @@ namespace Utili.Bot.Services
             var db = scope.GetDbContext();
 
             var configs = await db.AutopurgeConfigurations.Where(x => x.Mode != AutopurgeMode.None).ToListAsync();
-            var premiumSlots = await db.PremiumSlots.ToListAsync();
 
-            var premiumConfigs = configs.Where(x => premiumSlots.Any(y => y.GuildId == x.GuildId)).ToList();
-            configs.RemoveAll(x => premiumSlots.Any(y => y.GuildId == x.GuildId));
+            List<AutopurgeConfiguration> premiumConfigs;
+
+            if (_isPremiumService.IsFree)
+            {
+                // ToList clones the "configs" list so the clear() doesn't affect premiumConfigs
+                premiumConfigs = configs.ToList();
+                configs.Clear();
+            }
+            else
+            {
+                var premiumSlots = await db.PremiumSlots.ToListAsync();
+                premiumConfigs = configs.Where(x => premiumSlots.Any(y => y.GuildId == x.GuildId)).ToList();
+                configs.RemoveAll(x => premiumSlots.Any(y => y.GuildId == x.GuildId));
+            }
 
             var channelsToPurge = new List<AutopurgeConfiguration>();
 

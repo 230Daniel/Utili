@@ -7,10 +7,10 @@ using Microsoft.AspNetCore.Mvc;
 using Utili.Database;
 using Utili.Database.Entities;
 using Utili.Database.Extensions;
-using Microsoft.EntityFrameworkCore;
 using Utili.Backend.Authorisation;
 using Utili.Backend.Models;
 using Utili.Backend.Extensions;
+using Utili.Backend.Services;
 
 namespace Utili.Backend.Controllers
 {
@@ -20,11 +20,13 @@ namespace Utili.Backend.Controllers
     {
         private readonly IMapper _mapper;
         private readonly DatabaseContext _dbContext;
+        private readonly IsPremiumService _isPremiumService;
 
-        public VoteChannelsController(IMapper mapper, DatabaseContext dbContext)
+        public VoteChannelsController(IMapper mapper, DatabaseContext dbContext, IsPremiumService isPremiumService)
         {
             _mapper = mapper;
             _dbContext = dbContext;
+            _isPremiumService = isPremiumService;
         }
 
         [HttpGet]
@@ -41,7 +43,7 @@ namespace Utili.Backend.Controllers
 
             if (models.Any(x => x.Emojis.Count > 2))
             {
-                var premium = await _dbContext.PremiumSlots.AnyAsync(x => x.GuildId == guildId);
+                var premium = await _isPremiumService.GetIsGuildPremiumAsync(guildId);
                 var amountOfEmojis = premium ? 5 : 2;
                 foreach (var model in models)
                 {

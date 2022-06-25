@@ -9,16 +9,19 @@ using Utili.Database;
 using Utili.Database.Extensions;
 using Qmmands;
 using Utili.Bot.Implementations;
+using Utili.Bot.Services;
 
 namespace Utili.Bot.Commands
 {
     public class OwnerCommands : MyDiscordGuildModuleBase
     {
         private readonly DatabaseContext _dbContext;
+        private readonly IsPremiumService _isPremiumService;
 
-        public OwnerCommands(DatabaseContext dbContext)
+        public OwnerCommands(DatabaseContext dbContext, IsPremiumService isPremiumService)
         {
             _dbContext = dbContext;
+            _isPremiumService = isPremiumService;
         }
 
         [Command("userinfo"), RequireBotOwner]
@@ -48,7 +51,7 @@ namespace Utili.Bot.Commands
         public async Task<DiscordCommandResult> GuildInfoAsync(ulong guildId)
         {
             var guild = await Context.Bot.FetchGuildAsync(guildId, true);
-            var premium = await _dbContext.PremiumSlots.AnyAsync(x => x.GuildId == guildId);
+            var premium = await _isPremiumService.GetIsGuildPremiumAsync(guildId);
 
             var content = $"Id: {guild?.Id}\n" +
                           $"Owner: {guild.OwnerId}\n" +

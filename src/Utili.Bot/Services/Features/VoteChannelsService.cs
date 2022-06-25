@@ -9,6 +9,7 @@ using Microsoft.Extensions.Logging;
 using Utili.Database.Entities;
 using Utili.Database.Extensions;
 using Utili.Bot.Extensions;
+using Utili.Bot.Services;
 
 namespace Utili.Bot.Features
 {
@@ -16,11 +17,13 @@ namespace Utili.Bot.Features
     {
         private readonly ILogger<VoteChannelsService> _logger;
         private readonly DiscordClientBase _client;
+        private readonly IsPremiumService _isPremiumService;
 
-        public VoteChannelsService(ILogger<VoteChannelsService> logger, DiscordClientBase client)
+        public VoteChannelsService(ILogger<VoteChannelsService> logger, DiscordClientBase client, IsPremiumService isPremiumService)
         {
             _logger = logger;
             _client = client;
+            _isPremiumService = isPremiumService;
         }
 
         public async Task MessageReceived(IServiceScope scope, MessageReceivedEventArgs e)
@@ -35,7 +38,7 @@ namespace Utili.Bot.Features
 
                 if (config.Emojis.Count > 2)
                 {
-                    var premium = await db.GetIsGuildPremiumAsync(e.GuildId.Value);
+                    var premium = await _isPremiumService.GetIsGuildPremiumAsync(e.GuildId.Value);
                     config.Emojis = config.Emojis.Take(premium ? 5 : 2).ToList();
                 }
 

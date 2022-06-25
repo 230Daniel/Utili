@@ -22,15 +22,22 @@ namespace Utili.Bot.Services
         private readonly DiscordClientBase _client;
         private readonly IServiceScopeFactory _scopeFactory;
         private readonly MemberCacheService _memberCache;
+        private readonly IsPremiumService _isPremiumService;
 
         private Timer _timer;
 
-        public InactiveRoleService(ILogger<InactiveRoleService> logger, DiscordClientBase client, IServiceScopeFactory scopeFactory, MemberCacheService memberCache)
+        public InactiveRoleService(
+            ILogger<InactiveRoleService> logger,
+            DiscordClientBase client,
+            IServiceScopeFactory scopeFactory,
+            MemberCacheService memberCache,
+            IsPremiumService isPremiumService)
         {
             _logger = logger;
             _client = client;
             _scopeFactory = scopeFactory;
             _memberCache = memberCache;
+            _isPremiumService = isPremiumService;
 
             _timer = new Timer(30000);
             _timer.Elapsed += Timer_Elapsed;
@@ -154,7 +161,7 @@ namespace Utili.Bot.Services
                     var db = scope.GetDbContext();
 
                     var userRows = await db.InactiveRoleMembers.GetForAllGuildMembersAsync(config.GuildId);
-                    var premium = await db.GetIsGuildPremiumAsync(config.GuildId);
+                    var premium = await _isPremiumService.GetIsGuildPremiumAsync(config.GuildId);
 
                     foreach (var member in guild.GetMembers().Values.Where(x => !x.IsBot).OrderBy(x => x.Id))
                     {

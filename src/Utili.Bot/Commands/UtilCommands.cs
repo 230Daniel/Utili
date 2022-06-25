@@ -7,8 +7,6 @@ using Disqord.Bot;
 using Disqord.Extensions.Interactivity.Menus.Paged;
 using Disqord.Gateway;
 using Disqord.Rest;
-using Utili.Database;
-using Utili.Database.Extensions;
 using Qmmands;
 using Utili.Bot.Implementations;
 using Utili.Bot.Services;
@@ -19,13 +17,13 @@ namespace Utili.Bot.Commands
 {
     public class UtilCommands : MyDiscordGuildModuleBase
     {
-        private readonly DatabaseContext _dbContext;
         private readonly MemberCacheService _memberCache;
+        private readonly IsPremiumService _isPremiumService;
 
-        public UtilCommands(DatabaseContext dbContext, MemberCacheService memberCache)
+        public UtilCommands(MemberCacheService memberCache, IsPremiumService isPremiumService)
         {
-            _dbContext = dbContext;
             _memberCache = memberCache;
+            _isPremiumService = isPremiumService;
         }
 
         [Command("prune", "purge", "clear")]
@@ -127,14 +125,14 @@ namespace Utili.Bot.Commands
 
             if (!countSet)
             {
-                premium = await _dbContext.GetIsGuildPremiumAsync(Context.GuildId);
+                premium = await _isPremiumService.GetIsGuildPremiumAsync(Context.GuildId);
                 count = premium.Value ? 1000u : 100u;
             }
 
             if (count > 1000)
             {
                 count = 1000;
-                premium ??= await _dbContext.GetIsGuildPremiumAsync(Context.GuildId);
+                premium ??= await _isPremiumService.GetIsGuildPremiumAsync(Context.GuildId);
                 content = premium.Value
                     ? "For premium servers, you can delete up to 1000 messages at once\n"
                     : "For non-premium servers, you can delete up to 100 messages at once\n";
@@ -142,7 +140,7 @@ namespace Utili.Bot.Commands
 
             if (count > 100)
             {
-                premium ??= await _dbContext.GetIsGuildPremiumAsync(Context.GuildId);
+                premium ??= await _isPremiumService.GetIsGuildPremiumAsync(Context.GuildId);
                 if (!premium.Value)
                 {
                     count = 100;

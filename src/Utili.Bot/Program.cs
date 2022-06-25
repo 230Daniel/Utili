@@ -31,15 +31,15 @@ namespace Utili.Bot
                 .ConfigureServices(ConfigureServices)
                 .ConfigureDiscordBotSharder<MyDiscordBotSharder>((context, bot) =>
                 {
-                    bot.Token = context.Configuration.GetValue<string>("Token");
+                    bot.Token = context.Configuration.GetValue<string>("Discord:Token");
                     bot.ReadyEventDelayMode = ReadyEventDelayMode.Guilds;
                     bot.Intents |= GatewayIntent.Members;
                     bot.Intents |= GatewayIntent.VoiceStates;
-                    bot.Activities = new[] { new LocalActivity($"{context.Configuration.GetValue<string>("Domain")} | Starting up...", ActivityType.Playing) };
-                    bot.OwnerIds = new[] { new Snowflake(context.Configuration.GetValue<ulong>("OwnerId")) };
+                    bot.Activities = new[] { new LocalActivity($"{context.Configuration.GetValue<string>("Discord:Domain")} | Starting up...", ActivityType.Playing) };
+                    bot.OwnerIds = new[] { new Snowflake(context.Configuration.GetValue<ulong>("Discord:OwnerId")) };
 
-                    var shardIds = context.Configuration.GetSection("ShardIds").Get<int[]>();
-                    var totalShards = context.Configuration.GetValue<int>("TotalShards");
+                    var shardIds = context.Configuration.GetSection("Discord:ShardIds").Get<int[]>();
+                    var totalShards = context.Configuration.GetValue<int>("Discord:TotalShards");
                     bot.ShardIds = shardIds.Select(x => new ShardId(x, totalShards));
                 })
                 .Build();
@@ -85,6 +85,7 @@ namespace Utili.Bot
             services.AddSingleton<CommunityService>();
             services.AddSingleton<GuildCountService>();
             services.AddSingleton<WebhookService>();
+            services.AddSingleton<IsPremiumService>();
 
             services.AddSingleton<AutopurgeService>();
             services.AddSingleton<ChannelMirroringService>();
@@ -102,7 +103,7 @@ namespace Utili.Bot
             services.AddSingleton<VoteChannelsService>();
 
             services.Configure<DefaultGatewayCacheProviderConfiguration>(x => x.MessagesPerChannel = 1);
-            DatabaseContextExtensions.DefaultPrefix = context.Configuration["DefaultPrefix"];
+            DatabaseContextExtensions.DefaultPrefix = context.Configuration["Discord:DefaultPrefix"];
         }
     }
 }

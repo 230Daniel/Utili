@@ -58,7 +58,7 @@ namespace Utili.Bot.Services
                 await PermanentlyCacheMembersAsync(guildIds);
 
                 _logger.LogInformation("Finished caching members for {Shard}", e.ShardId);
-                await e.CurrentUser.GetGatewayClient().SetPresenceAsync(new LocalActivity($"{_configuration.GetValue<string>("Domain")} | {_configuration.GetValue<string>("DefaultPrefix")}help", ActivityType.Playing));
+                await e.CurrentUser.GetGatewayClient().SetPresenceAsync(new LocalActivity($"{_configuration.GetValue<string>("Services:WebsiteDomain")} | {_configuration.GetValue<string>("Discord:DefaultPrefix")}help", ActivityType.Playing));
             }
             catch (Exception ex)
             {

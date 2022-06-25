@@ -34,7 +34,7 @@ namespace Utili.Bot
             _client = client;
             _scopeFactory = scopeFactory;
 
-            _communityGuildId = _config.GetSection("Community").GetValue<ulong>("GuildId");
+            _communityGuildId = _config.GetValue<ulong>("CommunityGuild:GuildId");
         }
 
         public async Task GuildAvailable(GuildAvailableEventArgs e)
@@ -45,7 +45,7 @@ namespace Utili.Bot
                 {
                     _roleTimer?.Dispose();
                     await _client.Chunker.ChunkAsync(e.Guild);
-                    _logger.LogDebug($"Finished chunking members for community guild ({e.Guild.Name})");
+                    _logger.LogDebug("Finished chunking members for community guild ({Name})", e.Guild.Name);
 
                     _roleTimer = new Timer(60000);
                     _roleTimer.Elapsed += RoleTimer_Elapsed;
@@ -65,7 +65,7 @@ namespace Utili.Bot
                 try
                 {
                     var guild = _client.GetGuild(_communityGuildId);
-                    var premiumRole = guild.GetRole(_config.GetSection("Community").GetValue<ulong>("PremiumRoleId"));
+                    var premiumRole = guild.GetRole(_config.GetValue<ulong>("CommunityGuild:PremiumRoleId"));
 
                     if (premiumRole is not null)
                     {

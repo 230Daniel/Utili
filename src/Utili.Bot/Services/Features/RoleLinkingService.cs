@@ -17,13 +17,15 @@ namespace Utili.Bot.Services
     {
         private readonly ILogger<RoleLinkingService> _logger;
         private readonly DiscordClientBase _client;
+        private readonly IsPremiumService _isPremiumService;
 
         private List<RoleLinkAction> _actions;
 
-        public RoleLinkingService(ILogger<RoleLinkingService> logger, DiscordClientBase client)
+        public RoleLinkingService(ILogger<RoleLinkingService> logger, DiscordClientBase client, IsPremiumService isPremiumService)
         {
             _logger = logger;
             _client = client;
+            _isPremiumService = isPremiumService;
 
             _actions = new List<RoleLinkAction>();
         }
@@ -40,7 +42,7 @@ namespace Utili.Bot.Services
 
                 if (configs.Count > 2)
                 {
-                    var premium = await db.GetIsGuildPremiumAsync(guild.Id);
+                    var premium = await _isPremiumService.GetIsGuildPremiumAsync(guild.Id);
                     if (!premium) configs = configs.Take(2).ToList();
                 }
 

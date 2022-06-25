@@ -32,7 +32,7 @@ namespace Utili.Backend.Controllers
             var configuration = await _dbContext.CoreConfigurations.GetForGuildAsync(guildId);
             configuration ??= new CoreConfiguration(guildId)
             {
-                Prefix = _configuration["Other:DefaultPrefix"],
+                Prefix = _configuration["Discord:DefaultPrefix"],
                 CommandsEnabled = true,
                 NonCommandChannels = new()
             };

@@ -26,7 +26,7 @@ namespace Utili.Bot.Features
         [RequireBotOwner]
         public async Task<DiscordCommandResult> EvaluateAsync([Remainder] string code)
         {
-            if (Context.Message.Author.Id != _config.GetValue<ulong>("OwnerId"))
+            if (Context.Message.Author.Id != _config.GetValue<ulong>("Discord:OwnerId"))
             {
                 _logger.LogWarning("The bot owner check allowed a non-owner through - The eval command was not executed");
                 return null;

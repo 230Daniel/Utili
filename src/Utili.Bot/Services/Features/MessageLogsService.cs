@@ -22,15 +22,22 @@ namespace Utili.Bot.Services
         private readonly ILogger<MessageLogsService> _logger;
         private readonly DiscordClientBase _client;
         private readonly HasteService _haste;
+        private readonly IsPremiumService _isPremiumService;
 
         private readonly Timer _timer;
 
-        public MessageLogsService(IServiceScopeFactory scopeFactory, ILogger<MessageLogsService> logger, DiscordClientBase client, HasteService haste)
+        public MessageLogsService(
+            IServiceScopeFactory scopeFactory,
+            ILogger<MessageLogsService> logger,
+            DiscordClientBase client,
+            HasteService haste,
+            IsPremiumService isPremiumService)
         {
             _scopeFactory = scopeFactory;
             _logger = logger;
             _client = client;
             _haste = haste;
+            _isPremiumService = isPremiumService;
 
             _timer = new Timer(60000);
             _timer.Elapsed += (_, _) => _ = Delete30DayMessagesAsync();
@@ -68,7 +75,7 @@ namespace Utili.Bot.Services
 
                 db.MessageLogsMessages.Add(message);
 
-                if (!await db.GetIsGuildPremiumAsync(e.GuildId.Value))
+                if (!await _isPremiumService.GetIsGuildPremiumAsync(e.GuildId.Value))
                 {
                     var messages = await db.MessageLogsMessages
                         .Where(x => x.GuildId == e.GuildId.Value.RawValue && x.ChannelId == message.ChannelId)

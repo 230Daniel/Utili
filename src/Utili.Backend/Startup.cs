@@ -119,6 +119,7 @@ namespace Utili.Backend
             services.AddDbContext<DatabaseContext>();
 
             services.AddScoped<Services.CustomerService>();
+            services.AddScoped<IsPremiumService>();
             services.AddSingleton(new StripeClient(_configuration["Stripe:SecretKey"]));
 
             // Set a 10 second timeout on connections to hopefully avoid deadlock of DiscordUserGuildsService and other similar services
@@ -130,7 +131,7 @@ namespace Utili.Backend
             services.Configure<IpRateLimitOptions>(_configuration.GetSection("IpRateLimiting"));
             services.Configure<IpRateLimitPolicies>(_configuration.GetSection("IpRateLimitPolicies"));
 
-            DatabaseContextExtensions.DefaultPrefix = _configuration["Other:DefaultPrefix"];
+            DatabaseContextExtensions.DefaultPrefix = _configuration["Discord:DefaultPrefix"];
         }
 
         public static void Configure(IApplicationBuilder app, IWebHostEnvironment env)

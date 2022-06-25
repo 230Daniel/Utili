@@ -6,10 +6,10 @@ using Microsoft.AspNetCore.Mvc;
 using Utili.Database;
 using Utili.Database.Entities;
 using Utili.Database.Extensions;
-using Microsoft.EntityFrameworkCore;
 using Utili.Backend.Authorisation;
 using Utili.Backend.Models;
 using Utili.Backend.Extensions;
+using Utili.Backend.Services;
 
 namespace Utili.Backend.Controllers
 {
@@ -19,11 +19,13 @@ namespace Utili.Backend.Controllers
     {
         private readonly IMapper _mapper;
         private readonly DatabaseContext _dbContext;
+        private readonly IsPremiumService _isPremiumService;
 
-        public InactiveRoleController(IMapper mapper, DatabaseContext dbContext)
+        public InactiveRoleController(IMapper mapper, DatabaseContext dbContext, IsPremiumService isPremiumService)
         {
             _mapper = mapper;
             _dbContext = dbContext;
+            _isPremiumService = isPremiumService;
         }
 
         [HttpGet]
@@ -44,11 +46,9 @@ namespace Utili.Backend.Controllers
         [HttpPost]
         public async Task<IActionResult> PostAsync([Required] ulong guildId, [FromBody] InactiveRoleConfigurationModel model)
         {
-            if (model.AutoKick)
-            {
-                var premium = await _dbContext.PremiumSlots.AnyAsync(x => x.GuildId == guildId);
-                if (!premium) model.AutoKick = false;
-            }
+            if (model.AutoKick &&
+                !await _isPremiumService.GetIsGuildPremiumAsync(guildId))
+                model.AutoKick = false;
 
             var configuration = await _dbContext.InactiveRoleConfigurations.GetForGuildAsync(guildId);
 
