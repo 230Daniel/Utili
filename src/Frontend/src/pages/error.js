@@ -4,8 +4,8 @@ import Helmet from "react-helmet";
 import Fade from "../components/effects/fade";
 import "../styles/error.css";
 
-export default function Error(props){
-	return(
+export default function Error(props) {
+	return (
 		<>
 			<Helmet>
 				<title>{props.shortDescription} - Utili</title>
@@ -21,9 +21,9 @@ export default function Error(props){
 					<div className="error-short-description">
 						{props.shortDescription}
 					</div>
-				</div> <br/>
+				</div> <br />
 				<div className="error-long-description">
-						{props.longDescription}
+					{props.longDescription}
 				</div>
 			</Fade>
 		</>

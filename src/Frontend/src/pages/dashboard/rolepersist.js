@@ -10,8 +10,8 @@ import Card from "../../components/dashboard/card";
 import CardComponent from "../../components/dashboard/cardComponent";
 import CardListComponent from "../../components/dashboard/cardListComponent";
 
-class RolePersist extends React.Component{
-	constructor(props){
+class RolePersist extends React.Component {
+	constructor(props) {
 		super(props);
 		this.guildId = this.props.match.params.guildId;
 		this.state = {
@@ -21,12 +21,12 @@ class RolePersist extends React.Component{
 		this.settings = {
 			enabled: React.createRef(),
 			excludedRoles: React.createRef()
-		}
+		};
 	}
 
-	render(){
-		var values = this.state.roles?.map(x => {return {id: x.id, value: x.name}});
-		return(
+	render() {
+		var values = this.state.roles?.map(x => { return { id: x.id, value: x.name }; });
+		return (
 			<>
 				<Helmet>
 					<title>Role Persist - Utili Dashboard</title>
@@ -46,8 +46,8 @@ class RolePersist extends React.Component{
 			</>
 		);
 	}
-	
-	async componentDidMount(){
+
+	async componentDidMount() {
 		var response = await get(`dashboard/${this.guildId}/role-persist`);
 		this.state.rolePersist = await response?.json();
 		response = await get(`discord/${this.guildId}/roles`);
@@ -56,7 +56,7 @@ class RolePersist extends React.Component{
 		this.setState({});
 	}
 
-	getInput(){
+	getInput() {
 		this.state.rolePersist = {
 			enabled: this.settings.enabled.current.getValue(),
 			excludedRoles: this.settings.excludedRoles.current.getSelected()
@@ -64,7 +64,7 @@ class RolePersist extends React.Component{
 		this.setState({});
 	}
 
-	async save(){
+	async save() {
 		this.getInput();
 		var response = await post(`dashboard/${this.guildId}/role-persist`, this.state.rolePersist);
 		return response.ok;

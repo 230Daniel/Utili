@@ -9,8 +9,8 @@ import Card from "../../components/dashboard/card";
 import CardComponent from "../../components/dashboard/cardComponent";
 import CardListComponent from "../../components/dashboard/cardListComponent";
 
-class MessageLogs extends React.Component{
-	constructor(props){
+class MessageLogs extends React.Component {
+	constructor(props) {
 		super(props);
 		this.guildId = this.props.match.params.guildId;
 		this.state = {
@@ -23,12 +23,12 @@ class MessageLogs extends React.Component{
 			editedChannel: React.createRef(),
 			excludedChannels: React.createRef(),
 			logThreads: React.createRef()
-		}
+		};
 	}
 
-	render(){
-		var values = this.state.textChannels?.map(x => {return {id: x.id, value: x.name}});
-		return(
+	render() {
+		var values = this.state.textChannels?.map(x => { return { id: x.id, value: x.name }; });
+		return (
 			<>
 				<Helmet>
 					<title>Message Logging - Utili Dashboard</title>
@@ -54,22 +54,22 @@ class MessageLogs extends React.Component{
 		);
 	}
 
-	renderDescription(){
-		if(this.state.premium){
-			return(
-				<p>On your server, messages will be stored for 30 days.<br/>The 30 day limit is required by Discord.</p>
+	renderDescription() {
+		if (this.state.premium) {
+			return (
+				<p>On your server, messages will be stored for 30 days.<br />The 30 day limit is required by Discord.</p>
 			);
 		} else {
-			return(
+			return (
 				<div>
-					<p>On your server, up to 30 messages per text channel and up to 15 messages per thread will be stored for 30 days.<br/>The 30 day limit is required by Discord.</p>
+					<p>On your server, up to 30 messages per text channel and up to 15 messages per thread will be stored for 30 days.<br />The 30 day limit is required by Discord.</p>
 					<p><b>Premium:</b> Removes the message storage count limits</p>
 				</div>
 			);
 		}
 	}
-	
-	async componentDidMount(){
+
+	async componentDidMount() {
 		var response = await get(`dashboard/${this.guildId}/message-logs`);
 		this.state.messageLogs = await response?.json();
 		response = await get(`discord/${this.guildId}/text-channels`);
@@ -81,7 +81,7 @@ class MessageLogs extends React.Component{
 		this.setState({});
 	}
 
-	getInput(){
+	getInput() {
 		this.state.messageLogs = {
 			deletedChannelId: this.settings.deletedChannel.current.getValue(),
 			editedChannelId: this.settings.editedChannel.current.getValue(),
@@ -91,7 +91,7 @@ class MessageLogs extends React.Component{
 		this.setState({});
 	}
 
-	async save(){
+	async save() {
 		this.getInput();
 		var response = await post(`dashboard/${this.guildId}/message-logs`, this.state.messageLogs);
 		return response.ok;

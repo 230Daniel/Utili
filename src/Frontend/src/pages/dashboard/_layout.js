@@ -17,7 +17,7 @@ import MessageFilter from "./messagefilter";
 import MessageLogs from "./messagelogs";
 import MessagePinning from "./messagepinning";
 import Notices from "./notices";
-import Reputation from "./reputation"
+import Reputation from "./reputation";
 import RoleLinking from "./rolelinking";
 import RolePersist from "./rolepersist";
 import VoiceLink from "./voicelink";
@@ -25,13 +25,13 @@ import VoiceRoles from "./voiceroles";
 import VoteChannels from "./votechannels";
 import LoadAntiForgery from "../../components/loadAntiForgery";
 
-class Layout extends React.Component{
-	constructor(props){
+class Layout extends React.Component {
+	constructor(props) {
 		super(props);
 		this.state = {
 			saveStatus: "hidden",
 			sidebarCollapsed: true
-		}
+		};
 		this.body = React.createRef();
 		this.sidebar = React.createRef();
 
@@ -42,37 +42,37 @@ class Layout extends React.Component{
 		});
 	}
 
-	render(){
-		return(
+	render() {
+		return (
 			<>
 				<main>
-					<Navbar buttonLeft={true} guilds={true} onButtonLeftClick={() => this.toggleSidebar()}/>
+					<Navbar buttonLeft={true} guilds={true} onButtonLeftClick={() => this.toggleSidebar()} />
 					<LoadAntiForgery>
 						<div className={`dashboard-container${this.state.sidebarCollapsed ? "" : " collapsed"}`}>
-							<Sidebar ref={this.sidebar} collapsed={this.state.sidebarCollapsed} collapseSidebar={() => this.toggleSidebar(true)}/>
+							<Sidebar ref={this.sidebar} collapsed={this.state.sidebarCollapsed} collapseSidebar={() => this.toggleSidebar(true)} />
 							<div className="dashboard">
 								<Switch>
-									<Redirect exact from="/dashboard/" to="/dashboard"/>
-									<Route exact path="/dashboard/:guildId" render={(props) => (<Core {...props} onChanged={() => this.requireSave()} ref={this.body} />)}/>
-									<Route exact path="/dashboard/:guildId/autopurge" render={(props) => (<Autopurge {...props} onChanged={() => this.requireSave()} ref={this.body} />)}/>
-									<Route exact path="/dashboard/:guildId/channelmirroring" render={(props) => (<ChannelMirroring {...props} onChanged={() => this.requireSave()} ref={this.body} />)}/>
-									<Route exact path="/dashboard/:guildId/inactiverole" render={(props) => (<InactiveRole {...props} onChanged={() => this.requireSave()} ref={this.body} />)}/>
-									<Route exact path="/dashboard/:guildId/joinmessage" render={(props) => (<JoinMessage {...props} onChanged={() => this.requireSave()} ref={this.body} />)}/>
-									<Route exact path="/dashboard/:guildId/joinroles" render={(props) => (<JoinRoles {...props} onChanged={() => this.requireSave()} ref={this.body} />)}/>
-									<Route exact path="/dashboard/:guildId/messagefilter" render={(props) => (<MessageFilter {...props} onChanged={() => this.requireSave()} ref={this.body} />)}/>
-									<Route exact path="/dashboard/:guildId/messagelogs" render={(props) => (<MessageLogs {...props} onChanged={() => this.requireSave()} ref={this.body} />)}/>
-									<Route exact path="/dashboard/:guildId/messagepinning" render={(props) => (<MessagePinning {...props} onChanged={() => this.requireSave()} ref={this.body} />)}/>
-									<Route exact path="/dashboard/:guildId/notices" render={(props) => (<Notices {...props} onChanged={() => this.requireSave()} ref={this.body} />)}/>
-									<Route exact path="/dashboard/:guildId/reputation" render={(props) => (<Reputation {...props} onChanged={() => this.requireSave()} ref={this.body} />)}/>
-									<Route exact path="/dashboard/:guildId/rolelinking" render={(props) => (<RoleLinking {...props} onChanged={() => this.requireSave()} ref={this.body} />)}/>
-									<Route exact path="/dashboard/:guildId/rolepersist" render={(props) => (<RolePersist {...props} onChanged={() => this.requireSave()} ref={this.body} />)}/>
-									<Route exact path="/dashboard/:guildId/voicelink" render={(props) => (<VoiceLink {...props} onChanged={() => this.requireSave()} ref={this.body} />)}/>
-									<Route exact path="/dashboard/:guildId/voiceroles" render={(props) => (<VoiceRoles {...props} onChanged={() => this.requireSave()} ref={this.body} />)}/>
-									<Route exact path="/dashboard/:guildId/votechannels" render={(props) => (<VoteChannels {...props} onChanged={() => this.requireSave()} ref={this.body} />)}/>
-									<Route component={NotFound}/>
+									<Redirect exact from="/dashboard/" to="/dashboard" />
+									<Route exact path="/dashboard/:guildId" render={(props) => (<Core {...props} onChanged={() => this.requireSave()} ref={this.body} />)} />
+									<Route exact path="/dashboard/:guildId/autopurge" render={(props) => (<Autopurge {...props} onChanged={() => this.requireSave()} ref={this.body} />)} />
+									<Route exact path="/dashboard/:guildId/channelmirroring" render={(props) => (<ChannelMirroring {...props} onChanged={() => this.requireSave()} ref={this.body} />)} />
+									<Route exact path="/dashboard/:guildId/inactiverole" render={(props) => (<InactiveRole {...props} onChanged={() => this.requireSave()} ref={this.body} />)} />
+									<Route exact path="/dashboard/:guildId/joinmessage" render={(props) => (<JoinMessage {...props} onChanged={() => this.requireSave()} ref={this.body} />)} />
+									<Route exact path="/dashboard/:guildId/joinroles" render={(props) => (<JoinRoles {...props} onChanged={() => this.requireSave()} ref={this.body} />)} />
+									<Route exact path="/dashboard/:guildId/messagefilter" render={(props) => (<MessageFilter {...props} onChanged={() => this.requireSave()} ref={this.body} />)} />
+									<Route exact path="/dashboard/:guildId/messagelogs" render={(props) => (<MessageLogs {...props} onChanged={() => this.requireSave()} ref={this.body} />)} />
+									<Route exact path="/dashboard/:guildId/messagepinning" render={(props) => (<MessagePinning {...props} onChanged={() => this.requireSave()} ref={this.body} />)} />
+									<Route exact path="/dashboard/:guildId/notices" render={(props) => (<Notices {...props} onChanged={() => this.requireSave()} ref={this.body} />)} />
+									<Route exact path="/dashboard/:guildId/reputation" render={(props) => (<Reputation {...props} onChanged={() => this.requireSave()} ref={this.body} />)} />
+									<Route exact path="/dashboard/:guildId/rolelinking" render={(props) => (<RoleLinking {...props} onChanged={() => this.requireSave()} ref={this.body} />)} />
+									<Route exact path="/dashboard/:guildId/rolepersist" render={(props) => (<RolePersist {...props} onChanged={() => this.requireSave()} ref={this.body} />)} />
+									<Route exact path="/dashboard/:guildId/voicelink" render={(props) => (<VoiceLink {...props} onChanged={() => this.requireSave()} ref={this.body} />)} />
+									<Route exact path="/dashboard/:guildId/voiceroles" render={(props) => (<VoiceRoles {...props} onChanged={() => this.requireSave()} ref={this.body} />)} />
+									<Route exact path="/dashboard/:guildId/votechannels" render={(props) => (<VoteChannels {...props} onChanged={() => this.requireSave()} ref={this.body} />)} />
+									<Route component={NotFound} />
 								</Switch>
 							</div>
-							<Prompt when={this.doesRequireSave()} message="You have unsaved changes, are you sure you want to leave this page?"/>
+							<Prompt when={this.doesRequireSave()} message="You have unsaved changes, are you sure you want to leave this page?" />
 						</div>
 					</LoadAntiForgery>
 				</main>
@@ -83,8 +83,8 @@ class Layout extends React.Component{
 		);
 	}
 
-	doesRequireSave(){
-		switch(this.state.saveStatus){
+	doesRequireSave() {
+		switch (this.state.saveStatus) {
 			case "waiting":
 			case "saving":
 			case "error":
@@ -94,8 +94,8 @@ class Layout extends React.Component{
 		}
 	}
 
-	shouldSaveButtonBeVisible(){
-		switch(this.state.saveStatus){
+	shouldSaveButtonBeVisible() {
+		switch (this.state.saveStatus) {
 			case "waiting":
 			case "saving":
 			case "saved":
@@ -106,16 +106,16 @@ class Layout extends React.Component{
 		}
 	}
 
-	renderSaveButton(){
-		return(
+	renderSaveButton() {
+		return (
 			<div className={`saveNotification ${this.shouldSaveButtonBeVisible() ? "visible" : ""}`}>
 				<button className={`savebutton-${this.state.saveStatus}`} onClick={async () => await this.save()}>{this.getSaveButtonContent()}</button>
 			</div>
 		);
 	}
 
-	getSaveButtonContent(){
-		switch(this.state.saveStatus){
+	getSaveButtonContent() {
+		switch (this.state.saveStatus) {
 			case "waiting":
 				return "Save Changes";
 			case "saving":
@@ -128,53 +128,53 @@ class Layout extends React.Component{
 		}
 	}
 
-	toggleSidebar(collapse){
-		if(collapse === undefined) collapse = !this.state.sidebarCollapsed;
-		this.setState({sidebarCollapsed: collapse});
+	toggleSidebar(collapse) {
+		if (collapse === undefined) collapse = !this.state.sidebarCollapsed;
+		this.setState({ sidebarCollapsed: collapse });
 	}
 
-	requireSave(){
-		if(!this.doesRequireSave()){
-			this.setState({saveStatus: "waiting"});
+	requireSave() {
+		if (!this.doesRequireSave()) {
+			this.setState({ saveStatus: "waiting" });
 		}
 	}
 
-	async save(){
-		if(!this.doesRequireSave()) return;
-		this.setState({saveStatus: "saving"});
+	async save() {
+		if (!this.doesRequireSave()) return;
+		this.setState({ saveStatus: "saving" });
 		var success = await this.body.current.save();
-		if(success){
-			this.setState({saveStatus: "saved"});
+		if (success) {
+			this.setState({ saveStatus: "saved" });
 			setTimeout(() => {
-				if(!this.doesRequireSave())	this.setState({saveStatus: "hidden"});
+				if (!this.doesRequireSave()) this.setState({ saveStatus: "hidden" });
 			}, 500);
 		}
-		else this.setState({saveStatus: "error"});
+		else this.setState({ saveStatus: "error" });
 	}
 
 	onUnload = e => {
-		if(this.doesRequireSave()){
+		if (this.doesRequireSave()) {
 			e.preventDefault();
 			e.returnValue = "You have unsaved changes";
 			return "You have unsaved changes";
 		}
-	 }
- 
-	 componentDidMount() {
+	};
+
+	componentDidMount() {
 		window.addEventListener("beforeunload", this.onUnload);
-	 }
- 
-	 componentWillUnmount() {
-		 window.removeEventListener("beforeunload", this.onUnload);
-	 }
+	}
+
+	componentWillUnmount() {
+		window.removeEventListener("beforeunload", this.onUnload);
+	}
 }
 
-function NotFound(props){
-	return(
-		<Error 
-		code="404" 
-		shortDescription="Not found" 
-		longDescription="Sorry, we couldn't find that page on our servers."
+function NotFound(props) {
+	return (
+		<Error
+			code="404"
+			shortDescription="Not found"
+			longDescription="Sorry, we couldn't find that page on our servers."
 		/>
 	);
 }

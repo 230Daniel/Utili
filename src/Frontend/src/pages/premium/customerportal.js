@@ -2,18 +2,18 @@ import React from "react";
 import Load from "../../components/load";
 import { get } from "../../api/auth";
 
-class CustomerPortal extends React.Component{
-	render(){
-		return(
+class CustomerPortal extends React.Component {
+	render() {
+		return (
 			<>
 				<h1>Redirecting...</h1>
-				<Load loaded={false}/>
+				<Load loaded={false} />
 			</>
 		);
-		
+
 	}
 
-	async componentDidMount(){
+	async componentDidMount() {
 		var response = await get("stripe/customer-portal");
 		var json = await response.json();
 		window.location.href = json.url;

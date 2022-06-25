@@ -5,8 +5,8 @@ function ResetPage(props) {
 	useLocation();
 	window.scrollTo(0, 0);
 	var elems = document.querySelectorAll(".navbar-toggler");
-	[].forEach.call(elems, function(el) {
-		if(el.className.indexOf("collapsed") === -1){
+	[].forEach.call(elems, function (el) {
+		if (el.className.indexOf("collapsed") === -1) {
 			setTimeout(() => {
 				el.click();
 			}, 0);

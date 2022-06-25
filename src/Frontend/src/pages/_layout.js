@@ -8,18 +8,18 @@ import ResetPage from "../components/effects/reset";
 import "../styles/layout.css";
 import LoadAntiForgery from "../components/loadAntiForgery";
 
-export default function Layout(props){
-	return(
+export default function Layout(props) {
+	return (
 		<>
 			<main>
-				<Navbar/>
-				<ResetPage/>
+				<Navbar />
+				<ResetPage />
 				<LoadAntiForgery>
 					{props.children}
 				</LoadAntiForgery>
 			</main>
 			<footer>
-				<Footer/>
+				<Footer />
 			</footer>
 		</>
 	);

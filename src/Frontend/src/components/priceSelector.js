@@ -1,9 +1,9 @@
 import React from "react";
 import "../styles/price-selector.css";
 
-class PriceSelector extends React.Component{
-	render(){
-		return(
+class PriceSelector extends React.Component {
+	render() {
+		return (
 			<div className="price-selector">
 				<div className={`price left ${this.props.currency === "GBP" ? "selected" : ""}`} onClick={() => this.props.onChanged("GBP")}>GBP</div>
 				<div className={`price ${this.props.currency === "EUR" ? "selected" : ""}`} onClick={() => this.props.onChanged("EUR")}>EUR</div>

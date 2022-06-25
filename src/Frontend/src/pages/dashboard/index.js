@@ -7,16 +7,16 @@ import "../../styles/dashboard-index.css";
 import Fade from "../../components/effects/fade";
 import Load from "../../components/load";
 
-class Index extends React.Component{
-	constructor(props){
+class Index extends React.Component {
+	constructor(props) {
 		super(props);
 		this.state = {
 			guilds: null
 		};
 	}
 
-	render(){
-		return(
+	render() {
+		return (
 			<>
 				<Helmet>
 					<title>Dashboard - Utili</title>
@@ -27,11 +27,11 @@ class Index extends React.Component{
 					<Load loaded={this.state.guilds !== null}>
 						<div className="guild-container">
 							<div className="guilds">
-								{this.state.guilds?.filter(x => x.isManageable).map((guild, i) =>{
-									return(
+								{this.state.guilds?.filter(x => x.isManageable).map((guild, i) => {
+									return (
 										<Link className="guild" to={`dashboard/${guild.id}`} key={i}>
 											<div className="guild-icon">
-												<img width="200px" src={guild.iconUrl}/>
+												<img width="200px" src={guild.iconUrl} />
 											</div>
 											<div className="guild-name">
 												{guild.name}
@@ -42,15 +42,15 @@ class Index extends React.Component{
 							</div>
 						</div>
 					</Load>
-				</Fade>	
+				</Fade>
 			</>
 		);
 	}
 
-	async componentDidMount(){
+	async componentDidMount() {
 		var response = await get(`discord/guilds`);
 		var json = await response.json();
-		this.setState({guilds: json});
+		this.setState({ guilds: json });
 	}
 }
 

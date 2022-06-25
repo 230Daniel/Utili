@@ -1,8 +1,8 @@
 import React from "react";
 import ThemeSelector from "../layout/themeSelector";
 
-class CardListComponent extends React.Component{
-	constructor(props){
+class CardListComponent extends React.Component {
+	constructor(props) {
 		super(props);
 		this.state = {
 			values: this.props.values,
@@ -10,13 +10,13 @@ class CardListComponent extends React.Component{
 			options: this.props.values.filter(x => !this.props.selected.includes(x.id)).map(x => x.id),
 			selecting: false,
 			query: ""
-		}
+		};
 		this.search = React.createRef();
 	}
 
-	render(){
+	render() {
 		var disabled = this.props.max && this.state.selected?.length >= this.props.max;
-		return(
+		return (
 			<div className="dashboard-card-list-component" onFocus={() => this.searchUpdated()} onBlur={() => this.searchClosed()}>
 				<div className="dashboard-card-list-component-search">
 					<input placeholder={this.props.prompt} value={this.state.query} ref={this.search} disabled={disabled} onInput={() => this.searchUpdated()} />
@@ -27,12 +27,12 @@ class CardListComponent extends React.Component{
 		);
 	}
 
-	renderOptions(){
+	renderOptions() {
 		var options = this.sort(this.state.options.filter(x => this.getValue(x).toLowerCase().includes(this.state.query.toLowerCase())));
-		return(
+		return (
 			<div className={`dashboard-card-list-component-options${this.state.selecting ? "" : " collapsed"}`}>
 				{options.map((item, i) => {
-					return(
+					return (
 						<div className="dashboard-card-list-component-option" onClick={() => this.selectValue(item)} key={i}>
 							{this.getValue(item)}
 						</div>
@@ -42,65 +42,65 @@ class CardListComponent extends React.Component{
 		);
 	}
 
-	renderSelected(){
+	renderSelected() {
 		var selected = this.sort(this.state.selected);
-		return(
+		return (
 			<div className={this.state.selecting ? "collapsed" : ""}>
 				{selected.map((item, i) => {
-					return(
+					return (
 						<div className="dashboard-card-list-component-selected" key={i}>
 							{this.getValue(item)}
 							<div className="dashboard-card-list-component-selected-remove" onClick={() => this.unselectValue(item)}>
-								<img width={20} src="/bin.svg"/>
+								<img width={20} src="/bin.svg" />
 							</div>
 						</div>
 					);
 				})}
 			</div>
-			);
+		);
 	}
 
-	searchUpdated(){
-		this.setState({selecting: true, query: this.search.current.value});
+	searchUpdated() {
+		this.setState({ selecting: true, query: this.search.current.value });
 	}
 
-	searchClosed(){
+	searchClosed() {
 		setTimeout(() => {
-			this.setState({selecting: false, query: ""});
+			this.setState({ selecting: false, query: "" });
 		}, 100);
 	}
 
-	getValue(id){
+	getValue(id) {
 		return this.state.values.find(x => x.id === id).value.toString();
 	}
 
-	sort(ids){
-		if(this.props.noReorder) return ids;
+	sort(ids) {
+		if (this.props.noReorder) return ids;
 		return ids.map(x => this.state.values.find(y => y.id === x))
-		.orderBy(x => x.value)
-		.map(x => {if(x) return x.id; else return null;})
-		.filter(x => x !== null);
+			.orderBy(x => x.value)
+			.map(x => { if (x) return x.id; else return null; })
+			.filter(x => x !== null);
 	}
 
-	selectValue(id){
+	selectValue(id) {
 		var newSelected = this.state.selected;
 		newSelected.push(id);
 		var newOptions = this.state.options;
 		newOptions.splice(newOptions.indexOf(id), 1);
-		this.setState({selected: newSelected, options: newOptions});
+		this.setState({ selected: newSelected, options: newOptions });
 		this.props.onChanged();
 	}
 
-	unselectValue(id){
+	unselectValue(id) {
 		var newOptions = this.state.options;
-		newOptions.push(id)
+		newOptions.push(id);
 		var newSelected = this.state.selected;
 		newSelected.splice(newSelected.indexOf(id), 1);
-		this.setState({selected: newSelected, options: newOptions});
+		this.setState({ selected: newSelected, options: newOptions });
 		this.props.onChanged();
 	}
 
-	getSelected(){
+	getSelected() {
 		return this.state.selected;
 	}
 }

@@ -10,8 +10,8 @@ import Card from "../../components/dashboard/card";
 import CardComponent from "../../components/dashboard/cardComponent";
 import CardListComponent from "../../components/dashboard/cardListComponent";
 
-class VoiceLink extends React.Component{
-	constructor(props){
+class VoiceLink extends React.Component {
+	constructor(props) {
 		super(props);
 		this.guildId = this.props.match.params.guildId;
 		this.state = {
@@ -23,12 +23,12 @@ class VoiceLink extends React.Component{
 			deleteChannels: React.createRef(),
 			channelPrefix: React.createRef(),
 			excludedChannels: React.createRef()
-		}
+		};
 	}
 
-	render(){
-		var values = this.state.voiceChannels?.map(x => {return {id: x.id, value: x.name}});
-		return(
+	render() {
+		var values = this.state.voiceChannels?.map(x => { return { id: x.id, value: x.name }; });
+		return (
 			<>
 				<Helmet>
 					<title>Voice Link - Utili Dashboard</title>
@@ -37,8 +37,8 @@ class VoiceLink extends React.Component{
 					<div className="dashboard-title">Voice Link</div>
 					<div className="dashboard-subtitle">Creates a text channel for each voice channel</div>
 					<div className="dashboard-description">
-						<p>A private text channel is created in the same category as the voice channel.<br/>
-						When people are in the voice channel, they can use the text channel.</p>
+						<p>A private text channel is created in the same category as the voice channel.<br />
+							When people are in the voice channel, they can use the text channel.</p>
 						<p><b>Delete Channels:</b> Determines if the text channel should be deleted when the voice channel is empty</p>
 					</div>
 					<Load loaded={this.state.voiceLink !== null}>
@@ -55,8 +55,8 @@ class VoiceLink extends React.Component{
 			</>
 		);
 	}
-	
-	async componentDidMount(){
+
+	async componentDidMount() {
 		var response = await get(`dashboard/${this.guildId}/voice-link`);
 		this.state.voiceLink = await response?.json();
 		response = await get(`discord/${this.guildId}/vocal-channels`);
@@ -65,7 +65,7 @@ class VoiceLink extends React.Component{
 		this.setState({});
 	}
 
-	getInput(){
+	getInput() {
 		this.state.voiceLink = {
 			enabled: this.settings.enabled.current.getValue(),
 			deleteChannels: this.settings.deleteChannels.current.getValue(),
@@ -75,7 +75,7 @@ class VoiceLink extends React.Component{
 		this.setState({});
 	}
 
-	async save(){
+	async save() {
 		this.getInput();
 		var response = await post(`dashboard/${this.guildId}/voice-link`, this.state.voiceLink);
 		return response.ok;

@@ -1,7 +1,7 @@
 import React from "react";
 
-class CardAdderComponent extends React.Component{
-	constructor(props){
+class CardAdderComponent extends React.Component {
+	constructor(props) {
 		super(props);
 		this.state = {
 			values: this.props.values,
@@ -9,13 +9,13 @@ class CardAdderComponent extends React.Component{
 			options: this.props.values.filter(x => !this.props.selected.includes(x)),
 			selecting: false,
 			query: ""
-		}
+		};
 		this.search = React.createRef();
 	}
 
-	render(){
+	render() {
 		this.state.options = this.props.values.filter(x => !this.props.selected.includes(x));
-		return(
+		return (
 			<div className="dashboard-card-list-component" onFocus={() => this.searchUpdated()} onBlur={() => this.searchClosed()}>
 				<div className="dashboard-card-adder-component-search">
 					<input placeholder={this.props.prompt} value={this.state.query} ref={this.search} disabled={this.props.disabled} onInput={() => this.searchUpdated()} />
@@ -25,12 +25,12 @@ class CardAdderComponent extends React.Component{
 		);
 	}
 
-	renderOptions(){
+	renderOptions() {
 		var options = this.state.options.filter(x => x.value.toLowerCase().includes(this.state.query.toLowerCase())).orderBy(x => x.value);
-		return(
+		return (
 			<div className={`dashboard-card-list-component-options${this.state.selecting ? "" : " collapsed"}`}>
 				{options.map((item, i) => {
-					return(
+					return (
 						<div className="dashboard-card-list-component-option" onClick={() => this.selectValue(item)} key={i}>
 							{item.value}
 						</div>
@@ -40,36 +40,36 @@ class CardAdderComponent extends React.Component{
 		);
 	}
 
-	searchUpdated(){
-		this.setState({selecting: true, query: this.search.current.value});
+	searchUpdated() {
+		this.setState({ selecting: true, query: this.search.current.value });
 	}
 
-	searchClosed(){
+	searchClosed() {
 		setTimeout(() => {
-			this.setState({selecting: false, query: ""});
+			this.setState({ selecting: false, query: "" });
 		}, 100);
 	}
 
-	getValue(id){
+	getValue(id) {
 		return this.state.values.find(x => x.id === id).value.toString();
 	}
 
-	selectValue(id){
+	selectValue(id) {
 		var newSelected = this.state.selected;
 		newSelected.push(id);
 		var newOptions = this.state.options;
 		newOptions.splice(newOptions.indexOf(id), 1);
-		this.setState({selected: newSelected, options: newOptions});
+		this.setState({ selected: newSelected, options: newOptions });
 		this.props.onChanged();
 		this.props.onSelected(id);
 	}
 
-	unselectValue(id){
+	unselectValue(id) {
 		var newOptions = this.state.options;
-		newOptions.push(id)
+		newOptions.push(id);
 		var newSelected = this.state.selected;
 		newSelected.splice(newSelected.indexOf(id), 1);
-		this.setState({selected: newSelected, options: newOptions});
+		this.setState({ selected: newSelected, options: newOptions });
 		this.props.onChanged();
 		this.props.onUnselected(id);
 	}

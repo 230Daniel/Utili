@@ -4,8 +4,8 @@ import Helmet from "react-helmet";
 import Fade from "../components/effects/fade";
 import Divider from "../components/layout/divider";
 
-class Commands extends React.Component{
-	constructor(props){
+class Commands extends React.Component {
+	constructor(props) {
 		super(props);
 		this.state = {
 			feature: ""
@@ -15,19 +15,19 @@ class Commands extends React.Component{
 		this.i = 0;
 	}
 
-	render(){
-		return(
+	render() {
+		return (
 			<>
 				<Helmet>
 					<title>Commands - Utili</title>
 				</Helmet>
-				<div className="container" style={{paddingBottom: "40px"}}>
+				<div className="container" style={{ paddingBottom: "40px" }}>
 					<Fade>
 						<h1>Commands</h1>
 						<Divider top="40" bottom="30">Command Usage</Divider>
-						<div className="commands-section" style={{padding: "8px"}}>
-							<p>All commands start with your command prefix which you can configure on the dashboard.<br/>
-							Do not include brackets when executing commands.</p>
+						<div className="commands-section" style={{ padding: "8px" }}>
+							<p>All commands start with your command prefix which you can configure on the dashboard.<br />
+								Do not include brackets when executing commands.</p>
 							<ul>
 								<li>[arg] - Required argument</li>
 								<li>(arg) - Optional argument</li>
@@ -112,7 +112,7 @@ class Commands extends React.Component{
 						</CommandsSection>
 					</Fade>
 				</div>
-				
+
 			</>
 		);
 	}
@@ -120,13 +120,13 @@ class Commands extends React.Component{
 
 export default Commands;
 
-class CommandsSection extends React.Component{
-	render(){
-		return(
+class CommandsSection extends React.Component {
+	render() {
+		return (
 			<table className="commands-section">
 				<colgroup>
-					<col span="1" style={{width: "40%"}}/>
-					<col span="1" style={{width: "60%"}}/>
+					<col span="1" style={{ width: "40%" }} />
+					<col span="1" style={{ width: "60%" }} />
 				</colgroup>
 				<tbody>
 					{this.props.children}

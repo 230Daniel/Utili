@@ -2,25 +2,25 @@ import React from "react";
 
 import "../../styles/fade.css";
 
-class Fade extends React.Component{
-	constructor(props){
+class Fade extends React.Component {
+	constructor(props) {
 		super(props);
 		this.state = {
 			isVisible: false
 		};
 	}
 
-	render(){
-		return(
+	render() {
+		return (
 			<div className={`fade-in${this.state.isVisible ? " visible" : ""}`}>
 				{this.props.children}
 			</div>
 		);
 	}
 
-	componentDidMount(){
+	componentDidMount() {
 		setTimeout(() => {
-			this.setState({isVisible: true});
+			this.setState({ isVisible: true });
 		}, 100);
 	}
 }

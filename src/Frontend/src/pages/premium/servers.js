@@ -2,7 +2,7 @@ import React from "react";
 import { Helmet } from "react-helmet";
 import { get, post } from "../../api/auth";
 
-import Fade from "../../components/effects/fade"
+import Fade from "../../components/effects/fade";
 import Load from "../../components/load";
 import Divider from "../../components/layout/divider";
 import Subscriptions from "../../components/subscriptions";
@@ -12,8 +12,8 @@ import "../../styles/premium.css";
 import CardComponent from "../../components/dashboard/cardComponent";
 
 
-class PremiumServers extends React.Component{
-	constructor(props){
+class PremiumServers extends React.Component {
+	constructor(props) {
 		super(props);
 		this.state = {
 			guilds: [],
@@ -21,11 +21,11 @@ class PremiumServers extends React.Component{
 		};
 		this.settings = {
 			slots: []
-		}
+		};
 	}
 
-	render(){
-		var values = this.state.guilds.map(x => {return {id: x.id, value: x.name}})
+	render() {
+		var values = this.state.guilds.map(x => { return { id: x.id, value: x.name }; });
 		return (
 			<>
 				<Helmet>
@@ -35,15 +35,15 @@ class PremiumServers extends React.Component{
 					<div className="container premium">
 						<h1>Premium Servers</h1>
 						<Load loaded={this.state.slots}>
-							<Subscriptions alwaysDisplay={true}/>
+							<Subscriptions alwaysDisplay={true} />
 							<Divider top={25} bottom={25}>Premium Slots</Divider>
-							<div className="inline" style={{justifyContent: "center"}}>
-								{this.state.slots?.map((slot, i) =>{
-									return(
+							<div className="inline" style={{ justifyContent: "center" }}>
+								{this.state.slots?.map((slot, i) => {
+									return (
 										<Card title={`Slot ${i + 1}`} size={300} titleSize={0} inputSize={300} key={slot.slotId} onChanged={() => this.requireSave()}>
-											<CardComponent type="select-value" value={slot.guildId} values={values} ref={this.settings.slots[i].guildId}/>
+											<CardComponent type="select-value" value={slot.guildId} values={values} ref={this.settings.slots[i].guildId} />
 										</Card>
-									)
+									);
 								})}
 							</div>
 						</Load>
@@ -51,14 +51,14 @@ class PremiumServers extends React.Component{
 					</div>
 				</Fade>
 			</>
-		)
+		);
 	}
 
-	async componentDidMount(){
+	async componentDidMount() {
 		window.addEventListener("beforeunload", this.onUnload);
 		var response = await get("premium/slots");
 		var slots = await response.json();
-		
+
 		slots.orderByInt(x => x.slotId);
 
 		this.state.slots = slots;
@@ -66,16 +66,16 @@ class PremiumServers extends React.Component{
 		response = await get("discord/guilds");
 		this.state.guilds = await response.json();
 
-		for(var i = 0; i < this.state.slots.length; i++){
+		for (var i = 0; i < this.state.slots.length; i++) {
 			this.settings.slots.push({ guildId: React.createRef() });
 		}
 
 		this.setState({});
 	}
 
-	getInput(){
+	getInput() {
 		var slots = this.state.slots;
-		for(var i = 0; i < slots.length; i++){
+		for (var i = 0; i < slots.length; i++) {
 			var card = this.settings.slots[i];
 			slots[i].guildId = card.guildId.current.getValue();
 		}
@@ -83,14 +83,14 @@ class PremiumServers extends React.Component{
 		this.setState({});
 	}
 
-	async saveBody(){
+	async saveBody() {
 		this.getInput();
 		var response = await post(`premium/slots`, this.state.slots);
 		return response.ok;
 	}
 
-	doesRequireSave(){
-		switch(this.state.saveStatus){
+	doesRequireSave() {
+		switch (this.state.saveStatus) {
 			case "waiting":
 			case "saving":
 			case "error":
@@ -100,8 +100,8 @@ class PremiumServers extends React.Component{
 		}
 	}
 
-	shouldSaveButtonBeVisible(){
-		switch(this.state.saveStatus){
+	shouldSaveButtonBeVisible() {
+		switch (this.state.saveStatus) {
 			case "waiting":
 			case "saving":
 			case "saved":
@@ -112,16 +112,16 @@ class PremiumServers extends React.Component{
 		}
 	}
 
-	renderSaveButton(){
-		return(
+	renderSaveButton() {
+		return (
 			<div className={`saveNotification ${this.shouldSaveButtonBeVisible() ? "visible" : ""}`}>
 				<button className={`savebutton-${this.state.saveStatus}`} onClick={async () => await this.save()}>{this.getSaveButtonContent()}</button>
 			</div>
 		);
 	}
 
-	getSaveButtonContent(){
-		switch(this.state.saveStatus){
+	getSaveButtonContent() {
+		switch (this.state.saveStatus) {
 			case "waiting":
 				return "Save Changes";
 			case "saving":
@@ -134,36 +134,36 @@ class PremiumServers extends React.Component{
 		}
 	}
 
-	requireSave(){
-		if(!this.doesRequireSave()){
-			this.setState({saveStatus: "waiting"});
+	requireSave() {
+		if (!this.doesRequireSave()) {
+			this.setState({ saveStatus: "waiting" });
 		}
 	}
 
-	async save(){
-		if(!this.doesRequireSave()) return;
-		this.setState({saveStatus: "saving"});
+	async save() {
+		if (!this.doesRequireSave()) return;
+		this.setState({ saveStatus: "saving" });
 		var success = await this.saveBody();
-		if(success){
-			this.setState({saveStatus: "saved"});
+		if (success) {
+			this.setState({ saveStatus: "saved" });
 			setTimeout(() => {
-				if(!this.doesRequireSave())	this.setState({saveStatus: "hidden"});
+				if (!this.doesRequireSave()) this.setState({ saveStatus: "hidden" });
 			}, 500);
 		}
-		else this.setState({saveStatus: "error"});
+		else this.setState({ saveStatus: "error" });
 	}
 
 	onUnload = e => {
-		if(this.doesRequireSave()){
+		if (this.doesRequireSave()) {
 			e.preventDefault();
 			e.returnValue = "You have unsaved changes";
 			return "You have unsaved changes";
 		}
-	 }
- 
-	 componentWillUnmount() {
-		 window.removeEventListener("beforeunload", this.onUnload);
-	 }
+	};
+
+	componentWillUnmount() {
+		window.removeEventListener("beforeunload", this.onUnload);
+	}
 }
 
 export default PremiumServers;

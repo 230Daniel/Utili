@@ -3,7 +3,7 @@ import { Link, Redirect } from "react-router-dom";
 import { Helmet } from "react-helmet";
 import { get } from "../../api/auth";
 
-import Fade from "../../components/effects/fade"
+import Fade from "../../components/effects/fade";
 import Load from "../../components/load";
 import Divider from "../../components/layout/divider";
 import PriceSelector from "../../components/priceSelector";
@@ -11,8 +11,8 @@ import PriceSelector from "../../components/priceSelector";
 import "../../styles/premium.css";
 import Subscriptions from "../../components/subscriptions";
 
-class PremiumIndex extends React.Component{
-	constructor(props){
+class PremiumIndex extends React.Component {
+	constructor(props) {
 		super(props);
 		this.state = {
 			loading: true,
@@ -22,7 +22,7 @@ class PremiumIndex extends React.Component{
 		};
 	}
 
-	render(){
+	render() {
 		return (
 			<>
 				<Helmet>
@@ -32,7 +32,7 @@ class PremiumIndex extends React.Component{
 					<div className="container premium">
 						<h1>Premium</h1>
 						<Load loaded={!this.state.loading}>
-						<p>Premium benefits include...</p>
+							<p>Premium benefits include...</p>
 							<ul>
 								<li>More frequent autopurge purges</li>
 								<li>Unlimited message logs storage</li>
@@ -41,9 +41,9 @@ class PremiumIndex extends React.Component{
 								<li>The option to auto-kick inactive users</li>
 								<li>A coloured role on the Utili discord server</li>
 							</ul>
-							<Subscriptions/>
+							<Subscriptions />
 							<Divider top={25} bottom={25}>Premium Plans</Divider>
-							<PriceSelector currency={this.state.currency} onChanged={(currency) => this.setCurrency(currency)}/>
+							<PriceSelector currency={this.state.currency} onChanged={(currency) => this.setCurrency(currency)} />
 							<div className="premium-plans">
 								<PremiumPlan servers={1} price={this.getPrice(1)} currencyCode={this.state.currency}>One Utili Premium slot for a server of your choice</PremiumPlan>
 								<PremiumPlan servers={3} price={this.getPrice(3)} currencyCode={this.state.currency}>Three Utili Premium slots for servers of your choice</PremiumPlan>
@@ -53,42 +53,42 @@ class PremiumIndex extends React.Component{
 					</div>
 				</Fade>
 			</>
-		)
+		);
 	}
-	
-	getPrice(servers){
+
+	getPrice(servers) {
 		var prices;
-		switch(this.state.currency){
+		switch (this.state.currency) {
 			case "GBP":
-				prices = [1.5, 0, 3.75, 0, 5]
+				prices = [1.5, 0, 3.75, 0, 5];
 				break;
 			case "EUR":
-				prices = [1.75, 0, 4.25, 0, 5.5]
+				prices = [1.75, 0, 4.25, 0, 5.5];
 				break;
 			case "USD":
-				prices = [2, 0, 5, 0, 7]
+				prices = [2, 0, 5, 0, 7];
 				break;
 		}
-		return prices[servers-1];
+		return prices[servers - 1];
 	}
 
-	setCurrency(currency){
-		if(this.state.currencyLocked) return;
-		this.setState({currency: currency });
+	setCurrency(currency) {
+		if (this.state.currencyLocked) return;
+		this.setState({ currency: currency });
 	}
 
-	async componentDidMount(){
+	async componentDidMount() {
 		var response = await get(`stripe/currency`);
 		var currency = await response.json();
 		this.state.currency = currency.currency.toUpperCase();
 		this.state.currencyLocked = currency.locked;
-		this.setState({loading: false});
+		this.setState({ loading: false });
 	}
 }
 
-class PremiumPlan extends React.Component{
-	render(){
-		return(
+class PremiumPlan extends React.Component {
+	render() {
+		return (
 			<div className="premium-plan">
 				<h2>{this.props.servers} Server{this.props.servers == 1 ? "" : "s"}</h2>
 				<span className="muted">{this.props.children}</span>
@@ -102,8 +102,8 @@ class PremiumPlan extends React.Component{
 		);
 	}
 
-	getCurrency(){
-		switch(this.props.currencyCode){
+	getCurrency() {
+		switch (this.props.currencyCode) {
 			case "GBP":
 				return "£";
 			case "EUR":

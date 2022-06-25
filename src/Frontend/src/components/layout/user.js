@@ -3,42 +3,42 @@ import { Nav, NavDropdown } from "react-bootstrap";
 
 import { getDetails, signIn, signOut } from "../../api/auth";
 
-class User extends React.Component{
-	constructor(props){
+class User extends React.Component {
+	constructor(props) {
 		super(props);
 		this.state = {
 			user: null
 		};
 	}
 
-	render(){
-		if(!this.state.user){
-			return(
+	render() {
+		if (!this.state.user) {
+			return (
 				<Nav.Link onClick={() => this.signIn()}>Sign in</Nav.Link>
 			);
 		}
-		return(
-			<NavDropdown className="user-dropdown" title={<><img src={this.state.user.avatarUrl}/>{this.state.user.username}</>}>
+		return (
+			<NavDropdown className="user-dropdown" title={<><img src={this.state.user.avatarUrl} />{this.state.user.username}</>}>
 				<NavDropdown.Item onClick={() => this.signOut()}>Sign out</NavDropdown.Item>
 			</NavDropdown>
 		);
 	}
 
-	async componentDidMount(){
+	async componentDidMount() {
 		this.getDetails();
 	}
 
-	async getDetails(){
+	async getDetails() {
 		var user = await getDetails();
-		this.setState({user: user})
+		this.setState({ user: user });
 	}
 
-	async signIn(){
+	async signIn() {
 		await signIn();
 		await this.getDetails();
 	}
 
-	async signOut(){
+	async signOut() {
 		await signOut();
 		await this.getDetails();
 	}
