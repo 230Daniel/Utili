@@ -36,7 +36,7 @@ For now, you need to:
  - Run Utili.Backend and Utili.Bot 24/7, Systemd works well with the `Notify` type.
  - Use Nginx or similar to reverse-proxy traffic to the local addresses (defaults are `https://localhost:5001` and `http://localhost:5000`)
  - Build the frontend with `yarn install` then `yarn build`
- - TODO: Instruct on how to modify backend url
+ - Copy `config.example.js` to `config.js` (in `build/public`), then modify the settings to point it to your publicly accessible backend url (eg. `https://api.utili.xyz`), and set the Discord client ID.
  - Serve the files in the `/build` directory with a basic file server like Nginx.
 
 If you have any issues, don't hesitate to reach out to me. A Github issue would be good for this, as it would then stick around for future reference. For now though, please don't ask me to walk you through the entire process above - you should instead wait for the full instructions to be published.

@@ -16,7 +16,7 @@ class MessageLogs extends React.Component {
 		this.state = {
 			messageLogs: null,
 			textChannels: null,
-			premium: null
+			premium: !window.__config.enablePremium
 		};
 		this.settings = {
 			deletedChannel: React.createRef(),
@@ -75,8 +75,11 @@ class MessageLogs extends React.Component {
 		response = await get(`discord/${this.guildId}/text-channels`);
 		this.state.textChannels = await response?.json();
 		this.state.messageLogs.excludedChannels = this.state.messageLogs.excludedChannels.filter(x => this.state.textChannels.some(y => x == y.id));
-		response = await get(`premium/guild/${this.guildId}`);
-		this.state.premium = await response?.json();
+
+		if (window.__config.enablePremium) {
+			response = await get(`premium/guild/${this.guildId}`);
+			this.state.premium = await response?.json();
+		}
 
 		this.setState({});
 	}

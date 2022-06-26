@@ -18,7 +18,7 @@ class VoteChannels extends React.Component {
 		this.state = {
 			voteChannels: null,
 			textChannels: null,
-			premium: null
+			premium: !window.__config.enablePremium
 		};
 		this.settings = {
 			channelAdder: React.createRef(),
@@ -132,8 +132,11 @@ class VoteChannels extends React.Component {
 		this.state.voteChannels = await response?.json();
 		response = await get(`discord/${this.guildId}/text-channels`);
 		this.state.textChannels = await response?.json();
-		response = await get(`premium/guild/${this.guildId}`);
-		this.state.premium = await response?.json();
+
+		if (window.__config.enablePremium) {
+			response = await get(`premium/guild/${this.guildId}`);
+			this.state.premium = await response?.json();
+		}
 
 		this.state.voteChannels = this.state.voteChannels.filter(x => this.state.textChannels.some(y => y.id == x.channelId));
 		for (var i = 0; i < this.state.voteChannels.length; i++) {

@@ -16,7 +16,7 @@ class RoleLinking extends React.Component {
 		this.state = {
 			roleLinking: null,
 			roles: null,
-			premium: null
+			premium: !window.__config.enablePremium
 		};
 		this.settings = {
 			linkAdder: React.createRef(),
@@ -89,8 +89,11 @@ class RoleLinking extends React.Component {
 		console.log(this.state.roleLinking);
 		response = await get(`discord/${this.guildId}/roles`);
 		this.state.roles = await response?.json();
-		response = await get(`premium/guild/${this.guildId}`);
-		this.state.premium = await response?.json();
+
+		if (window.__config.enablePremium) {
+			response = await get(`premium/guild/${this.guildId}`);
+			this.state.premium = await response?.json();
+		}
 
 		if (!this.state.premium) this.state.roleLinking = this.state.roleLinking.orderBy(x => x.linkId).slice(0, 2);
 

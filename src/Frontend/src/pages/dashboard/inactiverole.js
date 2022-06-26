@@ -8,7 +8,6 @@ import { get, post } from "../../api/auth";
 
 import Card from "../../components/dashboard/card";
 import CardComponent from "../../components/dashboard/cardComponent";
-import CardListComponent from "../../components/dashboard/cardListComponent";
 
 class InactiveRole extends React.Component {
 	constructor(props) {
@@ -17,7 +16,7 @@ class InactiveRole extends React.Component {
 		this.state = {
 			inactiveRole: null,
 			roles: null,
-			premium: null
+			premium: !window.__config.enablePremium
 		};
 		this.settings = {
 			role: React.createRef(),
@@ -83,8 +82,11 @@ class InactiveRole extends React.Component {
 		this.state.inactiveRole = await response?.json();
 		response = await get(`discord/${this.guildId}/roles`);
 		this.state.roles = await response?.json();
-		response = await get(`premium/guild/${this.guildId}`);
-		this.state.premium = await response?.json();
+
+		if (window.__config.enablePremium) {
+			response = await get(`premium/guild/${this.guildId}`);
+			this.state.premium = await response?.json();
+		}
 
 		this.setState({});
 	}

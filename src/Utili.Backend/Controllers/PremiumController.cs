@@ -31,12 +31,6 @@ namespace Utili.Backend.Controllers
             _isPremiumService = isPremiumService;
         }
 
-        [HttpGet("free")]
-        public IActionResult IsFreePremium()
-        {
-            return Json(_isPremiumService.IsFree);
-        }
-
         [DiscordGuildAuthorise]
         [HttpGet("guild/{GuildId}")]
         public async Task<IActionResult> GuildIsPremiumAsync([Required] ulong guildId)

@@ -12,8 +12,7 @@ class MyNavbar extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			background: "dark",
-			displayPremium: true
+			background: "dark"
 		};
 	}
 
@@ -34,7 +33,7 @@ class MyNavbar extends React.Component {
 							<Nav className="mr-auto">
 								<Nav.Link to="/commands" as={Link}>Commands</Nav.Link>
 								<Nav.Link to="/dashboard" as={Link}>Dashboard</Nav.Link>
-								{this.state.displayPremium &&
+								{window.__config.enablePremium &&
 									<Nav.Link to="/premium" as={Link}>Premium</Nav.Link>
 								}
 							</Nav>
@@ -50,17 +49,8 @@ class MyNavbar extends React.Component {
 		);
 	}
 
-	async componentDidMount() {
+	componentDidMount() {
 		this.setNavbarButtonColour();
-
-		if (window._freePremium === undefined) {
-			var response = await get(`premium/free`);
-			var freePremium = await response?.json();
-			window._freePremium = freePremium;
-			this.setState({ displayPremium: !freePremium });
-		}
-
-		this.setState({ displayPremium: !window._freePremium });
 	}
 
 	setNavbarButtonColour() {

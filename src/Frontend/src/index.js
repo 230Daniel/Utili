@@ -34,16 +34,20 @@ ReactDOM.render(
 							<Route exact path="/" component={Index} />
 							<Route exact path="/commands/" component={Commands} />
 							<Route exact path="/dashboard/" component={DashboardIndex} />
-							<Route exact path="/premium/" component={Premium} />
-							<Route exact path="/premium/servers" component={PremiumServers} />
-							<Route exact path="/premium/thankyou" component={PremiumThankYou} />
-							<Route exact path="/premium/customerportal" component={CustomerPortal} />
-							<Route exact path="/premium/checkout/:currency/:slots" component={Checkout} />
 							<Route exact path="/contact/" component={Contact} />
 							<Route exact path="/return/" component={Return} />
 							<Route exact path="/invite/" component={Invite} />
 							<Route exact path="/invite/:guildId" component={Invite} />
 							<Route path="/:document" component={Document} />
+							{window.__config.enablePremium &&
+								<>
+									<Route exact path="/premium/" component={Premium} />
+									<Route exact path="/premium/servers" component={PremiumServers} />
+									<Route exact path="/premium/thankyou" component={PremiumThankYou} />
+									<Route exact path="/premium/customerportal" component={CustomerPortal} />
+									<Route exact path="/premium/checkout/:currency/:slots" component={Checkout} />
+								</>
+							}
 						</Switch>
 					</Layout>
 				</Route>
@@ -78,7 +82,7 @@ function Invite() {
 	cookies.set("return_path_error", `/dashboard`, { path: "/", maxAge: 60, sameSite: "strict" });
 
 	var url = "https://discord.com/api/oauth2/authorize?permissions=8&scope=bot&response_type=code" +
-		`&client_id=${getClientId()}` +
+		`&client_id=${window.__config.clientId}` +
 		`&redirect_uri=${encodeURIComponent(window.location.origin)}%2Freturn`;
 
 	if (guildId) url += `&guild_id=${guildId}`;
