@@ -38,7 +38,6 @@ ReactDOM.render(
 							<Route exact path="/return/" component={Return} />
 							<Route exact path="/invite/" component={Invite} />
 							<Route exact path="/invite/:guildId" component={Invite} />
-							<Route path="/:document" component={Document} />
 							{window.__config.enablePremium &&
 								<>
 									<Route exact path="/premium/" component={Premium} />
@@ -48,6 +47,7 @@ ReactDOM.render(
 									<Route exact path="/premium/checkout/:currency/:slots" component={Checkout} />
 								</>
 							}
+							<Route path="/:document" component={Document} />
 						</Switch>
 					</Layout>
 				</Route>
