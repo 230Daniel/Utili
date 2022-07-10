@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using Disqord;
 using Disqord.Gateway;
+using Disqord.Http;
 using Disqord.Rest;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -12,6 +12,7 @@ using Microsoft.Extensions.Logging;
 using Utili.Database.Entities;
 using Utili.Database.Extensions;
 using Utili.Bot.Extensions;
+using Utili.Bot.Utils;
 
 namespace Utili.Bot.Services
 {
@@ -21,18 +22,21 @@ namespace Utili.Bot.Services
         private readonly DiscordClientBase _client;
         private readonly IServiceScopeFactory _scopeFactory;
 
-        private Dictionary<(ulong, ulong), Timer> _pendingTimers = new();
+        private Scheduler<(Snowflake, Snowflake)> _roleGrantScheduler;
 
         public JoinRolesService(ILogger<JoinRolesService> logger, DiscordClientBase client, IServiceScopeFactory scopeFactory)
         {
             _logger = logger;
             _client = client;
             _scopeFactory = scopeFactory;
+            _roleGrantScheduler = new Scheduler<(Snowflake, Snowflake)>();
+            _roleGrantScheduler.Callback += OnRoleGrantSchedulerCallback;
+            _roleGrantScheduler.Start();
         }
 
         public void Start()
         {
-            _ = ScheduleAllAddRoles();
+            _ = ScheduleAllRoleGrants();
         }
 
         public async Task MemberJoined(IServiceScope scope, MemberJoinedEventArgs e, bool rolePersistAddedRoles)
@@ -41,43 +45,90 @@ namespace Utili.Bot.Services
             {
                 var db = scope.GetDbContext();
                 var config = await db.JoinRolesConfigurations.GetForGuildAsync(e.GuildId);
-                IGuild guild = _client.GetGuild(e.GuildId);
 
-                if (rolePersistAddedRoles && config.CancelOnRolePersist)
-                    return;
+                if(config is null ||
+                   config.CancelOnRolePersist && rolePersistAddedRoles ||
+                   config.JoinRoles.Count == 0) return;
 
-                if (config.WaitForVerification && (e.Member.IsPending || guild.VerificationLevel >= GuildVerificationLevel.High))
+                var memberRecord = await db.JoinRolesPendingMembers.GetForMemberAsync(e.GuildId, e.MemberId);
+                if (memberRecord is not null)
                 {
-                    var memberRecord = await db.JoinRolesPendingMembers.GetForMemberAsync(e.GuildId, e.Member.Id);
-                    if (memberRecord is null)
-                    {
-                        memberRecord = new JoinRolesPendingMember(e.GuildId, e.Member.Id)
-                        {
-                            IsPending = e.Member.IsPending,
-                            ScheduledFor = guild.VerificationLevel >= GuildVerificationLevel.High
-                                ? DateTime.UtcNow.AddMinutes(10)
-                                : DateTime.MinValue
-                        };
-                        db.JoinRolesPendingMembers.Add(memberRecord);
-                    }
-                    else
-                    {
-                        memberRecord.IsPending = e.Member.IsPending;
-                        memberRecord.ScheduledFor = guild.VerificationLevel >= GuildVerificationLevel.High
-                            ? DateTime.UtcNow.AddMinutes(10)
-                            : DateTime.MinValue;
-                        db.JoinRolesPendingMembers.Update(memberRecord);
-                    }
-
+                    db.JoinRolesPendingMembers.Remove(memberRecord);
                     await db.SaveChangesAsync();
-
-                    if (guild.VerificationLevel >= GuildVerificationLevel.High)
-                        ScheduleAddRoles(e.GuildId, e.Member.Id, DateTime.UtcNow.AddMinutes(10));
-
-                    return;
                 }
 
-                await AddRolesAsync(e.GuildId, e.Member.Id, false, config.JoinRoles);
+                // Must wait for membership screening or 10 minute delay
+                if (config.WaitForVerification)
+                {
+                    var pending = e.Member.IsPending;
+
+                    var newAccount = e.Member.CreatedAt().UtcDateTime >= DateTime.UtcNow - TimeSpan.FromMinutes(5);
+                    var fiveMinuteDelay = newAccount && e.Guild.VerificationLevel >= GuildVerificationLevel.Medium;
+                    var tenMinuteDelay = e.Guild.VerificationLevel >= GuildVerificationLevel.High;
+
+                    var delay = tenMinuteDelay
+                        ? TimeSpan.FromMinutes(10)
+                        : fiveMinuteDelay
+                            ? TimeSpan.FromMinutes(5)
+                            : TimeSpan.Zero;
+
+                    // If already verified (adding roles also verifies immediately)
+                    if ((!pending && delay == TimeSpan.Zero) || rolePersistAddedRoles)
+                    {
+                        await GrantRolesAsync(e.GuildId, e.MemberId, config.JoinRoles);
+                        return;
+                    }
+
+                    // If pending but no delay
+                    if (pending && delay == TimeSpan.Zero)
+                    {
+                        memberRecord = new JoinRolesPendingMember(e.GuildId, e.MemberId)
+                        {
+                            IsPending = true,
+                            ScheduledFor = DateTime.MinValue
+                        };
+
+                        // Roles will be added when MemberUpdated fires to signal that the member is no longer pending
+                        db.JoinRolesPendingMembers.Add(memberRecord);
+                        await db.SaveChangesAsync();
+                        return;
+                    }
+
+                    // If pending and delay
+                    if (pending && delay != TimeSpan.Zero)
+                    {
+                        memberRecord = new JoinRolesPendingMember(e.GuildId, e.MemberId)
+                        {
+                            IsPending = true,
+                            ScheduledFor = DateTime.UtcNow + delay
+                        };
+
+                        // Granting will be scheduled when MemberUpdated fires to signal that the member is no longer pending
+                        db.JoinRolesPendingMembers.Add(memberRecord);
+                        await db.SaveChangesAsync();
+                        return;
+                    }
+
+                    // If delay but not pending
+                    if (!pending && delay != TimeSpan.Zero)
+                    {
+                        memberRecord = new JoinRolesPendingMember(e.GuildId, e.MemberId)
+                        {
+                            IsPending = false,
+                            ScheduledFor = DateTime.UtcNow + delay
+                        };
+
+                        db.JoinRolesPendingMembers.Add(memberRecord);
+                        await db.SaveChangesAsync();
+
+                        // Create timer now
+                        ScheduleRoleGrant(e.GuildId, e.MemberId, memberRecord.ScheduledFor);
+                    }
+                }
+                else
+                {
+                    await GrantRolesAsync(e.GuildId, e.MemberId, config.JoinRoles);
+                }
             }
             catch (Exception ex)
             {
@@ -96,35 +147,34 @@ namespace Utili.Bot.Services
                 var memberRecord = await db.JoinRolesPendingMembers.GetForMemberAsync(guildId, e.MemberId);
                 if (memberRecord is null) return;
 
-                var record = await db.JoinRolesConfigurations.GetForGuildAsync(guildId);
-                if (record is null) return;
+                var config = await db.JoinRolesConfigurations.GetForGuildAsync(guildId);
+                if (config is null) return;
 
+                // If member has been granted a role (bypassing all verification)
                 if (e.NewMember.RoleIds.Any())
                 {
-                    // The member has been given a role, so all delays are now irrelevant
                     db.JoinRolesPendingMembers.Remove(memberRecord);
                     await db.SaveChangesAsync();
-                    await AddRolesAsync(guildId, e.NewMember.Id, false, record.JoinRoles);
+
+                    await GrantRolesAsync(guildId, e.MemberId, config.JoinRoles);
+                    return;
                 }
 
+                // If member is no longer pending
                 if (memberRecord.IsPending && !e.NewMember.IsPending)
                 {
-                    // The member has completed membership screening
-
-                    if (memberRecord.ScheduledFor < DateTime.UtcNow)
+                    // If there is no delay or the delay has already expired
+                    if (memberRecord.ScheduledFor <= DateTime.UtcNow)
                     {
-                        // ... and they have waited for 10 minutes (or the 10 minute wait is disabled)
                         db.JoinRolesPendingMembers.Remove(memberRecord);
                         await db.SaveChangesAsync();
-                        await AddRolesAsync(guildId, e.NewMember.Id, false, record.JoinRoles);
+
+                        await GrantRolesAsync(guildId, e.MemberId, config.JoinRoles);
+                        return;
                     }
-                    else
-                    {
-                        // ... but they still have to wait for 10 minutes before getting their roles
-                        memberRecord.IsPending = false;
-                        db.JoinRolesPendingMembers.Update(memberRecord);
-                        await db.SaveChangesAsync();
-                    }
+
+                    // Start the delay timer now
+                    ScheduleRoleGrant(guildId, e.MemberId, memberRecord.ScheduledFor);
                 }
             }
             catch (Exception ex)
@@ -133,82 +183,121 @@ namespace Utili.Bot.Services
             }
         }
 
-        private async Task AddRolesAsync(ulong guildId, ulong memberId, bool fromDelay, List<ulong> joinRoles = null)
+        public async Task MemberLeft(IServiceScope scope, MemberLeftEventArgs e)
         {
-            if (fromDelay || joinRoles is null)
+            try
+            {
+                var db = scope.GetDbContext();
+
+                var memberRecord = await db.JoinRolesPendingMembers.GetForMemberAsync(e.GuildId, e.MemberId);
+                if (memberRecord is null) return;
+
+                db.JoinRolesPendingMembers.Remove(memberRecord);
+                await db.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Exception thrown on member left");
+            }
+        }
+
+        private async Task ScheduleAllRoleGrants()
+        {
+            try
             {
                 using var scope = _scopeFactory.CreateScope();
                 var db = scope.GetDbContext();
+                var memberRecords = await db.JoinRolesPendingMembers.ToListAsync();
+                var configs = await db.JoinRolesConfigurations.ToListAsync();
 
-                if (fromDelay)
+                foreach (var memberRecord in memberRecords)
                 {
-                    var pendingRecord = await db.JoinRolesPendingMembers.GetForMemberAsync(guildId, memberId);
-                    // If the member is yet to complete membership screening they will be granted their roles when they do so.
-                    if (pendingRecord.IsPending) return;
-                    db.JoinRolesPendingMembers.Remove(pendingRecord);
-                    await db.SaveChangesAsync();
+                    var guild = _client.GetGuild(memberRecord.GuildId);
+                    if (guild is null) continue;
+
+                    IMember member;
+
+                    try
+                    {
+                        member = await _client.FetchMemberAsync(memberRecord.GuildId, memberRecord.MemberId);
+                    }
+                    catch (RestApiException ex) when (ex.StatusCode == HttpResponseStatusCode.NotFound)
+                    {
+                        db.JoinRolesPendingMembers.Remove(memberRecord);
+                        await db.SaveChangesAsync();
+                        continue;
+                    }
+
+                    var config = configs.FirstOrDefault(x => x.GuildId == memberRecord.GuildId);
+                    if (config is null || config.JoinRoles.Count == 0)
+                    {
+                        db.JoinRolesPendingMembers.Remove(memberRecord);
+                        await db.SaveChangesAsync();
+                        continue;
+                    }
+
+                    // If now verified
+                    if ((!member.IsPending && memberRecord.ScheduledFor <= DateTime.UtcNow) || member.RoleIds.Any())
+                    {
+                        db.JoinRolesPendingMembers.Remove(memberRecord);
+                        await db.SaveChangesAsync();
+                        await GrantRolesAsync(memberRecord.GuildId, memberRecord.MemberId, config.JoinRoles);
+                        continue;
+                    }
+
+                    // If not pending but still delayed
+                    if (!member.IsPending)
+                    {
+                        ScheduleRoleGrant(memberRecord.GuildId, memberRecord.MemberId, memberRecord.ScheduledFor);
+                    }
+
+                    // If none of the above:
+                    // Granting will be scheduled when MemberUpdated fires to signal that the member is no longer pending
                 }
-
-                joinRoles ??= (await db.JoinRolesConfigurations.GetForGuildAsync(guildId)).JoinRoles;
             }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Exception thrown on scheduling all role grants");
+            }
+        }
 
-            IGuild guild = _client.GetGuild(guildId);
+        private void ScheduleRoleGrant(Snowflake guildId, Snowflake memberId, DateTime scheduleFor)
+        {
+            _roleGrantScheduler.Cancel((guildId, memberId));
+            _roleGrantScheduler.Schedule((guildId, memberId), scheduleFor);
+        }
 
-            var roles = joinRoles.Select(x => guild.GetRole(x)).ToList();
-            roles.RemoveAll(x => x is null || !x.CanBeManaged());
+        private async Task OnRoleGrantSchedulerCallback((Snowflake, Snowflake) key)
+        {
+            var (guildId, memberId) = key;
 
-            var roleIds = roles.Select(x => x.Id).ToList();
+            try
+            {
+                using var scope = _scopeFactory.CreateScope();
+                var db = scope.GetDbContext();
+                var config = await db.JoinRolesConfigurations.GetForGuildAsync(guildId);
+
+                var memberRecord = await db.JoinRolesPendingMembers.GetForMemberAsync(guildId, memberId);
+                db.JoinRolesPendingMembers.Remove(memberRecord);
+                await db.SaveChangesAsync();
+
+                await GrantRolesAsync(guildId, memberId, config.JoinRoles);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Exception thrown on role grant scheduler callback");
+            }
+        }
+
+        private async Task GrantRolesAsync(Snowflake guildId, Snowflake memberId, List<ulong> roleIds)
+        {
+            var guild = _client.GetGuild(guildId);
+
+            roleIds.RemoveAll(x => !guild.GetRole(x).CanBeManaged());
             roleIds = roleIds.Distinct().ToList();
 
             foreach (var roleId in roleIds)
-            {
-                await guild.GrantRoleAsync(memberId, roleId, new DefaultRestRequestOptions { Reason = "Join Roles" });
-            }
-        }
-
-        private async Task ScheduleAllAddRoles()
-        {
-            using var scope = _scopeFactory.CreateScope();
-            var db = scope.GetDbContext();
-            var records = await db.JoinRolesPendingMembers.ToListAsync();
-
-            foreach (var record in records)
-            {
-                try
-                {
-                    ScheduleAddRoles(record.GuildId, record.MemberId, record.ScheduledFor);
-                }
-                catch (Exception e)
-                {
-                    _logger.LogError(e, $"Exception thrown re-scheduling pending join role user {record.GuildId}/{record.GuildId} (for {record.ScheduledFor})");
-                }
-            }
-
-            if (records.Count > 0) _logger.LogInformation($"Re-scheduled {records.Count} pending join role user{(records.Count == 1 ? "" : "s")}");
-        }
-
-        private void ScheduleAddRoles(ulong guildId, ulong memberId, DateTime due)
-        {
-            lock (_pendingTimers)
-            {
-                var key = (guildId, memberId);
-                if (_pendingTimers.TryGetValue(key, out var timer))
-                {
-                    timer.Dispose();
-                    _pendingTimers.Remove(key);
-                }
-
-                if (due <= DateTime.UtcNow.AddSeconds(10))
-                    _ = AddRolesAsync(guildId, memberId, true);
-                else
-                {
-                    timer = new Timer(x =>
-                    {
-                        _ = AddRolesAsync(guildId, memberId, true);
-                    }, this, due - DateTime.UtcNow, Timeout.InfiniteTimeSpan);
-                    _pendingTimers.Add(key, timer);
-                }
-            }
+                await _client.GrantRoleAsync(guildId, memberId, roleId, new DefaultRestRequestOptions { Reason = "Join Roles" });
         }
     }
 }
