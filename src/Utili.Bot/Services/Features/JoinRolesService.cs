@@ -256,6 +256,8 @@ namespace Utili.Bot.Services
 
                     // If none of the above:
                     // Granting will be scheduled when MemberUpdated fires to signal that the member is no longer pending
+
+                    await Task.Delay(500);
                 }
             }
             catch (Exception ex)
