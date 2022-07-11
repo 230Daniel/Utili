@@ -101,6 +101,11 @@ public class Scheduler<TKey> where TKey : IEquatable<TKey>
                 _ = Callback.Invoke(dueJob.Key);
             }
             catch (TaskCanceledException) { }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Critical error with Scheduler\n{ex}");
+                throw;
+            }
         }
     }
 
