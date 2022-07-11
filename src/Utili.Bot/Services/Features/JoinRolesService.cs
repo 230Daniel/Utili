@@ -31,12 +31,12 @@ namespace Utili.Bot.Services
             _scopeFactory = scopeFactory;
             _roleGrantScheduler = new Scheduler<(Snowflake, Snowflake)>();
             _roleGrantScheduler.Callback += OnRoleGrantSchedulerCallback;
-            _roleGrantScheduler.Start();
         }
 
         public void Start()
         {
             _ = ScheduleAllRoleGrants();
+            _roleGrantScheduler.Start();
         }
 
         public async Task MemberJoined(IServiceScope scope, MemberJoinedEventArgs e, bool rolePersistAddedRoles)
@@ -122,7 +122,7 @@ namespace Utili.Bot.Services
                         await db.SaveChangesAsync();
 
                         // Create timer now
-                        ScheduleRoleGrant(e.GuildId, e.MemberId, memberRecord.ScheduledFor);
+                        await ScheduleRoleGrantAsync(e.GuildId, e.MemberId, memberRecord.ScheduledFor);
                     }
                 }
                 else
@@ -174,7 +174,7 @@ namespace Utili.Bot.Services
                     }
 
                     // Start the delay timer now
-                    ScheduleRoleGrant(guildId, e.MemberId, memberRecord.ScheduledFor);
+                    await ScheduleRoleGrantAsync(guildId, e.MemberId, memberRecord.ScheduledFor);
                 }
             }
             catch (Exception ex)
@@ -192,6 +192,7 @@ namespace Utili.Bot.Services
                 var memberRecord = await db.JoinRolesPendingMembers.GetForMemberAsync(e.GuildId, e.MemberId);
                 if (memberRecord is null) return;
 
+                await _roleGrantScheduler.CancelAsync((e.GuildId, e.MemberId));
                 db.JoinRolesPendingMembers.Remove(memberRecord);
                 await db.SaveChangesAsync();
             }
@@ -248,7 +249,7 @@ namespace Utili.Bot.Services
                     // If not pending but still delayed
                     if (!member.IsPending)
                     {
-                        ScheduleRoleGrant(memberRecord.GuildId, memberRecord.MemberId, memberRecord.ScheduledFor);
+                        await ScheduleRoleGrantAsync(memberRecord.GuildId, memberRecord.MemberId, memberRecord.ScheduledFor);
                     }
 
                     // If none of the above:
@@ -261,10 +262,10 @@ namespace Utili.Bot.Services
             }
         }
 
-        private void ScheduleRoleGrant(Snowflake guildId, Snowflake memberId, DateTime scheduleFor)
+        private async Task ScheduleRoleGrantAsync(Snowflake guildId, Snowflake memberId, DateTime scheduleFor)
         {
-            _roleGrantScheduler.Cancel((guildId, memberId));
-            _roleGrantScheduler.Schedule((guildId, memberId), scheduleFor);
+            await _roleGrantScheduler.CancelAsync((guildId, memberId));
+            await _roleGrantScheduler.ScheduleAsync((guildId, memberId), scheduleFor);
         }
 
         private async Task OnRoleGrantSchedulerCallback((Snowflake, Snowflake) key)

@@ -10,12 +10,16 @@ public class Scheduler<TKey> where TKey : IEquatable<TKey>
 {
     public event OnSchedulerCallbackEventHandler Callback;
 
-    private List<Job> _jobs = new();
+    private List<Job> _jobs;
     private Job _currentJob;
+
+    private SemaphoreSlim _semaphore;
     private CancellationTokenSource _cts;
 
     public Scheduler()
     {
+        _jobs = new List<Job>();
+        _semaphore = new SemaphoreSlim(1, 1);
         _cts = new CancellationTokenSource();
     }
 
@@ -24,26 +28,38 @@ public class Scheduler<TKey> where TKey : IEquatable<TKey>
         _ = Main();
     }
 
-    public void Schedule(TKey key, DateTime activateAt)
+    public async Task ScheduleAsync(TKey key, DateTime activateAt)
     {
-        lock (_jobs)
+        await _semaphore.WaitAsync();
+
+        try
         {
             _jobs.Add(new Job(key, activateAt));
-        }
 
-        if (_currentJob is null || activateAt < _currentJob.ActivateAt)
-            CancelToken();
+            if (_currentJob is null || activateAt < _currentJob.ActivateAt)
+                CancelToken();
+        }
+        finally
+        {
+            _semaphore.Release();
+        }
     }
 
-    public void Cancel(TKey key)
+    public async Task CancelAsync(TKey key)
     {
-        lock (_jobs)
+        await _semaphore.WaitAsync();
+
+        try
         {
             _jobs.RemoveAll(x => x.Key.Equals(key));
-        }
 
-        if (_currentJob is not null && key.Equals(_currentJob.Key))
-            CancelToken();
+            if (_currentJob is not null && key.Equals(_currentJob.Key))
+                CancelToken();
+        }
+        finally
+        {
+            _semaphore.Release();
+        }
     }
 
     private void CancelToken()
@@ -57,25 +73,32 @@ public class Scheduler<TKey> where TKey : IEquatable<TKey>
     {
         while (true)
         {
+            await _semaphore.WaitAsync();
+
             try
             {
-                lock (_jobs)
-                {
-                    _currentJob = _jobs.MinBy(x => x.ActivateAt);
-                }
+                _currentJob = _jobs.MinBy(x => x.ActivateAt);
 
                 var delay = _currentJob is null
                     ? Timeout.InfiniteTimeSpan
                     : _currentJob.ActivateAt - DateTime.UtcNow;
 
+                if (_currentJob is not null && delay < TimeSpan.Zero)
+                    delay = TimeSpan.Zero;
+
+                _semaphore.Release();
+
                 await Task.Delay(delay, _cts.Token);
 
-                lock (_jobs)
-                {
-                    _jobs.Remove(_currentJob);
-                }
+                await _semaphore.WaitAsync();
 
-                _ = Callback.Invoke(_currentJob.Key);
+                var dueJob = _currentJob;
+                _jobs.Remove(_currentJob);
+                _currentJob = null;
+
+                _semaphore.Release();
+
+                _ = Callback.Invoke(dueJob.Key);
             }
             catch (TaskCanceledException) { }
         }
