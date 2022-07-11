@@ -216,13 +216,15 @@ namespace Utili.Bot.Services
                     var guild = _client.GetGuild(memberRecord.GuildId);
                     if (guild is null) continue;
 
-                    IMember member;
+                    IMember member = null;
 
                     try
                     {
                         member = await _client.FetchMemberAsync(memberRecord.GuildId, memberRecord.MemberId);
                     }
-                    catch (RestApiException ex) when (ex.StatusCode == HttpResponseStatusCode.NotFound)
+                    catch (RestApiException ex) when (ex.StatusCode == HttpResponseStatusCode.NotFound) { }
+
+                    if (member is null)
                     {
                         db.JoinRolesPendingMembers.Remove(memberRecord);
                         await db.SaveChangesAsync();
