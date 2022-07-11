@@ -18,7 +18,7 @@ namespace Utili.Bot.Extensions
             var botHighestPosition = botRoles.Max(x => x.Position);
             var botHighestRole = botRoles.Where(x => x.Position == botHighestPosition).OrderByDescending(x => x.Id).First();
 
-            return botHighestRole.Position > role.Position || botHighestRole.Position == role.Position && botHighestRole.Id > role.Id;
+            return botHighestRole.Position > role.Position || (botHighestRole.Position == role.Position && botHighestRole.Id < role.Id);
         }
     }
 }
