@@ -21,14 +21,17 @@ namespace Utili.Bot.Services
         private readonly ILogger<JoinRolesService> _logger;
         private readonly DiscordClientBase _client;
         private readonly IServiceScopeFactory _scopeFactory;
+        private readonly MemberCacheService _memberCacheService;
 
         private Scheduler<(Snowflake, Snowflake)> _roleGrantScheduler;
 
-        public JoinRolesService(ILogger<JoinRolesService> logger, DiscordClientBase client, IServiceScopeFactory scopeFactory)
+        public JoinRolesService(ILogger<JoinRolesService> logger, DiscordClientBase client, IServiceScopeFactory scopeFactory, MemberCacheService memberCacheService)
         {
             _logger = logger;
             _client = client;
             _scopeFactory = scopeFactory;
+            _memberCacheService = memberCacheService;
+
             _roleGrantScheduler = new Scheduler<(Snowflake, Snowflake)>();
             _roleGrantScheduler.Callback += OnRoleGrantSchedulerCallback;
         }
@@ -211,6 +214,16 @@ namespace Utili.Bot.Services
                 var memberRecords = await db.JoinRolesPendingMembers.ToListAsync();
                 var configs = await db.JoinRolesConfigurations.ToListAsync();
 
+                _logger.LogInformation("Checking status for {Count} pending join roles members...", memberRecords.Count);
+
+                var guildIdsWithManyPendingMembers = memberRecords
+                    .Select(x => x.GuildId)
+                    .Distinct()
+                    .Where(x => memberRecords.Count(y => y.GuildId == x) >= 10);
+
+                foreach (var guildId in guildIdsWithManyPendingMembers)
+                    await _memberCacheService.TemporarilyCacheMembersAsync(guildId);
+
                 foreach (var memberRecord in memberRecords)
                 {
                     var guild = _client.GetGuild(memberRecord.GuildId);
@@ -220,7 +233,8 @@ namespace Utili.Bot.Services
 
                     try
                     {
-                        member = await _client.FetchMemberAsync(memberRecord.GuildId, memberRecord.MemberId);
+                        member = _client.GetMember(memberRecord.GuildId, memberRecord.MemberId) ??
+                                 await _client.FetchMemberAsync(memberRecord.GuildId, memberRecord.MemberId);
                     }
                     catch (RestApiException ex) when (ex.StatusCode == HttpResponseStatusCode.NotFound) { }
 
