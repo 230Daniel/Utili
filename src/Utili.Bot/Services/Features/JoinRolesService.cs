@@ -214,6 +214,8 @@ namespace Utili.Bot.Services
                 var memberRecords = await db.JoinRolesPendingMembers.ToListAsync();
                 var configs = await db.JoinRolesConfigurations.ToListAsync();
 
+                memberRecords.RemoveAll(x => _client.GetGuild(x.GuildId) is null);
+
                 _logger.LogInformation("Checking status for {Count} pending join roles members...", memberRecords.Count);
 
                 var guildIdsWithManyPendingMembers = memberRecords
@@ -229,14 +231,17 @@ namespace Utili.Bot.Services
                     var guild = _client.GetGuild(memberRecord.GuildId);
                     if (guild is null) continue;
 
-                    IMember member = null;
+                    IMember member = _client.GetMember(memberRecord.GuildId, memberRecord.MemberId);
 
-                    try
+                    if (member is null)
                     {
-                        member = _client.GetMember(memberRecord.GuildId, memberRecord.MemberId) ??
-                                 await _client.FetchMemberAsync(memberRecord.GuildId, memberRecord.MemberId);
+                        try
+                        {
+                            member = await _client.FetchMemberAsync(memberRecord.GuildId, memberRecord.MemberId);
+                            await Task.Delay(500);
+                        }
+                        catch (RestApiException ex) when (ex.StatusCode == HttpResponseStatusCode.NotFound) { }
                     }
-                    catch (RestApiException ex) when (ex.StatusCode == HttpResponseStatusCode.NotFound) { }
 
                     if (member is null)
                     {
@@ -270,9 +275,9 @@ namespace Utili.Bot.Services
 
                     // If none of the above:
                     // Granting will be scheduled when MemberUpdated fires to signal that the member is no longer pending
-
-                    await Task.Delay(500);
                 }
+
+                _logger.LogInformation("Finished checking status of pending join role members");
             }
             catch (Exception ex)
             {
