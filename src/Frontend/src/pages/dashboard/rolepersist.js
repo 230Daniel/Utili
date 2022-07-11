@@ -34,6 +34,7 @@ class RolePersist extends React.Component {
 				<Fade>
 					<div className="dashboard-title">Role Persist</div>
 					<div className="dashboard-subtitle">Keep a user's roles if they leave and rejoin</div>
+					<div className="dashboard-description">Warning: This feature will not function properly if another bot is modifying member roles on join!</div>
 					<Load loaded={this.state.rolePersist !== null}>
 						<Card title="Role Persist Settings" size={400} titleSize={200} inputSize={200} onChanged={this.props.onChanged}>
 							<CardComponent type="checkbox" title="Enabled" value={this.state.rolePersist?.enabled} ref={this.settings.enabled}></CardComponent>
