@@ -1,14 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Disqord;
 using Disqord.Gateway;
 using Disqord.Rest;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Utili.Database.Extensions;
 using Utili.Bot.Extensions;
+using Utili.Database.Entities;
 
 namespace Utili.Bot.Services
 {
@@ -18,7 +20,8 @@ namespace Utili.Bot.Services
         private readonly DiscordClientBase _client;
         private readonly IServiceScopeFactory _scopeFactory;
 
-        private List<VoiceUpdateRequest> _updateRequests = new();
+        private SemaphoreSlim _semaphore = new(1, 1);
+        private List<UpdateRequest> _updateRequests = new();
 
         public VoiceRolesService(ILogger<VoiceRolesService> logger, DiscordClientBase client, IServiceScopeFactory scopeFactory)
         {
@@ -29,112 +32,142 @@ namespace Utili.Bot.Services
 
         public void Start()
         {
-            _ = UpdateMembersAsync();
+            _ = ContinuouslyActionAllUpdateRequestsAsync();
         }
 
-        public void VoiceStateUpdated(VoiceStateUpdatedEventArgs e)
+        public async Task VoiceStateUpdated(VoiceStateUpdatedEventArgs e)
         {
+            await _semaphore.WaitAsync();
+
             try
             {
-                lock (_updateRequests)
+                var existingRequest = _updateRequests.FirstOrDefault(x => x.GuildId == e.GuildId && x.MemberId == e.MemberId);
+
+                if (existingRequest is not null)
                 {
-                    _updateRequests.Add(new VoiceUpdateRequest(e.GuildId, e.MemberId, e.OldVoiceState?.ChannelId, e.NewVoiceState?.ChannelId));
+                    existingRequest.NewChannelId = e.NewVoiceState.ChannelId;
+                    return;
+                }
+
+                var newRequest = new UpdateRequest(e.GuildId, e.MemberId, e.OldVoiceState?.ChannelId, e.NewVoiceState?.ChannelId);
+                _updateRequests.Add(newRequest);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Exception thrown on voice state updated");
+            }
+            finally
+            {
+                _semaphore.Release();
+            }
+        }
+
+        private async Task ContinuouslyActionAllUpdateRequestsAsync()
+        {
+            while (true)
+            {
+                var actionTask = ActionAllUpdateRequestsAsync();
+                var delay = Task.Delay(1000);
+
+                await Task.WhenAll(actionTask, delay);
+            }
+        }
+
+        private async Task ActionAllUpdateRequestsAsync()
+        {
+            await _semaphore.WaitAsync();
+
+            try
+            {
+                using var scope = _scopeFactory.CreateScope();
+                var db = scope.GetDbContext();
+                var configs = await db.VoiceRoleConfigurations.ToListAsync();
+
+                var tasks = new List<Task>();
+
+                foreach (var updateRequest in _updateRequests)
+                {
+                    var guildConfigs = configs.Where(x => x.GuildId == updateRequest.GuildId);
+                    var task = ActionUpdateRequestAsync(updateRequest, guildConfigs);
+                    tasks.Add(task);
+                }
+
+                _updateRequests.Clear();
+
+                var allTasks = Task.WhenAll(tasks);
+                var delay = Task.Delay(5000);
+
+                await Task.WhenAny(allTasks, delay);
+
+                if (!allTasks.IsCompleted)
+                {
+                    var incompleteTaskCount = tasks.Count(x => !x.IsCompleted);
+                    _logger.LogWarning("The five second maximum wait for actioning update requests was exceeded for {Count} update requests", incompleteTaskCount);
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Exception thrown in voice state updated");
+                _logger.LogError(ex, "Exception thrown while actioning all update requests");
+            }
+            finally
+            {
+                _semaphore.Release();
             }
         }
 
-        private async Task UpdateMembersAsync()
+        private async Task ActionUpdateRequestAsync(UpdateRequest request, IEnumerable<VoiceRoleConfiguration> guildConfigurations)
         {
-            while (true)
+            await Task.Yield();
+
+            try
             {
-                try
+                if (request.OldChannelId == request.NewChannelId) return;
+
+                var configurationForOldChannel = request.OldChannelId.HasValue ?
+                    guildConfigurations.FirstOrDefault(x => x.ChannelId == request.OldChannelId) ??
+                    guildConfigurations.FirstOrDefault(x => x.ChannelId == 0)
+                    : null;
+
+                var configurationForNewChannel = request.NewChannelId.HasValue ?
+                    guildConfigurations.FirstOrDefault(x => x.ChannelId == request.NewChannelId) ??
+                    guildConfigurations.FirstOrDefault(x => x.ChannelId == 0)
+                    : null;
+
+                if (configurationForOldChannel?.RoleId == configurationForNewChannel?.RoleId) return;
+
+                var guild = _client.GetGuild(request.GuildId);
+
+                if (configurationForOldChannel is not null)
                 {
-                    var requests = new List<VoiceUpdateRequest>();
+                    var role = guild.GetRole(configurationForOldChannel.RoleId);
 
-                    lock (_updateRequests)
-                    {
-                        foreach (var request in _updateRequests)
-                        {
-                            var existingRequest = requests.FirstOrDefault(x => x.GuildId == request.GuildId && x.MemberId == request.MemberId);
-                            if (existingRequest is not null) existingRequest.NewChannelId = request.NewChannelId;
-                            else requests.Add(request);
-                        }
-
-                        _updateRequests.Clear();
-                    }
-
-                    var tasks = requests.Select(UpdateMemberAsync).ToList();
-                    await Task.WhenAll(tasks);
-
-                    await Task.Delay(250);
+                    if (role is not null && role.CanBeManaged())
+                        await guild.RevokeRoleAsync(request.MemberId, role.Id, new DefaultRestRequestOptions { Reason = "Voice Roles" });
                 }
-                catch (Exception ex)
+
+                if (configurationForNewChannel is not null)
                 {
-                    _logger.LogError(ex, "Exception thrown starting member updates");
+                    var role = guild.GetRole(configurationForNewChannel.RoleId);
+
+                    if (role is not null && role.CanBeManaged())
+                        await guild.GrantRoleAsync(request.MemberId, role.Id, new DefaultRestRequestOptions { Reason = "Voice Roles" });
                 }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Exception thrown while updating voice roles for member {GuildId}/{MemberId}, old channel {OldChannelId}, new channel {NewChannelId}",
+                    request.GuildId, request.MemberId, request.OldChannelId, request.NewChannelId);
             }
         }
 
-        private Task UpdateMemberAsync(VoiceUpdateRequest request)
-        {
-            return Task.Run(async () =>
-            {
-                try
-                {
-                    if (request.NewChannelId == request.OldChannelId) return;
-
-                    IGuild guild = _client.GetGuild(request.GuildId);
-                    IMember member = guild.GetMember(request.MemberId);
-
-                    using var scope = _scopeFactory.CreateScope();
-                    var db = scope.GetDbContext();
-                    var configs = await db.VoiceRoleConfigurations.GetAllForGuildAsync(request.GuildId);
-                    configs.RemoveAll(x => guild.GetRole(x.RoleId) is null);
-
-                    Snowflake? oldRoleId = null;
-                    Snowflake? newRoleId = null;
-
-                    if (request.OldChannelId.HasValue)
-                    {
-                        var record = configs.FirstOrDefault(x => x.ChannelId == request.OldChannelId.Value) ??
-                                     configs.FirstOrDefault(x => x.ChannelId == 0);
-                        oldRoleId = record?.RoleId;
-                    }
-
-                    if (request.NewChannelId.HasValue)
-                    {
-                        var config = configs.FirstOrDefault(x => x.ChannelId == request.NewChannelId.Value) ??
-                                     configs.FirstOrDefault(x => x.ChannelId == 0);
-                        newRoleId = config?.RoleId;
-                    }
-
-                    if (oldRoleId == newRoleId) return;
-
-                    if (oldRoleId.HasValue && guild.GetRole(oldRoleId.Value).CanBeManaged())
-                        await member.RevokeRoleAsync(oldRoleId.Value, new DefaultRestRequestOptions { Reason = "Voice Roles" });
-
-                    if (newRoleId.HasValue && guild.GetRole(newRoleId.Value).CanBeManaged())
-                        await member.GrantRoleAsync(newRoleId.Value, new DefaultRestRequestOptions { Reason = "Voice Roles" });
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Exception thrown updating member");
-                }
-            });
-        }
-
-        private class VoiceUpdateRequest
+        private class UpdateRequest
         {
             public Snowflake GuildId { get; }
             public Snowflake MemberId { get; }
             public Snowflake? OldChannelId { get; }
             public Snowflake? NewChannelId { get; set; }
 
-            public VoiceUpdateRequest(Snowflake guildId, Snowflake memberId, Snowflake? oldChannelId, Snowflake? newChannelId)
+            public UpdateRequest(Snowflake guildId, Snowflake memberId, Snowflake? oldChannelId, Snowflake? newChannelId)
             {
                 GuildId = guildId;
                 MemberId = memberId;
@@ -143,6 +176,4 @@ namespace Utili.Bot.Services
             }
         }
     }
-
-
 }

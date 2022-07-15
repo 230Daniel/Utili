@@ -238,7 +238,7 @@ namespace Utili.Bot.Services
                 await _voiceLink.VoiceStateUpdated(scope, e);
 
             if (config.HasFeature(BotFeatures.VoiceRoles))
-                _voiceRoles.VoiceStateUpdated(e);
+                await _voiceRoles.VoiceStateUpdated(e);
 
             if (config.HasFeature(BotFeatures.InactiveRole))
                 await _inactiveRole.VoiceStateUpdated(scope, e);
