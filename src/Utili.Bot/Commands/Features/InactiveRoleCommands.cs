@@ -36,7 +36,7 @@ namespace Utili.Bot.Commands
         public async Task<DiscordCommandResult> ListAsync()
         {
             var config = await _dbContext.InactiveRoleConfigurations.GetForGuildAsync(Context.GuildId);
-            if (Context.Guild.GetRole(config.RoleId) is null)
+            if (config is null || Context.Guild.GetRole(config.RoleId) is null)
                 return Failure("Error", "This server does not have an inactive role set");
 
             await _memberCache.TemporarilyCacheMembersAsync(Context.GuildId);
@@ -97,7 +97,7 @@ namespace Utili.Bot.Commands
         public async Task<DiscordCommandResult> KickAsync()
         {
             var config = await _dbContext.InactiveRoleConfigurations.GetForGuildAsync(Context.GuildId);
-            if (Context.Guild.GetRole(config.RoleId) is null)
+            if (config is null || Context.Guild.GetRole(config.RoleId) is null)
                 return Failure("Error", "This server does not have an inactive role set");
 
             lock (_kickingIn)
