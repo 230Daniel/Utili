@@ -1,28 +1,27 @@
 ﻿using Disqord;
 using Disqord.Gateway;
 
-namespace Utili.Bot.Extensions
+namespace Utili.Bot.Extensions;
+
+public static class ClientExtensions
 {
-    public static class ClientExtensions
+    public static CachedTextChannel GetTextChannel(this DiscordClientBase client, Snowflake guildId, Snowflake channelId)
     {
-        public static CachedTextChannel GetTextChannel(this DiscordClientBase client, Snowflake guildId, Snowflake channelId)
-        {
-            return client.GetChannel(guildId, channelId) as CachedTextChannel;
-        }
+        return client.GetChannel(guildId, channelId) as CachedTextChannel;
+    }
 
-        public static CachedMessageGuildChannel GetMessageGuildChannel(this DiscordClientBase client, Snowflake guildId, Snowflake channelId)
-        {
-            return client.GetChannel(guildId, channelId) as CachedMessageGuildChannel;
-        }
+    public static CachedMessageGuildChannel GetMessageGuildChannel(this DiscordClientBase client, Snowflake guildId, Snowflake channelId)
+    {
+        return client.GetChannel(guildId, channelId) as CachedMessageGuildChannel;
+    }
 
-        public static CachedVoiceChannel GetVoiceChannel(this DiscordClientBase client, Snowflake guildId, Snowflake channelId)
-        {
-            return client.GetChannel(guildId, channelId) as CachedVoiceChannel;
-        }
+    public static CachedVoiceChannel GetVoiceChannel(this DiscordClientBase client, Snowflake guildId, Snowflake channelId)
+    {
+        return client.GetChannel(guildId, channelId) as CachedVoiceChannel;
+    }
 
-        public static CachedCategoryChannel GetCategoryChannel(this DiscordClientBase client, Snowflake guildId, Snowflake channelId)
-        {
-            return client.GetChannel(guildId, channelId) as CachedCategoryChannel;
-        }
+    public static CachedCategoryChannel GetCategoryChannel(this DiscordClientBase client, Snowflake guildId, Snowflake channelId)
+    {
+        return client.GetChannel(guildId, channelId) as CachedCategoryChannel;
     }
 }

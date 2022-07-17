@@ -1,18 +1,17 @@
 ﻿using Disqord;
 using Disqord.Gateway;
 
-namespace Utili.Bot.Extensions
-{
-    public static class ChannelExtensions
-    {
-        public static bool BotHasPermissions(this IGuildChannel channel, Permission permissions)
-        {
-            return channel.GetGuild().GetCurrentMember().GetPermissions(channel).Has(permissions);
-        }
+namespace Utili.Bot.Extensions;
 
-        public static IGuild GetGuild(this IGuildChannel channel)
-        {
-            return (channel.Client as DiscordClientBase).GetGuild(channel.GuildId);
-        }
+public static class ChannelExtensions
+{
+    public static bool BotHasPermissions(this IGuildChannel channel, Permission permissions)
+    {
+        return channel.GetGuild().GetCurrentMember().GetPermissions(channel).Has(permissions);
+    }
+
+    public static IGuild GetGuild(this IGuildChannel channel)
+    {
+        return (channel.Client as DiscordClientBase).GetGuild(channel.GuildId);
     }
 }

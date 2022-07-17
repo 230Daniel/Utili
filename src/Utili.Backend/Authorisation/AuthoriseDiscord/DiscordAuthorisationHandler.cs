@@ -4,31 +4,30 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Utili.Backend.Services;
 
-namespace Utili.Backend.Authorisation
+namespace Utili.Backend.Authorisation;
+
+public class DiscordAuthorisationHandler : AuthorizationHandler<DiscordRequirement>
 {
-    public class DiscordAuthorisationHandler : AuthorizationHandler<DiscordRequirement>
+    private readonly DiscordClientService _discordClientService;
+
+    public DiscordAuthorisationHandler(DiscordClientService discordClientService)
     {
-        private readonly DiscordClientService _discordClientService;
+        _discordClientService = discordClientService;
+    }
 
-        public DiscordAuthorisationHandler(DiscordClientService discordClientService)
+    protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context, DiscordRequirement requirement)
+    {
+        var httpContext = (HttpContext)context.Resource;
+        var client = await _discordClientService.GetClientAsync(httpContext);
+
+        if (client is not null)
         {
-            _discordClientService = discordClientService;
-        }
+            httpContext.Items["DiscordClient"] ??= client;
 
-        protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context, DiscordRequirement requirement)
-        {
-            var httpContext = (HttpContext)context.Resource;
-            var client = await _discordClientService.GetClientAsync(httpContext);
-
-            if (client is not null)
+            if (client.Authorization.ExpiresAt > DateTimeOffset.Now)
             {
-                httpContext.Items["DiscordClient"] ??= client;
-
-                if (client.Authorization.ExpiresAt > DateTimeOffset.Now)
-                {
-                    requirement.DiscordAuthenticated = true;
-                    context.Succeed(requirement);
-                }
+                requirement.DiscordAuthenticated = true;
+                context.Succeed(requirement);
             }
         }
     }

@@ -1,11 +1,10 @@
 ﻿using Utili.Database.Entities.Base;
 
-namespace Utili.Database.Entities
-{
-    public class ReputationMember : MemberEntity
-    {
-        public long Reputation { get; set; }
+namespace Utili.Database.Entities;
 
-        public ReputationMember(ulong guildId, ulong memberId) : base(guildId, memberId) { }
-    }
+public class ReputationMember : MemberEntity
+{
+    public long Reputation { get; set; }
+
+    public ReputationMember(ulong guildId, ulong memberId) : base(guildId, memberId) { }
 }

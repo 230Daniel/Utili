@@ -8,70 +8,69 @@ using Utili.Database;
 using Utili.Database.Entities;
 using Utili.Database.Extensions;
 
-namespace Utili.Bot.Services
+namespace Utili.Bot.Services;
+
+public class CoreConfigurationCacheService
 {
-    public class CoreConfigurationCacheService
+    private static readonly TimeSpan CacheDuration = TimeSpan.FromSeconds(5);
+
+    private static Dictionary<Snowflake, SemaphoreSlim> _semaphores = new();
+    private static ConcurrentDictionary<Snowflake, CachedCoreConfiguration> _cachedConfigurations = new();
+
+    private readonly DatabaseContext _dbContext;
+
+    public CoreConfigurationCacheService(DatabaseContext dbContext)
     {
-        private static readonly TimeSpan CacheDuration = TimeSpan.FromSeconds(5);
+        _dbContext = dbContext;
+    }
 
-        private static Dictionary<Snowflake, SemaphoreSlim> _semaphores = new();
-        private static ConcurrentDictionary<Snowflake, CachedCoreConfiguration> _cachedConfigurations = new();
+    public async Task<CoreConfiguration> GetCoreConfigurationAsync(Snowflake guildId)
+    {
+        SemaphoreSlim semaphore;
 
-        private readonly DatabaseContext _dbContext;
-
-        public CoreConfigurationCacheService(DatabaseContext dbContext)
+        lock (_semaphores)
         {
-            _dbContext = dbContext;
-        }
-
-        public async Task<CoreConfiguration> GetCoreConfigurationAsync(Snowflake guildId)
-        {
-            SemaphoreSlim semaphore;
-
-            lock (_semaphores)
+            if (!_semaphores.TryGetValue(guildId, out semaphore))
             {
-                if (!_semaphores.TryGetValue(guildId, out semaphore))
-                {
-                    semaphore = new SemaphoreSlim(1, 1);
-                    _semaphores.Add(guildId, semaphore);
-                }
-            }
-
-            await semaphore.WaitAsync();
-
-            try
-            {
-                var now = DateTime.UtcNow;
-                if (_cachedConfigurations.TryGetValue(guildId, out var cachedConfiguration))
-                {
-                    if (cachedConfiguration.ExpiresAt >= now)
-                    {
-                        return cachedConfiguration.Configuration;
-                    }
-                    _cachedConfigurations.TryRemove(guildId, out _);
-                }
-
-                var config = await _dbContext.CoreConfigurations.GetForGuildAsync(guildId);
-                _cachedConfigurations.TryAdd(guildId, new CachedCoreConfiguration(config, now + CacheDuration));
-
-                return config;
-            }
-            finally
-            {
-                semaphore.Release();
+                semaphore = new SemaphoreSlim(1, 1);
+                _semaphores.Add(guildId, semaphore);
             }
         }
 
-        private class CachedCoreConfiguration
-        {
-            public CoreConfiguration Configuration { get; }
-            public DateTime ExpiresAt { get; }
+        await semaphore.WaitAsync();
 
-            public CachedCoreConfiguration(CoreConfiguration configuration, DateTime expiresAt)
+        try
+        {
+            var now = DateTime.UtcNow;
+            if (_cachedConfigurations.TryGetValue(guildId, out var cachedConfiguration))
             {
-                Configuration = configuration;
-                ExpiresAt = expiresAt;
+                if (cachedConfiguration.ExpiresAt >= now)
+                {
+                    return cachedConfiguration.Configuration;
+                }
+                _cachedConfigurations.TryRemove(guildId, out _);
             }
+
+            var config = await _dbContext.CoreConfigurations.GetForGuildAsync(guildId);
+            _cachedConfigurations.TryAdd(guildId, new CachedCoreConfiguration(config, now + CacheDuration));
+
+            return config;
+        }
+        finally
+        {
+            semaphore.Release();
+        }
+    }
+
+    private class CachedCoreConfiguration
+    {
+        public CoreConfiguration Configuration { get; }
+        public DateTime ExpiresAt { get; }
+
+        public CachedCoreConfiguration(CoreConfiguration configuration, DateTime expiresAt)
+        {
+            Configuration = configuration;
+            ExpiresAt = expiresAt;
         }
     }
 }

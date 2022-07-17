@@ -3,13 +3,12 @@ using Disqord;
 using Disqord.Bot;
 using Qmmands;
 
-namespace Utili.Bot.Commands
+namespace Utili.Bot.Commands;
+
+public class RequireNotThreadAttribute : DiscordGuildCheckAttribute
 {
-    public class RequireNotThreadAttribute : DiscordGuildCheckAttribute
+    public override ValueTask<CheckResult> CheckAsync(DiscordGuildCommandContext context)
     {
-        public override ValueTask<CheckResult> CheckAsync(DiscordGuildCommandContext context)
-        {
-            return context.Channel is IThreadChannel ? Failure("This command can not be used in a thread channel.") : Success();
-        }
+        return context.Channel is IThreadChannel ? Failure("This command can not be used in a thread channel.") : Success();
     }
 }

@@ -1,7 +1,6 @@
-﻿namespace Utili.Backend.Models.Stripe
+﻿namespace Utili.Backend.Models.Stripe;
+
+public class IpInfoModel
 {
-    public class IpInfoModel
-    {
-        public string Country { get; set; }
-    }
+    public string Country { get; set; }
 }

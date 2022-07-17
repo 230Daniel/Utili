@@ -13,139 +13,138 @@ using Utili.Backend.Extensions;
 using Utili.Backend.Services;
 using IConfiguration = Microsoft.Extensions.Configuration.IConfiguration;
 
-namespace Utili.Backend.Controllers
+namespace Utili.Backend.Controllers;
+
+[DiscordAuthorise]
+[Route("stripe")]
+public class StripeController : Controller
 {
-    [DiscordAuthorise]
-    [Route("stripe")]
-    public class StripeController : Controller
+    private readonly IConfiguration _configuration;
+    private readonly Services.CustomerService _customerService;
+    private readonly IStripeClient _stripeClient;
+    private readonly IsPremiumService _isPremiumService;
+
+    public StripeController(
+        IConfiguration configuration,
+        Services.CustomerService customerService,
+        StripeClient stripeClient,
+        IsPremiumService isPremiumService)
     {
-        private readonly IConfiguration _configuration;
-        private readonly Services.CustomerService _customerService;
-        private readonly IStripeClient _stripeClient;
-        private readonly IsPremiumService _isPremiumService;
+        _configuration = configuration;
+        _customerService = customerService;
+        _stripeClient = stripeClient;
+        _isPremiumService = isPremiumService;
+    }
 
-        public StripeController(
-            IConfiguration configuration,
-            Services.CustomerService customerService,
-            StripeClient stripeClient,
-            IsPremiumService isPremiumService)
+    [HttpPost("create-checkout-session")]
+    public async Task<IActionResult> CreateCheckoutSessionAsync([FromBody] CreateCheckoutSessionModel model)
+    {
+        if (_isPremiumService.IsFree) return NotFound();
+
+        var customerId = await _customerService.GetOrCreateCustomerIdAsync(HttpContext.GetUser());
+        if (customerId is null) throw new Exception("Customer ID was null");
+
+        var options = new SessionCreateOptions
         {
-            _configuration = configuration;
-            _customerService = customerService;
-            _stripeClient = stripeClient;
-            _isPremiumService = isPremiumService;
-        }
-
-        [HttpPost("create-checkout-session")]
-        public async Task<IActionResult> CreateCheckoutSessionAsync([FromBody] CreateCheckoutSessionModel model)
-        {
-            if (_isPremiumService.IsFree) return NotFound();
-
-            var customerId = await _customerService.GetOrCreateCustomerIdAsync(HttpContext.GetUser());
-            if (customerId is null) throw new Exception("Customer ID was null");
-
-            var options = new SessionCreateOptions
+            SuccessUrl = $"{_configuration["Frontend:Origin"]}/premium/thankyou",
+            CancelUrl = $"{_configuration["Frontend:Origin"]}/premium",
+            PaymentMethodTypes = new List<string>
             {
-                SuccessUrl = $"{_configuration["Frontend:Origin"]}/premium/thankyou",
-                CancelUrl = $"{_configuration["Frontend:Origin"]}/premium",
-                PaymentMethodTypes = new List<string>
+                "card"
+            },
+            Mode = "subscription",
+            LineItems = new List<SessionLineItemOptions>
+            {
+                new()
                 {
-                    "card"
-                },
-                Mode = "subscription",
-                LineItems = new List<SessionLineItemOptions>
-                {
-                    new()
-                    {
-                        Price = model.PriceId,
-                        Quantity = 1
-                    }
-                },
-                Customer = customerId,
-                AllowPromotionCodes = true
-            };
+                    Price = model.PriceId,
+                    Quantity = 1
+                }
+            },
+            Customer = customerId,
+            AllowPromotionCodes = true
+        };
 
-            var sessionService = new SessionService(_stripeClient);
-            var session = await sessionService.CreateAsync(options);
+        var sessionService = new SessionService(_stripeClient);
+        var session = await sessionService.CreateAsync(options);
 
-            return Json(new CheckoutSessionModel
-            {
-                SessionId = session.Id
-            });
-        }
-
-        [HttpGet("customer-portal")]
-        public async Task<IActionResult> CustomerPortalAsync()
+        return Json(new CheckoutSessionModel
         {
-            if (_isPremiumService.IsFree) return NotFound();
+            SessionId = session.Id
+        });
+    }
 
-            var customerId = await _customerService.GetOrCreateCustomerIdAsync(HttpContext.GetUser());
-            if (customerId is null) throw new Exception("Customer ID was null");
+    [HttpGet("customer-portal")]
+    public async Task<IActionResult> CustomerPortalAsync()
+    {
+        if (_isPremiumService.IsFree) return NotFound();
 
-            var options = new Stripe.BillingPortal.SessionCreateOptions
-            {
-                Customer = customerId,
-                ReturnUrl = $"{_configuration["Frontend:Origin"]}/premium"
-            };
+        var customerId = await _customerService.GetOrCreateCustomerIdAsync(HttpContext.GetUser());
+        if (customerId is null) throw new Exception("Customer ID was null");
 
-            var sessionService = new Stripe.BillingPortal.SessionService(_stripeClient);
-            var session = await sessionService.CreateAsync(options);
-
-            return Json(session);
-        }
-
-        [HttpGet("currency")]
-        public async Task<IActionResult> CurrencyAsync()
+        var options = new Stripe.BillingPortal.SessionCreateOptions
         {
-            if (_isPremiumService.IsFree) return NotFound();
+            Customer = customerId,
+            ReturnUrl = $"{_configuration["Frontend:Origin"]}/premium"
+        };
 
-            var customer = await _customerService.GetCustomerAsync(HttpContext.GetUser());
+        var sessionService = new Stripe.BillingPortal.SessionService(_stripeClient);
+        var session = await sessionService.CreateAsync(options);
 
-            if (customer is not null && !string.IsNullOrEmpty(customer.Currency))
-            {
-                return Json(new CustomerCurrencyModel
-                {
-                    Locked = true,
-                    Currency = customer.Currency
-                });
-            }
+        return Json(session);
+    }
 
-            var currency = await GetCustomerCurrencyByIpAsync();
+    [HttpGet("currency")]
+    public async Task<IActionResult> CurrencyAsync()
+    {
+        if (_isPremiumService.IsFree) return NotFound();
 
+        var customer = await _customerService.GetCustomerAsync(HttpContext.GetUser());
+
+        if (customer is not null && !string.IsNullOrEmpty(customer.Currency))
+        {
             return Json(new CustomerCurrencyModel
             {
-                Locked = false,
-                Currency = currency
+                Locked = true,
+                Currency = customer.Currency
             });
         }
 
-        private async Task<string> GetCustomerCurrencyByIpAsync()
+        var currency = await GetCustomerCurrencyByIpAsync();
+
+        return Json(new CustomerCurrencyModel
         {
-            var gbp = new[]
-            {
-                "GB", "IM", "JE", "GG"
-            };
-            var eur = new[]
-            {
-                "AX", "EU", "AD", "AT", "BE", "CY", "EE", "FI", "FR", "TF", "DE", "GR", "GP", "IE", "IT", "LV", "LT",
-                "LU", "MT", "GF", "MQ", "YT", "MC", "ME", "NL", "PT", "RE", "BL", "MF", "PM", "SM", "SK", "SI", "ES",
-                "VA"
-            };
-            var usd = new[]
-            {
-                "US", "AS", "IO", "VG", "BQ", "EC", "SV", "GU", "HT", "MH", "FM", "MP", "PW", "PA", "PR", "TL", "TC",
-                "VI", "UM"
-            };
+            Locked = false,
+            Currency = currency
+        });
+    }
 
-            var client = new HttpClient();
+    private async Task<string> GetCustomerCurrencyByIpAsync()
+    {
+        var gbp = new[]
+        {
+            "GB", "IM", "JE", "GG"
+        };
+        var eur = new[]
+        {
+            "AX", "EU", "AD", "AT", "BE", "CY", "EE", "FI", "FR", "TF", "DE", "GR", "GP", "IE", "IT", "LV", "LT",
+            "LU", "MT", "GF", "MQ", "YT", "MC", "ME", "NL", "PT", "RE", "BL", "MF", "PM", "SM", "SK", "SI", "ES",
+            "VA"
+        };
+        var usd = new[]
+        {
+            "US", "AS", "IO", "VG", "BQ", "EC", "SV", "GU", "HT", "MH", "FM", "MP", "PW", "PA", "PR", "TL", "TC",
+            "VI", "UM"
+        };
 
-            var response = await client.GetStringAsync($"https://ipinfo.io/{HttpContext.Connection.RemoteIpAddress}/json");
-            var country = JsonConvert.DeserializeObject<IpInfoModel>(response).Country;
+        var client = new HttpClient();
 
-            if (gbp.Contains(country)) return "gbp";
-            if (eur.Contains(country)) return "eur";
-            if (usd.Contains(country)) return "usd";
-            return "gbp";
-        }
+        var response = await client.GetStringAsync($"https://ipinfo.io/{HttpContext.Connection.RemoteIpAddress}/json");
+        var country = JsonConvert.DeserializeObject<IpInfoModel>(response).Country;
+
+        if (gbp.Contains(country)) return "gbp";
+        if (eur.Contains(country)) return "eur";
+        if (usd.Contains(country)) return "usd";
+        return "gbp";
     }
 }

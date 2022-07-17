@@ -7,57 +7,56 @@ using Utili.Backend.Authorisation;
 using Utili.Backend.Models;
 using Utili.Backend.Extensions;
 
-namespace Utili.Backend.Controllers
+namespace Utili.Backend.Controllers;
+
+[Route("authentication")]
+public class AuthenticationController : Controller
 {
-    [Route("authentication")]
-    public class AuthenticationController : Controller
+    private readonly IConfiguration _configuration;
+    private readonly IAntiforgery _antiforgery;
+
+    public AuthenticationController(IConfiguration configuration, IAntiforgery antiforgery)
     {
-        private readonly IConfiguration _configuration;
-        private readonly IAntiforgery _antiforgery;
+        _configuration = configuration;
+        _antiforgery = antiforgery;
+    }
 
-        public AuthenticationController(IConfiguration configuration, IAntiforgery antiforgery)
+    [HttpGet("signin")]
+    public IActionResult SignIn()
+    {
+        AuthenticationProperties authProperties = new()
         {
-            _configuration = configuration;
-            _antiforgery = antiforgery;
-        }
+            AllowRefresh = true,
+            IsPersistent = true,
+            RedirectUri = $"{_configuration["Frontend:Origin"]}/return"
+        };
 
-        [HttpGet("signin")]
-        public IActionResult SignIn()
+        return Challenge(authProperties, "Discord");
+    }
+
+    [HttpPost("signout")]
+    public new IActionResult SignOut()
+    {
+        return SignOut("Cookies");
+    }
+
+    [DiscordAuthorise]
+    [HttpGet("me")]
+    public IActionResult Me()
+    {
+        var user = HttpContext.GetDiscordUser();
+        return Json(new AuthenticationInfoModel
         {
-            AuthenticationProperties authProperties = new()
-            {
-                AllowRefresh = true,
-                IsPersistent = true,
-                RedirectUri = $"{_configuration["Frontend:Origin"]}/return"
-            };
+            Username = user.Name,
+            AvatarUrl = user.GetAvatarUrl()
+        });
+    }
 
-            return Challenge(authProperties, "Discord");
-        }
-
-        [HttpPost("signout")]
-        public new IActionResult SignOut()
-        {
-            return SignOut("Cookies");
-        }
-
-        [DiscordAuthorise]
-        [HttpGet("me")]
-        public IActionResult Me()
-        {
-            var user = HttpContext.GetDiscordUser();
-            return Json(new AuthenticationInfoModel
-            {
-                Username = user.Name,
-                AvatarUrl = user.GetAvatarUrl()
-            });
-        }
-
-        [IgnoreAntiforgeryToken]
-        [HttpGet("antiforgery")]
-        public IActionResult Antiforgery()
-        {
-            var tokens = _antiforgery.GetAndStoreTokens(HttpContext);
-            return Json(tokens.RequestToken);
-        }
+    [IgnoreAntiforgeryToken]
+    [HttpGet("antiforgery")]
+    public IActionResult Antiforgery()
+    {
+        var tokens = _antiforgery.GetAndStoreTokens(HttpContext);
+        return Json(tokens.RequestToken);
     }
 }

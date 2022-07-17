@@ -5,45 +5,44 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authorization.Policy;
 using Microsoft.AspNetCore.Http;
 
-namespace Utili.Backend.Authorisation
-{
-    public class ResultHandler : IAuthorizationMiddlewareResultHandler
-    {
-        private readonly AuthorizationMiddlewareResultHandler _defaultHandler;
+namespace Utili.Backend.Authorisation;
 
-        public ResultHandler()
+public class ResultHandler : IAuthorizationMiddlewareResultHandler
+{
+    private readonly AuthorizationMiddlewareResultHandler _defaultHandler;
+
+    public ResultHandler()
+    {
+        _defaultHandler = new();
+    }
+
+    public async Task HandleAsync(
+        RequestDelegate requestDelegate,
+        HttpContext httpContext,
+        AuthorizationPolicy authorisationPolicy,
+        PolicyAuthorizationResult policyAuthorisationResult)
+    {
+        if (authorisationPolicy.Requirements.Any(x => x is DiscordRequirement { DiscordAuthenticated: false }))
         {
-            _defaultHandler = new();
+            httpContext.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
+            return;
         }
 
-        public async Task HandleAsync(
-            RequestDelegate requestDelegate,
-            HttpContext httpContext,
-            AuthorizationPolicy authorisationPolicy,
-            PolicyAuthorizationResult policyAuthorisationResult)
+        if (authorisationPolicy.Requirements.FirstOrDefault(x => x is DiscordGuildRequirement) is DiscordGuildRequirement guildRequirement)
         {
-            if (authorisationPolicy.Requirements.Any(x => x is DiscordRequirement { DiscordAuthenticated: false }))
+            if (!guildRequirement.GuildManageable)
             {
-                httpContext.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
+                httpContext.Response.StatusCode = (int)HttpStatusCode.Forbidden;
                 return;
             }
 
-            if (authorisationPolicy.Requirements.FirstOrDefault(x => x is DiscordGuildRequirement) is DiscordGuildRequirement guildRequirement)
+            if (!guildRequirement.GuildHasBot)
             {
-                if (!guildRequirement.GuildManageable)
-                {
-                    httpContext.Response.StatusCode = (int)HttpStatusCode.Forbidden;
-                    return;
-                }
-
-                if (!guildRequirement.GuildHasBot)
-                {
-                    httpContext.Response.StatusCode = (int)HttpStatusCode.NotFound;
-                    return;
-                }
+                httpContext.Response.StatusCode = (int)HttpStatusCode.NotFound;
+                return;
             }
-
-            await _defaultHandler.HandleAsync(requestDelegate, httpContext, authorisationPolicy, policyAuthorisationResult);
         }
+
+        await _defaultHandler.HandleAsync(requestDelegate, httpContext, authorisationPolicy, policyAuthorisationResult);
     }
 }

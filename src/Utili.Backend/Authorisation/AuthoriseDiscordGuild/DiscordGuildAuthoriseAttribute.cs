@@ -1,12 +1,11 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 
-namespace Utili.Backend.Authorisation
+namespace Utili.Backend.Authorisation;
+
+public class DiscordGuildAuthoriseAttribute : AuthorizeAttribute
 {
-    public class DiscordGuildAuthoriseAttribute : AuthorizeAttribute
+    public DiscordGuildAuthoriseAttribute()
     {
-        public DiscordGuildAuthoriseAttribute()
-        {
-            Policy = "DiscordGuild";
-        }
+        Policy = "DiscordGuild";
     }
 }

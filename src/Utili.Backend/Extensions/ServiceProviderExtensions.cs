@@ -2,13 +2,12 @@
 using Microsoft.Extensions.DependencyInjection;
 using Utili.Database;
 
-namespace Utili.Backend.Extensions
+namespace Utili.Backend.Extensions;
+
+public static class ServiceProviderExtensions
 {
-    public static class ServiceProviderExtensions
+    public static DatabaseContext GetDbContext(this IServiceProvider serviceProvider)
     {
-        public static DatabaseContext GetDbContext(this IServiceProvider serviceProvider)
-        {
-            return serviceProvider.GetRequiredService<DatabaseContext>();
-        }
+        return serviceProvider.GetRequiredService<DatabaseContext>();
     }
 }

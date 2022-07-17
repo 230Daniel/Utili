@@ -1,14 +1,13 @@
-﻿namespace Utili.Database.Entities.Base
+﻿namespace Utili.Database.Entities.Base;
+
+public class GuildEntity
 {
-    public class GuildEntity
+    public ulong GuildId { get; internal set; }
+
+    protected GuildEntity(ulong guildId)
     {
-        public ulong GuildId { get; internal set; }
-
-        protected GuildEntity(ulong guildId)
-        {
-            GuildId = guildId;
-        }
-
-        internal GuildEntity() { }
+        GuildId = guildId;
     }
+
+    internal GuildEntity() { }
 }

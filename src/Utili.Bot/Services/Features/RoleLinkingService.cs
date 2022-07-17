@@ -11,127 +11,126 @@ using Utili.Database.Entities;
 using Utili.Database.Extensions;
 using Utili.Bot.Extensions;
 
-namespace Utili.Bot.Services
+namespace Utili.Bot.Services;
+
+public class RoleLinkingService
 {
-    public class RoleLinkingService
+    private readonly ILogger<RoleLinkingService> _logger;
+    private readonly DiscordClientBase _client;
+    private readonly IsPremiumService _isPremiumService;
+
+    private List<RoleLinkAction> _actions;
+
+    public RoleLinkingService(ILogger<RoleLinkingService> logger, DiscordClientBase client, IsPremiumService isPremiumService)
     {
-        private readonly ILogger<RoleLinkingService> _logger;
-        private readonly DiscordClientBase _client;
-        private readonly IsPremiumService _isPremiumService;
+        _logger = logger;
+        _client = client;
+        _isPremiumService = isPremiumService;
 
-        private List<RoleLinkAction> _actions;
+        _actions = new List<RoleLinkAction>();
+    }
 
-        public RoleLinkingService(ILogger<RoleLinkingService> logger, DiscordClientBase client, IsPremiumService isPremiumService)
+    public async Task MemberUpdated(IServiceScope scope, MemberUpdatedEventArgs e)
+    {
+        try
         {
-            _logger = logger;
-            _client = client;
-            _isPremiumService = isPremiumService;
+            IGuild guild = _client.GetGuild(e.NewMember.GuildId);
 
-            _actions = new List<RoleLinkAction>();
-        }
+            var db = scope.GetDbContext();
+            var configs = await db.RoleLinkingConfigurations.GetAllForGuildAsync(guild.Id);
+            if (configs.Count == 0) return;
 
-        public async Task MemberUpdated(IServiceScope scope, MemberUpdatedEventArgs e)
-        {
-            try
+            if (configs.Count > 2)
             {
-                IGuild guild = _client.GetGuild(e.NewMember.GuildId);
+                var premium = await _isPremiumService.GetIsGuildPremiumAsync(guild.Id);
+                if (!premium) configs = configs.Take(2).ToList();
+            }
 
-                var db = scope.GetDbContext();
-                var configs = await db.RoleLinkingConfigurations.GetAllForGuildAsync(guild.Id);
-                if (configs.Count == 0) return;
+            if (e.OldMember is null) throw new Exception($"Member {e.MemberId} was not cached in guild {e.NewMember.GuildId}");
+            var oldRoles = e.OldMember.RoleIds.Select(x => x.RawValue).ToList();
+            var newRoles = e.NewMember.RoleIds.Select(x => x.RawValue).ToList();
 
-                if (configs.Count > 2)
+            var addedRoles = newRoles.Where(x => oldRoles.All(y => y != x)).ToList();
+            var removedRoles = oldRoles.Where(x => newRoles.All(y => y != x)).ToList();
+
+            List<ulong> rolesToAdd;
+            List<ulong> rolesToRemove;
+
+            lock (_actions)
+            {
+                var actionsPerformedByBot = _actions.Where(x => x.GuildId == guild.Id && x.UserId == e.NewMember.Id).ToList();
+                foreach (var action in actionsPerformedByBot)
                 {
-                    var premium = await _isPremiumService.GetIsGuildPremiumAsync(guild.Id);
-                    if (!premium) configs = configs.Take(2).ToList();
-                }
-
-                if (e.OldMember is null) throw new Exception($"Member {e.MemberId} was not cached in guild {e.NewMember.GuildId}");
-                var oldRoles = e.OldMember.RoleIds.Select(x => x.RawValue).ToList();
-                var newRoles = e.NewMember.RoleIds.Select(x => x.RawValue).ToList();
-
-                var addedRoles = newRoles.Where(x => oldRoles.All(y => y != x)).ToList();
-                var removedRoles = oldRoles.Where(x => newRoles.All(y => y != x)).ToList();
-
-                List<ulong> rolesToAdd;
-                List<ulong> rolesToRemove;
-
-                lock (_actions)
-                {
-                    var actionsPerformedByBot = _actions.Where(x => x.GuildId == guild.Id && x.UserId == e.NewMember.Id).ToList();
-                    foreach (var action in actionsPerformedByBot)
+                    if (addedRoles.Contains(action.RoleId) && action.ActionType == RoleLinkActionType.Added)
                     {
-                        if (addedRoles.Contains(action.RoleId) && action.ActionType == RoleLinkActionType.Added)
-                        {
-                            addedRoles.Remove(action.RoleId);
-                            _actions.Remove(action);
-                        }
-                        else if (removedRoles.Contains(action.RoleId) && action.ActionType == RoleLinkActionType.Removed)
-                        {
-                            removedRoles.Remove(action.RoleId);
-                            _actions.Remove(action);
-                        }
+                        addedRoles.Remove(action.RoleId);
+                        _actions.Remove(action);
                     }
-
-                    rolesToAdd = configs.Where(x => addedRoles.Contains(x.RoleId) && x.Mode == RoleLinkingMode.GrantOnGrant).Select(x => x.LinkedRoleId).ToList();
-                    rolesToAdd.AddRange(configs.Where(x => removedRoles.Contains(x.RoleId) && x.Mode == RoleLinkingMode.GrantOnRevoke).Select(x => x.LinkedRoleId));
-
-                    rolesToRemove = configs.Where(x => addedRoles.Contains(x.RoleId) && x.Mode == RoleLinkingMode.RevokeOnGrant).Select(x => x.LinkedRoleId).ToList();
-                    rolesToRemove.AddRange(configs.Where(x => removedRoles.Contains(x.RoleId) && x.Mode == RoleLinkingMode.RevokeOnRevoke).Select(x => x.LinkedRoleId));
-
-                    rolesToAdd.RemoveAll(x =>
+                    else if (removedRoles.Contains(action.RoleId) && action.ActionType == RoleLinkActionType.Removed)
                     {
-                        var role = guild.GetRole(x);
-                        return role is null || !role.CanBeManaged();
-                    });
-
-                    rolesToRemove.RemoveAll(x =>
-                    {
-                        var role = guild.GetRole(x);
-                        return role is null || !role.CanBeManaged();
-                    });
-
-                    _actions.AddRange(rolesToAdd.Select(x => new RoleLinkAction(guild.Id, e.NewMember.Id, x, RoleLinkActionType.Added)));
-                    _actions.AddRange(rolesToRemove.Select(x => new RoleLinkAction(guild.Id, e.NewMember.Id, x, RoleLinkActionType.Removed)));
+                        removedRoles.Remove(action.RoleId);
+                        _actions.Remove(action);
+                    }
                 }
 
-                foreach (var roleId in rolesToAdd)
+                rolesToAdd = configs.Where(x => addedRoles.Contains(x.RoleId) && x.Mode == RoleLinkingMode.GrantOnGrant).Select(x => x.LinkedRoleId).ToList();
+                rolesToAdd.AddRange(configs.Where(x => removedRoles.Contains(x.RoleId) && x.Mode == RoleLinkingMode.GrantOnRevoke).Select(x => x.LinkedRoleId));
+
+                rolesToRemove = configs.Where(x => addedRoles.Contains(x.RoleId) && x.Mode == RoleLinkingMode.RevokeOnGrant).Select(x => x.LinkedRoleId).ToList();
+                rolesToRemove.AddRange(configs.Where(x => removedRoles.Contains(x.RoleId) && x.Mode == RoleLinkingMode.RevokeOnRevoke).Select(x => x.LinkedRoleId));
+
+                rolesToAdd.RemoveAll(x =>
                 {
-                    await e.NewMember.GrantRoleAsync(roleId, new DefaultRestRequestOptions { Reason = "Role Linking" });
-                    await Task.Delay(1000);
-                }
-                foreach (var roleId in rolesToRemove)
+                    var role = guild.GetRole(x);
+                    return role is null || !role.CanBeManaged();
+                });
+
+                rolesToRemove.RemoveAll(x =>
                 {
-                    await e.NewMember.RevokeRoleAsync(roleId, new DefaultRestRequestOptions { Reason = "Role Linking" });
-                    await Task.Delay(1000);
-                }
+                    var role = guild.GetRole(x);
+                    return role is null || !role.CanBeManaged();
+                });
+
+                _actions.AddRange(rolesToAdd.Select(x => new RoleLinkAction(guild.Id, e.NewMember.Id, x, RoleLinkActionType.Added)));
+                _actions.AddRange(rolesToRemove.Select(x => new RoleLinkAction(guild.Id, e.NewMember.Id, x, RoleLinkActionType.Removed)));
             }
-            catch (Exception ex)
+
+            foreach (var roleId in rolesToAdd)
             {
-                _logger.LogError(ex, "Exception thrown on member updated");
+                await e.NewMember.GrantRoleAsync(roleId, new DefaultRestRequestOptions { Reason = "Role Linking" });
+                await Task.Delay(1000);
             }
-        }
-
-        private class RoleLinkAction
-        {
-            public ulong GuildId { get; }
-            public ulong UserId { get; }
-            public ulong RoleId { get; }
-            public RoleLinkActionType ActionType { get; }
-
-            public RoleLinkAction(ulong guildId, ulong userId, ulong roleId, RoleLinkActionType actionType)
+            foreach (var roleId in rolesToRemove)
             {
-                GuildId = guildId;
-                UserId = userId;
-                RoleId = roleId;
-                ActionType = actionType;
+                await e.NewMember.RevokeRoleAsync(roleId, new DefaultRestRequestOptions { Reason = "Role Linking" });
+                await Task.Delay(1000);
             }
         }
-
-        private enum RoleLinkActionType
+        catch (Exception ex)
         {
-            Added,
-            Removed
+            _logger.LogError(ex, "Exception thrown on member updated");
         }
+    }
+
+    private class RoleLinkAction
+    {
+        public ulong GuildId { get; }
+        public ulong UserId { get; }
+        public ulong RoleId { get; }
+        public RoleLinkActionType ActionType { get; }
+
+        public RoleLinkAction(ulong guildId, ulong userId, ulong roleId, RoleLinkActionType actionType)
+        {
+            GuildId = guildId;
+            UserId = userId;
+            RoleId = roleId;
+            ActionType = actionType;
+        }
+    }
+
+    private enum RoleLinkActionType
+    {
+        Added,
+        Removed
     }
 }

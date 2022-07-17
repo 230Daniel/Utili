@@ -1,16 +1,15 @@
-﻿namespace Utili.Database.Entities
+﻿namespace Utili.Database.Entities;
+
+public class PremiumSlot
 {
-    public class PremiumSlot
+    public int SlotId { get; internal set; }
+    public ulong UserId { get; internal set; }
+    public ulong GuildId { get; set; }
+
+    public PremiumSlot(ulong userId)
     {
-        public int SlotId { get; internal set; }
-        public ulong UserId { get; internal set; }
-        public ulong GuildId { get; set; }
-
-        public PremiumSlot(ulong userId)
-        {
-            UserId = userId;
-        }
-
-        internal PremiumSlot() { }
+        UserId = userId;
     }
+
+    internal PremiumSlot() { }
 }

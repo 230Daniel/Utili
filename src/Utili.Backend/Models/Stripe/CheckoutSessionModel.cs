@@ -1,7 +1,6 @@
-﻿namespace Utili.Backend.Models.Stripe
+﻿namespace Utili.Backend.Models.Stripe;
+
+public class CheckoutSessionModel
 {
-    public class CheckoutSessionModel
-    {
-        public string SessionId { get; set; }
-    }
+    public string SessionId { get; set; }
 }

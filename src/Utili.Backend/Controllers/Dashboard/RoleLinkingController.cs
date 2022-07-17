@@ -12,60 +12,59 @@ using Utili.Backend.Models;
 using Utili.Backend.Extensions;
 using Utili.Backend.Services;
 
-namespace Utili.Backend.Controllers
+namespace Utili.Backend.Controllers;
+
+[DiscordGuildAuthorise]
+[Route("dashboard/{GuildId}/role-linking")]
+public class RoleLinkingController : Controller
 {
-    [DiscordGuildAuthorise]
-    [Route("dashboard/{GuildId}/role-linking")]
-    public class RoleLinkingController : Controller
+    private readonly IMapper _mapper;
+    private readonly DatabaseContext _dbContext;
+    private readonly IsPremiumService _isPremiumService;
+
+    public RoleLinkingController(IMapper mapper, DatabaseContext dbContext, IsPremiumService isPremiumService)
     {
-        private readonly IMapper _mapper;
-        private readonly DatabaseContext _dbContext;
-        private readonly IsPremiumService _isPremiumService;
+        _mapper = mapper;
+        _dbContext = dbContext;
+        _isPremiumService = isPremiumService;
+    }
 
-        public RoleLinkingController(IMapper mapper, DatabaseContext dbContext, IsPremiumService isPremiumService)
+    [HttpGet]
+    public async Task<IActionResult> GetAsync([Required] ulong guildId)
+    {
+        var configurations = await _dbContext.RoleLinkingConfigurations.GetAllForGuildAsync(guildId);
+        return Json(_mapper.Map<IEnumerable<RoleLinkingConfigurationModel>>(configurations));
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> PostAsync([Required] ulong guildId, [FromBody] List<RoleLinkingConfigurationModel> models)
+    {
+        var configurations = await _dbContext.RoleLinkingConfigurations.GetAllForGuildAsync(guildId);
+
+        if (models.Count > 2 &&
+            !await _isPremiumService.GetIsGuildPremiumAsync(guildId))
+            models = models.OrderBy(x => x.Id).Take(2).ToList();
+
+        foreach (var model in models)
         {
-            _mapper = mapper;
-            _dbContext = dbContext;
-            _isPremiumService = isPremiumService;
-        }
+            var configuration = configurations.FirstOrDefault(x => x.Id == model.Id);
 
-        [HttpGet]
-        public async Task<IActionResult> GetAsync([Required] ulong guildId)
-        {
-            var configurations = await _dbContext.RoleLinkingConfigurations.GetAllForGuildAsync(guildId);
-            return Json(_mapper.Map<IEnumerable<RoleLinkingConfigurationModel>>(configurations));
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> PostAsync([Required] ulong guildId, [FromBody] List<RoleLinkingConfigurationModel> models)
-        {
-            var configurations = await _dbContext.RoleLinkingConfigurations.GetAllForGuildAsync(guildId);
-
-            if (models.Count > 2 &&
-                !await _isPremiumService.GetIsGuildPremiumAsync(guildId))
-                models = models.OrderBy(x => x.Id).Take(2).ToList();
-
-            foreach (var model in models)
+            if (configuration is null)
             {
-                var configuration = configurations.FirstOrDefault(x => x.Id == model.Id);
-
-                if (configuration is null)
-                {
-                    configuration = new RoleLinkingConfiguration(guildId);
-                    model.ApplyTo(configuration);
-                    await _dbContext.RoleLinkingConfigurations.AddAsync(configuration);
-                }
-                else
-                {
-                    model.ApplyTo(configuration);
-                    _dbContext.RoleLinkingConfigurations.Update(configuration);
-                }
+                configuration = new RoleLinkingConfiguration(guildId);
+                model.ApplyTo(configuration);
+                await _dbContext.RoleLinkingConfigurations.AddAsync(configuration);
             }
-
-            _dbContext.RoleLinkingConfigurations.RemoveRange(configurations.Where(x => models.All(y => y.Id != x.Id)));
-            await _dbContext.SetHasFeatureAsync(guildId, BotFeatures.RoleLinking, models.Any());
-            await _dbContext.SaveChangesAsync();
-            return Ok();
+            else
+            {
+                model.ApplyTo(configuration);
+                _dbContext.RoleLinkingConfigurations.Update(configuration);
+            }
         }
+
+        _dbContext.RoleLinkingConfigurations.RemoveRange(configurations.Where(x => models.All(y => y.Id != x.Id)));
+        await _dbContext.SetHasFeatureAsync(guildId, BotFeatures.RoleLinking, models.Any());
+        await _dbContext.SaveChangesAsync();
+        return Ok();
     }
 }

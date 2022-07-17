@@ -21,143 +21,142 @@ using Utili.Backend.Extensions;
 using Utili.Backend.Middleware;
 using Utili.Backend.Services;
 
-namespace Utili.Backend
+namespace Utili.Backend;
+
+public class Startup
 {
-    public class Startup
+    private readonly IConfiguration _configuration;
+
+    public Startup(IConfiguration configuration)
     {
-        private readonly IConfiguration _configuration;
+        _configuration = configuration;
+    }
 
-        public Startup(IConfiguration configuration)
+    public void ConfigureServices(IServiceCollection services)
+    {
+        services.AddCors(options =>
+            options.AddPolicy("CorsPolicy",
+                builder => builder
+                    .WithOrigins(_configuration["Frontend:Origin"])
+                    .AllowAnyMethod()
+                    .AllowAnyHeader()
+                    .AllowCredentials()));
+
+        services.AddSingleton<IAuthorizationPolicyProvider, PolicyProvider>();
+        services.AddSingleton<IAuthorizationHandler, DiscordAuthorisationHandler>();
+        services.AddSingleton<IAuthorizationHandler, DiscordGuildAuthorisationHandler>();
+        services.AddSingleton<IAuthorizationMiddlewareResultHandler, ResultHandler>();
+        services.AddRestClient();
+        services.AddToken(Disqord.Token.Bot(_configuration["Discord:Token"]));
+
+        services.AddHsts(options =>
         {
-            _configuration = configuration;
-        }
+            options.MaxAge = TimeSpan.FromDays(30);
+            options.IncludeSubDomains = true;
+        });
 
-        public void ConfigureServices(IServiceCollection services)
+        services.AddMvc(options =>
         {
-            services.AddCors(options =>
-                options.AddPolicy("CorsPolicy",
-                    builder => builder
-                        .WithOrigins(_configuration["Frontend:Origin"])
-                        .AllowAnyMethod()
-                        .AllowAnyHeader()
-                        .AllowCredentials()));
-
-            services.AddSingleton<IAuthorizationPolicyProvider, PolicyProvider>();
-            services.AddSingleton<IAuthorizationHandler, DiscordAuthorisationHandler>();
-            services.AddSingleton<IAuthorizationHandler, DiscordGuildAuthorisationHandler>();
-            services.AddSingleton<IAuthorizationMiddlewareResultHandler, ResultHandler>();
-            services.AddRestClient();
-            services.AddToken(Disqord.Token.Bot(_configuration["Discord:Token"]));
-
-            services.AddHsts(options =>
+            options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute());
+            options.Filters.Add(new ResponseCacheAttribute
             {
-                options.MaxAge = TimeSpan.FromDays(30);
-                options.IncludeSubDomains = true;
+                Location = ResponseCacheLocation.None,
+                NoStore = true
             });
+        });
 
-            services.AddMvc(options =>
+        services.AddControllers(options =>
+        {
+            options.Filters.Add(new ResponseCacheAttribute
             {
-                options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute());
-                options.Filters.Add(new ResponseCacheAttribute
-                {
-                    Location = ResponseCacheLocation.None,
-                    NoStore = true
-                });
+                Location = ResponseCacheLocation.None,
+                NoStore = true
             });
+        });
 
-            services.AddControllers(options =>
+        services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+        services.AddHttpContextAccessor();
+        services.AddOptions();
+        services.AddMemoryCache();
+
+        services.AddAuthentication(options =>
             {
-                options.Filters.Add(new ResponseCacheAttribute
-                {
-                    Location = ResponseCacheLocation.None,
-                    NoStore = true
-                });
-            });
-
-            services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
-            services.AddHttpContextAccessor();
-            services.AddOptions();
-            services.AddMemoryCache();
-
-            services.AddAuthentication(options =>
-                {
-                    options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                })
-                .AddCookie(options =>
-                {
-                    // Same-site none is safe because the cookie is http-only
-                    options.Cookie.SameSite = SameSiteMode.None;
-                })
-                .AddDiscord(options =>
-                {
-                    options.ClientId = _configuration["Discord:ClientId"];
-                    options.ClientSecret = _configuration["Discord:ClientSecret"];
-                    options.AccessDeniedPath = "/";
-                    options.Scope.Add("email");
-                    options.Scope.Add("guilds");
-                    options.SaveTokens = true;
-                    options.ClaimActions.MapAll();
-                });
-
-            services.AddAntiforgery(options =>
+                options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+            })
+            .AddCookie(options =>
             {
-                options.HeaderName = "X-XSRF-TOKEN";
+                // Same-site none is safe because the cookie is http-only
                 options.Cookie.SameSite = SameSiteMode.None;
-                options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+            })
+            .AddDiscord(options =>
+            {
+                options.ClientId = _configuration["Discord:ClientId"];
+                options.ClientSecret = _configuration["Discord:ClientSecret"];
+                options.AccessDeniedPath = "/";
+                options.Scope.Add("email");
+                options.Scope.Add("guilds");
+                options.SaveTokens = true;
+                options.ClaimActions.MapAll();
             });
 
-            services.AddSingleton<IIpPolicyStore, MemoryCacheIpPolicyStore>();
-            services.AddSingleton<IRateLimitCounterStore, MemoryCacheRateLimitCounterStore>();
-            services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();
-
-            services.AddBearerClientFactory();
-            services.AddSingleton<DiscordClientService>();
-            services.AddSingleton<DiscordUserGuildsService>();
-            services.AddSingleton<DiscordRestService>();
-            services.AddHostedService<SlotDeletionService>();
-
-            services.AddDbContext<DatabaseContext>();
-
-            services.AddScoped<Services.CustomerService>();
-            services.AddScoped<IsPremiumService>();
-            services.AddSingleton(new StripeClient(_configuration["Stripe:SecretKey"]));
-
-            // Set a 10 second timeout on connections to hopefully avoid deadlock of DiscordUserGuildsService and other similar services
-            // All other timeouts in the client have reasonable default values
-            services.Configure<DefaultHttpClientFactoryConfiguration>(options =>
-                options.ClientConfiguration = handler =>
-                    handler.ConnectTimeout = TimeSpan.FromSeconds(10));
-
-            services.Configure<IpRateLimitOptions>(_configuration.GetSection("IpRateLimiting"));
-            services.Configure<IpRateLimitPolicies>(_configuration.GetSection("IpRateLimitPolicies"));
-
-            DatabaseContextExtensions.DefaultPrefix = _configuration["Discord:DefaultPrefix"];
-        }
-
-        public static void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        services.AddAntiforgery(options =>
         {
-            app.UseIpRateLimiting();
+            options.HeaderName = "X-XSRF-TOKEN";
+            options.Cookie.SameSite = SameSiteMode.None;
+            options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+        });
 
-            if (!env.IsDevelopment())
-            {
-                app.UseMiddleware<AlwaysHttpsMiddleware>();
-                app.UseHsts();
-            }
+        services.AddSingleton<IIpPolicyStore, MemoryCacheIpPolicyStore>();
+        services.AddSingleton<IRateLimitCounterStore, MemoryCacheRateLimitCounterStore>();
+        services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();
 
-            app.UseMiddleware<NoCacheMiddleware>();
+        services.AddBearerClientFactory();
+        services.AddSingleton<DiscordClientService>();
+        services.AddSingleton<DiscordUserGuildsService>();
+        services.AddSingleton<DiscordRestService>();
+        services.AddHostedService<SlotDeletionService>();
 
-            app.UseHttpsRedirection();
-            app.UseRouting();
-            app.UseCors("CorsPolicy");
-            app.UseAuthentication();
-            app.UseAuthorization();
+        services.AddDbContext<DatabaseContext>();
 
-            app.UseMiddleware<UserAccountsMiddleware>();
+        services.AddScoped<Services.CustomerService>();
+        services.AddScoped<IsPremiumService>();
+        services.AddSingleton(new StripeClient(_configuration["Stripe:SecretKey"]));
 
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapControllers();
-            });
+        // Set a 10 second timeout on connections to hopefully avoid deadlock of DiscordUserGuildsService and other similar services
+        // All other timeouts in the client have reasonable default values
+        services.Configure<DefaultHttpClientFactoryConfiguration>(options =>
+            options.ClientConfiguration = handler =>
+                handler.ConnectTimeout = TimeSpan.FromSeconds(10));
+
+        services.Configure<IpRateLimitOptions>(_configuration.GetSection("IpRateLimiting"));
+        services.Configure<IpRateLimitPolicies>(_configuration.GetSection("IpRateLimitPolicies"));
+
+        DatabaseContextExtensions.DefaultPrefix = _configuration["Discord:DefaultPrefix"];
+    }
+
+    public static void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+    {
+        app.UseIpRateLimiting();
+
+        if (!env.IsDevelopment())
+        {
+            app.UseMiddleware<AlwaysHttpsMiddleware>();
+            app.UseHsts();
         }
+
+        app.UseMiddleware<NoCacheMiddleware>();
+
+        app.UseHttpsRedirection();
+        app.UseRouting();
+        app.UseCors("CorsPolicy");
+        app.UseAuthentication();
+        app.UseAuthorization();
+
+        app.UseMiddleware<UserAccountsMiddleware>();
+
+        app.UseEndpoints(endpoints =>
+        {
+            endpoints.MapControllers();
+        });
     }
 }

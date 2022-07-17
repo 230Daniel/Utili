@@ -10,91 +10,90 @@ using Utili.Database.Entities;
 using Utili.Database.Extensions;
 using Utili.Bot.Extensions;
 
-namespace Utili.Bot.Services
+namespace Utili.Bot.Services;
+
+public class MessageFilterService
 {
-    public class MessageFilterService
+    private readonly ILogger<MessageFilterService> _logger;
+    private readonly DiscordClientBase _client;
+
+    private ConcurrentDictionary<Snowflake, DateTime> _offenceDictionary;
+
+    public MessageFilterService(ILogger<MessageFilterService> logger, DiscordClientBase client)
     {
-        private readonly ILogger<MessageFilterService> _logger;
-        private readonly DiscordClientBase _client;
+        _logger = logger;
+        _client = client;
+        _offenceDictionary = new();
+    }
 
-        private ConcurrentDictionary<Snowflake, DateTime> _offenceDictionary;
-
-        public MessageFilterService(ILogger<MessageFilterService> logger, DiscordClientBase client)
+    /// <returns>True if the message was deleted by the filter</returns>
+    public async Task<bool> MessageReceived(IServiceScope scope, MessageReceivedEventArgs e)
+    {
+        try
         {
-            _logger = logger;
-            _client = client;
-            _offenceDictionary = new();
-        }
+            if ((e.Message as IUserMessage)?.Type == UserMessageType.ThreadStarterMessage || !e.Channel.BotHasPermissions(Permission.ViewChannels | Permission.ManageMessages))
+                return false;
 
-        /// <returns>True if the message was deleted by the filter</returns>
-        public async Task<bool> MessageReceived(IServiceScope scope, MessageReceivedEventArgs e)
-        {
-            try
+            var userMessage = e.Message as IUserMessage;
+            if (userMessage is not null &&
+                e.Member is not null &&
+                e.Member.Id == _client.CurrentUser.Id &&
+                userMessage.Embeds.Count > 0 &&
+                userMessage.Embeds[0].Author?.Name == "Message deleted")
+                return false;
+            if (userMessage?.WebhookId is not null) return true;
+
+            var db = scope.GetDbContext();
+            var configChannelId = (e.Channel as IThreadChannel)?.ChannelId ?? e.ChannelId;
+            var config = await db.MessageFilterConfigurations.GetForGuildChannelAsync(e.GuildId.Value, configChannelId);
+            if (config is null || config.Mode == MessageFilterMode.All || e.Channel is IThreadChannel && !config.EnforceInThreads) return false;
+
+            if (e.Message is not IUserMessage message)
             {
-                if ((e.Message as IUserMessage)?.Type == UserMessageType.ThreadStarterMessage || !e.Channel.BotHasPermissions(Permission.ViewChannels | Permission.ManageMessages))
-                    return false;
-
-                var userMessage = e.Message as IUserMessage;
-                if (userMessage is not null &&
-                    e.Member is not null &&
-                    e.Member.Id == _client.CurrentUser.Id &&
-                    userMessage.Embeds.Count > 0 &&
-                    userMessage.Embeds[0].Author?.Name == "Message deleted")
-                    return false;
-                if (userMessage?.WebhookId is not null) return true;
-
-                var db = scope.GetDbContext();
-                var configChannelId = (e.Channel as IThreadChannel)?.ChannelId ?? e.ChannelId;
-                var config = await db.MessageFilterConfigurations.GetForGuildChannelAsync(e.GuildId.Value, configChannelId);
-                if (config is null || config.Mode == MessageFilterMode.All || e.Channel is IThreadChannel && !config.EnforceInThreads) return false;
-
-                if (e.Message is not IUserMessage message)
-                {
-                    await e.Message.DeleteAsync(new DefaultRestRequestOptions { Reason = "Message Filter" });
-                    return true;
-                }
-
-                if (!DoesMessageObeyRule(message, config.Mode, config.RegEx, out var allowedTypes))
-                {
-                    await e.Message.DeleteAsync(new DefaultRestRequestOptions { Reason = "Message Filter" });
-                    if (e.Member is null || e.Member.IsBot) return true;
-
-                    if (_offenceDictionary.TryGetValue(e.ChannelId, out var recentOffence) && recentOffence > DateTime.UtcNow.AddSeconds(-4))
-                        return true;
-
-                    _offenceDictionary.AddOrUpdate(e.ChannelId, DateTime.UtcNow, (_, _) => DateTime.UtcNow);
-
-                    var deletionMessage = string.IsNullOrWhiteSpace(config.DeletionMessage)
-                        ? allowedTypes.Contains(",") ? $"Your message must contain one of `{allowedTypes}` to be allowed in {e.Channel.Mention}"
-                        : $"Your message must contain `{allowedTypes}` to be allowed in {e.Channel.Mention}"
-                        : config.DeletionMessage;
-
-                    var sent = await e.Channel.SendFailureAsync("Message deleted", deletionMessage);
-                    await Task.Delay(8000);
-                    await sent.DeleteAsync();
-                    return true;
-                }
+                await e.Message.DeleteAsync(new DefaultRestRequestOptions { Reason = "Message Filter" });
+                return true;
             }
-            catch (Exception ex)
+
+            if (!DoesMessageObeyRule(message, config.Mode, config.RegEx, out var allowedTypes))
             {
-                _logger.LogError(ex, "Exception thrown on message received ({Guild}/{Channel}/{Message})", e.GuildId, e.ChannelId, e.MessageId);
+                await e.Message.DeleteAsync(new DefaultRestRequestOptions { Reason = "Message Filter" });
+                if (e.Member is null || e.Member.IsBot) return true;
+
+                if (_offenceDictionary.TryGetValue(e.ChannelId, out var recentOffence) && recentOffence > DateTime.UtcNow.AddSeconds(-4))
+                    return true;
+
+                _offenceDictionary.AddOrUpdate(e.ChannelId, DateTime.UtcNow, (_, _) => DateTime.UtcNow);
+
+                var deletionMessage = string.IsNullOrWhiteSpace(config.DeletionMessage)
+                    ? allowedTypes.Contains(",") ? $"Your message must contain one of `{allowedTypes}` to be allowed in {e.Channel.Mention}"
+                    : $"Your message must contain `{allowedTypes}` to be allowed in {e.Channel.Mention}"
+                    : config.DeletionMessage;
+
+                var sent = await e.Channel.SendFailureAsync("Message deleted", deletionMessage);
+                await Task.Delay(8000);
+                await sent.DeleteAsync();
+                return true;
             }
-            return false;
         }
-
-        private static bool DoesMessageObeyRule(IUserMessage message, MessageFilterMode mode, string regEx, out string allowedTypes)
+        catch (Exception ex)
         {
-            allowedTypes = mode.ToString();
-
-            if ((mode & MessageFilterMode.All) != 0) return true;
-            if ((mode & MessageFilterMode.Images) != 0 && message.IsImage()) return true;
-            if ((mode & MessageFilterMode.Videos) != 0 && message.IsVideo()) return true;
-            if ((mode & MessageFilterMode.Music) != 0 && message.IsMusic()) return true;
-            if ((mode & MessageFilterMode.Attachments) != 0 && message.IsAttachment()) return true;
-            if ((mode & MessageFilterMode.Links) != 0 && message.IsLink()) return true;
-            if ((mode & MessageFilterMode.RegEx) != 0 && message.IsRegex(regEx)) return true;
-
-            return false;
+            _logger.LogError(ex, "Exception thrown on message received ({Guild}/{Channel}/{Message})", e.GuildId, e.ChannelId, e.MessageId);
         }
+        return false;
+    }
+
+    private static bool DoesMessageObeyRule(IUserMessage message, MessageFilterMode mode, string regEx, out string allowedTypes)
+    {
+        allowedTypes = mode.ToString();
+
+        if ((mode & MessageFilterMode.All) != 0) return true;
+        if ((mode & MessageFilterMode.Images) != 0 && message.IsImage()) return true;
+        if ((mode & MessageFilterMode.Videos) != 0 && message.IsVideo()) return true;
+        if ((mode & MessageFilterMode.Music) != 0 && message.IsMusic()) return true;
+        if ((mode & MessageFilterMode.Attachments) != 0 && message.IsAttachment()) return true;
+        if ((mode & MessageFilterMode.Links) != 0 && message.IsLink()) return true;
+        if ((mode & MessageFilterMode.RegEx) != 0 && message.IsRegex(regEx)) return true;
+
+        return false;
     }
 }

@@ -7,38 +7,37 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Utili.Bot.Extensions;
 
-namespace Utili.Bot.Services
+namespace Utili.Bot.Services;
+
+internal class PrefixProvider : IPrefixProvider
 {
-    internal class PrefixProvider : IPrefixProvider
+    private IConfiguration _config;
+    private readonly IServiceScopeFactory _scopeFactory;
+
+    public PrefixProvider(IConfiguration config, IServiceScopeFactory scopeFactory)
     {
-        private IConfiguration _config;
-        private readonly IServiceScopeFactory _scopeFactory;
+        _config = config;
+        _scopeFactory = scopeFactory;
+    }
 
-        public PrefixProvider(IConfiguration config, IServiceScopeFactory scopeFactory)
+    public async ValueTask<IEnumerable<IPrefix>> GetPrefixesAsync(IGatewayUserMessage message)
+    {
+        if (!message.GuildId.HasValue)
         {
-            _config = config;
-            _scopeFactory = scopeFactory;
-        }
-
-        public async ValueTask<IEnumerable<IPrefix>> GetPrefixesAsync(IGatewayUserMessage message)
-        {
-            if (!message.GuildId.HasValue)
-            {
-                return new IPrefix[]
-                {
-                    new StringPrefix(_config["Discord:DefaultPrefix"]),
-                    new MentionPrefix((message.Client as DiscordClientBase).CurrentUser.Id)
-                };
-            }
-
-            using var scope = _scopeFactory.CreateScope();
-            var config = await scope.GetCoreConfigurationAsync(message.GuildId.Value);
-
             return new IPrefix[]
             {
-                new StringPrefix(string.IsNullOrWhiteSpace(config?.Prefix) ? _config["Discord:DefaultPrefix"] : config.Prefix),
+                new StringPrefix(_config["Discord:DefaultPrefix"]),
                 new MentionPrefix((message.Client as DiscordClientBase).CurrentUser.Id)
             };
         }
+
+        using var scope = _scopeFactory.CreateScope();
+        var config = await scope.GetCoreConfigurationAsync(message.GuildId.Value);
+
+        return new IPrefix[]
+        {
+            new StringPrefix(string.IsNullOrWhiteSpace(config?.Prefix) ? _config["Discord:DefaultPrefix"] : config.Prefix),
+            new MentionPrefix((message.Client as DiscordClientBase).CurrentUser.Id)
+        };
     }
 }

@@ -1,8 +1,7 @@
-﻿namespace Utili.Backend.Models.Stripe
+﻿namespace Utili.Backend.Models.Stripe;
+
+public class CustomerCurrencyModel
 {
-    public class CustomerCurrencyModel
-    {
-        public string Currency { get; set; }
-        public bool Locked { get; set; }
-    }
+    public string Currency { get; set; }
+    public bool Locked { get; set; }
 }

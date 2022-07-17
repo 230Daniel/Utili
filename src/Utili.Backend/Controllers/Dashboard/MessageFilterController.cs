@@ -11,60 +11,59 @@ using Utili.Backend.Authorisation;
 using Utili.Backend.Models;
 using Utili.Backend.Extensions;
 
-namespace Utili.Backend.Controllers
+namespace Utili.Backend.Controllers;
+
+[DiscordGuildAuthorise]
+[Route("dashboard/{GuildId}/message-filter")]
+public class MessageFilterController : Controller
 {
-    [DiscordGuildAuthorise]
-    [Route("dashboard/{GuildId}/message-filter")]
-    public class MessageFilterController : Controller
+    private readonly IMapper _mapper;
+    private readonly DatabaseContext _dbContext;
+
+    public MessageFilterController(IMapper mapper, DatabaseContext dbContext)
     {
-        private readonly IMapper _mapper;
-        private readonly DatabaseContext _dbContext;
+        _mapper = mapper;
+        _dbContext = dbContext;
+    }
 
-        public MessageFilterController(IMapper mapper, DatabaseContext dbContext)
+    [HttpGet]
+    public async Task<IActionResult> GetAsync([Required] ulong guildId)
+    {
+        var configurations = await _dbContext.MessageFilterConfigurations.GetAllForGuildAsync(guildId);
+        foreach (var configuration in configurations)
         {
-            _mapper = mapper;
-            _dbContext = dbContext;
+            configuration.RegEx ??= "";
+            configuration.DeletionMessage ??= "";
         }
+        return Json(_mapper.Map<IEnumerable<MessageFilterConfigurationModel>>(configurations));
+    }
 
-        [HttpGet]
-        public async Task<IActionResult> GetAsync([Required] ulong guildId)
+    [HttpPost]
+    public async Task<IActionResult> PostAsync([Required] ulong guildId, [FromBody] List<MessageFilterConfigurationModel> models)
+    {
+        var configurations = await _dbContext.MessageFilterConfigurations.GetAllForGuildAsync(guildId);
+
+        foreach (var model in models)
         {
-            var configurations = await _dbContext.MessageFilterConfigurations.GetAllForGuildAsync(guildId);
-            foreach (var configuration in configurations)
+            var channelId = ulong.Parse(model.ChannelId);
+            var configuration = configurations.FirstOrDefault(x => x.ChannelId == channelId);
+
+            if (configuration is null)
             {
-                configuration.RegEx ??= "";
-                configuration.DeletionMessage ??= "";
+                configuration = new MessageFilterConfiguration(guildId, channelId);
+                model.ApplyTo(configuration);
+                _dbContext.MessageFilterConfigurations.Add(configuration);
             }
-            return Json(_mapper.Map<IEnumerable<MessageFilterConfigurationModel>>(configurations));
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> PostAsync([Required] ulong guildId, [FromBody] List<MessageFilterConfigurationModel> models)
-        {
-            var configurations = await _dbContext.MessageFilterConfigurations.GetAllForGuildAsync(guildId);
-
-            foreach (var model in models)
+            else
             {
-                var channelId = ulong.Parse(model.ChannelId);
-                var configuration = configurations.FirstOrDefault(x => x.ChannelId == channelId);
-
-                if (configuration is null)
-                {
-                    configuration = new MessageFilterConfiguration(guildId, channelId);
-                    model.ApplyTo(configuration);
-                    _dbContext.MessageFilterConfigurations.Add(configuration);
-                }
-                else
-                {
-                    model.ApplyTo(configuration);
-                    _dbContext.MessageFilterConfigurations.Update(configuration);
-                }
+                model.ApplyTo(configuration);
+                _dbContext.MessageFilterConfigurations.Update(configuration);
             }
-
-            _dbContext.MessageFilterConfigurations.RemoveRange(configurations.Where(x => models.All(y => y.ChannelId != x.ChannelId.ToString())));
-            await _dbContext.SetHasFeatureAsync(guildId, BotFeatures.MessageFilter, models.Any());
-            await _dbContext.SaveChangesAsync();
-            return Ok();
         }
+
+        _dbContext.MessageFilterConfigurations.RemoveRange(configurations.Where(x => models.All(y => y.ChannelId != x.ChannelId.ToString())));
+        await _dbContext.SetHasFeatureAsync(guildId, BotFeatures.MessageFilter, models.Any());
+        await _dbContext.SaveChangesAsync();
+        return Ok();
     }
 }

@@ -10,49 +10,48 @@ using Utili.Backend.Authorisation;
 using Utili.Backend.Models;
 using Utili.Backend.Extensions;
 
-namespace Utili.Backend.Controllers
+namespace Utili.Backend.Controllers;
+
+[DiscordGuildAuthorise]
+[Route("dashboard/{GuildId}/reputation")]
+public class ReputationController : Controller
 {
-    [DiscordGuildAuthorise]
-    [Route("dashboard/{GuildId}/reputation")]
-    public class ReputationController : Controller
+    private readonly IMapper _mapper;
+    private readonly DatabaseContext _dbContext;
+
+    public ReputationController(IMapper mapper, DatabaseContext dbContext)
     {
-        private readonly IMapper _mapper;
-        private readonly DatabaseContext _dbContext;
+        _mapper = mapper;
+        _dbContext = dbContext;
+    }
 
-        public ReputationController(IMapper mapper, DatabaseContext dbContext)
+    [HttpGet]
+    public async Task<IActionResult> GetAsync([Required] ulong guildId)
+    {
+        var configuration = await _dbContext.ReputationConfigurations.GetForGuildWithEmojisAsync(guildId);
+        configuration ??= new ReputationConfiguration(guildId);
+        return Json(_mapper.Map<ReputationConfigurationModel>(configuration));
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> PostAsync([Required] ulong guildId, [FromBody] ReputationConfigurationModel model)
+    {
+        var configuration = await _dbContext.ReputationConfigurations.GetForGuildWithEmojisAsync(guildId);
+
+        if (configuration is null)
         {
-            _mapper = mapper;
-            _dbContext = dbContext;
+            configuration = new ReputationConfiguration(guildId);
+            model.ApplyTo(configuration);
+            _dbContext.ReputationConfigurations.Add(configuration);
+        }
+        else
+        {
+            model.ApplyTo(configuration);
+            _dbContext.ReputationConfigurations.Update(configuration);
         }
 
-        [HttpGet]
-        public async Task<IActionResult> GetAsync([Required] ulong guildId)
-        {
-            var configuration = await _dbContext.ReputationConfigurations.GetForGuildWithEmojisAsync(guildId);
-            configuration ??= new ReputationConfiguration(guildId);
-            return Json(_mapper.Map<ReputationConfigurationModel>(configuration));
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> PostAsync([Required] ulong guildId, [FromBody] ReputationConfigurationModel model)
-        {
-            var configuration = await _dbContext.ReputationConfigurations.GetForGuildWithEmojisAsync(guildId);
-
-            if (configuration is null)
-            {
-                configuration = new ReputationConfiguration(guildId);
-                model.ApplyTo(configuration);
-                _dbContext.ReputationConfigurations.Add(configuration);
-            }
-            else
-            {
-                model.ApplyTo(configuration);
-                _dbContext.ReputationConfigurations.Update(configuration);
-            }
-
-            await _dbContext.SetHasFeatureAsync(guildId, BotFeatures.Reputation, model.Emojis.Any());
-            await _dbContext.SaveChangesAsync();
-            return Ok();
-        }
+        await _dbContext.SetHasFeatureAsync(guildId, BotFeatures.Reputation, model.Emojis.Any());
+        await _dbContext.SaveChangesAsync();
+        return Ok();
     }
 }

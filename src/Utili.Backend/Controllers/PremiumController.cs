@@ -12,88 +12,87 @@ using Utili.Backend.Models;
 using Utili.Backend.Extensions;
 using Utili.Backend.Services;
 
-namespace Utili.Backend.Controllers
+namespace Utili.Backend.Controllers;
+
+[Route("premium")]
+public class PremiumController : Controller
 {
-    [Route("premium")]
-    public class PremiumController : Controller
+    private readonly IMapper _mapper;
+    private readonly DatabaseContext _databaseContext;
+    private readonly IsPremiumService _isPremiumService;
+
+    public PremiumController(
+        IMapper mapper,
+        DatabaseContext databaseContext,
+        IsPremiumService isPremiumService)
     {
-        private readonly IMapper _mapper;
-        private readonly DatabaseContext _databaseContext;
-        private readonly IsPremiumService _isPremiumService;
+        _mapper = mapper;
+        _databaseContext = databaseContext;
+        _isPremiumService = isPremiumService;
+    }
 
-        public PremiumController(
-            IMapper mapper,
-            DatabaseContext databaseContext,
-            IsPremiumService isPremiumService)
+    [DiscordGuildAuthorise]
+    [HttpGet("guild/{GuildId}")]
+    public async Task<IActionResult> GuildIsPremiumAsync([Required] ulong guildId)
+    {
+        var isPremium = await _isPremiumService.GetIsGuildPremiumAsync(guildId);
+        return Json(isPremium);
+    }
+
+    [DiscordAuthorise]
+    [HttpGet("slots")]
+    public async Task<IActionResult> SlotsAsync()
+    {
+        if (_isPremiumService.IsFree) return NotFound();
+
+        var user = HttpContext.GetDiscordUser();
+        var slots = await _databaseContext.PremiumSlots.GetAllForUserAsync(user.Id);
+        var subscriptions = await _databaseContext.Subscriptions.GetValidForUserAsync(user.Id);
+
+        if (slots.Count < subscriptions.Sum(x => x.Slots))
         {
-            _mapper = mapper;
-            _databaseContext = databaseContext;
-            _isPremiumService = isPremiumService;
-        }
-
-        [DiscordGuildAuthorise]
-        [HttpGet("guild/{GuildId}")]
-        public async Task<IActionResult> GuildIsPremiumAsync([Required] ulong guildId)
-        {
-            var isPremium = await _isPremiumService.GetIsGuildPremiumAsync(guildId);
-            return Json(isPremium);
-        }
-
-        [DiscordAuthorise]
-        [HttpGet("slots")]
-        public async Task<IActionResult> SlotsAsync()
-        {
-            if (_isPremiumService.IsFree) return NotFound();
-
-            var user = HttpContext.GetDiscordUser();
-            var slots = await _databaseContext.PremiumSlots.GetAllForUserAsync(user.Id);
-            var subscriptions = await _databaseContext.Subscriptions.GetValidForUserAsync(user.Id);
-
-            if (slots.Count < subscriptions.Sum(x => x.Slots))
+            while (slots.Count < subscriptions.Sum(x => x.Slots))
             {
-                while (slots.Count < subscriptions.Sum(x => x.Slots))
-                {
-                    var slot = new PremiumSlot(user.Id);
-                    _databaseContext.PremiumSlots.Add(slot);
-                    slots.Add(slot);
-                }
-                await _databaseContext.SaveChangesAsync();
+                var slot = new PremiumSlot(user.Id);
+                _databaseContext.PremiumSlots.Add(slot);
+                slots.Add(slot);
             }
-
-            return Json(_mapper.Map<IEnumerable<PremiumSlotModel>>(slots));
-        }
-
-        [DiscordAuthorise]
-        [HttpPost("slots")]
-        public async Task<IActionResult> SlotsAsync([FromBody] List<PremiumSlotModel> models)
-        {
-            if (_isPremiumService.IsFree) return NotFound();
-
-            var user = HttpContext.GetDiscordUser();
-            var slots = await _databaseContext.PremiumSlots.GetAllForUserAsync(user.Id);
-
-            foreach (var slot in slots)
-            {
-                var model = models.FirstOrDefault(x => x.SlotId == slot.SlotId);
-                if (model is null) continue;
-
-                model.ApplyTo(slot);
-                _databaseContext.PremiumSlots.Update(slot);
-            }
-
             await _databaseContext.SaveChangesAsync();
-            return Ok();
         }
 
-        [DiscordAuthorise]
-        [HttpGet("subscriptions")]
-        public async Task<IActionResult> SubscriptionsAsync()
+        return Json(_mapper.Map<IEnumerable<PremiumSlotModel>>(slots));
+    }
+
+    [DiscordAuthorise]
+    [HttpPost("slots")]
+    public async Task<IActionResult> SlotsAsync([FromBody] List<PremiumSlotModel> models)
+    {
+        if (_isPremiumService.IsFree) return NotFound();
+
+        var user = HttpContext.GetDiscordUser();
+        var slots = await _databaseContext.PremiumSlots.GetAllForUserAsync(user.Id);
+
+        foreach (var slot in slots)
         {
-            if (_isPremiumService.IsFree) return NotFound();
+            var model = models.FirstOrDefault(x => x.SlotId == slot.SlotId);
+            if (model is null) continue;
 
-            var user = HttpContext.GetDiscordUser();
-            var subscriptions = await _databaseContext.Subscriptions.GetAllForUserAsync(user.Id);
-            return Json(_mapper.Map<IEnumerable<SubscriptionModel>>(subscriptions));
+            model.ApplyTo(slot);
+            _databaseContext.PremiumSlots.Update(slot);
         }
+
+        await _databaseContext.SaveChangesAsync();
+        return Ok();
+    }
+
+    [DiscordAuthorise]
+    [HttpGet("subscriptions")]
+    public async Task<IActionResult> SubscriptionsAsync()
+    {
+        if (_isPremiumService.IsFree) return NotFound();
+
+        var user = HttpContext.GetDiscordUser();
+        var subscriptions = await _databaseContext.Subscriptions.GetAllForUserAsync(user.Id);
+        return Json(_mapper.Map<IEnumerable<SubscriptionModel>>(subscriptions));
     }
 }

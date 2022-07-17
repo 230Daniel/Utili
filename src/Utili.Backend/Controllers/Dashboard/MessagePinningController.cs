@@ -9,49 +9,48 @@ using Utili.Backend.Authorisation;
 using Utili.Backend.Models;
 using Utili.Backend.Extensions;
 
-namespace Utili.Backend.Controllers
+namespace Utili.Backend.Controllers;
+
+[DiscordGuildAuthorise]
+[Route("dashboard/{GuildId}/message-pinning")]
+public class MessagePinningController : Controller
 {
-    [DiscordGuildAuthorise]
-    [Route("dashboard/{GuildId}/message-pinning")]
-    public class MessagePinningController : Controller
+    private readonly IMapper _mapper;
+    private readonly DatabaseContext _dbContext;
+
+    public MessagePinningController(IMapper mapper, DatabaseContext dbContext)
     {
-        private readonly IMapper _mapper;
-        private readonly DatabaseContext _dbContext;
+        _mapper = mapper;
+        _dbContext = dbContext;
+    }
 
-        public MessagePinningController(IMapper mapper, DatabaseContext dbContext)
+    [HttpGet]
+    public async Task<IActionResult> GetAsync([Required] ulong guildId)
+    {
+        var configuration = await _dbContext.MessagePinningConfigurations.GetForGuildAsync(guildId);
+        configuration ??= new MessagePinningConfiguration(guildId);
+        return Json(_mapper.Map<MessagePinningConfigurationModel>(configuration));
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> PostAsync([Required] ulong guildId, [FromBody] MessagePinningConfigurationModel model)
+    {
+        var configuration = await _dbContext.MessagePinningConfigurations.GetForGuildAsync(guildId);
+
+        if (configuration is null)
         {
-            _mapper = mapper;
-            _dbContext = dbContext;
+            configuration = new MessagePinningConfiguration(guildId);
+            model.ApplyTo(configuration);
+            _dbContext.MessagePinningConfigurations.Add(configuration);
+        }
+        else
+        {
+            model.ApplyTo(configuration);
+            _dbContext.MessagePinningConfigurations.Update(configuration);
         }
 
-        [HttpGet]
-        public async Task<IActionResult> GetAsync([Required] ulong guildId)
-        {
-            var configuration = await _dbContext.MessagePinningConfigurations.GetForGuildAsync(guildId);
-            configuration ??= new MessagePinningConfiguration(guildId);
-            return Json(_mapper.Map<MessagePinningConfigurationModel>(configuration));
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> PostAsync([Required] ulong guildId, [FromBody] MessagePinningConfigurationModel model)
-        {
-            var configuration = await _dbContext.MessagePinningConfigurations.GetForGuildAsync(guildId);
-
-            if (configuration is null)
-            {
-                configuration = new MessagePinningConfiguration(guildId);
-                model.ApplyTo(configuration);
-                _dbContext.MessagePinningConfigurations.Add(configuration);
-            }
-            else
-            {
-                model.ApplyTo(configuration);
-                _dbContext.MessagePinningConfigurations.Update(configuration);
-            }
-
-            await _dbContext.SetHasFeatureAsync(guildId, BotFeatures.MessagePinning, true);
-            await _dbContext.SaveChangesAsync();
-            return Ok();
-        }
+        await _dbContext.SetHasFeatureAsync(guildId, BotFeatures.MessagePinning, true);
+        await _dbContext.SaveChangesAsync();
+        return Ok();
     }
 }

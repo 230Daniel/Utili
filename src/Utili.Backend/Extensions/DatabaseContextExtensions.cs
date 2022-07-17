@@ -3,32 +3,31 @@ using Utili.Database;
 using Utili.Database.Entities;
 using Utili.Database.Extensions;
 
-namespace Utili.Backend.Extensions
+namespace Utili.Backend.Extensions;
+
+public static class DatabaseContextExtensions
 {
-    public static class DatabaseContextExtensions
+    public static string DefaultPrefix { get; internal set; }
+
+    public static async Task SetHasFeatureAsync(this DatabaseContext dbContext, ulong guildId, BotFeatures feature, bool enabled)
     {
-        public static string DefaultPrefix { get; internal set; }
+        var coreConfig = await dbContext.CoreConfigurations.GetForGuildAsync(guildId);
 
-        public static async Task SetHasFeatureAsync(this DatabaseContext dbContext, ulong guildId, BotFeatures feature, bool enabled)
+        if (coreConfig is null)
         {
-            var coreConfig = await dbContext.CoreConfigurations.GetForGuildAsync(guildId);
-
-            if (coreConfig is null)
+            coreConfig = new CoreConfiguration(guildId)
             {
-                coreConfig = new CoreConfiguration(guildId)
-                {
-                    Prefix = DefaultPrefix,
-                    CommandsEnabled = true,
-                    NonCommandChannels = new()
-                };
-                coreConfig.SetHasFeature(feature, enabled);
-                dbContext.CoreConfigurations.Add(coreConfig);
-            }
-            else
-            {
-                coreConfig.SetHasFeature(feature, enabled);
-                dbContext.CoreConfigurations.Update(coreConfig);
-            }
+                Prefix = DefaultPrefix,
+                CommandsEnabled = true,
+                NonCommandChannels = new()
+            };
+            coreConfig.SetHasFeature(feature, enabled);
+            dbContext.CoreConfigurations.Add(coreConfig);
+        }
+        else
+        {
+            coreConfig.SetHasFeature(feature, enabled);
+            dbContext.CoreConfigurations.Update(coreConfig);
         }
     }
 }

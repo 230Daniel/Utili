@@ -1,10 +1,9 @@
-﻿namespace Utili.Backend.Models
+﻿namespace Utili.Backend.Models;
+
+public class GuildModel
 {
-    public class GuildModel
-    {
-        public string Id { get; init; }
-        public string Name { get; init; }
-        public string IconUrl { get; init; }
-        public bool IsManageable { get; init; }
-    }
+    public string Id { get; init; }
+    public string Name { get; init; }
+    public string IconUrl { get; init; }
+    public bool IsManageable { get; init; }
 }

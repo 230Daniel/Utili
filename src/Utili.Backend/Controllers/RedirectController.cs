@@ -1,21 +1,20 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 
-namespace Utili.Backend.Controllers
+namespace Utili.Backend.Controllers;
+
+public class RedirectController : Controller
 {
-    public class RedirectController : Controller
+    private readonly IConfiguration _configuration;
+
+    public RedirectController(IConfiguration configuration)
     {
-        private readonly IConfiguration _configuration;
+        _configuration = configuration;
+    }
 
-        public RedirectController(IConfiguration configuration)
-        {
-            _configuration = configuration;
-        }
-
-        [HttpGet("/")]
-        public IActionResult Get()
-        {
-            return Redirect($"{_configuration["Frontend:Origin"]}");
-        }
+    [HttpGet("/")]
+    public IActionResult Get()
+    {
+        return Redirect($"{_configuration["Frontend:Origin"]}");
     }
 }

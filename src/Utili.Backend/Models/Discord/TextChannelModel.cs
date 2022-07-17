@@ -1,8 +1,7 @@
-﻿namespace Utili.Backend.Models
+﻿namespace Utili.Backend.Models;
+
+public class TextChannelModel
 {
-    public class TextChannelModel
-    {
-        public string Id { get; set; }
-        public string Name { get; set; }
-    }
+    public string Id { get; set; }
+    public string Name { get; set; }
 }

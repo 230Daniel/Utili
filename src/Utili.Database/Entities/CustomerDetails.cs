@@ -1,15 +1,14 @@
-﻿namespace Utili.Database.Entities
+﻿namespace Utili.Database.Entities;
+
+public class CustomerDetails
 {
-    public class CustomerDetails
+    public string CustomerId { get; internal set; }
+    public ulong UserId { get; set; }
+
+    public CustomerDetails(string customerId)
     {
-        public string CustomerId { get; internal set; }
-        public ulong UserId { get; set; }
-
-        public CustomerDetails(string customerId)
-        {
-            CustomerId = customerId;
-        }
-
-        internal CustomerDetails() { }
+        CustomerId = customerId;
     }
+
+    internal CustomerDetails() { }
 }

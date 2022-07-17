@@ -1,13 +1,12 @@
 ﻿using Disqord.Bot;
 using Qmmands;
 
-namespace Utili.Bot.Commands
+namespace Utili.Bot.Commands;
+
+internal class DefaultCooldown : CooldownAttribute
 {
-    internal class DefaultCooldown : CooldownAttribute
+    public DefaultCooldown(int amount, int per)
+        : base(amount, per, CooldownMeasure.Seconds, CooldownBucketType.Channel)
     {
-        public DefaultCooldown(int amount, int per)
-            : base(amount, per, CooldownMeasure.Seconds, CooldownBucketType.Channel)
-        {
-        }
     }
 }

@@ -1,12 +1,11 @@
 ﻿using System;
 
-namespace Utili.Bot.Extensions
+namespace Utili.Bot.Extensions;
+
+internal static class DateTimeExtensions
 {
-    internal static class DateTimeExtensions
+    public static string ToUniversalFormat(this DateTime dt)
     {
-        public static string ToUniversalFormat(this DateTime dt)
-        {
-            return $"{dt.Year}-{dt.Month}-{dt.Day} {dt.Hour}:{dt.Minute}:{dt.Second}";
-        }
+        return $"{dt.Year}-{dt.Month}-{dt.Day} {dt.Hour}:{dt.Minute}:{dt.Second}";
     }
 }
