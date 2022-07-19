@@ -1,4 +1,4 @@
-.error-container{
+.error-container {
 	display: flex;
 	justify-content: center;
 	align-items: center;
@@ -6,11 +6,11 @@
 	color: var(--colour-text-invert);
 }
 
-.error-code{
+.error-code {
 	font-size: 40px;
 }
 
-.error-horizontal-seperator{
+.error-horizontal-seperator {
 	font-size: 50px;
 	color: var(--colour-text-invert-muted);
 	font-weight: 10;
@@ -20,7 +20,7 @@
 	user-select: none;
 }
 
-.error-short-description{
+.error-short-description {
 	font-size: 40px;
 }
 

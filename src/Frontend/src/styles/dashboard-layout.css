@@ -1,35 +1,35 @@
-.dashboard-title{
+.dashboard-title {
 	font-size: 50px !important;
 	font-weight: 100 !important;
 	margin-bottom: 30px;
-    color: var(--colour-text-invert) !important;
+	color: var(--colour-text-invert) !important;
 }
 
-.dashboard-subtitle{
+.dashboard-subtitle {
 	font-size: 28px;
-    font-weight: 100;
+	font-weight: 100;
 	color: var(--colour-text-invert-muted);
 	margin-top: -30px;
 	margin-bottom: 30px;
 }
 
-.dashboard-description{
+.dashboard-description {
 	font-size: 16px;
-    font-weight: 300;
+	font-weight: 300;
 	color: var(--colour-text-invert-muted);
 	margin-top: 30px;
 	margin-bottom: 40px;
 	padding-left: 40px;
 }
 
-.dashboard-container{
+.dashboard-container {
 	display: flex;
 	height: auto;
 	min-height: calc(100vh - 65px);
 	flex-direction: row;
 }
 
-.sidebar{
+.sidebar {
 	background-color: var(--colour-nav);
 	box-shadow: 5px -5px 10px var(--colour-shadow);
 	min-width: 300px;
@@ -42,20 +42,20 @@
 	scrollbar-width: thin;
 }
 
-.sidebar::-webkit-scrollbar{
+.sidebar::-webkit-scrollbar {
 	background-color: var(--colour-nav);
 	width: 10px;
 }
 
-.sidebar::-webkit-scrollbar-thumb{
+.sidebar::-webkit-scrollbar-thumb {
 	background-color: var(--colour-scrollbar-thumb);
 }
 
-.sidebar::-webkit-scrollbar-corner{
+.sidebar::-webkit-scrollbar-corner {
 	background-color: var(--colour-nav);
 }
 
-.sidebar-category{
+.sidebar-category {
 	background-color: var(--colour-sidebar-category);
 	border-radius: 0px 10px 10px 0px;
 	box-shadow: 2px 2px 2px var(--colour-shadow);
@@ -66,7 +66,7 @@
 	margin-bottom: 20px;
 }
 
-.sidebar-category-title{
+.sidebar-category-title {
 	height: 50px;
 	font-size: 18px;
 	display: flex;
@@ -75,15 +75,15 @@
 	cursor: pointer;
 }
 
-.sidebar-category-title:hover{
+.sidebar-category-title:hover {
 	padding-left: 40px;
 }
 
-.sidebar-category-items{
+.sidebar-category-items {
 	background-color: var(--colour-sidebar-item);
 }
 
-.sidebar-item{
+.sidebar-item {
 	height: 50px;
 	opacity: 1;
 	font-size: 18px;
@@ -93,7 +93,7 @@
 	color: var(--colour-text) !important;
 }
 
-.sidebar > div > .sidebar-item {
+.sidebar>div>.sidebar-item {
 	background-color: var(--colour-sidebar-item);
 	border-radius: 0px 10px 10px 0px;
 	box-shadow: 2px 2px 2px var(--colour-shadow);
@@ -103,16 +103,16 @@
 	margin-bottom: 20px;
 }
 
-.sidebar-item:hover{
+.sidebar-item:hover {
 	padding-left: 40px;
 }
 
-.sidebar-category.collapsed > .sidebar-category-items > .sidebar-item{
+.sidebar-category.collapsed>.sidebar-category-items>.sidebar-item {
 	height: 0px;
 	opacity: 0;
 }
 
-.dashboard{
+.dashboard {
 	width: calc(100% + 60px);
 	padding: 40px 0px 60px 60px;
 	overflow-x: auto;
@@ -120,22 +120,26 @@
 	overflow-y: auto;
 }
 
-@media (max-width: 992px){ /* 992 */
-	.sidebar.collapsed{
+@media (max-width: 992px) {
+
+	/* 992 */
+	.sidebar.collapsed {
 		max-width: 0;
 		min-width: 0;
 		overflow-x: hidden;
 	}
 }
 
-@media (max-width: 600px){ /* 992 */
-	.sidebar.collapsed{
+@media (max-width: 600px) {
+
+	/* 992 */
+	.sidebar.collapsed {
 		max-width: 0;
 		min-width: 0;
 		overflow-x: hidden;
 	}
 
-	.sidebar{
+	.sidebar {
 		min-width: 100%;
 		max-width: 100%;
 	}
@@ -144,20 +148,20 @@
 		overflow-x: hidden;
 	}
 
-	.dashboard-container.collapsed > .dashboard {
+	.dashboard-container.collapsed>.dashboard {
 		width: 0px;
 		max-height: calc(100vh - 65px);
 		padding: 0;
 	}
 }
 
-.inline{
+.inline {
 	display: flex;
 	flex-direction: row;
 	flex-wrap: wrap;
 }
 
-.saveNotification{
+.saveNotification {
 	width: 160px;
 	height: 75px;
 	position: fixed;
@@ -179,12 +183,12 @@
 	align-items: center;
 }
 
-.saveNotification.visible{
+.saveNotification.visible {
 	opacity: 1;
 	box-shadow: 5px 5px 5px var(--colour-shadow-invert);
 }
 
-.saveNotification > button{
+.saveNotification>button {
 	width: 120px;
 	height: 35px;
 	border-radius: 10px;
@@ -195,22 +199,22 @@
 	font-weight: 500;
 }
 
-.savebutton-waiting{
+.savebutton-waiting {
 	background-color: #43b581;
 }
 
-.savebutton-saving{
+.savebutton-saving {
 	background-color: #43b581;
 }
 
-.savebutton-saved{
+.savebutton-saved {
 	background-color: #43b581;
 }
 
-.savebutton-hidden{
+.savebutton-hidden {
 	background-color: #43b581;
 }
 
-.savebutton-error{
+.savebutton-error {
 	background-color: #b55043;
 }

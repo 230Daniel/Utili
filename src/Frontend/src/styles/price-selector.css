@@ -1,4 +1,4 @@
-.price-selector{
+.price-selector {
 	width: 150px;
 	height: 30px;
 	margin-left: auto;
@@ -9,11 +9,11 @@
 	flex-wrap: nowrap;
 }
 
-.price-selector > .price{
+.price-selector>.price {
 	width: 50px;
 	height: 100%;
 	background-color: var(--colour-card);
-	
+
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -22,18 +22,18 @@
 	box-shadow: 5px 5px 5px var(--colour-shadow-invert);
 }
 
-.price-selector > .price.left{
+.price-selector>.price.left {
 	border-radius: 25px 0 0 25px;
 }
 
-.price-selector > .price.right{
+.price-selector>.price.right {
 	border-radius: 0 25px 25px 0;
 }
 
-.price-selector > .price:hover{
+.price-selector>.price:hover {
 	background-color: var(--colour-card-hover);
 }
 
-.price-selector > .price.selected{
+.price-selector>.price.selected {
 	background-color: var(--colour-card-title);
 }

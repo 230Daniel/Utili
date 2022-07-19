@@ -1,4 +1,4 @@
-.guild-container{
+.guild-container {
 	display: flex;
 	justify-content: center;
 	margin-left: 12vw;
@@ -6,14 +6,14 @@
 	margin-top: 50px;
 }
 
-.guilds{
+.guilds {
 	display: flex;
 	flex-direction: row;
 	flex-wrap: wrap;
 	justify-content: center;
 }
 
-.guild{
+.guild {
 	width: 240px;
 	height: 300px;
 	margin-left: 20px;
@@ -34,13 +34,13 @@
 	transition: all 0.1s !important;
 }
 
-.guild:hover{
+.guild:hover {
 	top: -8px;
 	left: -8px;
 	box-shadow: 18px 18px 5px var(--colour-shadow-invert);
 }
 
-.guild-icon{
+.guild-icon {
 	margin-top: 20px;
 	margin-bottom: 20px;
 	width: 200px;
@@ -50,11 +50,11 @@
 	/*background-color: var(--colour-card-title);*/
 }
 
-.guild-name{
+.guild-name {
 	height: 60px;
 	width: 240px;
 	background-color: var(--colour-card-title);
-	
+
 	display: flex;
 	align-items: center;
 	justify-content: center;

@@ -1,4 +1,4 @@
-.index-container{
+.index-container {
 	display: flex;
 	flex-direction: row;
 	flex-wrap: wrap;
@@ -7,7 +7,7 @@
 	height: calc(100vh - 65px);
 }
 
-.index-container > .left{
+.index-container>.left {
 	width: 25vw;
 	min-width: 200px;
 	height: 100%;
@@ -18,13 +18,13 @@
 	overflow: hidden;
 }
 
-.index-container > .left > img{
+.index-container>.left>img {
 	object-fit: contain;
 	max-width: 100%;
 	max-height: 100%;
 }
 
-.index-container > .right{
+.index-container>.right {
 	width: 35vw;
 	min-width: 200px;
 	height: 100%;
@@ -34,23 +34,23 @@
 	overflow: hidden;
 }
 
-@media (max-width: 992px){
-	.title{
+@media (max-width: 992px) {
+	.title {
 		font-size: 80px !important;
 	}
 
-	.index-container{
+	.index-container {
 		flex-direction: column;
 		flex-wrap: nowrap;
 	}
 
-	.index-container > .left{
+	.index-container>.left {
 		height: 50%;
 		margin-right: 0;
 		align-items: flex-end;
 	}
 
-	.index-container > .right{
+	.index-container>.right {
 		height: 50%;
 		margin-left: 0;
 		justify-content: center;
@@ -58,29 +58,29 @@
 	}
 
 	#newline:after {
-		content:"\a";
+		content: "\a";
 		white-space: pre;
 	}
 }
 
-.title{
+.title {
 	font-size: 100px;
-    font-weight: 300;
+	font-weight: 300;
 	margin-bottom: -5px;
 	font-weight: 260;
 	color: var(--colour-text-invert);
 }
 
-.subtitle{
+.subtitle {
 	font-size: 22px;
 	font-weight: 360;
 	color: var(--colour-text-invert);
 }
 
-.index-container > .right > div{
+.index-container>.right>div {
 	margin-bottom: 55px;
 }
 
-.text-highlight{
+.text-highlight {
 	color: orangered;
 }
