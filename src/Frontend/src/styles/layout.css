@@ -1,48 +1,48 @@
 * {
-	transition: 
-	color 0s, 
-	background-color 0.1s, 
-	box-shadow 0.1s,
-	transform 0.1s, 
-	min-width 0.2s, 
-	max-width 0.2s, 
-	width 0.2s,
-	height 0.2s, 
-	max-height 0.2s,
-	overflow 0.2s,
-	opacity 0.2s,
-	padding 0.2s,
-	border 0.1s,
-	!important;
-	
+	transition:
+		color 0s,
+		background-color 0.1s,
+		box-shadow 0.1s,
+		transform 0.1s,
+		min-width 0.2s,
+		max-width 0.2s,
+		width 0.2s,
+		height 0.2s,
+		max-height 0.2s,
+		overflow 0.2s,
+		opacity 0.2s,
+		padding 0.2s,
+		border 0.1s,
+		 !important;
+
 	transition-delay: 0 !important;
 }
 
 /* Navbar */
 
-.navbar{
+.navbar {
 	background-color: var(--colour-nav);
 	box-shadow: 0 5px 10px var(--colour-shadow);
 	min-height: 65px !important;
 }
 
-.navbar-brand{
+.navbar-brand {
 	font-size: 20px !important;
 	color: var(--colour-text) !important;
-    padding-top: 0 !important;
-    padding-bottom: 0 !important;
+	padding-top: 0 !important;
+	padding-bottom: 0 !important;
 	white-space: nowrap !important;
 	margin-bottom: 4px;
 	display: flex !important;
 	align-items: center;
 }
 
-.navbar-brand > img{
+.navbar-brand>img {
 	margin-right: 5px;
 	margin-top: 2px;
 }
 
-.nav-link{
+.nav-link {
 	display: flex;
 	font-size: 18px !important;
 	color: var(--colour-text) !important;
@@ -50,25 +50,25 @@
 	align-items: center;
 }
 
-.navbar-toggler{
+.navbar-toggler {
 	border-color: var(--colour-text) !important;
 }
 
-.nav-link > img{
+.nav-link>img {
 	width: 0px;
 }
 
-button:focus{
+button:focus {
 	outline-width: 0px !important;
 }
 
-@media (min-width: 992px){
+@media (min-width: 992px) {
 	/* Styles only applied when navbar is in non-collapsed form */
 
-	.navbar{
+	.navbar {
 		height: 65px !important;
 	}
-	
+
 	.dropdown-menu {
 		right: auto !important;
 		left: 50% !important;
@@ -78,11 +78,11 @@ button:focus{
 		text-align: center !important;
 	}
 
-	.nav-item{
+	.nav-item {
 		margin-left: 15px;
 	}
 
-	#my-navbar > .btn{
+	#my-navbar>.btn {
 		border-width: 2px;
 		height: 35px;
 		font-size: 15px;
@@ -91,17 +91,17 @@ button:focus{
 		overflow-x: auto;
 	}
 
-	.navbar-nav > .nav-link{
+	.navbar-nav>.nav-link {
 		margin-left: 15px;
 	}
 
-	.user-dropdown{
+	.user-dropdown {
 		padding: 0px;
 		display: flex;
-		align-items: center; 
+		align-items: center;
 	}
 
-	.nav-link > img{
+	.nav-link>img {
 		width: 35px;
 		height: 35px;
 		border-radius: 17.5px;
@@ -109,36 +109,40 @@ button:focus{
 		width: initial !important;
 	}
 
-	.dropdown-toggle::after{
+	.dropdown-toggle::after {
 		margin-left: 8px;
 		margin-bottom: -1px;
 	}
 }
 
-.dropdown-menu{
+.dropdown-menu {
 	background-color: var(--colour-dropdown) !important;
+	overflow-y: auto;
+	scrollbar-color: var(--colour-nav) var(--colour-dropdown);
+	height: auto;
+	max-height: min(266.5px, calc(100vh - 65px));
 }
 
-.dropdown-item{
+.dropdown-item {
 	font-size: 15px;
 	color: var(--colour-text) !important;
 }
 
-.dropdown-item:hover{
+.dropdown-item:hover {
 	background-color: var(--colour-dropdown-hover) !important;
 }
 
-.guild-dropdown{
+.guild-dropdown {
 	padding: 0px;
 	display: flex;
-	align-items: center; 
+	align-items: center;
 }
 
-.guild-dropdown > div{
+.guild-dropdown>div {
 	text-align: start !important;
 }
 
-.guild-dropdown > div > a{
+.guild-dropdown>div>a {
 	padding-top: 6px;
 	padding-bottom: 6px;
 	display: flex;
@@ -146,7 +150,7 @@ button:focus{
 	align-items: center;
 }
 
-.guild-dropdown > div > a > img{
+.guild-dropdown>div>a>img {
 	width: 35px;
 	height: 35px;
 	border-radius: 17.5px;
@@ -154,27 +158,27 @@ button:focus{
 	width: initial !important;
 }
 
-.guild-dropdown-link{
+.guild-dropdown-link {
 	color: var(--colour-text-muted) !important;
 }
 
 /* Main */
 
-body{
+body {
 	font-weight: 400;
 	color: var(--colour-text)
 }
 
-main{
+main {
 	min-height: 100vh;
 	background-color: var(--colour-background);
 }
 
-br{
+br {
 	user-select: none;
 }
 
-h1{
+h1 {
 	font-size: 50px !important;
 	text-align: center !important;
 	font-weight: 100 !important;
@@ -182,7 +186,7 @@ h1{
 	color: var(--colour-text-invert) !important;
 }
 
-h2{
+h2 {
 	font-size: 30px !important;
 	text-align: center;
 	font-weight: 100 !important;
@@ -190,36 +194,36 @@ h2{
 	color: var(--colour-text-invert) !important;
 }
 
-.btn{
+.btn {
 	box-shadow: none !important;
 }
 
-.commands-section{
+.commands-section {
 	border-bottom-style: hidden;
 	width: 100%;
-    margin-bottom: 20px;
+	margin-bottom: 20px;
 	font-size: 16px;
 	margin-left: 20px;
 	margin-right: 20px;
 }
 
-.commands-section > tbody > tr > td{
+.commands-section>tbody>tr>td {
 	padding: 8px;
 }
 
 /* Scrollbars */
 
-::-webkit-scrollbar{
+::-webkit-scrollbar {
 	background-color: var(--colour-scrollbar);
-	
+
 	width: 14px;
 }
 
-::-webkit-scrollbar-thumb{
+::-webkit-scrollbar-thumb {
 	background-color: var(--colour-scrollbar-thumb);
 }
 
-::-webkit-scrollbar-corner{
+::-webkit-scrollbar-corner {
 	background-color: var(--colour-background);
 }
 
@@ -230,7 +234,7 @@ h2{
 
 /* Footer */
 
-.footer{
+.footer {
 	width: 100%;
 	height: 65px;
 	display: flex;
@@ -241,39 +245,40 @@ h2{
 	flex-direction: row;
 }
 
-.footer > * {
+.footer>* {
 	color: var(--colour-text);
 	font-size: 16px;
 	font-weight: 450;
 }
 
-.footer > .container > .footer-left{
+.footer>.container>.footer-left {
 	float: left;
 }
 
-.footer > .container > .footer-right{
+.footer>.container>.footer-right {
 	float: right;
 }
 
-.footer > .container > .footer-right > .nav{
+.footer>.container>.footer-right>.nav {
 	font-size: 16px;
 }
 
-.footer-right > a {
+.footer-right>a {
 	margin-left: 4px;
 	margin-right: 4px;
 }
 
-@media (max-width: 992px){
-	.footer{
+@media (max-width: 992px) {
+	.footer {
 		justify-content: center;
 	}
-	.footer > .container > .footer-left{
+
+	.footer>.container>.footer-left {
 		float: none;
 		text-align: center;
 	}
-	
-	.footer > .container > .footer-right{
+
+	.footer>.container>.footer-right {
 		float: none;
 		text-align: center;
 	}
@@ -281,14 +286,14 @@ h2{
 
 /* Links */
 
-a{
+a {
 	text-decoration: none !important;
 }
 
-.link{
+.link {
 	color: var(--colour-link) !important;
 }
 
-.link:hover{
+.link:hover {
 	color: var(--colour-link-hover) !important;
 }
