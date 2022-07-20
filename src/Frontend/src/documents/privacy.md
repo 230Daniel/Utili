@@ -8,7 +8,7 @@ This Privacy Policy describes how your personal information is collected, used, 
 
 When you log in to the Site via Discord, we store your unique Discord account ID and its associated email address. We refer to this information as "Account Information".
 
-The Site will also retrieve information about the Discord guilds which you are a member of, however this data will not be stored permanently.
+The Site will also retrieve information about the Discord guilds which you are a member of, however this data is not stored in our systems and is instead passed on immediately to you.
 
 When you add the Bot to a Discord guild it will begin retrieving information about that guild and its members in order to function properly. By default, no data is stored for a guild which the Bot is added to.
 
@@ -21,7 +21,9 @@ Some features of the Bot require the storage of sensitive information to functio
 | Message Logs  | Per-Guild with Per-Channel override | The content and metadata of messages sent within the last 30 days (author id, timestamp, content)                | Once a message has been edited or deleted its previous state is not accessible, so information must be stored about messages before they are edited or deleted in order for it to be possible to retrieve the previous state of a message |
 | Role Persist  | Per-Guild with Per-Role override    | The IDs of the roles that a member had when they left the guild                                                  | To add the roles back once the member rejoins                                                                                                                                                                                             |
 
-When we talk about "Sensitive Information" in this Privacy Policy, we are talking both about Account Information and Sensitive Discord Information.
+When we reference "Sensitive Information" in this Privacy Policy, we are referencing both about Account Information and Sensitive Discord Information.
+
+When accessing some pages of the Site, your IP address (a personal identifier and form of personal data) is temporarily recorded. This information is later referred to in this policy as "IP Address Information". IP Address Information is never saved to non-volatile storage on our systems.
 
 ## How we use your Sensitive Information
 
@@ -29,9 +31,13 @@ We use the Account Information that we collect to communicate with you if necess
 
 Sensitive Discord Information is used autonomously by the Bot to provide our features to applicable Discord guilds.
 
+IP Address Information is used to improve the user experience by selecting a suitable default currency on pages related to payments.
+
 ## Sharing your Sensitive Information
 
 Your Account Information is shared with our billing partner Stripe so that they can power our payments and subscriptions. You can read more about how Stripe uses your Account Information here: https://stripe.com/privacy.
+
+Your IP Address Information is shared with ipinfo.io, a service which queries a database to determine the approximate location of a given IP address. Find their privacy policy here: https://ipinfo.io/privacy-policy. For further information about what can be determined from an IP address, see this article by ipinfo.io: https://ipinfo.io/ip-address-information. 
 
 We may also share your Sensitive Information to comply with applicable laws and regulations, to respond to a subpoena, search warrant or other lawful request for information we receive, or to otherwise protect our rights.
 
