@@ -15,7 +15,6 @@ import Document from "./pages/document";
 
 import DashboardIndex from "./pages/dashboard/index";
 
-import { getClientId } from "./api/auth";
 import PremiumServers from "./pages/premium/servers";
 import PremiumThankYou from "./pages/premium/thankyou";
 
@@ -45,9 +44,12 @@ ReactDOM.render(
 									<Route exact path="/premium/thankyou" component={PremiumThankYou} />
 									<Route exact path="/premium/customerportal" component={CustomerPortal} />
 									<Route exact path="/premium/checkout/:currency/:slots" component={Checkout} />
+									<Route path="/:document" component={Document} />
 								</>
 							}
-							<Route path="/:document" component={Document} />
+							{!window.__config.enablePremium &&
+								<Route path="/:document" component={Document} />
+							}
 						</Switch>
 					</Layout>
 				</Route>
