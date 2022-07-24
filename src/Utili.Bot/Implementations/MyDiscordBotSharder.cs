@@ -89,8 +89,7 @@ public class MyDiscordBotSharder : DiscordBotSharder
 
         var format = "{0}";
 
-        // TODO: Implement when Quah sorts his shit out, again
-        /*if (positionalParameter.IsMultiple)
+        if (positionalParameter.GetTypeInformation().IsEnumerable)
         {
             format = "{0}[]";
         }
@@ -99,10 +98,10 @@ public class MyDiscordBotSharder : DiscordBotSharder
             if (positionalParameter.IsRemainder)
                 format = "{0}…";
 
-            format = positionalParameter.IsOptional
+            format = positionalParameter.GetTypeInformation().IsOptional
                 ? $"({format})"
                 : $"[{format}]";
-        }*/
+        }
 
         return string.Format(format, parameter.Name);
     }
