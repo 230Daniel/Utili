@@ -85,7 +85,7 @@ public class OwnerCommands : MyDiscordTextGuildModuleBase
         }
 
         var roles = member.RoleIds.Select(x => guild.Roles.First(y => y.Key == x).Value);
-        var perms = Discord.PermissionCalculation.CalculateGuildPermissions(guild, member, roles.ToArray()); // todo: revert `roles.ToArray()` to `roles` when quah sorts his shit out
+        var perms = Discord.PermissionCalculation.CalculateGuildPermissions(guild, member, roles.ToArray());
 
         if (guild.OwnerId == userId)
             return Success("Authorised", $"{member} is the owner of {guild}");
