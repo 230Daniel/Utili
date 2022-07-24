@@ -1,8 +1,10 @@
 ﻿using System;
+using Microsoft.EntityFrameworkCore;
 using Utili.Database.Entities.Base;
 
 namespace Utili.Database.Entities;
 
+[Index(nameof(GuildId), nameof(ChannelId), nameof(Timestamp), nameof(IsPinned))]
 public class AutopurgeMessage : MessageEntity
 {
     public ulong GuildId { get; init; }
