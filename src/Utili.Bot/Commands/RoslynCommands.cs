@@ -1,17 +1,19 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Disqord;
-using Disqord.Bot;
+using Disqord.Bot.Commands;
+using Disqord.Bot.Commands.Text;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Qmmands;
+using Qmmands.Text;
 using Utili.Bot.Implementations;
 
 namespace Utili.Bot.Features;
 
-public class RoslynCommands : MyDiscordGuildModuleBase
+public class RoslynCommands : MyDiscordTextGuildModuleBase
 {
     private ILogger<RoslynCommands> _logger;
     private IConfiguration _config;
@@ -22,9 +24,9 @@ public class RoslynCommands : MyDiscordGuildModuleBase
         _config = config;
     }
 
-    [Command("evaluate", "eval", "e")]
+    [TextCommand("evaluate", "eval", "e")]
     [RequireBotOwner]
-    public async Task<DiscordCommandResult> EvaluateAsync([Remainder] string code)
+    public async Task<IResult> EvaluateAsync([Remainder] string code)
     {
         if (Context.Message.Author.Id != _config.GetValue<ulong>("Discord:OwnerId"))
         {
@@ -59,7 +61,6 @@ public class RoslynCommands : MyDiscordGuildModuleBase
         RoslynGlobals globals = new(Context.Services, Context);
         try
         {
-            await using var yield = Context.BeginYield();
             var result = await CSharpScript.EvaluateAsync(code, options, globals);
             _logger.LogInformation($"Roslyn result: {result}");
             if (result is null) return Success("Evaluated result", "null");
@@ -77,9 +78,9 @@ public class RoslynGlobals
 {
     public IServiceProvider Services { get; }
     public DiscordClientBase Client { get; }
-    public DiscordGuildCommandContext Context { get; }
+    public IDiscordTextGuildCommandContext Context { get; }
 
-    public RoslynGlobals(IServiceProvider services, DiscordGuildCommandContext context)
+    public RoslynGlobals(IServiceProvider services, IDiscordTextGuildCommandContext context)
     {
         Services = services;
         Client = context.Bot;

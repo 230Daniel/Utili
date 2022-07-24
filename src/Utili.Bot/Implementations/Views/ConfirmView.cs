@@ -11,10 +11,10 @@ public class ConfirmView : ViewBase
     public bool Result;
 
     private readonly ConfirmViewOptions _options;
-    private IUserMessage Message => (Menu as DefaultMenu).Message;
+    private IUserMessage Message => (Menu as DefaultTextMenu).Message;
 
     public ConfirmView(Snowflake memberId, ConfirmViewOptions options)
-        : base(new LocalMessage().AddEmbed(MessageUtils.CreateEmbed(EmbedType.Info, options.PromptTitle, options.PromptDescription)))
+        : base(message => message.AddEmbed(MessageUtils.CreateEmbed(EmbedType.Info, options.PromptTitle, options.PromptDescription)))
     {
         _options = options;
 

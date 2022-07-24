@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using Disqord;
 using Disqord.Bot;
+using Disqord.Bot.Commands.Text;
 using Disqord.Gateway;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;

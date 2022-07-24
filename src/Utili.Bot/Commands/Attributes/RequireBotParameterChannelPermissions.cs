@@ -1,33 +1,36 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Disqord;
-using Disqord.Bot;
+using Disqord.Bot.Commands;
 using Disqord.Gateway;
 using Qmmands;
+using Utili.Bot.Extensions;
 
 namespace Utili.Bot.Commands;
 
 public class RequireBotParameterChannelPermissionsAttribute : DiscordGuildParameterCheckAttribute
 {
-    public Permission Permissions { get; }
+    public Permissions Permissions { get; }
 
-    public RequireBotParameterChannelPermissionsAttribute(Permission permissions)
+    public RequireBotParameterChannelPermissionsAttribute(Permissions permissions)
     {
         Permissions = permissions;
     }
 
-    public override bool CheckType(Type type)
-        => typeof(IGuildChannel).IsAssignableFrom(type);
-
-    public override ValueTask<CheckResult> CheckAsync(object argument, DiscordGuildCommandContext context)
+    public override bool CanCheck(IParameter parameter, object value)
     {
-        if (argument is null) return Success();
+        var parameterType = parameter.GetTypeInformation().ActualType;
+        return typeof(IGuildChannel).IsAssignableFrom(parameterType);
+    }
+
+    public override ValueTask<IResult> CheckAsync(IDiscordGuildCommandContext context, IParameter parameter, object argument)
+    {
+        if (argument is null) return Results.Success;
 
         var channel = (IGuildChannel)argument;
-        var permissions = context.CurrentMember.GetPermissions(channel);
+        var permissions = context.GetCurrentMember().CalculateChannelPermissions(channel);
 
-        return permissions.Has(Permissions) ?
-            Success() :
-            Failure($"The bot lacks the necessary channel permissions in {channel} ({Permissions & ~permissions}) to execute this.");
+        return permissions.HasFlag(Permissions) ?
+            Results.Success :
+            Results.Failure($"The bot lacks the necessary channel permissions in {channel} ({Permissions & ~permissions}) to execute this.");
     }
 }

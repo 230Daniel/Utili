@@ -1,19 +1,20 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
 using Disqord;
-using Disqord.Bot;
+using Disqord.Bot.Commands;
 using Disqord.Gateway;
 using Disqord.Rest;
 using Microsoft.EntityFrameworkCore;
 using Utili.Database;
 using Utili.Database.Extensions;
 using Qmmands;
+using Qmmands.Text;
 using Utili.Bot.Implementations;
 using Utili.Bot.Services;
 
 namespace Utili.Bot.Commands;
 
-public class OwnerCommands : MyDiscordGuildModuleBase
+public class OwnerCommands : MyDiscordTextGuildModuleBase
 {
     private readonly DatabaseContext _dbContext;
     private readonly IsPremiumService _isPremiumService;
@@ -24,8 +25,8 @@ public class OwnerCommands : MyDiscordGuildModuleBase
         _isPremiumService = isPremiumService;
     }
 
-    [Command("userinfo"), RequireBotOwner]
-    public async Task<DiscordCommandResult> UserInfoAsync(ulong userId)
+    [TextCommand("userinfo"), RequireBotOwner]
+    public async Task<IResult> UserInfoAsync(ulong userId)
     {
         var user = Context.Bot.GetUser(userId) as IUser ?? await Context.Bot.FetchUserAsync(userId);
 
@@ -47,8 +48,8 @@ public class OwnerCommands : MyDiscordGuildModuleBase
             $"Information about {user} was sent in a direct message");
     }
 
-    [Command("guildinfo"), RequireBotOwner]
-    public async Task<DiscordCommandResult> GuildInfoAsync(ulong guildId)
+    [TextCommand("guildinfo"), RequireBotOwner]
+    public async Task<IResult> GuildInfoAsync(ulong guildId)
     {
         var guild = await Context.Bot.FetchGuildAsync(guildId, true);
         var premium = await _isPremiumService.GetIsGuildPremiumAsync(guildId);
@@ -66,8 +67,8 @@ public class OwnerCommands : MyDiscordGuildModuleBase
             $"Information about {guild} was sent in a direct message");
     }
 
-    [Command("authorise"), RequireBotOwner]
-    public async Task<DiscordCommandResult> AuthoriseAsync(ulong guildId, ulong userId)
+    [TextCommand("authorise"), RequireBotOwner]
+    public async Task<IResult> AuthoriseAsync(ulong guildId, ulong userId)
     {
         IGuild guild = null;
         IMember member = null;
@@ -84,13 +85,13 @@ public class OwnerCommands : MyDiscordGuildModuleBase
         }
 
         var roles = member.RoleIds.Select(x => guild.Roles.First(y => y.Key == x).Value);
-        var perms = Discord.Permissions.CalculatePermissions(guild, member, roles);
+        var perms = Discord.PermissionCalculation.CalculateGuildPermissions(guild, member, roles.ToArray()); // todo: revert `roles.ToArray()` to `roles` when quah sorts his shit out
 
         if (guild.OwnerId == userId)
             return Success("Authorised", $"{member} is the owner of {guild}");
-        if (perms.Administrator)
+        if (perms.HasFlag(Permissions.Administrator))
             return Success("Authorised", $"{member} an administrator of {guild}");
-        if (perms.ManageGuild)
+        if (perms.HasFlag(Permissions.ManageGuild))
             return Success("Authorised", $"{member} has the manage server permission in {guild}");
         return Failure("Not authorised", $"{member} does not have the manage server permission in {guild}");
     }

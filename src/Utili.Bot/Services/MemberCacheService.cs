@@ -58,7 +58,7 @@ public class MemberCacheService
             await PermanentlyCacheMembersAsync(guildIds);
 
             _logger.LogInformation("Finished caching members for {Shard}", e.ShardId);
-            await e.CurrentUser.GetGatewayClient().SetPresenceAsync(new LocalActivity($"{_configuration.GetValue<string>("Services:WebsiteDomain")} | {_configuration.GetValue<string>("Discord:DefaultPrefix")}help", ActivityType.Playing));
+            await (_client as IGatewayClient).Shards[e.ShardId].SetPresenceAsync(new LocalActivity($"{_configuration.GetValue<string>("Services:WebsiteDomain")} | {_configuration.GetValue<string>("Discord:DefaultPrefix")}help", ActivityType.Playing));
         }
         catch (Exception ex)
         {

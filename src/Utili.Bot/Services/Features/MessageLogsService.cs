@@ -202,7 +202,7 @@ public class MessageLogsService
 
         if (messageRecord.Content.Length > 1024 || newMessage.Content.Length > 1024)
         {
-            if (messageRecord.Content.Length < 2024 - embed.Description.Length - 2)
+            if (messageRecord.Content.Length < 2024 - embed.Description.Value.Length - 2)
                 embed.Description += $"\n{messageRecord.Content}";
             else
                 embed.Description += "\nThe message is too large to fit in this embed";
@@ -227,7 +227,7 @@ public class MessageLogsService
         if (member is null) embed.WithAuthor("Unknown member");
         else embed.WithAuthor(member);
 
-        if (messageRecord.Content.Length > 2024 - embed.Description.Length - 2)
+        if (messageRecord.Content.Length > 2024 - embed.Description.Value.Length - 2)
             embed.Description += "\nThe message is too large to fit in this embed";
         else
             embed.Description += $"\n{messageRecord.Content}";

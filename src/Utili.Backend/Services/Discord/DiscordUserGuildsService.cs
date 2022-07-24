@@ -57,7 +57,7 @@ public class DiscordUserGuildsService
     {
         var guilds = await GetGuildsAsync(httpContext);
         if (guilds is null) return null;
-        guilds.Guilds.RemoveAll(x => !x.Permissions.ManageGuild);
+        guilds.Guilds.RemoveAll(x => !x.Permissions.HasFlag(Permissions.ManageGuild));
         return guilds;
     }
 

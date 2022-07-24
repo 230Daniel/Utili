@@ -3,56 +3,52 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Disqord;
-using Disqord.Bot;
+using Disqord.Bot.Commands;
+using Disqord.Bot.Commands.Text;
 using Disqord.Bot.Sharding;
 using Disqord.Sharding;
 using Utili.Bot.Extensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Qmmands;
+using Qmmands.Default;
+using Qmmands.Text;
 using Utili.Bot.Commands.TypeParsers;
 
 namespace Utili.Bot.Implementations;
 
 public class MyDiscordBotSharder : DiscordBotSharder
 {
-    protected override async ValueTask<bool> BeforeExecutedAsync(DiscordCommandContext context)
+    protected override async ValueTask<IResult> OnBeforeExecuted(IDiscordCommandContext context)
     {
-        if (!context.GuildId.HasValue || context.Author.IsBot) return false;
+        if (!context.GuildId.HasValue) return Results.Failure("Commands must be executed in a server.");
+        if (context.Author.IsBot) return Results.Failure("Commands can't be executed by a bot.");
 
         var config = await context.Services.GetCoreConfigurationAsync(context.GuildId.Value);
-        if (config is null) return true;
+        if (config is null) return Results.Success;
 
-        return !config.NonCommandChannels.Contains(context.ChannelId)
-            ? config.CommandsEnabled
-            : !config.CommandsEnabled;
+        if (config.NonCommandChannels.Contains(context.ChannelId))
+            return Results.Failure("Commands are disabled in this channel.");
+
+        if (!config.CommandsEnabled)
+            return Results.Failure("Commands are not enabled in this server.");
+
+        return Results.Success;
     }
 
-    protected override LocalMessage FormatFailureMessage(DiscordCommandContext context, FailedResult result)
+    protected override bool FormatFailureMessage(IDiscordCommandContext context, LocalMessageBase message, IResult result)
     {
-        static string FormatParameter(Parameter parameter)
-        {
-            var format = "{0}";
-            if (parameter.IsMultiple)
-            {
-                format = "{0}[]";
-            }
-            else
-            {
-                if (parameter.IsRemainder)
-                    format = "{0}…";
+        if (context is IDiscordTextCommandContext textContext)
+            return FormatTextFailureMessage(textContext, message, result);
 
-                format = parameter.IsOptional
-                    ? $"({format})"
-                    : $"[{format}]";
-            }
+        throw new NotImplementedException("Application commands are not yet supported");
+    }
 
-            return string.Format(format, parameter.Name);
-        }
-
+    protected bool FormatTextFailureMessage(IDiscordTextCommandContext context, LocalMessageBase message, IResult result)
+    {
         var reason = FormatFailureReason(context, result);
         if (reason == null)
-            return null;
+            return false;
 
         var embed = new LocalEmbed()
             .WithAuthor("Error", "https://i.imgur.com/Sg4663k.png")
@@ -66,31 +62,56 @@ public class MyDiscordBotSharder : DiscordBotSharder
                 if (overloadReason == null)
                     continue;
 
-                embed.AddField($"Overload: {overload.FullAliases[0]} {string.Join(' ', overload.Parameters.Select(FormatParameter))}", overloadReason);
+                embed.AddField($"Overload: {overload.Aliases[0]} {string.Join(' ', overload.Parameters.Select(FormatParameter))}", overloadReason);
             }
         }
-        else if (result is CommandOnCooldownResult cooldownResult)
+        else if (result is CommandRateLimitedResult cooldownResult)
         {
-            var cooldown = cooldownResult.Cooldowns.OrderBy(x => x.RetryAfter).Last();
-            var seconds = (int)Math.Round(cooldown.Item2.TotalSeconds);
+            var cooldown = cooldownResult.RateLimits.MaxBy(x => x.Value);
+            var seconds = (int)Math.Round(cooldown.Value.TotalSeconds);
             embed.WithDescription($"You're doing that too fast, try again in {seconds} {(seconds == 1 ? "second" : "seconds")}");
-            embed.WithFooter($"{cooldown.Item1.BucketType.ToString().Title()} cooldown");
+            embed.WithFooter($"{cooldown.Key.BucketType.ToString().Title()} cooldown");
         }
         else if (context.Command != null)
         {
-            embed.WithFooter($"{context.Command.FullAliases[0]} {string.Join(' ', context.Command.Parameters.Select(FormatParameter))}");
+            embed.WithFooter($"{context.Command.Aliases[0]} {string.Join(' ', context.Command.Parameters.Select(FormatParameter))}");
         }
 
-        return new LocalMessage()
-            .AddEmbed(embed)
-            .WithAllowedMentions(LocalAllowedMentions.None);
+        message.AddEmbed(embed);
+        message.WithAllowedMentions(LocalAllowedMentions.None);
+        return true;
     }
 
-    protected override ValueTask AddTypeParsersAsync(CancellationToken cancellationToken = default)
+    private static string FormatParameter(ITextParameter parameter)
     {
-        Commands.AddTypeParser(new EmojiTypeParser());
-        Commands.AddTypeParser(new RoleArrayTypeParser());
-        return base.AddTypeParsersAsync(cancellationToken);
+        if (parameter is not IPositionalParameter positionalParameter)
+            throw new NotImplementedException("Only positional parameters are supported");
+
+        var format = "{0}";
+
+        // TODO: Implement when Quah sorts his shit out, again
+        /*if (positionalParameter.IsMultiple)
+        {
+            format = "{0}[]";
+        }
+        else
+        {
+            if (positionalParameter.IsRemainder)
+                format = "{0}…";
+
+            format = positionalParameter.IsOptional
+                ? $"({format})"
+                : $"[{format}]";
+        }*/
+
+        return string.Format(format, parameter.Name);
+    }
+
+    protected override ValueTask AddTypeParsers(DefaultTypeParserProvider typeParserProvider, CancellationToken cancellationToken)
+    {
+        typeParserProvider.AddParser(new EmojiTypeParser());
+        typeParserProvider.AddParser(new RoleArrayTypeParser());
+        return base.AddTypeParsers(typeParserProvider, cancellationToken);
     }
 
     public MyDiscordBotSharder(

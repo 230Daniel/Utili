@@ -188,7 +188,7 @@ public class InactiveRoleService
 
                         if (lastAction <= minimumLastAction && !member.RoleIds.Contains(config.ImmuneRoleId))
                         {
-                            if (premium && config.AutoKick && lastAction <= minimumKickLastAction && guild.BotHasPermissions(Permission.KickMembers) && member.CanBeManaged())
+                            if (premium && config.AutoKick && lastAction <= minimumKickLastAction && guild.BotHasPermissions(Permissions.KickMembers) && member.CanBeManaged())
                             {
                                 await member.KickAsync(new DefaultRestRequestOptions { Reason = "Inactive Role (auto-kick)" });
                                 await Task.Delay(500);

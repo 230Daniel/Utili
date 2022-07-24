@@ -133,12 +133,12 @@ public class NoticesService
 
             if (channel is null ||
                 !channel.BotHasPermissions(
-                    Permission.ViewChannels |
-                    Permission.ReadMessageHistory |
-                    Permission.ManageMessages |
-                    Permission.SendMessages |
-                    Permission.SendEmbeds |
-                    Permission.SendAttachments)) return;
+                    Permissions.ViewChannels |
+                    Permissions.ReadMessageHistory |
+                    Permissions.ManageMessages |
+                    Permissions.SendMessages |
+                    Permissions.SendEmbeds |
+                    Permissions.SendAttachments)) return;
 
             var previousMessage = await channel.FetchMessageAsync(config.MessageId);
             if (previousMessage is not null) await previousMessage.DeleteAsync();

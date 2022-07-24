@@ -3,20 +3,20 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Disqord;
-using Disqord.Bot;
 using Disqord.Rest;
 using Microsoft.Extensions.Configuration;
 using Qmmands;
 using Utili.Bot.Extensions;
 using LinuxSystemStats;
 using Microsoft.EntityFrameworkCore;
+using Qmmands.Text;
 using Utili.Database;
 using Utili.Bot.Implementations;
 using Utili.Bot.Utils;
 
 namespace Utili.Bot.Commands;
 
-public class InfoCommands : MyDiscordGuildModuleBase
+public class InfoCommands : MyDiscordTextGuildModuleBase
 {
     private readonly IConfiguration _config;
     private readonly DatabaseContext _dbContext;
@@ -27,8 +27,8 @@ public class InfoCommands : MyDiscordGuildModuleBase
         _dbContext = dbContext;
     }
 
-    [Command("about", "info")]
-    public async Task<DiscordCommandResult> AboutAsync()
+    [TextCommand("about", "info")]
+    public async Task<IResult> AboutAsync()
     {
         var domain = _config.GetValue<string>("Services:WebsiteDomain");
         var guilds = await _dbContext.ShardDetails.Where(x => x.Heartbeat > DateTime.UtcNow.AddSeconds(-30)).SumAsync(x => x.Guilds);
@@ -44,11 +44,11 @@ public class InfoCommands : MyDiscordGuildModuleBase
         return Info("Utili", about);
     }
 
-    [Command("help", "commands")]
-    public DiscordCommandResult Help()
+    [TextCommand("help", "commands")]
+    public IResult Help()
     {
         var domain = _config.GetValue<string>("Services:WebsiteDomain");
-        var dashboardUrl = $"https://{domain}/dashboard/{Context.Guild.Id}";
+        var dashboardUrl = $"https://{domain}/dashboard/{Context.GuildId}";
 
         var embed = MessageUtils.CreateEmbed(EmbedType.Info, "Utili",
                 $"You can configure Utili on the [dashboard]({dashboardUrl}).\n" +
@@ -74,8 +74,8 @@ public class InfoCommands : MyDiscordGuildModuleBase
         return Response(embed);
     }
 
-    [Command("ping")]
-    public async Task<DiscordCommandResult> PingAsync()
+    [TextCommand("ping")]
+    public async Task<IResult> PingAsync()
     {
         var largestLatency = 0;
 
@@ -84,7 +84,7 @@ public class InfoCommands : MyDiscordGuildModuleBase
         if (gateway > largestLatency) largestLatency = gateway;
 
         var sw = Stopwatch.StartNew();
-        await Context.Channel.TriggerTypingAsync();
+        await Context.GetChannel().TriggerTypingAsync();
         sw.Stop();
 
         var rest = (int)sw.ElapsedMilliseconds;

@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Disqord;
-using Disqord.Bot;
+using Disqord.Bot.Commands;
 using Disqord.Gateway;
 using Disqord.Rest;
 using Utili.Database;
@@ -10,6 +10,7 @@ using Utili.Database.Entities;
 using Utili.Database.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Qmmands;
+using Qmmands.Text;
 using Utili.Bot.Implementations;
 using Utili.Bot.Implementations.Views;
 using Utili.Bot.Utils;
@@ -17,8 +18,8 @@ using Utili.Bot.Extensions;
 
 namespace Utili.Bot.Commands;
 
-[Group("reputation", "rep")]
-public class RepuatationCommands : MyDiscordGuildModuleBase
+[TextGroup("reputation", "rep")]
+public class RepuatationCommands : MyDiscordTextGuildModuleBase
 {
     private readonly DatabaseContext _dbContext;
 
@@ -27,8 +28,8 @@ public class RepuatationCommands : MyDiscordGuildModuleBase
         _dbContext = dbContext;
     }
 
-    [Command("")]
-    public async Task<DiscordCommandResult> ReputationAsync(
+    [TextCommand("")]
+    public async Task<IResult> ReputationAsync(
         [RequireNotBot] IMember member = null)
     {
         member ??= Context.Message.Author as IMember;
@@ -50,9 +51,9 @@ public class RepuatationCommands : MyDiscordGuildModuleBase
         return Response(embed);
     }
 
-    [Command("leaderboard", "top")]
-    [DefaultCooldown(1, 5)]
-    public async Task<DiscordCommandResult> LeaderboardAsync()
+    [TextCommand("leaderboard", "top")]
+    [DefaultRateLimit(1, 5)]
+    public async Task<IResult> LeaderboardAsync()
     {
         var repMembers = await _dbContext.ReputationMembers.GetForAllGuildMembersAsync(Context.GuildId);
         repMembers = repMembers.OrderByDescending(x => x.Reputation).ToList();
@@ -62,7 +63,7 @@ public class RepuatationCommands : MyDiscordGuildModuleBase
 
         foreach (var repMember in repMembers)
         {
-            var member = Context.Guild.GetMember(repMember.MemberId) ?? await Context.Guild.FetchMemberAsync(repMember.MemberId);
+            var member = Context.GetGuild().GetMember(repMember.MemberId) ?? await Context.GetGuild().FetchMemberAsync(repMember.MemberId);
             if (member is not null)
             {
                 content += $"{position}. {member.Mention} {repMember.Reputation}\n";
@@ -74,9 +75,9 @@ public class RepuatationCommands : MyDiscordGuildModuleBase
         return Info("Reputation Leaderboard", content);
     }
 
-    [Command("inverseleaderboard", "bottom")]
-    [DefaultCooldown(1, 5)]
-    public async Task<DiscordCommandResult> InvserseLeaderboardAsync()
+    [TextCommand("inverseleaderboard", "bottom")]
+    [DefaultRateLimit(1, 5)]
+    public async Task<IResult> InvserseLeaderboardAsync()
     {
         var repMembers = await _dbContext.ReputationMembers.GetForAllGuildMembersAsync(Context.GuildId);
         repMembers = repMembers.OrderBy(x => x.Reputation).ToList();
@@ -86,7 +87,7 @@ public class RepuatationCommands : MyDiscordGuildModuleBase
 
         foreach (var repMember in repMembers)
         {
-            var member = Context.Guild.GetMember(repMember.MemberId) ?? await Context.Guild.FetchMemberAsync(repMember.MemberId);
+            var member = Context.GetGuild().GetMember(repMember.MemberId) ?? await Context.GetGuild().FetchMemberAsync(repMember.MemberId);
             if (member is not null)
             {
                 content += $"{position}. {member.Mention} {repMember.Reputation}\n";
@@ -98,10 +99,10 @@ public class RepuatationCommands : MyDiscordGuildModuleBase
         return Info("Inverse Reputation Leaderboard", content);
     }
 
-    [Command("give", "add", "grant")]
-    [DefaultCooldown(1, 2)]
-    [RequireAuthorGuildPermissions(Permission.ManageGuild)]
-    public async Task<DiscordCommandResult> GiveAsync(
+    [TextCommand("give", "add", "grant")]
+    [DefaultRateLimit(1, 2)]
+    [RequireAuthorPermissions(Permissions.ManageGuild)]
+    public async Task<IResult> GiveAsync(
         [RequireNotBot] IMember member,
         ulong change)
     {
@@ -111,10 +112,10 @@ public class RepuatationCommands : MyDiscordGuildModuleBase
         return Success("Reputation given", $"Gave {change} reputation to {member.Mention}");
     }
 
-    [Command("take", "revoke")]
-    [DefaultCooldown(1, 2)]
-    [RequireAuthorGuildPermissions(Permission.ManageGuild)]
-    public async Task<DiscordCommandResult> TakeAsync(
+    [TextCommand("take", "revoke")]
+    [DefaultRateLimit(1, 2)]
+    [RequireAuthorPermissions(Permissions.ManageGuild)]
+    public async Task<IResult> TakeAsync(
         [RequireNotBot] IMember member,
         ulong change)
     {
@@ -124,10 +125,10 @@ public class RepuatationCommands : MyDiscordGuildModuleBase
         return Success("Reputation taken", $"Took {change} reputation from {member.Mention}");
     }
 
-    [Command("set")]
-    [DefaultCooldown(1, 2)]
-    [RequireAuthorGuildPermissions(Permission.ManageGuild)]
-    public async Task<DiscordCommandResult> SetAsync(
+    [TextCommand("set")]
+    [DefaultRateLimit(1, 2)]
+    [RequireAuthorPermissions(Permissions.ManageGuild)]
+    public async Task<IResult> SetAsync(
         [RequireNotBot] IMember member,
         long amount)
     {
@@ -152,10 +153,10 @@ public class RepuatationCommands : MyDiscordGuildModuleBase
         return Success("Reputation set", $"Set {member.Mention}'s reputation to {amount}");
     }
 
-    [Command("addemoji")]
-    [DefaultCooldown(2, 5)]
-    [RequireAuthorGuildPermissions(Permission.ManageGuild)]
-    public async Task<DiscordCommandResult> AddEmojiAsync(IEmoji emoji, int value = 0)
+    [TextCommand("addemoji")]
+    [DefaultRateLimit(2, 5)]
+    [RequireAuthorPermissions(Permissions.ManageGuild)]
+    public async Task<IResult> AddEmojiAsync(IEmoji emoji, int value = 0)
     {
         var config = await _dbContext.ReputationConfigurations.GetForGuildWithEmojisAsync(Context.GuildId);
         if (config is null)
@@ -194,9 +195,9 @@ public class RepuatationCommands : MyDiscordGuildModuleBase
             $"The {emoji} emoji was added successfully with value {value}\nYou can change its value or remove it on the dashboard");
     }
 
-    [Command("reset")]
-    [RequireAuthorGuildPermissions(Permission.ManageGuild)]
-    public async Task<DiscordCommandResult> ResetAsync()
+    [TextCommand("reset")]
+    [RequireAuthorPermissions(Permissions.ManageGuild)]
+    public async Task<IResult> ResetAsync()
     {
         if (await ConfirmAsync(new ConfirmViewOptions
             {

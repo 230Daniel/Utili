@@ -42,7 +42,7 @@ public class ChannelMirroringService
             var destinationChannel = guild.GetTextChannel(config.DestinationChannelId);
             if (destinationChannel is null) return;
 
-            if (!destinationChannel.BotHasPermissions(Permission.ViewChannels | Permission.ManageWebhooks)) return;
+            if (!destinationChannel.BotHasPermissions(Permissions.ViewChannels | Permissions.ManageWebhooks)) return;
 
             string username;
             string avatarUrl;
@@ -88,8 +88,8 @@ public class ChannelMirroringService
                 attachmentChunks.Add(currentAttachmentChunk.ToArray());
 
             var message = new LocalWebhookMessage()
-                .WithName(username)
-                .WithAvatarUrl(avatarUrl)
+                .WithAuthorName(username)
+                .WithAuthorAvatarUrl(avatarUrl)
                 .WithOptionalContent(content)
                 .WithEmbeds(userMessage.Embeds.Where(x => x.IsRich()).Select(LocalEmbed.FromEmbed))
                 .WithAllowedMentions(LocalAllowedMentions.None);
@@ -110,8 +110,8 @@ public class ChannelMirroringService
                         foreach (var attachmentChunk in attachmentChunks.Skip(1))
                         {
                             message = new LocalWebhookMessage()
-                                .WithName(username)
-                                .WithAvatarUrl(avatarUrl)
+                                .WithAuthorName(username)
+                                .WithAuthorAvatarUrl(avatarUrl)
                                 .WithAllowedMentions(LocalAllowedMentions.None)
                                 .WithAttachments(attachmentChunk);
 
@@ -120,8 +120,8 @@ public class ChannelMirroringService
                             if (userMessage.Attachments.Any(x => x.FileSize >= 8000000))
                             {
                                 message = new LocalWebhookMessage()
-                                    .WithName(username)
-                                    .WithAvatarUrl(avatarUrl)
+                                    .WithAuthorName(username)
+                                    .WithAuthorAvatarUrl(avatarUrl)
                                     .WithContent(string.Concat(userMessage.Attachments.Where(x => x.FileSize >= 8000000).Select(x => x.ProxyUrl + "\n")))
                                     .WithAllowedMentions(LocalAllowedMentions.None);
 

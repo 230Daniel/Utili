@@ -30,7 +30,7 @@ public class VoteChannelsService
     {
         try
         {
-            if (!e.Channel.BotHasPermissions(Permission.ViewChannels | Permission.ReadMessageHistory | Permission.AddReactions) || e.Message is ISystemMessage && e.Message.Author.Id == _client.CurrentUser.Id) return;
+            if (!e.Channel.BotHasPermissions(Permissions.ViewChannels | Permissions.ReadMessageHistory | Permissions.AddReactions) || e.Message is ISystemMessage && e.Message.Author.Id == _client.CurrentUser.Id) return;
 
             var db = scope.GetDbContext();
             var config = await db.VoteChannelConfigurations.GetForGuildChannelAsync(e.GuildId.Value, e.ChannelId);

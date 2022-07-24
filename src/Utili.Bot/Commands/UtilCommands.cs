@@ -3,11 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Disqord;
-using Disqord.Bot;
+using Disqord.Bot.Commands;
 using Disqord.Extensions.Interactivity.Menus.Paged;
 using Disqord.Gateway;
 using Disqord.Rest;
 using Qmmands;
+using Qmmands.Text;
 using Utili.Bot.Implementations;
 using Utili.Bot.Services;
 using Utili.Bot.Utils;
@@ -15,7 +16,7 @@ using Utili.Bot.Extensions;
 
 namespace Utili.Bot.Commands;
 
-public class UtilCommands : MyDiscordGuildModuleBase
+public class UtilCommands : MyDiscordTextGuildModuleBase
 {
     private readonly MemberCacheService _memberCache;
     private readonly IsPremiumService _isPremiumService;
@@ -26,10 +27,10 @@ public class UtilCommands : MyDiscordGuildModuleBase
         _isPremiumService = isPremiumService;
     }
 
-    [Command("prune", "purge", "clear")]
-    [RequireAuthorChannelPermissions(Permission.ManageMessages)]
-    [RequireBotChannelPermissions(Permission.ManageMessages | Permission.ReadMessageHistory)]
-    public DiscordCommandResult Prune()
+    [TextCommand("prune", "purge", "clear")]
+    [RequireAuthorPermissions(Permissions.ManageMessages)]
+    [RequireBotPermissions(Permissions.ManageMessages | Permissions.ReadMessageHistory)]
+    public IResult Prune()
     {
         return Info("Prune",
             "Add one or more of the following arguments in any order to delete messages\n" +
@@ -39,11 +40,11 @@ public class UtilCommands : MyDiscordGuildModuleBase
             "[How do I get a message ID?](https://support.discord.com/hc/en-us/articles/206346498)");
     }
 
-    [Command("prune", "purge", "clear")]
-    [DefaultCooldown(1, 10)]
-    [RequireAuthorChannelPermissions(Permission.ManageMessages)]
-    [RequireBotChannelPermissions(Permission.ManageMessages | Permission.ReadMessageHistory)]
-    public async Task<DiscordCommandResult> PruneAsync(
+    [TextCommand("prune", "purge", "clear")]
+    [DefaultRateLimit(1, 10)]
+    [RequireAuthorPermissions(Permissions.ManageMessages)]
+    [RequireBotPermissions(Permissions.ManageMessages | Permissions.ReadMessageHistory)]
+    public async Task<IResult> PruneAsync(
         [Remainder] string arguments)
     {
         var args = arguments is not null
@@ -74,7 +75,7 @@ public class UtilCommands : MyDiscordGuildModuleBase
                         {
                             i++;
                             var messageId = ulong.Parse(args[i]);
-                            beforeMessage = await Context.Channel.FetchMessageAsync(messageId);
+                            beforeMessage = await Context.GetChannel().FetchMessageAsync(messageId);
                             if (beforeMessage is null) throw new Exception();
                             beforeSet = true;
                             break;
@@ -89,7 +90,7 @@ public class UtilCommands : MyDiscordGuildModuleBase
                         {
                             i++;
                             var messageId = ulong.Parse(args[i]);
-                            afterMessage = await Context.Channel.FetchMessageAsync(messageId);
+                            afterMessage = await Context.GetChannel().FetchMessageAsync(messageId);
                             if (afterMessage is null) throw new Exception();
                             afterSet = true;
                             break;
@@ -148,12 +149,10 @@ public class UtilCommands : MyDiscordGuildModuleBase
             }
         }
 
-        await using var yield = Context.BeginYield();
-
         List<IMessage> messages;
-        if (afterMessage is not null) messages = (await Context.Channel.FetchMessagesAsync((int)count, RetrievalDirection.After, afterMessage.Id)).ToList();
-        else if (beforeMessage is not null) messages = (await Context.Channel.FetchMessagesAsync((int)count, RetrievalDirection.Before, beforeMessage.Id)).ToList();
-        else messages = (await Context.Channel.FetchMessagesAsync((int)count)).ToList();
+        if (afterMessage is not null) messages = (await Context.GetChannel().FetchMessagesAsync((int)count, FetchDirection.After, afterMessage.Id)).ToList();
+        else if (beforeMessage is not null) messages = (await Context.GetChannel().FetchMessagesAsync((int)count, FetchDirection.Before, beforeMessage.Id)).ToList();
+        else messages = (await Context.GetChannel().FetchMessagesAsync((int)count)).ToList();
 
         messages = messages.OrderBy(x => x.CreatedAt().UtcDateTime).ToList();
         if (beforeMessage is not null)
@@ -173,40 +172,41 @@ public class UtilCommands : MyDiscordGuildModuleBase
         if (outdated == 1) content += $"{outdated} message was not deleted because it is older than 14 days\n";
         else if (outdated > 1) content += $"{outdated} messages were not deleted because they are older than 14 days\n";
 
-        await Context.Channel.DeleteMessagesAsync(messages.Select(x => x.Id), new DefaultRestRequestOptions { Reason = $"Prune (manual by {Context.Message.Author} {Context.Message.Author.Id})" });
+        await Context.GetChannel().DeleteMessagesAsync(messages.Select(x => x.Id), new DefaultRestRequestOptions { Reason = $"Prune (manual by {Context.Message.Author} {Context.Message.Author.Id})" });
 
         var title = $"{messages.Count} messages deleted";
         if (messages.Count == 1) title = $"{messages.Count} message deleted";
 
-        var sentMessage = await Context.Channel.SendSuccessAsync(title, content);
+        var sentMessage = await Context.GetChannel().SendSuccessAsync(title, content);
         await Task.Delay(5000);
-        await Context.Channel.DeleteMessagesAsync(new[] { sentMessage.Id, Context.Message.Id });
+        await Context.GetChannel().DeleteMessagesAsync(new[] { sentMessage.Id, Context.Message.Id });
 
         return null;
     }
 
-    [Command("react", "addreaction", "addemoji")]
-    [DefaultCooldown(2, 5)]
-    [RequireAuthorChannelPermissions(Permission.AddReactions | Permission.ManageMessages)]
-    [RequireBotChannelPermissions(Permission.AddReactions | Permission.ReadMessageHistory)]
-    public async Task<DiscordCommandResult> ReactAsync(
+    [TextCommand("react", "addreaction", "addemoji")]
+    [DefaultRateLimit(2, 5)]
+    [RequireAuthorPermissions(Permissions.AddReactions | Permissions.ManageMessages)]
+    [RequireBotPermissions(Permissions.AddReactions | Permissions.ReadMessageHistory)]
+    public async Task<IResult> ReactAsync(
         ulong messageId,
         IEmoji emoji)
     {
-        var message = await Context.Channel.FetchMessageAsync(messageId);
+        var message = await Context.GetChannel().FetchMessageAsync(messageId);
 
         if (message is null)
-            return Failure("Error", $"No message was found in <#{Context.Channel.Id}> with ID {messageId}\n[How do I get a message ID?](https://support.discord.com/hc/en-us/articles/206346498)");
+            return Failure("Error", $"No message was found in <#{Context.ChannelId}> with ID {messageId}\n[How do I get a message ID?](https://support.discord.com/hc/en-us/articles/206346498)");
 
         await message.AddReactionAsync(LocalEmoji.FromEmoji(emoji));
         return Success("Reaction added",
             $"The {emoji} reaction was added to a message sent by {message.Author.Mention}");
     }
 
-    [Command("react", "addreaction", "addemoji")]
-    [DefaultCooldown(2, 5)]
-    public async Task<DiscordCommandResult> ReactAsync(
-        [RequireAuthorParameterChannelPermissions(Permission.AddReactions | Permission.ManageMessages)] [RequireBotParameterChannelPermissions(Permission.AddReactions | Permission.ReadMessageHistory)]
+    [TextCommand("react", "addreaction", "addemoji")]
+    [DefaultRateLimit(2, 5)]
+    public async Task<IResult> ReactAsync(
+        [RequireAuthorParameterChannelPermissions(Permissions.AddReactions | Permissions.ManageMessages)]
+        [RequireBotParameterChannelPermissions(Permissions.AddReactions | Permissions.ReadMessageHistory)]
         IMessageGuildChannel channel,
         ulong messageId,
         IEmoji emoji)
@@ -223,13 +223,13 @@ public class UtilCommands : MyDiscordGuildModuleBase
             $"The {emoji} reaction was added to a message sent by {message.Author.Mention} in {channel.Mention}");
     }
 
-    [Command("random", "pick")]
-    public async Task<DiscordCommandResult> RandomAsync()
+    [TextCommand("random", "pick")]
+    public async Task<IResult> RandomAsync()
     {
-        await _memberCache.TemporarilyCacheMembersAsync(Context.Guild.Id);
+        await _memberCache.TemporarilyCacheMembersAsync(Context.GuildId);
 
         var random = new Random();
-        var members = Context.Guild.GetMembers().Values.ToList();
+        var members = Context.GetGuild().GetMembers().Values.ToList();
         var member = members[random.Next(0, members.Count)];
 
         return Info("Random member",
@@ -237,14 +237,14 @@ public class UtilCommands : MyDiscordGuildModuleBase
             $"This member was picked randomly from {members.Count} server member{(members.Count == 1 ? "" : "s")}");
     }
 
-    [Command("random", "pick")]
-    public async Task<DiscordCommandResult> RandomAsync(
+    [TextCommand("random", "pick")]
+    public async Task<IResult> RandomAsync(
         [Remainder] IRole role)
     {
-        await _memberCache.TemporarilyCacheMembersAsync(Context.Guild.Id);
+        await _memberCache.TemporarilyCacheMembersAsync(Context.GuildId);
 
         var random = new Random();
-        var members = Context.Guild.GetMembers().Values
+        var members = Context.GetGuild().GetMembers().Values
             .Where(x => x.RoleIds.Contains(role.Id))
             .ToList();
         var member = members[random.Next(0, members.Count)];
@@ -254,9 +254,9 @@ public class UtilCommands : MyDiscordGuildModuleBase
             $"This member was picked randomly from {members.Count} server member{(members.Count == 1 ? "" : "s")} with the {role.Mention} role");
     }
 
-    [Command("random", "pick")]
-    [DefaultCooldown(2, 5)]
-    public async Task<DiscordCommandResult> RandomAsync(IMessageGuildChannel channel, ulong messageId, IEmoji emoji)
+    [TextCommand("random", "pick")]
+    [DefaultRateLimit(2, 5)]
+    public async Task<IResult> RandomAsync(IMessageGuildChannel channel, ulong messageId, IEmoji emoji)
     {
         var message = await channel.FetchMessageAsync(messageId);
 
@@ -280,23 +280,23 @@ public class UtilCommands : MyDiscordGuildModuleBase
             $"That message doesn't have the {emoji} reaction");
     }
 
-    [Command("random", "pick")]
-    [DefaultCooldown(2, 5)]
-    public Task<DiscordCommandResult> RandomAsync(ulong messageId, IEmoji emoji)
+    [TextCommand("random", "pick")]
+    [DefaultRateLimit(2, 5)]
+    public Task<IResult> RandomAsync(ulong messageId, IEmoji emoji)
     {
-        return RandomAsync(Context.Channel, messageId, emoji);
+        return RandomAsync(Context.GetChannel(), messageId, emoji);
     }
 
-    [Command("whohas")]
-    public async Task<DiscordCommandResult> WhoHasAsync(
+    [TextCommand("whohas")]
+    public async Task<IResult> WhoHasAsync(
         [Remainder] IRole[] roles)
     {
         await _memberCache.TemporarilyCacheMembersAsync(Context.GuildId);
 
-        var members = Context.Guild.GetMembers().Values
+        var members = Context.GetGuild().GetMembers().Values
             .Where(x =>
             {
-                foreach (var role in roles.Where(y => y.Id != Context.Guild.Id))
+                foreach (var role in roles.Where(y => y.Id != Context.GuildId))
                     if (!x.RoleIds.Contains(role.Id))
                         return false;
                 return true;
@@ -321,7 +321,7 @@ public class UtilCommands : MyDiscordGuildModuleBase
                 embed.AddField(new LocalEmbedField()
                     .WithBlankName()
                     .WithValue(content)
-                    .WithIsInline(true));
+                    .WithIsInline());
                 content = "";
             }
             if ((i + 1) % 30 == 0)
@@ -335,9 +335,9 @@ public class UtilCommands : MyDiscordGuildModuleBase
             embed.AddField(new LocalEmbedField()
                 .WithBlankName()
                 .WithValue(content)
-                .WithIsInline(true));
+                .WithIsInline());
 
-        if (embed.Fields.Count > 0)
+        if (embed.Fields.HasValue && embed.Fields.Value.Count > 0)
             pages.Add(new Page().AddEmbed(embed));
 
         var pageProvider = new ListPageProvider(pages);
@@ -345,15 +345,15 @@ public class UtilCommands : MyDiscordGuildModuleBase
         return View(menu, TimeSpan.FromMinutes(5));
     }
 
-    [Command("b64encode")]
-    public DiscordCommandResult B64Encode([Remainder] string input)
+    [TextCommand("b64encode")]
+    public IResult B64Encode([Remainder] string input)
     {
         var output = input.ToEncoded();
         return Success("Encoded string to base 64", output);
     }
 
-    [Command("b64decode")]
-    public DiscordCommandResult B64Decode([Remainder] string input)
+    [TextCommand("b64decode")]
+    public IResult B64Decode([Remainder] string input)
     {
         var output = input.ToDecoded();
 

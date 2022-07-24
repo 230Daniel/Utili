@@ -31,7 +31,7 @@ public class MessageFilterService
     {
         try
         {
-            if ((e.Message as IUserMessage)?.Type == UserMessageType.ThreadStarterMessage || !e.Channel.BotHasPermissions(Permission.ViewChannels | Permission.ManageMessages))
+            if ((e.Message as IUserMessage)?.Type == UserMessageType.ThreadStarterMessage || !e.Channel.BotHasPermissions(Permissions.ViewChannels | Permissions.ManageMessages))
                 return false;
 
             var userMessage = e.Message as IUserMessage;

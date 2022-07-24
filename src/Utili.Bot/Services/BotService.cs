@@ -298,14 +298,14 @@ public class BotService : DiscordClientService
         {
             if (!channelId.HasValue) continue;
             var channel = e.Guild.GetTextChannel(channelId.Value);
-            if (!channel.BotHasPermissions(Permission.ViewChannels | Permission.SendMessages | Permission.SendEmbeds)) continue;
+            if (!channel.BotHasPermissions(Permissions.ViewChannels | Permissions.SendMessages | Permissions.SendEmbeds)) continue;
             idealChannel = channel;
             break;
         }
 
         idealChannel ??= e.Guild.Channels.Values
             .OfType<ITextChannel>()
-            .Where(x => x.BotHasPermissions(Permission.ViewChannels | Permission.SendMessages | Permission.SendEmbeds))
+            .Where(x => x.BotHasPermissions(Permissions.ViewChannels | Permissions.SendMessages | Permissions.SendEmbeds))
             .OrderBy(x => x.CreatedAt())
             .FirstOrDefault();
 

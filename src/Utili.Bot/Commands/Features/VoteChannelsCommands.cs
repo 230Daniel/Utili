@@ -1,18 +1,19 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
 using Disqord;
-using Disqord.Bot;
+using Disqord.Bot.Commands;
 using Utili.Database;
 using Utili.Database.Extensions;
 using Qmmands;
+using Qmmands.Text;
 using Utili.Bot.Implementations;
 using Utili.Bot.Extensions;
 using Utili.Bot.Services;
 
 namespace Utili.Bot.Commands;
 
-[Group("votechannels", "votechannel", "votes")]
-public class VoteChannelsCommands : MyDiscordGuildModuleBase
+[TextGroup("votechannels", "votechannel", "votes")]
+public class VoteChannelsCommands : MyDiscordTextGuildModuleBase
 {
     private readonly DatabaseContext _dbContext;
     private readonly IsPremiumService _isPremiumService;
@@ -23,12 +24,12 @@ public class VoteChannelsCommands : MyDiscordGuildModuleBase
         _isPremiumService = isPremiumService;
     }
 
-    [Command("addemoji", "addemote")]
-    [RequireAuthorGuildPermissions(Permission.ManageGuild)]
-    [DefaultCooldown(2, 5)]
-    public async Task<DiscordCommandResult> AddEmojiAsync(
+    [TextCommand("addemoji", "addemote")]
+    [RequireAuthorPermissions(Permissions.ManageGuild)]
+    [DefaultRateLimit(2, 5)]
+    public async Task<IResult> AddEmojiAsync(
         IEmoji emoji,
-        [RequireBotParameterChannelPermissions(Permission.AddReactions)]
+        [RequireBotParameterChannelPermissions(Permissions.AddReactions)]
         ITextChannel channel)
     {
         channel ??= Context.Channel as ITextChannel;
@@ -53,25 +54,25 @@ public class VoteChannelsCommands : MyDiscordGuildModuleBase
         return Success("Emoji added", $"The {emoji} emoji was added to {channel.Mention}");
     }
 
-    [Command("addemoji", "addemote")]
-    [RequireAuthorGuildPermissions(Permission.ManageGuild)]
-    public Task<DiscordCommandResult> AddEmojiAsync(
-        [RequireBotParameterChannelPermissions(Permission.AddReactions)]
+    [TextCommand("addemoji", "addemote")]
+    [RequireAuthorPermissions(Permissions.ManageGuild)]
+    public Task<IResult> AddEmojiAsync(
+        [RequireBotParameterChannelPermissions(Permissions.AddReactions)]
         ITextChannel channel,
         IEmoji emoji)
         => AddEmojiAsync(emoji, channel);
 
-    [Command("addemoji", "addemote")]
+    [TextCommand("addemoji", "addemote")]
     [RequireNotThread]
-    [RequireAuthorGuildPermissions(Permission.ManageGuild)]
-    [RequireBotChannelPermissions(Permission.AddReactions)]
-    public Task<DiscordCommandResult> AddEmojiAsync(
+    [RequireAuthorPermissions(Permissions.ManageGuild)]
+    [RequireBotPermissions(Permissions.AddReactions)]
+    public Task<IResult> AddEmojiAsync(
         IEmoji emoji)
         => AddEmojiAsync(emoji, Context.Channel as ITextChannel);
 
-    [Command("removeemoji", "removeemote")]
-    [RequireAuthorGuildPermissions(Permission.ManageGuild)]
-    public async Task<DiscordCommandResult> RemoveEmojiAsync(
+    [TextCommand("removeemoji", "removeemote")]
+    [RequireAuthorPermissions(Permissions.ManageGuild)]
+    public async Task<IResult> RemoveEmojiAsync(
         [Minimum(1)] int emojiNumber,
         ITextChannel channel)
     {
@@ -82,7 +83,7 @@ public class VoteChannelsCommands : MyDiscordGuildModuleBase
         if (config.Emojis.Count < emojiNumber)
             return Failure("Error", $"There are only {config.Emojis.Count} emojis for {channel.Mention}");
 
-        var removedEmoji = Context.Guild.GetEmoji(config.Emojis[emojiNumber - 1]);
+        var removedEmoji = Context.GetGuild().GetEmoji(config.Emojis[emojiNumber - 1]);
 
         config.Emojis.RemoveAt(emojiNumber - 1);
         _dbContext.VoteChannelConfigurations.Update(config);
@@ -92,9 +93,9 @@ public class VoteChannelsCommands : MyDiscordGuildModuleBase
             $"The {removedEmoji} emoji was removed successfully");
     }
 
-    [Command("removeemoji", "removeemote")]
-    [RequireAuthorGuildPermissions(Permission.ManageGuild)]
-    public async Task<DiscordCommandResult> RemoveEmojiAsync(
+    [TextCommand("removeemoji", "removeemote")]
+    [RequireAuthorPermissions(Permissions.ManageGuild)]
+    public async Task<IResult> RemoveEmojiAsync(
         IEmoji emoji,
         ITextChannel channel)
     {
@@ -109,36 +110,36 @@ public class VoteChannelsCommands : MyDiscordGuildModuleBase
                                 "\nIf you can't specify the emoji, use its number found in the listEmoji command");
     }
 
-    [Command("removeemoji", "removeemote")]
-    [RequireAuthorGuildPermissions(Permission.ManageGuild)]
-    public Task<DiscordCommandResult> RemoveEmojiAsync(
+    [TextCommand("removeemoji", "removeemote")]
+    [RequireAuthorPermissions(Permissions.ManageGuild)]
+    public Task<IResult> RemoveEmojiAsync(
         ITextChannel channel,
         [Minimum(1)] int emojiNumber)
         => RemoveEmojiAsync(emojiNumber, channel);
 
-    [Command("removeemoji", "removeemote")]
-    [RequireAuthorGuildPermissions(Permission.ManageGuild)]
-    public Task<DiscordCommandResult> RemoveEmojiAsync(
+    [TextCommand("removeemoji", "removeemote")]
+    [RequireAuthorPermissions(Permissions.ManageGuild)]
+    public Task<IResult> RemoveEmojiAsync(
         ITextChannel channel,
         IEmoji emoji)
         => RemoveEmojiAsync(emoji, channel);
 
-    [Command("removeemoji", "removeemote")]
+    [TextCommand("removeemoji", "removeemote")]
     [RequireNotThread]
-    [RequireAuthorGuildPermissions(Permission.ManageGuild)]
-    public Task<DiscordCommandResult> RemoveEmojiAsync(
+    [RequireAuthorPermissions(Permissions.ManageGuild)]
+    public Task<IResult> RemoveEmojiAsync(
         IEmoji emoji)
         => RemoveEmojiAsync(emoji, Context.Channel as ITextChannel);
 
-    [Command("removeemoji", "removeemote")]
+    [TextCommand("removeemoji", "removeemote")]
     [RequireNotThread]
-    [RequireAuthorGuildPermissions(Permission.ManageGuild)]
-    public Task<DiscordCommandResult> RemoveEmojiAsync(
+    [RequireAuthorPermissions(Permissions.ManageGuild)]
+    public Task<IResult> RemoveEmojiAsync(
         [Minimum(1)] int emojiNumber)
         => RemoveEmojiAsync(emojiNumber, Context.Channel as ITextChannel);
 
-    [Command("listemojis", "listemoji", "listemotes", "listemote")]
-    public async Task<DiscordCommandResult> ListEmojisAsync(ITextChannel channel)
+    [TextCommand("listemojis", "listemoji", "listemotes", "listemote")]
+    public async Task<IResult> ListEmojisAsync(ITextChannel channel)
     {
         var config = await _dbContext.VoteChannelConfigurations.GetForGuildChannelAsync(Context.GuildId, channel.Id);
         if (config is null)
@@ -151,8 +152,8 @@ public class VoteChannelsCommands : MyDiscordGuildModuleBase
         return Info("Emojis", $"There are {config.Emojis.Count} emojis for {channel.Mention}\n\n{content}");
     }
 
-    [Command("listemojis", "listemoji", "listemotes", "listemote")]
+    [TextCommand("listemojis", "listemoji", "listemotes", "listemote")]
     [RequireNotThread]
-    public Task<DiscordCommandResult> ListEmojisAsync()
+    public Task<IResult> ListEmojisAsync()
         => ListEmojisAsync(Context.Channel as ITextChannel);
 }

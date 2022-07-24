@@ -22,9 +22,9 @@ public static class GuildExtensions
         return guild.GetChannel(channelId) as CachedVoiceChannel;
     }
 
-    public static CachedVocalGuildChannel GetAudioChannel(this IGuild guild, Snowflake channelId)
+    public static IVocalGuildChannel GetAudioChannel(this IGuild guild, Snowflake channelId)
     {
-        return guild.GetChannel(channelId) as CachedVocalGuildChannel;
+        return guild.GetChannel(channelId) as IVocalGuildChannel;
     }
 
     public static CachedCategoryChannel GetCategoryChannel(this IGuild guild, Snowflake channelId)
@@ -42,9 +42,9 @@ public static class GuildExtensions
         return guild.GetMember((guild.Client as DiscordClientBase).CurrentUser.Id);
     }
 
-    public static bool BotHasPermissions(this IGuild guild, Permission permissions)
+    public static bool BotHasPermissions(this IGuild guild, Permissions permissions)
     {
-        return guild.GetCurrentMember().GetPermissions().Has(permissions);
+        return guild.GetCurrentMember().CalculateGuildPermissions().HasFlag(permissions);
     }
 
     public static IEmoji GetEmoji(this IGuild guild, string emojiString)
