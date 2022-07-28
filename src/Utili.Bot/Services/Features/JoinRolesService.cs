@@ -317,7 +317,12 @@ public class JoinRolesService
     {
         var guild = _client.GetGuild(guildId);
 
-        roleIds.RemoveAll(x => !guild.GetRole(x).CanBeManaged());
+        roleIds.RemoveAll(x =>
+        {
+            var role = guild.GetRole(x);
+            return role is null || !role.CanBeManaged();
+        });
+
         roleIds = roleIds.Distinct().ToList();
 
         foreach (var roleId in roleIds)
