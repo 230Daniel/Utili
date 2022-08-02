@@ -20,44 +20,70 @@ import PremiumThankYou from "./pages/premium/thankyou";
 
 defineExtensions();
 
-ReactDOM.render(
-	<Router>
-		<>
-			<Switch>
-				<Route path="/dashboard/*">
-					<DashboardLayout />
-				</Route>
-				<Route path="*">
-					<Layout>
-						<Switch>
-							<Route exact path="/" component={Index} />
-							<Route exact path="/commands/" component={Commands} />
-							<Route exact path="/dashboard/" component={DashboardIndex} />
-							<Route exact path="/contact/" component={Contact} />
-							<Route exact path="/return/" component={Return} />
-							<Route exact path="/invite/" component={Invite} />
-							<Route exact path="/invite/:guildId" component={Invite} />
-							{window.__config.enablePremium &&
-								<>
-									<Route exact path="/premium/" component={Premium} />
-									<Route exact path="/premium/servers" component={PremiumServers} />
-									<Route exact path="/premium/thankyou" component={PremiumThankYou} />
-									<Route exact path="/premium/customerportal" component={CustomerPortal} />
-									<Route exact path="/premium/checkout/:currency/:slots" component={Checkout} />
-									<Route path="/:document" component={Document} />
-								</>
-							}
-							{!window.__config.enablePremium &&
+// I couldn't get conditional rendering of premium pages working without bugs
+// So we have duplicated code. JavaScript <3
+
+if (window.__config.enablePremium) {
+	ReactDOM.render(
+		<Router>
+			<>
+				<Switch>
+					<Route path="/dashboard/*">
+						<DashboardLayout />
+					</Route>
+					<Route path="*">
+						<Layout>
+							<Switch>
+								<Route exact path="/" component={Index} />
+								<Route exact path="/commands/" component={Commands} />
+								<Route exact path="/dashboard/" component={DashboardIndex} />
+								<Route exact path="/contact/" component={Contact} />
+								<Route exact path="/return/" component={Return} />
+								<Route exact path="/invite/" component={Invite} />
+								<Route exact path="/invite/:guildId" component={Invite} />
+								<Route exact path="/premium/" component={Premium} />
+								<Route exact path="/premium/servers" component={PremiumServers} />
+								<Route exact path="/premium/thankyou" component={PremiumThankYou} />
+								<Route exact path="/premium/customerportal" component={CustomerPortal} />
+								<Route exact path="/premium/checkout/:currency/:slots" component={Checkout} />
 								<Route path="/:document" component={Document} />
-							}
-						</Switch>
-					</Layout>
-				</Route>
-			</Switch>
-		</>
-	</Router>,
-	document.getElementById("root")
-);
+							</Switch>
+						</Layout>
+					</Route>
+				</Switch>
+			</>
+		</Router>,
+		document.getElementById("root")
+	);
+}
+else {
+	ReactDOM.render(
+		<Router>
+			<>
+				<Switch>
+					<Route path="/dashboard/*">
+						<DashboardLayout />
+					</Route>
+					<Route path="*">
+						<Layout>
+							<Switch>
+								<Route exact path="/" component={Index} />
+								<Route exact path="/commands/" component={Commands} />
+								<Route exact path="/dashboard/" component={DashboardIndex} />
+								<Route exact path="/contact/" component={Contact} />
+								<Route exact path="/return/" component={Return} />
+								<Route exact path="/invite/" component={Invite} />
+								<Route exact path="/invite/:guildId" component={Invite} />
+								<Route path="/:document" component={Document} />
+							</Switch>
+						</Layout>
+					</Route>
+				</Switch>
+			</>
+		</Router>,
+		document.getElementById("root")
+	);
+}
 
 function Return() {
 	const cookies = new Cookies();
