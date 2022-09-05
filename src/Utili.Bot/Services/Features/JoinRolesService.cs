@@ -135,7 +135,7 @@ public class JoinRolesService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Exception thrown on member joined");
+            _logger.LogError(ex, "Exception thrown on member joined ({GuildId}/{MemberId})", e.GuildId, e.MemberId);
         }
     }
 
@@ -182,7 +182,7 @@ public class JoinRolesService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Exception thrown on member updated");
+            _logger.LogError(ex, "Exception thrown on member updated ({GuildId}/{MemberId})", e.GuildId, e.MemberId);
         }
     }
 
@@ -201,7 +201,7 @@ public class JoinRolesService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Exception thrown on member left");
+            _logger.LogError(ex, "Exception thrown on member left ({GuildId}/{MemberId})", e.GuildId, e.MemberId);
         }
     }
 
