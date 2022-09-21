@@ -3,10 +3,9 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Disqord;
+using Disqord.Bot;
 using Disqord.Bot.Commands;
 using Disqord.Bot.Commands.Text;
-using Disqord.Bot.Sharding;
-using Disqord.Sharding;
 using Utili.Bot.Extensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -15,9 +14,9 @@ using Qmmands.Default;
 using Qmmands.Text;
 using Utili.Bot.Commands.TypeParsers;
 
-namespace Utili.Bot.Implementations;
+namespace Utili.Bot.Services;
 
-public class MyDiscordBotSharder : DiscordBotSharder
+public class UtiliDiscordBot : DiscordBot
 {
     protected override async ValueTask<IResult> OnBeforeExecuted(IDiscordCommandContext context)
     {
@@ -113,11 +112,11 @@ public class MyDiscordBotSharder : DiscordBotSharder
         return base.AddTypeParsers(typeParserProvider, cancellationToken);
     }
 
-    public MyDiscordBotSharder(
-        IOptions<DiscordBotSharderConfiguration> options,
-        ILogger<MyDiscordBotSharder> logger,
+    public UtiliDiscordBot(
+        IOptions<DiscordBotConfiguration> options,
+        ILogger<UtiliDiscordBot> logger,
         IServiceProvider services,
-        DiscordClientSharder client)
+        DiscordClient client)
         : base(options,
             logger,
             services,

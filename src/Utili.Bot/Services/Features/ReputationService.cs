@@ -14,12 +14,12 @@ namespace Utili.Bot.Services;
 public class ReputationService
 {
     private readonly ILogger<ReputationService> _logger;
-    private readonly DiscordClientBase _client;
+    private readonly UtiliDiscordBot _bot;
 
-    public ReputationService(ILogger<ReputationService> logger, DiscordClientBase client)
+    public ReputationService(ILogger<ReputationService> logger, UtiliDiscordBot bot)
     {
         _logger = logger;
-        _client = client;
+        _bot = bot;
     }
 
     public async Task ReactionAdded(IServiceScope scope, ReactionAddedEventArgs e)
@@ -28,7 +28,7 @@ public class ReputationService
         {
             if (!e.GuildId.HasValue) return;
 
-            var guild = _client.GetGuild(e.GuildId.Value);
+            var guild = _bot.GetGuild(e.GuildId.Value);
             var channel = guild.GetMessageGuildChannel(e.ChannelId);
 
             var db = scope.GetDbContext();
@@ -59,7 +59,7 @@ public class ReputationService
         {
             if (!e.GuildId.HasValue) return;
 
-            var guild = _client.GetGuild(e.GuildId.Value);
+            var guild = _bot.GetGuild(e.GuildId.Value);
             var channel = guild.GetMessageGuildChannel(e.ChannelId);
 
             var db = scope.GetDbContext();

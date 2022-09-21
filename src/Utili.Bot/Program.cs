@@ -1,12 +1,10 @@
 ﻿using System;
-using System.Linq;
 using System.Threading.Tasks;
 using Disqord;
 using Disqord.Bot;
 using Disqord.Bot.Hosting;
 using Disqord.Extensions.Interactivity;
 using Disqord.Gateway;
-using Disqord.Gateway.Api;
 using Disqord.Gateway.Default;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -18,7 +16,6 @@ using Utili.Database;
 using Serilog;
 using Utili.Bot.Extensions;
 using Utili.Bot.Features;
-using Utili.Bot.Implementations;
 using Utili.Bot.Services;
 
 namespace Utili.Bot;
@@ -31,18 +28,14 @@ internal static class Program
             .UseSystemd()
             .UseSerilog()
             .ConfigureServices(ConfigureServices)
-            .ConfigureDiscordBotSharder<MyDiscordBotSharder>((context, bot) =>
+            .ConfigureDiscordBot<UtiliDiscordBot>((context, bot) =>
             {
                 bot.Token = context.Configuration.GetValue<string>("Discord:Token");
                 bot.ReadyEventDelayMode = ReadyEventDelayMode.Guilds;
-                bot.Intents |= GatewayIntent.Members;
-                bot.Intents |= GatewayIntent.VoiceStates;
+                bot.Intents |= GatewayIntents.Members;
+                bot.Intents |= GatewayIntents.VoiceStates;
                 bot.Activities = new[] { new LocalActivity($"{context.Configuration.GetValue<string>("Services:WebsiteDomain")} | Starting up...", ActivityType.Playing) };
                 bot.OwnerIds = new[] { new Snowflake(context.Configuration.GetValue<ulong>("Discord:OwnerId")) };
-
-                var shardIds = context.Configuration.GetSection("Discord:ShardIds").Get<int[]>();
-                var totalShards = context.Configuration.GetValue<int>("Discord:TotalShards");
-                bot.ShardIds = shardIds.Select(x => new ShardId(x, totalShards));
             })
             .Build();
 

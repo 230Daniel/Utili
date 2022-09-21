@@ -19,16 +19,16 @@ namespace Utili.Bot.Services;
 public class JoinRolesService
 {
     private readonly ILogger<JoinRolesService> _logger;
-    private readonly DiscordClientBase _client;
+    private readonly UtiliDiscordBot _bot;
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly MemberCacheService _memberCacheService;
 
     private Scheduler<(Snowflake, Snowflake)> _roleGrantScheduler;
 
-    public JoinRolesService(ILogger<JoinRolesService> logger, DiscordClientBase client, IServiceScopeFactory scopeFactory, MemberCacheService memberCacheService)
+    public JoinRolesService(ILogger<JoinRolesService> logger, UtiliDiscordBot bot, IServiceScopeFactory scopeFactory, MemberCacheService memberCacheService)
     {
         _logger = logger;
-        _client = client;
+        _bot = bot;
         _scopeFactory = scopeFactory;
         _memberCacheService = memberCacheService;
 
@@ -214,7 +214,7 @@ public class JoinRolesService
             var memberRecords = await db.JoinRolesPendingMembers.ToListAsync();
             var configs = await db.JoinRolesConfigurations.ToListAsync();
 
-            memberRecords.RemoveAll(x => _client.GetGuild(x.GuildId) is null);
+            memberRecords.RemoveAll(x => _bot.GetGuild(x.GuildId) is null);
 
             _logger.LogInformation("Checking status for {Count} pending join roles members...", memberRecords.Count);
 
@@ -228,16 +228,16 @@ public class JoinRolesService
 
             foreach (var memberRecord in memberRecords)
             {
-                var guild = _client.GetGuild(memberRecord.GuildId);
+                var guild = _bot.GetGuild(memberRecord.GuildId);
                 if (guild is null) continue;
 
-                IMember member = _client.GetMember(memberRecord.GuildId, memberRecord.MemberId);
+                IMember member = _bot.GetMember(memberRecord.GuildId, memberRecord.MemberId);
 
                 if (member is null)
                 {
                     try
                     {
-                        member = await _client.FetchMemberAsync(memberRecord.GuildId, memberRecord.MemberId);
+                        member = await _bot.FetchMemberAsync(memberRecord.GuildId, memberRecord.MemberId);
                         await Task.Delay(500);
                     }
                     catch (RestApiException ex) when (ex.StatusCode == HttpResponseStatusCode.NotFound) { }
@@ -315,12 +315,12 @@ public class JoinRolesService
 
     private async Task GrantRolesAsync(Snowflake guildId, Snowflake memberId, List<ulong> roleIds)
     {
-        var guild = _client.GetGuild(guildId);
+        var guild = _bot.GetGuild(guildId);
 
         roleIds.RemoveAll(x => !guild.GetRole(x).CanBeManaged());
         roleIds = roleIds.Distinct().ToList();
 
         foreach (var roleId in roleIds)
-            await _client.GrantRoleAsync(guildId, memberId, roleId, new DefaultRestRequestOptions { Reason = "Join Roles" });
+            await _bot.GrantRoleAsync(guildId, memberId, roleId, new DefaultRestRequestOptions { Reason = "Join Roles" });
     }
 }

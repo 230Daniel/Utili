@@ -19,7 +19,7 @@ public class InactiveRoleService
     private static readonly TimeSpan GapBetweenUpdates = TimeSpan.FromMinutes(60);
 
     private readonly ILogger<InactiveRoleService> _logger;
-    private readonly DiscordClientBase _client;
+    private readonly UtiliDiscordBot _bot;
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly MemberCacheService _memberCache;
     private readonly IsPremiumService _isPremiumService;
@@ -28,13 +28,13 @@ public class InactiveRoleService
 
     public InactiveRoleService(
         ILogger<InactiveRoleService> logger,
-        DiscordClientBase client,
+        UtiliDiscordBot bot,
         IServiceScopeFactory scopeFactory,
         MemberCacheService memberCache,
         IsPremiumService isPremiumService)
     {
         _logger = logger;
-        _client = client;
+        _bot = bot;
         _scopeFactory = scopeFactory;
         _memberCache = memberCache;
         _isPremiumService = isPremiumService;
@@ -78,7 +78,7 @@ public class InactiveRoleService
     {
         var db = scope.GetDbContext();
         var config = await db.InactiveRoleConfigurations.GetForGuildAsync(guildId);
-        IGuild guild = _client.GetGuild(guildId);
+        IGuild guild = _bot.GetGuild(guildId);
         var inactiveRole = guild.GetRole(config.RoleId);
 
         if (inactiveRole is null) return;
@@ -124,7 +124,7 @@ public class InactiveRoleService
             var now = DateTime.UtcNow;
             var maximumLastUpdate = now - GapBetweenUpdates;
             var configsRequiringUpdate = await db.InactiveRoleConfigurations.Where(x => x.LastUpdate < maximumLastUpdate).ToListAsync();
-            configsRequiringUpdate.RemoveAll(x => _client.GetGuild(x.GuildId) is null);
+            configsRequiringUpdate.RemoveAll(x => _bot.GetGuild(x.GuildId) is null);
             configsRequiringUpdate = configsRequiringUpdate.Take(5).ToList();
 
             foreach (var config in configsRequiringUpdate)
@@ -150,7 +150,7 @@ public class InactiveRoleService
         {
             try
             {
-                IGuild guild = _client.GetGuild(config.GuildId);
+                IGuild guild = _bot.GetGuild(config.GuildId);
                 var inactiveRole = guild.GetRole(config.RoleId);
                 if (inactiveRole is null || !inactiveRole.CanBeManaged()) return;
 

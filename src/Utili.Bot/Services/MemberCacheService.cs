@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Timers;
 using Disqord;
 using Disqord.Gateway;
+using Disqord.Gateway.Api;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -22,7 +23,7 @@ public class MemberCacheService
 
     private readonly ILogger<MemberCacheService> _logger;
     private readonly IConfiguration _configuration;
-    private readonly DiscordClientBase _client;
+    private readonly UtiliDiscordBot _bot;
     private readonly IServiceScopeFactory _scopeFactory;
 
     private List<Snowflake> _cachedGuilds;
@@ -30,11 +31,11 @@ public class MemberCacheService
     private Dictionary<Snowflake, SemaphoreSlim> _semaphores;
     private Timer _timer;
 
-    public MemberCacheService(ILogger<MemberCacheService> logger, IConfiguration configuration, DiscordClientBase client, IServiceScopeFactory scopeFactory)
+    public MemberCacheService(ILogger<MemberCacheService> logger, IConfiguration configuration, UtiliDiscordBot bot, IServiceScopeFactory scopeFactory)
     {
         _logger = logger;
         _configuration = configuration;
-        _client = client;
+        _bot = bot;
         _scopeFactory = scopeFactory;
 
         _cachedGuilds = new();
@@ -58,7 +59,12 @@ public class MemberCacheService
             await PermanentlyCacheMembersAsync(guildIds);
 
             _logger.LogInformation("Finished caching members for {Shard}", e.ShardId);
-            await (_client as IGatewayClient).Shards[e.ShardId].SetPresenceAsync(new LocalActivity($"{_configuration.GetValue<string>("Services:WebsiteDomain")} | {_configuration.GetValue<string>("Discord:DefaultPrefix")}help", ActivityType.Playing));
+
+            var domain = _configuration["Services:WebsiteDomain"];
+            var defaultPrefix = _configuration["Discord:DefaultPrefix"];
+            var activity = new LocalActivity($"{domain} | {defaultPrefix}help", ActivityType.Playing);
+            var readyShard = (_bot.ApiClient as IGatewayApiClient).Shards[e.ShardId];
+            await readyShard.SetPresenceAsync(activity);
         }
         catch (Exception ex)
         {
@@ -98,7 +104,7 @@ public class MemberCacheService
             }
 
             // The expiry time is in the past, chunk members now and set expiry time
-            await _client.Chunker.ChunkAsync(_client.GetGuild(guildId));
+            await _bot.Chunker.ChunkAsync(_bot.GetGuild(guildId));
             _tempCachedGuilds[guildId] = DateTime.UtcNow.Add(TemporaryCacheLength);
             _logger.LogInformation("Temporarily cached members for {Guild}", guildId);
         }
@@ -112,7 +118,7 @@ public class MemberCacheService
     {
         _ = Task.Run(async () =>
         {
-            var guildIdsToCheck = _client.GetGuilds().Select(x => x.Key).ToList();
+            var guildIdsToCheck = _bot.GetGuilds().Select(x => x.Key).ToList();
             guildIdsToCheck.RemoveAll(x => _cachedGuilds.Contains(x));
 
             var guildIds = await GetRequiredDownloadsAsync(guildIdsToCheck);
@@ -132,9 +138,9 @@ public class MemberCacheService
 
             foreach (var guildId in guildIds)
             {
-                var guild = _client.GetGuild(guildId);
+                var guild = _bot.GetGuild(guildId);
                 if (guild is null) continue;
-                await _client.Chunker.ChunkAsync(guild);
+                await _bot.Chunker.ChunkAsync(guild);
                 _logger.LogDebug("Cached members for {Guild}", guildId);
             }
         }
@@ -195,14 +201,14 @@ public class MemberCacheService
                         // The expiry time is in the past, remove it and un-cache
                         _tempCachedGuilds.TryRemove(guildId, out _);
 
-                        if (!_client.CacheProvider.TryGetMembers(guildId, out var cache))
+                        if (!_bot.CacheProvider.TryGetMembers(guildId, out var cache))
                             continue;
 
                         var toRemove = cache.Where(x =>
                             {
                                 var (memberId, member) = x;
 
-                                if (memberId == _client.CurrentUser.Id)
+                                if (memberId == _bot.CurrentUser.Id)
                                     return false;
 
                                 if (member.IsPending)

@@ -3,7 +3,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Timers;
 using BotlistStatsPoster;
-using Disqord;
 using Disqord.Gateway;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -17,7 +16,7 @@ namespace Utili.Bot.Services;
 
 public class GuildCountService
 {
-    private readonly DiscordClientBase _client;
+    private readonly UtiliDiscordBot _client;
     private readonly ILogger<GuildCountService> _logger;
     private readonly IConfiguration _config;
     private readonly IServiceScopeFactory _scopeFactory;
@@ -25,7 +24,7 @@ public class GuildCountService
     private Timer _timer;
     private int _counter;
 
-    public GuildCountService(ILogger<GuildCountService> logger, DiscordClientBase client, IConfiguration config, IServiceScopeFactory scopeFactory)
+    public GuildCountService(ILogger<GuildCountService> logger, UtiliDiscordBot client, IConfiguration config, IServiceScopeFactory scopeFactory)
     {
         _logger = logger;
         _client = client;

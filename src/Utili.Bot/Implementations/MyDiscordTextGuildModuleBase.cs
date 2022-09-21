@@ -2,7 +2,6 @@
 using System.Threading.Tasks;
 using Disqord.Bot.Commands.Text;
 using Qmmands;
-using Utili.Bot.Implementations.Views;
 using Utili.Bot.Utils;
 
 namespace Utili.Bot.Implementations;

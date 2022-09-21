@@ -12,11 +12,11 @@ namespace Utili.Bot.Services;
 public class WebhookService
 {
     private readonly ILogger<WebhookService> _logger;
-    private readonly DiscordClientBase _client;
+    private readonly UtiliDiscordBot _client;
     private readonly Dictionary<Snowflake, IWebhook> _webhooks;
     private readonly SemaphoreSlim _semaphore;
 
-    public WebhookService(ILogger<WebhookService> logger, DiscordClientBase client)
+    public WebhookService(ILogger<WebhookService> logger, UtiliDiscordBot client)
     {
         _logger = logger;
         _client = client;

@@ -10,6 +10,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Utili.Bot.Extensions;
+using Utili.Bot.Services;
 
 namespace Utili.Bot;
 
@@ -17,7 +18,7 @@ public class CommunityService
 {
     private readonly ILogger<CommunityService> _logger;
     private readonly IConfiguration _config;
-    private readonly DiscordClientBase _client;
+    private readonly UtiliDiscordBot _client;
     private readonly Snowflake _communityGuildId;
     private readonly IServiceScopeFactory _scopeFactory;
 
@@ -26,7 +27,7 @@ public class CommunityService
     public CommunityService(
         ILogger<CommunityService> logger,
         IConfiguration config,
-        DiscordClientBase client,
+        UtiliDiscordBot client,
         IServiceScopeFactory scopeFactory)
     {
         _logger = logger;

@@ -87,7 +87,7 @@ public class MessagePinningCommands : MyDiscordTextGuildModuleBase
                         .WithAuthorName(username)
                         .WithAuthorAvatarUrl(avatarUrl)
                         .WithOptionalContent(message.Content)
-                        .WithEmbeds(message.Embeds.Select(LocalEmbed.FromEmbed))
+                        .WithEmbeds(message.Embeds.Select(LocalEmbed.CreateFrom))
                         .WithAllowedMentions(LocalAllowedMentions.None);
 
                     await Context.Bot.ExecuteWebhookAsync(webhook.Id, webhook.Token, messageBuilder);

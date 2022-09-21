@@ -4,7 +4,7 @@ using Disqord.Extensions.Interactivity.Menus;
 using Disqord.Rest;
 using Utili.Bot.Utils;
 
-namespace Utili.Bot.Implementations.Views;
+namespace Utili.Bot.Implementations;
 
 public class ConfirmView : ViewBase
 {

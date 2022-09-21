@@ -12,7 +12,6 @@ using Microsoft.EntityFrameworkCore;
 using Qmmands;
 using Qmmands.Text;
 using Utili.Bot.Implementations;
-using Utili.Bot.Implementations.Views;
 using Utili.Bot.Utils;
 using Utili.Bot.Extensions;
 

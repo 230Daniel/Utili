@@ -18,13 +18,13 @@ namespace Utili.Bot.Services;
 public class ChannelMirroringService
 {
     private readonly ILogger<ChannelMirroringService> _logger;
-    private readonly DiscordClientBase _client;
+    private readonly UtiliDiscordBot _bot;
     private readonly WebhookService _webhookService;
 
-    public ChannelMirroringService(ILogger<ChannelMirroringService> logger, DiscordClientBase client, WebhookService webhookService)
+    public ChannelMirroringService(ILogger<ChannelMirroringService> logger, UtiliDiscordBot bot, WebhookService webhookService)
     {
         _logger = logger;
-        _client = client;
+        _bot = bot;
         _webhookService = webhookService;
     }
 
@@ -38,7 +38,7 @@ public class ChannelMirroringService
             var config = await db.ChannelMirroringConfigurations.GetForGuildChannelAsync(e.GuildId.Value, e.ChannelId);
             if (config is null) return;
 
-            var guild = _client.GetGuild(e.GuildId.Value);
+            var guild = _bot.GetGuild(e.GuildId.Value);
             var destinationChannel = guild.GetTextChannel(config.DestinationChannelId);
             if (destinationChannel is null) return;
 
@@ -56,7 +56,7 @@ public class ChannelMirroringService
             }
             else
             {
-                var bot = _client.GetGuild(e.GuildId.Value).GetCurrentMember();
+                var bot = _bot.GetGuild(e.GuildId.Value).GetCurrentMember();
                 username = bot.Nick ?? bot.Name;
                 avatarUrl = null;
                 content = e.Message.Content.Contains('\n')
@@ -91,7 +91,7 @@ public class ChannelMirroringService
                 .WithAuthorName(username)
                 .WithAuthorAvatarUrl(avatarUrl)
                 .WithOptionalContent(content)
-                .WithEmbeds(userMessage.Embeds.Where(x => x.IsRich()).Select(LocalEmbed.FromEmbed))
+                .WithEmbeds(userMessage.Embeds.Where(x => x.IsRich()).Select(LocalEmbed.CreateFrom))
                 .WithAllowedMentions(LocalAllowedMentions.None);
 
             if (attachmentChunks.Any())
@@ -105,7 +105,7 @@ public class ChannelMirroringService
 
                     try
                     {
-                        await _client.ExecuteWebhookAsync(webhook.Id, webhook.Token, message);
+                        await _bot.ExecuteWebhookAsync(webhook.Id, webhook.Token, message);
 
                         foreach (var attachmentChunk in attachmentChunks.Skip(1))
                         {
@@ -115,7 +115,7 @@ public class ChannelMirroringService
                                 .WithAllowedMentions(LocalAllowedMentions.None)
                                 .WithAttachments(attachmentChunk);
 
-                            await _client.ExecuteWebhookAsync(webhook.Id, webhook.Token, message);
+                            await _bot.ExecuteWebhookAsync(webhook.Id, webhook.Token, message);
 
                             if (userMessage.Attachments.Any(x => x.FileSize >= 8000000))
                             {
@@ -125,7 +125,7 @@ public class ChannelMirroringService
                                     .WithContent(string.Concat(userMessage.Attachments.Where(x => x.FileSize >= 8000000).Select(x => x.ProxyUrl + "\n")))
                                     .WithAllowedMentions(LocalAllowedMentions.None);
 
-                                await _client.ExecuteWebhookAsync(webhook.Id, webhook.Token, message);
+                                await _bot.ExecuteWebhookAsync(webhook.Id, webhook.Token, message);
                             }
                         }
 

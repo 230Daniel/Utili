@@ -20,7 +20,7 @@ public class MessageLogsService
 {
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly ILogger<MessageLogsService> _logger;
-    private readonly DiscordClientBase _client;
+    private readonly UtiliDiscordBot _bot;
     private readonly HasteService _haste;
     private readonly IsPremiumService _isPremiumService;
 
@@ -29,13 +29,13 @@ public class MessageLogsService
     public MessageLogsService(
         IServiceScopeFactory scopeFactory,
         ILogger<MessageLogsService> logger,
-        DiscordClientBase client,
+        UtiliDiscordBot bot,
         HasteService haste,
         IsPremiumService isPremiumService)
     {
         _scopeFactory = scopeFactory;
         _logger = logger;
-        _client = client;
+        _bot = bot;
         _haste = haste;
         _isPremiumService = isPremiumService;
 
@@ -104,7 +104,7 @@ public class MessageLogsService
             var config = await db.MessageLogsConfigurations.GetForGuildAsync(e.GuildId.Value);
             if (config is null || (config.DeletedChannelId == 0 && config.EditedChannelId == 0) || config.ExcludedChannels.Contains(e.ChannelId)) return;
 
-            IMessageGuildChannel channel = _client.GetMessageGuildChannel(e.GuildId.Value, e.ChannelId);
+            IMessageGuildChannel channel = _bot.GetMessageGuildChannel(e.GuildId.Value, e.ChannelId);
             if (channel is IThreadChannel threadChannel && (!config.LogThreads || config.ExcludedChannels.Contains(threadChannel.ChannelId)))
                 return;
 
@@ -118,7 +118,7 @@ public class MessageLogsService
             db.MessageLogsMessages.Update(messageRecord);
             await db.SaveChangesAsync();
 
-            var logChannel = _client.GetTextChannel(e.GuildId.Value, config.EditedChannelId);
+            var logChannel = _bot.GetTextChannel(e.GuildId.Value, config.EditedChannelId);
             if (logChannel is not null) await logChannel.SendEmbedAsync(embed);
         }
         catch (Exception ex)
@@ -135,14 +135,14 @@ public class MessageLogsService
             var config = await db.MessageLogsConfigurations.GetForGuildAsync(e.GuildId.Value);
             if (config is null || (config.DeletedChannelId == 0 && config.EditedChannelId == 0) || config.ExcludedChannels.Contains(e.ChannelId)) return;
 
-            IMessageGuildChannel channel = _client.GetMessageGuildChannel(e.GuildId.Value, e.ChannelId);
+            IMessageGuildChannel channel = _bot.GetMessageGuildChannel(e.GuildId.Value, e.ChannelId);
             if (channel is IThreadChannel threadChannel && (!config.LogThreads || config.ExcludedChannels.Contains(threadChannel.ChannelId)))
                 return;
 
             var messageRecord = await db.MessageLogsMessages.GetForMessageAsync(e.MessageId);
             if (messageRecord is null) return;
 
-            var member = _client.GetMember(e.GuildId.Value, messageRecord.AuthorId) ?? await _client.FetchMemberAsync(e.GuildId.Value, messageRecord.AuthorId);
+            var member = _bot.GetMember(e.GuildId.Value, messageRecord.AuthorId) ?? await _bot.FetchMemberAsync(e.GuildId.Value, messageRecord.AuthorId);
             if (member is not null && member.IsBot) return;
 
             var embed = GetDeletedEmbed(messageRecord, member);
@@ -150,7 +150,7 @@ public class MessageLogsService
             db.MessageLogsMessages.Remove(messageRecord);
             await db.SaveChangesAsync();
 
-            var logChannel = _client.GetTextChannel(e.GuildId.Value, config.DeletedChannelId);
+            var logChannel = _bot.GetTextChannel(e.GuildId.Value, config.DeletedChannelId);
             if (logChannel is not null) await logChannel.SendEmbedAsync(embed);
         }
         catch (Exception ex)
@@ -167,7 +167,7 @@ public class MessageLogsService
             var config = await db.MessageLogsConfigurations.GetForGuildAsync(e.GuildId);
             if (config is null || (config.DeletedChannelId == 0 && config.EditedChannelId == 0) || config.ExcludedChannels.Contains(e.ChannelId)) return;
 
-            IMessageGuildChannel channel = _client.GetMessageGuildChannel(e.GuildId, e.ChannelId);
+            IMessageGuildChannel channel = _bot.GetMessageGuildChannel(e.GuildId, e.ChannelId);
             if (channel is IThreadChannel threadChannel && (!config.LogThreads || config.ExcludedChannels.Contains(threadChannel.ChannelId)))
                 return;
 
@@ -182,7 +182,7 @@ public class MessageLogsService
                 await db.SaveChangesAsync();
             }
 
-            var logChannel = _client.GetTextChannel(e.GuildId, config.DeletedChannelId);
+            var logChannel = _bot.GetTextChannel(e.GuildId, config.DeletedChannelId);
             if (logChannel is not null) await logChannel.SendEmbedAsync(embed);
         }
         catch (Exception ex)
@@ -275,7 +275,7 @@ public class MessageLogsService
             {
                 if (!cachedUsers.TryGetValue(message.AuthorId, out var user))
                 {
-                    user = _client.GetUser(message.AuthorId) as IUser ?? await _client.FetchUserAsync(message.AuthorId);
+                    user = _bot.GetUser(message.AuthorId) as IUser ?? await _bot.FetchUserAsync(message.AuthorId);
                     cachedUsers.Add(message.AuthorId, user);
                     await Task.Delay(500);
                 }

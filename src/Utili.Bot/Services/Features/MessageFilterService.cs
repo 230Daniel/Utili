@@ -15,14 +15,14 @@ namespace Utili.Bot.Services;
 public class MessageFilterService
 {
     private readonly ILogger<MessageFilterService> _logger;
-    private readonly DiscordClientBase _client;
+    private readonly UtiliDiscordBot _bot;
 
     private ConcurrentDictionary<Snowflake, DateTime> _offenceDictionary;
 
-    public MessageFilterService(ILogger<MessageFilterService> logger, DiscordClientBase client)
+    public MessageFilterService(ILogger<MessageFilterService> logger, UtiliDiscordBot bot)
     {
         _logger = logger;
-        _client = client;
+        _bot = bot;
         _offenceDictionary = new();
     }
 
@@ -37,7 +37,7 @@ public class MessageFilterService
             var userMessage = e.Message as IUserMessage;
             if (userMessage is not null &&
                 e.Member is not null &&
-                e.Member.Id == _client.CurrentUser.Id &&
+                e.Member.Id == _bot.CurrentUser.Id &&
                 userMessage.Embeds.Count > 0 &&
                 userMessage.Embeds[0].Author?.Name == "Message deleted")
                 return false;

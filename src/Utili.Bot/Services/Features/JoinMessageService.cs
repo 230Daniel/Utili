@@ -14,12 +14,12 @@ namespace Utili.Bot.Services;
 public class JoinMessageService
 {
     private readonly ILogger<JoinMessageService> _logger;
-    private readonly DiscordClientBase _client;
+    private readonly UtiliDiscordBot _bot;
 
-    public JoinMessageService(ILogger<JoinMessageService> logger, DiscordClientBase client)
+    public JoinMessageService(ILogger<JoinMessageService> logger, UtiliDiscordBot bot)
     {
         _logger = logger;
-        _client = client;
+        _bot = bot;
     }
 
     public async Task MemberJoined(IServiceScope scope, MemberJoinedEventArgs e)
@@ -41,7 +41,7 @@ public class JoinMessageService
             }
             else
             {
-                var channel = _client.GetTextChannel(e.GuildId, config.ChannelId);
+                var channel = _bot.GetTextChannel(e.GuildId, config.ChannelId);
                 if (!channel.BotHasPermissions(Permissions.ViewChannels | Permissions.SendMessages | Permissions.SendEmbeds)) return;
                 var sentMessage = await channel.SendMessageAsync(message);
 

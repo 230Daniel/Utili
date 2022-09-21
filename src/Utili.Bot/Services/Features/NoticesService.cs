@@ -21,16 +21,16 @@ namespace Utili.Bot.Services;
 public class NoticesService
 {
     private readonly ILogger<NoticesService> _logger;
-    private readonly DiscordClientBase _client;
+    private readonly UtiliDiscordBot _bot;
     private readonly IServiceScopeFactory _scopeFactory;
 
     private Dictionary<Snowflake, Timer> _channelUpdateTimers = new();
     private RepeatingTimer _dashboardNoticeUpdateTimer;
 
-    public NoticesService(ILogger<NoticesService> logger, DiscordClientBase client, IServiceScopeFactory scopeFactory)
+    public NoticesService(ILogger<NoticesService> logger, UtiliDiscordBot bot, IServiceScopeFactory scopeFactory)
     {
         _logger = logger;
-        _client = client;
+        _bot = bot;
         _scopeFactory = scopeFactory;
 
         _dashboardNoticeUpdateTimer = new RepeatingTimer(3000);
@@ -50,12 +50,12 @@ public class NoticesService
             var config = await db.NoticeConfigurations.GetForGuildChannelAsync(e.GuildId.Value, e.ChannelId);
             if (config is null) return;
 
-            if (config.Enabled && e.Message is ISystemMessage && e.Message.Author.Id == _client.CurrentUser.Id)
+            if (config.Enabled && e.Message is ISystemMessage && e.Message.Author.Id == _bot.CurrentUser.Id)
             {
                 await e.Message.DeleteAsync();
                 return;
             }
-            if (!config.Enabled || e.Message.Author.Id == _client.CurrentUser.Id) return;
+            if (!config.Enabled || e.Message.Author.Id == _bot.CurrentUser.Id) return;
 
             var delay = config.Delay;
             var minimumDelay = e.Member is null || e.Member.IsBot
@@ -84,7 +84,7 @@ public class NoticesService
             var db = scope.GetDbContext();
 
             var updatedConfigs = await db.NoticeConfigurations.Where(x => x.UpdatedFromDashboard).ToListAsync();
-            updatedConfigs.RemoveAll(x => _client.GetGuild(x.GuildId) is null);
+            updatedConfigs.RemoveAll(x => _bot.GetGuild(x.GuildId) is null);
 
             foreach (var updatedConfig in updatedConfigs)
             {
@@ -128,7 +128,7 @@ public class NoticesService
 
             if (config is null || !config.Enabled) return;
 
-            var guild = _client.GetGuild(guildId);
+            var guild = _bot.GetGuild(guildId);
             var channel = guild.GetTextChannel(channelId);
 
             if (channel is null ||

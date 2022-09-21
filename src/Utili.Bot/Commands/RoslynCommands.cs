@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Disqord;
+using Disqord.Bot;
 using Disqord.Bot.Commands;
 using Disqord.Bot.Commands.Text;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
@@ -50,12 +51,14 @@ public class RoslynCommands : MyDiscordTextGuildModuleBase
                 "Disqord",
                 "Disqord.Rest",
                 "Disqord.Gateway",
+                "Discord.Bot",
                 "Utili.Bot",
                 "Utili.Bot.Services",
                 "Utili.Bot.Utils",
                 "Utili.Bot.Extensions")
             .WithReferences(
                 typeof(DiscordClientBase).Assembly,
+                typeof(DiscordBotBase).Assembly,
                 typeof(Program).Assembly);
 
         RoslynGlobals globals = new(Context.Services, Context);
@@ -77,7 +80,7 @@ public class RoslynCommands : MyDiscordTextGuildModuleBase
 public class RoslynGlobals
 {
     public IServiceProvider Services { get; }
-    public DiscordClientBase Client { get; }
+    public DiscordBotBase Client { get; }
     public IDiscordTextGuildCommandContext Context { get; }
 
     public RoslynGlobals(IServiceProvider services, IDiscordTextGuildCommandContext context)

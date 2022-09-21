@@ -3,8 +3,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using Disqord;
 using Disqord.Bot;
+using Disqord.Bot.Hosting;
 using Disqord.Gateway;
-using Disqord.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Utili.Database.Entities;
@@ -16,7 +16,7 @@ using Utili.Bot.Extensions;
 
 namespace Utili.Bot.Services;
 
-public class BotService : DiscordClientService
+public class BotService : DiscordBotService
 {
     private readonly ILogger<BotService> _logger;
     private readonly IConfiguration _configuration;
@@ -45,7 +45,7 @@ public class BotService : DiscordClientService
         ILogger<BotService> logger,
         IConfiguration configuration,
         IServiceScopeFactory scopeFactory,
-        DiscordBotBase client,
+        DiscordBotBase bot,
         CommunityService community,
         GuildCountService guildCount,
         MemberCacheService memberCache,
@@ -63,7 +63,7 @@ public class BotService : DiscordClientService
         VoiceLinkService voiceLink,
         VoiceRolesService voiceRoles,
         VoteChannelsService voteChannels)
-        : base(logger, client)
+        : base(logger, bot)
     {
         _logger = logger;
         _configuration = configuration;
@@ -118,7 +118,7 @@ public class BotService : DiscordClientService
         return ValueTask.CompletedTask;
     }
 
-    protected override async ValueTask OnMessageReceived(MessageReceivedEventArgs e)
+    protected override async ValueTask OnMessageReceived(BotMessageReceivedEventArgs e)
     {
         if (!e.GuildId.HasValue) return;
 

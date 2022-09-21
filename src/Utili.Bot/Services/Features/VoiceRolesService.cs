@@ -17,16 +17,16 @@ namespace Utili.Bot.Services;
 public class VoiceRolesService
 {
     private readonly ILogger<VoiceRolesService> _logger;
-    private readonly DiscordClientBase _client;
+    private readonly UtiliDiscordBot _bot;
     private readonly IServiceScopeFactory _scopeFactory;
 
     private SemaphoreSlim _semaphore = new(1, 1);
     private List<UpdateRequest> _updateRequests = new();
 
-    public VoiceRolesService(ILogger<VoiceRolesService> logger, DiscordClientBase client, IServiceScopeFactory scopeFactory)
+    public VoiceRolesService(ILogger<VoiceRolesService> logger, UtiliDiscordBot bot, IServiceScopeFactory scopeFactory)
     {
         _logger = logger;
-        _client = client;
+        _bot = bot;
         _scopeFactory = scopeFactory;
     }
 
@@ -135,7 +135,7 @@ public class VoiceRolesService
 
             if (configurationForOldChannel?.RoleId == configurationForNewChannel?.RoleId) return;
 
-            var guild = _client.GetGuild(request.GuildId);
+            var guild = _bot.GetGuild(request.GuildId);
 
             if (configurationForOldChannel is not null)
             {
