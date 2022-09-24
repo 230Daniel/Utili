@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using Disqord;
 using Microsoft.AspNetCore.Mvc;
 using Utili.Backend.Authorisation;
 using Utili.Backend.Models;
@@ -34,7 +35,7 @@ public class DiscordController : Controller
         {
             Id = guild.Id.ToString(),
             Name = guild.Name,
-            IsManageable = guild.Permissions.ManageGuild,
+            IsManageable = guild.Permissions.HasFlag(Permissions.ManageGuild),
             IconUrl = guild.GetIconUrl()
         }));
     }

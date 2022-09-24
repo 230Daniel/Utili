@@ -29,33 +29,36 @@ public class MyPagedView : PagedViewBase
         AddComponent(NextPageButton);
     }
 
-    protected static LocalMessage GetPagelessMessage()
-        => new LocalMessage().WithContent("No pages to view.");
-
     protected void ApplyPageIndex(Page page)
     {
         var indexText = $"Page {CurrentPageIndex + 1} of {PageProvider.PageCount}";
-        var embed = page.Embeds.LastOrDefault();
+        var embed = page.Embeds.HasValue ?
+            page.Embeds.Value.LastOrDefault() :
+            null;
+
         if (embed != null)
         {
-            if (embed.Footer != null)
-            {
-                if (embed.Footer.Text == null)
-                    embed.Footer.Text = indexText;
-                else if (embed.Footer.Text.Length + indexText.Length + 3 <= LocalEmbedFooter.MaxTextLength)
-                    embed.Footer.Text += $" | {indexText}";
-            }
-            else
+            if (!embed.Footer.HasValue ||
+                !embed.Footer.Value.Text.HasValue ||
+                string.IsNullOrWhiteSpace(embed.Footer.Value.Text.Value))
             {
                 embed.WithFooter(indexText);
+            }
+            else if (embed.Footer.Value.Text.Value.Length + indexText.Length + 3 <= Discord.Limits.Message.Embed.Footer.MaxTextLength)
+            {
+                embed.Footer.Value.Text += $" | {indexText}";
             }
         }
         else
         {
-            if (page.Content == null)
-                page.Content = indexText;
-            else if (page.Content.Length + indexText.Length + 1 <= LocalMessageBase.MaxContentLength)
+            if (!page.Content.HasValue || string.IsNullOrWhiteSpace(page.Content.Value))
+            {
+                page.WithContent(indexText);
+            }
+            else if (page.Content.Value.Length + indexText.Length + 1 <= Discord.Limits.Message.MaxContentLength)
+            {
                 page.Content += $"\n{indexText}";
+            }
         }
     }
 
@@ -81,7 +84,7 @@ public class MyPagedView : PagedViewBase
         }
         else
         {
-            TemplateMessage ??= GetPagelessMessage();
+            MessageTemplate = message => message.WithContent("No pages to view.");
             PreviousPageButton.IsDisabled = true;
             NextPageButton.IsDisabled = true;
         }

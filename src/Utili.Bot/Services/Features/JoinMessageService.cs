@@ -14,12 +14,12 @@ namespace Utili.Bot.Services;
 public class JoinMessageService
 {
     private readonly ILogger<JoinMessageService> _logger;
-    private readonly DiscordClientBase _client;
+    private readonly UtiliDiscordBot _bot;
 
-    public JoinMessageService(ILogger<JoinMessageService> logger, DiscordClientBase client)
+    public JoinMessageService(ILogger<JoinMessageService> logger, UtiliDiscordBot bot)
     {
         _logger = logger;
-        _client = client;
+        _bot = bot;
     }
 
     public async Task MemberJoined(IServiceScope scope, MemberJoinedEventArgs e)
@@ -41,11 +41,11 @@ public class JoinMessageService
             }
             else
             {
-                var channel = _client.GetTextChannel(e.GuildId, config.ChannelId);
-                if (!channel.BotHasPermissions(Permission.ViewChannels | Permission.SendMessages | Permission.SendEmbeds)) return;
+                var channel = _bot.GetTextChannel(e.GuildId, config.ChannelId);
+                if (!channel.BotHasPermissions(Permissions.ViewChannels | Permissions.SendMessages | Permissions.SendEmbeds)) return;
                 var sentMessage = await channel.SendMessageAsync(message);
 
-                if (!config.CreateThread || !channel.BotHasPermissions(Permission.CreatePublicThreads)) return;
+                if (!config.CreateThread || !channel.BotHasPermissions(Permissions.CreatePublicThreads)) return;
                 var threadTitle = config.ThreadTitle;
                 if (string.IsNullOrWhiteSpace(threadTitle)) threadTitle = "Welcome %user%";
                 threadTitle = threadTitle.Replace("%user%", e.Member.Name);

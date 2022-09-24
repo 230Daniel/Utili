@@ -15,12 +15,12 @@ namespace Utili.Bot.Services;
 public class RolePersistService
 {
     private readonly ILogger<RolePersistService> _logger;
-    private readonly DiscordClientBase _client;
+    private readonly UtiliDiscordBot _bot;
 
-    public RolePersistService(ILogger<RolePersistService> logger, DiscordClientBase client)
+    public RolePersistService(ILogger<RolePersistService> logger, UtiliDiscordBot bot)
     {
         _logger = logger;
-        _client = client;
+        _bot = bot;
     }
 
     // Returns true if it granted any roles to the new member
@@ -37,7 +37,7 @@ public class RolePersistService
             var memberRecord = await db.RolePersistMembers.GetForMemberAsync(e.GuildId, e.Member.Id);
             if (memberRecord is null) return false;
 
-            var guild = _client.GetGuild(e.GuildId);
+            var guild = _bot.GetGuild(e.GuildId);
             var roles = memberRecord.Roles.Select(x => guild.GetRole(x)).ToList();
             roles.RemoveAll(x => x is null || !x.CanBeManaged() || config.ExcludedRoles.Contains(x.Id));
             if (!roles.Any()) return false;
@@ -68,7 +68,7 @@ public class RolePersistService
         {
             if (e.User.IsBot) return;
 
-            IGuild guild = _client.GetGuild(e.GuildId);
+            IGuild guild = _bot.GetGuild(e.GuildId);
 
             var db = scope.GetDbContext();
             var config = await db.RolePersistConfigurations.GetForGuildAsync(e.GuildId);

@@ -16,13 +16,13 @@ namespace Utili.Bot.Features;
 public class VoteChannelsService
 {
     private readonly ILogger<VoteChannelsService> _logger;
-    private readonly DiscordClientBase _client;
+    private readonly UtiliDiscordBot _bot;
     private readonly IsPremiumService _isPremiumService;
 
-    public VoteChannelsService(ILogger<VoteChannelsService> logger, DiscordClientBase client, IsPremiumService isPremiumService)
+    public VoteChannelsService(ILogger<VoteChannelsService> logger, UtiliDiscordBot bot, IsPremiumService isPremiumService)
     {
         _logger = logger;
-        _client = client;
+        _bot = bot;
         _isPremiumService = isPremiumService;
     }
 
@@ -30,7 +30,7 @@ public class VoteChannelsService
     {
         try
         {
-            if (!e.Channel.BotHasPermissions(Permission.ViewChannels | Permission.ReadMessageHistory | Permission.AddReactions) || e.Message is ISystemMessage && e.Message.Author.Id == _client.CurrentUser.Id) return;
+            if (!e.Channel.BotHasPermissions(Permissions.ViewChannels | Permissions.ReadMessageHistory | Permissions.AddReactions) || e.Message is ISystemMessage && e.Message.Author.Id == _bot.CurrentUser.Id) return;
 
             var db = scope.GetDbContext();
             var config = await db.VoteChannelConfigurations.GetForGuildChannelAsync(e.GuildId.Value, e.ChannelId);
@@ -42,7 +42,7 @@ public class VoteChannelsService
                 config.Emojis = config.Emojis.Take(premium ? 5 : 2).ToList();
             }
 
-            var guild = _client.GetGuild(e.GuildId.Value);
+            var guild = _bot.GetGuild(e.GuildId.Value);
             foreach (var emojiString in config.Emojis)
             {
                 var emoji = guild.GetEmoji(emojiString);

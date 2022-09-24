@@ -18,15 +18,15 @@ namespace Utili.Bot.Services;
 public class VoiceLinkService
 {
     private readonly ILogger<VoiceLinkService> _logger;
-    private readonly DiscordClientBase _client;
+    private readonly UtiliDiscordBot _bot;
     private readonly IServiceScopeFactory _scopeFactory;
 
     private List<(ulong, ulong)> _channelsRequiringUpdate;
 
-    public VoiceLinkService(ILogger<VoiceLinkService> logger, DiscordClientBase client, IServiceScopeFactory scopeFactory)
+    public VoiceLinkService(ILogger<VoiceLinkService> logger, UtiliDiscordBot bot, IServiceScopeFactory scopeFactory)
     {
         _logger = logger;
-        _client = client;
+        _bot = bot;
         _scopeFactory = scopeFactory;
 
         _channelsRequiringUpdate = new List<(ulong, ulong)>();
@@ -116,7 +116,7 @@ public class VoiceLinkService
 
             var channelRecord = await db.VoiceLinkChannels.GetForGuildChannelAsync(guildId, channelId);
 
-            var guild = _client.GetGuild(guildId);
+            var guild = _bot.GetGuild(guildId);
             var voiceChannel = guild.GetAudioChannel(channelId);
             if (voiceChannel is null)
             {
@@ -126,9 +126,9 @@ public class VoiceLinkService
 
             var category = voiceChannel.CategoryId.HasValue ? guild.GetCategoryChannel(voiceChannel.CategoryId.Value) : null;
 
-            if (!voiceChannel.BotHasPermissions(Permission.ViewChannels)) return;
-            if (category is not null && !category.BotHasPermissions(Permission.ViewChannels | Permission.ManageChannels | Permission.ManageRoles)) return;
-            if (category is null && !guild.BotHasPermissions(Permission.ViewChannels | Permission.ManageChannels | Permission.ManageRoles)) return;
+            if (!voiceChannel.BotHasPermissions(Permissions.ViewChannels)) return;
+            if (category is not null && !category.BotHasPermissions(Permissions.ViewChannels | Permissions.ManageChannels | Permissions.ManageRoles)) return;
+            if (category is null && !guild.BotHasPermissions(Permissions.ViewChannels | Permissions.ManageChannels | Permissions.ManageRoles)) return;
 
             var voiceStates = guild.GetVoiceStates().Where(x => x.Value.ChannelId == voiceChannel.Id).Select(x => x.Value).ToList();
             var connectedUsers = guild.Members.Values.Where(x => voiceStates.Any(y => y.MemberId == x.Id)).ToList();
@@ -150,8 +150,8 @@ public class VoiceLinkService
                     x.Topic = $"Users in {voiceChannel.Name} have access - Created by Utili";
                     x.Overwrites = new List<LocalOverwrite>
                     {
-                        LocalOverwrite.Member(_client.CurrentUser.Id, new OverwritePermissions().Allow(Permission.ViewChannels)),
-                        LocalOverwrite.Role(guildId, new OverwritePermissions().Deny(Permission.ViewChannels)) // @everyone
+                        LocalOverwrite.Member(_bot.CurrentUser.Id, new OverwritePermissions().Allow(Permissions.ViewChannels)),
+                        LocalOverwrite.Role(guildId, new OverwritePermissions().Deny(Permissions.ViewChannels)) // @everyone
                     };
                 }, new DefaultRestRequestOptions { Reason = "Voice Link" }, cancellationToken);
 
@@ -173,7 +173,7 @@ public class VoiceLinkService
             }
             else
             {
-                if (!textChannel.BotHasPermissions(Permission.ViewChannels | Permission.ManageChannels | Permission.ManageRoles)) return;
+                if (!textChannel.BotHasPermissions(Permissions.ViewChannels | Permissions.ManageChannels | Permissions.ManageRoles)) return;
             }
 
             var overwrites = textChannel.Overwrites.Select(x => new LocalOverwrite(x.TargetId, x.TargetType, x.Permissions)).ToList();
@@ -181,9 +181,9 @@ public class VoiceLinkService
 
             overwrites.RemoveAll(x =>
             {
-                if (x.TargetType == OverwriteTargetType.Member && x.TargetId != _client.CurrentUser.Id)
+                if (x.TargetType == OverwriteTargetType.Member && x.TargetId != _bot.CurrentUser.Id)
                 {
-                    IMember member = guild.GetMember(x.TargetId);
+                    var member = guild.GetMember(x.TargetId.Value);
                     if (member is null || voiceStates.All(y => y.MemberId != member.Id) || voiceStates.First(y => y.MemberId == member.Id).ChannelId == voiceChannel.Id)
                     {
                         overwritesChanged = true;
@@ -198,16 +198,16 @@ public class VoiceLinkService
                 if (!overwrites.Any(x => x.TargetId == member.Id && x.TargetType == OverwriteTargetType.Member))
                 {
                     overwritesChanged = true;
-                    overwrites.Add(LocalOverwrite.Member(member.Id, new OverwritePermissions().Allow(Permission.ViewChannels)));
+                    overwrites.Add(LocalOverwrite.Member(member.Id, new OverwritePermissions().Allow(Permissions.ViewChannels)));
                 }
             }
 
             var everyoneOverwrite = overwrites.FirstOrDefault(x => x.TargetId == guildId && x.TargetType == OverwriteTargetType.Role);
-            if (everyoneOverwrite is null || everyoneOverwrite.Permissions.Denied.ViewChannels)
+            if (everyoneOverwrite is null || everyoneOverwrite.Permissions.Value.Denied.HasFlag(Permissions.ViewChannels))
             {
                 overwritesChanged = true;
                 overwrites.Remove(everyoneOverwrite);
-                overwrites.Add(new LocalOverwrite(guildId, OverwriteTargetType.Role, new OverwritePermissions().Deny(Permission.ViewChannels)));
+                overwrites.Add(new LocalOverwrite(guildId, OverwriteTargetType.Role, new OverwritePermissions().Deny(Permissions.ViewChannels)));
             }
 
             if (overwritesChanged)
@@ -225,7 +225,7 @@ public class VoiceLinkService
     {
         if (channelRecord is null) return;
         var textChannel = guild.GetTextChannel(channelRecord.TextChannelId);
-        if (textChannel is null || !textChannel.BotHasPermissions(Permission.ViewChannels | Permission.ManageChannels)) return;
+        if (textChannel is null || !textChannel.BotHasPermissions(Permissions.ViewChannels | Permissions.ManageChannels)) return;
 
         if (config.DeleteChannels)
         {
@@ -240,7 +240,7 @@ public class VoiceLinkService
         {
             // Remove all permission overwrites except @everyone and utili
             var overwrites = textChannel.Overwrites.Select(x => new LocalOverwrite(x.TargetId, x.TargetType, x.Permissions)).ToList();
-            overwrites.RemoveAll(x => x.TargetId != guild.Id && x.TargetId != _client.CurrentUser.Id);
+            overwrites.RemoveAll(x => x.TargetId != guild.Id && x.TargetId != _bot.CurrentUser.Id);
             await textChannel.ModifyAsync(x => x.Overwrites = new Optional<IEnumerable<LocalOverwrite>>(overwrites), new DefaultRestRequestOptions { Reason = "Voice Link" }, cancellationToken);
         }
     }

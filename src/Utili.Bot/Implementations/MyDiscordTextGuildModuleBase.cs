@@ -1,25 +1,24 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Disqord.Bot;
-using Utili.Bot.Implementations.Views;
+using Disqord.Bot.Commands.Text;
+using Qmmands;
 using Utili.Bot.Utils;
 
 namespace Utili.Bot.Implementations;
 
-public class MyDiscordGuildModuleBase : DiscordGuildModuleBase
+public class MyDiscordTextGuildModuleBase : DiscordTextGuildModuleBase
 {
-    protected DiscordCommandResult Info(string title, string content = null)
+    protected IResult Info(string title, string content = null)
         => Response(MessageUtils.CreateEmbed(EmbedType.Info, title, content));
 
-    protected DiscordCommandResult Success(string title, string content = null)
+    protected IResult Success(string title, string content = null)
         => Response(MessageUtils.CreateEmbed(EmbedType.Success, title, content));
 
-    protected DiscordCommandResult Failure(string title, string content = null)
+    protected IResult Failure(string title, string content = null)
         => Response(MessageUtils.CreateEmbed(EmbedType.Failure, title, content));
 
     protected async Task<bool> ConfirmAsync(ConfirmViewOptions options)
     {
-        await using var yield = Context.BeginYield();
         var view = new ConfirmView(Context.Author.Id, options);
 
         try

@@ -16,15 +16,15 @@ namespace Utili.Bot.Services;
 public class RoleLinkingService
 {
     private readonly ILogger<RoleLinkingService> _logger;
-    private readonly DiscordClientBase _client;
+    private readonly UtiliDiscordBot _bot;
     private readonly IsPremiumService _isPremiumService;
 
     private List<RoleLinkAction> _actions;
 
-    public RoleLinkingService(ILogger<RoleLinkingService> logger, DiscordClientBase client, IsPremiumService isPremiumService)
+    public RoleLinkingService(ILogger<RoleLinkingService> logger, UtiliDiscordBot bot, IsPremiumService isPremiumService)
     {
         _logger = logger;
-        _client = client;
+        _bot = bot;
         _isPremiumService = isPremiumService;
 
         _actions = new List<RoleLinkAction>();
@@ -34,7 +34,7 @@ public class RoleLinkingService
     {
         try
         {
-            IGuild guild = _client.GetGuild(e.NewMember.GuildId);
+            IGuild guild = _bot.GetGuild(e.NewMember.GuildId);
 
             var db = scope.GetDbContext();
             var configs = await db.RoleLinkingConfigurations.GetAllForGuildAsync(guild.Id);

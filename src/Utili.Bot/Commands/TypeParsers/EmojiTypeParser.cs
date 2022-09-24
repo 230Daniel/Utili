@@ -1,10 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using Disqord;
-using Disqord.Bot;
+using Disqord.Bot.Commands;
 using Qmmands;
 using Newtonsoft.Json;
+using Utili.Bot.Extensions;
 
 namespace Utili.Bot.Commands.TypeParsers;
 
@@ -20,17 +22,19 @@ public class EmojiTypeParser : DiscordGuildTypeParser<IEmoji>
         _emojis = serializer.Deserialize<HashSet<string>>(reader);
     }
 
-    public override ValueTask<TypeParserResult<IEmoji>> ParseAsync(Parameter parameter, string value, DiscordGuildCommandContext context)
+    public override ValueTask<ITypeParserResult<IEmoji>> ParseAsync(IDiscordGuildCommandContext context, IParameter parameter, ReadOnlyMemory<char> value)
     {
-        if (LocalCustomEmoji.TryParse(value, out var emoji))
+        var valueString = value.ToString();
+
+        if (LocalCustomEmoji.TryParse(valueString, out var emoji))
         {
-            return context.Guild.Emojis.TryGetValue(emoji.Id, out var guildEmoji) ?
-                Success(guildEmoji) :
+            return context.GetGuild().Emojis.TryGetValue(emoji.Id.Value, out var guildEmoji) ?
+                Success(new(guildEmoji)) :
                 Failure("The provided custom emoji is not from this guild.");
         }
 
-        return _emojis.Contains(value) ?
-            Success(new LocalEmoji(value)) :
+        return _emojis.Contains(valueString) ?
+            Success(new LocalEmoji(valueString)) :
             Failure("The provided value is not an emoji");
     }
 }

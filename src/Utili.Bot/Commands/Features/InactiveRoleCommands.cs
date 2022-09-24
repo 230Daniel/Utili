@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Disqord;
-using Disqord.Bot;
+using Disqord.Bot.Commands;
 using Disqord.Extensions.Interactivity.Menus.Paged;
 using Disqord.Gateway;
 using Disqord.Rest;
@@ -11,16 +11,16 @@ using Utili.Database;
 using Utili.Database.Entities;
 using Utili.Database.Extensions;
 using Qmmands;
+using Qmmands.Text;
 using Utili.Bot.Implementations;
-using Utili.Bot.Implementations.Views;
 using Utili.Bot.Services;
 using Utili.Bot.Utils;
 using Utili.Bot.Extensions;
 
 namespace Utili.Bot.Commands;
 
-[Group("inactive", "inactiverole")]
-public class InactiveRoleCommands : MyDiscordGuildModuleBase
+[TextGroup("inactive", "inactiverole")]
+public class InactiveRoleCommands : MyDiscordTextGuildModuleBase
 {
     private readonly DatabaseContext _dbContext;
     private readonly MemberCacheService _memberCache;
@@ -32,20 +32,20 @@ public class InactiveRoleCommands : MyDiscordGuildModuleBase
         _memberCache = memberCache;
     }
 
-    [Command("list")]
-    public async Task<DiscordCommandResult> ListAsync()
+    [TextCommand("list")]
+    public async Task<IResult> ListAsync()
     {
         var config = await _dbContext.InactiveRoleConfigurations.GetForGuildAsync(Context.GuildId);
-        if (config is null || Context.Guild.GetRole(config.RoleId) is null)
+        if (config is null || Context.GetGuild().GetRole(config.RoleId) is null)
             return Failure("Error", "This server does not have an inactive role set");
 
         await _memberCache.TemporarilyCacheMembersAsync(Context.GuildId);
         var inactiveMembers = config.Mode == InactiveRoleMode.GrantWhenInactive
-            ? Context.Guild.GetMembers().Values
+            ? Context.GetGuild().GetMembers().Values
                 .Where(x => x.GetRole(config.RoleId) is not null && x.GetRole(config.ImmuneRoleId) is null)
                 .OrderBy(x => x.Nick ?? x.Name)
                 .ToList()
-            : Context.Guild.GetMembers().Values
+            : Context.GetGuild().GetMembers().Values
                 .Where(x => x.GetRole(config.RoleId) is null && x.GetRole(config.ImmuneRoleId) is null)
                 .OrderBy(x => x.Nick ?? x.Name)
                 .ToList();
@@ -65,7 +65,7 @@ public class InactiveRoleCommands : MyDiscordGuildModuleBase
                 embed.AddField(new LocalEmbedField()
                     .WithBlankName()
                     .WithValue(content)
-                    .WithIsInline(true));
+                    .WithIsInline());
                 content = "";
             }
             if ((i + 1) % 30 == 0)
@@ -79,9 +79,9 @@ public class InactiveRoleCommands : MyDiscordGuildModuleBase
             embed.AddField(new LocalEmbedField()
                 .WithBlankName()
                 .WithValue(content)
-                .WithIsInline(true));
+                .WithIsInline());
 
-        if (embed.Fields.Count > 0)
+        if (embed.Fields.HasValue && embed.Fields.Value.Count > 0)
             pages.Add(new Page().AddEmbed(embed));
 
         var pageProvider = new ListPageProvider(pages);
@@ -89,15 +89,14 @@ public class InactiveRoleCommands : MyDiscordGuildModuleBase
         return View(menu, TimeSpan.FromMinutes(5));
     }
 
-    [Command("kick")]
-    [RequireAuthorGuildPermissions(Permission.Administrator)]
-    [RequireBotGuildPermissions(Permission.KickMembers)]
-    [RequireBotChannelPermissions(Permission.AddReactions)]
-    [Cooldown(1, 10, CooldownMeasure.Seconds, CooldownBucketType.Guild)]
-    public async Task<DiscordCommandResult> KickAsync()
+    [TextCommand("kick")]
+    [RequireAuthorPermissions(Permissions.Administrator)]
+    [RequireBotPermissions(Permissions.KickMembers | Permissions.AddReactions)]
+    [RateLimit(1, 10, RateLimitMeasure.Seconds, RateLimitBucketType.Guild)]
+    public async Task<IResult> KickAsync()
     {
         var config = await _dbContext.InactiveRoleConfigurations.GetForGuildAsync(Context.GuildId);
-        if (config is null || Context.Guild.GetRole(config.RoleId) is null)
+        if (config is null || Context.GetGuild().GetRole(config.RoleId) is null)
             return Failure("Error", "This server does not have an inactive role set");
 
         lock (_kickingIn)
@@ -112,11 +111,11 @@ public class InactiveRoleCommands : MyDiscordGuildModuleBase
         {
             await _memberCache.TemporarilyCacheMembersAsync(Context.GuildId);
             var inactiveMembers = config.Mode == InactiveRoleMode.GrantWhenInactive
-                ? Context.Guild.GetMembers().Values
+                ? Context.GetGuild().GetMembers().Values
                     .Where(x => x.GetRole(config.RoleId) is not null && x.GetRole(config.ImmuneRoleId) is null)
                     .OrderBy(x => x.Nick ?? x.Name)
                     .ToList()
-                : Context.Guild.GetMembers().Values
+                : Context.GetGuild().GetMembers().Values
                     .Where(x => x.GetRole(config.RoleId) is null && x.GetRole(config.ImmuneRoleId) is null)
                     .OrderBy(x => x.Nick ?? x.Name)
                     .ToList();
@@ -129,8 +128,6 @@ public class InactiveRoleCommands : MyDiscordGuildModuleBase
                     ConfirmDescription = $"Under ideal conditions, this action will take {TimeSpan.FromSeconds(inactiveMembers.Count * 1.1).ToLongString()}"
                 }))
             {
-                await using var yield = Context.BeginYield();
-
                 var failed = 0;
                 foreach (var member in inactiveMembers)
                 {

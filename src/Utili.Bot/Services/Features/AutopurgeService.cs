@@ -19,7 +19,7 @@ namespace Utili.Bot.Services;
 public class AutopurgeService
 {
     private readonly ILogger<AutopurgeService> _logger;
-    private readonly DiscordClientBase _client;
+    private readonly UtiliDiscordBot _bot;
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly IsPremiumService _isPremiumService;
 
@@ -29,12 +29,12 @@ public class AutopurgeService
 
     public AutopurgeService(
         ILogger<AutopurgeService> logger,
-        DiscordClientBase client,
+        UtiliDiscordBot bot,
         IServiceScopeFactory scopeFactory,
         IsPremiumService isPremiumService)
     {
         _logger = logger;
-        _client = client;
+        _bot = bot;
         _scopeFactory = scopeFactory;
         _isPremiumService = isPremiumService;
 
@@ -54,8 +54,8 @@ public class AutopurgeService
         try
         {
             var rows = await SelectChannelsToPurgeAsync();
-            rows.RemoveAll(x => _client.GetGuild(x.GuildId) is null);
-            rows.RemoveAll(x => _client.GetGuild(x.GuildId).GetTextChannel(x.ChannelId) is null);
+            rows.RemoveAll(x => _bot.GetGuild(x.GuildId) is null);
+            rows.RemoveAll(x => _bot.GetGuild(x.GuildId).GetTextChannel(x.ChannelId) is null);
 
             var tasks = new List<Task>();
             foreach (var row in rows)
@@ -98,7 +98,7 @@ public class AutopurgeService
 
         if (_purgeNumber % 3 == 0)
         {
-            foreach (var guild in _client.GetGuilds().Values)
+            foreach (var guild in _bot.GetGuilds().Values)
             {
                 var guildConfigs = configs
                     .Where(x => x.GuildId == guild.Id && guild.GetTextChannel(x.ChannelId) is not null)
@@ -130,9 +130,9 @@ public class AutopurgeService
             var config = await db.AutopurgeConfigurations.GetForGuildChannelAsync(staleConfig.GuildId, staleConfig.ChannelId);
             if (config is null || config.Mode == AutopurgeMode.None || config.Timespan > TimeSpan.FromDays(14)) return;
 
-            var guild = _client.GetGuild(config.GuildId);
+            var guild = _bot.GetGuild(config.GuildId);
             var channel = guild.GetTextChannel(config.ChannelId);
-            if (!channel.BotHasPermissions(Permission.ViewChannels | Permission.ReadMessageHistory | Permission.ManageMessages)) return;
+            if (!channel.BotHasPermissions(Permissions.ViewChannels | Permissions.ReadMessageHistory | Permissions.ManageMessages)) return;
 
             var now = DateTime.UtcNow;
             var maxTimestamp = now - config.Timespan;
@@ -292,7 +292,7 @@ public class AutopurgeService
             var db = scope.GetDbContext();
 
             var configs = await db.AutopurgeConfigurations.Where(x => x.Mode != AutopurgeMode.None).ToListAsync();
-            configs.RemoveAll(x => _client.GetGuild(x.GuildId)?.GetTextChannel(x.ChannelId) is null);
+            configs.RemoveAll(x => _bot.GetGuild(x.GuildId)?.GetTextChannel(x.ChannelId) is null);
 
             _logger.LogInformation($"Started downloading messages for {configs.Count} channels");
 
@@ -340,91 +340,90 @@ public class AutopurgeService
         }
     }
 
-    private Task FetchForChannelAsync(AutopurgeConfiguration config)
+    private async Task FetchForChannelAsync(AutopurgeConfiguration config)
     {
-        return Task.Run(async () =>
+        await Task.Yield();
+
+        lock (_downloadingFor)
+        {
+            if (_downloadingFor.Contains(config.ChannelId)) return;
+            _downloadingFor.Add(config.ChannelId);
+        }
+
+        try
+        {
+            var guild = _bot.GetGuild(config.GuildId);
+            var channel = guild.GetTextChannel(config.ChannelId);
+
+            if (!channel.BotHasPermissions(Permissions.ViewChannels | Permissions.ReadMessageHistory)) return;
+
+            using var scope = _scopeFactory.CreateScope();
+            var db = scope.GetDbContext();
+
+            var messages = new List<IMessage>();
+            IMessage oldestMessage = null;
+
+            while (true)
+            {
+                List<IMessage> fetchedMessages;
+                if (oldestMessage is null)
+                    fetchedMessages = (await channel.FetchMessagesAsync()).ToList();
+                else
+                    fetchedMessages = (await channel.FetchMessagesAsync(100, FetchDirection.Before, oldestMessage.Id)).ToList();
+
+                if (fetchedMessages.Count == 0) break;
+                oldestMessage = fetchedMessages.OrderBy(x => x.CreatedAt().UtcDateTime).First();
+
+                messages.AddRange(fetchedMessages.Where(x =>
+                    x.CreatedAt().UtcDateTime > DateTime.UtcNow.AddDays(-14)));
+
+                if (messages.Count < 100 ||
+                    oldestMessage.CreatedAt().UtcDateTime < DateTime.UtcNow.AddDays(-14)) break;
+
+                await Task.Delay(1000);
+            }
+
+            var messageRows = await db.AutopurgeMessages
+                .Where(x => x.GuildId == config.GuildId && x.ChannelId == config.ChannelId).ToListAsync();
+
+            foreach (var message in messages)
+            {
+                var messageRow = messageRows.FirstOrDefault(x => x.MessageId == message.Id);
+                if (messageRow is not null)
+                {
+                    var pinned = message is IUserMessage { IsPinned: true };
+                    if (messageRow.IsPinned != pinned)
+                    {
+                        messageRow.IsPinned = pinned;
+                        db.AutopurgeMessages.Update(messageRow);
+                    }
+                }
+                else
+                {
+                    messageRow = new AutopurgeMessage(message.Id)
+                    {
+                        GuildId = guild.Id,
+                        ChannelId = channel.Id,
+                        Timestamp = message.CreatedAt().UtcDateTime,
+                        IsBot = message.Author.IsBot,
+                        IsPinned = message is IUserMessage { IsPinned: true }
+                    };
+                    db.AutopurgeMessages.Add(messageRow);
+                }
+            }
+
+            await db.SaveChangesAsync();
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, $"Exception thrown while fetching messages for channel {config.GuildId}/{config.ChannelId}");
+        }
+        finally
         {
             lock (_downloadingFor)
             {
-                if (_downloadingFor.Contains(config.ChannelId)) return;
-                _downloadingFor.Add(config.ChannelId);
+                _downloadingFor.Remove(config.ChannelId);
             }
-
-            try
-            {
-                var guild = _client.GetGuild(config.GuildId);
-                var channel = guild.GetTextChannel(config.ChannelId);
-
-                if (!channel.BotHasPermissions(Permission.ViewChannels | Permission.ReadMessageHistory)) return;
-
-                using var scope = _scopeFactory.CreateScope();
-                var db = scope.GetDbContext();
-
-                var messages = new List<IMessage>();
-                IMessage oldestMessage = null;
-
-                while (true)
-                {
-                    List<IMessage> fetchedMessages;
-                    if (oldestMessage is null)
-                        fetchedMessages = (await channel.FetchMessagesAsync()).ToList();
-                    else
-                        fetchedMessages = (await channel.FetchMessagesAsync(100, RetrievalDirection.Before, oldestMessage.Id)).ToList();
-
-                    if (fetchedMessages.Count == 0) break;
-                    oldestMessage = fetchedMessages.OrderBy(x => x.CreatedAt().UtcDateTime).First();
-
-                    messages.AddRange(fetchedMessages.Where(x =>
-                        x.CreatedAt().UtcDateTime > DateTime.UtcNow.AddDays(-14)));
-
-                    if (messages.Count < 100 ||
-                        oldestMessage.CreatedAt().UtcDateTime < DateTime.UtcNow.AddDays(-14)) break;
-
-                    await Task.Delay(1000);
-                }
-
-                var messageRows = await db.AutopurgeMessages
-                    .Where(x => x.GuildId == config.GuildId && x.ChannelId == config.ChannelId).ToListAsync();
-
-                foreach (var message in messages)
-                {
-                    var messageRow = messageRows.FirstOrDefault(x => x.MessageId == message.Id);
-                    if (messageRow is not null)
-                    {
-                        var pinned = message is IUserMessage { IsPinned: true };
-                        if (messageRow.IsPinned != pinned)
-                        {
-                            messageRow.IsPinned = pinned;
-                            db.AutopurgeMessages.Update(messageRow);
-                        }
-                    }
-                    else
-                    {
-                        messageRow = new AutopurgeMessage(message.Id)
-                        {
-                            GuildId = guild.Id,
-                            ChannelId = channel.Id,
-                            Timestamp = message.CreatedAt().UtcDateTime,
-                            IsBot = message.Author.IsBot,
-                            IsPinned = message is IUserMessage { IsPinned: true }
-                        };
-                        db.AutopurgeMessages.Add(messageRow);
-                    }
-                }
-
-                await db.SaveChangesAsync();
-            }
-            catch (Exception e)
-            {
-                _logger.LogError(e, $"Exception thrown while fetching messages for channel {config.GuildId}/{config.ChannelId}");
-            }
-            finally
-            {
-                lock (_downloadingFor)
-                {
-                    _downloadingFor.Remove(config.ChannelId);
-                }
-            }
-        });
+        }
     }
 }

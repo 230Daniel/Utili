@@ -34,9 +34,7 @@ public class DiscordClientService
         if (identity is null || !identity.IsAuthenticated || string.IsNullOrWhiteSpace(token))
             return null;
 
-        // Workaround Snowflake.Parse broken in v191
-        // TODO: Replace with Snowflake.Parse when fixed
-        var userId = new Snowflake(ulong.Parse(httpContext.User.FindFirstValue("id")));
+        var userId = Snowflake.Parse(httpContext.User.FindFirstValue("id"));
 
         await _semaphore.WaitAsync();
 

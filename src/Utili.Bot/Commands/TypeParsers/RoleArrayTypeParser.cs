@@ -1,36 +1,42 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Disqord;
-using Disqord.Bot;
+using Disqord.Bot.Commands;
 using Qmmands;
+using Utili.Bot.Extensions;
 
 namespace Utili.Bot.Commands.TypeParsers;
 
 public class RoleArrayTypeParser : DiscordGuildTypeParser<IRole[]>
 {
-    public override ValueTask<TypeParserResult<IRole[]>> ParseAsync(Parameter parameter, string value, DiscordGuildCommandContext context)
+    public override ValueTask<ITypeParserResult<IRole[]>> ParseAsync(IDiscordGuildCommandContext context, IParameter parameter, ReadOnlyMemory<char> value)
     {
-        var singleRole = context.Guild.Roles.Values.FirstOrDefault(x => x.Mention == value);
-        singleRole ??= context.Guild.Roles.Values.FirstOrDefault(x => x.Id.ToString() == value);
-        singleRole ??= context.Guild.Roles.Values.FirstOrDefault(x => x.Name == value);
-        singleRole ??= context.Guild.Roles.Values.FirstOrDefault(x => x.Name.ToLower() == value.ToLower());
+        var valueString = value.ToString();
+
+        var singleRole = context.GetGuild().Roles.Values.FirstOrDefault(x => x.Mention == valueString);
+        singleRole ??= context.GetGuild().Roles.Values.FirstOrDefault(x => x.Id.ToString() == valueString);
+        singleRole ??= context.GetGuild().Roles.Values.FirstOrDefault(x => x.Name == valueString);
+        singleRole ??= context.GetGuild().Roles.Values.FirstOrDefault(x => x.Name.ToLower() == valueString.ToLower());
 
         if (singleRole is not null) return Success(new[] { singleRole });
 
-        var seperator = value.Contains(",") ? "," : " ";
-        var roleStrings = value.Split(seperator);
+        var seperator = valueString.Contains(',') ? "," : " ";
+        var roleStrings = valueString.Split(seperator);
 
         List<IRole> roles = new();
         foreach (var roleString in roleStrings)
         {
             var roleStringTrimmed = roleString.Trim();
-            var role = context.Guild.Roles.Values.FirstOrDefault(x => x.Mention == roleStringTrimmed);
-            role ??= context.Guild.Roles.Values.FirstOrDefault(x => x.Id.ToString() == roleStringTrimmed);
-            role ??= context.Guild.Roles.Values.FirstOrDefault(x => x.Name == roleStringTrimmed);
-            role ??= context.Guild.Roles.Values.FirstOrDefault(x => x.Name.ToLower() == roleStringTrimmed.ToLower());
+            var role = context.GetGuild().Roles.Values.FirstOrDefault(x => x.Mention == roleStringTrimmed);
+            role ??= context.GetGuild().Roles.Values.FirstOrDefault(x => x.Id.ToString() == roleStringTrimmed);
+            role ??= context.GetGuild().Roles.Values.FirstOrDefault(x => x.Name == roleStringTrimmed);
+            role ??= context.GetGuild().Roles.Values.FirstOrDefault(x => x.Name.ToLower() == roleStringTrimmed.ToLower());
+
             if (role is null)
                 return Failure($"Could not find a role matching '{roleStringTrimmed}'");
+
             roles.Add(role);
         }
 

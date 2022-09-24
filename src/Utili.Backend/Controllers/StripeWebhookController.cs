@@ -90,7 +90,6 @@ public class StripeWebhookController : Controller
                         return Ok();
                     }
 
-                    // TODO: Instead of this, store a last updated timestamp for each subscription and check we're not receiving an old event
                     if (stripeEvent.Type == "customer.subscription.created")
                     {
                         // We somehow received the created event after the updated event

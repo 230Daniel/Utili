@@ -9,7 +9,7 @@ public static class RoleExtensions
     public static bool CanBeManaged(this IRole role)
     {
         IGuild guild = (role.Client as DiscordClientBase).GetGuild(role.GuildId);
-        if (!guild.BotHasPermissions(Permission.ManageRoles)) return false;
+        if (!guild.BotHasPermissions(Permissions.ManageRoles)) return false;
         if (role.IsManaged) return false;
 
         // The higher the position the higher the role in the hierarchy

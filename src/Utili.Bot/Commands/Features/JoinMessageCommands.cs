@@ -1,17 +1,17 @@
 ﻿using System.Threading.Tasks;
 using Disqord;
-using Disqord.Bot;
 using Utili.Database;
 using Utili.Database.Extensions;
 using Disqord.Rest;
-using Qmmands;
+using Qmmands.Text;
 using Utili.Bot.Services;
 using Utili.Bot.Extensions;
+using Utili.Bot.Implementations;
 
 namespace Utili.Bot.Commands;
 
-[Group("joinmessage", "joinmessages")]
-public class JoinMessageCommands : DiscordGuildModuleBase
+[TextGroup("joinmessage", "joinmessages")]
+public class JoinMessageCommands : MyDiscordTextGuildModuleBase
 {
     private readonly DatabaseContext _dbContext;
 
@@ -20,14 +20,14 @@ public class JoinMessageCommands : DiscordGuildModuleBase
         _dbContext = dbContext;
     }
 
-    [Command("preview")]
+    [TextCommand("preview")]
     public async Task PreviewAsync()
     {
         var config = await _dbContext.JoinMessageConfigurations.GetForGuildAsync(Context.GuildId);
         var message = JoinMessageService.GetJoinMessage(config, Context.Author);
-        var sentMessage = await Context.Channel.SendMessageAsync(message);
+        var sentMessage = await Context.GetChannel().SendMessageAsync(message);
 
-        if (!config.CreateThread || !Context.Channel.BotHasPermissions(Permission.CreatePublicThreads)) return;
+        if (!config.CreateThread || !Context.GetChannel().BotHasPermissions(Permissions.CreatePublicThreads)) return;
         var threadTitle = config.ThreadTitle;
         if (string.IsNullOrWhiteSpace(threadTitle)) threadTitle = "Welcome %user%";
         threadTitle = threadTitle.Replace("%user%", Context.Author.Name);

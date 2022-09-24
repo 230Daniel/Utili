@@ -1,16 +1,17 @@
 ﻿using System.Threading.Tasks;
 using Disqord;
-using Disqord.Bot;
+using Disqord.Bot.Commands;
 using Utili.Database;
 using Utili.Database.Extensions;
 using Qmmands;
+using Qmmands.Text;
 using Utili.Bot.Implementations;
 using Utili.Bot.Services;
 
 namespace Utili.Bot.Commands.Features;
 
-[Group("notice", "notices")]
-public class NoticesCommands : MyDiscordGuildModuleBase
+[TextGroup("notice", "notices")]
+public class NoticesCommands : MyDiscordTextGuildModuleBase
 {
     private readonly DatabaseContext _dbContext;
 
@@ -19,20 +20,20 @@ public class NoticesCommands : MyDiscordGuildModuleBase
         _dbContext = dbContext;
     }
 
-    [Command("preview", "send")]
+    [TextCommand("preview", "send")]
     [RequireNotThread]
-    [RequireBotChannelPermissions(Permission.SendMessages | Permission.SendEmbeds | Permission.SendAttachments)]
-    public async Task<DiscordCommandResult> PreviewAsync()
+    [RequireBotPermissions(Permissions.SendMessages | Permissions.SendEmbeds | Permissions.SendAttachments)]
+    public async Task<IResult> PreviewAsync()
     {
-        var config = await _dbContext.NoticeConfigurations.GetForGuildChannelAsync(Context.GuildId, Context.Channel.Id);
+        var config = await _dbContext.NoticeConfigurations.GetForGuildChannelAsync(Context.GuildId, Context.ChannelId);
         if (config is null) return Failure("Error", "This channel does not have a notice.");
         return Response(NoticesService.GetNotice(config));
     }
 
-    [Command("preview", "send")]
-    [RequireBotChannelPermissions(Permission.SendMessages | Permission.SendEmbeds | Permission.SendAttachments)]
-    public async Task<DiscordCommandResult> PreviewAsync(
-        [RequireAuthorParameterChannelPermissions(Permission.ViewChannels | Permission.ReadMessageHistory)]
+    [TextCommand("preview", "send")]
+    [RequireBotPermissions(Permissions.SendMessages | Permissions.SendEmbeds | Permissions.SendAttachments)]
+    public async Task<IResult> PreviewAsync(
+        [RequireAuthorParameterChannelPermissions(Permissions.ViewChannels | Permissions.ReadMessageHistory)]
         ITextChannel channel)
     {
         var config = await _dbContext.NoticeConfigurations.GetForGuildChannelAsync(Context.GuildId, channel.Id);

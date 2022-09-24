@@ -1,12 +1,13 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
 using Disqord;
-using Disqord.Bot;
+using Disqord.Bot.Commands;
 using Disqord.Rest;
 using Utili.Database;
 using Utili.Database.Extensions;
 using Disqord.Http;
 using Qmmands;
+using Qmmands.Text;
 using Utili.Bot.Commands;
 using Utili.Bot.Implementations;
 using Utili.Bot.Services;
@@ -14,7 +15,7 @@ using Utili.Bot.Extensions;
 
 namespace Utili.Bot.Features;
 
-public class MessagePinningCommands : MyDiscordGuildModuleBase
+public class MessagePinningCommands : MyDiscordTextGuildModuleBase
 {
     private readonly DatabaseContext _dbContext;
     private readonly WebhookService _webhookService;
@@ -25,26 +26,26 @@ public class MessagePinningCommands : MyDiscordGuildModuleBase
         _webhookService = webhookService;
     }
 
-    [Command("pin")]
-    [DefaultCooldown(2, 5)]
-    [RequireAuthorChannelPermissions(Permission.ManageMessages)]
-    public Task<DiscordCommandResult> PinAsync(
+    [TextCommand("pin")]
+    [DefaultRateLimit(2, 5)]
+    [RequireAuthorPermissions(Permissions.ManageMessages)]
+    public Task<IResult> PinAsync(
         ulong messageId,
-        [RequireBotParameterChannelPermissions(Permission.ViewChannels | Permission.ManageWebhooks)]
+        [RequireBotParameterChannelPermissions(Permissions.ViewChannels | Permissions.ManageWebhooks)]
         ITextChannel pinChannel = null)
-        => PinAsync(messageId, pinChannel, Context.Channel);
+        => PinAsync(messageId, pinChannel, Context.GetChannel());
 
-    [Command("pin")]
-    [DefaultCooldown(2, 5)]
-    public Task<DiscordCommandResult> PinAsync(
-        [RequireAuthorParameterChannelPermissions(Permission.ViewChannels | Permission.ManageMessages)]
+    [TextCommand("pin")]
+    [DefaultRateLimit(2, 5)]
+    public Task<IResult> PinAsync(
+        [RequireAuthorParameterChannelPermissions(Permissions.ViewChannels | Permissions.ManageMessages)]
         IMessageGuildChannel channel,
         ulong messageId,
-        [RequireBotParameterChannelPermissions(Permission.ViewChannels | Permission.ManageWebhooks)]
+        [RequireBotParameterChannelPermissions(Permissions.ViewChannels | Permissions.ManageWebhooks)]
         ITextChannel pinChannel = null)
         => PinAsync(messageId, pinChannel, channel);
 
-    private async Task<DiscordCommandResult> PinAsync(ulong messageId, ITextChannel pinChannel, IMessageGuildChannel channel)
+    private async Task<IResult> PinAsync(ulong messageId, ITextChannel pinChannel, IMessageGuildChannel channel)
     {
         var message = await channel.FetchMessageAsync(messageId) as IUserMessage;
 
@@ -58,7 +59,7 @@ public class MessagePinningCommands : MyDiscordGuildModuleBase
         if (config is not null && config.PinMessages)
             await message.PinAsync(new DefaultRestRequestOptions { Reason = $"Message Pinning (manual by {Context.Message.Author} {Context.Message.Author.Id})" });
 
-        pinChannel ??= config is null ? null : Context.Guild.GetTextChannel(config.PinChannelId);
+        pinChannel ??= config is null ? null : Context.GetGuild().GetTextChannel(config.PinChannelId);
 
         if (pinChannel is null && (config is not null && config.PinMessages))
         {
@@ -83,10 +84,10 @@ public class MessagePinningCommands : MyDiscordGuildModuleBase
                 if (!string.IsNullOrWhiteSpace(message.Content) || message.Embeds.Count > 0)
                 {
                     var messageBuilder = new LocalWebhookMessage()
-                        .WithName(username)
-                        .WithAvatarUrl(avatarUrl)
+                        .WithAuthorName(username)
+                        .WithAuthorAvatarUrl(avatarUrl)
                         .WithOptionalContent(message.Content)
-                        .WithEmbeds(message.Embeds.Select(LocalEmbed.FromEmbed))
+                        .WithEmbeds(message.Embeds.Select(LocalEmbed.CreateFrom))
                         .WithAllowedMentions(LocalAllowedMentions.None);
 
                     await Context.Bot.ExecuteWebhookAsync(webhook.Id, webhook.Token, messageBuilder);
@@ -95,8 +96,8 @@ public class MessagePinningCommands : MyDiscordGuildModuleBase
                 foreach (var attachment in message.Attachments)
                 {
                     var attachmentMessage = new LocalWebhookMessage()
-                        .WithName(username)
-                        .WithAvatarUrl(avatarUrl)
+                        .WithAuthorName(username)
+                        .WithAuthorAvatarUrl(avatarUrl)
                         .WithContent(attachment.Url);
                     await Context.Bot.ExecuteWebhookAsync(webhook.Id, webhook.Token, attachmentMessage);
                 }
