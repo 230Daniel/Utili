@@ -67,4 +67,4 @@ We may update this privacy policy at any time in order to reflect, for example, 
 
 ## Contact Us
 
-For more information about our privacy practices, if you have questions, if you would like to make a complaint, or if you would like to request access to or the deletion of your data; please contact us by email at dpo@utili.xyz.
+For more information about our privacy practices, if you have questions, if you would like to make a complaint, or if you would like to request access to or the deletion of your data; please contact us by email at daniel.baynton@hotmail.com.

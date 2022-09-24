@@ -148,4 +148,4 @@ We reserve the right, at our sole discretion, to update, change or replace any p
 
 ## 20 - Contact Information
 
-Questions about the Terms of Service should be sent to us at legal@utili.xyz.
+Questions about the Terms of Service should be sent to us at daniel.baynton@hotmail.com.
