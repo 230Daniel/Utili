@@ -40,8 +40,4 @@
     <ProjectReference Include="..\Utili.Database\Utili.Database.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Implementations\Views" />
-  </ItemGroup>
-
 </Project>
