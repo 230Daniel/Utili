@@ -10,8 +10,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Qmmands.Text;
-using Qmmands.Text.Default;
 using Utili.Database;
 using Serilog;
 using Utili.Bot.Extensions;
@@ -38,10 +36,6 @@ internal static class Program
                 bot.OwnerIds = new[] { new Snowflake(context.Configuration.GetValue<ulong>("Discord:OwnerId")) };
             })
             .Build();
-
-        // Use legacy text command argument parsing behaviour
-        var argumentParserProvider = (DefaultArgumentParserProvider) host.Services.GetRequiredService<IArgumentParserProvider>();
-        argumentParserProvider.SetDefaultParser(typeof(ClassicArgumentParser));
 
         Log.Logger = new LoggerConfiguration()
             .ReadFrom.Configuration(host.Services.GetRequiredService<IConfiguration>())

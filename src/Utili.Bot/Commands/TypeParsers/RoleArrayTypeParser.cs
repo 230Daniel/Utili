@@ -9,9 +9,9 @@ using Utili.Bot.Extensions;
 
 namespace Utili.Bot.Commands.TypeParsers;
 
-public class RoleArrayTypeParser : DiscordGuildTypeParser<IRole[]>
+public class RoleArrayTypeParser : DiscordGuildTypeParser<RoleArray>
 {
-    public override ValueTask<ITypeParserResult<IRole[]>> ParseAsync(IDiscordGuildCommandContext context, IParameter parameter, ReadOnlyMemory<char> value)
+    public override ValueTask<ITypeParserResult<RoleArray>> ParseAsync(IDiscordGuildCommandContext context, IParameter parameter, ReadOnlyMemory<char> value)
     {
         var valueString = value.ToString();
 
@@ -20,7 +20,7 @@ public class RoleArrayTypeParser : DiscordGuildTypeParser<IRole[]>
         singleRole ??= context.GetGuild().Roles.Values.FirstOrDefault(x => x.Name == valueString);
         singleRole ??= context.GetGuild().Roles.Values.FirstOrDefault(x => x.Name.ToLower() == valueString.ToLower());
 
-        if (singleRole is not null) return Success(new[] { singleRole });
+        if (singleRole is not null) return Success(new RoleArray(new[] { singleRole }));
 
         var seperator = valueString.Contains(',') ? "," : " ";
         var roleStrings = valueString.Split(seperator);
@@ -40,6 +40,16 @@ public class RoleArrayTypeParser : DiscordGuildTypeParser<IRole[]>
             roles.Add(role);
         }
 
-        return Success(roles.ToArray());
+        return Success(new RoleArray(roles.ToArray()));
+    }
+}
+
+public class RoleArray
+{
+    public IRole[] Array { get; }
+
+    public RoleArray(IRole[] array)
+    {
+        Array = array;
     }
 }

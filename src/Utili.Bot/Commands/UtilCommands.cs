@@ -9,6 +9,7 @@ using Disqord.Gateway;
 using Disqord.Rest;
 using Qmmands;
 using Qmmands.Text;
+using Utili.Bot.Commands.TypeParsers;
 using Utili.Bot.Implementations;
 using Utili.Bot.Services;
 using Utili.Bot.Utils;
@@ -116,7 +117,7 @@ public class UtilCommands : MyDiscordTextGuildModuleBase
                 "[How do I get a message ID?](https://support.discord.com/hc/en-us/articles/206346498)");
         }
 
-        if (afterMessage is not null && beforeMessage is not null && afterMessage.CreatedAt() >= beforeMessage.CreatedAt())
+        if (afterMessage is not null && afterMessage.CreatedAt() >= beforeMessage.CreatedAt())
         {
             return Failure("Error", "There are no messages between the after and before messages");
         }
@@ -151,17 +152,13 @@ public class UtilCommands : MyDiscordTextGuildModuleBase
 
         List<IMessage> messages;
         if (afterMessage is not null) messages = (await Context.GetChannel().FetchMessagesAsync((int)count, FetchDirection.After, afterMessage.Id)).ToList();
-        else if (beforeMessage is not null) messages = (await Context.GetChannel().FetchMessagesAsync((int)count, FetchDirection.Before, beforeMessage.Id)).ToList();
-        else messages = (await Context.GetChannel().FetchMessagesAsync((int)count)).ToList();
+        else messages = (await Context.GetChannel().FetchMessagesAsync((int)count, FetchDirection.Before, beforeMessage.Id)).ToList();
 
         messages = messages.OrderBy(x => x.CreatedAt().UtcDateTime).ToList();
-        if (beforeMessage is not null)
+        if (messages.Any(x => x.Id == beforeMessage.Id))
         {
-            if (messages.Any(x => x.Id == beforeMessage.Id))
-            {
-                var index = messages.FindIndex(x => x.Id == beforeMessage.Id);
-                messages.RemoveRange(index, messages.Count - index);
-            }
+            var index = messages.FindIndex(x => x.Id == beforeMessage.Id);
+            messages.RemoveRange(index, messages.Count - index);
         }
 
         var pinned = messages.RemoveAll(x => x is IUserMessage { IsPinned: true });
@@ -289,14 +286,14 @@ public class UtilCommands : MyDiscordTextGuildModuleBase
 
     [TextCommand("whohas")]
     public async Task<IResult> WhoHasAsync(
-        [Remainder] IRole[] roles)
+        [Remainder] RoleArray roles)
     {
         await _memberCache.TemporarilyCacheMembersAsync(Context.GuildId);
 
         var members = Context.GetGuild().GetMembers().Values
             .Where(x =>
             {
-                foreach (var role in roles.Where(y => y.Id != Context.GuildId))
+                foreach (var role in roles.Array.Where(y => y.Id != Context.GuildId))
                     if (!x.RoleIds.Contains(role.Id))
                         return false;
                 return true;
@@ -304,10 +301,10 @@ public class UtilCommands : MyDiscordTextGuildModuleBase
             .OrderBy(x => x.Nick ?? x.Name)
             .ToList();
 
-        var roleString = string.Join(", ", roles.Select(x => x.Name));
+        var roleString = string.Join(", ", roles.Array.Select(x => x.Name));
 
         if (members.Count == 0)
-            return Failure($"Members with {roleString}", "There are no members with those roles.");
+            return Info($"Members with {roleString}", "None");
 
         var pages = new List<Page>();
         var content = "";

@@ -6,6 +6,8 @@ using Disqord;
 using Disqord.Bot;
 using Disqord.Bot.Commands;
 using Disqord.Bot.Commands.Text;
+using Disqord.Gateway;
+using Microsoft.Extensions.DependencyInjection;
 using Utili.Bot.Extensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -18,21 +20,19 @@ namespace Utili.Bot.Services;
 
 public class UtiliDiscordBot : DiscordBot
 {
-    protected override async ValueTask<IResult> OnBeforeExecuted(IDiscordCommandContext context)
+    private readonly IServiceProvider _services;
+
+    protected override async ValueTask<bool> OnMessage(IGatewayUserMessage message)
     {
-        if (!context.GuildId.HasValue) return Results.Failure("Commands must be executed in a server.");
-        if (context.Author.IsBot) return Results.Failure("Commands can't be executed by a bot.");
+        if (message.Author.IsBot || !message.GuildId.HasValue) return false;
 
-        var config = await context.Services.GetCoreConfigurationAsync(context.GuildId.Value);
-        if (config is null) return Results.Success;
+        using var scope = _services.CreateScope();
+        var config = await scope.GetCoreConfigurationAsync(message.GuildId.Value);
+        if (config is null) return true;
 
-        if (config.NonCommandChannels.Contains(context.ChannelId))
-            return Results.Failure("Commands are disabled in this channel.");
-
-        if (!config.CommandsEnabled)
-            return Results.Failure("Commands are not enabled in this server.");
-
-        return Results.Success;
+        var nonCommandChannel = config.NonCommandChannels.Contains(message.ChannelId);
+        if (config.CommandsEnabled) return !nonCommandChannel;
+        return nonCommandChannel;
     }
 
     protected override bool FormatFailureMessage(IDiscordCommandContext context, LocalMessageBase message, IResult result)
@@ -122,5 +122,6 @@ public class UtiliDiscordBot : DiscordBot
             services,
             client)
     {
+        _services = services;
     }
 }
