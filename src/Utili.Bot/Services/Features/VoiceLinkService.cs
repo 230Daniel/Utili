@@ -42,7 +42,7 @@ public class VoiceLinkService
 
             lock (_channelsRequiringUpdate)
             {
-                if (e.NewVoiceState?.ChannelId is not null &&
+                if (e.NewVoiceState.ChannelId is not null &&
                     !config.ExcludedChannels.Contains(e.NewVoiceState.ChannelId.Value))
                     _channelsRequiringUpdate.Add((e.GuildId, e.NewVoiceState.ChannelId.Value));
                 if (e.OldVoiceState?.ChannelId is not null &&

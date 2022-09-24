@@ -91,7 +91,7 @@ public class InactiveRoleCommands : MyDiscordTextGuildModuleBase
 
     [TextCommand("kick")]
     [RequireAuthorPermissions(Permissions.Administrator)]
-    [RequireBotPermissions(Permissions.KickMembers | Permissions.AddReactions)]
+    [RequireBotPermissions(Permissions.KickMembers)]
     [RateLimit(1, 10, RateLimitMeasure.Seconds, RateLimitBucketType.Guild)]
     public async Task<IResult> KickAsync()
     {

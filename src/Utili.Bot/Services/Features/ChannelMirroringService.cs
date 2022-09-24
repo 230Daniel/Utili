@@ -39,7 +39,7 @@ public class ChannelMirroringService
             if (config is null) return;
 
             var guild = _bot.GetGuild(e.GuildId.Value);
-            var destinationChannel = guild.GetTextChannel(config.DestinationChannelId);
+            var destinationChannel = guild.GetMessageGuildChannel(config.DestinationChannelId);
             if (destinationChannel is null) return;
 
             if (!destinationChannel.BotHasPermissions(Permissions.ViewChannels | Permissions.ManageWebhooks)) return;

@@ -32,7 +32,7 @@ public class MessagePinningCommands : MyDiscordTextGuildModuleBase
     public Task<IResult> PinAsync(
         ulong messageId,
         [RequireBotParameterChannelPermissions(Permissions.ViewChannels | Permissions.ManageWebhooks)]
-        ITextChannel pinChannel = null)
+        IMessageGuildChannel pinChannel = null)
         => PinAsync(messageId, pinChannel, Context.GetChannel());
 
     [TextCommand("pin")]
@@ -42,10 +42,10 @@ public class MessagePinningCommands : MyDiscordTextGuildModuleBase
         IMessageGuildChannel channel,
         ulong messageId,
         [RequireBotParameterChannelPermissions(Permissions.ViewChannels | Permissions.ManageWebhooks)]
-        ITextChannel pinChannel = null)
+        IMessageGuildChannel pinChannel = null)
         => PinAsync(messageId, pinChannel, channel);
 
-    private async Task<IResult> PinAsync(ulong messageId, ITextChannel pinChannel, IMessageGuildChannel channel)
+    private async Task<IResult> PinAsync(ulong messageId, IMessageGuildChannel pinChannel, IMessageGuildChannel channel)
     {
         var message = await channel.FetchMessageAsync(messageId) as IUserMessage;
 
@@ -59,7 +59,7 @@ public class MessagePinningCommands : MyDiscordTextGuildModuleBase
         if (config is not null && config.PinMessages)
             await message.PinAsync(new DefaultRestRequestOptions { Reason = $"Message Pinning (manual by {Context.Message.Author} {Context.Message.Author.Id})" });
 
-        pinChannel ??= config is null ? null : Context.GetGuild().GetTextChannel(config.PinChannelId);
+        pinChannel ??= config is null ? null : Context.GetGuild().GetMessageGuildChannel(config.PinChannelId);
 
         if (pinChannel is null && (config is not null && config.PinMessages))
         {

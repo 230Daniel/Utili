@@ -21,6 +21,8 @@ public class JoinMessageCommands : MyDiscordTextGuildModuleBase
     }
 
     [TextCommand("preview")]
+    [RequireNotThread]
+    [RequireNotVoice]
     public async Task PreviewAsync()
     {
         var config = await _dbContext.JoinMessageConfigurations.GetForGuildAsync(Context.GuildId);

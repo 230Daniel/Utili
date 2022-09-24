@@ -129,7 +129,7 @@ public class NoticesService
             if (config is null || !config.Enabled) return;
 
             var guild = _bot.GetGuild(guildId);
-            var channel = guild.GetTextChannel(channelId);
+            var channel = guild.GetMessageGuildChannel(channelId);
 
             if (channel is null ||
                 !channel.BotHasPermissions(

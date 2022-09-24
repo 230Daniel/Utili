@@ -55,7 +55,7 @@ public class AutopurgeService
         {
             var rows = await SelectChannelsToPurgeAsync();
             rows.RemoveAll(x => _bot.GetGuild(x.GuildId) is null);
-            rows.RemoveAll(x => _bot.GetGuild(x.GuildId).GetTextChannel(x.ChannelId) is null);
+            rows.RemoveAll(x => _bot.GetGuild(x.GuildId).GetMessageGuildChannel(x.ChannelId) is null);
 
             var tasks = new List<Task>();
             foreach (var row in rows)
@@ -101,7 +101,7 @@ public class AutopurgeService
             foreach (var guild in _bot.GetGuilds().Values)
             {
                 var guildConfigs = configs
-                    .Where(x => x.GuildId == guild.Id && guild.GetTextChannel(x.ChannelId) is not null)
+                    .Where(x => x.GuildId == guild.Id && guild.GetMessageGuildChannel(x.ChannelId) is not null)
                     .OrderBy(x => x.ChannelId)
                     .ToList();
 
@@ -131,7 +131,7 @@ public class AutopurgeService
             if (config is null || config.Mode == AutopurgeMode.None || config.Timespan > TimeSpan.FromDays(14)) return;
 
             var guild = _bot.GetGuild(config.GuildId);
-            var channel = guild.GetTextChannel(config.ChannelId);
+            var channel = guild.GetMessageGuildChannel(config.ChannelId);
             if (!channel.BotHasPermissions(Permissions.ViewChannels | Permissions.ReadMessageHistory | Permissions.ManageMessages)) return;
 
             var now = DateTime.UtcNow;
@@ -292,7 +292,7 @@ public class AutopurgeService
             var db = scope.GetDbContext();
 
             var configs = await db.AutopurgeConfigurations.Where(x => x.Mode != AutopurgeMode.None).ToListAsync();
-            configs.RemoveAll(x => _bot.GetGuild(x.GuildId)?.GetTextChannel(x.ChannelId) is null);
+            configs.RemoveAll(x => _bot.GetGuild(x.GuildId)?.GetMessageGuildChannel(x.ChannelId) is null);
 
             _logger.LogInformation($"Started downloading messages for {configs.Count} channels");
 
@@ -353,7 +353,7 @@ public class AutopurgeService
         try
         {
             var guild = _bot.GetGuild(config.GuildId);
-            var channel = guild.GetTextChannel(config.ChannelId);
+            var channel = guild.GetMessageGuildChannel(config.ChannelId);
 
             if (!channel.BotHasPermissions(Permissions.ViewChannels | Permissions.ReadMessageHistory)) return;
 
