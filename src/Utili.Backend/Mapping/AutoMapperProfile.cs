@@ -17,6 +17,7 @@ public class AutoMapperProfile : Profile
 
     private void MapDiscordModels()
     {
+        CreateMap<IMessageGuildChannel, MessageGuildChannelModel>();
         CreateMap<ITextChannel, TextChannelModel>();
         CreateMap<IVocalGuildChannel, VocalChannelModel>();
         CreateMap<IRole, RoleModel>();

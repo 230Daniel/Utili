@@ -89,6 +89,11 @@ public class DiscordRestService
         return channels;
     }
 
+    public async Task<IEnumerable<IMessageGuildChannel>> GetMessageGuildChannelsAsync(ulong guildId)
+    {
+        return (await GetChannelsAsync(guildId)).OfType<IMessageGuildChannel>();
+    }
+
     public async Task<IEnumerable<ITextChannel>> GetTextChannelsAsync(ulong guildId)
     {
         return (await GetChannelsAsync(guildId)).OfType<ITextChannel>();
