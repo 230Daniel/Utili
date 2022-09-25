@@ -130,7 +130,7 @@ class VoteChannels extends React.Component {
 	async componentDidMount() {
 		var response = await get(`dashboard/${this.guildId}/vote-channels`);
 		this.state.voteChannels = await response?.json();
-		response = await get(`discord/${this.guildId}/text-channels`);
+		response = await get(`discord/${this.guildId}/message-channels`);
 		this.state.textChannels = await response?.json();
 
 		if (window.__config.enablePremium) {

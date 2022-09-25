@@ -92,10 +92,6 @@ class Reputation extends React.Component {
 		var response = await post(`dashboard/${this.guildId}/reputation`, this.state.reputation);
 		return response.ok;
 	}
-
-	getChannelName(id) {
-		return this.state.textChannels.find(x => x.id == id).name;
-	}
 }
 
 export default Reputation;

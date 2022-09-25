@@ -62,7 +62,7 @@ class Notices extends React.Component {
 									<Card title={row.channelName} size={600} titleSize={200} inputSize={400} key={row.channelId} onChanged={() => this.onCardChanged(i)} onRemoved={() => this.onChannelRemoved(row.channelId)}>
 										<CardComponent type="checkbox" title="Enabled" value={row.enabled} ref={this.settings.channels[i].enabled} />
 										<CardComponent type="timespan" title="Delay" value={Duration.fromISO(row.delay)} ref={this.settings.channels[i].delay} />
-										<CardComponent type="checkbox" title="Pin Message" value={row.pin} ref={this.settings.channels[i].pin} />
+										<CardComponent type="checkbox" title="Pin Message" value={row.pin} visible={!row.channelIsVoice} ref={this.settings.channels[i].pin} />
 										<CardComponent type="text" title="Title" value={row.title} ref={this.settings.channels[i].title} />
 										<CardComponent type="text-multiline" title="Content" height={80} padding={16} value={row.content} ref={this.settings.channels[i].content} />
 										<CardComponent type="text" title="Footer" value={row.footer} ref={this.settings.channels[i].footer} />
@@ -84,7 +84,7 @@ class Notices extends React.Component {
 	async componentDidMount() {
 		var response = await get(`dashboard/${this.guildId}/notices`);
 		this.state.notices = await response?.json();
-		response = await get(`discord/${this.guildId}/text-channels`);
+		response = await get(`discord/${this.guildId}/message-channels`);
 		this.state.textChannels = await response?.json();
 
 		this.state.notices = this.state.notices.filter(x => this.state.textChannels.some(y => y.id == x.channelId));
@@ -102,7 +102,9 @@ class Notices extends React.Component {
 				icon: React.createRef(),
 				colour: React.createRef()
 			});
-			this.state.notices[i]["channelName"] = this.getChannelName(this.state.notices[i].channelId);
+			var channel = this.getChannel(this.state.notices[i].channelId);
+			this.state.notices[i]["channelName"] = channel.name;
+			this.state.notices[i]["channelIsVoice"] = channel.isVoice;
 		}
 		this.state.notices.orderBy(x => x.channelName);
 		this.setState({});
@@ -127,6 +129,9 @@ class Notices extends React.Component {
 			icon: React.createRef(),
 			colour: React.createRef()
 		});
+
+		var channel = this.getChannel(channel.id);
+
 		this.state.notices.push({
 			channelId: channel.id,
 			enabled: false,
@@ -140,7 +145,8 @@ class Notices extends React.Component {
 			thumbnail: "",
 			icon: "",
 			colour: "43b581",
-			channelName: this.getChannelName(channel.id)
+			channelName: channel.name,
+			channelIsVoice: channel.isVoice
 		});
 		this.state.notices.orderBy(x => x.channelName);
 		this.setState({});
@@ -182,8 +188,8 @@ class Notices extends React.Component {
 		return response.ok;
 	}
 
-	getChannelName(id) {
-		return this.state.textChannels.find(x => x.id == id).name;
+	getChannel(id) {
+		return this.state.textChannels.find(x => x.id == id);
 	}
 }
 

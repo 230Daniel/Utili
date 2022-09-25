@@ -72,7 +72,7 @@ class MessageLogs extends React.Component {
 	async componentDidMount() {
 		var response = await get(`dashboard/${this.guildId}/message-logs`);
 		this.state.messageLogs = await response?.json();
-		response = await get(`discord/${this.guildId}/text-channels`);
+		response = await get(`discord/${this.guildId}/message-channels`);
 		this.state.textChannels = await response?.json();
 		this.state.messageLogs.excludedChannels = this.state.messageLogs.excludedChannels.filter(x => this.state.textChannels.some(y => x == y.id));
 
