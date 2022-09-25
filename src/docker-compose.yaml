@@ -1,13 +1,32 @@
 name: Utili
-version: 3.3
+version: '3.3'
 services:
     backend:
-        build: 'Utili.Backend'
+        build:
+            context: '.'
+            dockerfile: 'Utili.Backend/Dockerfile'
+        depends_on:
+            - 'postgres'
         volumes:
-            - './appsettings.json:/app/appsettings.json:ro'
+            - './backend.json:/app/appsettings.json:ro'
         ports:
             - '443:443'
+            - '80:5000'
+            - '5000:5000'
     bot:
-        build: 'Utili.Bot'
+        build:
+            context: '.'
+            dockerfile: 'Utili.Bot/Dockerfile'
+        depends_on:
+            - 'postgres'
+            - 'backend'
         volumes:
-            - './appsettings.json:/app/appsettings.json:ro'
+            - './bot.json:/app/appsettings.json:ro'
+    postgres:
+        image: postgres
+        restart: always
+        volumes:
+            - './postgresql-data:/var/lib/postgresql/data'
+        environment:
+            POSTGRES_PASSWORD: password
+            POSTGRES_DB: utili

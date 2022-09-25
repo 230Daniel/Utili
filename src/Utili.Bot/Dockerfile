@@ -5,6 +5,7 @@ FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 WORKDIR /src
 COPY ["Utili.Bot/Utili.Bot.csproj", "Utili.Bot/"]
 COPY ["Utili.Database/Utili.Database.csproj", "Utili.Database/"]
+COPY ["NuGet.Config", "Utili.Bot/NuGet.Config"]
 RUN dotnet restore "Utili.Bot/Utili.Bot.csproj"
 COPY . .
 WORKDIR "/src/Utili.Bot"

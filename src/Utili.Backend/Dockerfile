@@ -1,11 +1,13 @@
 ﻿FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS base
 WORKDIR /app
 EXPOSE 443
+EXPOSE 80
 
 FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 WORKDIR /src
 COPY ["Utili.Backend/Utili.Backend.csproj", "Utili.Backend/"]
 COPY ["Utili.Database/Utili.Database.csproj", "Utili.Database/"]
+COPY ["NuGet.Config", "Utili.Backend/NuGet.Config"]
 RUN dotnet restore "Utili.Backend/Utili.Backend.csproj"
 COPY . .
 WORKDIR "/src/Utili.Backend"
