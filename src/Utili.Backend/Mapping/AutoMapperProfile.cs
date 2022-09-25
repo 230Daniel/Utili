@@ -33,7 +33,7 @@ public class AutoMapperProfile : Profile
 
         CreateMap<IVocalGuildChannel, VocalChannelModel>()
             .ForMember(dest => dest.Name,
-                opt => opt.MapFrom(s => $"#🔈{s.Name}"));
+                opt => opt.MapFrom(s => $"🔈{s.Name}"));
 
         CreateMap<IRole, RoleModel>();
     }
