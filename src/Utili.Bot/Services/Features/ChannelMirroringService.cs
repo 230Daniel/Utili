@@ -39,10 +39,14 @@ public class ChannelMirroringService
             if (config is null) return;
 
             var guild = _bot.GetGuild(e.GuildId.Value);
-            var destinationChannel = guild.GetTextChannel(config.DestinationChannelId);
+            var destinationChannel = guild.GetMessageGuildChannel(config.DestinationChannelId);
             if (destinationChannel is null) return;
 
             if (!destinationChannel.BotHasPermissions(Permissions.ViewChannels | Permissions.ManageWebhooks)) return;
+
+            var channelPrefix = e.Channel.Type is ChannelType.Voice or ChannelType.Stage
+                ? "🔈"
+                : "#";
 
             string username;
             string avatarUrl;
@@ -50,7 +54,7 @@ public class ChannelMirroringService
 
             if (config.AuthorDisplayMode == ChannelMirroringAuthorDisplayMode.WebhookName)
             {
-                username = $"{e.Message.Author} in #{e.Channel.Name}";
+                username = $"{e.Message.Author} in {channelPrefix}{e.Channel.Name}";
                 avatarUrl = e.Message.Author.GetAvatarUrl();
                 content = e.Message.Content;
             }

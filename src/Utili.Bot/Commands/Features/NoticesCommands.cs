@@ -34,7 +34,7 @@ public class NoticesCommands : MyDiscordTextGuildModuleBase
     [RequireBotPermissions(Permissions.SendMessages | Permissions.SendEmbeds | Permissions.SendAttachments)]
     public async Task<IResult> PreviewAsync(
         [RequireAuthorParameterChannelPermissions(Permissions.ViewChannels | Permissions.ReadMessageHistory)]
-        ITextChannel channel)
+        IMessageGuildChannel channel)
     {
         var config = await _dbContext.NoticeConfigurations.GetForGuildChannelAsync(Context.GuildId, channel.Id);
         if (config is null) return Failure("Error", $"{channel.Mention} does not have a notice.");

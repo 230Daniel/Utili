@@ -41,6 +41,14 @@ public class DiscordController : Controller
     }
 
     [DiscordGuildAuthorise]
+    [HttpGet("{GuildId}/message-channels")]
+    public async Task<IActionResult> MessageChannelsAsync([Required] ulong guildId)
+    {
+        var channels = await _discordRestService.GetMessageGuildChannelsAsync(guildId);
+        return Json(_mapper.Map<IEnumerable<MessageGuildChannelModel>>(channels));
+    }
+
+    [DiscordGuildAuthorise]
     [HttpGet("{GuildId}/text-channels")]
     public async Task<IActionResult> TextChannelsAsync([Required] ulong guildId)
     {

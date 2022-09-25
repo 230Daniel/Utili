@@ -129,7 +129,7 @@ public class NoticesService
             if (config is null || !config.Enabled) return;
 
             var guild = _bot.GetGuild(guildId);
-            var channel = guild.GetTextChannel(channelId);
+            var channel = guild.GetMessageGuildChannel(channelId);
 
             if (channel is null ||
                 !channel.BotHasPermissions(
@@ -149,7 +149,7 @@ public class NoticesService
             db.NoticeConfigurations.Update(config);
             await db.SaveChangesAsync();
 
-            if (config.Pin)
+            if (config.Pin && channel is ITextChannel)
                 await message.PinAsync(new DefaultRestRequestOptions { Reason = "Sticky Notices" });
         }
         catch (Exception ex)

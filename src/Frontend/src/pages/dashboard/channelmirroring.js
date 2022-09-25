@@ -64,7 +64,7 @@ class ChannelMirroring extends React.Component {
 	async componentDidMount() {
 		var response = await get(`dashboard/${this.guildId}/channel-mirroring`);
 		this.state.channelMirroring = await response?.json();
-		response = await get(`discord/${this.guildId}/text-channels`);
+		response = await get(`discord/${this.guildId}/message-channels`);
 		this.state.textChannels = await response?.json();
 
 		this.state.channelMirroring = this.state.channelMirroring.filter(x => this.state.textChannels.some(y => y.id == x.channelId));

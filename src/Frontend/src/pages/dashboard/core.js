@@ -57,7 +57,7 @@ class Core extends React.Component {
 	async componentDidMount() {
 		var response = await get(`dashboard/${this.guildId}/core`);
 		var core = await response?.json();
-		response = await get(`discord/${this.guildId}/text-channels`);
+		response = await get(`discord/${this.guildId}/message-channels`);
 		var textChannels = await response?.json();
 		core.nonCommandChannels = core.nonCommandChannels.filter(x => textChannels.some(y => x == y.id));
 

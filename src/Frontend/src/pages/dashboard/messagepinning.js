@@ -7,7 +7,6 @@ import { get, post } from "../../api/auth";
 
 import Card from "../../components/dashboard/card";
 import CardComponent from "../../components/dashboard/cardComponent";
-import CardListComponent from "../../components/dashboard/cardListComponent";
 
 class MessagePinning extends React.Component {
 	constructor(props) {
@@ -55,7 +54,7 @@ class MessagePinning extends React.Component {
 	async componentDidMount() {
 		var response = await get(`dashboard/${this.guildId}/message-pinning`);
 		this.state.messagePinning = await response?.json();
-		response = await get(`discord/${this.guildId}/text-channels`);
+		response = await get(`discord/${this.guildId}/message-channels`);
 		this.state.textChannels = await response?.json();
 
 		this.setState({});

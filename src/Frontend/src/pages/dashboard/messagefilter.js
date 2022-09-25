@@ -100,7 +100,7 @@ class MessageFilter extends React.Component {
 	async componentDidMount() {
 		var response = await get(`dashboard/${this.guildId}/message-filter`);
 		this.state.messageFilter = await response?.json();
-		response = await get(`discord/${this.guildId}/text-channels`);
+		response = await get(`discord/${this.guildId}/message-channels`);
 		this.state.textChannels = await response?.json();
 
 		this.state.messageFilter = this.state.messageFilter.filter(x => this.state.textChannels.some(y => y.id == x.channelId));

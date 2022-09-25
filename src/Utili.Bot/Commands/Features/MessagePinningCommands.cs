@@ -32,7 +32,7 @@ public class MessagePinningCommands : MyDiscordTextGuildModuleBase
     public Task<IResult> PinAsync(
         ulong messageId,
         [RequireBotParameterChannelPermissions(Permissions.ViewChannels | Permissions.ManageWebhooks)]
-        ITextChannel pinChannel = null)
+        IMessageGuildChannel pinChannel = null)
         => PinAsync(messageId, pinChannel, Context.GetChannel());
 
     [TextCommand("pin")]
@@ -42,24 +42,22 @@ public class MessagePinningCommands : MyDiscordTextGuildModuleBase
         IMessageGuildChannel channel,
         ulong messageId,
         [RequireBotParameterChannelPermissions(Permissions.ViewChannels | Permissions.ManageWebhooks)]
-        ITextChannel pinChannel = null)
+        IMessageGuildChannel pinChannel = null)
         => PinAsync(messageId, pinChannel, channel);
 
-    private async Task<IResult> PinAsync(ulong messageId, ITextChannel pinChannel, IMessageGuildChannel channel)
+    private async Task<IResult> PinAsync(ulong messageId, IMessageGuildChannel pinChannel, IMessageGuildChannel channel)
     {
-        var message = await channel.FetchMessageAsync(messageId) as IUserMessage;
-
-        if (message is null)
+        if (await channel.FetchMessageAsync(messageId) is not IUserMessage message)
         {
             return Failure("Error",
                 $"No message was found in {channel.Mention} with ID {messageId}\n[How do I get a message ID?](https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID-)");
         }
 
         var config = await _dbContext.MessagePinningConfigurations.GetForGuildAsync(Context.GuildId);
-        if (config is not null && config.PinMessages)
+        if (config is not null && config.PinMessages && channel is ITextChannel)
             await message.PinAsync(new DefaultRestRequestOptions { Reason = $"Message Pinning (manual by {Context.Message.Author} {Context.Message.Author.Id})" });
 
-        pinChannel ??= config is null ? null : Context.GetGuild().GetTextChannel(config.PinChannelId);
+        pinChannel ??= config is null ? null : Context.GetGuild().GetMessageGuildChannel(config.PinChannelId);
 
         if (pinChannel is null && (config is not null && config.PinMessages))
         {
@@ -72,7 +70,10 @@ public class MessagePinningCommands : MyDiscordTextGuildModuleBase
                 "Message pinning is not enabled on this server.");
         }
 
-        var username = $"{message.Author} in #{channel.Name}";
+        var channelPrefix = channel.Type is ChannelType.Voice or ChannelType.Stage
+            ? "🔈"
+            : "#";
+        var username = $"{message.Author} in {channelPrefix}{channel.Name}";
         var avatarUrl = message.Author.GetAvatarUrl();
 
         for (var i = 0; i < 2; i++)
