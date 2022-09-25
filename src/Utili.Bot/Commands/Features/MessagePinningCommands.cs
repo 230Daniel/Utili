@@ -41,6 +41,7 @@ public class MessagePinningCommands : MyDiscordTextGuildModuleBase
         [RequireAuthorParameterChannelPermissions(Permissions.ViewChannels | Permissions.ManageMessages)]
         IMessageGuildChannel channel,
         ulong messageId,
+        [RequireAuthorParameterChannelPermissions(Permissions.ViewChannels)]
         [RequireBotParameterChannelPermissions(Permissions.ViewChannels | Permissions.ManageWebhooks)]
         IMessageGuildChannel pinChannel = null)
         => PinAsync(messageId, pinChannel, channel);
