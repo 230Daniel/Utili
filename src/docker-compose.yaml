@@ -1,0 +1,13 @@
+name: Utili
+version: 3.3
+services:
+    backend:
+        build: 'Utili.Backend'
+        volumes:
+            - './appsettings.json:/app/appsettings.json:ro'
+        ports:
+            - '443:443'
+    bot:
+        build: 'Utili.Bot'
+        volumes:
+            - './appsettings.json:/app/appsettings.json:ro'
