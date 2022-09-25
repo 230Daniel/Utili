@@ -3,13 +3,15 @@ import { Link, Redirect } from "react-router-dom";
 import { Helmet } from "react-helmet";
 import { get } from "../../api/auth";
 
+import { getBestSupportedCurrency } from "../../helpers/currency";
+
 import Fade from "../../components/effects/fade";
 import Load from "../../components/load";
 import Divider from "../../components/layout/divider";
 import PriceSelector from "../../components/priceSelector";
+import Subscriptions from "../../components/subscriptions";
 
 import "../../styles/premium.css";
-import Subscriptions from "../../components/subscriptions";
 
 class PremiumIndex extends React.Component {
 	constructor(props) {
@@ -80,8 +82,14 @@ class PremiumIndex extends React.Component {
 	async componentDidMount() {
 		var response = await get(`stripe/currency`);
 		var currency = await response.json();
-		this.state.currency = currency.currency.toUpperCase();
-		this.state.currencyLocked = currency.locked;
+
+		if (currency) {
+			this.state.currency = currency.toUpperCase();
+			this.state.currencyLocked = true;
+		} else {
+			this.state.currency = getBestSupportedCurrency();
+		}
+
 		this.setState({ loading: false });
 	}
 }

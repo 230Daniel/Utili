@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
 using Stripe;
 using Stripe.Checkout;
 using Utili.Backend.Authorisation;
@@ -102,49 +99,8 @@ public class StripeController : Controller
         var customer = await _customerService.GetCustomerAsync(HttpContext.GetUser());
 
         if (customer is not null && !string.IsNullOrEmpty(customer.Currency))
-        {
-            return Json(new CustomerCurrencyModel
-            {
-                Locked = true,
-                Currency = customer.Currency
-            });
-        }
+            return Json(customer.Currency);
 
-        var currency = await GetCustomerCurrencyByIpAsync();
-
-        return Json(new CustomerCurrencyModel
-        {
-            Locked = false,
-            Currency = currency
-        });
-    }
-
-    private async Task<string> GetCustomerCurrencyByIpAsync()
-    {
-        var gbp = new[]
-        {
-            "GB", "IM", "JE", "GG"
-        };
-        var eur = new[]
-        {
-            "AX", "EU", "AD", "AT", "BE", "CY", "EE", "FI", "FR", "TF", "DE", "GR", "GP", "IE", "IT", "LV", "LT",
-            "LU", "MT", "GF", "MQ", "YT", "MC", "ME", "NL", "PT", "RE", "BL", "MF", "PM", "SM", "SK", "SI", "ES",
-            "VA"
-        };
-        var usd = new[]
-        {
-            "US", "AS", "IO", "VG", "BQ", "EC", "SV", "GU", "HT", "MH", "FM", "MP", "PW", "PA", "PR", "TL", "TC",
-            "VI", "UM"
-        };
-
-        var client = new HttpClient();
-
-        var response = await client.GetStringAsync($"https://ipinfo.io/{HttpContext.Connection.RemoteIpAddress}/json");
-        var country = JsonConvert.DeserializeObject<IpInfoModel>(response).Country;
-
-        if (gbp.Contains(country)) return "gbp";
-        if (eur.Contains(country)) return "eur";
-        if (usd.Contains(country)) return "usd";
-        return "gbp";
+        return Json(null);
     }
 }
