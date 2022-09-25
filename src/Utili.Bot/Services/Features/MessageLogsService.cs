@@ -118,7 +118,7 @@ public class MessageLogsService
             db.MessageLogsMessages.Update(messageRecord);
             await db.SaveChangesAsync();
 
-            var logChannel = _bot.GetTextChannel(e.GuildId.Value, config.EditedChannelId);
+            var logChannel = _bot.GetMessageGuildChannel(e.GuildId.Value, config.EditedChannelId);
             if (logChannel is not null) await logChannel.SendEmbedAsync(embed);
         }
         catch (Exception ex)
@@ -150,7 +150,7 @@ public class MessageLogsService
             db.MessageLogsMessages.Remove(messageRecord);
             await db.SaveChangesAsync();
 
-            var logChannel = _bot.GetTextChannel(e.GuildId.Value, config.DeletedChannelId);
+            var logChannel = _bot.GetMessageGuildChannel(e.GuildId.Value, config.DeletedChannelId);
             if (logChannel is not null) await logChannel.SendEmbedAsync(embed);
         }
         catch (Exception ex)
@@ -182,7 +182,7 @@ public class MessageLogsService
                 await db.SaveChangesAsync();
             }
 
-            var logChannel = _bot.GetTextChannel(e.GuildId, config.DeletedChannelId);
+            var logChannel = _bot.GetMessageGuildChannel(e.GuildId, config.DeletedChannelId);
             if (logChannel is not null) await logChannel.SendEmbedAsync(embed);
         }
         catch (Exception ex)

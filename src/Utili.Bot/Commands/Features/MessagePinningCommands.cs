@@ -47,16 +47,14 @@ public class MessagePinningCommands : MyDiscordTextGuildModuleBase
 
     private async Task<IResult> PinAsync(ulong messageId, IMessageGuildChannel pinChannel, IMessageGuildChannel channel)
     {
-        var message = await channel.FetchMessageAsync(messageId) as IUserMessage;
-
-        if (message is null)
+        if (await channel.FetchMessageAsync(messageId) is not IUserMessage message)
         {
             return Failure("Error",
                 $"No message was found in {channel.Mention} with ID {messageId}\n[How do I get a message ID?](https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID-)");
         }
 
         var config = await _dbContext.MessagePinningConfigurations.GetForGuildAsync(Context.GuildId);
-        if (config is not null && config.PinMessages)
+        if (config is not null && config.PinMessages && channel is ITextChannel)
             await message.PinAsync(new DefaultRestRequestOptions { Reason = $"Message Pinning (manual by {Context.Message.Author} {Context.Message.Author.Id})" });
 
         pinChannel ??= config is null ? null : Context.GetGuild().GetMessageGuildChannel(config.PinChannelId);
@@ -72,7 +70,10 @@ public class MessagePinningCommands : MyDiscordTextGuildModuleBase
                 "Message pinning is not enabled on this server.");
         }
 
-        var username = $"{message.Author} in #{channel.Name}";
+        var channelPrefix = channel.Type is ChannelType.Voice or ChannelType.Stage
+            ? "🔈"
+            : "#";
+        var username = $"{message.Author} in {channelPrefix}{channel.Name}";
         var avatarUrl = message.Author.GetAvatarUrl();
 
         for (var i = 0; i < 2; i++)

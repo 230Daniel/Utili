@@ -44,13 +44,17 @@ public class ChannelMirroringService
 
             if (!destinationChannel.BotHasPermissions(Permissions.ViewChannels | Permissions.ManageWebhooks)) return;
 
+            var channelPrefix = e.Channel.Type is ChannelType.Voice or ChannelType.Stage
+                ? "🔈"
+                : "#";
+
             string username;
             string avatarUrl;
             string content;
 
             if (config.AuthorDisplayMode == ChannelMirroringAuthorDisplayMode.WebhookName)
             {
-                username = $"{e.Message.Author} in #{e.Channel.Name}";
+                username = $"{e.Message.Author} in {channelPrefix}{e.Channel.Name}";
                 avatarUrl = e.Message.Author.GetAvatarUrl();
                 content = e.Message.Content;
             }

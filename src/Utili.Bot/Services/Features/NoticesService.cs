@@ -149,7 +149,7 @@ public class NoticesService
             db.NoticeConfigurations.Update(config);
             await db.SaveChangesAsync();
 
-            if (config.Pin)
+            if (config.Pin && channel is ITextChannel)
                 await message.PinAsync(new DefaultRestRequestOptions { Reason = "Sticky Notices" });
         }
         catch (Exception ex)

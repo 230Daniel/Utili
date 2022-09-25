@@ -17,9 +17,24 @@ public class AutoMapperProfile : Profile
 
     private void MapDiscordModels()
     {
-        CreateMap<IMessageGuildChannel, MessageGuildChannelModel>();
-        CreateMap<ITextChannel, TextChannelModel>();
-        CreateMap<IVocalGuildChannel, VocalChannelModel>();
+        CreateMap<IMessageGuildChannel, MessageGuildChannelModel>()
+            .ForMember(dest => dest.Name,
+                opt => opt.MapFrom(s =>
+                    s.Type == ChannelType.Voice || s.Type == ChannelType.Stage
+                        ? $"🔈{s.Name}"
+                        : $"#{s.Name}"))
+            .ForMember(dest => dest.IsVoice,
+                opt => opt.MapFrom(s =>
+                    s.Type == ChannelType.Voice || s.Type == ChannelType.Stage));
+
+        CreateMap<ITextChannel, TextChannelModel>()
+            .ForMember(dest => dest.Name,
+                opt => opt.MapFrom(s => $"#{s.Name}"));
+
+        CreateMap<IVocalGuildChannel, VocalChannelModel>()
+            .ForMember(dest => dest.Name,
+                opt => opt.MapFrom(s => $"#🔈{s.Name}"));
+
         CreateMap<IRole, RoleModel>();
     }
 
