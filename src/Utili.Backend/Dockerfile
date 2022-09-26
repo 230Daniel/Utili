@@ -19,4 +19,4 @@ RUN dotnet publish "Utili.Backend.csproj" -c Release -o /app/publish
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "Utili.Backend.dll"]
+ENTRYPOINT ["dotnet", "Utili.Backend.dll", "--no-database-migration"]
