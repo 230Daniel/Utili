@@ -1,4 +1,3 @@
 /.idea/
-bot.json
-backend.json
-postgresql-data/
+/config/
+/postgresql-data/
