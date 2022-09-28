@@ -4,6 +4,7 @@ version: '3.3'
 services:
 
     postgres:
+        container_name: utili-postgres
         image: postgres
         volumes:
             - './postgresql-data:/var/lib/postgresql/data'
@@ -13,6 +14,7 @@ services:
             POSTGRES_DB: utili
 
     bot:
+        container_name: utili-bot
         build:
             context: './src'
             dockerfile: './Utili.Bot/Dockerfile'
@@ -27,6 +29,7 @@ services:
                 max-size: 50M
 
     backend:
+        container_name: utili-backend
         build:
             context: './src'
             dockerfile: './Utili.Backend/Dockerfile'
@@ -41,6 +44,7 @@ services:
                 max-size: 50M
 
     nginx:
+        container_name: utili-nginx
         build:
             context: './src/Frontend/'
             dockerfile: 'Dockerfile'
