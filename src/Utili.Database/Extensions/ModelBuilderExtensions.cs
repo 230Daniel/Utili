@@ -73,9 +73,6 @@ internal static class ModelBuilderExtensions
         modelBuilder.Entity<RoleLinkingConfiguration>().HasKey(e => e.Id);
         modelBuilder.Entity<RoleLinkingConfiguration>().Property(e => e.Id).ValueGeneratedOnAdd();
 
-        modelBuilder.Entity<ShardDetail>().HasKey(e => e.ShardId);
-        modelBuilder.Entity<ShardDetail>().Property(e => e.ShardId).ValueGeneratedNever();
-
         modelBuilder.Entity<Subscription>().HasKey(e => e.Id);
         modelBuilder.Entity<Subscription>().Property(e => e.Id).ValueGeneratedNever();
 
