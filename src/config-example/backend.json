@@ -1,0 +1,49 @@
+﻿{
+    "Kestrel": {
+        "Endpoints": {
+            "Http": {
+                "Url": "http://backend:80"
+            }
+        }
+    },
+    "Frontend": {
+        "Origin": "https://example.com"
+    },
+    "Discord": {
+        "ClientId": "",
+        "ClientSecret": "",
+        "Token": "",
+        "DefaultPrefix": "."
+    },
+    "Database": {
+        "Connection": "Server=postgres;Port=5432;Database=utili;UserId=postgres;Password=password;"
+    },
+    "IpRateLimiting": {
+        "EnableEndpointRateLimiting": false,
+        "StackBlockedRequests": false,
+        "RealIpHeader": "X-Real-IP",
+        "ClientIdHeader": "X-ClientId",
+        "HttpStatusCode": 429,
+        "GeneralRules": [
+            {
+                "Endpoint": "*",
+                "Period": "2s",
+                "Limit": 20
+            }
+        ]
+    },
+    "Serilog": {
+        "MinimumLevel": "Information",
+        "Enrich": [
+            "FromLogContext"
+        ],
+        "WriteTo": [
+            {
+                "Name": "Console",
+                "Args": {
+                    "outputTemplate": "[{Timestamp:HH:mm:ss} {Level:u3}] {Message}{NewLine}{Exception}"
+                }
+            }
+        ]
+    }
+}
