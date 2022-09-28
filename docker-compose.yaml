@@ -1,0 +1,55 @@
+name: Utili
+version: '3.3'
+
+services:
+
+    postgres:
+        image: postgres
+        volumes:
+            - './postgresql-data:/var/lib/postgresql/data'
+        restart: always
+        environment:
+            POSTGRES_PASSWORD: password
+            POSTGRES_DB: utili
+
+    bot:
+        build:
+            context: './src'
+            dockerfile: './Utili.Bot/Dockerfile'
+        depends_on:
+            - 'postgres'
+        volumes:
+            - './config/bot.json:/app/appsettings.json:ro'
+        restart: always
+        logging:
+            driver: "local"
+            options:
+                max-size: 50M
+
+    backend:
+        build:
+            context: './src'
+            dockerfile: './Utili.Backend/Dockerfile'
+        depends_on:
+            - 'bot'
+        volumes:
+            - './config/backend.json:/app/appsettings.json:ro'
+        restart: always
+        logging:
+            driver: "local"
+            options:
+                max-size: 50M
+
+    nginx:
+        build:
+            context: './src/Frontend/'
+            dockerfile: 'Dockerfile'
+        depends_on:
+            - 'backend'
+        volumes:
+            - './config/frontend.js:/build/config.js:ro'
+            - './config/nginx.conf:/etc/nginx/nginx.conf:ro'
+            - '/etc/letsencrypt:/etc/letsencrypt:ro'
+        ports:
+            - '443:443'
+            - '80:80'

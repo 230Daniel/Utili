@@ -5,6 +5,7 @@
     <TargetFramework>net6.0</TargetFramework>
     <StartupObject>Utili.Bot.Program</StartupObject>
     <LangVersion>10</LangVersion>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
   </PropertyGroup>
 
   <ItemGroup>

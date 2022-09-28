@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Disqord;
 using Disqord.Bot;
@@ -20,9 +21,9 @@ namespace Utili.Bot;
 
 internal static class Program
 {
-    private static async Task Main()
+    private static async Task Main(string[] args)
     {
-        var host = Host.CreateDefaultBuilder()
+        var host = Host.CreateDefaultBuilder(args)
             .UseSystemd()
             .UseSerilog()
             .ConfigureServices(ConfigureServices)
@@ -43,9 +44,12 @@ internal static class Program
 
         try
         {
-            Log.Information("Migrating database");
-            using (var scope = host.Services.CreateScope())
+            if (args.Contains("--no-database-migration"))
+                Log.Information("Skipping database migration");
+            else
             {
+                Log.Information("Migrating database");
+                using var scope = host.Services.CreateScope();
                 var db = scope.ServiceProvider.GetRequiredService<DatabaseContext>();
                 await db.Database.MigrateAsync();
             }

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
@@ -82,11 +81,5 @@ public static class DbSetExtensions
         repMember.Reputation += change;
         dbSet.Update(repMember);
         return repMember;
-    }
-
-    public static Task<int> GetTotalGuildCountAsync(this DbSet<ShardDetail> dbSet)
-    {
-        var minimumHeartbeat = DateTime.UtcNow.AddSeconds(-30);
-        return dbSet.Where(x => x.Heartbeat >= minimumHeartbeat).SumAsync(x => x.Guilds);
     }
 }

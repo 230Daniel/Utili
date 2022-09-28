@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Utili.Database;
 using Microsoft.AspNetCore.Hosting;
@@ -29,12 +30,16 @@ public class Program
 
         try
         {
-            Log.Information("Migrating database");
-            using (var scope = host.Services.CreateScope())
+            if (args.Contains("--no-database-migration"))
+                Log.Information("Skipping database migration");
+            else
             {
+                Log.Information("Migrating database");
+                using var scope = host.Services.CreateScope();
                 var db = scope.ServiceProvider.GetRequiredService<DatabaseContext>();
                 await db.Database.MigrateAsync();
             }
+
 
             Log.Information("Running host");
             await host.RunAsync();

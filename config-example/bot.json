@@ -1,0 +1,28 @@
+﻿{
+    "Discord": {
+        "Token": "",
+        "DefaultPrefix": ".",
+        "OwnerId": 0
+    },
+    "Services": {
+        "WebsiteDomain": "localhost:3000",
+        "HasteAddress": "https://haste.utili.xyz"
+    },
+    "Database": {
+        "Connection": "Server=postgres;Port=5432;Database=utili;UserId=postgres;Password=password;"
+    },
+    "Serilog": {
+        "MinimumLevel": "Information",
+        "Enrich": [
+            "FromLogContext"
+        ],
+        "WriteTo": [
+            {
+                "Name": "Console",
+                "Args": {
+                    "outputTemplate": "[{Timestamp:HH:mm:ss} {Level:u3} {SourceContext}] {Message}{NewLine}{Exception}"
+                }
+            }
+        ]
+    }
+}

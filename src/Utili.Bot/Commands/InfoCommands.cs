@@ -1,37 +1,36 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Linq;
 using System.Threading.Tasks;
 using Disqord;
+using Disqord.Gateway;
 using Disqord.Rest;
 using Microsoft.Extensions.Configuration;
 using Qmmands;
 using Utili.Bot.Extensions;
 using LinuxSystemStats;
-using Microsoft.EntityFrameworkCore;
 using Qmmands.Text;
-using Utili.Database;
 using Utili.Bot.Implementations;
+using Utili.Bot.Services;
 using Utili.Bot.Utils;
 
 namespace Utili.Bot.Commands;
 
 public class InfoCommands : MyDiscordTextGuildModuleBase
 {
+    private readonly UtiliDiscordBot _bot;
     private readonly IConfiguration _config;
-    private readonly DatabaseContext _dbContext;
 
-    public InfoCommands(IConfiguration config, DatabaseContext dbContext)
+    public InfoCommands(UtiliDiscordBot bot, IConfiguration config)
     {
+        _bot = bot;
         _config = config;
-        _dbContext = dbContext;
     }
 
     [TextCommand("about", "info")]
-    public async Task<IResult> AboutAsync()
+    public IResult About()
     {
         var domain = _config.GetValue<string>("Services:WebsiteDomain");
-        var guilds = await _dbContext.ShardDetails.Where(x => x.Heartbeat > DateTime.UtcNow.AddSeconds(-30)).SumAsync(x => x.Guilds);
+        var guilds = _bot.GetGuilds().Count;
 
         var about = string.Concat(
             "Created by 230Daniel#1920\n",
