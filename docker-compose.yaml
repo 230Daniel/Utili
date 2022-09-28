@@ -14,8 +14,8 @@ services:
 
     bot:
         build:
-            context: '.'
-            dockerfile: 'Utili.Bot/Dockerfile'
+            context: './src'
+            dockerfile: './Utili.Bot/Dockerfile'
         depends_on:
             - 'postgres'
         volumes:
@@ -28,8 +28,8 @@ services:
 
     backend:
         build:
-            context: '.'
-            dockerfile: 'Utili.Backend/Dockerfile'
+            context: './src'
+            dockerfile: './Utili.Backend/Dockerfile'
         depends_on:
             - 'bot'
         volumes:
@@ -42,7 +42,7 @@ services:
 
     nginx:
         build:
-            context: './Frontend/'
+            context: './src/Frontend/'
             dockerfile: 'Dockerfile'
         depends_on:
             - 'backend'

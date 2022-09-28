@@ -3,16 +3,16 @@ WORKDIR /app
 
 FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 WORKDIR /src
-COPY ["Utili.Bot/Utili.Bot.csproj", "Utili.Bot/"]
-COPY ["Utili.Database/Utili.Database.csproj", "Utili.Database/"]
-COPY ["NuGet.Config", "Utili.Bot/NuGet.Config"]
-RUN dotnet restore "Utili.Bot/Utili.Bot.csproj"
+COPY Utili.Bot/Utili.Bot.csproj Utili.Bot/
+COPY Utili.Database/Utili.Database.csproj Utili.Database/
+COPY NuGet.Config Utili.Bot/
+RUN dotnet restore Utili.Bot/Utili.Bot.csproj
 COPY . .
-WORKDIR "/src/Utili.Bot"
-RUN dotnet build "Utili.Bot.csproj" -c Release -o /app/build
+WORKDIR /src/Utili.Bot
+RUN dotnet build Utili.Bot.csproj -c Release -o /app/build
 
 FROM build AS publish
-RUN dotnet publish "Utili.Bot.csproj" -c Release -o /app/publish
+RUN dotnet publish Utili.Bot.csproj -c Release -o /app/publish
 
 FROM base AS final
 WORKDIR /app
