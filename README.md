@@ -24,19 +24,47 @@ Please note that it is licensed under the [GNU Lesser General Public License](ht
 
 I had a lot of fun working with this library, and its superior reliability saved Utili as the bot grew more popular. I highly recommend checking it out if you're looking to write a Discord bot in Dotnet.
 
-## Self-Hosting
+## Running with Docker
 
-Full instructions on how to self-host this project are in the works, and I may eventually endeavour to create a solution to make this easier, such as a Docker image. (If someone is an expert with Docker images, this would be a great contribution)
+The easiest way to host your own instance of Utili is using Docker.
 
-For now, you need to:
+You will need a Linux machine which runs 24/7 (eg. a VPS), a domain or subdomain, and an SSL certificate for that domain or subdomain. For SSL certificates, I recommend [Certbot](https://certbot.eff.org/) - it's free and convenient!
 
- - Run a Postgresql server. I run version 14, but higher versions probably work. At runtime the database will be updated automatically to the correct schema. Avoid starting both the Backend and Bot at the same time if the database needs to update.
- - For both Utili.Backend and Utili.Bot, make an appsettings.json with the contents of appsettings.example.json, and configure the settings. Point both the backend and the bot to the same database.
- - Compile Utili.Backend and Utili.Bot (eg. `dotnet publish -r linux-x64 -c release`)
- - Run Utili.Backend and Utili.Bot 24/7, Systemd works well with the `Notify` type.
- - Use Nginx or similar to reverse-proxy traffic to the local addresses (defaults are `https://localhost:5001` and `http://localhost:5000`)
- - Build the frontend with `yarn install` then `yarn build`
- - Copy `config.example.js` to `config.js` (in `build/public`), then modify the settings to point it to your publicly accessible backend url (eg. `https://api.utili.xyz`), and set the Discord client ID.
- - Serve the files in the `/build` directory with a basic file server like Nginx.
+1. [Install Docker on a Linux machine](https://docs.docker.com/engine/install/#server).
+2. Clone the repository: `git clone https://github.com/230Daniel/Utili`
+3. Change directory into the repository root: `cd Utili`
+4. Copy the example configuration files: `cp -r config-example config`
+5. Modify the files in the `config` folder as per the instructions in the Configuration section below.
+6. Start the containers: `docker compose up -d`
+7. Monitor the container logs to check for any errors: `docker compose logs (bot|backend|postgres|nginx)`
 
-If you have any issues, don't hesitate to reach out to me. A Github issue would be good for this, as it would then stick around for future reference. For now though, please don't ask me to walk you through the entire process above - you should instead wait for the full instructions to be published.
+### Configuration
+
+#### bot.json
+
+You must set the following values in the `bot.json` file:
+
+ - `Discord:Token` - Your Discord bot's token
+ - `Discord:OwnerId` - Your Discord account's user ID (not the bot)
+ - `Services:WebsiteDomain` - The domain that your Utili website will be on (eg. `example.com` or `utili.example.com`)
+
+#### backend.json
+
+You must set the following values in the `backend.json` file:
+
+ - `Frontend:Origin` - The address that the frontend will be on (eg. `https://example.com` or `https://utili.example.com`)
+ - `Discord:ClientId` - Your Discord bot's client ID
+ - `Discord:ClientSecret` - Your Discord bot's client secret
+ - `Discord:Token` - Your Discord bot's token
+
+#### frontend.js
+
+You must set the following values in the `frontend.js` file:
+
+ - `backend` - The address that the backend will be on (eg. `https://example.com/api`)
+ - `clientId` - Your Discord bot's client ID
+
+#### nginx.conf
+
+ - Replace both `server_name` fields with the domain that your Utili website will be on (eg. `example.com` or `utili.example.com`)
+ - Change the `ssl_certificate` and `ssl_certificate_key` fields to point to your SSL certificate. By default, your host machine's `/etc/letsencrypt` folder is accessible to the container. If you're not using Certbot, you'll need to modify `docker-compose.yaml` to make another folder accessible instead. You'll need to edit `services:nginx:volumes`. [More about Docker volumes](https://docs.docker.com/storage/volumes/).
