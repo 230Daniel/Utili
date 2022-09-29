@@ -37,6 +37,7 @@ services:
             - 'bot'
         volumes:
             - './config/backend.json:/app/appsettings.json:ro'
+            - './aspnet-data:/root/.aspnet'
         restart: always
         logging:
             driver: "local"
