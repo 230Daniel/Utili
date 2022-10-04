@@ -25,7 +25,7 @@ class MyNavbar extends React.Component {
 							<button className="navbar-toggler" onClick={() => this.props.onButtonLeftClick()}><span className="navbar-toggler-icon"></span></button>
 							: null}
 						<Navbar.Brand to="/" as={Link}>
-							<img src="https://file.utili.xyz/UtiliSmall.png" width="40px" className="d-inline-block align-middle" alt="Utili Logo" />
+							<img src="UtiliSmall.png" width="40px" className="d-inline-block align-middle" alt="Utili Logo" />
 							Utili
 						</Navbar.Brand>
 						<Navbar.Toggle aria-controls="my-navbar" />
