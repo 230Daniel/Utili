@@ -131,8 +131,9 @@ public class AutopurgeService
             if (config is null || config.Mode == AutopurgeMode.None || config.Timespan > TimeSpan.FromDays(14)) return;
 
             var guild = _bot.GetGuild(config.GuildId);
+            if (guild is null) return;
             var channel = guild.GetMessageGuildChannel(config.ChannelId);
-            if (!channel.BotHasPermissions(Permissions.ViewChannels | Permissions.ReadMessageHistory | Permissions.ManageMessages)) return;
+            if (channel is null || !channel.BotHasPermissions(Permissions.ViewChannels | Permissions.ReadMessageHistory | Permissions.ManageMessages)) return;
 
             var now = DateTime.UtcNow;
             var maxTimestamp = now - config.Timespan;
