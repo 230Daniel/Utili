@@ -1,10 +1,10 @@
 FROM node:16.17.0 as build-deps
 WORKDIR /app
 COPY package.json yarn.lock ./
-RUN yarn
+RUN npm install
 COPY . ./
-RUN yarn build
+RUN npm run build
 
-FROM nginx:1.12-alpine
+FROM nginx
 COPY --from=build-deps /app/build /build
 CMD ["nginx", "-g", "daemon off;"]
