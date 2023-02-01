@@ -16,7 +16,7 @@
         "DefaultPrefix": "."
     },
     "Database": {
-        "Connection": "Server=postgres;Port=5432;Database=utili;UserId=postgres;Password=password;"
+        "Connection": "Server=postgres;Port=5432;Database=utili;UserId=utili;Password=password;"
     },
     "IpRateLimiting": {
         "EnableEndpointRateLimiting": false,

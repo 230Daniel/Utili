@@ -10,6 +10,7 @@ services:
             - './postgresql-data:/var/lib/postgresql/data'
         restart: always
         environment:
+            POSTGRES_USER: utili
             POSTGRES_PASSWORD: password
             POSTGRES_DB: utili
 
