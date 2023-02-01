@@ -30,13 +30,14 @@ The easiest way to host your own instance of Utili is using Docker.
 
 You will need a Linux machine which runs 24/7 (eg. a VPS), a domain or subdomain, and an SSL certificate for that domain or subdomain. For SSL certificates, I recommend [Certbot](https://certbot.eff.org/) - it's free and convenient!
 
-1. [Install Docker on a Linux machine](https://docs.docker.com/engine/install/#server).
-2. Clone the repository: `git clone https://github.com/230Daniel/Utili`
-3. Change directory into the repository root: `cd Utili`
-4. Copy the example configuration files: `cp -r config-example config`
-5. Modify the files in the `config` folder as per the instructions in the Configuration section below.
-6. Start the containers: `docker compose up -d`
-7. Monitor the container logs to check for any errors: `docker compose logs (bot|backend|postgres|nginx)`
+1. Create a Discord app on discord.com/developers, allow the Members and Message Content intents. Add https://example.com/signin-discord to your Oauth2 allowed redirects, replacing example.com with the domain which you will host Utili's website on.
+2. [Install Docker on a Linux machine](https://docs.docker.com/engine/install/#server).
+3. Clone the repository: `git clone https://github.com/230Daniel/Utili`
+4. Change directory into the repository root: `cd Utili`
+5. Copy the example configuration files: `cp -r config-example config`
+6. Modify the files in the `config` folder as per the instructions in the Configuration section below.
+7. Start the containers: `docker compose up -d`
+8. Monitor the container logs to check for any errors: `docker compose logs (bot|backend|postgres|nginx)`
 
 ### Configuration
 
