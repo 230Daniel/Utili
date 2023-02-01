@@ -36,8 +36,9 @@ You will need a Linux machine which runs 24/7 (eg. a VPS), a domain or subdomain
 4. Change directory into the repository root: `cd Utili`
 5. Copy the example configuration files: `cp -r config-example config`
 6. Modify the files in the `config` folder as per the instructions in the Configuration section below.
-7. Start the containers: `docker compose up -d`
+7. Start the containers: `docker compose up -d`. It will probably take ages to build.
 8. Monitor the container logs to check for any errors: `docker compose logs (bot|backend|postgres|nginx)`
+9. Optionally run `docker system prune` to delete build caches and free up space. (Building will take ages still in subsequent runs).
 
 ### Configuration
 
