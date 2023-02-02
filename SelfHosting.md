@@ -124,6 +124,8 @@ Finally, something to do with my code!
 
 1. If something's not working, you can view the logs of a service with `docker compose logs (bot|backend|postgres|nginx)`.
 
-2. To restart or stop the services, you can use `docker compose restart` or `docker compose down`.
+2. To restart or stop the services, you can use `docker compose restart` or `docker compose down`. Start them again with `docker compose up -d`.
 
 3. Your SSL certificate will expire after 3 months. Simply run `./certificates.sh` again to renew the certificate. Alternatively, you can install Certbot properly on your virtual machine and have it renew the certificate automatically. Follow the instructions [here](https://certbot.eff.org/instructions?ws=other&os=debianbuster).
+
+4. If the code has changed, use `docker compose up -d --build` to rebuild the containers which have changed. Don't worry, this is significantly faster than the first docker up! Remote changes can be fetched with `git pull`.
