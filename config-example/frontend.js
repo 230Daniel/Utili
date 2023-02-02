@@ -1,4 +1,4 @@
 window.__config = {
-	backend: "https://example.com/api",
-	clientId: ""
+	backend: "https://{DOMAIN}/api",
+	clientId: "{CLIENT_ID}"
 };

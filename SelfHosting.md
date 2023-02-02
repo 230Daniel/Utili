@@ -13,6 +13,8 @@ The guide assumes that you are on a Windows machine, and that you will host Util
 
 2. [Provisioning and Configuring a Virtual Server](#provisioning-and-configuring-a-virtual-server)
 
+3. [Installing Docker](#installing-docker)
+
 
 ## Domain Name
 
@@ -52,7 +54,7 @@ The guide assumes that you are on a Windows machine, and that you will host Util
 
 6. Install sudo by running `apt update && apt install sudo -y`
 
-7. Create a new user by running `useradd -m utili -s /bin/bash`. You can change the username "utili" to anything you want. Add the new user to the sudoers group with `usermod -aG sudo utili`.
+7. Create a new user by running `useradd -m utili -s /bin/bash`. You can change the username "utili" to anything you want. If you are not prompted to create a password, create one with `passwd utili`. Add the new user to the sudoers group with `usermod -aG sudo utili`.
 
 8. On your PC, if you do not already have an SSH key, run `ssh-keygen; Get-Contents ~/.ssh/id_rsa.pub` in a PowerShell window to create one. Command prompt is not the same as PowerShell, this will not work in Command Prompt! Copy the public key which is printed, it starts with `ssh-rsa`, and ends with `rsa-key-00000000`.
 
@@ -69,3 +71,43 @@ PasswordAuthentication no
 ```
 
 12. Restart the SSH service with `systemctl restart sshd`. Confirm that you can still log in to the new user over SSH. Exit the old SSH terminal, and use the direct connection to the user account for the remainder of the setup.
+
+
+## Installing Docker
+
+1. Follow the instructions [here](https://docs.docker.com/engine/install/debian/#install-using-the-repository) to install Docker on your virtual server. Copy each command independently, copying several at once will not work.
+
+
+## Cloning Repository
+
+1. If you plan to make changes to the code, fork the [repository](https://github.com/230Daniel/Utili) on GitHub. In subsequent commands use your own repository's URL instead of mine.
+
+2. Clone the repository with `git clone https://github.com/230Daniel/Utili utili`. Move into the Utili directory with `cd utili`.
+
+
+## Domain Configuration and SSL Certificates
+
+1. Configure your domain so that it resolves to your virtual server's IPv4 address. Your domain provider should have instructions on how to do this. You can confirm that the domain is pointing to your server by accessing SSH via the domain, for example `ssh utili@example.com`. It can take a while for the domain to update, sometimes up to an hour.
+
+2. Run `chmod +x ./certificates.sh && ./certificates.sh` to start Certbot.
+
+3. Select option 1, "Spin up a temporary webserver (standalone)".
+
+4. Enter your email address so that you will receive alerts before the certificate expires.
+
+5. Accept the terms of service by entering Y.
+
+6. Decline marketing emails by entering N.
+
+7. Enter your domain name, for example `example.com` or `utili.example.com`.
+
+8. Confirm that the certificate was successfully obtained. If verification failed, check your domain and that the virtual machine is accessible on port 80.
+
+
+## Utili Configuration
+
+Finally, something to do with my code!
+
+1. Create a config folder by copying the example with `cp -r config-example config`.
+
+2. Move into the config directory with `cd config`.

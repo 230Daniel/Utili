@@ -1,11 +1,11 @@
 ﻿{
     "Discord": {
-        "Token": "",
-        "DefaultPrefix": ".",
-        "OwnerId": 0
+        "Token": "{TOKEN}",
+        "DefaultPrefix": "{DEFAULT_PREFIX}",
+        "OwnerId": "{OWNER_ID}"
     },
     "Services": {
-        "WebsiteDomain": "localhost:3000",
+        "WebsiteDomain": "{DOMAIN}",
         "HasteAddress": "https://haste.utili.xyz"
     },
     "Database": {

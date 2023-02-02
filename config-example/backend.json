@@ -7,13 +7,13 @@
         }
     },
     "Frontend": {
-        "Origin": "https://example.com"
+        "Origin": "https://{DOMAIN}"
     },
     "Discord": {
-        "ClientId": "",
-        "ClientSecret": "",
-        "Token": "",
-        "DefaultPrefix": "."
+        "ClientId": "{CLIENT_ID}",
+        "ClientSecret": "{CLIENT_SECRET}",
+        "Token": "{TOKEN}",
+        "DefaultPrefix": "{DEFAULT_PREFIX}"
     },
     "Database": {
         "Connection": "Server=postgres;Port=5432;Database=utili;UserId=utili;Password=password;"
