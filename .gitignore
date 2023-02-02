@@ -1,3 +1,5 @@
 /config/
 /postgresql-data/
 /aspnet-data/
+/bot-logs/
+/backend-logs/
