@@ -54,7 +54,7 @@ The guide assumes that you are on a Windows machine, and that you will host Util
 
 6. Install sudo by running `apt update && apt install sudo -y`
 
-7. Create a new user by running `useradd -m utili -s /bin/bash`. You can change the username "utili" to anything you want. If you are not prompted to create a password, create one with `passwd utili`. Add the new user to the sudoers group with `usermod -aG sudo utili`.
+7. Create a new user by running `useradd -m utili -s /bin/bash`. You can change the username "utili" to anything you want. If you are not prompted to create a password, create one with `passwd utili`. Add the new user to the sudoers and docker groups with `usermod -aG sudo utili && usermod -aG docker utili`.
 
 8. On your PC, if you do not already have an SSH key, run `ssh-keygen; Get-Contents ~/.ssh/id_rsa.pub` in a PowerShell window to create one. Command prompt is not the same as PowerShell, this will not work in Command Prompt! Copy the public key which is printed, it starts with `ssh-rsa`, and ends with `rsa-key-00000000`.
 
@@ -108,16 +108,14 @@ PasswordAuthentication no
 
 Finally, something to do with my code!
 
-1. Create a config folder by copying the example with `cp -r config-example config`.
-
-2. Run `./configure.sh` to start the configuration wizard.
+1. Run `./configure.sh` to start the configuration wizard.
 
 3. Input the details that the script requests, and enter y to confirm the values.
 
 
 ## It's go time!
 
-1. Run `sudo docker compose up -d` to start the build process. Depending on your hardware and internet connection, this step can take from a couple of minutes to an hour.
+1. Run `docker compose up -d` to start the build process. Depending on your hardware and internet connection, this step can take from a couple of minutes to an hour.
 
 2. Once the build has completed, all of Utili's services will start running automatically.
 
