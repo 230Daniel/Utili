@@ -47,7 +47,7 @@
             {
                 "Name": "File",
                 "Args": {
-                    "path": "Logs/log_.txt",
+                    "path": "logs/log_.txt",
                     "rollingInterval": "Day",
                     "restrictedToMinimumLevel": "Information",
                     "outputTemplate": "[{Timestamp:HH:mm:ss} {Level:u3}] {Message}{NewLine}{Exception}"
