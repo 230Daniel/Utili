@@ -7,19 +7,19 @@ The guide assumes that you are on a Windows machine, and that you will host Util
 
 ## Contents
 
-1. [Domain Name](#1-domain-name)
+1. [Domain Name](#domain-name)
 
-1. [Creating your Discord Application](#2-creating-your-discord-application)
+1. [Creating your Discord Application](#creating-your-discord-application)
 
-2. [Provisioning and Configuring a Virtual Server](#3-provisioning-and-configuring-a-virtual-server)
+2. [Provisioning and Configuring a Virtual Server](#provisioning-and-configuring-a-virtual-server)
 
 
-## 1 - Domain Name
+## Domain Name
 
 1. You need a domain name which the website will be accessible from. A subdomain will suffice, such as `utili.example.com`. Free domain names are available from some sites, but most require an annual subscription. You could also ask your nerdy friend nicely to see if they will lend you a subdomain, as these are free to create.
 
 
-## 2 - Creating your Discord Application
+## Creating your Discord Application
 
 1. Head over to https://discord.com/developers/applications and click "New Application". Enter a suitable name to create the application.
 
@@ -40,7 +40,7 @@ The guide assumes that you are on a Windows machine, and that you will host Util
 9. Click "Reset Token" and note down the token displayed.
 
 
-## 3 - Provisioning and Configuring a Virtual Server
+## Provisioning and Configuring a Virtual Server
 
 1. You need a Linux server to run Utili on. The easiest option is renting a virtual server from a cloud provider. Utili will run with 1 CPU core and 2GB of RAM. Expect to pay around £5 per month for this virtual server.
 
