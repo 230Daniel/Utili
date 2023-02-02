@@ -89,7 +89,7 @@ PasswordAuthentication no
 
 1. Configure your domain so that it resolves to your virtual server's IPv4 address. Your domain provider should have instructions on how to do this. You can confirm that the domain is pointing to your server by accessing SSH via the domain, for example `ssh utili@example.com`. It can take a while for the domain to update, sometimes up to an hour.
 
-2. Run `chmod +x ./certificates.sh && ./certificates.sh` to start Certbot.
+2. Run `./certificates.sh` to start Certbot.
 
 3. Select option 1, "Spin up a temporary webserver (standalone)".
 
@@ -110,4 +110,22 @@ Finally, something to do with my code!
 
 1. Create a config folder by copying the example with `cp -r config-example config`.
 
-2. Move into the config directory with `cd config`.
+2. Run `./configure.sh` to start the configuration wizard.
+
+3. Input the details that the script requests, and enter y to confirm the values.
+
+
+## It's go time!
+
+1. Run `sudo docker compose up -d` to start the build process. Depending on your hardware and internet connection, this step can take from a couple of minutes to an hour.
+
+2. Once the build has completed, all of Utili's services will start running automatically.
+
+
+## Monitoring and Maintainence
+
+1. If something's not working, you can view the logs of a service with `docker compose logs (bot|backend|postgres|nginx)`.
+
+2. To restart or stop the services, you can use `docker compose restart` or `docker compose down`.
+
+3. Your SSL certificate will expire after 3 months. Simply run `./certificates.sh` again to renew the certificate. Alternatively, you can install Certbot properly on your virtual machine and have it renew the certificate automatically. Follow the instructions [here](https://certbot.eff.org/instructions?ws=other&os=debianbuster).
