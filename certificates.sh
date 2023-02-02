@@ -18,5 +18,5 @@ sudo docker run -it --rm --name certbot \
 
 if [ $STATUS = "RUNNING" ]; then
     echo -e "\n\nRestarting nginx container now that Certbot is finished...\n\n"
-    docker compose start nginx > /dev/null
+    docker compose start nginx
 fi
