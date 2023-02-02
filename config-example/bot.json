@@ -22,6 +22,15 @@
                 "Args": {
                     "outputTemplate": "[{Timestamp:HH:mm:ss} {Level:u3} {SourceContext}] {Message}{NewLine}{Exception}"
                 }
+            },
+            {
+                "Name": "File",
+                "Args": {
+                    "path": "logs/log_.txt",
+                    "rollingInterval": "Day",
+                    "restrictedToMinimumLevel": "Information",
+                    "outputTemplate": "[{Timestamp:HH:mm:ss} {Level:u3} {SourceContext}] {Message}{NewLine}{Exception}"
+                }
             }
         ]
     }

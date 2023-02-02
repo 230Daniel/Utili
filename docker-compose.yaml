@@ -23,6 +23,7 @@ services:
             - 'postgres'
         volumes:
             - './config/bot.json:/app/appsettings.json:ro'
+            - './bot-logs:/app/logs'
         restart: always
         logging:
             driver: "local"
@@ -39,6 +40,7 @@ services:
         volumes:
             - './config/backend.json:/app/appsettings.json:ro'
             - './aspnet-data:/root/.aspnet'
+            - './backend-logs:/app/logs'
         restart: always
         logging:
             driver: "local"
