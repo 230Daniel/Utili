@@ -9,12 +9,21 @@ The guide assumes that you are on a Windows machine, and that you will host Util
 
 1. [Domain Name](#domain-name)
 
-1. [Creating your Discord Application](#creating-your-discord-application)
+2. [Creating your Discord Application](#creating-your-discord-application)
 
-2. [Provisioning and Configuring a Virtual Server](#provisioning-and-configuring-a-virtual-server)
+3. [Provisioning and Configuring a Virtual Server](#provisioning-and-configuring-a-virtual-server)
 
-3. [Installing Docker](#installing-docker)
+4. [Installing Docker](#installing-docker)
 
+5. [Cloning Repository](#cloning-repository)
+
+6. [Domain Configuration and SSL Certificates](#domain-configuration-and-ssl-certificates)
+
+7. [Utili Configuration](#utili-configuration)
+
+8. [It's go time!](#its-go-time)
+
+9. [Monitoring and Maintainance](#monitoring-and-maintainence)
 
 ## Domain Name
 
@@ -50,19 +59,27 @@ The guide assumes that you are on a Windows machine, and that you will host Util
 
 4. Once you have purchased your virtual server, your cloud provider will tell you its IPv4 address. Note this down as you will need it throughout the setup process.
 
-5. Connect to your server over SSH. Again, you cloud provider should provide a guide on how to do this. After this stage you should have remote terminal access to your virtual server.
+5. In a PowerShell window on your PC, run `ssh-keygen; Get-Content ~/.ssh/id_rsa.pub`. Command prompt is not the same as PowerShell, this will not work in Command Prompt! Note down the public key which is printed, it starts with `ssh-rsa`, and ends with `rsa-key-00000000`.
 
-6. Install sudo by running `apt update && apt install sudo -y`
+6. Connect to your server over SSH. Again, you cloud provider should provide a guide on how to do this. After this stage you should have remote terminal access to your virtual server. Eg. `ssh root@12.34.56.78` but with your server's IPv4 address.
 
-7. Create a new user by running `useradd -m utili -s /bin/bash`. You can change the username "utili" to anything you want. If you are not prompted to create a password, create one with `passwd utili`. Add the new user to the sudoers and docker groups with `usermod -aG sudo utili && usermod -aG docker utili`.
+7. Install sudo by running `apt update && apt install sudo -y`.
 
-8. On your PC, if you do not already have an SSH key, run `ssh-keygen; Get-Contents ~/.ssh/id_rsa.pub` in a PowerShell window to create one. Command prompt is not the same as PowerShell, this will not work in Command Prompt! Copy the public key which is printed, it starts with `ssh-rsa`, and ends with `rsa-key-00000000`.
+8. Create a new user by running `useradd -m utili -s /bin/bash && passwd -d utili`.
 
-9. On your virtual server, switch to the newly created user with `su utili`. Create the SSH configuration directory with `mkdir ~/.ssh`. Run `nano ~/.ssh/authorized_keys` to open a text editor. Paste your public key into this file, you might need to right-click or use CTRL+SHIFT+V instead of the usual CTRL+V. Exit the text editor with `CTRL+X`, `y`, then `Enter`.
+9. Add the new user to the sudoers and docker groups with `groupadd docker; usermod -aG sudo utili && usermod -aG docker utili`.
 
-10. On your PC, confirm that you can log into the new user over SSH. For example, `ssh utili@12.34.56.78`. This will not require a password, instead your computer will automatically authenticate using the key you generated earlier.
+10. Switch to the newly created user with `su utili`. Create the SSH configuration directory with `mkdir ~/.ssh`. 
 
-11. On your virtual server, return to the root user with `exit`. Open a text editor with `nano /etc/ssh/sshd_config`. Scroll down until you find the `PermitRootLogin` line. Remove the `#` at the start of the line, and change the value to `no`. Remove the `#` in front of `PubkeyAuthentication` and change its value to `yes`. Finally, remove the `#` in front of `PasswordAuthentication` and change its value to `no`. The changed lines should look like this once you have completed this step:
+11. Run `nano ~/.ssh/authorized_keys` to open a text editor. Paste the public key into this file, you created this in step 5. You might need to right-click or use `Ctrl+Shift+v` instead of the usual `Ctrl+v`. 
+
+12. Exit the text editor with `Ctrl+x`, `y`, then `Enter`.
+
+13. In a new PowerShell window on your PC, confirm that you can log into the new user over SSH. For example, `ssh utili@12.34.56.78` but with your server's IPv4 address. This will not require a password, instead your computer will automatically authenticate using the key you generated earlier.
+
+14. Back on your old SSH session, return to the root user with `exit`.
+
+15. Open a text editor with `nano /etc/ssh/sshd_config`. Scroll down until you find the `PermitRootLogin` line. Change the value to `no`. Remove the `#` in front of `PubkeyAuthentication` and make sure its value is `yes`. Finally, remove the `#` in front of `PasswordAuthentication` and change its value to `no`. The changed lines should look like this once you have completed this step:
 
 ```
 PermitRootLogin no
@@ -70,12 +87,26 @@ PubkeyAuthentication yes
 PasswordAuthentication no
 ```
 
-12. Restart the SSH service with `systemctl restart sshd`. Confirm that you can still log in to the new user over SSH. Exit the old SSH terminal, and use the direct connection to the user account for the remainder of the setup.
+16. Exit the text editor with `Ctrl+x`, `y`, then `Enter`.
+
+17. Restart the SSH service with `systemctl restart sshd`.
+
+18. Set a password for the new user. This can be something like "password" because the password cannot be used to log into the server. You will need to type it when executing some commands during the rest of the setup. `passwd utili`.
 
 
 ## Installing Docker
 
-1. Follow the instructions [here](https://docs.docker.com/engine/install/debian/#install-using-the-repository) to install Docker on your virtual server. Copy each command independently, copying several at once will not work.
+These instructions are copied from [here](https://docs.docker.com/engine/install/debian/#install-using-the-repository). If anything goes wrong, refer to the Docker documentation.
+
+1. Install prerequisites by running `sudo apt update && sudo apt install ca-certificates curl gnupg lsb-release`.
+
+2. Add Docker's key with `sudo mkdir -p /etc/apt/keyrings && curl -fsSL https://download.docker.com/linux/debian/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg`.
+
+3. Set up the Docker repository by running `echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null`.
+
+4. Install Docker Engine with `sudo apt update && sudo apt install docker-ce docker-ce-cli containerd.io docker-compose-plugin`.
+
+5. Make sure that Docker is working by running the Hello World image. `docker run --rm hello-world`.
 
 
 ## Cloning Repository
