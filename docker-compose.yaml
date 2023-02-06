@@ -67,8 +67,8 @@ services:
             context: './src/Hastebin/'
             dockerfile: 'Dockerfile'
         volumes:
-            - './hastebin-data:/data'
-        env:
+            - './hastebin-data:/usr/src/app/data'
+        environment:
             STORAGE_TYPE: 'file'
-            STORAGE_PATH: '/data'
+            STORAGE_PATH: 'data'
             STORAGE_EXPIRE_SECONDS: 2592000

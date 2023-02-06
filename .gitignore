@@ -1,5 +1,7 @@
+/src/Hastebin
 /config/
 /postgresql-data/
 /aspnet-data/
+/hastebin-data/
 /bot-logs/
 /backend-logs/
