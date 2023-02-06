@@ -60,3 +60,15 @@ services:
             - '443:443'
             - '80:80'
         restart: always
+
+    hastebin:
+        container_name: utili-hastebin
+        build:
+            context: './src/Hastebin/'
+            dockerfile: 'Dockerfile'
+        volumes:
+            - './hastebin-data:/data'
+        env:
+            STORAGE_TYPE: 'file'
+            STORAGE_PATH: '/data'
+            STORAGE_EXPIRE_SECONDS: 2592000

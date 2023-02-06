@@ -25,6 +25,7 @@ The guide assumes that you are on a Windows machine, and that you will host Util
 
 9. [Monitoring and Maintainance](#monitoring-and-maintainence)
 
+
 ## Domain Name
 
 1. You need a domain name which the website will be accessible from. A subdomain will suffice, such as `utili.example.com`. Free domain names are available from some sites, but most require an annual subscription. You could also ask your nerdy friend nicely to see if they will lend you a subdomain, as these are free to create.
@@ -46,7 +47,7 @@ The guide assumes that you are on a Windows machine, and that you will host Util
 
 7. On the Bot tab, click "Add Bot".
 
-8. Under the Priviliged Gateway Intents section, enable the Server Members Intent and Message Content Intent.
+8. Under the Priviliged Gateway Intents section, enable the Server Members Intent and the Message Content Intent.
 
 9. Click "Reset Token" and note down the token displayed.
 
@@ -63,7 +64,7 @@ The guide assumes that you are on a Windows machine, and that you will host Util
 
 6. Connect to your server over SSH. Again, you cloud provider should provide a guide on how to do this. After this stage you should have remote terminal access to your virtual server. Eg. `ssh root@12.34.56.78` but with your server's IPv4 address.
 
-7. Install sudo by running `apt update && apt install sudo -y`.
+7. Install sudo and git by running `apt update && apt install sudo git -y`.
 
 8. Create a new user by running `useradd -m utili -s /bin/bash && passwd -d utili`.
 
@@ -91,20 +92,18 @@ PasswordAuthentication no
 
 17. Restart the SSH service with `systemctl restart sshd`.
 
-18. Set a password for the new user. This can be something like "password" because the password cannot be used to log into the server. You will need to type it when executing some commands during the rest of the setup. `passwd utili`.
-
 
 ## Installing Docker
 
 These instructions are copied from [here](https://docs.docker.com/engine/install/debian/#install-using-the-repository). If anything goes wrong, refer to the Docker documentation.
 
-1. Install prerequisites by running `sudo apt update && sudo apt install ca-certificates curl gnupg lsb-release`.
+1. Install prerequisites by running `sudo apt update && sudo apt install ca-certificates curl gnupg lsb-release -y`.
 
 2. Add Docker's key with `sudo mkdir -p /etc/apt/keyrings && curl -fsSL https://download.docker.com/linux/debian/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg`.
 
 3. Set up the Docker repository by running `echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null`.
 
-4. Install Docker Engine with `sudo apt update && sudo apt install docker-ce docker-ce-cli containerd.io docker-compose-plugin`.
+4. Install Docker Engine with `sudo apt update && sudo apt install docker-ce docker-ce-cli containerd.io docker-compose-plugin -y`.
 
 5. Make sure that Docker is working by running the Hello World image. `docker run --rm hello-world`.
 
