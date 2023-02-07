@@ -6,7 +6,7 @@
     },
     "Services": {
         "WebsiteDomain": "{DOMAIN}",
-        "HasteAddress": "https://haste.utili.xyz"
+        "HasteAddress": "https://{DOMAIN}/hastebin"
     },
     "Database": {
         "Connection": "Server=postgres;Port=5432;Database=utili;UserId=utili;Password=password;"

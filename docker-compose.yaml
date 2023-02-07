@@ -71,4 +71,6 @@ services:
         environment:
             STORAGE_TYPE: 'file'
             STORAGE_PATH: 'data'
-            STORAGE_EXPIRE_SECONDS: 2592000
+            KEY_LENGTH: 32
+            KEYGENERATOR_TYPE: 'random'
+            KEYGENERATOR_KEYSPACE: 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
