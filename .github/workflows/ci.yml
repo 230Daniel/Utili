@@ -6,7 +6,7 @@ on:
 
 jobs:
 
-  build-bot:
+  build-frontend:
     runs-on: ubuntu-latest
     steps:
     -
@@ -26,6 +26,6 @@ jobs:
       name: Build and push
       uses: docker/build-push-action@v4
       with:
-        context: ./src
-        file: ./src/Utili.Bot/Dockerfile
-        tags: 230daniel/utili-bot:${{ steps.date.outputs.date }}
+        context: ./src/Frontend
+        file: ./Dockerfile
+        tags: 230daniel/utili-frontend:${{ steps.date.outputs.date }}
