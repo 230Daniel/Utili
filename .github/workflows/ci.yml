@@ -9,11 +9,11 @@ jobs:
   build-bot:
     runs-on: ubuntu-latest
     steps:
-    - 
+    -
       name: Get current date
       id: date
       run: echo "date=$(date +%s)" >> $GITHUB_OUTPUT
-    - 
+    -
       name: Debug
       run: echo ${{ steps.date.outputs.date }}
     -
@@ -28,5 +28,4 @@ jobs:
       with:
         context: ./src
         file: ./src/Utili.Bot/Dockerfile
-        push: true
         tags: 230daniel/utili-bot:${{ steps.date.outputs.date }}
