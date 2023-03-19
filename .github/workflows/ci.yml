@@ -26,15 +26,13 @@ jobs:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
     -
-      name: tree
-      run: ls -la
-    -
       name: Build and push
       uses: docker/build-push-action@v4
       with:
         context: ./src
         file: ./src/Utili.Bot/Dockerfile
         tags: 230daniel/utili-bot:${{ steps.date.outputs.date }}
+        push: true
 
   build-backend:
     runs-on: ubuntu-latest
@@ -56,15 +54,13 @@ jobs:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
     -
-      name: tree
-      run: ls -la
-    -
       name: Build and push
       uses: docker/build-push-action@v4
       with:
         context: ./src
         file: ./src/Utili.Backend/Dockerfile
         tags: 230daniel/utili-backend:${{ steps.date.outputs.date }}
+        push: true
 
   build-frontend:
     runs-on: ubuntu-latest
@@ -86,12 +82,10 @@ jobs:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
     -
-      name: tree
-      run: ls -la
-    -
       name: Build and push
       uses: docker/build-push-action@v4
       with:
         context: ./src/Frontend
         file: ./src/Frontend/Dockerfile
         tags: 230daniel/utili-frontend:${{ steps.date.outputs.date }}
+        push: true
