@@ -36,5 +36,5 @@ jobs:
       uses: docker/build-push-action@v4
       with:
         context: ./src/Frontend
-        file: ./Dockerfile
+        file: ./src/Frontend/Dockerfile
         tags: 230daniel/utili-frontend:${{ steps.date.outputs.date }}
