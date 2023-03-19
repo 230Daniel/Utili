@@ -11,16 +11,16 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Build the Utili Bot Docker image
-      working-directory: ./src/Utili.Bot
-      run: docker build . --file ./Dockerfile --tag utili-bot:$(date +%s)
+      working-directory: ./src
+      run: docker build . --file ./Utili.Bot/Dockerfile --tag utili-bot:$(date +%s)
 
   build-backend:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
     - name: Build the Utili Backend Docker image
-      working-directory: ./src/Utili.Backend
-      run: docker build . --file ./Dockerfile --tag utili-backend:$(date +%s)
+      working-directory: ./src
+      run: docker build . --file ./Utili.Backend/Dockerfile --tag utili-backend:$(date +%s)
   
   build-frontend:
     runs-on: ubuntu-latest
