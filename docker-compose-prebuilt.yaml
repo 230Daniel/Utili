@@ -57,9 +57,7 @@ services:
 
     hastebin:
         container_name: utili-hastebin
-        build:
-            context: './src/Hastebin/'
-            dockerfile: 'Dockerfile'
+        image: 230daniel/utili-hastebin
         volumes:
             - './hastebin-data:/usr/src/app/data'
         environment:

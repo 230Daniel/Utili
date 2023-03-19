@@ -13,10 +13,6 @@ jobs:
       name: Checkout
       uses: actions/checkout@v3
     -
-      name: Get current date
-      id: date
-      run: echo "date=$(date +%s)" >> $GITHUB_OUTPUT
-    -
       name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v2
     -
@@ -31,7 +27,7 @@ jobs:
       with:
         context: ./src
         file: ./src/Utili.Bot/Dockerfile
-        tags: 230daniel/utili-bot:${{ steps.date.outputs.date }}
+        tags: 230daniel/utili-bot:latest
         push: true
 
   build-backend:
@@ -40,10 +36,6 @@ jobs:
     -
       name: Checkout
       uses: actions/checkout@v3
-    -
-      name: Get current date
-      id: date
-      run: echo "date=$(date +%s)" >> $GITHUB_OUTPUT
     -
       name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v2
@@ -59,7 +51,7 @@ jobs:
       with:
         context: ./src
         file: ./src/Utili.Backend/Dockerfile
-        tags: 230daniel/utili-backend:${{ steps.date.outputs.date }}
+        tags: 230daniel/utili-backend:latest
         push: true
 
   build-frontend:
@@ -68,10 +60,6 @@ jobs:
     -
       name: Checkout
       uses: actions/checkout@v3
-    -
-      name: Get current date
-      id: date
-      run: echo "date=$(date +%s)" >> $GITHUB_OUTPUT
     -
       name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v2
@@ -87,7 +75,7 @@ jobs:
       with:
         context: ./src/Frontend
         file: ./src/Frontend/Dockerfile
-        tags: 230daniel/utili-frontend:${{ steps.date.outputs.date }}
+        tags: 230daniel/utili-frontend:latest
         push: true
 
   build-hastebin:
@@ -99,10 +87,6 @@ jobs:
     -
       name: Clone Hastebin
       run: git clone https://github.com/230Daniel/haste-server src/Hastebin
-    -
-      name: Get current date
-      id: date
-      run: echo "date=$(date +%s)" >> $GITHUB_OUTPUT
     -
       name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v2
@@ -118,5 +102,5 @@ jobs:
       with:
         context: ./src/Hastebin
         file: ./src/Hastebin/Dockerfile
-        tags: 230daniel/utili-hastebin:${{ steps.date.outputs.date }}
+        tags: 230daniel/utili-hastebin:latest
         push: true
