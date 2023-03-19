@@ -1,0 +1,30 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+
+  build-bot:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Build the Utili Bot Docker image
+      run: docker build . --file ./src/Utili.Bot/Dockerfile --tag utili-bot:$(date +%s)
+
+  build-backend:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Build the Utili Backend Docker image
+      run: docker build . --file ./src/Utili.Backend/Dockerfile --tag utili-bot:$(date +%s)
+  
+  build-frontend:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Build the Utili Frontend Docker image
+      run: docker build . --file ./src/Utili.Frontend/Dockerfile" --tag utili-frontend:$(date +%s)
