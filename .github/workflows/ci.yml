@@ -10,12 +10,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     -
+      name: Checkout
+      uses: actions/checkout@v3
+    -
       name: Get current date
       id: date
       run: echo "date=$(date +%s)" >> $GITHUB_OUTPUT
-    -
-      name: Debug
-      run: echo ${{ steps.date.outputs.date }}
     -
       name: Set up QEMU
       uses: docker/setup-qemu-action@v2
@@ -35,6 +35,6 @@ jobs:
       name: Build and push
       uses: docker/build-push-action@v4
       with:
-        context: .
-        file: ./src/Frontend/Dockerfile
+        context: ./src/Frontend
+        file: ./Dockerfile
         tags: 230daniel/utili-frontend:${{ steps.date.outputs.date }}
