@@ -11,18 +11,18 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Build the Utili Bot Docker image
-      run: docker build ./src/Utili.Bot --file ./Dockerfile --tag utili-bot:$(date +%s)
+      run: docker build ./src/Utili.Bot --file ./src/Utili.Bot/Dockerfile --tag utili-bot:$(date +%s)
 
   build-backend:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
     - name: Build the Utili Backend Docker image
-      run: docker build ./src/Utili.Backend --file ./Dockerfile --tag utili-backend:$(date +%s)
+      run: docker build ./src/Utili.Backend --file ./src/Utili.Backend/Dockerfile --tag utili-backend:$(date +%s)
   
   build-frontend:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
     - name: Build the Utili Frontend Docker image
-      run: docker build ./src/Frontend --file ./Dockerfile --tag utili-frontend:$(date +%s)
+      run: docker build ./src/Frontend --file ./src/Utili.Frontend/Dockerfile --tag utili-frontend:$(date +%s)
