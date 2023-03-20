@@ -43,7 +43,7 @@ services:
             options:
                 max-size: 50M
 
-    nginx:
+    frontend:
         container_name: utili-frontend
         image: 230daniel/utili-frontend
         volumes:

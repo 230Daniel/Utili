@@ -3,6 +3,9 @@ name: ci
 on:
   push:
     branches: [ "main" ]
+    commit-ignore:
+    - [skip ci]
+    - [ci skip]
 
 jobs:
 

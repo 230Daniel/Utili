@@ -47,8 +47,8 @@ services:
             options:
                 max-size: 50M
 
-    nginx:
-        container_name: utili-nginx
+    frontend:
+        container_name: utili-frontend
         build:
             context: './src/Frontend/'
             dockerfile: 'Dockerfile'
