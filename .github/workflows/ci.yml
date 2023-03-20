@@ -27,6 +27,7 @@ jobs:
       with:
         context: ./src
         file: ./src/Utili.Bot/Dockerfile
+        platforms: linux/amd64,linux/arm64
         tags: 230daniel/utili-bot:latest
         push: true
 
@@ -51,6 +52,7 @@ jobs:
       with:
         context: ./src
         file: ./src/Utili.Backend/Dockerfile
+        platforms: linux/amd64,linux/arm64
         tags: 230daniel/utili-backend:latest
         push: true
 
@@ -75,6 +77,7 @@ jobs:
       with:
         context: ./src/Frontend
         file: ./src/Frontend/Dockerfile
+        platforms: linux/amd64,linux/arm64
         tags: 230daniel/utili-frontend:latest
         push: true
 
@@ -102,5 +105,6 @@ jobs:
       with:
         context: ./src/Hastebin
         file: ./src/Hastebin/Dockerfile
+        platforms: linux/amd64,linux/arm64
         tags: 230daniel/utili-hastebin:latest
         push: true
