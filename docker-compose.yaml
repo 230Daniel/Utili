@@ -61,16 +61,30 @@ services:
             - '80:80'
         restart: always
 
+    hastebin_postgres:
+        container_name: utili-hastebin-postgres
+        image: postgres
+        volumes:
+            - './hastebin-postgresql-data:/var/lib/postgresql/data'
+        restart: always
+        environment:
+            POSTGRES_USER: hastebin
+            POSTGRES_PASSWORD: password
+            POSTGRES_DB: hastebin
+
     hastebin:
         container_name: utili-hastebin
         build:
             context: './src/Hastebin/'
             dockerfile: 'Dockerfile'
+        depends_on:
+            - 'hastebin_postgres'
         volumes:
             - './hastebin-data:/usr/src/app/data'
         environment:
-            STORAGE_TYPE: 'file'
-            STORAGE_PATH: 'data'
+            STORAGE_TYPE: 'postgres'
+            DATABASE_URL: 'postgres://hastebin:password@hastebin_postgres:5432/hastebin'
             KEY_LENGTH: 32
             KEYGENERATOR_TYPE: 'random'
             KEYGENERATOR_KEYSPACE: 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+            STORAGE_EXPIRE_SECONDS: 2592000
