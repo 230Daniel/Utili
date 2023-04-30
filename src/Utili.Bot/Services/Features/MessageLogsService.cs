@@ -1,18 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Timers;
 using Disqord;
 using Disqord.Gateway;
 using Disqord.Rest;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Utili.Database.Entities;
 using Utili.Database.Extensions;
 using Utili.Bot.Extensions;
+using Utili.Database;
 
 namespace Utili.Bot.Services;
 
@@ -21,7 +22,7 @@ public class MessageLogsService
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly ILogger<MessageLogsService> _logger;
     private readonly UtiliDiscordBot _bot;
-    private readonly HasteService _haste;
+    private readonly IConfiguration _config;
     private readonly IsPremiumService _isPremiumService;
 
     private readonly Timer _timer;
@@ -30,13 +31,13 @@ public class MessageLogsService
         IServiceScopeFactory scopeFactory,
         ILogger<MessageLogsService> logger,
         UtiliDiscordBot bot,
-        HasteService haste,
+        IConfiguration config,
         IsPremiumService isPremiumService)
     {
         _scopeFactory = scopeFactory;
         _logger = logger;
         _bot = bot;
-        _haste = haste;
+        _config = config;
         _isPremiumService = isPremiumService;
 
         _timer = new Timer(60000);
@@ -174,7 +175,7 @@ public class MessageLogsService
             var messageIds = e.MessageIds.Select(x => x.RawValue);
             var messages = await db.MessageLogsMessages.Where(x => messageIds.Contains(x.MessageId)).ToListAsync();
 
-            var embed = await GetBulkDeletedEmbedAsync(messages, e.MessageIds.Count, channel);
+            var embed = await GetBulkDeletedEmbedAsync(messages, e.MessageIds.Count, channel, db);
 
             if (messages.Any())
             {
@@ -235,7 +236,7 @@ public class MessageLogsService
         return embed;
     }
 
-    private async Task<LocalEmbed> GetBulkDeletedEmbedAsync(List<MessageLogsMessage> messageRecords, int count, IMessageGuildChannel channel)
+    private async Task<LocalEmbed> GetBulkDeletedEmbedAsync(List<MessageLogsMessage> messageRecords, int count, IMessageGuildChannel channel, DatabaseContext db)
     {
         if (messageRecords.Count == 0)
         {
@@ -246,57 +247,46 @@ public class MessageLogsService
                 .WithAuthor("Bulk Deletion");
         }
 
-        var paste = await PasteMessagesAsync(messageRecords, count);
+        var messages = new List<string>();
 
-        var link = paste is not null
-            ? $"[View {messageRecords.Count} logged message{(messageRecords.Count == 1 ? "" : "s")}]({paste})"
-            : "Exception thrown uploading messages to Haste server";
+        var cachedUsers = new Dictionary<Snowflake, IUser>();
+        foreach (var messageRecord in messageRecords)
+        {
+            if (!cachedUsers.TryGetValue(messageRecord.AuthorId, out var user))
+            {
+                user = _bot.GetUser(messageRecord.AuthorId) as IUser ?? await _bot.FetchUserAsync(messageRecord.AuthorId);
+                cachedUsers.Add(messageRecord.AuthorId, user);
+                await Task.Delay(500);
+            }
+
+            var username = user is null
+                ? $"Unknown member ({messageRecord.AuthorId})"
+                : $"{user} ({messageRecord.AuthorId})";
+            var timestamp = $"{messageRecord.Timestamp.ToUniversalFormat()} UTC";
+            var message = $"{username}\n at {timestamp}\n    {messageRecord.Content.Replace("\n", "\n    ")}";
+
+            messages.Add(message);
+        }
+
+        var entry = new MessageLogsBulkDeletedMessages()
+        {
+            Timestamp = DateTime.UtcNow,
+            MessagesDeleted = count,
+            MessagesLogged = messageRecords.Count,
+            Messages = messages.ToArray()
+        };
+
+        db.MessageLogsBulkDeletedMessages.Add(entry);
+        await db.SaveChangesAsync();
+
+        var domain = _config.GetValue<string>("Services:WebsiteDomain");
+        var link = $"https://{domain}/message-logs/{entry.Id}";
 
         return new LocalEmbed()
             .WithColor(new Color(245, 66, 66))
             .WithDescription($"**{count} messages bulk deleted in {Mention.Channel(messageRecords[0].ChannelId)}**\n" +
-                             link)
+                             $"View {entry.MessagesLogged} logged message{(entry.MessagesLogged == 1 ? "" : "s")}]({link})")
             .WithAuthor("Bulk Deletion");
-    }
-
-    private async Task<string> PasteMessagesAsync(List<MessageLogsMessage> messages, int count)
-    {
-        try
-        {
-            var sb = new StringBuilder();
-
-            sb.AppendLine($"Logged {messages.Count} of {count} deleted messages");
-            sb.AppendLine();
-            sb.AppendLine();
-
-            var cachedUsers = new Dictionary<Snowflake, IUser>();
-
-            foreach (var message in messages)
-            {
-                if (!cachedUsers.TryGetValue(message.AuthorId, out var user))
-                {
-                    user = _bot.GetUser(message.AuthorId) as IUser ?? await _bot.FetchUserAsync(message.AuthorId);
-                    cachedUsers.Add(message.AuthorId, user);
-                    await Task.Delay(500);
-                }
-
-                if (user is null) sb.AppendLine($"Unknown member ({user.Id})");
-                else sb.AppendLine($"{user} ({user.Id})");
-                sb.AppendLine($" at {message.Timestamp.ToUniversalFormat()} UTC");
-
-                var messageContent = "    " + message.Content.Replace("\n", "\n    ");
-
-                sb.AppendLine($"{messageContent}\n");
-            }
-
-            var content = sb.ToString().TrimEnd('\r', '\n');
-            return await _haste.PasteAsync(content, "txt");
-        }
-        catch (Exception e)
-        {
-            _logger.LogError(e, "Exception thrown uploading messages to Haste server");
-            return null;
-        }
     }
 
     private async Task Delete30DayMessagesAsync()
@@ -308,6 +298,7 @@ public class MessageLogsService
 
             var minTimestamp = DateTime.UtcNow - TimeSpan.FromDays(30);
             await db.Database.ExecuteSqlInterpolatedAsync($"DELETE FROM message_logs_messages WHERE timestamp < {minTimestamp};");
+            await db.Database.ExecuteSqlInterpolatedAsync($"DELETE FROM message_logs_bulk_deleted_messages WHERE timestamp < {minTimestamp};");
         }
         catch (Exception ex)
         {

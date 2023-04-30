@@ -13,6 +13,11 @@ public class AutoMapperProfile : Profile
         MapDiscordModels();
         MapDashboardModels();
         MapPremiumModels();
+
+        CreateMap<MessageLogsBulkDeletedMessages, MessageLogsBulkDeletedMessagesModel>()
+            .ForMember(
+                dest => dest.Timestamp,
+                opt => opt.MapFrom(s => XmlConvert.ToString(s.Timestamp, XmlDateTimeSerializationMode.Utc)));
     }
 
     private void MapDiscordModels()

@@ -11,6 +11,7 @@ import CustomerPortal from "./pages/premium/customerportal";
 import Checkout from "./pages/premium/checkout";
 import Contact from "./pages/contact";
 import DashboardLayout from "./pages/dashboard/_layout";
+import MessageLogs from "./pages/messagelogs";
 import Document from "./pages/document";
 
 import DashboardIndex from "./pages/dashboard/index";
@@ -46,6 +47,7 @@ if (window.__config.enablePremium) {
 								<Route exact path="/premium/thankyou" component={PremiumThankYou} />
 								<Route exact path="/premium/customerportal" component={CustomerPortal} />
 								<Route exact path="/premium/checkout/:currency/:slots" component={Checkout} />
+								<Route exact path="/message-logs/:id" component={MessageLogs} />
 								<Route path="/:document" component={Document} />
 							</Switch>
 						</Layout>
@@ -74,6 +76,7 @@ else {
 								<Route exact path="/return/" component={Return} />
 								<Route exact path="/invite/" component={Invite} />
 								<Route exact path="/invite/:guildId" component={Invite} />
+								<Route exact path="/message-logs/:id" component={MessageLogs} />
 								<Route path="/:document" component={Document} />
 							</Switch>
 						</Layout>

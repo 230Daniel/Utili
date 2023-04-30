@@ -33,8 +33,14 @@ internal static class Program
                 bot.ReadyEventDelayMode = ReadyEventDelayMode.Guilds;
                 bot.Intents |= GatewayIntents.Members;
                 bot.Intents |= GatewayIntents.VoiceStates;
-                bot.Activities = new[] { new LocalActivity($"{context.Configuration.GetValue<string>("Services:WebsiteDomain")} | Starting up...", ActivityType.Playing) };
-                bot.OwnerIds = new[] { new Snowflake(context.Configuration.GetValue<ulong>("Discord:OwnerId")) };
+                bot.Activities = new[]
+                {
+                    new LocalActivity($"{context.Configuration.GetValue<string>("Services:WebsiteDomain")} | Starting up...", ActivityType.Playing)
+                };
+                bot.OwnerIds = new[]
+                {
+                    new Snowflake(context.Configuration.GetValue<ulong>("Discord:OwnerId"))
+                };
             })
             .Build();
 
@@ -78,7 +84,6 @@ internal static class Program
         services.AddPrefixProvider<PrefixProvider>();
 
         services.AddSingleton<MemberCacheService>();
-        services.AddSingleton<HasteService>();
         services.AddSingleton<CommunityService>();
         services.AddSingleton<GuildCountService>();
         services.AddSingleton<WebhookService>();
