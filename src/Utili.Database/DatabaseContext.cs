@@ -18,6 +18,7 @@ public class DatabaseContext : DbContext
     public DbSet<JoinRolesConfiguration> JoinRolesConfigurations { get; internal set; }
     public DbSet<JoinRolesPendingMember> JoinRolesPendingMembers { get; internal set; }
     public DbSet<MessageFilterConfiguration> MessageFilterConfigurations { get; internal set; }
+    public DbSet<MessageLogsBulkDeletedMessages> MessageLogsBulkDeletedMessages { get; internal set; }
     public DbSet<MessageLogsConfiguration> MessageLogsConfigurations { get; internal set; }
     public DbSet<MessageLogsMessage> MessageLogsMessages { get; internal set; }
     public DbSet<MessagePinningConfiguration> MessagePinningConfigurations { get; internal set; }
@@ -50,6 +51,7 @@ public class DatabaseContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.ConfigureGuidEntities();
         modelBuilder.ConfigureGuildEntities();
         modelBuilder.ConfigureGuildChannelEntities();
         modelBuilder.ConfigureMemberEntities();

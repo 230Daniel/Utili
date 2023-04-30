@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
@@ -9,6 +10,11 @@ namespace Utili.Database.Extensions;
 
 public static class DbSetExtensions
 {
+    public static Task<T> GetForGuidAsync<T>(this DbSet<T> dbSet, Guid id) where T : GuidEntity
+    {
+        return dbSet.FirstOrDefaultAsync(x => x.Id == id);
+    }
+
     public static Task<T> GetForGuildAsync<T>(this DbSet<T> dbSet, ulong guildId) where T : GuildEntity
     {
         return dbSet.FirstOrDefaultAsync(x => x.GuildId == guildId);

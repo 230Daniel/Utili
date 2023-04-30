@@ -8,6 +8,18 @@ namespace Utili.Database.Extensions;
 
 internal static class ModelBuilderExtensions
 {
+    public static void ConfigureGuidEntities(this ModelBuilder modelBuilder)
+    {
+        var types = Assembly.GetExecutingAssembly().GetTypes()
+            .Where(x => x.IsAssignableTo(typeof(GuidEntity)) && !x.IsEquivalentTo(typeof(GuidEntity)));
+
+        foreach (var type in types)
+        {
+            modelBuilder.Entity(type).HasKey("Id");
+            modelBuilder.Entity(type).Property("Id").ValueGeneratedOnAdd();
+        }
+    }
+
     public static void ConfigureGuildEntities(this ModelBuilder modelBuilder)
     {
         var types = Assembly.GetExecutingAssembly().GetTypes()
