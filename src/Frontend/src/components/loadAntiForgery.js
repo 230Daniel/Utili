@@ -45,7 +45,7 @@ export default class LoadAntiForgery extends React.Component {
 
 			await setAntiForgeryToken();
 
-			window.stripe = process.env.NODE_ENV == "production"
+			window.stripe = window.__config.stripeTestMode
 				? await loadStripe("pk_live_51Hcvk4B8DUEVWcSDwjMf0bvWv4NiSZizxfj495VdwB3UvqPZCNYt30781RdZ4tG8QnylVc98ywuj7k13wAec6cCq00I21LkJCn")
 				: await loadStripe("pk_test_51Hcvk4B8DUEVWcSDhAutXkeJErW0lmmZvTahVkIxQij2cNun9JXuh3FfIt2QXlOQVO519maTYUn8V0tcT4fnuvMH000mz5kD2V");
 

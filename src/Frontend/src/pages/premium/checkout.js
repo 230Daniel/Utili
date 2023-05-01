@@ -28,7 +28,7 @@ class CustomerPortal extends React.Component {
 	}
 
 	getPriceId(currency, slots) {
-		if (window.__config.testPriceIds) {
+		if (window.__config.stripeTestMode) {
 			switch (slots) {
 				case 1:
 					if (currency === "gbp") return "price_1I0bUCB8DUEVWcSDYIEsUvWA";
