@@ -46,7 +46,7 @@ class Document extends React.Component {
 	}
 
 	render() {
-		if (this.state.notFound) {
+		if (this.state.notFound || !window.__config.officialInstance) {
 			return notFound();
 		}
 		if (this.state.markdown === '') {

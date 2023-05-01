@@ -28,13 +28,18 @@ class Contact extends React.Component {
 						<div style={{ fontSize: "16px" }}>
 							<p>The fastest way to contact us is by joining our <a href="https://discord.gg/WsxqABZ" className="link">Discord server</a>.</p>
 						</div>
-						<Divider top="30" bottom="30">Email</Divider>
-						<div style={{ fontSize: "16px" }}>
-							<p>Alternatively, contact us by email:</p>
-							<ul>
-								<li>All inquiries - <a className="link" href="mailto:daniel.baynton@hotmail.com">daniel.baynton@hotmail.com</a></li>
-							</ul>
-						</div>
+						{window.__config.officialInstance &&
+							<>
+								<Divider top="30" bottom="30">Email</Divider>
+								<div style={{ fontSize: "16px" }}>
+									<p>Alternatively, contact us by email:</p>
+									<ul>
+										<li>All inquiries - <a className="link" href="mailto:daniel.baynton@hotmail.com">daniel.baynton@hotmail.com</a></li>
+									</ul>
+								</div>
+							</>
+						}
+
 					</Fade>
 				</div>
 
