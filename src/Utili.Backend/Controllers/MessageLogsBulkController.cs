@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Utili.Backend.Models;
 using Utili.Database;
-using Utili.Database.Extensions;
 
 namespace Utili.Backend.Controllers;
 
