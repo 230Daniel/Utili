@@ -286,7 +286,7 @@ public class MessageLogsService
         return new LocalEmbed()
             .WithColor(new Color(245, 66, 66))
             .WithDescription($"**{count} messages bulk deleted in {Mention.Channel(messageRecords[0].ChannelId)}**\n" +
-                             $"View {entry.MessagesLogged} logged message{(entry.MessagesLogged == 1 ? "" : "s")}]({link})")
+                             $"[View {entry.MessagesLogged} logged message{(entry.MessagesLogged == 1 ? "" : "s")}]({link})")
             .WithAuthor("Bulk Deletion");
     }
 
