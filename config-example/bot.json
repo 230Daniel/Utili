@@ -5,8 +5,7 @@
         "OwnerId": "{OWNER_ID}"
     },
     "Services": {
-        "WebsiteDomain": "{DOMAIN}",
-        "HasteAddress": "https://{DOMAIN}/hastebin"
+        "WebsiteDomain": "{DOMAIN}"
     },
     "Database": {
         "Connection": "Server=postgres;Port=5432;Database=utili;UserId=utili;Password=password;"
