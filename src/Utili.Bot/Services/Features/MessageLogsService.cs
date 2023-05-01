@@ -250,7 +250,7 @@ public class MessageLogsService
         var messages = new List<MessageLogsBulkDeletedMessage>();
 
         var cachedUsers = new Dictionary<Snowflake, IUser>();
-        foreach (var messageRecord in messageRecords)
+        foreach (var messageRecord in messageRecords.OrderBy(x => x.Timestamp))
         {
             if (!cachedUsers.TryGetValue(messageRecord.AuthorId, out var user))
             {
