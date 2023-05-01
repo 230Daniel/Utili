@@ -145,9 +145,21 @@ Finally, something to do with my code!
 
 ## It's go time!
 
+### Running with pre-built containers
+
+This is the recommended method if you won't be making changes to the source code.
+
+1. Run `./update.sh` to download and run the pre-built containers from Docker Hub.
+
+2. To update when a new version of Utili is released, run `./update.sh` again.
+
+### Building and running containers from source
+
+This method builds the containers from source, allowing you to customise the bot.
+
 1. Run `docker compose up -d` to start the build process. Depending on your hardware and internet connection, this step can take from a couple of minutes to an hour.
 
-2. Once the build has completed, all of Utili's services will start running automatically.
+2. To update when a new version of Utili is released, run `git pull` to update the source code, and then run `docker compose up -d --build` to re-build the containers which have changed.
 
 
 ## Monitoring and Maintainence
@@ -158,4 +170,3 @@ Finally, something to do with my code!
 
 3. Your SSL certificate will expire after 3 months. Simply run `./certificates.sh` again to renew the certificate. Alternatively, you can install Certbot properly on your virtual machine and have it renew the certificate automatically. Follow the instructions [here](https://certbot.eff.org/instructions?ws=other&os=debianbuster).
 
-4. If the code has changed, use `docker compose up -d --build` to rebuild the containers which have changed. Don't worry, this is significantly faster than the first docker up! Remote changes can be fetched with `git pull`.
