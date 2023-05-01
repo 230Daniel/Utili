@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Utili.Backend.Models;
 using Utili.Database;
 using Utili.Database.Extensions;
@@ -27,7 +28,10 @@ public class MessageLogsBulkController : Controller
         if (!Guid.TryParse(id, out var guid))
             return NotFound();
 
-        var entry = await _dbContext.MessageLogsBulkDeletedMessages.GetForGuidAsync(guid);
+        var entry = await _dbContext.MessageLogsBulkDeletedMessages
+            .Include(x => x.Messages)
+            .FirstAsync(x => x.Id == guid);
+
         return entry is null
             ? NotFound()
             : Json(_mapper.Map<MessageLogsBulkDeletedMessagesModel>(entry));

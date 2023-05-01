@@ -17,7 +17,12 @@ public class AutoMapperProfile : Profile
         CreateMap<MessageLogsBulkDeletedMessages, MessageLogsBulkDeletedMessagesModel>()
             .ForMember(
                 dest => dest.Timestamp,
-                opt => opt.MapFrom(s => XmlConvert.ToString(s.Timestamp, XmlDateTimeSerializationMode.Utc)));
+                opt => opt.MapFrom(s => $"{s.Timestamp.ToLongDateString()} at {s.Timestamp.ToLongTimeString()}"));
+
+        CreateMap<MessageLogsBulkDeletedMessage, MessageLogsBulkDeletedMessageModel>()
+            .ForMember(
+                dest => dest.Timestamp,
+                opt => opt.MapFrom(s => $"{s.Timestamp.ToLongDateString()} at {s.Timestamp.ToLongTimeString()}"));
     }
 
     private void MapDiscordModels()

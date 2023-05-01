@@ -247,7 +247,7 @@ public class MessageLogsService
                 .WithAuthor("Bulk Deletion");
         }
 
-        var messages = new List<string>();
+        var messages = new List<MessageLogsBulkDeletedMessage>();
 
         var cachedUsers = new Dictionary<Snowflake, IUser>();
         foreach (var messageRecord in messageRecords)
@@ -259,13 +259,14 @@ public class MessageLogsService
                 await Task.Delay(500);
             }
 
-            var username = user is null
-                ? $"Unknown member ({messageRecord.AuthorId})"
-                : $"{user} ({messageRecord.AuthorId})";
-            var timestamp = $"{messageRecord.Timestamp.ToUniversalFormat()} UTC";
-            var message = $"{username}\n at {timestamp}\n    {messageRecord.Content.Replace("\n", "\n    ")}";
-
-            messages.Add(message);
+            messages.Add(new MessageLogsBulkDeletedMessage(messageRecord.MessageId)
+            {
+                Username = user is null
+                    ? messageRecord.AuthorId.ToString()
+                    : user.ToString(),
+                Timestamp = messageRecord.Timestamp,
+                Content = messageRecord.Content
+            });
         }
 
         var entry = new MessageLogsBulkDeletedMessages()
@@ -273,7 +274,7 @@ public class MessageLogsService
             Timestamp = DateTime.UtcNow,
             MessagesDeleted = count,
             MessagesLogged = messageRecords.Count,
-            Messages = messages.ToArray()
+            Messages = messages
         };
 
         db.MessageLogsBulkDeletedMessages.Add(entry);
