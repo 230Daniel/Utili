@@ -29,7 +29,7 @@ public class MessageLogsBulkController : Controller
 
         var entry = await _dbContext.MessageLogsBulkDeletedMessages
             .Include(x => x.Messages)
-            .FirstAsync(x => x.Id == guid);
+            .FirstOrDefaultAsync(x => x.Id == guid);
 
         return entry is null
             ? NotFound()
