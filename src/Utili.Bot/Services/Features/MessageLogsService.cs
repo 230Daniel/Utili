@@ -299,7 +299,15 @@ public class MessageLogsService
 
             var minTimestamp = DateTime.UtcNow - TimeSpan.FromDays(30);
             await db.Database.ExecuteSqlInterpolatedAsync($"DELETE FROM message_logs_messages WHERE timestamp < {minTimestamp};");
-            await db.Database.ExecuteSqlInterpolatedAsync($"DELETE FROM message_logs_bulk_deleted_messages WHERE timestamp < {minTimestamp};");
+
+            var oldBulkDeletes = await db.MessageLogsBulkDeletedMessages
+                .Where(x => x.Timestamp < minTimestamp)
+                .Include(x => x.Messages)
+                .ToListAsync();
+            db.MessageLogsBulkDeletedMessages.RemoveRange(oldBulkDeletes);
+            await db.SaveChangesAsync();
+
+            await db.Database.ExecuteSqlRawAsync("DELETE FROM message_logs_bulk_deleted_message WHERE message_logs_bulk_deleted_messages_id is null;");
         }
         catch (Exception ex)
         {
