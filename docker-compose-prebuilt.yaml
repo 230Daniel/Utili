@@ -54,15 +54,3 @@ services:
             - '443:443'
             - '80:80'
         restart: always
-
-    hastebin:
-        container_name: utili-hastebin
-        image: 230daniel/utili-hastebin
-        volumes:
-            - './hastebin-data:/usr/src/app/data'
-        environment:
-            STORAGE_TYPE: 'file'
-            STORAGE_PATH: 'data'
-            KEY_LENGTH: 32
-            KEYGENERATOR_TYPE: 'random'
-            KEYGENERATOR_KEYSPACE: 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'

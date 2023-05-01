@@ -134,11 +134,6 @@ These instructions are copied from [here](https://docs.docker.com/engine/install
 8. Confirm that the certificate was successfully obtained. If verification failed, check your domain and that the virtual machine is accessible on port 80.
 
 
-## Hastebin
-
-1. Download and configure the Hastebin server by running `./hastebin.sh`
-
-
 ## Utili Configuration
 
 Finally, something to do with my code!
