@@ -46,6 +46,8 @@ services:
     frontend:
         container_name: utili-frontend
         image: 230daniel/utili-frontend
+        depends_on:
+            - 'backend'
         volumes:
             - './config/frontend.js:/build/config.js:ro'
             - './config/nginx.conf:/etc/nginx/nginx.conf:ro'
