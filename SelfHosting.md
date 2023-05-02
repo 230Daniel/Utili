@@ -107,12 +107,16 @@ These instructions are copied from [here](https://docs.docker.com/engine/install
 
 5. Make sure that Docker is working by running the Hello World image. `docker run --rm hello-world`.
 
+6. Close this SSH session, you won't need it anymore.
+
 
 ## Cloning Repository
 
 1. If you plan to make changes to the code, fork the [repository](https://github.com/230Daniel/Utili) on GitHub. In subsequent commands use your own repository's URL instead of mine.
 
-2. Clone the repository with `git clone https://github.com/230Daniel/Utili utili`. Move into the Utili directory with `cd utili`.
+2. Connect to your virtual server over SSH using the `utili` username. Eg. `ssh utili@12.34.56.78`.
+
+3. Clone the repository with `git clone https://github.com/230Daniel/Utili utili`. Move into the Utili directory with `cd utili`.
 
 
 ## Domain Configuration and SSL Certificates
@@ -170,3 +174,4 @@ This method builds the containers from source, allowing you to customise the bot
 
 3. Your SSL certificate will expire after 3 months. Simply run `./certificates.sh` again to renew the certificate. Alternatively, you can install Certbot properly on your virtual machine and have it renew the certificate automatically. Follow the instructions [here](https://certbot.eff.org/instructions?ws=other&os=debianbuster).
 
+4. To create a backup of your database, run `docker compose -f ~/utili/docker-compose-prebuilt.yaml exec postgres pg_dump -U utili utili > data.bak`. Note that if utili isn't in your home folder, you'll need to change the path to point to your `docker-compose-prebuilt.yaml` file. To restore this backup, see [ImportPostgresData.md](./ImportPostgresData.md).

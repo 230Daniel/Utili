@@ -8,7 +8,7 @@ services:
         image: postgres
         volumes:
             - './postgresql-data:/var/lib/postgresql/data'
-        restart: always
+        restart: unless-stopped
         environment:
             POSTGRES_USER: utili
             POSTGRES_PASSWORD: password
@@ -24,7 +24,7 @@ services:
         volumes:
             - './config/bot.json:/app/appsettings.json:ro'
             - './bot-logs:/app/logs'
-        restart: always
+        restart: unless-stopped
         logging:
             driver: "local"
             options:
@@ -41,7 +41,7 @@ services:
             - './config/backend.json:/app/appsettings.json:ro'
             - './aspnet-data:/root/.aspnet'
             - './backend-logs:/app/logs'
-        restart: always
+        restart: unless-stopped
         logging:
             driver: "local"
             options:
@@ -59,15 +59,4 @@ services:
         ports:
             - '443:443'
             - '80:80'
-        restart: always
-
-    hastebin_postgres:
-        container_name: utili-hastebin-postgres
-        image: postgres
-        volumes:
-            - './hastebin-postgresql-data:/var/lib/postgresql/data'
-        restart: always
-        environment:
-            POSTGRES_USER: hastebin
-            POSTGRES_PASSWORD: password
-            POSTGRES_DB: hastebin
+        restart: unless-stopped
