@@ -3,11 +3,11 @@
 # Interactive script to create or renew SSL certificates.
 
 STATUS="STOPPED"
-docker container inspect utili-nginx > /dev/null && STATUS="RUNNING"
+docker container inspect utili-frontend > /dev/null && STATUS="RUNNING"
 
 if [ $STATUS = "RUNNING" ]; then
-    echo -e "\n\nStopping nginx container while Certbot needs port 80...\n\n"
-    docker compose stop nginx
+    echo -e "\n\nStopping frontend container while Certbot needs port 80...\n\n"
+    docker compose stop frontend
 fi
 
 sudo docker run -it --rm --name certbot \
@@ -17,6 +17,6 @@ sudo docker run -it --rm --name certbot \
     certbot/certbot certonly
 
 if [ $STATUS = "RUNNING" ]; then
-    echo -e "\n\nRestarting nginx container now that Certbot is finished...\n\n"
-    docker compose start nginx
+    echo -e "\n\nRestarting frontend container now that Certbot is finished...\n\n"
+    docker compose start frontend
 fi

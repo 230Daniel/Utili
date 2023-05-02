@@ -168,7 +168,7 @@ This method builds the containers from source, allowing you to customise the bot
 
 ## Monitoring and Maintainence
 
-1. If something's not working, you can view the logs of a service with `docker compose logs (bot|backend|postgres|nginx)`.
+1. If something's not working, you can view the logs of a service with `docker compose logs [service]` where `[service]` is one of `bot`, `backend`, `frontend`, or `postgres`.
 
 2. To restart or stop the services, you can use `docker compose restart` or `docker compose stop`. Start them again with `docker compose start -d`.
 
