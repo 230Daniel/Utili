@@ -36,7 +36,7 @@ public class OwnerCommands : MyDiscordTextGuildModuleBase
 
         var content = $"Id: {user?.Id}\n" +
                       $"Email: {userRow.Email}\n" +
-                      $"Customer: {customerDetails.CustomerId}\n" +
+                      $"Customer: {customerDetails?.CustomerId ?? "None"}\n" +
                       $"Valid subscriptions: {subscriptions.Count}\n" +
                       $"Premium slots: {subscriptions.Sum(x => x.Slots)}";
 
