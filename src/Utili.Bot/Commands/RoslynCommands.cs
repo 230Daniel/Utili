@@ -51,7 +51,7 @@ public class RoslynCommands : MyDiscordTextGuildModuleBase
                 "Disqord",
                 "Disqord.Rest",
                 "Disqord.Gateway",
-                "Discord.Bot",
+                "Disqord.Bot",
                 "Utili.Bot",
                 "Utili.Bot.Services",
                 "Utili.Bot.Utils",
@@ -76,7 +76,6 @@ public class RoslynCommands : MyDiscordTextGuildModuleBase
         }
     }
 }
-
 public class RoslynGlobals
 {
     public IServiceProvider Services { get; }
