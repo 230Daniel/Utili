@@ -76,6 +76,7 @@ public class RoslynCommands : MyDiscordTextGuildModuleBase
         }
     }
 }
+
 public class RoslynGlobals
 {
     public IServiceProvider Services { get; }
