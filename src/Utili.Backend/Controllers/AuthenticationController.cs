@@ -47,7 +47,7 @@ public class AuthenticationController : Controller
         var user = HttpContext.GetDiscordUser();
         return Json(new AuthenticationInfoModel
         {
-            Username = user.Name,
+            Username = user.HasMigratedName() ? user.GlobalName : user.Name,
             AvatarUrl = user.GetAvatarUrl()
         });
     }
