@@ -5,7 +5,7 @@ services:
 
     postgres:
         container_name: utili-postgres
-        image: postgres
+        image: postgres:15
         volumes:
             - './postgresql-data:/var/lib/postgresql/data'
         restart: unless-stopped
