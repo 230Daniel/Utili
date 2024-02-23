@@ -16,9 +16,9 @@ class CardAdderComponent extends React.Component {
 	render() {
 		this.state.options = this.props.values.filter(x => !this.props.selected.includes(x));
 		return (
-			<div className="dashboard-card-list-component" onFocus={() => this.searchUpdated()} onBlur={() => this.searchClosed()}>
+			<div className="dashboard-card-list-component" onFocus={() => this.searchOpened()} onBlur={() => this.searchClosed()}>
 				<div className="dashboard-card-adder-component-search">
-					<input placeholder={this.props.prompt} value={this.state.query} ref={this.search} disabled={this.props.disabled} onInput={() => this.searchUpdated()} />
+					<input placeholder={this.props.prompt} value={this.state.selecting ? this.state.query : ""} ref={this.search} disabled={this.props.disabled} onInput={() => this.searchUpdated()} />
 				</div>
 				{this.renderOptions()}
 			</div>
@@ -40,14 +40,16 @@ class CardAdderComponent extends React.Component {
 		);
 	}
 
+	searchOpened() {
+		this.setState({ selecting: true, query: "" });
+	}
+
 	searchUpdated() {
 		this.setState({ selecting: true, query: this.search.current.value });
 	}
 
 	searchClosed() {
-		setTimeout(() => {
-			this.setState({ selecting: false, query: "" });
-		}, 100);
+		this.setState({ selecting: false });
 	}
 
 	getValue(id) {
