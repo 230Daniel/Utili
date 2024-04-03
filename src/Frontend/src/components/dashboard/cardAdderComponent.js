@@ -31,7 +31,7 @@ class CardAdderComponent extends React.Component {
 			<div className={`dashboard-card-list-component-options${this.state.selecting ? "" : " collapsed"}`}>
 				{options.map((item, i) => {
 					return (
-						<div className="dashboard-card-list-component-option" onClick={() => this.selectValue(item)} key={i}>
+						<div className="dashboard-card-list-component-option" onClick={() => this.selectValue(item)} tabIndex={-1} key={i}>
 							{item.value}
 						</div>
 					);
@@ -57,6 +57,7 @@ class CardAdderComponent extends React.Component {
 	}
 
 	selectValue(id) {
+		this.searchClosed();
 		var newSelected = this.state.selected;
 		newSelected.push(id);
 		var newOptions = this.state.options;
