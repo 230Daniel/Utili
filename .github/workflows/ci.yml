@@ -6,6 +6,7 @@ on:
     commit-ignore:
     - [skip ci]
     - [ci skip]
+  workflow_dispatch:
 
 jobs:
 
