@@ -83,7 +83,7 @@ public class VoiceLinkService
                 _logger.LogError(e, "Exception thrown starting channel updates");
             }
 
-            await Task.Delay(250);
+            await Task.Delay(1500);
         }
     }
 
