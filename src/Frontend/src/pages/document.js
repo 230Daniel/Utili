@@ -1,7 +1,7 @@
 import React from "react";
 import Helmet from "react-helmet";
 import toMarkdown from "marked";
-import cheerio from "cheerio";
+import { load } from "cheerio";
 import { useParams } from "react-router-dom";
 
 import Fade from "../components/effects/fade";
@@ -31,7 +31,7 @@ class Document extends React.Component {
 			var response = await fetch(source.default);
 			var text = await response.text();
 			var markdown = toMarkdown(text);
-			var title = cheerio.load(markdown)('h1').first().html();
+			var title = load(markdown)('h1').first().html();
 			this.setState({ markdown: markdown, title: title });
 		}
 		catch {

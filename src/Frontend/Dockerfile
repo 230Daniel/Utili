@@ -1,4 +1,4 @@
-FROM node:16.17.0 as build-deps
+FROM node:22.7.0 as build-deps
 WORKDIR /app
 COPY package.json ./
 RUN npm install
