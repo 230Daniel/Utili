@@ -15,6 +15,10 @@ FROM build AS publish
 RUN dotnet publish Utili.Bot.csproj -c Release -o /app/publish
 
 FROM base AS final
+
+RUN apt-get update && apt-get install -y procps && apt-get clean
+
 WORKDIR /app
 COPY --from=publish /app/publish .
+
 ENTRYPOINT ["dotnet", "Utili.Bot.dll"]
