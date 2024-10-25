@@ -1,13 +1,14 @@
 name: utili
-version: '3.3'
 
 services:
 
     postgres:
         container_name: utili-postgres
-        image: postgres:15
+        image: postgres:16
         volumes:
             - './postgresql-data:/var/lib/postgresql/data'
+        networks:
+            - backend
         restart: unless-stopped
         environment:
             POSTGRES_USER: utili
@@ -24,6 +25,8 @@ services:
         volumes:
             - './config/bot.json:/app/appsettings.json:ro'
             - './bot-logs:/app/logs'
+        networks:
+            - backend
         restart: unless-stopped
         logging:
             driver: "local"
@@ -41,6 +44,9 @@ services:
             - './config/backend.json:/app/appsettings.json:ro'
             - './aspnet-data:/root/.aspnet'
             - './backend-logs:/app/logs'
+        networks:
+            - backend
+            - frontend
         restart: unless-stopped
         logging:
             driver: "local"
@@ -58,7 +64,15 @@ services:
             - './config/frontend.js:/build/config.js:ro'
             - './config/nginx.conf:/etc/nginx/nginx.conf:ro'
             - '/etc/letsencrypt:/etc/letsencrypt:ro'
+        networks:
+            - frontend
         ports:
             - '443:443'
             - '80:80'
         restart: unless-stopped
+
+networks:
+    backend:
+        driver: bridge
+    frontend:
+        driver: bridge
