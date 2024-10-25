@@ -35,12 +35,12 @@ public class MessageFilterService
                 return false;
 
             var userMessage = e.Message as IUserMessage;
+
             if (userMessage is not null &&
                 e.Member is not null &&
-                e.Member.Id == _bot.CurrentUser.Id &&
-                userMessage.Embeds.Count > 0 &&
-                userMessage.Embeds[0].Author?.Name == "Message deleted")
+                e.Member.Id == _bot.CurrentUser.Id)
                 return false;
+
             if (userMessage?.WebhookId is not null) return true;
 
             var db = scope.GetDbContext();
