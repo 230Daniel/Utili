@@ -9,6 +9,8 @@ using Disqord.Bot.Commands.Text;
 using Disqord.Gateway;
 using Microsoft.Extensions.DependencyInjection;
 using Utili.Bot.Extensions;
+using Utili.Database.Entities;
+using Utili.Database.Extensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Qmmands;
@@ -30,9 +32,17 @@ public class UtiliDiscordBot : DiscordBot
         var config = await scope.GetCoreConfigurationAsync(message.GuildId.Value);
         if (config is null) return true;
 
-        var nonCommandChannel = config.NonCommandChannels.Contains(message.ChannelId);
-        if (config.CommandsEnabled) return !nonCommandChannel;
-        return nonCommandChannel;
+        var channelToggle = config.NonCommandChannels.Contains(message.ChannelId);
+        if (config.CommandsEnabled ^ !channelToggle) return false;
+
+        if (config.HasFeature(BotFeatures.MessageFilter))
+        {
+            var db = scope.GetDbContext();
+            var messageFilterConfig = await db.MessageFilterConfigurations.GetForGuildChannelAsync(message.GuildId.Value, message.ChannelId);
+            if (messageFilterConfig is not null && messageFilterConfig.Mode != MessageFilterMode.All) return false;
+        }
+
+        return true;
     }
 
     protected override bool FormatFailureMessage(IDiscordCommandContext context, LocalMessageBase message, IResult result)
