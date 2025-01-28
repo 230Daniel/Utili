@@ -31,9 +31,9 @@ class CustomerPortal extends React.Component {
 		if (window.__config.stripeTestMode) {
 			switch (slots) {
 				case 1:
-					if (currency === "gbp") return "price_1I0bUCB8DUEVWcSDYIEsUvWA";
-					if (currency === "usd") return "price_1I0bUeB8DUEVWcSD6ksIYGra";
-					if (currency === "eur") return "price_1I0bWFB8DUEVWcSDut7TNTEJ";
+					if (currency === "gbp") return "price_1QmIfTB8DUEVWcSDmbgml4eG";
+					if (currency === "usd") return "price_1QmIfTB8DUEVWcSDd0CfTjmC";
+					if (currency === "eur") return "price_1QmIfUB8DUEVWcSDp5ztR4Ue";
 					break;
 
 				case 3:
