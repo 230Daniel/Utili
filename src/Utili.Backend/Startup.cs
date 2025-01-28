@@ -74,7 +74,7 @@ public class Startup
             });
         });
 
-        services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+        services.AddAutoMapper(cfg => cfg.ShouldMapMethod = (m) => false, AppDomain.CurrentDomain.GetAssemblies());
         services.AddHttpContextAccessor();
         services.AddOptions();
         services.AddMemoryCache();
