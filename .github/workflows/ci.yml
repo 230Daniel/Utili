@@ -2,11 +2,13 @@ name: ci
 
 on:
   push:
-    branches: [ "fix-ci" ]
     commit-ignore:
     - [skip ci]
     - [ci skip]
   workflow_dispatch:
+
+env:
+  DO_PUSH: ${{ github.ref == 'refs/heads/main' }}
 
 jobs:
 
@@ -32,8 +34,8 @@ jobs:
         context: ./src
         file: ./src/Utili.Bot/Dockerfile
         platforms: linux/amd64,linux/arm64
-        tags: 230daniel/utili-bot:test
-        push: true
+        tags: 230daniel/utili-bot:latest
+        push: ${{ DO_PUSH }}
 
   build-backend:
     runs-on: ubuntu-latest
@@ -57,8 +59,8 @@ jobs:
         context: ./src
         file: ./src/Utili.Backend/Dockerfile
         platforms: linux/amd64,linux/arm64
-        tags: 230daniel/utili-backend:test
-        push: true
+        tags: 230daniel/utili-backend:latest
+        push: ${{ DO_PUSH }}
 
   build-frontend:
     runs-on: ubuntu-latest
@@ -83,4 +85,4 @@ jobs:
         file: ./src/Frontend/Dockerfile
         platforms: linux/amd64,linux/arm64
         tags: 230daniel/utili-frontend:latest
-        push: true
+        push: ${{ DO_PUSH }}
