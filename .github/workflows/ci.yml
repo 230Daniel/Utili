@@ -60,27 +60,27 @@ jobs:
         tags: 230daniel/utili-backend:test
         push: true
 
-  # build-frontend:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #   -
-  #     name: Checkout
-  #     uses: actions/checkout@v3
-  #   -
-  #     name: Set up Docker Buildx
-  #     uses: docker/setup-buildx-action@v3
-  #   -
-  #     name: Login to Docker Hub
-  #     uses: docker/login-action@v3
-  #     with:
-  #       username: ${{ secrets.DOCKERHUB_USERNAME }}
-  #       password: ${{ secrets.DOCKERHUB_TOKEN }}
-  #   -
-  #     name: Build and push
-  #     uses: docker/build-push-action@v4
-  #     with:
-  #       context: ./src/Frontend
-  #       file: ./src/Frontend/Dockerfile
-  #       platforms: linux/amd64,linux/arm64
-  #       tags: 230daniel/utili-frontend:latest
-  #       push: true
+  build-frontend:
+    runs-on: ubuntu-latest
+    steps:
+    -
+      name: Checkout
+      uses: actions/checkout@v3
+    -
+      name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+    -
+      name: Login to Docker Hub
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+    -
+      name: Build and push
+      uses: docker/build-push-action@v4
+      with:
+        context: ./src/Frontend
+        file: ./src/Frontend/Dockerfile
+        platforms: linux/amd64,linux/arm64
+        tags: 230daniel/utili-frontend:latest
+        push: true
