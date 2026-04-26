@@ -5,6 +5,7 @@ services:
     postgres:
         container_name: utili-postgres
         image: postgres:16
+        command: -c 'max_connections=500'
         volumes:
             - './postgresql-data:/var/lib/postgresql/data'
         networks:
