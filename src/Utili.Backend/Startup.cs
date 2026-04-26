@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -116,7 +117,11 @@ public class Startup
         services.AddSingleton<DiscordRestService>();
         services.AddHostedService<SlotDeletionService>();
 
-        services.AddDbContext<DatabaseContext>();
+        services.AddDbContextPool<DatabaseContext>(options =>
+        {
+            options.UseNpgsql(_configuration["Database:Connection"]);
+            options.UseSnakeCaseNamingConvention();
+        });
 
         services.AddScoped<Services.CustomerService>();
         services.AddScoped<IsPremiumService>();

@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
 
@@ -12,6 +13,12 @@ public class DesignTimeDatabaseContextFactory : IDesignTimeDbContextFactory<Data
             .AddJsonFile(Directory.GetCurrentDirectory() + "/../Utili.Bot/appsettings.json")
             .Build();
 
-        return new DatabaseContext(configuration);
+        var builder = new DbContextOptionsBuilder<DatabaseContext>();
+        var connectionString = configuration["Database:Connection"];
+
+        builder.UseNpgsql(connectionString);
+        builder.UseSnakeCaseNamingConvention();
+
+        return new DatabaseContext(builder.Options);
     }
 }

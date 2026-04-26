@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Utili.Database.Extensions;
 using Utili.Database.Entities;
 
@@ -36,18 +35,7 @@ public class DatabaseContext : DbContext
     public DbSet<VoiceRoleConfiguration> VoiceRoleConfigurations { get; internal set; }
     public DbSet<VoteChannelConfiguration> VoteChannelConfigurations { get; internal set; }
 
-    private readonly string _connectionString;
-
-    public DatabaseContext(IConfiguration configuration)
-    {
-        _connectionString = configuration["Database:Connection"];
-    }
-
-    protected override void OnConfiguring(DbContextOptionsBuilder options)
-    {
-        options.UseNpgsql(_connectionString);
-        options.UseSnakeCaseNamingConvention();
-    }
+    public DatabaseContext(DbContextOptions<DatabaseContext> options) : base(options) {}
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

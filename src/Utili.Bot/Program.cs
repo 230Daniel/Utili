@@ -77,7 +77,12 @@ internal static class Program
     {
         services.AddSingleton(typeof(Microsoft.Extensions.Logging.ILogger<>), typeof(Logger<>));
 
-        services.AddDbContext<DatabaseContext>();
+        services.AddDbContextPool<DatabaseContext>(options =>
+        {
+            options.UseNpgsql(context.Configuration["Database:Connection"]);
+            options.UseSnakeCaseNamingConvention();
+        });
+
         services.AddScoped<CoreConfigurationCacheService>();
 
         services.AddInteractivityExtension();
