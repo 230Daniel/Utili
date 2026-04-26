@@ -153,14 +153,20 @@ public class AutopurgeService
 
             if (messagesToDelete.Count == 0) return;
 
+            try
+            {
+                await channel.DeleteMessagesAsync(messagesToDelete.Select(x => new Snowflake(x.MessageId)), new DefaultRestRequestOptions { Reason = "Autopurge" });
+            }
+            catch (RestApiException ex) when (ex.StatusCode == HttpResponseStatusCode.NotFound)
+            {
+                // We get a 404 if there was only one message to delete and it doesn't exist.
+                // Should still remove the message from our database.
+                _logger.LogDebug(ex, $"Exception thrown (404) while purging channel {staleConfig.GuildId}/{staleConfig.ChannelId}");
+            }
+
+            // Remove from database once successfully deleted on Discord to avoid losing track of messages if there's a transient failure.
             db.AutopurgeMessages.RemoveRange(messagesToDelete);
             await db.SaveChangesAsync();
-
-            await channel.DeleteMessagesAsync(messagesToDelete.Select(x => new Snowflake(x.MessageId)), new DefaultRestRequestOptions { Reason = "Autopurge" });
-        }
-        catch (RestApiException ex) when (ex.StatusCode == HttpResponseStatusCode.NotFound)
-        {
-            _logger.LogDebug(ex, $"Exception thrown while purging channel {staleConfig.GuildId}/{staleConfig.ChannelId}");
         }
         catch (Exception ex)
         {
