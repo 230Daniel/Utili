@@ -25,7 +25,8 @@ public static class MessageExtensions
             "png",
             "jpg",
             "jpeg",
-            "webp"
+            "webp",
+            "avif"
         };
 
         var filenames = message.Attachments.Select(x => x.FileName).ToList();
