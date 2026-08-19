@@ -1,7 +1,7 @@
 FROM --platform=$BUILDPLATFORM node:22.7.0 as build
 WORKDIR /app
-COPY package.json ./
-RUN npm install
+COPY package.json package-lock.json ./
+RUN npm ci
 COPY . ./
 RUN npm run build
 
