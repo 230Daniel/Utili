@@ -69,7 +69,7 @@ public class DiscordController : Controller
     public IActionResult Roles([Required] ulong guildId)
     {
         var guild = HttpContext.GetDiscordGuild();
-        var roles = guild.Roles.Values.Where(x => !x.IsManaged && x.Id != guildId);
+        var roles = guild.Roles.Values.Where(x => (!x.IsManaged || x.Tags.IsNitroBooster) && x.Id != guildId);
         return Json(_mapper.Map<IEnumerable<RoleModel>>(roles));
     }
 }
