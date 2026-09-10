@@ -143,7 +143,7 @@ public class MessageLogsService
             var messageRecord = await db.MessageLogsMessages.GetForMessageAsync(e.MessageId);
             if (messageRecord is null) return;
 
-            var member = _bot.GetMember(e.GuildId.Value, messageRecord.AuthorId) ?? await _bot.FetchMemberAsync(e.GuildId.Value, messageRecord.AuthorId);
+            var member = (IMember) _bot.GetMember(e.GuildId.Value, messageRecord.AuthorId) ?? await _bot.FetchMemberAsync(e.GuildId.Value, messageRecord.AuthorId);
             if (member is not null && member.IsBot) return;
 
             var embed = GetDeletedEmbed(messageRecord, member);

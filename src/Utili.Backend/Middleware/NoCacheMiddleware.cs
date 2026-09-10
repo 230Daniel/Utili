@@ -14,7 +14,7 @@ public class NoCacheMiddleware
 
     public Task InvokeAsync(HttpContext context)
     {
-        context.Response.Headers.Add("cache-control", "no-cache");
+        context.Response.Headers.Append("cache-control", "no-cache");
         return _next(context);
     }
 }

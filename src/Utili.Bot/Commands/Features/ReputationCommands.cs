@@ -62,7 +62,7 @@ public class RepuatationCommands : MyDiscordTextGuildModuleBase
 
         foreach (var repMember in repMembers)
         {
-            var member = Context.GetGuild().GetMember(repMember.MemberId) ?? await Context.GetGuild().FetchMemberAsync(repMember.MemberId);
+            var member = (IMember) Context.GetGuild().GetMember(repMember.MemberId) ?? await Context.GetGuild().FetchMemberAsync(repMember.MemberId);
             if (member is not null)
             {
                 content += $"{position}. {member.Mention} {repMember.Reputation}\n";
@@ -86,7 +86,7 @@ public class RepuatationCommands : MyDiscordTextGuildModuleBase
 
         foreach (var repMember in repMembers)
         {
-            var member = Context.GetGuild().GetMember(repMember.MemberId) ?? await Context.GetGuild().FetchMemberAsync(repMember.MemberId);
+            var member = (IMember) Context.GetGuild().GetMember(repMember.MemberId) ?? await Context.GetGuild().FetchMemberAsync(repMember.MemberId);
             if (member is not null)
             {
                 content += $"{position}. {member.Mention} {repMember.Reputation}\n";
